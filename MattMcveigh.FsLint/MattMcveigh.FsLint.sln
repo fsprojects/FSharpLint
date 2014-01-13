@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MattMcveigh.FsLint", "MattMcveigh.FsLint\MattMcveigh.FsLint.fsproj", "{8552C997-0ECE-407C-B642-AA7FCCFA9E2B}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MattMcveigh.FsLint.Test", "MattMcveigh.FsLint.Test\MattMcveigh.FsLint.Test.fsproj", "{6338B725-CAEE-467F-A658-7593C5DC4EAC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8552C997-0ECE-407C-B642-AA7FCCFA9E2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8552C997-0ECE-407C-B642-AA7FCCFA9E2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8552C997-0ECE-407C-B642-AA7FCCFA9E2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8552C997-0ECE-407C-B642-AA7FCCFA9E2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6338B725-CAEE-467F-A658-7593C5DC4EAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6338B725-CAEE-467F-A658-7593C5DC4EAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6338B725-CAEE-467F-A658-7593C5DC4EAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6338B725-CAEE-467F-A658-7593C5DC4EAC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
