@@ -1,8 +1,0 @@
-bin
-obj
-packages/*
-!packages/repositories.config
-
-*.dll
-*.exe
-*.suo

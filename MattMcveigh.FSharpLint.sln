@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MattMcveigh.FSharpLint", "MattMcveigh.FSharpLint\MattMcveigh.FSharpLint.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MattMcveigh.FSharpLint.Tests", "MattMcveigh.FSharpLint.Tests\MattMcveigh.FSharpLint.Tests.fsproj", "{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
