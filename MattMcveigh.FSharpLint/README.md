@@ -16,9 +16,9 @@ The linter will have 3 different levels:
 Examples of rules where the different levels could be used:
 
 
-⋅⋅*Level 1 could be used by a rule that gives warnings when a line of source code contains too many characters.
-⋅⋅*Level 2 could be used by a rule that gives warnings when a binary operator does not have whitespace on both sides of it.
-⋅⋅*Level 3 could be used by a rule that gives warnings when there's a redudant else if statement.
+⋅⋅* Level 1 could be used by a rule that gives warnings when a line of source code contains too many characters.
+⋅⋅* Level 2 could be used by a rule that gives warnings when a binary operator does not have whitespace on both sides of it.
+⋅⋅* Level 3 could be used by a rule that gives warnings when there's a redudant else if statement.
 
 
 The advantage of this is that it will be much simpler to write rules for their appropriate levels than say trying to write all 
