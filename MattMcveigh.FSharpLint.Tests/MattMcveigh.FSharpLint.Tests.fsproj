@@ -43,9 +43,12 @@
     <Compile Include="TestTokeniser.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="README" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Compiler.Service">
+      <HintPath>..\packages\FSharp.Compiler.Service.0.0.11-alpha\lib\net40\FSharp.Compiler.Service.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -57,6 +60,13 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MattMcveigh.FSharpLint\MattMcveigh.FSharpLint.fsproj">
+      <Name>MattMcveigh.FSharpLint</Name>
+      <Project>{ffb38d12-8e91-42c9-aba6-2aae5c60f805}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

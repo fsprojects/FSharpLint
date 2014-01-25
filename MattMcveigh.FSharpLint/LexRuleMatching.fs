@@ -24,24 +24,27 @@ module LexRuleMatching =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Tokeniser
     
+    /// Provides different methods of matching a token's string.
     type Match =
     | RegexMatch of string
     | StringMatch of string
     | Anything
 
+    /// Provides a way of matching a token by both the token's type and the token's string.
     type MatchToken = 
         {
             CharClass: TokenCharKind
             ToMatch: Match
         }
 
+    /// Finds out if a MatchToken matches a given token.
     let isMatch matchToken token =
         if matchToken.CharClass <> token.Token.CharClass then
             false
         else
             match matchToken.ToMatch with
             | Anything -> true
-            | RegexMatch regex -> true
+            | RegexMatch pattern -> Regex.IsMatch(token.FromString, pattern)
             | StringMatch str -> token.FromString = str
 
     type LexRule =

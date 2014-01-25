@@ -19,25 +19,96 @@
 module TestTokeniser
 
 open NUnit.Framework
+open Microsoft.FSharp.Compiler.SourceCodeServices
+open MattMcveigh.FSharpLint.Tokeniser
+
+type Assert with
+    static member AreTokensEqual(expectedTokens, (tokens:Token list)) =
+        let zippedLists = List.zip expectedTokens tokens
+
+        List.iter (fun (expectedToken, actualToken) -> 
+            Assert.AreEqual(expectedToken, actualToken.Token.CharClass)) zippedLists
+end
 
 [<TestFixture>]
 type TestTokeniser() =
     [<Test>]
     member self.TokeniseLine() = 
-        Assert.Fail()
+        let expectedTokens = [
+            TokenCharKind.Keyword
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Identifier
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Operator
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Literal
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Operator
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Literal
+        ]
+
+        let actualTokens = tokenise "" ["let meow = 5 + 6"]
+
+        Assert.AreTokensEqual(expectedTokens, actualTokens.Head)
 
     [<Test>]
     member self.TokeniseLines() = 
-        Assert.Fail()
+        let expectedTokensLine1 = [
+            TokenCharKind.Keyword
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Identifier
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Operator
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Literal
+        ]
+
+        let expectedTokensLine2 = [
+            TokenCharKind.Keyword
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Identifier
+            TokenCharKind.Operator
+            TokenCharKind.Delimiter
+            TokenCharKind.Delimiter
+        ]
+
+        let actualTokens = tokenise "" ["let meow = 5";"let dog=()"]
+
+        Assert.AreTokensEqual(expectedTokensLine1, actualTokens.Head)
+        Assert.AreTokensEqual(expectedTokensLine2, actualTokens.Tail.Head)
 
     [<Test>]
     member self.TokeniseLineWithNewLineInside() = 
-        Assert.Fail()
+        let expectedTokens = [
+            TokenCharKind.Keyword
+            TokenCharKind.WhiteSpace
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Identifier
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Operator
+            TokenCharKind.WhiteSpace
+            TokenCharKind.Literal
+        ]
+
+        let actualTokens = tokenise "" ["let \nmeow = 5"]
+
+        Assert.AreTokensEqual(expectedTokens, actualTokens.Head)
 
     [<Test>]
     member self.TokeniseInvalidCode() = 
-        Assert.Fail()
+        let expectedTokens = [
+            TokenCharKind.Keyword
+            TokenCharKind.WhiteSpace
+            TokenCharKind.LineComment
+        ]
+
+        let actualTokens = tokenise "" ["let ////"]
+
+        Assert.AreTokensEqual(expectedTokens, actualTokens.Head)
 
     [<Test>]
     member self.TokeniseNoLines() = 
-        Assert.Fail()
+        let actualTokens = tokenise "" []
+
+        Assert.AreEqual([], actualTokens)
