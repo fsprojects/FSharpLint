@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+  <metadata>
+    <id>FSharp.Compiler.Service</id>
+    <version>0.0.11-alpha</version>
+    <authors>Microsoft Corporation,  Dave Thomas,  Anh-Dung Phan,  Tomas Petricek</authors>
+    <owners>Microsoft Corporation,  Dave Thomas,  Anh-Dung Phan,  Tomas Petricek</owners>
+    <licenseUrl>https://github.com/fsharp/FSharp.Compiler.Service/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/fsharp/FSharp.Compiler.Service</projectUrl>
+    <iconUrl>https://raw.github.com/fsharp/FSharp.Compiler.Service/master/misc/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The F# compiler services package contains a custom build of the F# compiler that exposes additional functionality for implementing F# language bindings, additional tools based on the compiler or refactoring tools. The package also includes F#  interactive service that can be used for embedding F# scripting into your applications.</description>
+    <summary>F# compiler services for creating IDE tools, language extensions and for F# embedding</summary>
+    <releaseNotes>Add 'IsUnresolved'</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>F# fsharp interactive compiler editor</tags>
+    <references>
+      <reference file="FSharp.Compiler.Service.dll" />
+    </references>
+  </metadata>
+</package>

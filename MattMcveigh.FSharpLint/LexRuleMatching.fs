@@ -1,8 +1,28 @@
-﻿namespace MattMcveigh.FSharpLint
+﻿(*
+    FSharpLint, a linter for F#.
+    Copyright (C) 2014 Matthew Mcveigh
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
+
+namespace MattMcveigh.FSharpLint
 
 module LexRuleMatching =
 
+    open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open Tokeniser
     
     type Match =
     | RegexMatch of string
@@ -11,10 +31,19 @@ module LexRuleMatching =
 
     type MatchToken = 
         {
-            tokenKind: TokenCharKind
-            toMatch: Match
+            CharClass: TokenCharKind
+            ToMatch: Match
         }
-        
+
+    let isMatch matchToken token =
+        if matchToken.CharClass <> token.Token.CharClass then
+            false
+        else
+            match matchToken.ToMatch with
+            | Anything -> true
+            | RegexMatch regex -> true
+            | StringMatch str -> token.FromString = str
+
     type LexRule =
     | Not of LexRule
     | One of LexRule
@@ -24,9 +53,8 @@ module LexRuleMatching =
     | Rule of LexRule list
     | Token of MatchToken
     
-    let rec findBrokenRules notifyRuleBroken rules = function
-    | token::tokens -> 
-        
-
-        findBrokenRules notifyRuleBroken rules tokens
-    | [] -> ()
+    let rec findBrokenRules notifyRuleBroken rules tokenLines =
+        match tokenLines with
+        | line :: lines -> 
+            findBrokenRules notifyRuleBroken rules lines
+        | [] -> ()
