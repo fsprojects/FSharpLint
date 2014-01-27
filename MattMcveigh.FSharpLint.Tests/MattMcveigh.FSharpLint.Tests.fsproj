@@ -41,6 +41,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
     <Compile Include="TestTokeniser.fs" />
+    <Compile Include="TestLexRuleMatching.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
