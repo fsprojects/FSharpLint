@@ -42,7 +42,8 @@
   <ItemGroup>
     <Compile Include="Tokeniser.fs" />
     <Compile Include="LexRuleMatching.fs" />
-    <Compile Include="LexRules.fs" />
+    <Compile Include="ErrorHandling.fs" />
+    <Compile Include="Ast.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
