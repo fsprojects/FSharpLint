@@ -43,6 +43,7 @@
     <Compile Include="Tokeniser.fs" />
     <Compile Include="LexRuleMatching.fs" />
     <Compile Include="ErrorHandling.fs" />
+    <Compile Include="AstVisitorBase.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />

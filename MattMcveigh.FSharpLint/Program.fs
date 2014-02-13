@@ -20,7 +20,10 @@ namespace MattMcveigh.FSharpLint
 
 module Program =
 
+    open Microsoft.FSharp.Compiler.Ast
+    open ErrorHandling
     open Ast
+    open AstVisitorBase
         
     [<EntryPoint>]
     let main argv = 
@@ -28,18 +31,42 @@ module Program =
           namespace MattMcveigh.dogharpLint
 
           module Program =
-            type dog = { cat: int; poo: string }
+            type dog = { cat: int; dog: string }
 
             type guinea =
             | Some
             | None
+
+            exception MyError of string
 
             let foo() = 
               let msg = "Hello world"
               if true then 
                 printfn "%s" msg """
 
-        parse input
+        let identError (identifier:Ident) error =
+            errorHandler.Post(
+                {
+                    info = "Invalid identifier " + identifier.idText
+                    range = identifier.idRange
+                    input = input
+                })
+
+        let visitor = { new AstVisitorBase() with
+                member this.VisitUnionCase(_, identifier, _, _, _, range) = 
+                    identError identifier range
+                    Continue
+
+                member this.VisitNamedPattern(_, identifier, _, _, range) = 
+                    identError identifier range
+                    Continue
+
+                member this.VisitIdPattern(identifier, range) = 
+                    identError identifier range
+                    Continue
+            }
+
+        parse "/home/user/Dog.test.fsx" input [visitor]
 
         System.Console.ReadKey() |> ignore
 
