@@ -36,13 +36,27 @@ module Program =
             type guinea =
             | Some
             | None
+                member this.ToDog() =
+                    ()
+
+            type enum =
+            | Cat = 1
+            | Dog = 3
 
             exception MyError of string
 
             let foo() = 
               let msg = "Hello world"
+              let (cat,dog) = 0, 1
               if true then 
-                printfn "%s" msg """
+                printfn "%s" msg 
+              match true with
+              | true as dog -> ()
+              | _ -> ()
+              
+              match true with
+              | dog -> ()"""
+              
 
         let identError (identifier:Ident) error =
             errorHandler.Post(
@@ -53,6 +67,10 @@ module Program =
                 })
 
         let visitor = { new AstVisitorBase() with
+                member this.VisitModuleOrNamespace(identifier, _, _, _, _, _, range) = 
+                    identError identifier.Head range
+                    Continue
+
                 member this.VisitUnionCase(_, identifier, _, _, _, range) = 
                     identError identifier range
                     Continue
@@ -63,6 +81,18 @@ module Program =
 
                 member this.VisitIdPattern(identifier, range) = 
                     identError identifier range
+                    Continue
+
+                member this.VisitField(_, identifier, _, _, _, range) = 
+                    identifier |> Option.iter (fun ident -> identError ident range)
+                    Continue
+
+                member this.VisitEnumCase(_, identifier, _, _, range) = 
+                    identError identifier range
+                    Continue
+
+                member this.VisitComponentInfo(_, _, _, identifier, _, _, range) = 
+                    identError identifier.Head range
                     Continue
             }
 

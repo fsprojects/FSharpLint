@@ -57,7 +57,9 @@ module Ast =
         and 
             traverseModuleDeclaration visitors = function
             | SynModuleDecl.ModuleAbbrev(identifier, longIdentifier, _) -> ()
-            | SynModuleDecl.NestedModule(_, moduleDeclarations, _, _) ->
+            | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) ->
+                traverseComponentInfo visitors componentInfo
+
                 let traverseModuleDeclaration = traverseModuleDeclaration visitors
 
                 moduleDeclarations |> List.iter traverseModuleDeclaration
@@ -99,9 +101,17 @@ module Ast =
                 traverseUnionCase visitors unionCase
         and
             traverseTypeDefinition visitors = function
-            | SynTypeDefn.TypeDefn(_, typeRepresentation, members, _) -> 
+            | SynTypeDefn.TypeDefn(componentInfo, typeRepresentation, members, _) -> 
+                traverseComponentInfo visitors componentInfo
                 traverseTypeRepresentation visitors typeRepresentation
                 members |> List.iter (traverseMember visitors)
+        and 
+            traverseComponentInfo visitors = function
+            | SynComponentInfo.ComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, _, access, range) ->
+                let visit (visitor: AstVisitorBase) =
+                    visitor.VisitComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, access, range) |> ignore
+
+                visitors |> List.iter visit
         and 
             traverseTypeRepresentation visitors = function
             | ObjectModel(_, members, _) -> 
@@ -113,7 +123,7 @@ module Ast =
             | SynTypeDefnSimpleRepr.Union(access, unionCases, range) -> 
                 unionCases |> List.iter (traverseUnionCase visitors)
             | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> 
-                enumCases |> List.iter traverseEnumCase
+                enumCases |> List.iter (traverseEnumCase visitors)
             | SynTypeDefnSimpleRepr.Record(_, fields, _) -> 
                 fields |> List.iter (traverseField visitors)
             | SynTypeDefnSimpleRepr.General(_, _, _, _, _, _, _, _) -> ()
@@ -126,11 +136,20 @@ module Ast =
                 visitors |> List.iter (fun (visitor:AstVisitorBase) ->
                     visitor.VisitUnionCase(attributes, identifier, caseType, xmlDoc, access, range) |> ignore)
         and 
-            traverseEnumCase = function
-            | SynEnumCase.EnumCase(attributes, identifier, constant, _, _) -> ()
+            traverseEnumCase visitors = function
+            | SynEnumCase.EnumCase(attributes, identifier, constant, xmlDoc, range) -> 
+                let visit (visitor:AstVisitorBase) =
+                    visitor.VisitEnumCase(attributes, identifier, constant, xmlDoc, range) |> ignore
+
+                visitors |> List.iter visit
         and
             traverseField visitors = function
-            | SynField.Field(attributes, _, identifier, synType, _, _, _, _) -> 
+            | SynField.Field(attributes, _, identifier, synType, _, xmlDoc, access, range) -> 
+                let visit (visitor:AstVisitorBase) =
+                    visitor.VisitField(attributes, identifier, synType, xmlDoc, access, range).ShallContinue
+
+                let visitors = visitors |> List.filter visit
+
                 traverseType visitors synType
         and
             traverseType visitors synType = 

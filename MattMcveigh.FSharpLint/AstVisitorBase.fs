@@ -43,6 +43,18 @@ module AstVisitorBase =
             SynAttributes * Ident * SynUnionCaseType * PreXmlDoc * SynAccess option * range -> Continue
         default this.VisitUnionCase(_, _, _, _, _, _) = Continue
 
+        abstract VisitEnumCase : 
+            SynAttributes * Ident * SynConst * PreXmlDoc * range -> Continue
+        default this.VisitEnumCase(_, _, _, _, _) = Continue
+
+        abstract VisitField : 
+            SynAttributes * Ident option * SynType * PreXmlDoc * SynAccess option * range -> Continue
+        default this.VisitField(_, _, _, _, _, _) = Continue
+
+        abstract VisitComponentInfo : 
+            SynAttributes * SynTyparDecl list * SynTypeConstraint list * LongIdent * PreXmlDoc * SynAccess option * range -> Continue
+        default this.VisitComponentInfo(_, _, _, _, _, _, _) = Continue
+
         abstract VisitExceptionRepresentation : 
             SynAttributes * SynUnionCase * LongIdent option * PreXmlDoc * SynAccess option * range -> Continue
         default this.VisitExceptionRepresentation(_, _, _, _, _, _) = Continue
