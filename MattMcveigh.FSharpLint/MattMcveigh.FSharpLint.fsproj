@@ -45,6 +45,7 @@
     <Compile Include="ErrorHandling.fs" />
     <Compile Include="AstVisitorBase.fs" />
     <Compile Include="Ast.fs" />
+    <Compile Include="NameConventionRules.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />

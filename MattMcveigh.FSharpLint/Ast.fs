@@ -383,7 +383,12 @@ module Ast =
                     traversePattern visitors pattern1
                 | SynPat.Ands(patterns, _) -> 
                     patterns |> List.iter (traversePattern visitors)
-                | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, _, _) -> 
+                | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
+                    let visit (visitor: AstVisitorBase) =
+                        visitor.VisitLongIdentPattern(longIdentifier, identifier, access, range).ShallContinue
+
+                    let visitors = visitors |> List.filter visit
+
                     traverseConstructorArguments visitors constructorArguments
                 | SynPat.Tuple(patterns, _) -> 
                     patterns |> List.iter (traversePattern visitors)

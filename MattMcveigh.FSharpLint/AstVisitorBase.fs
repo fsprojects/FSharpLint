@@ -66,3 +66,7 @@ module AstVisitorBase =
         abstract VisitIdPattern : 
             Ident * range -> Continue
         default this.VisitIdPattern(_, _) = Continue
+        
+        abstract VisitLongIdentPattern :
+            LongIdentWithDots * Ident option * SynAccess option * range -> Continue
+        default this.VisitLongIdentPattern(_, _, _, _) = Continue

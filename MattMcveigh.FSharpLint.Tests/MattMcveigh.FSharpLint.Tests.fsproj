@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="TestTokeniser.fs" />
     <Compile Include="TestLexRuleMatching.fs" />
+    <Compile Include="TestNameConventionRules.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
