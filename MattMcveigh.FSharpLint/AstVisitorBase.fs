@@ -23,6 +23,7 @@ module AstVisitorBase =
     open System
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.SourceCodeServices
 
     type Continue =
     | Continue
@@ -34,7 +35,7 @@ module AstVisitorBase =
             | End -> false
 
     [<AbstractClass>]
-    type AstVisitorBase() =
+    type AstVisitorBase(checkFile:CheckFileResults) =
         abstract VisitModuleOrNamespace : 
             LongIdent * bool * SynModuleDecls * PreXmlDoc * SynAttributes * SynAccess option * range -> Continue
         default this.VisitModuleOrNamespace(_, _, _, _, _, _, _) = Continue

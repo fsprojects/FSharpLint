@@ -23,6 +23,7 @@ module NameConventionRules =
     open System
     open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.SourceCodeServices
     open ErrorHandling
     open AstVisitorBase
 
@@ -38,8 +39,22 @@ module NameConventionRules =
     let camelCaseError (identifier:string) = 
         String.Format("Expected camel case identifier but was {0}", identifier)
 
-    let namingConventionVisitor postError = 
-        { new AstVisitorBase() with
+    let isSymbolMember = function
+    | Some(symbol:FSharpSymbol) ->
+        match symbol with
+        | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsMember -> true
+        | _ -> false
+    | None -> false
+
+    let isSymbolInterface = function
+    | Some(symbol:FSharpSymbol) ->
+        match symbol with
+        | :? FSharpEntity as entity when entity.IsInterface -> true
+        | _ -> false
+    | None -> false
+
+    let namingConventionVisitor postError checkFile = 
+        { new AstVisitorBase(checkFile) with
             member this.VisitModuleOrNamespace(identifier, _, _, _, _, _, range) = 
                 let expect identifier =
                     if not <| isPascalCase identifier then
@@ -89,6 +104,16 @@ module NameConventionRules =
 
                 identifier |> List.iter expect
 
+                let interfaceIdentifier = identifier.Head
+                let interfaceRange = interfaceIdentifier.idRange
+
+                let startLine, endColumn = interfaceRange.StartLine, interfaceRange.EndColumn
+
+                if isSymbolInterface <| checkFile.GetSymbolAtLocation(startLine-1, endColumn, "", [interfaceIdentifier.idText]) then 
+                    if not <| interfaceIdentifier.idText.StartsWith("I") then
+                        let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
+                        postError interfaceRange error
+                    
                 Continue
 
             member this.VisitLongIdentPattern(longIdentifier, identifier, access, range) =  
@@ -96,7 +121,15 @@ module NameConventionRules =
                     if not <| isCamelCase identifier then
                         postError identifier.idRange (camelCaseError <| identifier.idText)
 
-                longIdentifier.Lid |> List.iter expect
+                let memberName = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
+
+                let line, endColumn, memberIdent = memberName.idRange.EndLine, memberName.idRange.EndColumn, memberName.idText
+
+                if checkFile.GetSymbolAtLocation(line-1, 42, "", [memberIdent]) |> isSymbolMember then
+                    if not <| isPascalCase memberName then
+                        postError memberName.idRange (pascalCaseError <| memberIdent)
+                else
+                    longIdentifier.Lid |> List.iter expect
 
                 Continue
         }

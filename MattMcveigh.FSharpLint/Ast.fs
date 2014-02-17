@@ -114,7 +114,7 @@ module Ast =
                 visitors |> List.iter visit
         and 
             traverseTypeRepresentation visitors = function
-            | ObjectModel(_, members, _) -> 
+            | ObjectModel(typeKind, members, _) -> 
                 members |> List.iter (traverseMember visitors)
             | Simple(simpleTypeRepresentation, _) -> 
                 traverseSimpleTypeRepresentation visitors simpleTypeRepresentation
@@ -291,7 +291,8 @@ module Ast =
                     traverseExpression expression1
                     expression2 |> Option.iter traverseExpression
                 | SynExpr.Ident(identifier) -> ()
-                | SynExpr.LongIdent(_, identifier, _, _) -> ()
+                | SynExpr.LongIdent(_, identifier, _, _) -> 
+                    ()
                 | SynExpr.LongIdentSet(identifier, expression, _) -> 
                     traverseExpression expression
                 | SynExpr.DotGet(expression, _, identifier, _) -> 
@@ -432,5 +433,15 @@ module Ast =
         let projOptions = checker.GetProjectOptionsFromScript(file, input)
         let parseFileResults = checker.ParseFileInProject(file, input, projOptions)
         match parseFileResults.ParseTree with
-        | Some tree -> traverse tree visitors
+        | Some tree -> 
+            let checkFileResults = 
+                checker.CheckFileInProject(parseFileResults, file, 0, input, projOptions) 
+                |> Async.RunSynchronously
+
+            match checkFileResults with
+            | CheckFileAnswer.Succeeded(res) -> 
+                let visitors = visitors |> List.map (fun visitor -> visitor res)
+                traverse tree visitors
+            | res -> failwithf "Parsing did not finish... (%A)" res
         | None -> failwith "Something went wrong during parsing!"
+        

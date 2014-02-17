@@ -28736,6 +28736,16 @@ Emit comparison instructions
  by input from &apos;stdin&apos;.
 </summary>
 </member>
+<member name="M:Microsoft.FSharp.Compiler.Interactive.Shell.FsiEvaluationSession.EvalScript(System.String)">
+<summary>
+ Execute the given script. Stop on first error, discarding the rest
+ of the script. Errors are sent to the output writer, a &apos;true&apos; return value indicates there
+ were no errors overall. Execution is performed on the &apos;Run()&apos; thread.
+
+ Due to a current limitation, it is not fully thread-safe to run this operation concurrently with evaluation triggered
+ by input from &apos;stdin&apos;.
+</summary>
+</member>
 <member name="M:Microsoft.FSharp.Compiler.Interactive.Shell.FsiEvaluationSession.EvalInteraction(System.String)">
 <summary>
  Execute the code as if it had been entered as one or more interactions, with an
@@ -30471,6 +30481,9 @@ Emit comparison instructions
 <member name="">
 
 </member>
+<member name="">
+
+</member>
 <member name="P:Microsoft.FSharp.Compiler.Nameres.CapturedNameResolution.Range">
 <summary>
  The starting and ending position      
@@ -30852,6 +30865,12 @@ Emit comparison instructions
 </member>
 <member name="">
 
+</member>
+<member name="M:Microsoft.FSharp.Compiler.Nameres.|AbbrevOrAppTy|_|(Microsoft.FSharp.Compiler.Tast.TType)">
+<summary>
+ Detect a use of a nominal type, including type abbreviations.
+ When reporting symbols, we care about abbreviations, e.g. &apos;int&apos; and &apos;int32&apos; count as two separate symbols.
+</summary>
 </member>
 <member name="">
 
@@ -35058,6 +35077,11 @@ Emit comparison instructions
 <member name="">
 
 </member>
+<member name="M:Microsoft.FSharp.Compiler.SourceCodeServices.CheckFileResults.GetAllUsesOfAllSymbolsInFile">
+<summary>
+ Get all textual usages of all symbols throughout the file
+</summary>
+</member>
 <member name="T:Microsoft.FSharp.Compiler.SourceCodeServices.CheckFileResults">
 <summary>
  A handle to the results of CheckFileInProject.
@@ -35089,6 +35113,11 @@ Emit comparison instructions
 <member name="M:Microsoft.FSharp.Compiler.SourceCodeServices.CheckProjectResults.GetUsesOfSymbol(Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbol)">
 <summary>
  Get the textual usages that resolved to the given symbol throughout the project
+</summary>
+</member>
+<member name="M:Microsoft.FSharp.Compiler.SourceCodeServices.CheckProjectResults.GetAllUsesOfAllSymbols">
+<summary>
+ Get all textual usages of all symbols throughout the project
 </summary>
 </member>
 <member name="T:Microsoft.FSharp.Compiler.SourceCodeServices.CheckProjectResults">
@@ -35389,10 +35418,8 @@ Emit comparison instructions
  Get the declared accessibility of the representation, not taking signatures into account 
 </summary>
 </member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.RecordFields">
-<summary>
- Get the fields of the class, struct or enum 
-</summary>
+<member name="">
+
 </member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.QualifiedName">
 <summary>
@@ -35454,12 +35481,7 @@ Emit comparison instructions
 </member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.IsInterface">
 <summary>
- Indicates if the type definition is a delegate type
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.IsInterface">
-<summary>
- Indicates if the type definition is a delegate type
+ Indicates if the type definition is an interface
 </summary>
 </member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.IsFSharpUnion">
@@ -35523,6 +35545,18 @@ Emit comparison instructions
  Get the generic parameters, possibly including unit-of-measure parameters
 </summary>
 </member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.FullName">
+<summary>
+ Get the full name of the type or module
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.FSharpFields">
+<summary>
+ Get the fields of a record, class, struct or enum from the perspective of the F# language.
+ This includes static fields, the &apos;val&apos; bindings in classes and structs, and the value definitions in enums.
+ For classes, the list may include compiler generated fields implied by the use of primary constructors.
+</summary>
+</member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpEntity.FSharpDelegateSignature">
 <summary>
  Indicates if the type is a delegate with the given Invoke signature 
@@ -35579,6 +35613,79 @@ Emit comparison instructions
 <summary>
  Represents a type definition or module as seen by the F# language
 </summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.XmlDocSig">
+<summary>
+ Get the XML documentation signature for .xml file lookup for the field, used for .xml file lookup for compiled code
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.XmlDoc">
+<summary>
+ Get the in-memory XML documentation for the field, used when code is checked in-memory
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.PropertyAttributes">
+<summary>
+ Get the attributes attached to generated property 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.Name">
+<summary>
+ Get the name of the field 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsVolatile">
+<summary>
+ Indicates if the field is declared volatile 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsUnresolved">
+<summary>
+ Indicates if the record field is for a type in an unresolved assembly 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsStatic">
+<summary>
+ Indicates a static field 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsMutable">
+<summary>
+ Indicates if the field is declared &apos;static&apos;
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsDefaultValue">
+<summary>
+ Indicates if the field declared is declared &apos;DefaultValue&apos; 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.IsCompilerGenerated">
+<summary>
+ Indicates a compiler generated field, not visible to Intellisense or name resolution 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.FieldType">
+<summary>
+ Get the type of the field, w.r.t. the generic parameters of the enclosing type constructor 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.FieldAttributes">
+<summary>
+ Get the attributes attached to generated field 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.DeclarationLocation">
+<summary>
+ Get the declaration location of the field 
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpField.Accessibility">
+<summary>
+  Indicates if the declared visibility of the field, not taking signatures into account 
+</summary>
+</member>
+<member name="">
+
 </member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpGenericParameter.XmlDoc">
 <summary>
@@ -35793,7 +35900,7 @@ Emit comparison instructions
  Indictes the value is inlined but compiled code for the function still exists, e.g. to satisfy interfaces on objects, but that it is also always inlined 
 </summary>
 </member>
-<member name="T:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpInlineAnnotation.PsuedoValue">
+<member name="T:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpInlineAnnotation.PseudoValue">
 <summary>
  Indictes the value is inlined and compiled code for the function does not exist
 </summary>
@@ -35959,66 +36066,6 @@ Emit comparison instructions
 <member name="">
 
 </member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.XmlDocSig">
-<summary>
- Get the XML documentation signature for .xml file lookup for the field, used for .xml file lookup for compiled code
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.XmlDoc">
-<summary>
- Get the in-memory XML documentation for the field, used when code is checked in-memory
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.PropertyAttributes">
-<summary>
- Get the attributes attached to generated property 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.Name">
-<summary>
- Get the name of the field 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.IsUnresolved">
-<summary>
- Indicates if the record field is for a type in an unresolved assembly 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.IsStatic">
-<summary>
- Indicates a static field 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.IsMutable">
-<summary>
- Is the field declared in F#? 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.IsCompilerGenerated">
-<summary>
- Indicates a compiler generated field, not visible to Intellisense or name resolution 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.FieldType">
-<summary>
- Get the type of the field, w.r.t. the generic parameters of the enclosing type constructor 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.FieldAttributes">
-<summary>
- Get the attributes attached to generated field 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.DeclarationLocation">
-<summary>
- Get the declaration location of the field 
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField.Accessibility">
-<summary>
-  Indicates if the declared visibility of the field, not taking signatures into account 
-</summary>
-</member>
 <member name="T:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpRecordField">
 <summary>
  Represents a record or union case field as seen by the F# language
@@ -36045,6 +36092,29 @@ Emit comparison instructions
 <member name="M:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbol.Create(Microsoft.FSharp.Compiler.Env.TcGlobals,Microsoft.FSharp.Compiler.Nameres.Item)">
 <summary>
  Internal use only. 
+</summary>
+</member>
+<member name="">
+
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbolUse.Symbol">
+<summary>
+ The symbol referenced
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbolUse.Range">
+<summary>
+ The range of text representing the reference to the symbol
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbolUse.IsDefinition">
+<summary>
+ Indicates if the reference a definition for the symbol, either in a signature or implementation
+</summary>
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpSymbolUse.FileName">
+<summary>
+ The file name the reference occurs in 
 </summary>
 </member>
 <member name="">
@@ -36246,7 +36316,7 @@ Emit comparison instructions
 <summary>
  Notify the host that a project has been fully checked in the background (using file contents provided by the file system API)
 
- The event may be raised on a backgrounnd thread.
+ The event may be raised on a background thread.
 </summary>
 </member>
 <member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.GlobalForegroundTypeCheckCountStatistic">
@@ -36259,12 +36329,15 @@ Emit comparison instructions
  Report a statistic for testability
 </summary>
 </member>
-<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.FileTypeCheckStateIsDirty">
+<member name="">
+
+</member>
+<member name="P:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.BeforeBackgroundFileCheck">
 <summary>
  Notify the host that the logical type checking context for a file has now been updated internally
  and that the file has become eligible to be re-typechecked for errors.
 
- The event may be raised on a backgrounnd thread.
+ The event may be raised on a background thread.
 </summary>
 </member>
 <member name="M:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.WaitForBackgroundCompile">
@@ -46041,6 +46114,9 @@ verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. T
 <member name="">
 
 </member>
+<member name="">
+
+</member>
 <member name="T:Microsoft.FSharp.Compiler.Typrelns.OverrideInfo">
 <summary>
  The overall information about a method implementation in a class or object expression 
@@ -46124,7 +46200,7 @@ verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. T
  Look for the unique supertype of ty2 for which ty2 :&gt; ty1 might feasibly hold
 </summary>
 </member>
-<member name="M:Microsoft.FSharp.Compiler.Typrelns.FinalTypeDefinitionChecksAtEndOfInferenceScope(Microsoft.FSharp.Compiler.Infos.InfoReader,System.Boolean,Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Tast.Entity)">
+<member name="M:Microsoft.FSharp.Compiler.Typrelns.FinalTypeDefinitionChecksAtEndOfInferenceScope(Microsoft.FSharp.Compiler.Infos.InfoReader,Microsoft.FSharp.Compiler.Nameres.NameResolutionEnv,Microsoft.FSharp.Compiler.Nameres.TcResultsSink,System.Boolean,Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Tast.Entity)">
 <summary>
  &quot;Type Completion&quot; inference and a few other checks at the end of the inference scope
 </summary>
@@ -46350,7 +46426,7 @@ verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. T
 <member name="T:Microsoft.FSharp.Compiler.Typrelns.ProvidedMethodCalls">
 
 </member>
-<member name="M:Microsoft.FSharp.Compiler.Typrelns.DispatchSlotChecking.CheckImplementationRelationAtEndOfInferenceScope(Microsoft.FSharp.Compiler.Infos.InfoReader,Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Tast.Entity,System.Boolean)">
+<member name="M:Microsoft.FSharp.Compiler.Typrelns.DispatchSlotChecking.CheckImplementationRelationAtEndOfInferenceScope(Microsoft.FSharp.Compiler.Infos.InfoReader,Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Nameres.NameResolutionEnv,Microsoft.FSharp.Compiler.Nameres.TcResultsSink,Microsoft.FSharp.Compiler.Tast.Entity,System.Boolean)">
 <summary>
  Check that a type definition implements all its required interfaces after processing all declarations 
  within a file.
@@ -46372,7 +46448,7 @@ verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. T
  Check all implementations implement some dispatch slot.
 </summary>
 </member>
-<member name="M:Microsoft.FSharp.Compiler.Typrelns.DispatchSlotChecking.CheckDispatchSlotsAreImplemented(Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Env.TcGlobals,Microsoft.FSharp.Compiler.Import.ImportMap,Microsoft.FSharp.Compiler.Range.range,System.Boolean,Microsoft.FSharp.Compiler.Tast.TType,Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.RequiredSlot},Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.OverrideInfo},Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.OverrideInfo})">
+<member name="M:Microsoft.FSharp.Compiler.Typrelns.DispatchSlotChecking.CheckDispatchSlotsAreImplemented(Microsoft.FSharp.Compiler.Tastops.DisplayEnv,Microsoft.FSharp.Compiler.Env.TcGlobals,Microsoft.FSharp.Compiler.Import.ImportMap,Microsoft.FSharp.Compiler.Range.range,Microsoft.FSharp.Compiler.Nameres.NameResolutionEnv,Microsoft.FSharp.Compiler.Nameres.TcResultsSink,System.Boolean,Microsoft.FSharp.Compiler.Tast.TType,Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.RequiredSlot},Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.OverrideInfo},Microsoft.FSharp.Collections.FSharpList{Microsoft.FSharp.Compiler.Typrelns.OverrideInfo})">
 <summary>
  Check all dispatch slots are implemented by some override.
 </summary>
