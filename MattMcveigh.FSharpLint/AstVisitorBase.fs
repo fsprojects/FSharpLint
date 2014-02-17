@@ -71,3 +71,7 @@ module AstVisitorBase =
         abstract VisitLongIdentPattern :
             LongIdentWithDots * Ident option * SynAccess option * range -> Continue
         default this.VisitLongIdentPattern(_, _, _, _) = Continue
+
+        abstract VisitValueSignature : 
+            Ident * range -> Continue
+        default this.VisitValueSignature(_, _) = Continue

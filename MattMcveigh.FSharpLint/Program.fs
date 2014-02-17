@@ -27,17 +27,17 @@ module Program =
     [<EntryPoint>]
     let main argv = 
         let input = """
-          namespace MattMcveigh.dogharpLint
+        module Dog
 
-          module Program =
+        let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 
-            type MyClass3() as self =
-              member this.CenterX with get() = x and set xval = x <- xval
-              member this.printMessage() = ()
+        let TestNumber input =
+           match input with
+           | Even -> printfn "%d is even" input
+           | Odd -> printfn "%d is odd" input
 
-            let foo() = 
-              let Cat = 88
-              (66 * 77) / 8"""
+        TestNumber 7
+        """
 
         let postError range error =
             errorHandler.Post(

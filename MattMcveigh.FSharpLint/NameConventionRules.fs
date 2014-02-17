@@ -23,6 +23,7 @@ module NameConventionRules =
     open System
     open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open ErrorHandling
     open AstVisitorBase
@@ -52,6 +53,17 @@ module NameConventionRules =
         | :? FSharpEntity as entity when entity.IsInterface -> true
         | _ -> false
     | None -> false
+
+    type IsProperty =
+    | Property of range
+    | NotProperty
+
+    let isIdentifierProperty = function
+    | Some(identifier:Ident) ->
+        match identifier.idText with
+        | "set" | "get" -> Property identifier.idRange
+        | _ ->  NotProperty
+    | _ ->  NotProperty
 
     let namingConventionVisitor postError checkFile = 
         { new AstVisitorBase(checkFile) with
@@ -123,13 +135,34 @@ module NameConventionRules =
 
                 let memberName = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-                let line, endColumn, memberIdent = memberName.idRange.EndLine, memberName.idRange.EndColumn, memberName.idText
+                let memberRange = match isIdentifierProperty identifier with
+                                    | Property(range) -> range
+                                    | NotProperty -> memberName.idRange
 
-                if checkFile.GetSymbolAtLocation(line-1, 42, "", [memberIdent]) |> isSymbolMember then
-                    if not <| isPascalCase memberName then
-                        postError memberName.idRange (pascalCaseError <| memberIdent)
-                else
-                    longIdentifier.Lid |> List.iter expect
+                let line, endColumn, memberIdent = memberRange.EndLine, memberRange.EndColumn, memberName.idText
+
+                let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [memberIdent])
+
+                let isUnionCaseInPattern = match symbol with
+                                            | Some(symbol:FSharpSymbol) ->
+                                                match symbol with
+                                                | :? FSharpUnionCase -> true
+                                                | _ -> false
+                                            | None -> false
+
+                if not isUnionCaseInPattern then
+                    if isSymbolMember symbol then
+                        if not <| isPascalCase memberName then
+                            postError memberName.idRange (pascalCaseError <| memberIdent)
+                    else
+                        longIdentifier.Lid |> List.iter expect
+
+                Continue
+
+            /// Must be an abstract member signature.
+            member this.VisitValueSignature(identifier, range) = 
+                if not <| isPascalCase identifier then
+                    postError identifier.idRange (pascalCaseError <| identifier.idText)
 
                 Continue
         }

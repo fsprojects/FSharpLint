@@ -30,7 +30,7 @@ module Ast =
     open ErrorHandling
     open AstVisitorBase
 
-    /// used to track route during traversal AST
+    /// Used to track route during traversal AST
     [<RequireQualifiedAccess>]
     type TraverseStep = 
         | Expr of SynExpr
@@ -210,7 +210,10 @@ module Ast =
                     traverseExpression visitors expression
                 | SynMemberDefn.LetBindings(bindings, _, _, _) -> 
                     bindings |> List.iter traverseBinding
-                | SynMemberDefn.AbstractSlot(valueSignature, _, _) -> ()
+                | SynMemberDefn.AbstractSlot(valueSignature, _, _) -> 
+                    match valueSignature with
+                    | SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, range) -> 
+                        visitors |> List.iter (fun v -> v.VisitValueSignature(identifier, range) |> ignore)
                 | SynMemberDefn.Interface(synType, members, _) -> 
                     traverseType synType
                     members |> Option.iter (fun members -> members |> List.iter traverseMember)
@@ -430,6 +433,50 @@ module Ast =
 
     let parse file input visitors =
         let checker = InteractiveChecker.Create()
+
+        let projectOptions = 
+            let allFlags = 
+                [| yield "--simpleresolution"; 
+                   yield "--noframework"; 
+                   yield "--debug:full"; 
+                   yield "--define:DEBUG"; 
+                   yield "--optimize-"; 
+                   yield "--doc:test.xml"; 
+                   yield "--warn:3"; 
+                   yield "--fullpaths"; 
+                   yield "--flaterrors"; 
+                   yield "--target:library"; 
+                   let references =
+                     [ //@"mscorlib"; 
+                       @"C:\Users\matthewm\Documents\GitHub\FSharpLint\packages\FSharp.Compiler.Service\FSharp.Compiler.Service.dll"; 
+                       @"C:\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0\FSharp.Core.dll"; 
+                       //@"System.Numerics"; 
+                       //@"System.Core"; 
+                       //@"System"
+                    ]
+                   for r in references do 
+                         yield "-r:" + r |]
+ 
+            { ProjectFileName = @"C:\Users\matthewm\Documents\GitHub\FSharpLint\MattMcveigh.FSharpLint\MattMcveigh.FSharpLint.fsproj" // Make a name that is unique in this directory.
+              ProjectFileNames = 
+                  [| 
+                    "Tokeniser.fs"; 
+                    "LexRuleMatching.fs" ;
+                    "ErrorHandling.fs"; 
+                    "AstVisitorBase.fs"; 
+                    "Ast.fs"; 
+                    "NameConventionRules.fs"; 
+                    "Program.fs"; 
+                  |]
+              ProjectOptions = allFlags 
+              IsIncompleteTypeCheckEnvironment = false
+              UseScriptResolutionRules = true 
+              LoadTime = System.DateTime.Now // Note using 'Now' forces reloading
+              UnresolvedReferences = None }
+
+              
+        //let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
+
         let projOptions = checker.GetProjectOptionsFromScript(file, input)
         let parseFileResults = checker.ParseFileInProject(file, input, projOptions)
         match parseFileResults.ParseTree with
@@ -444,4 +491,3 @@ module Ast =
                 traverse tree visitors
             | res -> failwithf "Parsing did not finish... (%A)" res
         | None -> failwith "Something went wrong during parsing!"
-        
