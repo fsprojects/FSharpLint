@@ -32,10 +32,10 @@ type TestNameConventionRules() =
 
     let parse = parse stubFilename
 
-    let errorRanges = System.Collections.Generic.List<range>()
+    let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
-        errorRanges.Add(range)
+        errorRanges.Add(range, error)
 
     let parse input = parse input [namingConventionVisitor postError]
 
@@ -45,21 +45,25 @@ type TestNameConventionRules() =
 
     [<Test>]
     member self.IsPascalCase() = 
-        Assert.IsTrue(isPascalCase <| Ident("DogInBin", range()))
+        Assert.IsTrue(isPascalCase "DogInBin")
 
-        Assert.IsFalse(isPascalCase <| Ident("dogInBin", range()))
+        Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
     member self.IsCamelCase() = 
-        Assert.IsTrue(isCamelCase <| Ident("dogInBin", range()))
+        Assert.IsTrue(isCamelCase "dogInBin")
 
-        Assert.IsFalse(isCamelCase <| Ident("DogInBin", range()))
+        Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
     member self.ContainsUnderScore() = 
-        Assert.IsTrue(containsUnderscore <| Ident("dog_", range()))
+        Assert.IsTrue(containsUnderscore "dog_")
 
-        Assert.IsFalse(containsUnderscore <| Ident("dog", range()))
+        Assert.IsTrue(containsUnderscore "_dog")
+
+        Assert.IsTrue(containsUnderscore "d_og")
+
+        Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
     member self.ClassNameIsPascalCase() = 
@@ -68,7 +72,7 @@ module Program
   type MyClass2() as self =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartColumn = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.ClassNameIsCamelCase() = 
@@ -77,7 +81,7 @@ module Program
   type myClass2() as self =
     member this.PrintMessage() = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.InterfaceNameBeginsWithI() = 
@@ -86,7 +90,7 @@ module Program
   type IPrintable =
     abstract member Print : unit -> unit"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.InterfaceNameDoesNotBeginWithI() = 
@@ -95,7 +99,7 @@ module Program
   type Printable =
     abstract member Print : unit -> unit"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.ClassMemberIsPascalCase() = 
@@ -104,7 +108,7 @@ module Program
   type MyClass2() as self =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 16))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 16))
 
     [<Test>]
     member self.ClassMemberIsCamelCase() = 
@@ -113,7 +117,7 @@ module Program
   type MyClass2() as self =
     member this.printMessage() = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 16))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 16))
 
     [<Test>]
     member self.EnumNameIsPascalCase() = 
@@ -122,7 +126,7 @@ module Program
   type MyEnum =
     | EnumCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.EnumNameIsCamelCase() = 
@@ -131,7 +135,7 @@ module Program
   type myEnum =
     | EnumCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.EnumCaseIsPascalCase() = 
@@ -140,7 +144,7 @@ module Program
   type MyEnum =
     | EnumCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
 
     [<Test>]
     member self.EnumCaseIsCamelCase() = 
@@ -149,7 +153,7 @@ module Program
   type MyEnum =
     | enumCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
 
     [<Test>]
     member self.UnionNameIsPascalCase() = 
@@ -158,7 +162,7 @@ module Program
   type Union =
     | Some"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.UnionNameIsCamelCase() = 
@@ -167,7 +171,7 @@ module Program
   type union =
     | Some"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.UnionCaseIsPascalCase() = 
@@ -176,7 +180,7 @@ module Program
   type Union =
     | UnionCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
 
     [<Test>]
     member self.UnionCaseIsCamelCase() = 
@@ -185,7 +189,7 @@ module Program
   type Union =
     | unionCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
 
     [<Test>]
     member self.RecordNameIsPascalCase() = 
@@ -193,7 +197,7 @@ module Program
 module Program
   type Record = { dog: int }"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.RecordNameIsCamelCase() = 
@@ -201,7 +205,7 @@ module Program
 module Program
   type record = { dog: int }"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.RecordFieldIsPascalCase() = 
@@ -209,7 +213,7 @@ module Program
 module Program
   type record = { Dog: int }"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 18))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 18))
 
     [<Test>]
     member self.RecordFieldIsCamelCase() = 
@@ -217,7 +221,7 @@ module Program
 module Program
   type record = { dog: int }"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 18))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 18))
 
     [<Test>]
     member self.TypeAbbreviationIsPascalCase() = 
@@ -225,7 +229,7 @@ module Program
 module Program
   type Cat = int"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.TypeAbbreviationIsCamelCase() = 
@@ -233,7 +237,7 @@ module Program
 module Program
   type cat = int"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.ModuleNameIsPascalCase() = 
@@ -241,7 +245,7 @@ module Program
 module Program
   let main = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 2 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 7))
 
     [<Test>]
     member self.ModuleNameIsCamelCase() = 
@@ -249,21 +253,21 @@ module Program
 module program
   let main = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 2 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 7))
 
     [<Test>]
     member self.NamespaceIsPascalCase() = 
         parse """
 namespace Matt.Dog.Cat"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 2 && r.StartColumn = 10))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 10))
 
     [<Test>]
     member self.NamespaceIsCamelCase() = 
         parse """
 namespace matt.dog.cat"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 2 && r.StartColumn = 10))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 10))
 
     [<Test>]
     member self.VariablePatternMatchIsPascalCase() = 
@@ -273,7 +277,7 @@ module program
     match true with
     | Dog -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 6))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 6))
 
     [<Test>]
     member self.VariablePatternMatchIsCamelCase() = 
@@ -283,7 +287,7 @@ module program
     match true with
     | dog -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 6))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 6))
 
     [<Test>]
     member self.TupleIsPascalCase() = 
@@ -292,7 +296,7 @@ module program
   let main = 
     let (Cat, _) = 1, 0"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 9))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
 
     [<Test>]
     member self.TupleIsCamelCase() = 
@@ -301,7 +305,7 @@ module program
   let main = 
     let (cat, _) = 1, 0"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 4 && r.StartColumn = 9))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
 
     [<Test>]
     member self.PatternMatchAsIsPascalCase() = 
@@ -311,7 +315,7 @@ module program
     match true with
     | _ as Dog -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 11))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 11))
 
     [<Test>]
     member self.PatternMatchAsIsCamelCase() = 
@@ -321,7 +325,7 @@ module program
     match true with
     | _ as dog -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 11))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 11))
 
     [<Test>]
     member self.DelegateNameIsPascalCase() = 
@@ -329,7 +333,7 @@ module program
 module program
   type Delegate2 = delegate of int * int -> int"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.DelegateNameIsCamelCase() = 
@@ -337,7 +341,7 @@ module program
 module program
   type delegate2 = delegate of int * int -> int"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.FunctionNameIsPascalCase() = 
@@ -345,7 +349,7 @@ module program
 module program
   let Main () = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 6))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
 
     [<Test>]
     member self.FunctionNameIsCamelCase() = 
@@ -353,7 +357,7 @@ module program
 module program
   let main () = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 6))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
 
     [<Test>]
     member self.FunctionParameterIsPascalCase() = 
@@ -361,7 +365,7 @@ module program
 module program
   let main Dog = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 11))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 11))
 
     [<Test>]
     member self.FunctionParameterIsCamelCase() = 
@@ -369,7 +373,7 @@ module program
 module program
   let main dog = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 11))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 11))
 
     [<Test>]
     member self.ConstructorParameterIsPascalCase() = 
@@ -378,7 +382,7 @@ module Program
   type MyClass2(Cats) as self =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartColumn = 3 && r.EndColumn = 16))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.EndColumn = 16))
 
     [<Test>]
     member self.ConstructorParameterIsCamelCase() = 
@@ -387,7 +391,7 @@ module Program
   type MyClass2(cats) as self =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartColumn = 3 && r.EndColumn = 16))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.EndColumn = 16))
 
     [<Test>]
     member self.StructNameIsPascalCase() = 
@@ -400,7 +404,7 @@ module program
       new(x: float, y: float) = { X = x; Y = y }
     end"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.StructNameIsCamelCase() = 
@@ -413,7 +417,7 @@ module program
       new(x: float, y: float) = { X = x; Y = y }
     end"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
     [<Test>]
     member self.PropertyIsPascalCase() = 
@@ -424,7 +428,7 @@ module program
 
     member this.CenterX with get() = x and set xval = x <- xval"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 6 && r.StartColumn = 16))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 16))
 
     [<Test>]
     member self.PropertyIsCamelCase() = 
@@ -435,7 +439,7 @@ module program
 
     member this.centerX with get() = x and set xval = x <- xval"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 6 && r.StartColumn = 16))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 16))
 
     [<Test>]
     member self.AbstractMemberNameIsPascalCase() = 
@@ -445,7 +449,7 @@ module program
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 20))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 20))
 
     [<Test>]
     member self.AbstractMemberNameIsCamelCase() = 
@@ -455,7 +459,7 @@ module program
   type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 20))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 20))
 
     [<Test>]
     member self.AbstractPropertyNameIsPascalCase() = 
@@ -465,7 +469,7 @@ module program
   type Shape2D(x0 : float, y0 : float) =
     abstract Area : float with get"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 13))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 13))
 
     [<Test>]
     member self.AbstractPropertyNameIsCamelCase() = 
@@ -475,7 +479,7 @@ module program
   type Shape2D(x0 : float, y0 : float) =
     abstract area : float with get"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 5 && r.StartColumn = 13))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 13))
 
     [<Test>]
     member self.DefaultMemberIsPascalCase() = 
@@ -486,7 +490,7 @@ module program
     abstract member Rotate: float -> unit
     default this.Rotate(angle) = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun r -> r.StartLine = 6 && r.StartColumn = 17))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 17))
 
     [<Test>]
     member self.DefaultMemberIsCamelCase() = 
@@ -497,4 +501,96 @@ module program
     abstract member rotate: float -> unit
     default this.rotate(angle) = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun r -> r.StartLine = 6 && r.StartColumn = 17))
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 17))
+
+    [<Test>]
+    member self.ActivePatternContainsUnderscore() = 
+        parse """
+module program
+let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
+
+match 4 with
+| Ev_en -> ()
+| Odd -> ()"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.ActivePatternDoesNotContainUnderscore() = 
+        parse """
+module program
+let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
+
+match 4 with
+| Even -> ()
+| Odd -> ()"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.PartialActivePatternContainsUnderscore() = 
+        parse """
+module program
+let (|Ev_en|_|) input = if input % 2 = 0 then Some 4 else None
+        
+match 3 with
+| Ev_en(x) -> ()
+| dog -> ()"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.PartialActivePatternDoesNotContainUnderscore() = 
+        parse """
+module program
+let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
+        
+match 3 with
+| Even(x) -> ()
+| dog -> ()"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.ExceptionIsPascalCase() = 
+        parse """
+module program
+exception MyError of string
+"""
+
+        let error = "Expected pascal case identifier but was MyError"
+
+        Assert.IsFalse(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+
+    [<Test>]
+    member self.ExceptionIsCamelCase() = 
+        parse """
+module program
+exception myError of string
+"""
+
+        let error = "Expected pascal case identifier but was myError"
+
+        Assert.IsTrue(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+
+    [<Test>]
+    member self.ExceptionEndsWithException() = 
+        parse """
+module program
+exception MyErrorException of string
+"""
+
+        let error = "Exception identifier should end with 'Exception', but was MyErrorException"
+
+        Assert.IsFalse(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+
+    [<Test>]
+    member self.ExceptionDoesNotEndWithException() = 
+        parse """
+module program
+exception MyError of string
+"""
+
+        let error = "Exception identifier should end with 'Exception', but was MyError"
+
+        Assert.IsTrue(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))

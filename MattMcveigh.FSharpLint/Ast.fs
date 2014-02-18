@@ -18,7 +18,6 @@
 
 namespace MattMcveigh.FSharpLint
 
-/// Currently a mess I'm playing around with to work out a good design.
 module Ast =
 
     open System
@@ -29,19 +28,6 @@ module Ast =
     open Tokeniser
     open ErrorHandling
     open AstVisitorBase
-
-    /// Used to track route during traversal AST
-    [<RequireQualifiedAccess>]
-    type TraverseStep = 
-        | Expr of SynExpr
-        | Module of SynModuleDecl
-        | ModuleOrNamespace of SynModuleOrNamespace
-        | TypeDefn of SynTypeDefn
-        | MemberDefn of SynMemberDefn
-        | MatchClause of SynMatchClause
-        | Binding of SynBinding
-
-    type TraversePath = TraverseStep list
 
     /// Traverse an implementation file walking all the way down.
     let traverse parseTree (allVisitors: AstVisitorBase list) =
@@ -249,7 +235,9 @@ module Ast =
                 | SynExpr.New(_, synType, expression, _) -> 
                     traverseExpression expression
                     traverseType visitors synType
-                | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> ()
+                | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> 
+                    traverseType visitors synType
+                    bindings |> List.iter (fun x -> traverseBinding visitors x)
                 | SynExpr.While(_, expression, expression1, _) -> 
                     traverseExpression expression
                     traverseExpression expression1
