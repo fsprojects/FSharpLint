@@ -5,23 +5,23 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>d0103c74-6538-4c6e-a684-dfc8f1dd41c7</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>MattMcveigh.FSharpLint.Tests</RootNamespace>
-    <AssemblyName>MattMcveigh.FSharpLint.Tests</AssemblyName>
+    <ProjectGuid>ffb38d12-8e91-42c9-aba6-2aae5c60f805</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MattMcveigh.FSharpLint</RootNamespace>
+    <AssemblyName>MattMcveigh.FSharpLint</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>MattMcveigh.FSharpLint.Tests</Name>
+    <Name>FSharpLint</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\MattMcveigh.FSharpLint.Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\MattMcveigh.FSharpLint.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\MattMcveigh.FSharpLint.Tests.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\MattMcveigh.FSharpLint.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
@@ -40,35 +40,28 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <ItemGroup>
-    <Compile Include="TestTokeniser.fs" />
-    <Compile Include="TestLexRuleMatching.fs" />
-    <Compile Include="TestNameConventionRules.fs" />
+    <Compile Include="Tokeniser.fs" />
+    <Compile Include="LexRuleMatching.fs" />
+    <Compile Include="ErrorHandling.fs" />
+    <Compile Include="AstVisitorBase.fs" />
+    <Compile Include="Ast.fs" />
+    <Compile Include="NameConventionRules.fs" />
+    <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\packages\FSharp.Compiler.Service.0.0.11-alpha\lib\net40\FSharp.Compiler.Service.dll</HintPath>
+      <HintPath>..\..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\MattMcveigh.FSharpLint\MattMcveigh.FSharpLint.fsproj">
-      <Name>MattMcveigh.FSharpLint</Name>
-      <Project>{ffb38d12-8e91-42c9-aba6-2aae5c60f805}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
