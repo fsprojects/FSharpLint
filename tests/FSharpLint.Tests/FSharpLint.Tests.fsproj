@@ -64,7 +64,7 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MattMcveigh.FSharpLint\FSharpLint.fsproj">
+    <ProjectReference Include="..\..\src\FSharpLint\FSharpLint.fsproj">
       <Name>FSharpLint</Name>
       <Project>{ffb38d12-8e91-42c9-aba6-2aae5c60f805}</Project>
       <Private>True</Private>
