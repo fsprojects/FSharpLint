@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 /// Contains the functionality for reporting lint errors.
 module ErrorHandling =
@@ -27,7 +27,7 @@ module ErrorHandling =
     /// Generates error reporting information on where in a file an error has occured.
     let errorInfoLine (range:range) (input:string) =
         let errorenousLine = input.Split([|'\n'|]).[range.StartLine - 1]
-        let firstLine = String.Format("Error in file {0} on line {1} starting at column {2}", range.FileName, range.StartLine, range.StartColumn)
+        let firstLine = sprintf "Error in file %s on line %d starting at column %d" range.FileName range.StartLine range.StartColumn
         let highlightColumnLine = 
             errorenousLine 
                 |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")

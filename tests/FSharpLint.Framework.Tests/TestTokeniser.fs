@@ -20,7 +20,7 @@ module TestTokeniser
 
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.SourceCodeServices
-open MattMcveigh.FSharpLint.Tokeniser
+open FSharpLint.Tokeniser
 
 type Assert with
     static member AreTokensEqual(expectedTokens, (tokens:Token list)) =

@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 module Ast =
 
@@ -26,7 +26,6 @@ module Ast =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Tokeniser
-    open ErrorHandling
     open AstVisitorBase
 
     /// Traverse an implementation file walking all the way down.
@@ -68,7 +67,8 @@ module Ast =
                 traverseModuleOrNamespace visitors moduleOrNamespace
         and
             traverseBinding visitors = function
-            | SynBinding.Binding(access, bindingKind, _, _, attributes, xmlDoc, _, pattern, _, expression, _, _) -> 
+            | SynBinding.Binding(access, bindingKind, _, _, attributes, xmlDoc, _, pattern, _, expression, range, _) ->
+                visitors |> List.iter (fun visitor -> visitor.VisitBinding(pattern, range) |> ignore)
                 traversePattern visitors pattern
                 traverseExpression visitors expression
         and 
@@ -383,7 +383,7 @@ module Ast =
                     patterns |> List.iter (traversePattern visitors)
                 | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
                     let visit (visitor: AstVisitorBase) =
-                        visitor.VisitLongIdentPattern(longIdentifier, identifier, access, range).ShallContinue
+                        visitor.VisitLongIdentPattern(longIdentifier, identifier, constructorArguments, access, range).ShallContinue
 
                     let visitors = visitors |> List.filter visit
 
@@ -427,49 +427,6 @@ module Ast =
 
     let parse file input visitors =
         let checker = InteractiveChecker.Create()
-
-        let projectOptions = 
-            let allFlags = 
-                [| yield "--simpleresolution"; 
-                   yield "--noframework"; 
-                   yield "--debug:full"; 
-                   yield "--define:DEBUG"; 
-                   yield "--optimize-"; 
-                   yield "--doc:test.xml"; 
-                   yield "--warn:3"; 
-                   yield "--fullpaths"; 
-                   yield "--flaterrors"; 
-                   yield "--target:library"; 
-                   let references =
-                     [ //@"mscorlib"; 
-                       @"C:\Users\matthewm\Documents\GitHub\FSharpLint\packages\FSharp.Compiler.Service\FSharp.Compiler.Service.dll"; 
-                       @"C:\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0\FSharp.Core.dll"; 
-                       //@"System.Numerics"; 
-                       //@"System.Core"; 
-                       //@"System"
-                    ]
-                   for r in references do 
-                         yield "-r:" + r |]
- 
-            { ProjectFileName = @"C:\Users\matthewm\Documents\GitHub\FSharpLint\MattMcveigh.FSharpLint\MattMcveigh.FSharpLint.fsproj" // Make a name that is unique in this directory.
-              ProjectFileNames = 
-                  [| 
-                    "Tokeniser.fs"; 
-                    "LexRuleMatching.fs" ;
-                    "ErrorHandling.fs"; 
-                    "AstVisitorBase.fs"; 
-                    "Ast.fs"; 
-                    "NameConventionRules.fs"; 
-                    "Program.fs"; 
-                  |]
-              ProjectOptions = allFlags 
-              IsIncompleteTypeCheckEnvironment = false
-              UseScriptResolutionRules = true 
-              LoadTime = System.DateTime.Now // Note using 'Now' forces reloading
-              UnresolvedReferences = None }
-
-              
-        //let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
 
         let projOptions = checker.GetProjectOptionsFromScript(file, input)
         let parseFileResults = checker.ParseFileInProject(file, input, projOptions)

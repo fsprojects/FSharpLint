@@ -16,28 +16,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 module Program =
 
     open Ast
     open ErrorHandling
-    open NameConventionRules
         
     [<EntryPoint>]
     let main argv = 
         let input = """
 module goat
 
-{ new System.IComparable with
-    member this.CompareTo(obj) =
-        let Cat = 0
-        1
-}
+type Point3D =
+    struct 
+        val mutable x: float
+        val y: float
+        val z: float
+    end 
 
-for I = 10 downto 1 do System.Console.Write(I)
+let ((_)) = ()
+
+let _, a = 0, 1
+
+//for I = 10 downto 1 do System.Console.Write(I)
 
 for I in 1..10 do System.Console.Write(I)
+
+let functionCat meow dog (m, d, g) e o w = ()
+
+type MyClass(x) =
+    new() = MyClass(0)
         """
 
         let postError range error =
@@ -48,9 +57,13 @@ for I in 1..10 do System.Console.Write(I)
                     input = input
                 })
 
-        let visitor = namingConventionVisitor postError
+        let visitors = [
+            NameConventions.visitor postError
+            FavourIgnoreOverLetWild.visitor postError
+            FunctionParametersLength.visitor postError
+        ]
 
-        parse "/home/user/Dog.test.fsx" input [visitor] |> ignore
+        parse "/home/user/Dog.test.fsx" input visitors |> ignore
 
         System.Console.ReadKey() |> ignore
 

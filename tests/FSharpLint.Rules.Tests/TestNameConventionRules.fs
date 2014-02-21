@@ -23,8 +23,8 @@ open System.Linq
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
-open MattMcveigh.FSharpLint.NameConventionRules
-open MattMcveigh.FSharpLint.Ast
+open FSharpLint.NameConventions
+open FSharpLint.Ast
 
 [<TestFixture>]
 type TestNameConventionRules() =
@@ -37,7 +37,7 @@ type TestNameConventionRules() =
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
-    let parse input = parse input [namingConventionVisitor postError]
+    let parse input = parse input [visitor postError]
 
     [<SetUp>]
     member self.SetUp() = 
@@ -118,6 +118,16 @@ module Program
     member this.printMessage() = ()"""
 
         Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 16))
+
+    /// The new member (constructor) is not pascal case so check it does not post an error.
+    [<Test>]
+    member self.ConstructorDoesNotPostError() = 
+        parse """
+module Program
+type MyClass(x) =
+    new() = MyClass(0)"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 4))
 
     [<Test>]
     member self.EnumNameIsPascalCase() = 

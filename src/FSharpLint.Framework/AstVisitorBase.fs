@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 module AstVisitorBase =
 
@@ -69,8 +69,8 @@ module AstVisitorBase =
         default this.VisitIdPattern(_, _) = Continue
         
         abstract VisitLongIdentPattern :
-            LongIdentWithDots * Ident option * SynAccess option * range -> Continue
-        default this.VisitLongIdentPattern(_, _, _, _) = Continue
+            LongIdentWithDots * Ident option * SynConstructorArgs * SynAccess option * range -> Continue
+        default this.VisitLongIdentPattern(_, _, _, _, _) = Continue
 
         abstract VisitValueSignature : 
             Ident * range -> Continue
@@ -79,3 +79,7 @@ module AstVisitorBase =
         abstract VisitFor : 
             Ident * range -> Continue
         default this.VisitFor(_, _) = Continue
+
+        abstract VisitBinding : 
+            SynPat * range -> Continue
+        default this.VisitBinding(_, _) = Continue

@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 /// Contains a lexer (tokeniser function) which given a list of F# lines of code (each element should be a line of code)
 /// turns them into a list of tokens, the tokens contain the string matched to the token and a TokenInformation instance.

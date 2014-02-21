@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint", "src\FSharpLint\FSharpLint.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
+# Visual Studio Express 2012 for Web
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Tests", "tests\FSharpLint.Tests\FSharpLint.Tests.fsproj", "{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework.Tests", "tests\FSharpLint.Framework.Tests\FSharpLint.Framework.Tests.fsproj", "{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29468D96-1CC1-463E-9B81-7BD9D466D57D}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,6 +11,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Rules", "src\FSharpLint.Rules\FSharpLint.Rules.fsproj", "{FAA41613-E697-4012-94CD-6E6890A6E7C7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework", "src\FSharpLint.Framework\FSharpLint.Framework.fsproj", "{94220BA0-E632-4F4F-8F6D-A11A5AA52636}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Rules.Tests", "tests\FSharpLint.Rules.Tests\FSharpLint.Rules.Tests.fsproj", "{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +32,18 @@ Global
 		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

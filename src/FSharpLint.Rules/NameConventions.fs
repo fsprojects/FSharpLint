@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace MattMcveigh.FSharpLint
+namespace FSharpLint
 
 /// Checks whether any code in an F# program violates best practices for naming identifiers.
-module NameConventionRules =
+module NameConventions =
 
     open System
     open System.Linq
@@ -28,7 +28,6 @@ module NameConventionRules =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open AstVisitorBase
-    open ErrorHandling
 
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 
@@ -37,14 +36,14 @@ module NameConventionRules =
     let containsUnderscore (identifier:string) = identifier.Contains("_")
 
     let pascalCaseError (identifier:string) = 
-        String.Format("Expected pascal case identifier but was {0}", identifier)
+        sprintf "Expected pascal case identifier but was %s" identifier
 
     let camelCaseError (identifier:string) = 
-        String.Format("Expected camel case identifier but was {0}", identifier)
+        sprintf "Expected camel case identifier but was %s" identifier
 
     let expectNoUnderscore postError (identifier:Ident) =
         if containsUnderscore identifier.idText then
-            let error = String.Format("Identifiers should not contain underscores, but one was found in {0}", identifier)
+            let error = sprintf "Identifiers should not contain underscores, but one was found in %s" identifier.idText
             postError identifier.idRange error
 
     let expect predicate getError postError (identifier:Ident) =
@@ -54,21 +53,25 @@ module NameConventionRules =
             let error = getError identifier.idText
             postError identifier.idRange error
 
+    /// Checks an identifier is camel case, if not an error is posted.
     let expectCamelCase = expect isCamelCase camelCaseError
-
+    
+    /// Checks an identifier is pascal case, if not an error is posted.
     let expectPascalCase = expect isPascalCase pascalCaseError
 
-    let isSymbolInterface = function
+    let isSymbolAnInterface = function
     | Some(symbol:FSharpSymbol) ->
         match symbol with
         | :? FSharpEntity as entity when entity.IsInterface -> true
         | _ -> false
     | None -> false
 
+    /// Whether or not an identifier is representing a class property.
     type IsProperty =
     | Property of range
     | NotProperty
 
+    /// Is an identifier a class property?
     let isIdentifierAProperty = function
     | Some(identifier:Ident) ->
         match identifier.idText with
@@ -76,15 +79,17 @@ module NameConventionRules =
         | _ ->  NotProperty
     | _ ->  NotProperty
 
+    /// Validate the name conventions of an active pattern definition (for example '|Dog|Cat|').
     let expectValidActivePatternDefinition postError (identifier:Ident) =
         let error ident =
             if containsUnderscore ident then
-                let error = String.Format("Identifiers should not contain underscores, but one was found in: {0}", ident)
+                let error = sprintf "Identifiers should not contain underscores, but one was found in: %s" ident
                 postError identifier.idRange error
 
         identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
             |> Seq.iter error
 
+    /// Possible types a long identifier as part of a pattern may be representing.
     type LongIdentPatternType =
     | UnionCase of FSharpUnionCase
     | Member of FSharpMemberFunctionOrValue
@@ -121,7 +126,7 @@ module NameConventionRules =
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
-    let namingConventionVisitor postError checkFile = 
+    let visitor postError checkFile = 
         let expectCamelCase, expectPascalCase = expectCamelCase postError, expectPascalCase postError
 
         { new AstVisitorBase(checkFile) with
@@ -157,18 +162,18 @@ module NameConventionRules =
 
                 let startLine, endColumn = interfaceRange.StartLine, interfaceRange.EndColumn
 
-                if isSymbolInterface <| checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [interfaceIdentifier.idText]) then 
+                if isSymbolAnInterface <| checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [interfaceIdentifier.idText]) then 
                     if not <| interfaceIdentifier.idText.StartsWith("I") then
                         let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
                         postError interfaceRange error
                     
                 Continue
 
-            member this.VisitLongIdentPattern(longIdentifier, identifier, access, range) =  
+            member this.VisitLongIdentPattern(longIdentifier, identifier, _, access, range) =  
                 let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
                 match longIdentPatternType longIdentifier identifier checkFile with
-                | Member(_) -> expectPascalCase lastIdent
+                | Member(_) when lastIdent.idText <> "new" -> expectPascalCase lastIdent
                 | ValueOrFunction(_) -> expectCamelCase lastIdent
                 | ActivePatternDefinition(_) -> expectValidActivePatternDefinition postError lastIdent
                 | _ -> ()
@@ -179,7 +184,7 @@ module NameConventionRules =
                 match unionCase with 
                 | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
                     if not <| identifier.idText.EndsWith("Exception") then
-                        let error = String.Format("Exception identifier should end with 'Exception', but was {0}", identifier)
+                        let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                         postError identifier.idRange error
                 
                 Continue
