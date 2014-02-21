@@ -23,21 +23,17 @@ open System.Linq
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
-open FSharpLint.NameConventions
-open FSharpLint.Ast
+open FSharpLint.Rules.NameConventions
+open FSharpLint.Framework.Ast
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    let stubFilename = "/home/user/Dog.test.fsx"
-
-    let parse = parse stubFilename
-
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
-    let parse input = parse input [visitor postError]
+    let parse input = parseInput input [visitor postError]
 
     [<SetUp>]
     member self.SetUp() = 

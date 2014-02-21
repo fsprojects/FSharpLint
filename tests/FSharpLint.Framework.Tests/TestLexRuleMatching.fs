@@ -20,8 +20,8 @@ module TestLexRuleMatching
 
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.SourceCodeServices
-open FSharpLint.LexRuleMatching
-open FSharpLint.Tokeniser
+open FSharpLint.Framework.LexRuleMatching
+open FSharpLint.Framework.Tokeniser
 
 [<TestFixture>]
 type TestLexRuleMatching() =

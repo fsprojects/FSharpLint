@@ -16,21 +16,17 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Console
 
 module Program =
 
-    open Ast
-    open ErrorHandling
-        
-    [<EntryPoint>]
-    let main argv = 
+    let parseLiteralString () = 
         let input = """
 module goat
 
 type Point3D =
     struct 
-        val mutable x: float
+        val mutable _x: float
         val y: float
         val z: float
     end 
@@ -50,20 +46,24 @@ type MyClass(x) =
         """
 
         let postError range error =
-            errorHandler.Post(
+            ErrorHandling.errorHandler.Post(
                 {
-                    info = error
-                    range = range
-                    input = input
+                    Info = error
+                    Range = range
+                    Input = input
                 })
 
         let visitors = [
-            NameConventions.visitor postError
-            FavourIgnoreOverLetWild.visitor postError
-            FunctionParametersLength.visitor postError
+            FSharpLint.Rules.NameConventions.visitor postError
+            FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
+            FSharpLint.Rules.FunctionParametersLength.visitor postError
         ]
 
-        parse "/home/user/Dog.test.fsx" input visitors |> ignore
+        FSharpLint.Framework.Ast.parseInput input visitors |> ignore
+    
+    [<EntryPoint>]
+    let main argv = 
+        parseLiteralString()
 
         System.Console.ReadKey() |> ignore
 

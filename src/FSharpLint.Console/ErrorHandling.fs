@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Console
 
 /// Contains the functionality for reporting lint errors.
 module ErrorHandling =
@@ -38,12 +38,12 @@ module ErrorHandling =
     type Error =
         {
             /// Description of the error.
-            info: string
+            Info: string
 
-            range: range
+            Range: range
 
             /// Entire input file, needed to display where in the file the error occurred.
-            input: string
+            Input: string
         }
 
     /// Agent that handles the application's errors.
@@ -51,8 +51,8 @@ module ErrorHandling =
     let errorHandler = MailboxProcessor.Start(fun agent -> 
         let rec loop () = async {
             let! error = agent.Receive()
-            Console.WriteLine(error.info)
-            Console.WriteLine(errorInfoLine error.range error.input)
+            Console.WriteLine(error.Info)
+            Console.WriteLine(errorInfoLine error.Range error.Input)
             return! loop()
         }
         loop())

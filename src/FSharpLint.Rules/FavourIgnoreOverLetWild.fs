@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Rules
 
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 module FavourIgnoreOverLetWild =
@@ -24,7 +24,7 @@ module FavourIgnoreOverLetWild =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open AstVisitorBase
+    open FSharpLint.Framework.AstVisitorBase
     
     let visitor postError checkFile = 
         { new AstVisitorBase(checkFile) with
@@ -38,5 +38,5 @@ module FavourIgnoreOverLetWild =
                 if findWildAndIgnoreParens pattern then
                     postError range "Favour using the ignore function rather than let _ = ..."
 
-                Continue
+                [this]
         }

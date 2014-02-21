@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Rules
 
 /// Checks if a function is declared with more than a configurable number of parameters.
 module FunctionParametersLength =
@@ -24,7 +24,7 @@ module FunctionParametersLength =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open AstVisitorBase
+    open FSharpLint.Framework.AstVisitorBase
 
     // Change this to be retrieved from a config file.
     [<Literal>]
@@ -44,5 +44,5 @@ module FunctionParametersLength =
                     postError failedPattern.Range (error MaxParameters)
                 | _ -> ()
 
-                Continue
+                [this]
         }

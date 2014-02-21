@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Framework
 
 module Ast =
 
@@ -34,9 +34,9 @@ module Ast =
             traverseModuleOrNamespace visitors = function
             | SynModuleOrNamespace(identifier, isModule, moduleDeclarations, xmlDoc, attributes, access, range) ->
                 let visit (visitor: AstVisitorBase) =
-                    visitor.VisitModuleOrNamespace(identifier, isModule, moduleDeclarations, xmlDoc, attributes, access, range).ShallContinue
+                    visitor.VisitModuleOrNamespace(identifier, isModule, moduleDeclarations, xmlDoc, attributes, access, range)
 
-                let traverseModuleDeclaration =  visitors |> List.filter visit |> traverseModuleDeclaration
+                let traverseModuleDeclaration =  visitors |> List.collect visit |> traverseModuleDeclaration
 
                 moduleDeclarations |> List.iter traverseModuleDeclaration
         and 
@@ -45,9 +45,7 @@ module Ast =
             | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) ->
                 traverseComponentInfo visitors componentInfo
 
-                let traverseModuleDeclaration = traverseModuleDeclaration visitors
-
-                moduleDeclarations |> List.iter traverseModuleDeclaration
+                moduleDeclarations |> List.iter (traverseModuleDeclaration visitors)
             | SynModuleDecl.Let(_, bindings, _) -> 
                 let traverseBinding = traverseBinding visitors
 
@@ -68,7 +66,7 @@ module Ast =
         and
             traverseBinding visitors = function
             | SynBinding.Binding(access, bindingKind, _, _, attributes, xmlDoc, _, pattern, _, expression, range, _) ->
-                visitors |> List.iter (fun visitor -> visitor.VisitBinding(pattern, range) |> ignore)
+                let visitors = visitors |> List.collect (fun visitor -> visitor.VisitBinding(pattern, range))
                 traversePattern visitors pattern
                 traverseExpression visitors expression
         and 
@@ -80,9 +78,9 @@ module Ast =
             traverseExceptionRepresentation visitors = function
             | SynExceptionRepr.ExceptionDefnRepr(attributes, unionCase, identifier, xmlDoc, access, range) -> 
                 let visit (visitor: AstVisitorBase) =
-                    visitor.VisitExceptionRepresentation(attributes, unionCase, identifier, xmlDoc, access, range).ShallContinue
+                    visitor.VisitExceptionRepresentation(attributes, unionCase, identifier, xmlDoc, access, range)
 
-                let visitors = visitors |> List.filter visit
+                let visitors = visitors |> List.collect visit
 
                 traverseUnionCase visitors unionCase
         and
@@ -95,9 +93,9 @@ module Ast =
             traverseComponentInfo visitors = function
             | SynComponentInfo.ComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, _, access, range) ->
                 let visit (visitor: AstVisitorBase) =
-                    visitor.VisitComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, access, range) |> ignore
+                    visitor.VisitComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, access, range)
 
-                visitors |> List.iter visit
+                visitors |> List.collect visit |> ignore
         and 
             traverseTypeRepresentation visitors = function
             | ObjectModel(typeKind, members, _) -> 
@@ -132,9 +130,9 @@ module Ast =
             traverseField visitors = function
             | SynField.Field(attributes, _, identifier, synType, _, xmlDoc, access, range) -> 
                 let visit (visitor:AstVisitorBase) =
-                    visitor.VisitField(attributes, identifier, synType, xmlDoc, access, range).ShallContinue
+                    visitor.VisitField(attributes, identifier, synType, xmlDoc, access, range)
 
-                let visitors = visitors |> List.filter visit
+                let visitors = visitors |> List.collect visit
 
                 traverseType visitors synType
         and
@@ -214,132 +212,130 @@ module Ast =
                     traverseExpression visitors expression
         and
             traverseExpression visitors expression = 
-                let traverseExpression = traverseExpression visitors
-
                 match expression with
                 | SynExpr.Paren(expression, _, _, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.Quote(expression, _, expression1, _, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.Const(constant, _) -> ()
                 | SynExpr.Typed(expression, synType, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     traverseType visitors synType
                 | SynExpr.Tuple(expressions, _, _) -> 
-                    expressions |> List.iter traverseExpression
+                    expressions |> List.iter (traverseExpression visitors)
                 | SynExpr.ArrayOrList(_, expressions, _) -> 
-                    expressions |> List.iter traverseExpression
+                    expressions |> List.iter (traverseExpression visitors)
                 | SynExpr.Record(synType, expression, _, _) -> 
-                    expression |> Option.iter (fun (expression, _) -> traverseExpression expression)
+                    expression |> Option.iter (fun (expression, _) -> traverseExpression visitors expression)
                 | SynExpr.New(_, synType, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     traverseType visitors synType
                 | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> 
                     traverseType visitors synType
                     bindings |> List.iter (fun x -> traverseBinding visitors x)
                 | SynExpr.While(_, expression, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.For(_, identifier, expression, _, expression1, expression2, range) -> 
-                    visitors |> List.iter (fun visitor -> visitor.VisitFor(identifier, range) |> ignore)
-                    traverseExpression expression
-                    traverseExpression expression1
-                    traverseExpression expression2
+                    let visitors = visitors |> List.collect (fun visitor -> visitor.VisitFor(identifier, range))
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
+                    traverseExpression visitors expression2
                 | SynExpr.ForEach(_, sequenceExpression, _, pattern, expression, expression1, _) -> 
                     traversePattern visitors pattern
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.ArrayOrListOfSeqExpr(_, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.CompExpr(_, _, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.Lambda(_, _, simplePatterns, expression, _) -> 
                     traverseSimplePatterns visitors simplePatterns
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
                     matchClauses |> List.iter (traverseMatchClause visitors)
                 | SynExpr.Match(_, expression, matchClauses, _, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     matchClauses |> List.iter (traverseMatchClause visitors)
                 | SynExpr.Do(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.Assert(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.App(_, _, expression, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> ()
                 | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
                     bindings |> List.iter (traverseBinding visitors)
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     matchClauses |> List.iter (traverseMatchClause visitors)
                 | SynExpr.TryFinally(expression, expression1, _, _, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.Lazy(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.Sequential(_, _, expression, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.IfThenElse(expression, expression1, expression2, _, _, _, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
-                    expression2 |> Option.iter traverseExpression
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
+                    expression2 |> Option.iter (traverseExpression visitors)
                 | SynExpr.Ident(identifier) -> ()
                 | SynExpr.LongIdent(_, identifier, _, _) -> ()
                 | SynExpr.LongIdentSet(identifier, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.DotGet(expression, _, identifier, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.DotSet(expression, identifier, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.DotIndexedGet(expression, indexerArguments, _, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.DotIndexedSet(expression, indexerArguments, expression1, _, _, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.NamedIndexedPropertySet(identifier, expression, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.DotNamedIndexedPropertySet(expression, identifier, expression1, expression2, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
-                    traverseExpression expression2
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
+                    traverseExpression visitors expression2
                 | SynExpr.TypeTest(expression, synType, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     traverseType visitors synType
                 | SynExpr.Upcast(expression, synType, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     traverseType visitors synType
                 | SynExpr.Downcast(expression, synType, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                     traverseType visitors synType
                 | SynExpr.InferredUpcast(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.InferredDowncast(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.Null(_) -> ()
                 | SynExpr.AddressOf(_, expression, _, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.TraitCall(typeParameters, memberSignature, expression, _) -> ()
                 | SynExpr.JoinIn(expression, _, expression1, _) -> 
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.ImplicitZero(_) -> ()
                 | SynExpr.YieldOrReturn(_, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.YieldOrReturnFrom(_, expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _) -> 
                     traversePattern visitors pattern
-                    traverseExpression expression
-                    traverseExpression expression1
+                    traverseExpression visitors expression
+                    traverseExpression visitors expression1
                 | SynExpr.DoBang(expression, _) -> 
-                    traverseExpression expression
+                    traverseExpression visitors expression
                 | _ -> ()
         and
             traverseSimplePattern visitors = function
@@ -366,9 +362,9 @@ module Ast =
                 | SynPat.Wild(_) -> ()
                 | SynPat.Named(pattern, identifier, x, access, range) -> 
                     let visit (visitor: AstVisitorBase) =
-                        visitor.VisitNamedPattern(pattern, identifier, x, access, range).ShallContinue
+                        visitor.VisitNamedPattern(pattern, identifier, x, access, range)
 
-                    let visitors = visitors |> List.filter visit
+                    let visitors = visitors |> List.collect visit
 
                     traversePattern visitors pattern
                 | SynPat.Typed(pattern, synType, _) -> 
@@ -383,9 +379,9 @@ module Ast =
                     patterns |> List.iter (traversePattern visitors)
                 | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
                     let visit (visitor: AstVisitorBase) =
-                        visitor.VisitLongIdentPattern(longIdentifier, identifier, constructorArguments, access, range).ShallContinue
+                        visitor.VisitLongIdentPattern(longIdentifier, identifier, constructorArguments, access, range)
 
-                    let visitors = visitors |> List.filter visit
+                    let visitors = visitors |> List.collect visit
 
                     traverseConstructorArguments visitors constructorArguments
                 | SynPat.Tuple(patterns, _) -> 
@@ -425,15 +421,13 @@ module Ast =
                 moduleOrNamespaces |> List.iter traverseModuleOrNamespace
             | ParsedInput.SigFile _sigFile -> ()
 
-    let parse file input visitors =
-        let checker = InteractiveChecker.Create()
-
-        let projOptions = checker.GetProjectOptionsFromScript(file, input)
-        let parseFileResults = checker.ParseFileInProject(file, input, projOptions)
+    /// Parse a file.
+    let parse (checker:InteractiveChecker) projectOptions file input visitors =
+        let parseFileResults = checker.ParseFileInProject(file, input, projectOptions)
         match parseFileResults.ParseTree with
         | Some tree -> 
             let checkFileResults = 
-                checker.CheckFileInProject(parseFileResults, file, 0, input, projOptions) 
+                checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
                 |> Async.RunSynchronously
 
             match checkFileResults with
@@ -442,3 +436,13 @@ module Ast =
                 traverse tree visitors
             | res -> failwithf "Parsing did not finish... (%A)" res
         | None -> failwith "Something went wrong during parsing!"
+
+    /// Parse a single string.
+    let parseInput input visitors =
+        let checker = InteractiveChecker.Create()
+
+        let file = "/home/user/Dog.test.fsx"
+        
+        let projectOptions = checker.GetProjectOptionsFromScript(file, input)
+
+        parse checker projectOptions file input visitors |> ignore

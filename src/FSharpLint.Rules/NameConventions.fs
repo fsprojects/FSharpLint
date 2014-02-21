@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Rules
 
 /// Checks whether any code in an F# program violates best practices for naming identifiers.
 module NameConventions =
@@ -27,7 +27,7 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open AstVisitorBase
+    open FSharpLint.Framework.AstVisitorBase
 
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 
@@ -132,27 +132,27 @@ module NameConventions =
         { new AstVisitorBase(checkFile) with
             member this.VisitModuleOrNamespace(identifier, _, _, _, _, _, range) = 
                 identifier |> List.iter expectPascalCase
-                Continue
+                [this]
 
             member this.VisitUnionCase(_, identifier, _, _, _, range) = 
                 expectPascalCase identifier
-                Continue
+                [this]
 
             member this.VisitNamedPattern(_, identifier, _, _, range) = 
                 expectCamelCase identifier
-                Continue
+                [this]
 
             member this.VisitIdPattern(identifier, range) = 
                 expectCamelCase identifier
-                Continue
+                [this]
 
             member this.VisitField(_, identifier, _, _, _, range) = 
                 identifier |> Option.iter expectPascalCase
-                Continue
+                [this]
 
             member this.VisitEnumCase(_, identifier, _, _, range) = 
                 expectPascalCase identifier
-                Continue
+                [this]
 
             member this.VisitComponentInfo(_, _, _, identifier, _, _, range) = 
                 identifier |> List.iter expectPascalCase
@@ -167,7 +167,7 @@ module NameConventions =
                         let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
                         postError interfaceRange error
                     
-                Continue
+                [this]
 
             member this.VisitLongIdentPattern(longIdentifier, identifier, _, access, range) =  
                 let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
@@ -178,7 +178,7 @@ module NameConventions =
                 | ActivePatternDefinition(_) -> expectValidActivePatternDefinition postError lastIdent
                 | _ -> ()
 
-                Continue
+                [this]
 
             member this.VisitExceptionRepresentation(_, unionCase, _, _, _, _) = 
                 match unionCase with 
@@ -187,14 +187,14 @@ module NameConventions =
                         let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                         postError identifier.idRange error
                 
-                Continue
+                [this]
 
             /// If inside of an implementation file the node must be an abstract member signature.
             member this.VisitValueSignature(identifier, range) = 
                 expectPascalCase identifier
-                Continue
+                [this]
 
             member this.VisitFor(identifier, range) = 
                 expectCamelCase identifier
-                Continue
+                [this]
         }

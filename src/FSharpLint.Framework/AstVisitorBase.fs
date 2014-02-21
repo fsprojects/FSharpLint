@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint
+namespace FSharpLint.Framework
 
 module AstVisitorBase =
 
@@ -25,61 +25,52 @@ module AstVisitorBase =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
 
-    type Continue =
-    | Continue
-    | End
-
-        member this.ShallContinue = 
-            match this with
-            | Continue -> true
-            | End -> false
-
     [<AbstractClass>]
     type AstVisitorBase(checkFile:CheckFileResults) =
         abstract VisitModuleOrNamespace : 
-            LongIdent * bool * SynModuleDecls * PreXmlDoc * SynAttributes * SynAccess option * range -> Continue
-        default this.VisitModuleOrNamespace(_, _, _, _, _, _, _) = Continue
+            LongIdent * bool * SynModuleDecls * PreXmlDoc * SynAttributes * SynAccess option * range -> AstVisitorBase list
+        default this.VisitModuleOrNamespace(_, _, _, _, _, _, _) = [this]
 
         abstract VisitUnionCase : 
-            SynAttributes * Ident * SynUnionCaseType * PreXmlDoc * SynAccess option * range -> Continue
-        default this.VisitUnionCase(_, _, _, _, _, _) = Continue
+            SynAttributes * Ident * SynUnionCaseType * PreXmlDoc * SynAccess option * range -> AstVisitorBase list
+        default this.VisitUnionCase(_, _, _, _, _, _) = [this]
 
         abstract VisitEnumCase : 
-            SynAttributes * Ident * SynConst * PreXmlDoc * range -> Continue
-        default this.VisitEnumCase(_, _, _, _, _) = Continue
+            SynAttributes * Ident * SynConst * PreXmlDoc * range -> AstVisitorBase list
+        default this.VisitEnumCase(_, _, _, _, _) = [this]
 
         abstract VisitField : 
-            SynAttributes * Ident option * SynType * PreXmlDoc * SynAccess option * range -> Continue
-        default this.VisitField(_, _, _, _, _, _) = Continue
+            SynAttributes * Ident option * SynType * PreXmlDoc * SynAccess option * range -> AstVisitorBase list
+        default this.VisitField(_, _, _, _, _, _) = [this]
 
         abstract VisitComponentInfo : 
-            SynAttributes * SynTyparDecl list * SynTypeConstraint list * LongIdent * PreXmlDoc * SynAccess option * range -> Continue
-        default this.VisitComponentInfo(_, _, _, _, _, _, _) = Continue
+            SynAttributes * SynTyparDecl list * SynTypeConstraint list * LongIdent * PreXmlDoc * SynAccess option * range -> AstVisitorBase list
+        default this.VisitComponentInfo(_, _, _, _, _, _, _) = [this]
 
         abstract VisitExceptionRepresentation : 
-            SynAttributes * SynUnionCase * LongIdent option * PreXmlDoc * SynAccess option * range -> Continue
-        default this.VisitExceptionRepresentation(_, _, _, _, _, _) = Continue
+            SynAttributes * SynUnionCase * LongIdent option * PreXmlDoc * SynAccess option * range -> AstVisitorBase list
+        default this.VisitExceptionRepresentation(_, _, _, _, _, _) = [this]
 
         abstract VisitNamedPattern : 
-            SynPat * Ident * bool * SynAccess option * range -> Continue
-        default this.VisitNamedPattern(_, _, _, _, _) = Continue
+            SynPat * Ident * bool * SynAccess option * range -> AstVisitorBase list
+        default this.VisitNamedPattern(_, _, _, _, _) = [this]
 
         abstract VisitIdPattern : 
-            Ident * range -> Continue
-        default this.VisitIdPattern(_, _) = Continue
+            Ident * range -> AstVisitorBase list
+        default this.VisitIdPattern(_, _) = [this]
         
         abstract VisitLongIdentPattern :
-            LongIdentWithDots * Ident option * SynConstructorArgs * SynAccess option * range -> Continue
-        default this.VisitLongIdentPattern(_, _, _, _, _) = Continue
+            LongIdentWithDots * Ident option * SynConstructorArgs * SynAccess option * range -> AstVisitorBase list
+        default this.VisitLongIdentPattern(_, _, _, _, _) = [this]
 
         abstract VisitValueSignature : 
-            Ident * range -> Continue
-        default this.VisitValueSignature(_, _) = Continue
+            Ident * range -> AstVisitorBase list
+        default this.VisitValueSignature(_, _) = [this]
 
         abstract VisitFor : 
-            Ident * range -> Continue
-        default this.VisitFor(_, _) = Continue
+            Ident * range -> AstVisitorBase list
+        default this.VisitFor(_, _) = [this]
 
         abstract VisitBinding : 
-            SynPat * range -> Continue
-        default this.VisitBinding(_, _) = Continue
+            SynPat * range -> AstVisitorBase list
+        default this.VisitBinding(_, _) = [this]
