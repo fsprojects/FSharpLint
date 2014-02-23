@@ -419,7 +419,7 @@ module Ast =
         match parseTree with
             | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
                 moduleOrNamespaces |> List.iter traverseModuleOrNamespace
-            | ParsedInput.SigFile _sigFile -> ()
+            | ParsedInput.SigFile _ -> ()
 
     /// Parse a file.
     let parse (checker:InteractiveChecker) projectOptions file input visitors =

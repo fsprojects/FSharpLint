@@ -18,6 +18,15 @@
 
 namespace FSharpLint.Console
 
+/// <summary>Runs the lint on an entire project using a .fsproj file.</summary>
+/// <remarks>
+/// Depends on MSBuild classes that are appearantly obselete.
+/// Probably doesn't handle all cases, as such this is temporary
+/// just so that the lint is a workable tool, will be reworked
+/// once there's a fair amount of rules completed as those have 
+/// a higher priority. Probably end up using ReferenceResolution.fs
+/// from fsharp.
+/// </remarks>
 module ProjectFile =
 
     open System.Linq
@@ -27,6 +36,8 @@ module ProjectFile =
     open Microsoft.Build.BuildEngine
     open Microsoft.FSharp.Compiler.SourceCodeServices 
     
+    /// An instance of the IBuildEngine is required for ResolveAssemblyReference.
+    /// We don't need it to do anything.
     let stubBuildEngine = 
         { new IBuildEngine with
             member this.BuildProjectFile(_, _, _, _) = true
@@ -48,56 +59,93 @@ module ProjectFile =
             member this.LogWarningEvent(_) = ()
         }
 
-    let parseProject (projectFile:string) = 
-        let p = ProjectInstance(projectFile)
+    /// Default paths to looks for references within. Used by ResolveAssemblyReference.
+    let defaultSearchPaths extraSearchPaths =
+        [
+            "{CandidateAssemblyFiles}"
+            "{HintPathFromItem}"
+            "{TargetFrameworkDirectory}"
+            "{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}"
+            "{AssemblyFolders}"
+            "{GAC}"
+            "{RawFileName}"
+        ] @ extraSearchPaths |> List.toArray
 
-        let p = p.Items
-
-        let compiles = 
-            p
-                |> Seq.filter (fun x -> x.ItemType = "Compile")
-                |> Seq.map (fun x -> x.EvaluatedInclude.ToString())
-                |> Seq.toList
-
+    /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
+    let resolveReferences (projectInstance:ProjectInstance) outputPath references =
         let resolve = ResolveAssemblyReference()
         resolve.BuildEngine <- stubBuildEngine
 
-        let references = p |> Seq.filter (fun x -> x.ItemType = "Reference" || x.ItemType = "ProjectReference") 
+        resolve.TargetFrameworkVersion <- projectInstance.ToolsVersion
 
-        resolve.TargetFrameworkVersion <- "v4.0"
+        resolve.SearchPaths <- defaultSearchPaths [outputPath]
 
-        let frameworkMoniker = System.Runtime.Versioning.FrameworkName(".NETFramework", System.Version("4.0"))
+        resolve.Assemblies <- references |> Seq.map (fun x -> (x :> ITaskItem)) |> Seq.toArray
+
+        let frameworkMoniker = System.Runtime.Versioning.FrameworkName(".NETFramework", System.Version(projectInstance.ToolsVersion))
         let referenceAssemblies = Microsoft.Build.Utilities.ToolLocationHelper.GetPathToReferenceAssemblies(frameworkMoniker)
 
         resolve.TargetFrameworkDirectories <- referenceAssemblies.ToArray()
-
-        resolve.AppConfigFile <- @"C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Console\App.config"
-
-        resolve.SearchPaths <- 
-            [|
-                "{CandidateAssemblyFiles}"
-                "{HintPathFromItem}"
-                "{TargetFrameworkDirectory}"
-                "{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}"
-                "{AssemblyFolders}"
-                "{GAC}"
-                "{RawFileName}"
-                @"C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Console\bin"
-            |]
-
-        resolve.Assemblies <- references |> Seq.map (fun x -> (x :> ITaskItem)) |> Seq.toArray
         
         resolve.Execute() |> ignore
 
-        //let projectreferences = p |> Seq.filter (fun x -> x.ItemType = "ProjectReference")
+        resolve.ResolvedFiles |> Seq.map (fun x -> x.ItemSpec.ToString()) |> Seq.toList
+
+    /// Paths of all required files used to construct project options (must be absolute paths).
+    type ProjectFile = 
+        {
+            References: string list
+            ProjectReferences: string list
+            FSharpFiles: string list
+        }
+
+    let getOutputRelativePath (projectInstance:ProjectInstance) =
+        projectInstance.Items 
+            |> Seq.filter (fun x -> x.ItemType = "_OutputPathItem") 
+            |> Seq.head 
+            |> fun x -> x.ToString()
+
+    let getProjectReferences (projectInstance:ProjectInstance) projectPath =
+        projectInstance.Items 
+            |> Seq.filter (fun x -> x.ItemType = "ProjectReference")
+            |> Seq.collect (fun x -> ProjectInstance(System.IO.Path.Combine(projectPath, x.ToString())).Items)
+            |> Seq.filter (fun x -> x.ItemType = "BuiltProjectOutputGroupKeyOutput")
+            |> Seq.map (fun x -> x.ToString())
+
+    let getReferences (projectInstance:ProjectInstance) =
+        projectInstance.Items |> Seq.filter (fun x -> x.ItemType = "Reference")
+
+    /// Gets a list of the .fs and .fsi files in the project.
+    let getFSharpFiles (projectInstance:ProjectInstance) projectPath =
+        projectInstance.Items 
+            |> Seq.filter (fun item -> item.ItemType = "Compile")
+            |> Seq.map (fun item -> item.EvaluatedInclude.ToString())
+            |> Seq.toList
+            |> List.map (fun x -> System.IO.Path.Combine(projectPath, x.ToString()))
+
+    let getProjectFiles (projectFile:string) =
+        let projectPath = System.IO.Path.GetDirectoryName(projectFile)
+
+        let projectInstance = ProjectInstance(projectFile)
+
+        let references = getReferences projectInstance
+
+        let projectReferences = getProjectReferences projectInstance projectPath
+
+        let outputAbsolutePath = System.IO.Path.Combine(projectPath, getOutputRelativePath projectInstance)
+
+        {
+            References = getReferences projectInstance |> resolveReferences projectInstance outputAbsolutePath
+            ProjectReferences = projectReferences |> Seq.toList
+            FSharpFiles = getFSharpFiles projectInstance projectPath
+        }
+        
+    /// <summary>Parses and runs the linter on all the files in a project.</summary>
+    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
+    let parseProject (projectFile:string) = 
+        let projectFileValues = getProjectFiles projectFile
 
         let checker = InteractiveChecker.Create()
-
-        let files = 
-            [
-                "C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Console\ErrorHandling.fs"
-                "C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Console\Program.fs"
-            ]
         
         let projectOptions = 
             checker.GetProjectOptionsFromCommandLineArgs
@@ -113,11 +161,9 @@ module ProjectFile =
                    yield "--fullpaths" 
                    yield "--flaterrors" 
                    yield "--target:exe" 
-                   //for c in compiles do yield c
-                   for c in files do yield c
-                   for r in resolve.ResolvedFiles do yield "-r:" + r.ItemSpec.ToString()
-                   yield "-r:FSharpLint.Framework.dll"
-                   yield "-r:FSharpLint.Rules.dll"
+                   yield! projectFileValues.FSharpFiles
+                   for r in projectFileValues.References do yield "-r:" + r
+                   for r in projectFileValues.ProjectReferences do yield "-r:" + r
                 |])
 
         let parseFile file =
@@ -139,4 +185,4 @@ module ProjectFile =
 
             FSharpLint.Framework.Ast.parse checker projectOptions file input visitors |> ignore
 
-        files |> List.iter parseFile
+        projectFileValues.FSharpFiles |> List.iter parseFile

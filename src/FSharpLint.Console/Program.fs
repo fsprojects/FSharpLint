@@ -63,7 +63,8 @@ type MyClass(x) =
     
     [<EntryPoint>]
     let main argv = 
-        parseLiteralString()
+        //ProjectFile.parseProject @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Console\FSharpLint.Console.fsproj"
+        ProjectFile.parseProject @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Framework\FSharpLint.Framework.fsproj"
 
         System.Console.ReadKey() |> ignore
 
