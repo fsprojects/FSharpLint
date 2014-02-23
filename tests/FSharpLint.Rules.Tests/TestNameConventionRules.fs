@@ -636,3 +636,12 @@ for I in 1..10 do System.Console.Write(I)
 """
 
         Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 4))
+
+    [<Test>]
+    member self.CompilerGeneratedArgumentName() = 
+        parse """
+module program
+(fun _ -> ())
+"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
