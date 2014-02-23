@@ -56,8 +56,8 @@ module AstVisitorBase =
         default this.VisitNamedPattern(_, _, _, _, _) = [this]
 
         abstract VisitIdPattern : 
-            Ident * range -> AstVisitorBase list
-        default this.VisitIdPattern(_, _) = [this]
+            Ident * isCompilerGenerated:bool * range -> AstVisitorBase list
+        default this.VisitIdPattern(_, _, _) = [this]
         
         abstract VisitLongIdentPattern :
             LongIdentWithDots * Ident option * SynConstructorArgs * SynAccess option * range -> AstVisitorBase list

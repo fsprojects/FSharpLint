@@ -339,8 +339,8 @@ module Ast =
                 | _ -> ()
         and
             traverseSimplePattern visitors = function
-            | SynSimplePat.Id(identifier, _, _, _, _, range) -> 
-                let visit (visitor: AstVisitorBase) = visitor.VisitIdPattern(identifier, range) |> ignore
+            | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, range) -> 
+                let visit (visitor: AstVisitorBase) = visitor.VisitIdPattern(identifier, isCompilerGenerated, range) |> ignore
 
                 visitors |> List.iter visit
             | SynSimplePat.Typed(simplePattern, synType, _) -> 

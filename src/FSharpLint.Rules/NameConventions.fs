@@ -142,8 +142,9 @@ module NameConventions =
                 expectCamelCase identifier
                 [this]
 
-            member this.VisitIdPattern(identifier, range) = 
-                expectCamelCase identifier
+            member this.VisitIdPattern(identifier, isCompilerGenerated, range) = 
+                if not <| isCompilerGenerated then
+                    expectCamelCase identifier
                 [this]
 
             member this.VisitField(_, identifier, _, _, _, range) = 
