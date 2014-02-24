@@ -47,6 +47,7 @@
     <Compile Include="NameConventions.fs" />
     <Compile Include="FunctionParametersLength.fs" />
     <Compile Include="FavourIgnoreOverLetWild.fs" />
+    <Compile Include="XmlDocumentation.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Framework\FSharpLint.Framework.fsproj">

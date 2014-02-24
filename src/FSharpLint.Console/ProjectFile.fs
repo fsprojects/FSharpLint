@@ -181,6 +181,7 @@ module ProjectFile =
                 FSharpLint.Rules.NameConventions.visitor postError
                 FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
                 FSharpLint.Rules.FunctionParametersLength.visitor postError
+                FSharpLint.Rules.XmlDocumentation.visitor postError
             ]
 
             FSharpLint.Framework.Ast.parse checker projectOptions file input visitors |> ignore
