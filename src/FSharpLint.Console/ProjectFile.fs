@@ -186,4 +186,8 @@ module ProjectFile =
 
             FSharpLint.Framework.Ast.parse checker projectOptions file input visitors |> ignore
 
-        projectFileValues.FSharpFiles |> List.iter parseFile
+        try
+            projectFileValues.FSharpFiles |> List.iter parseFile
+        with 
+            | FSharpLint.Framework.Ast.ParseException(message) -> 
+                System.Console.WriteLine(message)

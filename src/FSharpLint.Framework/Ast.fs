@@ -421,6 +421,8 @@ module Ast =
                 moduleOrNamespaces |> List.iter traverseModuleOrNamespace
             | ParsedInput.SigFile _ -> ()
 
+    exception ParseException of string
+
     /// Parse a file.
     let parse (checker:InteractiveChecker) projectOptions file input visitors =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions)
@@ -434,8 +436,10 @@ module Ast =
             | CheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
                 traverse tree visitors
-            | res -> failwithf "Parsing did not finish... (%A)" res
-        | None -> failwith "Something went wrong during parsing!"
+            | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
+        | None -> 
+            let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
+            raise <| ParseException(error) 
 
     /// Parse a single string.
     let parseInput input visitors =

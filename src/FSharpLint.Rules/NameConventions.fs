@@ -29,6 +29,115 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.AstVisitorBase
 
+    let operatorIdentifiers = [
+        "op_Nil"
+        "op_ColonColon"
+        "op_Addition"
+        "op_Splice"
+        "op_SpliceUntyped"
+        "op_Increment"
+        "op_Decrement"
+        "op_Subtraction"
+        "op_Multiply"
+        "op_Exponentiation"
+        "op_Division"
+        "op_Append"
+        "op_Concatenate"
+        "op_Modulus"
+        "op_BitwiseAnd"
+        "op_BitwiseOr"
+        "op_ExclusiveOr"
+        "op_LeftShift"
+        "op_LogicalNot"
+        "op_RightShift"
+        "op_UnaryPlus"
+        "op_UnaryNegation"
+        "op_AddressOf"
+        "op_IntegerAddressOf"
+        "op_BooleanAnd"
+        "op_BooleanOr"
+        "op_LessThanOrEqual"
+        "op_Equality"
+        "op_Inequality"
+        "op_GreaterThanOrEqual"
+        "op_LessThan"
+        "op_GreaterThan"
+        "op_PipeRight"
+        "op_PipeRight2"
+        "op_PipeRight3"
+        "op_PipeLeft"
+        "op_PipeLeft2"
+        "op_PipeLeft3"
+        "op_Dereference"
+        "op_ComposeRight"
+        "op_ComposeLeft"
+        "op_TypedQuotationUnicode"
+        "op_ChevronsBar"
+        "op_Quotation"
+        "op_QuotationUntyped"
+        "op_AdditionAssignment"
+        "op_SubtractionAssignment"
+        "op_MultiplyAssignment"
+        "op_DivisionAssignment"
+        "op_Range"
+        "op_RangeStep"
+        "op_Dynamic"
+        "op_DynamicAssignment"
+        "op_ArrayLookup"
+        "op_ArrayAssign"
+    ]    
+
+    /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
+    let operators = [ 
+        "Greater"
+        "Less" 
+        "Plus"
+        "Minus"
+        "Multiply"
+        "Equals"
+        "Twiddle"
+        "Percent"
+        "Dot"
+        "Dollar"
+        "Amp"
+        "Bar"
+        "At"
+        "Hash"
+        "Hat"
+        "Bang"
+        "Qmark"
+        "Divide"
+        "Colon"
+        "LParen"
+        "Comma"
+        "RParen"
+        "Space"
+        "LBrack"
+        "RBrack" 
+    ]
+
+    let rec isSequenceOfOperators (str:string) =
+        if Seq.isEmpty str then
+            true
+        else
+            let operator = operators |> List.tryFind (fun op -> str.StartsWith(op))
+
+            match operator with
+            | Some(operator) -> str.Substring(operator.Length) |> isSequenceOfOperators
+            | None -> false
+
+    /// Is an identifier an operator overload?
+    let isOperator (identifier:Ident) =
+        if operatorIdentifiers |> List.exists (fun x -> x = identifier.idText) then
+            true
+        else
+            if identifier.idText.StartsWith("op_") && identifier.idText.Length > 3 then
+                let identifier = identifier.idText.Substring(3)
+
+                isSequenceOfOperators identifier
+            else
+                false
+
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 
     let isCamelCase (identifier:string) = Regex.Match(identifier, @"^[a-z]([a-z]|[A-Z]|\d)*").Success
@@ -47,11 +156,12 @@ module NameConventions =
             postError identifier.idRange error
 
     let expect predicate getError postError (identifier:Ident) =
-        expectNoUnderscore postError identifier
+        if not <| isOperator identifier then
+            expectNoUnderscore postError identifier
 
-        if not <| predicate identifier.idText then
-            let error = getError identifier.idText
-            postError identifier.idRange error
+            if not <| predicate identifier.idText then
+                let error = getError identifier.idText
+                postError identifier.idRange error
 
     /// Checks an identifier is camel case, if not an error is posted.
     let expectCamelCase = expect isCamelCase camelCaseError
@@ -139,7 +249,19 @@ module NameConventions =
                 [this]
 
             member this.VisitNamedPattern(_, identifier, _, _, range) = 
-                expectCamelCase identifier
+                let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
+
+                let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
+        
+                match symbol with
+                | Some(symbol) ->
+                    match symbol with
+                    | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsActivePattern -> 
+                        expectValidActivePatternDefinition postError identifier
+                    | _ -> expectCamelCase identifier
+                | None -> 
+                    expectCamelCase identifier
+
                 [this]
 
             member this.VisitIdPattern(identifier, isCompilerGenerated, range) = 

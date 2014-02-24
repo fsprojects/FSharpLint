@@ -8,7 +8,7 @@
     <ProjectGuid>ffb38d12-8e91-42c9-aba6-2aae5c60f805</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>MattMcveigh.FSharpLint</RootNamespace>
-    <AssemblyName>MattMcveigh.FSharpLint</AssemblyName>
+    <AssemblyName>fsharplint</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Name>FSharpLint.Console</Name>
   </PropertyGroup>

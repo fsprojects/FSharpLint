@@ -18,32 +18,20 @@
 
 namespace FSharpLint.Console
 
-module Program =
+module program =
 
     let parseLiteralString () = 
         let input = """
-module goat
+module program
+let (|Even|Odd|) = function
+| i when i % 2 = 0 -> Even
+| _ -> Odd
 
-type Point3D =
-    struct 
-        val mutable _x: float
-        val y: float
-        val z: float
-    end 
+let ``function`` = 0
 
-let ((_)) = ()
-
-let _, a = 0, 1
-
-//for I = 10 downto 1 do System.Console.Write(I)
-
-for I in 1..10 do System.Console.Write(I)
-
-let functionCat meow dog (m, d, g) e o w = ()
-
-type MyClass(x) =
-    new() = MyClass(0)
-        """
+match 4 with
+| Even -> ()
+| Odd -> ()"""
 
         let postError range error =
             ErrorHandling.errorHandler.Post(
@@ -59,13 +47,31 @@ type MyClass(x) =
             FSharpLint.Rules.FunctionParametersLength.visitor postError
         ]
 
-        FSharpLint.Framework.Ast.parseInput input visitors |> ignore
+        try
+            FSharpLint.Framework.Ast.parseInput input visitors |> ignore
+        with 
+            | :? FSharpLint.Framework.Ast.ParseException as e -> 
+                System.Console.WriteLine(e.Message)
+
+    let help () =
+        System.Console.WriteLine("Use -f followed by the absolute path of the .fsproj \
+        file of the project to lint to run the tool.")
     
     [<EntryPoint>]
     let main argv = 
-        //ProjectFile.parseProject @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Console\FSharpLint.Console.fsproj"
-        ProjectFile.parseProject @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Framework\FSharpLint.Framework.fsproj"
-
+        parseLiteralString()
         System.Console.ReadKey() |> ignore
+
+        (*
+        if argv.Length < 2 then
+            help()
+        else
+            match argv.[0] with
+            | "-f" -> 
+                ProjectFile.parseProject argv.[1]
+                System.Console.WriteLine("Finished.")
+                System.Console.ReadKey() |> ignore
+            | _ -> help()
+        *)
 
         0

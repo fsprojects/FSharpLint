@@ -510,6 +510,20 @@ module program
         Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 17))
 
     [<Test>]
+    member self.PatternFunctionValidActivePattern() = 
+        parse """
+module program
+let (|Even|Odd|) = function
+| i when i % 2 = 0 -> Even
+| _ -> Odd
+
+match 4 with
+| Even -> ()
+| Odd -> ()"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
     member self.ActivePatternContainsUnderscore() = 
         parse """
 module program
