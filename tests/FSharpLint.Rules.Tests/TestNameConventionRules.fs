@@ -62,6 +62,18 @@ type TestNameConventionRules() =
         Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
+    member self.IsOperator() = 
+        Assert.IsTrue(isOperator "op_LeftShift")
+
+        Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")
+
+        Assert.IsFalse(isOperator "TwiddleEqualsDivideComma")
+
+        Assert.IsFalse(isOperator "op_fTwiddleEqualsDivideComma")
+
+        Assert.IsFalse(isOperator "op_TwiddleEqualsDivideCommaf")
+
+    [<Test>]
     member self.ClassNameIsPascalCase() = 
         parse """
 module Program
@@ -659,3 +671,55 @@ module program
 """
 
         Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.TypeExtensionMethodIsPascalCase() = 
+        parse """
+module program
+
+type MyClass() =
+    member this.F() = 100
+
+type MyClass with 
+    member this.Goat() = 200"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 8 && r.StartColumn = 16))
+
+    [<Test>]
+    member self.TypeExtensionMethodIsCamelCase() = 
+        parse """
+module program
+
+type MyClass() =
+    member this.F() = 100
+
+type MyClass with 
+    member this.goat() = 200"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 8 && r.StartColumn = 16))
+
+    [<Test>]
+    member self.TypeExtensionTypeIsCamelCase() = 
+        parse """
+module program
+
+type myClass() =
+    member this.F() = 100
+
+type myClass with 
+    member this.Goat() = 200"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 7 && r.StartColumn = 5))
+
+    [<Test>]
+    member self.TypeExtensionTypeIsPascalCase() = 
+        parse """
+module program
+
+type MyClass() =
+    member this.F() = 100
+
+type MyClass with 
+    member this.Goat() = 200"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 7 && r.StartColumn = 5))

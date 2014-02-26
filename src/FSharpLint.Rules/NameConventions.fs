@@ -127,12 +127,12 @@ module NameConventions =
             | None -> false
 
     /// Is an identifier an operator overload?
-    let isOperator (identifier:Ident) =
-        if operatorIdentifiers |> List.exists (fun x -> x = identifier.idText) then
+    let isOperator (identifier:string) =
+        if operatorIdentifiers |> List.exists (fun x -> x = identifier) then
             true
         else
-            if identifier.idText.StartsWith("op_") && identifier.idText.Length > 3 then
-                let identifier = identifier.idText.Substring(3)
+            if identifier.StartsWith("op_") && identifier.Length > 3 then
+                let identifier = identifier.Substring(3)
 
                 isSequenceOfOperators identifier
             else
@@ -156,7 +156,7 @@ module NameConventions =
             postError identifier.idRange error
 
     let expect predicate getError postError (identifier:Ident) =
-        if not <| isOperator identifier then
+        if not <| isOperator identifier.idText then
             expectNoUnderscore postError identifier
 
             if not <| predicate identifier.idText then
@@ -278,14 +278,27 @@ module NameConventions =
                 [this]
 
             member this.VisitComponentInfo(_, _, _, identifier, _, _, range) = 
-                identifier |> List.iter expectPascalCase
-
-                let interfaceIdentifier = identifier.Head
+                let interfaceIdentifier = identifier.[List.length identifier - 1]
                 let interfaceRange = interfaceIdentifier.idRange
 
                 let startLine, endColumn = interfaceRange.StartLine, interfaceRange.EndColumn
 
-                if isSymbolAnInterface <| checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [interfaceIdentifier.idText]) then 
+                let symbol = checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [interfaceIdentifier.idText])
+
+                /// Is symbol the same identifier but declared elsewhere?
+                let isSymbolAnExtensionType = function
+                | Some(symbol:FSharpSymbol) ->
+                    match symbol with
+                    | :? FSharpEntity as entity -> 
+                        entity.DeclarationLocation.Start <> interfaceRange.Start
+                        && entity.DisplayName = (interfaceIdentifier).idText
+                    | _ -> false
+                | None -> false
+                
+                if not <| isSymbolAnExtensionType symbol then
+                    identifier |> List.iter expectPascalCase
+
+                if isSymbolAnInterface symbol then 
                     if not <| interfaceIdentifier.idText.StartsWith("I") then
                         let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
                         postError interfaceRange error

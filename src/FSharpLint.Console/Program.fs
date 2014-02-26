@@ -22,16 +22,23 @@ module program =
 
     let parseLiteralString () = 
         let input = """
-module program
-let (|Even|Odd|) = function
-| i when i % 2 = 0 -> Even
-| _ -> Odd
+namespace goat
+module MyModule1 =
 
-let ``function`` = 0
+    // Define a type. 
+    type myClass() =
+      member this.F() = 100
 
-match 4 with
-| Even -> ()
-| Odd -> ()"""
+module MyModule2 =
+    // Define type extension. 
+    type MyModule1.myClass with 
+       member this.goat() = 200
+
+   let function1 (obj1: MyModule1.myClass) =
+      // Call an ordinary method.
+      printfn "%d" (obj1.F())
+      // Call the extension method.
+      printfn "%d" (obj1.goat())"""
 
         let postError range error =
             ErrorHandling.errorHandler.Post(
