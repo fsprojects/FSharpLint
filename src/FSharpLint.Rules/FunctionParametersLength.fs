@@ -24,7 +24,7 @@ module FunctionParametersLength =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework.AstVisitorBase
+    open FSharpLint.Framework.Ast
 
     // Change this to be retrieved from a config file.
     [<Literal>]
@@ -32,17 +32,17 @@ module FunctionParametersLength =
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
-    let visitor postError checkFile = 
-        { new AstVisitorBase(checkFile) with
+    let visitor postError (checkFile:CheckFileResults) astNode = 
+        match astNode with
+            | AstNode.Pattern(pattern) ->
+                match pattern with
+                    | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
+                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-            member this.VisitLongIdentPattern(longIdentifier, identifier, constructorArguments, access, range) =  
-                let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-
-                match constructorArguments with
-                | SynConstructorArgs.Pats(patterns) when List.length patterns >= MaxParameters -> 
-                    let failedPattern = patterns.[MaxParameters - 1]
-                    postError failedPattern.Range (error MaxParameters)
-                | _ -> ()
-
-                [this]
-        }
+                        match constructorArguments with
+                            | SynConstructorArgs.Pats(patterns) when List.length patterns >= MaxParameters -> 
+                                let failedPattern = patterns.[MaxParameters - 1]
+                                postError failedPattern.Range (error MaxParameters)
+                            | _ -> ()
+                    | _ -> ()
+            | _ -> ()

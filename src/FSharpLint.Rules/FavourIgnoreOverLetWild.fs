@@ -24,12 +24,11 @@ module FavourIgnoreOverLetWild =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework.AstVisitorBase
+    open FSharpLint.Framework.Ast
     
-    let visitor postError checkFile = 
-        { new AstVisitorBase(checkFile) with
-
-            member this.VisitBinding(pattern, range) = 
+    let visitor postError (checkFile:CheckFileResults) astNode = 
+        match astNode with
+            | AstNode.Binding(SynBinding.Binding(identifier, _, _, _, _, _, _, pattern, _, _, range, _)) -> 
                 let rec findWildAndIgnoreParens = function
                 | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
                 | SynPat.Wild(_) -> true
@@ -37,6 +36,4 @@ module FavourIgnoreOverLetWild =
                 
                 if findWildAndIgnoreParens pattern then
                     postError range "Favour using the ignore function rather than let _ = ..."
-
-                [this]
-        }
+            | _ -> ()

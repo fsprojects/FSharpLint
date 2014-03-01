@@ -27,7 +27,7 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework.AstVisitorBase
+    open FSharpLint.Framework.Ast
 
     let operatorIdentifiers = [
         "op_Nil"
@@ -236,48 +236,19 @@ module NameConventions =
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
-    let visitor postError checkFile = 
+    let visitor postError (checkFile:CheckFileResults) astNode = 
         let expectCamelCase, expectPascalCase = expectCamelCase postError, expectPascalCase postError
 
-        { new AstVisitorBase(checkFile) with
-            member this.VisitModuleOrNamespace(identifier, _, _, _, _, _, range) = 
+        match astNode with
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, _, _, _, _, _)) -> 
                 identifier |> List.iter expectPascalCase
-                [this]
-
-            member this.VisitUnionCase(_, identifier, _, _, _, range) = 
+            | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
                 expectPascalCase identifier
-                [this]
-
-            member this.VisitNamedPattern(_, identifier, _, _, range) = 
-                let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
-
-                let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
-        
-                match symbol with
-                | Some(symbol) ->
-                    match symbol with
-                    | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsActivePattern -> 
-                        expectValidActivePatternDefinition postError identifier
-                    | _ -> expectCamelCase identifier
-                | None -> 
-                    expectCamelCase identifier
-
-                [this]
-
-            member this.VisitIdPattern(identifier, isCompilerGenerated, range) = 
-                if not <| isCompilerGenerated then
-                    expectCamelCase identifier
-                [this]
-
-            member this.VisitField(_, identifier, _, _, _, range) = 
+            | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
                 identifier |> Option.iter expectPascalCase
-                [this]
-
-            member this.VisitEnumCase(_, identifier, _, _, range) = 
+            | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
                 expectPascalCase identifier
-                [this]
-
-            member this.VisitComponentInfo(_, _, _, identifier, _, _, range) = 
+            | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
                 let interfaceIdentifier = identifier.[List.length identifier - 1]
                 let interfaceRange = interfaceIdentifier.idRange
 
@@ -302,35 +273,50 @@ module NameConventions =
                     if not <| interfaceIdentifier.idText.StartsWith("I") then
                         let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
                         postError interfaceRange error
-                    
-                [this]
-
-            member this.VisitLongIdentPattern(longIdentifier, identifier, _, access, range) =  
-                let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-
-                match longIdentPatternType longIdentifier identifier checkFile with
-                | Member(_) when lastIdent.idText <> "new" -> expectPascalCase lastIdent
-                | ValueOrFunction(_) -> expectCamelCase lastIdent
-                | ActivePatternDefinition(_) -> expectValidActivePatternDefinition postError lastIdent
-                | _ -> ()
-
-                [this]
-
-            member this.VisitExceptionRepresentation(_, unionCase, _, _, _, _) = 
+            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
                 match unionCase with 
                 | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
                     if not <| identifier.idText.EndsWith("Exception") then
                         let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                         postError identifier.idRange error
-                
-                [this]
+            | AstNode.Expression(expr) ->
+                match expr with
+                    | SynExpr.For(_, identifier, _, _, _, _, _) ->
+                        expectCamelCase identifier
+                    | _ -> ()
+            | AstNode.MemberDefinition(memberDef) ->
+                match memberDef with
+                    | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
+                        expectPascalCase identifier
+                    | _ -> ()
+            | AstNode.Pattern(pattern) ->
+                match pattern with
+                    | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
+                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-            /// If inside of an implementation file the node must be an abstract member signature.
-            member this.VisitValueSignature(identifier, range) = 
-                expectPascalCase identifier
-                [this]
+                        match longIdentPatternType longIdentifier identifier checkFile with
+                            | Member(_) when lastIdent.idText <> "new" -> expectPascalCase lastIdent
+                            | ValueOrFunction(_) -> expectCamelCase lastIdent
+                            | ActivePatternDefinition(_) -> expectValidActivePatternDefinition postError lastIdent
+                            | _ -> ()
+                    | SynPat.Named(_, identifier, _, _, _) -> 
+                        let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
 
-            member this.VisitFor(identifier, range) = 
-                expectCamelCase identifier
-                [this]
-        }
+                        let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
+        
+                        match symbol with
+                        | Some(symbol) ->
+                            match symbol with
+                            | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsActivePattern -> 
+                                expectValidActivePatternDefinition postError identifier
+                            | _ -> expectCamelCase identifier
+                        | None -> 
+                            expectCamelCase identifier
+                    | _ -> ()
+            | AstNode.SimplePattern(pattern) ->
+                match pattern with
+                    | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
+                        if not <| isCompilerGenerated then
+                            expectCamelCase identifier
+                    | _ -> ()
+            | _ -> ()

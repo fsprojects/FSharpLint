@@ -46,7 +46,6 @@
   <ItemGroup>
     <Compile Include="Tokeniser.fs" />
     <Compile Include="LexRuleMatching.fs" />
-    <Compile Include="AstVisitorBase.fs" />
     <Compile Include="Ast.fs" />
   </ItemGroup>
   <PropertyGroup>

@@ -26,400 +26,341 @@ module Ast =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Tokeniser
-    open AstVisitorBase
 
-    /// Traverse an implementation file walking all the way down.
-    let traverse parseTree (allVisitors: AstVisitorBase list) =
-        let rec 
-            traverseModuleOrNamespace visitors = function
-            | SynModuleOrNamespace(identifier, isModule, moduleDeclarations, xmlDoc, attributes, access, range) ->
-                let visit (visitor: AstVisitorBase) =
-                    visitor.VisitModuleOrNamespace(identifier, isModule, moduleDeclarations, xmlDoc, attributes, access, range)
+    type AstNode =
+        | Expression of SynExpr
+        | Pattern of SynPat
+        | SimplePattern of SynSimplePat
+        | SimplePatterns of SynSimplePats
+        | ModuleOrNamespace of SynModuleOrNamespace
+        | ModuleDeclaration of SynModuleDecl
+        | Binding of SynBinding
+        | TypeDefinition of SynTypeDefn
+        | MemberDefinition of SynMemberDefn
+        | ComponentInfo of SynComponentInfo
+        | ExceptionDefinition of SynExceptionDefn
+        | ExceptionRepresentation of SynExceptionRepr
+        | UnionCase of SynUnionCase
+        | EnumCase of SynEnumCase
+        | TypeRepresentation of SynTypeDefnRepr
+        | TypeSimpleRepresentation of SynTypeDefnSimpleRepr
+        | Type of SynType
+        | Field of SynField
+        | Match of SynMatchClause
+        | ConstructorArguments of SynConstructorArgs
+        | TypeParameter of SynTypar
+        | InterfaceImplementation of SynInterfaceImpl
 
-                let traverseModuleDeclaration =  visitors |> List.collect visit |> traverseModuleDeclaration
+    let rec walk path visitors node = 
+        let walk = walk (node :: path)
 
-                moduleDeclarations |> List.iter traverseModuleDeclaration
-        and 
-            traverseModuleDeclaration visitors = function
-            | SynModuleDecl.ModuleAbbrev(identifier, longIdentifier, _) -> ()
-            | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) ->
-                traverseComponentInfo visitors componentInfo
+        visitors |> List.iter (fun visit -> visit node)
 
-                moduleDeclarations |> List.iter (traverseModuleDeclaration visitors)
-            | SynModuleDecl.Let(_, bindings, _) -> 
-                let traverseBinding = traverseBinding visitors
+        let walk = walk visitors
 
-                bindings |> List.iter traverseBinding
-            | SynModuleDecl.DoExpr(_, expression, _) -> 
-                traverseExpression visitors expression
-            | SynModuleDecl.Types(typeDefinitions, _) -> 
-                let traverseTypeDefinition = traverseTypeDefinition visitors
-
-                typeDefinitions |> List.iter traverseTypeDefinition
-            | SynModuleDecl.Exception(exceptionDefinition, _) -> 
-                traverseExceptionDefinition visitors exceptionDefinition
-            | SynModuleDecl.Open(longIdentifier, _) -> ()
-            | SynModuleDecl.Attributes(attributes, _) -> ()
-            | SynModuleDecl.HashDirective(hashDirective, _) -> ()
-            | SynModuleDecl.NamespaceFragment(moduleOrNamespace) -> 
-                traverseModuleOrNamespace visitors moduleOrNamespace
-        and
-            traverseBinding visitors = function
-            | SynBinding.Binding(access, bindingKind, _, _, attributes, xmlDoc, _, pattern, _, expression, range, _) ->
-                let visitors = visitors |> List.collect (fun visitor -> visitor.VisitBinding(pattern, range))
-                traversePattern visitors pattern
-                traverseExpression visitors expression
-        and 
-            traverseExceptionDefinition visitors = function
-            | SynExceptionDefn.ExceptionDefn(exceptionRepresentation, members, _) -> 
-                traverseExceptionRepresentation visitors exceptionRepresentation
-                members |> List.iter (traverseMember visitors)
-        and
-            traverseExceptionRepresentation visitors = function
-            | SynExceptionRepr.ExceptionDefnRepr(attributes, unionCase, identifier, xmlDoc, access, range) -> 
-                let visit (visitor: AstVisitorBase) =
-                    visitor.VisitExceptionRepresentation(attributes, unionCase, identifier, xmlDoc, access, range)
-
-                let visitors = visitors |> List.collect visit
-
-                traverseUnionCase visitors unionCase
-        and
-            traverseTypeDefinition visitors = function
-            | SynTypeDefn.TypeDefn(componentInfo, typeRepresentation, members, _) -> 
-                traverseComponentInfo visitors componentInfo
-                traverseTypeRepresentation visitors typeRepresentation
-                members |> List.iter (traverseMember visitors)
-        and 
-            traverseComponentInfo visitors = function
-            | SynComponentInfo.ComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, _, access, range) ->
-                let visit (visitor: AstVisitorBase) =
-                    visitor.VisitComponentInfo(attributes, typeParameters, typeConstraints, identifier, xmlDoc, access, range)
-
-                visitors |> List.collect visit |> ignore
-        and 
-            traverseTypeRepresentation visitors = function
-            | ObjectModel(typeKind, members, _) -> 
-                members |> List.iter (traverseMember visitors)
-            | Simple(simpleTypeRepresentation, _) -> 
-                traverseSimpleTypeRepresentation visitors simpleTypeRepresentation
-        and
-            traverseSimpleTypeRepresentation visitors = function
-            | SynTypeDefnSimpleRepr.Union(access, unionCases, range) -> 
-                unionCases |> List.iter (traverseUnionCase visitors)
-            | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> 
-                enumCases |> List.iter (traverseEnumCase visitors)
-            | SynTypeDefnSimpleRepr.Record(_, fields, _) -> 
-                fields |> List.iter (traverseField visitors)
-            | SynTypeDefnSimpleRepr.General(_, _, _, _, _, _, _, _) -> ()
-            | SynTypeDefnSimpleRepr.TypeAbbrev(_, synType, _) -> 
-                traverseType visitors synType
-            | _ -> ()
-        and 
-            traverseUnionCase visitors = function
-            | SynUnionCase.UnionCase(attributes, identifier, caseType, xmlDoc, access, range) -> 
-                visitors |> List.iter (fun (visitor:AstVisitorBase) ->
-                    visitor.VisitUnionCase(attributes, identifier, caseType, xmlDoc, access, range) |> ignore)
-        and 
-            traverseEnumCase visitors = function
-            | SynEnumCase.EnumCase(attributes, identifier, constant, xmlDoc, range) -> 
-                let visit (visitor:AstVisitorBase) =
-                    visitor.VisitEnumCase(attributes, identifier, constant, xmlDoc, range) |> ignore
-
-                visitors |> List.iter visit
-        and
-            traverseField visitors = function
-            | SynField.Field(attributes, _, identifier, synType, _, xmlDoc, access, range) -> 
-                let visit (visitor:AstVisitorBase) =
-                    visitor.VisitField(attributes, identifier, synType, xmlDoc, access, range)
-
-                let visitors = visitors |> List.collect visit
-
-                traverseType visitors synType
-        and
-            traverseType visitors synType = 
-                let traverseType = traverseType visitors
-
+        match node with
+            | ModuleDeclaration(moduleDeclaration) ->
+                match moduleDeclaration with
+                    | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) ->
+                        ComponentInfo(componentInfo) |> walk
+                        moduleDeclarations |> List.iter (fun x -> ModuleDeclaration(x) |> walk)
+                    | SynModuleDecl.Let(_, bindings, _) -> 
+                        bindings |> List.iter (fun x -> Binding(x) |> walk)
+                    | SynModuleDecl.DoExpr(_, expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynModuleDecl.Types(typeDefinitions, _) -> 
+                        typeDefinitions |> List.iter (fun x -> TypeDefinition(x) |> walk)
+                    | SynModuleDecl.Exception(exceptionDefinition, _) -> 
+                        ExceptionDefinition(exceptionDefinition) |> walk
+                    | SynModuleDecl.NamespaceFragment(moduleOrNamespace) -> 
+                        ModuleOrNamespace(moduleOrNamespace) |> walk
+                    | SynModuleDecl.Open(_, _)
+                    | SynModuleDecl.Attributes(_, _)
+                    | SynModuleDecl.HashDirective(_, _)
+                    | SynModuleDecl.ModuleAbbrev(_, _, _) -> ()
+            | ModuleOrNamespace(moduleOrNamespace) ->
+                match moduleOrNamespace with
+                    | SynModuleOrNamespace(_, _, moduleDeclarations, _, _, _, _) ->
+                        moduleDeclarations |> List.iter (fun x -> ModuleDeclaration(x) |> walk)
+            | Binding(binding) ->
+                match binding with
+                    | SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _) ->
+                        Pattern(pattern) |> walk
+                        Expression(expression) |> walk
+            | ExceptionDefinition(exceptionDefinition) ->
+                match exceptionDefinition with
+                    | SynExceptionDefn.ExceptionDefn(exceptionRepresentation, members, _) -> 
+                        ExceptionRepresentation(exceptionRepresentation) |> walk
+                        members |> List.iter (fun x -> MemberDefinition(x) |> walk)
+            | ExceptionRepresentation(exceptionRepresentation) ->
+                match exceptionRepresentation with
+                    | SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _) -> 
+                        UnionCase(unionCase) |> walk
+            | TypeDefinition(typeDefinition) ->
+                match typeDefinition with
+                    | SynTypeDefn.TypeDefn(componentInfo, typeRepresentation, members, _) -> 
+                        ComponentInfo(componentInfo) |> walk
+                        TypeRepresentation(typeRepresentation) |> walk
+                        members |> List.iter (fun x -> MemberDefinition(x) |> walk)
+            | ComponentInfo(componentInfo) ->
+                match componentInfo with
+                    | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, _, _) -> ()
+            | TypeRepresentation(typeRepresentation) ->
+                match typeRepresentation with
+                    | ObjectModel(typeKind, members, _) -> 
+                        members |> List.iter (fun x -> MemberDefinition(x) |> walk)
+                    | Simple(typeSimpleRepresentation, _) -> 
+                        TypeSimpleRepresentation(typeSimpleRepresentation) |> walk
+            | TypeSimpleRepresentation(typeSimpleRepresentation) ->
+                match typeSimpleRepresentation with
+                    | SynTypeDefnSimpleRepr.Union(access, unionCases, range) -> 
+                        unionCases |> List.iter (fun x -> UnionCase(x) |> walk)
+                    | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> 
+                        enumCases |> List.iter (fun x -> EnumCase(x) |> walk)
+                    | SynTypeDefnSimpleRepr.Record(_, fields, _) -> 
+                        fields |> List.iter (fun x -> Field(x) |> walk)
+                    | SynTypeDefnSimpleRepr.TypeAbbrev(_, synType, _) -> 
+                        Type(synType) |> walk
+                    | SynTypeDefnSimpleRepr.General(_, _, _, _, _, _, _, _)
+                    | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(_, _)
+                    | SynTypeDefnSimpleRepr.None(_) -> ()
+            | UnionCase(unionCase) ->
+                match unionCase with
+                    | SynUnionCase.UnionCase(_, _, _, _, _, _) -> ()
+            | EnumCase(enumCase) ->
+                match enumCase with
+                    | SynEnumCase.EnumCase(_, _, _, _, _) -> ()
+            | Field(field) ->
+                match field with
+                    | SynField.Field(_, _, _, synType, _, _, _, _) -> 
+                        Type(synType) |> walk
+            | Type(synType) ->
                 match synType with
-                | SynType.LongIdent(longIndetifier) -> ()
-                | SynType.App(synType, _, types, _, _, _, _) -> 
-                    traverseType synType
-                    types |> List.iter traverseType
-                | SynType.LongIdentApp(synType, identifier, _, types, _, _, _) -> 
-                    traverseType synType
-                    types |> List.iter traverseType
-                | SynType.Tuple(types, _) ->    
-                    types |> List.iter (fun (_, synType) -> traverseType synType)
-                | SynType.Array(_, synType, _) -> 
-                    traverseType synType
-                | SynType.Fun(synType, synType1, _) -> 
-                    traverseType synType
-                    traverseType synType1
-                | SynType.Var(_, _) -> ()
-                | SynType.Anon(_) -> ()
-                | SynType.WithGlobalConstraints(synType, typeConstraints, _) -> 
-                    traverseType synType
-                | SynType.HashConstraint(synType, _) -> 
-                    traverseType synType
-                | SynType.MeasureDivide(synType, synType1, _) -> 
-                    traverseType synType
-                    traverseType synType1
-                | SynType.MeasurePower(synType, _, _) -> 
-                    traverseType synType
-                | SynType.StaticConstant(constant, _) -> ()
-                | SynType.StaticConstantExpr(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynType.StaticConstantNamed(synType, synType1, _) -> 
-                    traverseType synType
-                    traverseType synType1
-        and
-            traverseMatchClause visitors = function
-            | SynMatchClause.Clause(pattern, expression, expression1, _, _) -> 
-                traversePattern visitors pattern
-                expression |> Option.iter (traverseExpression visitors)
-                traverseExpression visitors expression1
-        and
-            traverseMember visitors synMember =
-                let traverseType = traverseType visitors
-                let traverseMember = traverseMember visitors
-                let traverseBinding = traverseBinding visitors
-
+                    | SynType.App(synType, _, types, _, _, _, _) 
+                    | SynType.LongIdentApp(synType, _, _, types, _, _, _) -> 
+                        Type(synType) |> walk
+                        types |> List.iter (fun x -> Type(x) |> walk)
+                    | SynType.Tuple(types, _) ->    
+                        types |> List.iter (fun (_, x) -> Type(x) |> walk)
+                    | SynType.Fun(synType, synType1, _)
+                    | SynType.StaticConstantNamed(synType, synType1, _)
+                    | SynType.MeasureDivide(synType, synType1, _) -> 
+                        Type(synType) |> walk
+                        Type(synType1) |> walk
+                    | SynType.WithGlobalConstraints(synType, _, _)
+                    | SynType.HashConstraint(synType, _)
+                    | SynType.MeasurePower(synType, _, _)
+                    | SynType.Array(_, synType, _) -> 
+                        Type(synType) |> walk
+                    | SynType.StaticConstantExpr(expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynType.Var(_, _)
+                    | SynType.Anon(_)
+                    | SynType.StaticConstant(_, _) 
+                    | SynType.LongIdent(_) -> ()
+            | Match(matchClause) ->
+                match matchClause with
+                    | SynMatchClause.Clause(pattern, expression, expression1, _, _) -> 
+                        Pattern(pattern) |> walk
+                        expression |> Option.iter (fun x -> Expression(x) |> walk)
+                        Expression(expression1) |> walk
+            | MemberDefinition(synMember) ->
                 match synMember with
-                | SynMemberDefn.Open(longIdentier, _) -> ()
-                | SynMemberDefn.Member(binding, _) -> 
-                    traverseBinding binding
-                | SynMemberDefn.ImplicitCtor(_, attributes, patterns, identifier, _) -> 
-                    patterns |> List.iter (traverseSimplePattern visitors)
-                | SynMemberDefn.ImplicitInherit(synType, expression, identifier, _) -> 
-                    traverseType synType
-                    traverseExpression visitors expression
-                | SynMemberDefn.LetBindings(bindings, _, _, _) -> 
-                    bindings |> List.iter traverseBinding
-                | SynMemberDefn.AbstractSlot(valueSignature, _, _) -> 
-                    match valueSignature with
-                    | SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, range) -> 
-                        visitors |> List.iter (fun v -> v.VisitValueSignature(identifier, range) |> ignore)
-                | SynMemberDefn.Interface(synType, members, _) -> 
-                    traverseType synType
-                    members |> Option.iter (fun members -> members |> List.iter traverseMember)
-                | SynMemberDefn.Inherit(synType, identifier, _) -> 
-                    traverseType synType
-                | SynMemberDefn.ValField(field, _) -> 
-                    traverseField visitors field
-                | SynMemberDefn.NestedType(typeDefinition, _, _) -> 
-                    traverseTypeDefinition visitors typeDefinition
-                | SynMemberDefn.AutoProperty(attributes, _, identifier, synType, _, _, _, _, expression, _, _) -> 
-                    synType |> Option.iter traverseType
-                    traverseExpression visitors expression
-        and
-            traverseExpression visitors expression = 
+                    | SynMemberDefn.Member(binding, _) -> 
+                        Binding(binding) |> walk
+                    | SynMemberDefn.ImplicitCtor(_, attributes, patterns, identifier, _) -> 
+                        patterns |> List.iter (fun x -> SimplePattern(x) |> walk)
+                    | SynMemberDefn.ImplicitInherit(synType, expression, _, _) -> 
+                        Type(synType) |> walk
+                        Expression(expression) |> walk
+                    | SynMemberDefn.LetBindings(bindings, _, _, _) -> 
+                        bindings |> List.iter (fun x -> Binding(x) |> walk)
+                    | SynMemberDefn.Interface(synType, members, _) -> 
+                        Type(synType) |> walk
+                        members |> Option.iter (fun x -> x |> List.iter (fun x -> MemberDefinition(x) |> walk))
+                    | SynMemberDefn.Inherit(synType, _, _) -> 
+                        Type(synType) |> walk
+                    | SynMemberDefn.ValField(field, _) -> 
+                        Field(field) |> walk
+                    | SynMemberDefn.NestedType(typeDefinition, _, _) -> 
+                        TypeDefinition(typeDefinition) |> walk
+                    | SynMemberDefn.AutoProperty(attributes, _, identifier, synType, _, _, _, _, expression, _, _) -> 
+                        synType |> Option.iter (fun x -> Type(x) |> walk)
+                        Expression(expression) |> walk
+                    | SynMemberDefn.Open(_, _)
+                    | SynMemberDefn.AbstractSlot(_, _, _) -> ()
+            | Expression(expression) ->
                 match expression with
-                | SynExpr.Paren(expression, _, _, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.Quote(expression, _, expression1, _, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.Const(constant, _) -> ()
-                | SynExpr.Typed(expression, synType, _) -> 
-                    traverseExpression visitors expression
-                    traverseType visitors synType
-                | SynExpr.Tuple(expressions, _, _) -> 
-                    expressions |> List.iter (traverseExpression visitors)
-                | SynExpr.ArrayOrList(_, expressions, _) -> 
-                    expressions |> List.iter (traverseExpression visitors)
-                | SynExpr.Record(synType, expression, _, _) -> 
-                    expression |> Option.iter (fun (expression, _) -> traverseExpression visitors expression)
-                | SynExpr.New(_, synType, expression, _) -> 
-                    traverseExpression visitors expression
-                    traverseType visitors synType
-                | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> 
-                    traverseType visitors synType
-                    bindings |> List.iter (fun x -> traverseBinding visitors x)
-                | SynExpr.While(_, expression, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.For(_, identifier, expression, _, expression1, expression2, range) -> 
-                    let visitors = visitors |> List.collect (fun visitor -> visitor.VisitFor(identifier, range))
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                    traverseExpression visitors expression2
-                | SynExpr.ForEach(_, sequenceExpression, _, pattern, expression, expression1, _) -> 
-                    traversePattern visitors pattern
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.ArrayOrListOfSeqExpr(_, expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.CompExpr(_, _, expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.Lambda(_, _, simplePatterns, expression, _) -> 
-                    traverseSimplePatterns visitors simplePatterns
-                    traverseExpression visitors expression
-                | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
-                    matchClauses |> List.iter (traverseMatchClause visitors)
-                | SynExpr.Match(_, expression, matchClauses, _, _) -> 
-                    traverseExpression visitors expression
-                    matchClauses |> List.iter (traverseMatchClause visitors)
-                | SynExpr.Do(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.Assert(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.App(_, _, expression, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> ()
-                | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
-                    bindings |> List.iter (traverseBinding visitors)
-                    traverseExpression visitors expression
-                | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _) -> 
-                    traverseExpression visitors expression
-                    matchClauses |> List.iter (traverseMatchClause visitors)
-                | SynExpr.TryFinally(expression, expression1, _, _, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.Lazy(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.Sequential(_, _, expression, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.IfThenElse(expression, expression1, expression2, _, _, _, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                    expression2 |> Option.iter (traverseExpression visitors)
-                | SynExpr.Ident(identifier) -> ()
-                | SynExpr.LongIdent(_, identifier, _, _) -> ()
-                | SynExpr.LongIdentSet(identifier, expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.DotGet(expression, _, identifier, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.DotSet(expression, identifier, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.DotIndexedGet(expression, indexerArguments, _, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.DotIndexedSet(expression, indexerArguments, expression1, _, _, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.NamedIndexedPropertySet(identifier, expression, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.DotNamedIndexedPropertySet(expression, identifier, expression1, expression2, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                    traverseExpression visitors expression2
-                | SynExpr.TypeTest(expression, synType, _) -> 
-                    traverseExpression visitors expression
-                    traverseType visitors synType
-                | SynExpr.Upcast(expression, synType, _) -> 
-                    traverseExpression visitors expression
-                    traverseType visitors synType
-                | SynExpr.Downcast(expression, synType, _) -> 
-                    traverseExpression visitors expression
-                    traverseType visitors synType
-                | SynExpr.InferredUpcast(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.InferredDowncast(expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.Null(_) -> ()
-                | SynExpr.AddressOf(_, expression, _, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.TraitCall(typeParameters, memberSignature, expression, _) -> ()
-                | SynExpr.JoinIn(expression, _, expression1, _) -> 
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.ImplicitZero(_) -> ()
-                | SynExpr.YieldOrReturn(_, expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.YieldOrReturnFrom(_, expression, _) -> 
-                    traverseExpression visitors expression
-                | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _) -> 
-                    traversePattern visitors pattern
-                    traverseExpression visitors expression
-                    traverseExpression visitors expression1
-                | SynExpr.DoBang(expression, _) -> 
-                    traverseExpression visitors expression
-                | _ -> ()
-        and
-            traverseSimplePattern visitors = function
-            | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, range) -> 
-                let visit (visitor: AstVisitorBase) = visitor.VisitIdPattern(identifier, isCompilerGenerated, range) |> ignore
-
-                visitors |> List.iter visit
-            | SynSimplePat.Typed(simplePattern, synType, _) -> 
-                traverseSimplePattern visitors simplePattern
-                traverseType visitors synType
-            | SynSimplePat.Attrib(simplePattern, attributes, _) -> 
-                traverseSimplePattern visitors simplePattern
-        and
-            traverseSimplePatterns visitors = function
-            | SynSimplePats.SimplePats(simplePatterns, _) -> 
-                simplePatterns |> List.iter (traverseSimplePattern visitors)
-            | SynSimplePats.Typed(simplePatterns, synType, _) -> 
-                traverseSimplePatterns visitors simplePatterns
-                traverseType visitors synType
-        and
-            traversePattern visitors pattern = 
+                    | SynExpr.Paren(expression, _, _, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.Quote(expression, _, expression1, _, _)
+                    | SynExpr.App(_, _, expression, expression1, _)
+                    | SynExpr.Sequential(_, _, expression, expression1, _)
+                    | SynExpr.NamedIndexedPropertySet(_, expression, expression1, _)
+                    | SynExpr.DotIndexedSet(expression, _, expression1, _, _, _)
+                    | SynExpr.JoinIn(expression, _, expression1, _)
+                    | SynExpr.While(_, expression, expression1, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                    | SynExpr.Typed(expression, synType, _) -> 
+                        Expression(expression) |> walk
+                        Type(synType) |> walk
+                    | SynExpr.Tuple(expressions, _, _)
+                    | SynExpr.ArrayOrList(_, expressions, _) ->
+                        expressions |> List.iter (fun x -> Expression(x) |> walk) 
+                    | SynExpr.Record(synType, expression, _, _) -> 
+                        expression |> Option.iter (fun (x, _) -> Expression(x) |> walk)
+                    | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> 
+                        Type(synType) |> walk
+                        bindings |> List.iter (fun x -> Binding(x) |> walk)
+                    | SynExpr.For(_, _, expression, _, expression1, expression2, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                        Expression(expression2) |> walk
+                    | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) -> 
+                        Pattern(pattern) |> walk
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                    | SynExpr.Do(expression, _)
+                    | SynExpr.Assert(expression, _)
+                    | SynExpr.CompExpr(_, _, expression, _)
+                    | SynExpr.ArrayOrListOfSeqExpr(_, expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.Lambda(_, _, simplePatterns, expression, _) -> 
+                        SimplePatterns(simplePatterns) |> walk
+                        Expression(expression) |> walk
+                    | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
+                        matchClauses |> List.iter (fun x -> Match(x) |> walk)
+                    | SynExpr.Match(_, expression, matchClauses, _, _) -> 
+                        Expression(expression) |> walk
+                        matchClauses |> List.iter (fun x -> Match(x) |> walk)
+                    | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> 
+                        Expression(expression) |> walk
+                        types |> List.iter (fun x -> Type(x) |> walk)
+                    | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
+                        bindings |> List.iter (fun x -> Binding(x) |> walk)
+                        Expression(expression) |> walk
+                    | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _) -> 
+                        Expression(expression) |> walk
+                        matchClauses |> List.iter (fun x -> Match(x) |> walk)
+                    | SynExpr.TryFinally(expression, expression1, _, _, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                    | SynExpr.IfThenElse(expression, expression1, expression2, _, _, _, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                        expression2 |> Option.iter (fun x -> Expression(x) |> walk)
+                    | SynExpr.DotGet(expression, _, _, _)
+                    | SynExpr.LongIdentSet(_, expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.DotSet(expression, _, expression1, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                    | SynExpr.DotIndexedGet(expression, _, _, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _) -> 
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                        Expression(expression2) |> walk
+                    | SynExpr.New(_, synType, expression, _) 
+                    | SynExpr.TypeTest(expression, synType, _)
+                    | SynExpr.Upcast(expression, synType, _)
+                    | SynExpr.Downcast(expression, synType, _) -> 
+                        Expression(expression) |> walk
+                        Type(synType) |> walk
+                    | SynExpr.AddressOf(_, expression, _, _) 
+                    | SynExpr.InferredDowncast(expression, _)
+                    | SynExpr.InferredUpcast(expression, _)
+                    | SynExpr.DoBang(expression, _)
+                    | SynExpr.Lazy(expression, _)
+                    | SynExpr.TraitCall(_, _, expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.ImplicitZero(_) -> ()
+                    | SynExpr.YieldOrReturn(_, expression, _)
+                    | SynExpr.YieldOrReturnFrom(_, expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _) -> 
+                        Pattern(pattern) |> walk
+                        Expression(expression) |> walk
+                        Expression(expression1) |> walk
+                    | SynExpr.Ident(_) 
+                    | SynExpr.LongIdent(_, _, _, _) 
+                    | SynExpr.Null(_)
+                    | SynExpr.Const(_, _)
+                    | SynExpr.DiscardAfterMissingQualificationAfterDot(_, _)
+                    | SynExpr.FromParseError(_, _)
+                    | SynExpr.LibraryOnlyILAssembly(_, _, _, _, _)
+                    | SynExpr.LibraryOnlyStaticOptimization(_, _, _, _)
+                    | SynExpr.LibraryOnlyUnionCaseFieldGet(_, _, _, _)
+                    | SynExpr.LibraryOnlyUnionCaseFieldSet(_, _, _, _, _)
+                    | SynExpr.ArbitraryAfterError(_, _) -> ()
+            | SimplePattern(simplePattern) ->
+                match simplePattern with
+                    | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, range) -> ()
+                    | SynSimplePat.Typed(simplePattern, synType, _) -> 
+                        SimplePattern(simplePattern) |> walk
+                        Type(synType) |> walk
+                    | SynSimplePat.Attrib(simplePattern, attributes, _) -> 
+                        SimplePattern(simplePattern) |> walk
+            | SimplePatterns(simplePatterns) ->
+                match simplePatterns with
+                    | SynSimplePats.SimplePats(simplePatterns, _) -> 
+                        simplePatterns |> List.iter (fun x -> SimplePattern(x) |> walk)
+                    | SynSimplePats.Typed(simplePatterns, synType, _) -> 
+                        SimplePatterns(simplePatterns) |> walk
+                        Type(synType) |> walk
+            | Pattern(pattern) ->
                 match pattern with
-                | SynPat.Const(constant, _) -> ()
-                | SynPat.Wild(_) -> ()
-                | SynPat.Named(pattern, identifier, x, access, range) -> 
-                    let visit (visitor: AstVisitorBase) =
-                        visitor.VisitNamedPattern(pattern, identifier, x, access, range)
+                    | SynPat.Named(pattern, _, _, _, _) -> 
+                        Pattern(pattern) |> walk
+                    | SynPat.Typed(pattern, synType, _) -> 
+                        Pattern(pattern) |> walk
+                        Type(synType) |> walk
+                    | SynPat.Or(pattern, pattern1, _) -> 
+                        Pattern(pattern) |> walk
+                        Pattern(pattern1) |> walk
+                    | SynPat.ArrayOrList(_, patterns, _)
+                    | SynPat.Ands(patterns, _) -> 
+                        patterns |> List.iter (fun x -> Pattern(x) |> walk)
+                    | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> 
+                        ConstructorArguments(constructorArguments) |> walk
+                    | SynPat.Tuple(patterns, _) -> 
+                        patterns |> List.iter (fun x -> Pattern(x) |> walk)
+                    | SynPat.Attrib(pattern, _, _)
+                    | SynPat.Paren(pattern, _) -> 
+                        Pattern(pattern) |> walk
+                    | SynPat.Record(patternsAndIdentifier, _) -> 
+                        patternsAndIdentifier |> List.iter (fun (_, pattern) -> Pattern(pattern) |> walk)
+                    | SynPat.Null(_) -> ()
+                    | SynPat.OptionalVal(identifier, _) -> ()
+                    | SynPat.IsInst(synType, _) -> 
+                        Type(synType) |> walk
+                    | SynPat.QuoteExpr(expression, _) -> 
+                        Expression(expression) |> walk
+                    | SynPat.Const(_, _)
+                    | SynPat.Wild(_)
+                    | SynPat.FromParseError(_)
+                    | SynPat.InstanceMember(_, _, _, _, _)
+                    | SynPat.DeprecatedCharRange(_, _, _) -> ()
+            | ConstructorArguments(arguments) ->
+                match arguments with
+                    | SynConstructorArgs.Pats(patterns) -> 
+                       patterns |> List.iter (fun x -> Pattern(x) |> walk)
+                    | SynConstructorArgs.NamePatPairs(namePatterns, _) -> 
+                        namePatterns |> List.iter (fun (_, pattern) -> Pattern(pattern) |> walk)
+            | InterfaceImplementation(implementation) ->
+                match implementation with
+                    | SynInterfaceImpl.InterfaceImpl(synType, bindings, _) -> 
+                        Type(synType) |> walk
+                        bindings |> List.iter (fun x -> Binding(x) |> walk)
+            | TypeParameter(typeParameter) ->
+                match typeParameter with 
+                    | SynTypar.Typar(_, _, _) -> ()
 
-                    let visitors = visitors |> List.collect visit
-
-                    traversePattern visitors pattern
-                | SynPat.Typed(pattern, synType, _) -> 
-                    traversePattern visitors pattern
-                    traverseType visitors synType
-                | SynPat.Attrib(pattern, attributes, _) -> 
-                    traversePattern visitors pattern
-                | SynPat.Or(pattern, pattern1, _) -> 
-                    traversePattern visitors pattern
-                    traversePattern visitors pattern1
-                | SynPat.Ands(patterns, _) -> 
-                    patterns |> List.iter (traversePattern visitors)
-                | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
-                    let visit (visitor: AstVisitorBase) =
-                        visitor.VisitLongIdentPattern(longIdentifier, identifier, constructorArguments, access, range)
-
-                    let visitors = visitors |> List.collect visit
-
-                    traverseConstructorArguments visitors constructorArguments
-                | SynPat.Tuple(patterns, _) -> 
-                    patterns |> List.iter (traversePattern visitors)
-                | SynPat.Paren(pattern, _) -> 
-                    traversePattern visitors pattern
-                | SynPat.ArrayOrList(_, patterns, _) -> 
-                    patterns |> List.iter (traversePattern visitors)
-                | SynPat.Record(patternsAndIdentifier, _) -> 
-                    patternsAndIdentifier |> List.iter (fun (identifier, pattern) -> traversePattern visitors pattern)
-                | SynPat.Null(_) -> ()
-                | SynPat.OptionalVal(identifier, _) -> ()
-                | SynPat.IsInst(synType, _) -> 
-                    traverseType visitors synType
-                | SynPat.QuoteExpr(expression, _) -> 
-                    traverseExpression visitors expression
-                | _ -> ()
-        and
-            traverseConstructorArguments visitors = function
-            | SynConstructorArgs.Pats(patterns) -> 
-                patterns |> List.iter (traversePattern visitors)
-            | SynConstructorArgs.NamePatPairs(namePatterns, _) -> 
-                namePatterns |> List.iter (fun (identifier, pattern) -> traversePattern visitors pattern)
-        and
-            traverseInterface visitors = function
-            | SynInterfaceImpl.InterfaceImpl(synType, bindings, _) -> 
-                traverseType visitors synType
-                bindings |> List.iter (traverseBinding visitors)
-        and 
-            traverseParameter = function
-            | SynTypar.Typar(identifier, _, _) -> ()
-
-        let traverseModuleOrNamespace = traverseModuleOrNamespace allVisitors
-
-        match parseTree with
-            | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
-                moduleOrNamespaces |> List.iter traverseModuleOrNamespace
-            | ParsedInput.SigFile _ -> ()
+    let walkFile visitors = function
+        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
+            moduleOrNamespaces |> List.iter (fun x -> walk [] visitors (ModuleOrNamespace(x)))
+        | ParsedInput.SigFile _ -> ()
 
     exception ParseException of string
 
@@ -435,7 +376,7 @@ module Ast =
             match checkFileResults with
             | CheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
-                traverse tree visitors
+                walkFile visitors tree
             | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
         | None -> 
             let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file

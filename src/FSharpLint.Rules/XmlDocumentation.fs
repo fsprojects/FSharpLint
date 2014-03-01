@@ -24,19 +24,18 @@ module XmlDocumentation =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework.AstVisitorBase
+    open FSharpLint.Framework.Ast
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
         | XmlDoc(lines) when Array.length lines = 0 -> true
         | _ -> false
-    
-    let visitor postError checkFile = 
-        { new AstVisitorBase(checkFile) with
-        
-            member this.VisitExceptionRepresentation(_, unionCase, _, xmlDoc, _, range) = 
-                if isPreXmlDocEmpty xmlDoc then
-                    postError range "Expected exception type to have xml documentation."
-                
-                [this]
-        }
+
+    let visitor postError (checkFile:CheckFileResults) astNode = 
+        match astNode with
+            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
+                match xmlDoc.ToXmlDoc() with
+                    | XmlDoc(lines) when Array.length lines = 0 -> 
+                        postError range "Expected exception type to have xml documentation."
+                    | _ -> ()
+            | _ -> ()
