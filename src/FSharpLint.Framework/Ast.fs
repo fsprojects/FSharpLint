@@ -51,10 +51,17 @@ module Ast =
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
 
+    type VisitorResult =
+        | ContinueWalk
+        | Stop
+
     let rec walk path visitors node = 
         let walk = walk (node :: path)
 
-        visitors |> List.iter (fun visit -> visit node)
+        let visitors = visitors |> List.filter (fun visit -> 
+            match visit path node with
+                | ContinueWalk -> true
+                | Stop -> false)
 
         let walk = walk visitors
 

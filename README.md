@@ -4,7 +4,7 @@ Attempt at a lint tool for F#.
 
 ## Rules somewhat covered right now:
 
-* Naming conventions following FSharp guidelines, further improvements to be made: any value with the Literal attribute should be pascal case, any public value/function should be camel case or pascal case (right now restricted to camel case), and the spelling of words should be checked against a dictionary.
+* Naming conventions following FSharp guidelines, further improvements to be made: any public value/function should be camel case or pascal case (right now restricted to camel case), and the spelling of words should be checked against a dictionary.
 * Suggests to use the ignore function over 'let _ = expr'
 * Restricts the number of parameters a function can have (right now it's set as 5 params, but this should be configurable).
 

@@ -31,7 +31,7 @@ module XmlDocumentation =
         | XmlDoc(lines) when Array.length lines = 0 -> true
         | _ -> false
 
-    let visitor postError (checkFile:CheckFileResults) astNode = 
+    let visitor postError (checkFile:CheckFileResults) path astNode = 
         match astNode with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 match xmlDoc.ToXmlDoc() with
@@ -39,3 +39,5 @@ module XmlDocumentation =
                         postError range "Expected exception type to have xml documentation."
                     | _ -> ()
             | _ -> ()
+
+        ContinueWalk

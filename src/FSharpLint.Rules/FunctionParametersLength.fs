@@ -32,7 +32,7 @@ module FunctionParametersLength =
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
-    let visitor postError (checkFile:CheckFileResults) astNode = 
+    let visitor postError (checkFile:CheckFileResults) path astNode = 
         match astNode with
             | AstNode.Pattern(pattern) ->
                 match pattern with
@@ -46,3 +46,5 @@ module FunctionParametersLength =
                             | _ -> ()
                     | _ -> ()
             | _ -> ()
+
+        ContinueWalk

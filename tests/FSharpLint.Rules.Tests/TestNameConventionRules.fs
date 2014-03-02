@@ -723,3 +723,23 @@ type MyClass with
     member this.Goat() = 200"""
 
         Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 7 && r.StartColumn = 5))
+        
+    [<Test>]
+    member self.LiteralIsPascalCase() =
+        parse """
+module program
+
+[<Literal>]
+let Cat = 5"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        
+    [<Test>]
+    member self.LiteralIsCamelCase() =
+        parse """
+module program
+
+[<Literal>]
+let cat = 5"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))

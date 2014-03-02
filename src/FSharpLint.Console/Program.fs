@@ -18,27 +18,16 @@
 
 namespace FSharpLint.Console
 
-module program =
+module Program =
 
     let parseLiteralString () = 
         let input = """
-namespace goat
-module MyModule1 =
+module goat
 
-    // Define a type. 
-    type myClass() =
-      member this.F() = 100
+[<Literal>]
+let cat = 5
 
-module MyModule2 =
-    // Define type extension. 
-    type MyModule1.myClass with 
-       member this.goat() = 200
-
-   let function1 (obj1: MyModule1.myClass) =
-      // Call an ordinary method.
-      printfn "%d" (obj1.F())
-      // Call the extension method.
-      printfn "%d" (obj1.goat())"""
+let dog = 7"""
 
         let postError range error =
             ErrorHandling.errorHandler.Post(
