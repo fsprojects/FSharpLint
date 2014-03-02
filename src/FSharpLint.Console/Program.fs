@@ -24,10 +24,12 @@ module Program =
         let input = """
 module goat
 
-[<Literal>]
-let cat = 5
+let Goat2() =
+    let Cat = 5
 
-let dog = 7"""
+    Cat
+
+let Dog = 7"""
 
         let postError range error =
             ErrorHandling.errorHandler.Post(

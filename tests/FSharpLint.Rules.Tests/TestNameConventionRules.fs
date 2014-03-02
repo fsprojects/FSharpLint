@@ -743,3 +743,23 @@ module program
 let cat = 5"""
 
         Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        
+    [<Test>]
+    member self.FullyQualifiedLiteralIsPascalCase() =
+        parse """
+module program
+
+[<Microsoft.FSharp.Core.Literal>]
+let Cat = 5"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        
+    [<Test>]
+    member self.FullyQualifiedLiteralIsCamelCase() =
+        parse """
+module program
+
+[<Microsoft.FSharp.Core.Literal>]
+let cat = 5"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))

@@ -54,7 +54,82 @@ module Ast =
     type VisitorResult =
         | ContinueWalk
         | Stop
+        
+    let isPublic node =
+        let isSynAccessPublic = function
+            | Some(SynAccess.Public) -> true
+            | None -> true
+            | _ -> false
 
+        let rec isPublic publicSoFar isBinding = function
+            | node :: path when publicSoFar ->
+                match node with
+                    | Pattern(pattern) ->
+                        match pattern with
+                            | SynPat.Named(_, _, _, access, _)
+                            | SynPat.LongIdent(_, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                            | _ -> true
+                    | Binding(binding) ->
+                        match binding with
+                            | SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _) ->
+                                isPublic (isSynAccessPublic access) true path
+                    | TypeSimpleRepresentation(typeSimpleRepresentation) ->
+                        match typeSimpleRepresentation with
+                            | SynTypeDefnSimpleRepr.Record(access, _, _)
+                            | SynTypeDefnSimpleRepr.Union(access, _, _) -> 
+                                isPublic (isSynAccessPublic access) isBinding path
+                            | _ -> true
+                    | UnionCase(unionCase) ->
+                        match unionCase with
+                            | SynUnionCase.UnionCase(_, _, _, _, access, _) -> 
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | Field(field) ->
+                        match field with
+                            | SynField.Field(_, _, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ComponentInfo(componentInfo) ->
+                        match componentInfo with
+                            | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | MemberDefinition(memberDefinition) ->
+                        match memberDefinition with
+                        | SynMemberDefn.NestedType(_, access, _)
+                        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _)
+                        | SynMemberDefn.ImplicitCtor(access, _, _, _, _)
+                        | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                        | _ -> true
+                    | ExceptionRepresentation(exceptionRepresentation) ->
+                        match exceptionRepresentation with
+                            | SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ModuleOrNamespace (moduleOrNamespace) ->
+                        match moduleOrNamespace with
+                            | SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ExceptionDefinition(_)
+                    | EnumCase(_)
+                    | TypeRepresentation(_)
+                    | Type(_)
+                    | Match(_)
+                    | ConstructorArguments(_)
+                    | TypeParameter(_)
+                    | InterfaceImplementation(_)
+                    | ModuleDeclaration(_)
+                    | SimplePattern(_)
+                    | SimplePatterns(_) -> isPublic publicSoFar isBinding path
+                    | TypeDefinition(_)
+                    | Expression(_) ->
+                        if isBinding then
+                            false
+                        else
+                            isPublic publicSoFar isBinding path
+            | [] -> publicSoFar
+            | _ -> false
+
+        isPublic true false node
+        
     let rec walk path visitors node = 
         let walk = walk (node :: path)
 

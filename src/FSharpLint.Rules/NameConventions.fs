@@ -226,19 +226,25 @@ module NameConventions =
                 let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                 postError identifier.idRange error
 
-    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) =
+    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) isPublic =
         let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
 
         let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
-        
-        match symbol with
-            | Some(symbol) ->
+
+        let isActivePattern = function
+            | Some(symbol:FSharpSymbol) ->
                 match symbol with
                     | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsActivePattern -> 
-                        expectValidActivePatternDefinition postError identifier
-                    | _ -> expectCamelCase postError identifier
-            | None -> 
-                expectCamelCase postError identifier
+                        true
+                    | _ -> false
+            | None -> false
+
+        if symbol |> isActivePattern then
+            expectValidActivePatternDefinition postError identifier
+        else if isPublic then
+            expectNoUnderscore postError identifier
+        else
+            expectCamelCase postError identifier
 
     /// Possible types a long identifier as part of a pattern may be representing.
     type LongIdentPatternType =
@@ -272,12 +278,16 @@ module NameConventions =
             | None -> 
                 Other
 
-    let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) =
+    let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) isPublic =
         let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
         match longIdentPatternType longIdentifier identifier checkFile with
             | Member when lastIdent.idText <> "new" -> expectPascalCase postError lastIdent
-            | ValueOrFunction -> expectCamelCase postError lastIdent
+            | ValueOrFunction -> 
+                if isPublic then
+                    expectNoUnderscore postError lastIdent
+                else
+                    expectCamelCase postError lastIdent
             | ActivePatternDefinition -> expectValidActivePatternDefinition postError lastIdent
             | _ -> ()
 
@@ -337,9 +347,11 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        checkLongIdentPattern postError checkFile longIdentifier identifier
+                        let isPublic = (astNode :: path) |> isPublic
+                        checkLongIdentPattern postError checkFile longIdentifier identifier isPublic
                     | SynPat.Named(_, identifier, _, _, _) -> 
-                        checkNamedPattern postError checkFile identifier
+                        let isPublic = (astNode :: path) |> isPublic
+                        checkNamedPattern postError checkFile identifier isPublic
                     | _ -> ()
                 ContinueWalk
             | AstNode.SimplePattern(pattern) ->
