@@ -26,8 +26,8 @@ module FavourIgnoreOverLetWild =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     
-    let visitor postError (checkFile:CheckFileResults) path astNode = 
-        match astNode with
+    let visitor postError (checkFile:CheckFileResults) astNode = 
+        match astNode.CurrentNode with
             | AstNode.Binding(SynBinding.Binding(identifier, _, _, _, _, _, _, pattern, _, _, range, _)) -> 
                 let rec findWildAndIgnoreParens = function
                 | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern

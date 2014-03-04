@@ -32,8 +32,8 @@ module FunctionParametersLength =
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
-    let visitor postError (checkFile:CheckFileResults) path astNode = 
-        match astNode with
+    let visitor postError (checkFile:CheckFileResults) astNode = 
+        match astNode.CurrentNode with
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 

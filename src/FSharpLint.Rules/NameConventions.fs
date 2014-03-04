@@ -310,10 +310,10 @@ module NameConventions =
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
-    let visitor postError (checkFile:CheckFileResults) path astNode = 
+    let visitor postError (checkFile:CheckFileResults) astNode = 
         let expectCamelCase, expectPascalCase = expectCamelCase postError, expectPascalCase postError
 
-        match astNode with
+        match astNode.CurrentNode with
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, _, _, _, _, _)) -> 
                 identifier |> List.iter expectPascalCase
                 ContinueWalk
@@ -347,10 +347,10 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        let isPublic = (astNode :: path) |> isPublic
+                        let isPublic = (astNode.CurrentNode :: astNode.Breadcrumbs) |> isPublic
                         checkLongIdentPattern postError checkFile longIdentifier identifier isPublic
                     | SynPat.Named(_, identifier, _, _, _) -> 
-                        let isPublic = (astNode :: path) |> isPublic
+                        let isPublic = (astNode.CurrentNode :: astNode.Breadcrumbs) |> isPublic
                         checkNamedPattern postError checkFile identifier isPublic
                     | _ -> ()
                 ContinueWalk
