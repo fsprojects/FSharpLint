@@ -50,10 +50,6 @@ module Ast =
         | ConstructorArguments of SynConstructorArgs
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
-
-    type VisitorResult =
-        | ContinueWalk
-        | Stop
         
     let isPublic path =
         let isSynAccessPublic = function
@@ -444,24 +440,55 @@ module Ast =
 
     type CurrentNode =
         {
-            CurrentNode: AstNode
+            Node: AstNode
             ChildNodes: AstNode list
             Breadcrumbs: AstNode list
         }
+
+    /// Defines a function that visits a node on the AST.
+    type Visitor = CurrentNode -> VisitorResult
+    and 
+        /// Defines a function that a visitor will return when it wants to supply 
+        /// specific visitors for the node its visiting's children
+        GetVisitorForChild = int -> AstNode -> Visitor option
+    and 
+        /// The return value of a visitor that lets the it specify how the 
+        /// children of a visited node should be visited.
+        VisitorResult =
+            | Continue
+            | Stop
+            | ContinueWithVisitor of Visitor
+            | ContinueWithVisitorsForChildren of GetVisitorForChild
+
+    /// Visits a node with a single visitor, and returns each visitor to be used for each child node.
+    /// This allows a visitor to decide how the children of the visited node shall be visited.
+    let visit node visitor =
+         match visitor node with
+            | Continue -> 
+                node.ChildNodes |> List.map (fun _ -> Some(visitor))
+            | Stop -> 
+                node.ChildNodes |> List.map (fun _ -> None)
+            | ContinueWithVisitor(visitor) -> 
+                node.ChildNodes |> List.map (fun _ -> Some(visitor))
+            | ContinueWithVisitorsForChildren(getVisitorForChild) -> 
+                node.ChildNodes |> List.mapi (fun i child -> getVisitorForChild i child)
         
     let rec walk breadcrumbs visitors node = 
         let walk = walk (node :: breadcrumbs)
 
         let children = traverseNode node
 
-        let currentNode = { CurrentNode = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
+        let currentNode = { Node = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
 
-        let visitors = visitors |> List.filter (fun visit -> 
-            match visit currentNode with
-                | ContinueWalk -> true
-                | Stop -> false)
+        let visitorsForChildren = visitors |> List.map (visit currentNode)
 
-        children |> List.iter (walk visitors)
+        children |> List.iteri (fun i child ->
+            let visitors = 
+                visitorsForChildren 
+                    |> List.map (fun v -> v.[i])
+                    |> List.choose id
+
+            walk visitors child)
 
     let walkFile visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 

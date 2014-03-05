@@ -307,17 +307,27 @@ module program
 
         Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 6))
 
+    /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member self.TupleIsPascalCase() = 
+    member self.PublicTupleIsPascalCase() = 
         parse """
 module program
   let main = 
     let (Cat, _) = 1, 0"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
 
     [<Test>]
-    member self.TupleIsCamelCase() = 
+    member self.PrivateTupleIsPascalCase() = 
+        parse """
+module program
+  let main = 
+    let private (Cat, _) = 1, 0"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 17))
+
+    [<Test>]
+    member self.PublicTupleIsCamelCase() = 
         parse """
 module program
   let main = 
@@ -361,16 +371,45 @@ module program
 
         Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
 
+    /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member self.FunctionNameIsPascalCase() = 
+    member self.PublicFunctionNameIsPascalCase() = 
         parse """
 module program
   let Main () = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
 
     [<Test>]
-    member self.FunctionNameIsCamelCase() = 
+    member self.PrivateFunctionNameIsPascalCase() = 
+        parse """
+module program
+  let private Main () = ()"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 14))
+
+    [<Test>]
+    member self.FunctionNameNestedInBindingIsPascalCase() = 
+        parse """
+module program
+  let main () =
+    let Main () = ()
+    ()"""
+
+        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 8))
+
+    [<Test>]
+    member self.FunctionNameNestedInBindingIsCamelCase() = 
+        parse """
+module program
+  let main () =
+    let bain () = ()
+    ()"""
+
+        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 8))
+
+    [<Test>]
+    member self.PublicFunctionNameIsCamelCase() = 
         parse """
 module program
   let main () = ()"""

@@ -226,7 +226,7 @@ module NameConventions =
                 let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                 postError identifier.idRange error
 
-    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) isPublic =
+    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) =
         let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
 
         let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
@@ -241,8 +241,6 @@ module NameConventions =
 
         if symbol |> isActivePattern then
             expectValidActivePatternDefinition postError identifier
-        else if isPublic then
-            expectNoUnderscore postError identifier
         else
             expectCamelCase postError identifier
 
@@ -278,16 +276,12 @@ module NameConventions =
             | None -> 
                 Other
 
-    let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) isPublic =
+    let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) =
         let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
         match longIdentPatternType longIdentifier identifier checkFile with
             | Member when lastIdent.idText <> "new" -> expectPascalCase postError lastIdent
-            | ValueOrFunction -> 
-                if isPublic then
-                    expectNoUnderscore postError lastIdent
-                else
-                    expectCamelCase postError lastIdent
+            | ValueOrFunction -> expectCamelCase postError lastIdent
             | ActivePatternDefinition -> expectValidActivePatternDefinition postError lastIdent
             | _ -> ()
 
@@ -310,57 +304,55 @@ module NameConventions =
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
-    let visitor postError (checkFile:CheckFileResults) astNode = 
+    let rec visitor postError (checkFile:CheckFileResults) astNode = 
         let expectCamelCase, expectPascalCase = expectCamelCase postError, expectPascalCase postError
 
-        match astNode.CurrentNode with
+        match astNode.Node with
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, _, _, _, _, _)) -> 
                 identifier |> List.iter expectPascalCase
-                ContinueWalk
+                Continue
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
                 expectPascalCase identifier
-                ContinueWalk
+                Continue
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
                 identifier |> Option.iter expectPascalCase
-                ContinueWalk
+                Continue
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
                 expectPascalCase identifier
-                ContinueWalk
+                Continue
             | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
                 checkComponentInfo postError checkFile identifier
-                ContinueWalk
+                Continue
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
                 checkException postError checkFile unionCase
-                ContinueWalk
+                Continue
             | AstNode.Expression(expr) ->
                 match expr with
                     | SynExpr.For(_, identifier, _, _, _, _, _) ->
                         expectCamelCase identifier
                     | _ -> ()
-                ContinueWalk
+                Continue
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                     | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
                         expectPascalCase identifier
                     | _ -> ()
-                ContinueWalk
+                Continue
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        let isPublic = (astNode.CurrentNode :: astNode.Breadcrumbs) |> isPublic
-                        checkLongIdentPattern postError checkFile longIdentifier identifier isPublic
+                        checkLongIdentPattern postError checkFile longIdentifier identifier
                     | SynPat.Named(_, identifier, _, _, _) -> 
-                        let isPublic = (astNode.CurrentNode :: astNode.Breadcrumbs) |> isPublic
-                        checkNamedPattern postError checkFile identifier isPublic
+                        checkNamedPattern postError checkFile identifier
                     | _ -> ()
-                ContinueWalk
+                Continue
             | AstNode.SimplePattern(pattern) ->
                 match pattern with
                     | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
                         if not <| isCompilerGenerated then
                             expectCamelCase identifier
                     | _ -> ()
-                ContinueWalk
+                Continue
             | AstNode.Binding(binding) ->
                 match binding with
                     | SynBinding.Binding(_, _, _, _, attributes, _, _, pattern, _, _, _, _) -> 
@@ -372,5 +364,45 @@ module NameConventions =
 
                             Stop
                         else
-                            ContinueWalk
-            | _ -> ContinueWalk
+                            let getVisitorForChild i child =
+                                match child with
+                                    | Pattern(_) ->
+                                        Some(bindingPatternVisitor postError checkFile)
+                                    | _ -> 
+                                        Some(visitor postError checkFile)
+
+                            ContinueWithVisitorsForChildren(getVisitorForChild)
+            | _ -> Continue
+    and 
+        bindingPatternVisitor postError (checkFile:CheckFileResults) astNode = 
+            match astNode.Node with
+                | AstNode.Pattern(pattern) ->
+                    match pattern with
+                        | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
+                            let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
+
+                            match longIdentPatternType longIdentifier identifier checkFile with
+                                | Member when lastIdent.idText <> "new" -> 
+                                    expectPascalCase postError lastIdent
+                                    Continue
+                                | ValueOrFunction when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
+                                    expectNoUnderscore postError lastIdent
+                                    ContinueWithVisitor(visitor postError checkFile)
+                                | ValueOrFunction -> 
+                                    expectCamelCase postError lastIdent
+                                    Continue
+                                | ActivePatternDefinition -> 
+                                    expectValidActivePatternDefinition postError lastIdent
+                                    Continue
+                                | _ -> Continue
+                        | SynPat.Named(_, identifier, _, _, _) -> 
+                            expectNoUnderscore postError identifier
+                            Continue
+                        | _ -> Continue
+                | AstNode.SimplePattern(pattern) ->
+                    match pattern with
+                        | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
+                            expectNoUnderscore postError identifier
+                        | _ -> ()
+                    Continue
+                | _ -> Continue

@@ -32,7 +32,7 @@ module XmlDocumentation =
         | _ -> false
 
     let visitor postError (checkFile:CheckFileResults) astNode = 
-        match astNode.CurrentNode with
+        match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 match xmlDoc.ToXmlDoc() with
                     | XmlDoc(lines) when Array.length lines = 0 -> 
@@ -40,4 +40,4 @@ module XmlDocumentation =
                     | _ -> ()
             | _ -> ()
 
-        ContinueWalk
+        Continue
