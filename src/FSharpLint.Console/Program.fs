@@ -24,6 +24,8 @@ module Program =
         let input = """
 module goat
 
+exception SomeException of string
+
 let Goat2() =
     let Cat = 5
 
@@ -43,6 +45,7 @@ let Dog = 7"""
             FSharpLint.Rules.NameConventions.visitor postError
             FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
             FSharpLint.Rules.FunctionParametersLength.visitor postError
+            FSharpLint.Rules.XmlDocumentation.visitor postError
         ]
 
         try

@@ -50,6 +50,8 @@
     <Compile Include="TestRuleBase.fs" />
     <Compile Include="TestNameConventionRules.fs" />
     <Compile Include="TestFavourIgnoreOverLetWildRules.fs" />
+    <Compile Include="TestFunctionParametersLengthRules.fs" />
+    <Compile Include="TestXmlDocumentationRules.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FSharpLint.Framework\FSharpLint.Framework.fsproj">
