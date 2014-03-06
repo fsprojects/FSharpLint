@@ -19,40 +19,26 @@
 module TestNameConventionRules
 
 open NUnit.Framework
-open System.Linq
-open Microsoft.FSharp.Compiler.SourceCodeServices
-open Microsoft.FSharp.Compiler.Ast
-open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Rules.NameConventions
-open FSharpLint.Framework.Ast
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    let errorRanges = System.Collections.Generic.List<range * string>()
-
-    let postError (range:range) error =
-        errorRanges.Add(range, error)
-
-    let parse input = parseInput input [visitor postError]
-
-    [<SetUp>]
-    member self.SetUp() = 
-        errorRanges.Clear()
+    inherit TestRuleBase.TestRuleBase(visitor)
 
     [<Test>]
-    member self.IsPascalCase() = 
+    member this.IsPascalCase() = 
         Assert.IsTrue(isPascalCase "DogInBin")
 
         Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
-    member self.IsCamelCase() = 
+    member this.IsCamelCase() = 
         Assert.IsTrue(isCamelCase "dogInBin")
 
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member self.ContainsUnderScore() = 
+    member this.ContainsUnderScore() = 
         Assert.IsTrue(containsUnderscore "dog_")
 
         Assert.IsTrue(containsUnderscore "_dog")
@@ -62,7 +48,7 @@ type TestNameConventionRules() =
         Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
-    member self.IsOperator() = 
+    member this.IsOperator() = 
         Assert.IsTrue(isOperator "op_LeftShift")
 
         Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")
@@ -74,385 +60,385 @@ type TestNameConventionRules() =
         Assert.IsFalse(isOperator "op_TwiddleEqualsDivideCommaf")
 
     [<Test>]
-    member self.ClassNameIsPascalCase() = 
-        parse """
+    member this.ClassNameIsPascalCase() = 
+        this.Parse """
 module Program
-  type MyClass2() as self =
+  type MyClass2() as this =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.ClassNameIsCamelCase() = 
-        parse """
+    member this.ClassNameIsCamelCase() = 
+        this.Parse """
 module Program
-  type myClass2() as self =
+  type myClass2() as this =
     member this.PrintMessage() = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.InterfaceNameBeginsWithI() = 
-        parse """
+    member this.InterfaceNameBeginsWithI() = 
+        this.Parse """
 module Program
   type IPrintable =
     abstract member Print : unit -> unit"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.InterfaceNameDoesNotBeginWithI() = 
-        parse """
+    member this.InterfaceNameDoesNotBeginWithI() = 
+        this.Parse """
 module Program
   type Printable =
     abstract member Print : unit -> unit"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.ClassMemberIsPascalCase() = 
-        parse """
+    member this.ClassMemberIsPascalCase() = 
+        this.Parse """
 module Program
-  type MyClass2() as self =
+  type MyClass2() as this =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 16))
+        Assert.IsFalse(this.ErrorExistsAt(4, 16))
 
     [<Test>]
-    member self.ClassMemberIsCamelCase() = 
-        parse """
+    member this.ClassMemberIsCamelCase() = 
+        this.Parse """
 module Program
-  type MyClass2() as self =
+  type MyClass2() as this =
     member this.printMessage() = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 16))
+        Assert.IsTrue(this.ErrorExistsAt(4, 16))
 
     /// The new member (constructor) is not pascal case so check it does not post an error.
     [<Test>]
-    member self.ConstructorDoesNotPostError() = 
-        parse """
+    member this.ConstructorDoesNotPostError() = 
+        this.Parse """
 module Program
 type MyClass(x) =
     new() = MyClass(0)"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 4))
+        Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
     [<Test>]
-    member self.EnumNameIsPascalCase() = 
-        parse """
+    member this.EnumNameIsPascalCase() = 
+        this.Parse """
 module Program
   type MyEnum =
     | EnumCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.EnumNameIsCamelCase() = 
-        parse """
+    member this.EnumNameIsCamelCase() = 
+        this.Parse """
 module Program
   type myEnum =
     | EnumCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.EnumCaseIsPascalCase() = 
-        parse """
+    member this.EnumCaseIsPascalCase() = 
+        this.Parse """
 module Program
   type MyEnum =
     | EnumCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsFalse(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member self.EnumCaseIsCamelCase() = 
-        parse """
+    member this.EnumCaseIsCamelCase() = 
+        this.Parse """
 module Program
   type MyEnum =
     | enumCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsTrue(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member self.UnionNameIsPascalCase() = 
-        parse """
+    member this.UnionNameIsPascalCase() = 
+        this.Parse """
 module Program
   type Union =
     | Some"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.UnionNameIsCamelCase() = 
-        parse """
+    member this.UnionNameIsCamelCase() = 
+        this.Parse """
 module Program
   type union =
     | Some"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.UnionCaseIsPascalCase() = 
-        parse """
+    member this.UnionCaseIsPascalCase() = 
+        this.Parse """
 module Program
   type Union =
     | UnionCase = 1"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsFalse(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member self.UnionCaseIsCamelCase() = 
-        parse """
+    member this.UnionCaseIsCamelCase() = 
+        this.Parse """
 module Program
   type Union =
     | unionCase = 1"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 6))
+        Assert.IsTrue(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member self.RecordNameIsPascalCase() = 
-        parse """
+    member this.RecordNameIsPascalCase() = 
+        this.Parse """
 module Program
   type Record = { dog: int }"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.RecordNameIsCamelCase() = 
-        parse """
+    member this.RecordNameIsCamelCase() = 
+        this.Parse """
 module Program
   type record = { dog: int }"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.RecordFieldIsPascalCase() = 
-        parse """
+    member this.RecordFieldIsPascalCase() = 
+        this.Parse """
 module Program
   type record = { Dog: int }"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 18))
+        Assert.IsFalse(this.ErrorExistsAt(3, 18))
 
     [<Test>]
-    member self.RecordFieldIsCamelCase() = 
-        parse """
+    member this.RecordFieldIsCamelCase() = 
+        this.Parse """
 module Program
   type record = { dog: int }"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 18))
+        Assert.IsTrue(this.ErrorExistsAt(3, 18))
 
     [<Test>]
-    member self.TypeAbbreviationIsPascalCase() = 
-        parse """
+    member this.TypeAbbreviationIsPascalCase() = 
+        this.Parse """
 module Program
   type Cat = int"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.TypeAbbreviationIsCamelCase() = 
-        parse """
+    member this.TypeAbbreviationIsCamelCase() = 
+        this.Parse """
 module Program
   type cat = int"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.ModuleNameIsPascalCase() = 
-        parse """
+    member this.ModuleNameIsPascalCase() = 
+        this.Parse """
 module Program
   let main = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(2, 7))
 
     [<Test>]
-    member self.ModuleNameIsCamelCase() = 
-        parse """
+    member this.ModuleNameIsCamelCase() = 
+        this.Parse """
 module program
   let main = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(2, 7))
 
     [<Test>]
-    member self.NamespaceIsPascalCase() = 
-        parse """
+    member this.NamespaceIsPascalCase() = 
+        this.Parse """
 namespace Matt.Dog.Cat"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 10))
+        Assert.IsFalse(this.ErrorExistsAt(2, 10))
 
     [<Test>]
-    member self.NamespaceIsCamelCase() = 
-        parse """
+    member this.NamespaceIsCamelCase() = 
+        this.Parse """
 namespace matt.dog.cat"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 2 && r.StartColumn = 10))
+        Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
-    member self.VariablePatternMatchIsPascalCase() = 
-        parse """
+    member this.VariablePatternMatchIsPascalCase() = 
+        this.Parse """
 module program
   let main = 
     match true with
     | Dog -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 6))
+        Assert.IsTrue(this.ErrorExistsAt(5, 6))
 
     [<Test>]
-    member self.VariablePatternMatchIsCamelCase() = 
-        parse """
+    member this.VariablePatternMatchIsCamelCase() = 
+        this.Parse """
 module program
   let main = 
     match true with
     | dog -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 6))
+        Assert.IsFalse(this.ErrorExistsAt(5, 6))
 
     /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member self.PublicTupleIsPascalCase() = 
-        parse """
+    member this.PublicTupleIsPascalCase() = 
+        this.Parse """
 module program
   let main = 
     let (Cat, _) = 1, 0"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
+        Assert.IsFalse(this.ErrorExistsAt(4, 9))
 
     [<Test>]
-    member self.PrivateTupleIsPascalCase() = 
-        parse """
+    member this.PrivateTupleIsPascalCase() = 
+        this.Parse """
 module program
   let main = 
     let private (Cat, _) = 1, 0"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 17))
+        Assert.IsTrue(this.ErrorExistsAt(4, 17))
 
     [<Test>]
-    member self.PublicTupleIsCamelCase() = 
-        parse """
+    member this.PublicTupleIsCamelCase() = 
+        this.Parse """
 module program
   let main = 
     let (cat, _) = 1, 0"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 9))
+        Assert.IsFalse(this.ErrorExistsAt(4, 9))
 
     [<Test>]
-    member self.PatternMatchAsIsPascalCase() = 
-        parse """
+    member this.PatternMatchAsIsPascalCase() = 
+        this.Parse """
 module program
   let main = 
     match true with
     | _ as Dog -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 11))
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
 
     [<Test>]
-    member self.PatternMatchAsIsCamelCase() = 
-        parse """
+    member this.PatternMatchAsIsCamelCase() = 
+        this.Parse """
 module program
   let main = 
     match true with
     | _ as dog -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 11))
+        Assert.IsFalse(this.ErrorExistsAt(5, 11))
 
     [<Test>]
-    member self.DelegateNameIsPascalCase() = 
-        parse """
+    member this.DelegateNameIsPascalCase() = 
+        this.Parse """
 module program
   type Delegate2 = delegate of int * int -> int"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.DelegateNameIsCamelCase() = 
-        parse """
+    member this.DelegateNameIsCamelCase() = 
+        this.Parse """
 module program
   type delegate2 = delegate of int * int -> int"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member self.PublicFunctionNameIsPascalCase() = 
-        parse """
+    member this.PublicFunctionNameIsPascalCase() = 
+        this.Parse """
 module program
   let Main () = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
+        Assert.IsFalse(this.ErrorExistsAt(3, 6))
 
     [<Test>]
-    member self.PrivateFunctionNameIsPascalCase() = 
-        parse """
+    member this.PrivateFunctionNameIsPascalCase() = 
+        this.Parse """
 module program
   let private Main () = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 14))
+        Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
-    member self.FunctionNameNestedInBindingIsPascalCase() = 
-        parse """
+    member this.FunctionNameNestedInBindingIsPascalCase() = 
+        this.Parse """
 module program
   let main () =
     let Main () = ()
     ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 8))
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member self.FunctionNameNestedInBindingIsCamelCase() = 
-        parse """
+    member this.FunctionNameNestedInBindingIsCamelCase() = 
+        this.Parse """
 module program
   let main () =
     let bain () = ()
     ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 4 && r.StartColumn = 8))
+        Assert.IsFalse(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member self.PublicFunctionNameIsCamelCase() = 
-        parse """
+    member this.PublicFunctionNameIsCamelCase() = 
+        this.Parse """
 module program
   let main () = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 6))
+        Assert.IsFalse(this.ErrorExistsAt(3, 6))
 
     [<Test>]
-    member self.FunctionParameterIsPascalCase() = 
-        parse """
+    member this.FunctionParameterIsPascalCase() = 
+        this.Parse """
 module program
   let main Dog = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 11))
+        Assert.IsTrue(this.ErrorExistsAt(3, 11))
 
     [<Test>]
-    member self.FunctionParameterIsCamelCase() = 
-        parse """
+    member this.FunctionParameterIsCamelCase() = 
+        this.Parse """
 module program
   let main dog = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 11))
+        Assert.IsFalse(this.ErrorExistsAt(3, 11))
 
     [<Test>]
-    member self.ConstructorParameterIsPascalCase() = 
-        parse """
+    member this.ConstructorParameterIsPascalCase() = 
+        this.Parse """
 module Program
-  type MyClass2(Cats) as self =
+  type MyClass2(Cats) as this =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.EndColumn = 16))
+        Assert.IsTrue(this.ErrorExistsAt(3, 16))
 
     [<Test>]
-    member self.ConstructorParameterIsCamelCase() = 
-        parse """
+    member this.ConstructorParameterIsCamelCase() = 
+        this.Parse """
 module Program
-  type MyClass2(cats) as self =
+  type MyClass2(cats) as this =
     member this.PrintMessage() = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartColumn = 3 && r.EndColumn = 16))
+        Assert.IsFalse(this.ErrorExistsAt(3, 16))
 
     [<Test>]
-    member self.StructNameIsPascalCase() = 
-        parse """
+    member this.StructNameIsPascalCase() = 
+        this.Parse """
 module program
   type Point2D =
     struct 
@@ -461,11 +447,11 @@ module program
       new(x: float, y: float) = { X = x; Y = y }
     end"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.StructNameIsCamelCase() = 
-        parse """
+    member this.StructNameIsCamelCase() = 
+        this.Parse """
 module program
   type point2D =
     struct 
@@ -474,95 +460,95 @@ module program
       new(x: float, y: float) = { X = x; Y = y }
     end"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 7))
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member self.PropertyIsPascalCase() = 
-        parse """
+    member this.PropertyIsPascalCase() = 
+        this.Parse """
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
     member this.CenterX with get() = x and set xval = x <- xval"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 16))
+        Assert.IsFalse(this.ErrorExistsAt(6, 16))
 
     [<Test>]
-    member self.PropertyIsCamelCase() = 
-        parse """
+    member this.PropertyIsCamelCase() = 
+        this.Parse """
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
     member this.centerX with get() = x and set xval = x <- xval"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 16))
+        Assert.IsTrue(this.ErrorExistsAt(6, 16))
 
     [<Test>]
-    member self.AbstractMemberNameIsPascalCase() = 
-        parse """
+    member this.AbstractMemberNameIsPascalCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 20))
+        Assert.IsFalse(this.ErrorExistsAt(5, 20))
 
     [<Test>]
-    member self.AbstractMemberNameIsCamelCase() = 
-        parse """
+    member this.AbstractMemberNameIsCamelCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 20))
+        Assert.IsTrue(this.ErrorExistsAt(5, 20))
 
     [<Test>]
-    member self.AbstractPropertyNameIsPascalCase() = 
-        parse """
+    member this.AbstractPropertyNameIsPascalCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract Area : float with get"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 13))
+        Assert.IsFalse(this.ErrorExistsAt(5, 13))
 
     [<Test>]
-    member self.AbstractPropertyNameIsCamelCase() = 
-        parse """
+    member this.AbstractPropertyNameIsCamelCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract area : float with get"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 13))
+        Assert.IsTrue(this.ErrorExistsAt(5, 13))
 
     [<Test>]
-    member self.DefaultMemberIsPascalCase() = 
-        parse """
+    member this.DefaultMemberIsPascalCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
     default this.Rotate(angle) = ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 17))
+        Assert.IsFalse(this.ErrorExistsAt(6, 17))
 
     [<Test>]
-    member self.DefaultMemberIsCamelCase() = 
-        parse """
+    member this.DefaultMemberIsCamelCase() = 
+        this.Parse """
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit
     default this.rotate(angle) = ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 6 && r.StartColumn = 17))
+        Assert.IsTrue(this.ErrorExistsAt(6, 17))
 
     [<Test>]
-    member self.PatternFunctionValidActivePattern() = 
-        parse """
+    member this.PatternFunctionValidActivePattern() = 
+        this.Parse """
 module program
 let (|Even|Odd|) = function
 | i when i % 2 = 0 -> Even
@@ -572,11 +558,11 @@ match 4 with
 | Even -> ()
 | Odd -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.ActivePatternContainsUnderscore() = 
-        parse """
+    member this.ActivePatternContainsUnderscore() = 
+        this.Parse """
 module program
 let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
 
@@ -584,11 +570,11 @@ match 4 with
 | Ev_en -> ()
 | Odd -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.ActivePatternDoesNotContainUnderscore() = 
-        parse """
+    member this.ActivePatternDoesNotContainUnderscore() = 
+        this.Parse """
 module program
 let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 
@@ -596,11 +582,11 @@ match 4 with
 | Even -> ()
 | Odd -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.PartialActivePatternContainsUnderscore() = 
-        parse """
+    member this.PartialActivePatternContainsUnderscore() = 
+        this.Parse """
 module program
 let (|Ev_en|_|) input = if input % 2 = 0 then Some 4 else None
         
@@ -608,11 +594,11 @@ match 3 with
 | Ev_en(x) -> ()
 | dog -> ()"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.PartialActivePatternDoesNotContainUnderscore() = 
-        parse """
+    member this.PartialActivePatternDoesNotContainUnderscore() = 
+        this.Parse """
 module program
 let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
         
@@ -620,100 +606,100 @@ match 3 with
 | Even(x) -> ()
 | dog -> ()"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.ExceptionIsPascalCase() = 
-        parse """
+    member this.ExceptionIsPascalCase() = 
+        this.Parse """
 module program
 exception MyError of string
 """
 
         let error = "Expected pascal case identifier but was MyError"
 
-        Assert.IsFalse(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+        Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member self.ExceptionIsCamelCase() = 
-        parse """
+    member this.ExceptionIsCamelCase() = 
+        this.Parse """
 module program
 exception myError of string
 """
 
         let error = "Expected pascal case identifier but was myError"
-
-        Assert.IsTrue(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+        
+        Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member self.ExceptionEndsWithException() = 
-        parse """
+    member this.ExceptionEndsWithException() = 
+        this.Parse """
 module program
 exception MyErrorException of string
 """
 
         let error = "Exception identifier should end with 'Exception', but was MyErrorException"
-
-        Assert.IsFalse(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+        
+        Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member self.ExceptionDoesNotEndWithException() = 
-        parse """
+    member this.ExceptionDoesNotEndWithException() = 
+        this.Parse """
 module program
 exception MyError of string
 """
 
         let error = "Exception identifier should end with 'Exception', but was MyError"
-
-        Assert.IsTrue(errorRanges.Any(fun (r, e) -> r.StartLine = 3 && r.StartColumn = 10 && e = error))
+        
+        Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member self.ForLoopIdentifierIsCamelCase() = 
-        parse """
+    member this.ForLoopIdentifierIsCamelCase() = 
+        this.Parse """
 module program
 for i = 10 downto 1 do System.Console.Write(i)
 """
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 4))
+        Assert.IsFalse(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member self.ForLoopIdentifierIsPascalCase() = 
-        parse """
+    member this.ForLoopIdentifierIsPascalCase() = 
+        this.Parse """
 module program
 for I = 10 downto 1 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 4))
+        Assert.IsTrue(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member self.ForEachLoopIdentifierIsCamelCase() = 
-        parse """
+    member this.ForEachLoopIdentifierIsCamelCase() = 
+        this.Parse """
 module program
 for i in 1..10 do System.Console.Write(i)
 """
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 4))
+        Assert.IsFalse(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member self.ForEachLoopIdentifierIsPascalCase() = 
-        parse """
+    member this.ForEachLoopIdentifierIsPascalCase() = 
+        this.Parse """
 module program
 for I in 1..10 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 4))
+        Assert.IsTrue(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member self.CompilerGeneratedArgumentName() = 
-        parse """
+    member this.CompilerGeneratedArgumentName() = 
+        this.Parse """
 module program
 (fun _ -> ())
 """
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 3 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member self.TypeExtensionMethodIsPascalCase() = 
-        parse """
+    member this.TypeExtensionMethodIsPascalCase() = 
+        this.Parse """
 module program
 
 type MyClass() =
@@ -722,11 +708,11 @@ type MyClass() =
 type MyClass with 
     member this.Goat() = 200"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 8 && r.StartColumn = 16))
+        Assert.IsFalse(this.ErrorExistsAt(8, 16))
 
     [<Test>]
-    member self.TypeExtensionMethodIsCamelCase() = 
-        parse """
+    member this.TypeExtensionMethodIsCamelCase() = 
+        this.Parse """
 module program
 
 type MyClass() =
@@ -735,11 +721,11 @@ type MyClass() =
 type MyClass with 
     member this.goat() = 200"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 8 && r.StartColumn = 16))
+        Assert.IsTrue(this.ErrorExistsAt(8, 16))
 
     [<Test>]
-    member self.TypeExtensionTypeIsCamelCase() = 
-        parse """
+    member this.TypeExtensionTypeIsCamelCase() = 
+        this.Parse """
 module program
 
 type myClass() =
@@ -748,11 +734,11 @@ type myClass() =
 type myClass with 
     member this.Goat() = 200"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 7 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(7, 5))
 
     [<Test>]
-    member self.TypeExtensionTypeIsPascalCase() = 
-        parse """
+    member this.TypeExtensionTypeIsPascalCase() = 
+        this.Parse """
 module program
 
 type MyClass() =
@@ -761,44 +747,116 @@ type MyClass() =
 type MyClass with 
     member this.Goat() = 200"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 7 && r.StartColumn = 5))
+        Assert.IsFalse(this.ErrorExistsAt(7, 5))
         
     [<Test>]
-    member self.LiteralIsPascalCase() =
-        parse """
+    member this.LiteralIsPascalCase() =
+        this.Parse """
 module program
 
 [<Literal>]
 let Cat = 5"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        Assert.IsFalse(this.ErrorExistsAt(5, 4))
         
     [<Test>]
-    member self.LiteralIsCamelCase() =
-        parse """
+    member this.LiteralIsCamelCase() =
+        this.Parse """
 module program
 
 [<Literal>]
 let cat = 5"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
         
     [<Test>]
-    member self.FullyQualifiedLiteralIsPascalCase() =
-        parse """
+    member this.FullyQualifiedLiteralIsPascalCase() =
+        this.Parse """
 module program
 
 [<Microsoft.FSharp.Core.Literal>]
 let Cat = 5"""
 
-        Assert.IsFalse(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        Assert.IsFalse(this.ErrorExistsAt(5, 4))
         
     [<Test>]
-    member self.FullyQualifiedLiteralIsCamelCase() =
-        parse """
+    member this.FullyQualifiedLiteralIsCamelCase() =
+        this.Parse """
 module program
 
 [<Microsoft.FSharp.Core.Literal>]
 let cat = 5"""
 
-        Assert.IsTrue(errorRanges.Any(fun (r, _) -> r.StartLine = 5 && r.StartColumn = 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+                
+    [<Test>]
+    member this.CamelCaseLetBindingInType() =
+        this.Parse """
+module program
+
+type Dog() =
+    let cat() = ()
+
+    member this.Goat() = ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+                
+    [<Test>]
+    member this.PascalCaseLetBindingInType() =
+        this.Parse """
+module program
+
+type Dog() =
+    let Cat() = ()
+
+    member this.Goat() = ()"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+                
+    [<Test>]
+    member this.PascalCaseLetBindingInMethod() =
+        this.Parse """
+module program
+
+type Cat() =
+  member this.ContainsBinding() =
+    let Goat = 0
+    ()"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 8))
+                
+    [<Test>]
+    member this.CamelCaseLetBindingInMethod() =
+        this.Parse """
+module program
+
+type Cat() =
+  member this.ContainsBinding() =
+    let goat = 0
+    ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(6, 8))
+                
+    [<Test>]
+    member this.PascalCaseTypeAbbreviationOfLiteral() =
+        this.Parse """
+module program
+
+type Abbreviation = LiteralAttribute
+
+[<Abbreviation>]
+let Dog = 6"""
+
+        Assert.IsFalse(this.ErrorExistsAt(7, 4))
+                
+    [<Test>]
+    member this.CamelCaseTypeAbbreviationOfLiteral() =
+        this.Parse """
+module program
+
+type Abbreviation = LiteralAttribute
+
+[<Abbreviation>]
+let dog = 6"""
+
+        Assert.IsTrue(this.ErrorExistsAt(7, 4))

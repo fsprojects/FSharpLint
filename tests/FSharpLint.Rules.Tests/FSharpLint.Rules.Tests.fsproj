@@ -47,7 +47,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestRuleBase.fs" />
     <Compile Include="TestNameConventionRules.fs" />
+    <Compile Include="TestFavourIgnoreOverLetWildRules.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FSharpLint.Framework\FSharpLint.Framework.fsproj">

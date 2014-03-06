@@ -95,7 +95,7 @@ module Ast =
                         | SynMemberDefn.ImplicitCtor(access, _, _, _, _)
                         | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _) ->
                                 isPublic (isSynAccessPublic access) isBinding path
-                        | _ -> true
+                        | _ -> isPublic publicSoFar isBinding path
                     | ExceptionRepresentation(exceptionRepresentation) ->
                         match exceptionRepresentation with
                             | SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _) ->
@@ -114,8 +114,12 @@ module Ast =
                     | InterfaceImplementation(_)
                     | ModuleDeclaration(_)
                     | SimplePattern(_)
-                    | SimplePatterns(_) -> isPublic publicSoFar isBinding path
-                    | TypeDefinition(_)
+                    | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
+                    | TypeDefinition(_) -> 
+                        if isBinding then
+                            false
+                        else
+                            isPublic publicSoFar isBinding path
                     | Expression(_) ->
                         if isBinding then
                             false
