@@ -29,6 +29,23 @@ module Configuration =
                 <Rule Name="InterfaceNamesMustBeginWithI">
                     <RuleSettings>
                         <BooleanProperty Name="Enabled">True</BooleanProperty>
+                        <BooleanProperty Name="Enabled">True</BooleanProperty>
+                        <StringProperty Name="Enabled">True</StringProperty>
+                    </RuleSettings>
+                </Rule>
+                <Rule Name="InterfaceNamesMustBeginWithI">
+                    <RuleSettings>
+                        <BooleanProperty Name="Enabled">True</BooleanProperty>
+                    </RuleSettings>
+                </Rule>
+            </Rules>
+            <AnalyzerSettings />
+        </Analyzer>
+        <Analyzer AnalyzerId="FSharpLint.NamingRules">
+            <Rules>
+                <Rule Name="InterfaceNamesMustBeginWithI">
+                    <RuleSettings>
+                        <BooleanProperty Name="Enabled">True</BooleanProperty>
                     </RuleSettings>
                 </Rule>
             </Rules>
@@ -37,4 +54,49 @@ module Configuration =
     </Analyzers>
 </FSharpLintSettings>""">
 
-    let configuration file = Config.Parse(file)
+    type RuleSetting =
+        | Enabled of bool
+
+    type Rule = 
+        {
+            Settings: RuleSetting list
+        }
+
+        member this.IsEnabled() =
+            let isSettingEnabled = function
+                | Enabled(true) -> true
+                | _ -> false
+
+            this.Settings |> List.find isSettingEnabled
+
+    let private parseRule (rule:Config.DomainTypes.Rule) =
+        [
+            {
+                Settings =
+                    [
+                        for setting in rule.RuleSettings.GetBooleanProperties() do
+                            match setting.Name with
+                                | "Enabled" -> yield Enabled(setting.Value)
+                                | _ -> ()
+                    ]
+            }
+        ]
+
+    let private getRules (analyser:Config.DomainTypes.Analyzer) =
+        [ 
+            for rule in analyser.Rules.GetRules() do 
+                yield (rule.Name, parseRule rule) 
+        ]
+            |> Map.ofList
+
+    /// Parse a configuration file.
+    let configuration file = 
+        let config = Config.Parse(file)
+        [ 
+            for analyser in config.Analyzers.GetAnalyzers() do 
+                yield (analyser.AnalyzerId, getRules analyser) 
+        ]
+            |> Map.ofList
+
+    let loadDefaultConfiguration () =
+        System.IO.File.ReadAllText("DefaultConfiguration.FSharpLint") |> configuration

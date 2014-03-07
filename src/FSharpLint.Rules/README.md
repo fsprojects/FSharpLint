@@ -1,0 +1,1 @@
+﻿# FSharpLint Rules

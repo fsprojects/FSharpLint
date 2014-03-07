@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FSharpLint.VisualStudioAddin</name>
+    </assembly>
+    <members>
+        <member name="M:FSharpLint.VisualStudioAddin.Connect.QueryStatus(System.String,EnvDTE.vsCommandStatusTextWanted,EnvDTE.vsCommandStatus@,System.Object@)">
+            <summary>Implements the QueryStatus method of the IDTCommandTarget interface. This is called when the command's availability is updated</summary>
+            <param term='commandName'>The name of the command to determine state for.</param>
+            <param term='neededText'>Text that is needed for the command.</param>
+            <param term='status'>The state of the command in the user interface.</param>
+            <param term='commandText'>Text requested by the neededText parameter.</param>
+            <seealso class='Exec' />
+        </member>
+        <member name="M:FSharpLint.VisualStudioAddin.Connect.Exec(System.String,EnvDTE.vsCommandExecOption,System.Object@,System.Object@,System.Boolean@)">
+            <summary>Implements the Exec method of the IDTCommandTarget interface. This is called when the command is invoked.</summary>
+            <param term='commandName'>The name of the command to execute.</param>
+            <param term='executeOption'>Describes how the command should be run.</param>
+            <param term='varIn'>Parameters passed from the caller to the command handler.</param>
+            <param term='varOut'>Parameters passed from the command handler to the caller.</param>
+            <param term='handled'>Informs the caller if the command was handled or not.</param>
+            <seealso class='Exec' />
+        </member>
+    </members>
+</doc>

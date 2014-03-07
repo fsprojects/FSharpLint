@@ -72,7 +72,7 @@ module ProjectFile =
         ] @ extraSearchPaths |> List.toArray
 
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
-    let resolveReferences (projectInstance:ProjectInstance) outputPath references =
+    let private resolveReferences (projectInstance:ProjectInstance) outputPath references =
         let resolve = ResolveAssemblyReference()
         resolve.BuildEngine <- stubBuildEngine
 
@@ -166,16 +166,26 @@ module ProjectFile =
                    for r in projectFileValues.ProjectReferences do yield "-r:" + r
                 |])
 
+        let errors = System.Collections.Generic.List<ErrorHandling.Error>()
+
         let parseFile file =
             let input = System.IO.File.ReadAllText(file);
 
             let postError range error =
+                errors.Add(
+                    {
+                        Info = error
+                        Range = range
+                        Input = input
+                    })
+            (*
                 ErrorHandling.errorHandler.Post(
                     {
                         Info = error
                         Range = range
                         Input = input
                     })
+                    *)
 
             let visitors = [
                 FSharpLint.Rules.NameConventions.visitor postError
@@ -191,3 +201,5 @@ module ProjectFile =
         with 
             | FSharpLint.Framework.Ast.ParseException(message) -> 
                 System.Console.WriteLine(message)
+
+        errors

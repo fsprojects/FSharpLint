@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Web
+# Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework.Tests", "tests\FSharpLint.Framework.Tests\FSharpLint.Framework.Tests.fsproj", "{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}"
@@ -17,6 +17,13 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework", "src\FSharpLint.Framework\FSharpLint.Framework.fsproj", "{94220BA0-E632-4F4F-8F6D-A11A5AA52636}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Rules.Tests", "tests\FSharpLint.Rules.Tests\FSharpLint.Rules.Tests.fsproj", "{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41975DF6-F469-4A42-80F6-521C9061659D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
