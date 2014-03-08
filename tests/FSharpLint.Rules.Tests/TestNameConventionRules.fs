@@ -561,6 +561,16 @@ match 4 with
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
+    member this.PatternFunctionValidPartialActivePattern() = 
+        this.Parse """
+module program
+let (|Even|_|) = function
+| i when i % 2 = 0 -> Some(i)
+| _ -> None"""
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 5))
+
+    [<Test>]
     member this.ActivePatternContainsUnderscore() = 
         this.Parse """
 module program

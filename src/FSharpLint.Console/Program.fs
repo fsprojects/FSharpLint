@@ -26,6 +26,14 @@ module goat
 
 exception SomeException of string
 
+let (|Dog|_|) = function
+    | "" -> Some(1)
+    | _ -> None
+
+let (|Even|Odd|) = function
+    | i when i % 2 = 0 -> Even
+    | _ -> Odd
+
 let Goat2() =
     let Cat = 5
 

@@ -226,7 +226,7 @@ module NameConventions =
                 let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
                 postError identifier.idRange error
 
-    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) =
+    let isNamedPatternActivePattern (checkFile:CheckFileResults) (identifier:Ident) =
         let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
 
         let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
@@ -239,7 +239,10 @@ module NameConventions =
                     | _ -> false
             | None -> false
 
-        if symbol |> isActivePattern then
+        symbol |> isActivePattern
+
+    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) =
+        if isNamedPatternActivePattern checkFile identifier then
             expectValidActivePatternDefinition postError identifier
         else
             expectCamelCase postError identifier
@@ -396,7 +399,10 @@ module NameConventions =
                                     Continue
                                 | _ -> Continue
                         | SynPat.Named(_, identifier, _, _, _) -> 
-                            expectNoUnderscore postError identifier
+                            if isNamedPatternActivePattern checkFile identifier then
+                                expectValidActivePatternDefinition postError identifier
+                            else
+                                expectNoUnderscore postError identifier
                             Continue
                         | _ -> Continue
                 | AstNode.SimplePattern(pattern) ->
