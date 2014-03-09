@@ -57,6 +57,10 @@ module Configuration =
     type RuleSetting =
         | Enabled of bool
 
+    let areSameRule lhs rhs =
+        match lhs, rhs with
+            | Enabled(_), Enabled(_) -> true
+
     type Rule = 
         {
             Settings: RuleSetting list
@@ -68,19 +72,17 @@ module Configuration =
                 | _ -> false
 
             this.Settings |> List.find isSettingEnabled
-
+        
     let private parseRule (rule:Config.DomainTypes.Rule) =
-        [
-            {
-                Settings =
-                    [
-                        for setting in rule.RuleSettings.GetBooleanProperties() do
-                            match setting.Name with
-                                | "Enabled" -> yield Enabled(setting.Value)
-                                | _ -> ()
-                    ]
-            }
-        ]
+        {
+            Settings =
+                [
+                    for setting in rule.RuleSettings.GetBooleanProperties() do
+                        match setting.Name with
+                            | "Enabled" -> yield Enabled(setting.Value)
+                            | _ -> ()
+                ]
+        }
 
     let private getRules (analyser:Config.DomainTypes.Analyzer) =
         [ 
@@ -98,5 +100,36 @@ module Configuration =
         ]
             |> Map.ofList
 
+    let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
+        [ 
+            for keyValuePair in oldMap do
+                if newMap |> Map.containsKey keyValuePair.Key then
+                    yield (keyValuePair.Key, overwriteValue keyValuePair.Value newMap.[keyValuePair.Key])
+                else
+                    yield (keyValuePair.Key, keyValuePair.Value)
+        ]
+            |> Map.ofList
+
+    let private overrideRule oldRule newRule =
+        {
+            Settings =
+                [
+                    for oldRule in oldRule.Settings do
+                        let rule = newRule.Settings |> List.tryFind (areSameRule oldRule)
+
+                        match rule with
+                            | Some(rule) -> yield rule
+                            | None -> yield oldRule
+                ]
+        }
+
+    let private overrideRules oldRules newRules =
+        overwriteMap oldRules newRules overrideRule
+
+    let overrideConfiguration configToOverride file =
+        let newAnalysers = configuration file
+
+        overwriteMap configToOverride newAnalysers overrideRules
+        
     let loadDefaultConfiguration () =
         System.IO.File.ReadAllText("DefaultConfiguration.FSharpLint") |> configuration
