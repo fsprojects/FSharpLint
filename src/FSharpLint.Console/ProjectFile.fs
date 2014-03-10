@@ -139,10 +139,21 @@ module ProjectFile =
             ProjectReferences = projectReferences |> Seq.toList
             FSharpFiles = getFSharpFiles projectInstance projectPath
         }
+
+    type ParserProgress =
+        | Starting of string
+        | ReachedEnd of string
+        | Failed of string
+
+        member this.Filename() =
+            match this with 
+                | Starting(f) 
+                | ReachedEnd(f)
+                | Failed(f) -> f
         
     /// <summary>Parses and runs the linter on all the files in a project.</summary>
     /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    let parseProject (projectFile:string) = 
+    let parseProject (projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
         let projectFileValues = getProjectFiles projectFile
 
         let checker = InteractiveChecker.Create()
@@ -172,20 +183,12 @@ module ProjectFile =
             let input = System.IO.File.ReadAllText(file);
 
             let postError range error =
-                errors.Add(
+                errorReceived.Invoke(
                     {
                         Info = error
                         Range = range
                         Input = input
                     })
-            (*
-                ErrorHandling.errorHandler.Post(
-                    {
-                        Info = error
-                        Range = range
-                        Input = input
-                    })
-                    *)
 
             let visitors = [
                 FSharpLint.Rules.NameConventions.visitor postError
@@ -194,7 +197,11 @@ module ProjectFile =
                 FSharpLint.Rules.XmlDocumentation.visitor postError
             ]
 
-            FSharpLint.Framework.Ast.parse checker projectOptions file input visitors |> ignore
+            progress.Invoke(Starting(file))
+
+            FSharpLint.Framework.Ast.parse checker projectOptions file input visitors
+
+            progress.Invoke(ReachedEnd(file))
 
         try
             projectFileValues.FSharpFiles |> List.iter parseFile

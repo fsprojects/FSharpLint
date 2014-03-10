@@ -17,56 +17,46 @@ namespace FSharpLint.VisualStudioAddin
         private ErrorListProvider errorListProvider;
         private IList<ErrorTask> errorTasks;
         private SolutionEvents solutionEvents;
+        private AddIn addinInstance;
+
+        private const string CommandName = "FSharpLintRun";
 
         public void OnConnection(object application, ext_ConnectMode connectMode, object addInInst, ref System.Array a)
         {
             app = (DTE)application;
 
-            app.Events.BuildEvents.OnBuildDone += (f, s) => AddSampleErrors();
+            addinInstance = (AddIn)addInInst;
 
-            var addInInstance = (AddIn)addInInst;
-            if (connectMode == ext_ConnectMode.ext_cm_UISetup)
+            //app.Events.BuildEvents.OnBuildDone += (f, s) => AddErrors();
+
+            var commandName = addinInstance.ProgID + "." + CommandName;
+
+            EnvDTE.Command codeWindowCommand = null;
+
+            try
             {
-                object[] contextGUIDS = new object[] { };
-                Commands2 commands = (Commands2)app.Commands;
-                string toolsMenuName = "Tools";
-
-                Microsoft.VisualStudio.CommandBars.CommandBar menuBarCommandBar = ((Microsoft.VisualStudio.CommandBars.CommandBars)app.CommandBars)["MenuBar"];
-
-                CommandBarControl toolsControl = menuBarCommandBar.Controls[toolsMenuName];
-                CommandBarPopup toolsPopup = (CommandBarPopup)toolsControl;
-
-                try
-                {
-                    Command command = commands.AddNamedCommand2(
-                        addInInstance, 
-                        "FSharpLint",
-                        "FSharpLint", 
-                        "", 
-                        true, 
-                        59, 
-                        ref contextGUIDS, 
-                        (int)vsCommandStatus.vsCommandStatusSupported + (int)vsCommandStatus.vsCommandStatusEnabled, 
-                        (int)vsCommandStyle.vsCommandStylePictAndText, 
-                        vsCommandControlType.vsCommandControlTypeButton);
-
-                    if ((command != null) && (toolsPopup != null))
-                    {
-                        command.AddControl(toolsPopup.CommandBar, 1);
-                    }
-
-                    CommandBar standardCommandBar = ((CommandBars)app.CommandBars)["Standard"];
-                    CommandBarButton standardCommandBarButton = (CommandBarButton)command.AddControl(
-                                standardCommandBar, standardCommandBar.Controls.Count + 1);
-                    standardCommandBarButton.Style = MsoButtonStyle.msoButtonIcon;
-                }
-                catch (System.ArgumentException)
-                {
-                    // If we are here, then the exception is probably because a command with that name
-                    // already exists. If so there is no need to recreate the command and we can 
-                    // safely ignore the exception.
-                }
+                codeWindowCommand = app.Commands.Item(commandName);
             }
+            catch (Exception ignore) { }
+
+            if (codeWindowCommand == null)
+            {
+                codeWindowCommand = app.Commands.AddNamedCommand(addinInstance, CommandName,
+                    "Run FSharpLint", "Runs FSharpLint on all open projects.", true, 18, 
+                    null, 
+                    (int)(vsCommandStatus.vsCommandStatusSupported | vsCommandStatus.vsCommandStatusEnabled));
+            }
+
+            var codeWindow = ((CommandBars)app.CommandBars)["Code Window"];
+            var tools = ((CommandBars)app.CommandBars)["Tools"];
+
+            var button = (CommandBarControl)codeWindowCommand.AddControl(codeWindow);
+            button.Caption = "Run FSharpLint";
+            button.TooltipText = "Runs FSharpLint on all open projects.";
+
+            var toolsButton = (CommandBarControl)codeWindowCommand.AddControl(tools);
+            button.Caption = "Run FSharpLint";
+            button.TooltipText = "Runs FSharpLint on all open projects.";
 
             if (connectMode == ext_ConnectMode.ext_cm_AfterStartup)
             {
@@ -75,16 +65,16 @@ namespace FSharpLint.VisualStudioAddin
             }
         }
 
-        public void OnDisconnection(ext_DisconnectMode disconnectMode, ref System.Array a)
+        public void OnDisconnection(ext_DisconnectMode disconnectMode, ref Array a)
         {
             RemoveTasks();
         }
 
-        public void OnAddInsUpdate(ref System.Array a) { }
+        public void OnAddInsUpdate(ref Array a) { }
 
-        public void OnBeginShutdown(ref System.Array a) { }
+        public void OnBeginShutdown(ref Array a) { }
 
-        public void OnStartupComplete(ref System.Array a)
+        public void OnStartupComplete(ref Array a)
         {
             solutionEvents = app.Events.SolutionEvents;
 
@@ -108,35 +98,52 @@ namespace FSharpLint.VisualStudioAddin
             errorListProvider.Show();
         }
 
-        private void AddSampleErrors()
+        private void OutputProgress(Console.ProjectFile.ParserProgress progress)
+        {
+            var outputPane = ((DTE2)this.app).ToolWindows.OutputWindow.ActivePane;
+
+            if (progress.IsStarting)
+                outputPane.OutputString("Started parsing ");
+            else if (progress.IsReachedEnd)
+                outputPane.OutputString("Finished parsing ");
+            else
+                outputPane.OutputString("Failed to parse ");
+
+            outputPane.OutputString(progress.Filename() + "\n");
+        }
+
+        private Action<Console.ErrorHandling.Error> AddError(EnvDTE.Project project)
+        {
+            return error =>
+                {
+                    var range = error.Range;
+
+                    AddErrorToErrorList(
+                        project,
+                        range.FileName,
+                        error.Info,
+                        TaskErrorCategory.Warning,
+                        range.StartLine,
+                        range.StartColumn);
+                };
+        }
+
+        private void AddErrors()
         {
             new System.Threading.Tasks.Task(() =>
             {
-                if (app.Solution.IsOpen)
+                if (app.Solution.IsOpen && app.Solution.Projects.Count > 0)
                 {
-                    if (app.Solution.Projects.Count > 0)
+                    for (var i = 1; i <= app.Solution.Projects.Count; i++)
                     {
-                        for (var i = 1; i < app.Solution.Projects.Count; i++)
+                        var project = app.Solution.Projects.Item(i);
+
+                        if (System.IO.Path.GetExtension(project.FileName) == ".fsproj")
                         {
-                            var project = app.Solution.Projects.Item(i);
-
-                            if (System.IO.Path.GetExtension(project.FileName) == ".fsproj")
-                            {
-                                var errors = FSharpLint.Console.ProjectFile.parseProject(project.FileName);
-
-                                foreach (var error in errors)
-                                {
-                                    var range = error.Range;
-
-                                    AddErrorToErrorList(
-                                        project,
-                                        range.FileName,
-                                        error.Info,
-                                        TaskErrorCategory.Warning,
-                                        range.StartLine,
-                                        range.StartColumn);
-                                }
-                            }
+                            FSharpLint.Console.ProjectFile.parseProject(
+                                project.FileName,
+                                OutputProgress,
+                                AddError(project));
                         }
                     }
                 }
@@ -147,10 +154,9 @@ namespace FSharpLint.VisualStudioAddin
            string sErrorText, TaskErrorCategory eTaskErrorCategory, int iLine,
            int iColumn)
         {
-            IVsHierarchy objVsHierarchy;
-
             var objIVsSolution = (IVsSolution)GetService(typeof(SVsSolution));
 
+            IVsHierarchy objVsHierarchy;
             var project = objIVsSolution.GetProjectOfUniqueName(objProject.UniqueName, out objVsHierarchy);
 
             ErrorHandler.ThrowOnFailure(project);
@@ -193,24 +199,22 @@ namespace FSharpLint.VisualStudioAddin
         {
             if (errorTasks != null)
             {
-                for (var i = errorTasks.Count - 1; i >= 0; i--)
+                foreach (var errorTask in errorTasks)
                 {
-                    var objErrorTask = errorTasks[i];
+                    object project;
 
-                    object objObject;
-
-                    ErrorHandler.ThrowOnFailure(objErrorTask.HierarchyItem.GetProperty(
+                    ErrorHandler.ThrowOnFailure(errorTask.HierarchyItem.GetProperty(
                         VSConstants.VSITEMID_ROOT,
                         (int)__VSHPROPID.VSHPROPID_ExtObject,
-                        out objObject));
+                        out project));
 
-                    if (objObject is Project)
+                    if (project is Project)
                     {
-                        var objErrorTaskProject = (Project)objObject;
+                        var objErrorTaskProject = (Project)project;
 
                         if (objErrorTaskProject.UniqueName == objProject.UniqueName)
                         {
-                            RemoveTask(objErrorTask);
+                            RemoveTask(errorTask);
                         }
                     }
                 }
@@ -228,59 +232,39 @@ namespace FSharpLint.VisualStudioAddin
             }
         }
 
-        private void RemoveTask(ErrorTask objErrorTask)
+        private void RemoveTask(ErrorTask errorTask)
         {
             try
             {
                 errorListProvider.SuspendRefresh();
 
-                objErrorTask.Navigate -= ErrorTaskNavigate;
+                errorTask.Navigate -= ErrorTaskNavigate;
 
-                errorTasks.Remove(objErrorTask);
+                errorTasks.Remove(errorTask);
 
-                errorListProvider.Tasks.Remove(objErrorTask);
+                errorListProvider.Tasks.Remove(errorTask);
             }
-            catch (Exception e)
-            { }
             finally
             {
-
                 errorListProvider.ResumeRefresh();
             }
         }
-
-        /// <summary>Implements the QueryStatus method of the IDTCommandTarget interface. This is called when the command's availability is updated</summary>
-        /// <param term='commandName'>The name of the command to determine state for.</param>
-        /// <param term='neededText'>Text that is needed for the command.</param>
-        /// <param term='status'>The state of the command in the user interface.</param>
-        /// <param term='commandText'>Text requested by the neededText parameter.</param>
-        /// <seealso class='Exec' />
-        public void QueryStatus(string commandName, vsCommandStatusTextWanted neededText, ref vsCommandStatus status, ref object commandText)
+       
+        public void Exec(string CmdName, vsCommandExecOption ExecuteOption, ref object VariantIn, ref object VariantOut, ref bool Handled)
         {
-            if (neededText == vsCommandStatusTextWanted.vsCommandStatusTextWantedNone)
+            if (CmdName == addinInstance.ProgID + "." + CommandName)
             {
-                if (commandName == "dog.Connect.dog")
-                {
-                    status = (vsCommandStatus)vsCommandStatus.vsCommandStatusSupported | vsCommandStatus.vsCommandStatusEnabled;
-                }
+                AddErrors();
             }
         }
 
-        /// <summary>Implements the Exec method of the IDTCommandTarget interface. This is called when the command is invoked.</summary>
-        /// <param term='commandName'>The name of the command to execute.</param>
-        /// <param term='executeOption'>Describes how the command should be run.</param>
-        /// <param term='varIn'>Parameters passed from the caller to the command handler.</param>
-        /// <param term='varOut'>Parameters passed from the command handler to the caller.</param>
-        /// <param term='handled'>Informs the caller if the command was handled or not.</param>
-        /// <seealso class='Exec' />
-        public void Exec(string commandName, vsCommandExecOption executeOption, ref object varIn, ref object varOut, ref bool handled)
+        public void QueryStatus(string CmdName, vsCommandStatusTextWanted NeededText, ref vsCommandStatus StatusOption, ref object CommandText)
         {
-            handled = false;
-            if (executeOption == vsCommandExecOption.vsCommandExecOptionDoDefault)
+            if (NeededText == vsCommandStatusTextWanted.vsCommandStatusTextWantedNone)
             {
-                if (commandName == "dog.Connect.dog")
+                if (CmdName == addinInstance.ProgID + "." + CommandName)
                 {
-                    handled = true;
+                    StatusOption = (int)vsCommandStatus.vsCommandStatusSupported + vsCommandStatus.vsCommandStatusEnabled;
                 }
             }
         }

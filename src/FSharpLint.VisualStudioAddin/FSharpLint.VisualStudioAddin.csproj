@@ -47,8 +47,9 @@
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
-    <Reference Include="fsharplint">
-      <HintPath>..\src\FSharpLint.Console\bin\fsharplint.exe</HintPath>
+    <Reference Include="fsharplint, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\FSharpLint.Console\bin\fsharplint.exe</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
