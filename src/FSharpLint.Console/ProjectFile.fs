@@ -152,8 +152,11 @@ module ProjectFile =
                 | Failed(f) -> f
         
     /// <summary>Parses and runs the linter on all the files in a project.</summary>
+    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
     /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    let parseProject (projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
+    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
+    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
+    let parseProject (finishEarly, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
         let projectFileValues = getProjectFiles projectFile
 
         let checker = InteractiveChecker.Create()
@@ -180,28 +183,34 @@ module ProjectFile =
         let errors = System.Collections.Generic.List<ErrorHandling.Error>()
 
         let parseFile file =
-            let input = System.IO.File.ReadAllText(file);
+            if not <| finishEarly() then
+                let input = System.IO.File.ReadAllText(file)
 
-            let postError range error =
-                errorReceived.Invoke(
-                    {
-                        Info = error
-                        Range = range
-                        Input = input
-                    })
+                let postError range error =
+                    errorReceived.Invoke(
+                        {
+                            Info = error
+                            Range = range
+                            Input = input
+                        })
 
-            let visitors = [
-                FSharpLint.Rules.NameConventions.visitor postError
-                FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
-                FSharpLint.Rules.FunctionParametersLength.visitor postError
-                FSharpLint.Rules.XmlDocumentation.visitor postError
-            ]
+                let visitors = [
+                    FSharpLint.Rules.NameConventions.visitor postError
+                    FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
+                    FSharpLint.Rules.FunctionParametersLength.visitor postError
+                    FSharpLint.Rules.XmlDocumentation.visitor postError
+                ]
 
-            progress.Invoke(Starting(file))
+                progress.Invoke(Starting(file))
 
-            FSharpLint.Framework.Ast.parse checker projectOptions file input visitors
+                try
+                    FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
+                with 
+                    | FSharpLint.Framework.Ast.ParseException(message) -> 
+                        progress.Invoke(Failed(file))
+                        reraise()
 
-            progress.Invoke(ReachedEnd(file))
+                progress.Invoke(ReachedEnd(file))
 
         try
             projectFileValues.FSharpFiles |> List.iter parseFile

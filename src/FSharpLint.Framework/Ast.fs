@@ -477,8 +477,10 @@ module Ast =
             | ContinueWithVisitorsForChildren(getVisitorForChild) -> 
                 node.ChildNodes |> List.mapi (fun i child -> getVisitorForChild i child)
         
-    let rec walk breadcrumbs visitors node = 
-        let walk = walk (node :: breadcrumbs)
+    /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
+    /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
+    let rec walk finishEarly breadcrumbs visitors node = 
+        let walk = walk finishEarly (node :: breadcrumbs)
 
         let children = traverseNode node
 
@@ -486,23 +488,24 @@ module Ast =
 
         let visitorsForChildren = visitors |> List.map (visit currentNode)
 
-        children |> List.iteri (fun i child ->
-            let visitors = 
-                visitorsForChildren 
-                    |> List.map (fun v -> v.[i])
-                    |> List.choose id
+        if not <| finishEarly() then
+            children |> List.iteri (fun i child ->
+                let visitors = 
+                    visitorsForChildren 
+                        |> List.map (fun v -> v.[i])
+                        |> List.choose id
 
-            walk visitors child)
+                walk visitors child)
 
-    let walkFile visitors = function
+    let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
-            moduleOrNamespaces |> List.iter (fun x -> walk [] visitors (ModuleOrNamespace(x)))
+            moduleOrNamespaces |> List.iter (fun x -> walk finishEarly [] visitors (ModuleOrNamespace(x)))
         | ParsedInput.SigFile _ -> ()
 
     exception ParseException of string
 
     /// Parse a file.
-    let parse (checker:InteractiveChecker) projectOptions file input visitors =
+    let parse finishEarly (checker:InteractiveChecker) projectOptions file input visitors =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions)
         match parseFileResults.ParseTree with
         | Some tree -> 
@@ -513,7 +516,7 @@ module Ast =
             match checkFileResults with
             | CheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
-                walkFile visitors tree
+                walkFile finishEarly visitors tree
             | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
         | None -> 
             let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
@@ -527,4 +530,4 @@ module Ast =
         
         let projectOptions = checker.GetProjectOptionsFromScript(file, input)
 
-        parse checker projectOptions file input visitors |> ignore
+        parse (fun _ -> true) checker projectOptions file input visitors |> ignore
