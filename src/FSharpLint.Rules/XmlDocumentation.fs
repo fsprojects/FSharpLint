@@ -28,16 +28,14 @@ module XmlDocumentation =
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
-        | XmlDoc(lines) when Array.length lines = 0 -> true
-        | _ -> false
+            | XmlDoc(lines) when Array.length lines = 0 -> true
+            | _ -> false
 
     let visitor postError (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
-                match xmlDoc.ToXmlDoc() with
-                    | XmlDoc(lines) when Array.length lines = 0 -> 
-                        postError range "Expected exception type to have xml documentation."
-                    | _ -> ()
+                if isPreXmlDocEmpty xmlDoc then
+                    postError range "Expected exception type to have xml documentation."
             | _ -> ()
 
         Continue

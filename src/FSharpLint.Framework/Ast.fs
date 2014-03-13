@@ -530,4 +530,4 @@ module Ast =
         
         let projectOptions = checker.GetProjectOptionsFromScript(file, input)
 
-        parse (fun _ -> true) checker projectOptions file input visitors |> ignore
+        parse (fun _ -> false) checker projectOptions file input visitors |> ignore
