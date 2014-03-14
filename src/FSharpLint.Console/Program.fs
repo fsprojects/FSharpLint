@@ -20,6 +20,9 @@ namespace FSharpLint.Console
 
 module Program =
 
+    open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.Configuration
+
     let parseLiteralString () = 
         let input = """
 module goat
@@ -49,17 +52,25 @@ let Dog = 7"""
                     Input = input
                 })
 
+        let config = Map.ofList [ ("", { Rules = Map.ofList [ ("", { Settings = [] }) ] }) ]
+
+        let visitorInfo = 
+            {
+                Config = config
+                PostError = postError
+            }
+
         let visitors = [
-            FSharpLint.Rules.NameConventions.visitor postError
-            FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
-            FSharpLint.Rules.FunctionParametersLength.visitor postError
-            FSharpLint.Rules.XmlDocumentation.visitor postError
+            FSharpLint.Rules.NameConventions.visitor visitorInfo
+            FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
+            FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
+            FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
         ]
 
         try
-            FSharpLint.Framework.Ast.parseInput input visitors |> ignore
+            parseInput input visitors |> ignore
         with 
-            | :? FSharpLint.Framework.Ast.ParseException as e -> 
+            | :? ParseException as e -> 
                 System.Console.WriteLine(e.Message)
 
     let help () =

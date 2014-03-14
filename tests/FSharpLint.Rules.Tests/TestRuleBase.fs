@@ -22,6 +22,7 @@ open NUnit.Framework
 open System.Linq
 open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
+open FSharpLint.Framework.Configuration
 
 [<AbstractClass>]
 type TestRuleBase(visitor) =
@@ -30,7 +31,9 @@ type TestRuleBase(visitor) =
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
-    member this.Parse input = parseInput input [visitor postError]
+    let config = Map.ofList [ ("", { Rules = Map.ofList [ ("", { Settings = [] }) ] }) ]
+
+    member this.Parse input = parseInput input [visitor { PostError = postError; Config = config }]
 
     member this.ErrorExistsAt(startLine, startColumn) =
         errorRanges.Any(fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)

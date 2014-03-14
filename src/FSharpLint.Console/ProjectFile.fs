@@ -35,6 +35,10 @@ module ProjectFile =
     open Microsoft.Build.Framework
     open Microsoft.Build.BuildEngine
     open Microsoft.FSharp.Compiler.SourceCodeServices 
+    open FSharpLint.Framework.Configuration
+
+    [<Literal>]
+    let SettingsFileName = "Settings.FSharpLint"
     
     /// An instance of the IBuildEngine is required for ResolveAssemblyReference.
     /// We don't need it to do anything.
@@ -182,6 +186,16 @@ module ProjectFile =
 
         let errors = System.Collections.Generic.List<ErrorHandling.Error>()
 
+        let config = loadDefaultConfiguration()
+        
+        let projectConfigPath = System.IO.Path.GetDirectoryName(projectFile)
+
+        let config = 
+            if projectConfigPath <> null && System.IO.File.Exists(projectConfigPath + "/" + SettingsFileName) then
+                overrideConfiguration config (projectConfigPath + "/" + SettingsFileName)
+            else
+                config
+
         let parseFile file =
             if not <| finishEarly() then
                 let input = System.IO.File.ReadAllText(file)
@@ -194,11 +208,17 @@ module ProjectFile =
                             Input = input
                         })
 
+                let visitorInfo = 
+                    {
+                        FSharpLint.Framework.Ast.Config = config
+                        FSharpLint.Framework.Ast.PostError = postError
+                    }
+
                 let visitors = [
-                    FSharpLint.Rules.NameConventions.visitor postError
-                    FSharpLint.Rules.FavourIgnoreOverLetWild.visitor postError
-                    FSharpLint.Rules.FunctionParametersLength.visitor postError
-                    FSharpLint.Rules.XmlDocumentation.visitor postError
+                    FSharpLint.Rules.NameConventions.visitor visitorInfo
+                    FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
+                    FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
+                    FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
                 ]
 
                 progress.Invoke(Starting(file))

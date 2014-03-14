@@ -32,7 +32,7 @@ module FunctionParametersLength =
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
-    let visitor postError (checkFile:CheckFileResults) astNode = 
+    let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.Pattern(pattern) ->
                 match pattern with
@@ -42,7 +42,7 @@ module FunctionParametersLength =
                         match constructorArguments with
                             | SynConstructorArgs.Pats(patterns) when List.length patterns >= MaxParameters -> 
                                 let failedPattern = patterns.[MaxParameters - 1]
-                                postError failedPattern.Range (error MaxParameters)
+                                visitorInfo.PostError failedPattern.Range (error MaxParameters)
                             | _ -> ()
                     | _ -> ()
             | _ -> ()

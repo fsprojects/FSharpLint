@@ -72,6 +72,8 @@ module Configuration =
                 | _ -> false
 
             this.Settings |> List.find isSettingEnabled
+
+    type Analyser = { Rules: Map<string, Rule> }
         
     let private parseRule (rule:Config.DomainTypes.Rule) =
         {
@@ -96,7 +98,7 @@ module Configuration =
         let config = Config.Parse(file)
         [ 
             for analyser in config.Analyzers.GetAnalyzers() do 
-                yield (analyser.AnalyzerId, getRules analyser) 
+                yield (analyser.AnalyzerId, { Rules = getRules analyser }) 
         ]
             |> Map.ofList
 
@@ -124,7 +126,7 @@ module Configuration =
         }
 
     let private overrideRules oldRules newRules =
-        overwriteMap oldRules newRules overrideRule
+        { Rules = overwriteMap oldRules.Rules newRules.Rules overrideRule }
 
     let overrideConfiguration configToOverride file =
         let newAnalysers = configuration file

@@ -307,8 +307,8 @@ module NameConventions =
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
-    let rec visitor postError (checkFile:CheckFileResults) astNode = 
-        let expectCamelCase, expectPascalCase = expectCamelCase postError, expectPascalCase postError
+    let rec visitor visitorInfo checkFile astNode = 
+        let expectCamelCase, expectPascalCase = expectCamelCase visitorInfo.PostError, expectPascalCase visitorInfo.PostError
 
         match astNode.Node with
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, _, _, _, _, _)) -> 
@@ -324,10 +324,10 @@ module NameConventions =
                 expectPascalCase identifier
                 Continue
             | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
-                checkComponentInfo postError checkFile identifier
+                checkComponentInfo visitorInfo.PostError checkFile identifier
                 Continue
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
-                checkException postError checkFile unionCase
+                checkException visitorInfo.PostError checkFile unionCase
                 Continue
             | AstNode.Expression(expr) ->
                 match expr with
@@ -344,9 +344,9 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        checkLongIdentPattern postError checkFile longIdentifier identifier
+                        checkLongIdentPattern visitorInfo.PostError checkFile longIdentifier identifier
                     | SynPat.Named(_, identifier, _, _, _) -> 
-                        checkNamedPattern postError checkFile identifier
+                        checkNamedPattern visitorInfo.PostError checkFile identifier
                     | _ -> ()
                 Continue
             | AstNode.SimplePattern(pattern) ->
@@ -370,14 +370,14 @@ module NameConventions =
                             let getVisitorForChild i child =
                                 match child with
                                     | Pattern(_) ->
-                                        Some(bindingPatternVisitor postError checkFile)
+                                        Some(bindingPatternVisitor visitorInfo checkFile)
                                     | _ -> 
-                                        Some(visitor postError checkFile)
+                                        Some(visitor visitorInfo checkFile)
 
                             ContinueWithVisitorsForChildren(getVisitorForChild)
             | _ -> Continue
     and 
-        bindingPatternVisitor postError (checkFile:CheckFileResults) astNode = 
+        bindingPatternVisitor visitorInfo checkFile astNode = 
             match astNode.Node with
                 | AstNode.Pattern(pattern) ->
                     match pattern with
@@ -386,29 +386,29 @@ module NameConventions =
 
                             match longIdentPatternType longIdentifier identifier checkFile with
                                 | Member when lastIdent.idText <> "new" -> 
-                                    expectPascalCase postError lastIdent
+                                    expectPascalCase visitorInfo.PostError lastIdent
                                     Continue
                                 | ValueOrFunction when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
-                                    expectNoUnderscore postError lastIdent
-                                    ContinueWithVisitor(visitor postError checkFile)
+                                    expectNoUnderscore visitorInfo.PostError lastIdent
+                                    ContinueWithVisitor(visitor visitorInfo checkFile)
                                 | ValueOrFunction -> 
-                                    expectCamelCase postError lastIdent
+                                    expectCamelCase visitorInfo.PostError lastIdent
                                     Continue
                                 | ActivePatternDefinition -> 
-                                    expectValidActivePatternDefinition postError lastIdent
+                                    expectValidActivePatternDefinition visitorInfo.PostError lastIdent
                                     Continue
                                 | _ -> Continue
                         | SynPat.Named(_, identifier, _, _, _) -> 
                             if isNamedPatternActivePattern checkFile identifier then
-                                expectValidActivePatternDefinition postError identifier
+                                expectValidActivePatternDefinition visitorInfo.PostError identifier
                             else
-                                expectNoUnderscore postError identifier
+                                expectNoUnderscore visitorInfo.PostError identifier
                             Continue
                         | _ -> Continue
                 | AstNode.SimplePattern(pattern) ->
                     match pattern with
                         | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
-                            expectNoUnderscore postError identifier
+                            expectNoUnderscore visitorInfo.PostError identifier
                         | _ -> ()
                     Continue
                 | _ -> Continue

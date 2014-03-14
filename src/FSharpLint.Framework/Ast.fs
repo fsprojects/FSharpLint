@@ -27,6 +27,12 @@ module Ast =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Tokeniser
 
+    type VisitorInfo =
+        {
+            Config: Map<string, Configuration.Analyser>
+            PostError: range -> string -> unit
+        }
+
     type AstNode =
         | Expression of SynExpr
         | Pattern of SynPat

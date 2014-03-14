@@ -31,11 +31,11 @@ module XmlDocumentation =
             | XmlDoc(lines) when Array.length lines = 0 -> true
             | _ -> false
 
-    let visitor postError (checkFile:CheckFileResults) astNode = 
+    let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 if isPreXmlDocEmpty xmlDoc then
-                    postError range "Expected exception type to have xml documentation."
+                    visitorInfo.PostError range "Expected exception type to have xml documentation."
             | _ -> ()
 
         Continue
