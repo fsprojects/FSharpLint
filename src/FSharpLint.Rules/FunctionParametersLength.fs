@@ -37,8 +37,6 @@ module FunctionParametersLength =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
-                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-
                         match constructorArguments with
                             | SynConstructorArgs.Pats(patterns) when List.length patterns >= MaxParameters -> 
                                 let failedPattern = patterns.[MaxParameters - 1]

@@ -27,16 +27,16 @@ module Program =
         let input = """
 module goat
 
-exception SomeException of string
+let dog = fun x ->
+    ()
 
-let (|Dog|_|) = function
-    | "" -> Some(1)
-    | _ -> None
+type Goat =
+    | Dog
 
-let (|Even|Odd|) = function
-    | i when i % 2 = 0 -> Even
-    | _ -> Odd
+    member this.Cat() = ()
 
+type Class() =
+    let mutable value = 10
 let Goat2() =
     let Cat = 5
 
@@ -65,6 +65,7 @@ let Dog = 7"""
             FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
             FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
             FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
+            FSharpLint.Rules.SourceLength.visitor visitorInfo
         ]
 
         try

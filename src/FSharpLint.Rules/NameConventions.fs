@@ -28,6 +28,7 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.TypeChecking
 
     let operatorIdentifiers = [
         "op_Nil"
@@ -176,14 +177,6 @@ module NameConventions =
             | _ -> false
         | None -> false
 
-    /// Is an identifier a class property?
-    let (|Property|NotProperty|) = function
-        | Some(identifier:Ident) ->
-            match identifier.idText with
-            | "set" | "get" -> Property identifier.idRange
-            | _ ->  NotProperty
-        | _ ->  NotProperty
-
     /// Validate the name conventions of an active pattern definition (for example '|Dog|Cat|').
     let expectValidActivePatternDefinition postError (identifier:Ident) =
         let error ident =
@@ -246,38 +239,6 @@ module NameConventions =
             expectValidActivePatternDefinition postError identifier
         else
             expectCamelCase postError identifier
-
-    /// Possible types a long identifier as part of a pattern may be representing.
-    type LongIdentPatternType =
-        | Member
-        | ActivePatternDefinition
-        | ValueOrFunction
-        | Other
-
-    let longIdentPatternType (longIdentifier:LongIdentWithDots) (identifier:Ident option) (checkFile:CheckFileResults) = 
-        let name = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-
-        let range = match identifier with
-                    | Property(range) -> range
-                    | NotProperty -> name.idRange
-
-        let line, endColumn, ident = range.EndLine, range.EndColumn, name.idText
-
-        let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
-        
-        match symbol with
-            | Some(symbol) ->
-                match symbol with
-                    | :? FSharpMemberFunctionOrValue as memberFunctionOrValue -> 
-                        if memberFunctionOrValue.IsMember then
-                            Member
-                        else if memberFunctionOrValue.IsActivePattern then
-                            ActivePatternDefinition
-                        else 
-                            ValueOrFunction
-                    | _ -> Other
-            | None -> 
-                Other
 
     let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) =
         let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]

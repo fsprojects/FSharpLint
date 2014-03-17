@@ -42,6 +42,7 @@
     <Compile Include="Tokeniser.fs" />
     <Compile Include="LexRuleMatching.fs" />
     <Compile Include="Ast.fs" />
+    <Compile Include="TypeChecking.fs" />
     <None Include="packages.config" />
     <None Include="DefaultConfiguration.FSharpLint">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

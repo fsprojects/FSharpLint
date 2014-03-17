@@ -41,6 +41,7 @@
     <Compile Include="TestFavourIgnoreOverLetWildRules.fs" />
     <Compile Include="TestFunctionParametersLengthRules.fs" />
     <Compile Include="TestXmlDocumentationRules.fs" />
+    <Compile Include="TestSourceLengthRules.fs" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
