@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -9,12 +10,16 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using EnvDTE;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace MattMcveigh.FSharpLint_VisualStudioExtension
 {
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideAutoLoad("{f1536ef8-92ec-443c-9ed7-fdadf150da82}")]
     [Guid(GuidList.guidFSharpLint_VisualStudioExtensionPkgString)]
     public sealed class FSharpLint_VisualStudioExtensionPkg : Package
     {
@@ -22,6 +27,17 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
         private Guid fsharpLintOutputGuid = new Guid("69e38f97-532c-4974-9612-fbdd515aa3d7");
         private ErrorListProvider errorListProvider;
         private DTE dte;
+        private IList<ErrorTask> errorsDisplayed = new List<ErrorTask>();
+
+        private CancellationTokenSource cts;
+        private OleMenuCommand m;
+
+        private const string ToolsButtonText = "Run FSharpLint on open projects.";
+
+        private bool IsProjectFSharpProject(Project project)
+        {
+            return System.IO.Path.GetExtension(project.FileName) == ".fsproj";
+        }
 
         protected override void Initialize()
         {
@@ -41,8 +57,46 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             if (menuCommandService != null)
             {
                 var commandId = new CommandID(GuidList.guidFSharpLint_VisualStudioExtensionCmdSet, (int)PkgCmdIDList.menuRunFSharpLint);
-                var menuItem = new MenuCommand(MenuItemCallback, commandId);
-                menuCommandService.AddCommand(menuItem);
+                this.m = new OleMenuCommand(this.MenuItemCallbackAsync, commandId)
+                {
+                    Text = ToolsButtonText
+                };
+                menuCommandService.AddCommand(this.m);
+
+                this.dte.Events.SolutionEvents.Opened += () => 
+                {
+                    if (this.Projects().Any(this.IsProjectFSharpProject))
+                    {
+                        this.m.Visible = true;
+                    }
+                };
+
+                this.dte.Events.SolutionEvents.BeforeClosing += () =>
+                {
+                    if (cts != null)
+                    {
+                        cts.Cancel();
+                    }
+
+                    this.m.Visible = false;
+                };
+
+                this.dte.Events.BuildEvents.OnBuildBegin += (d, g) => 
+                {
+                    if (cts != null)
+                    {
+                        cts.Cancel();
+                    }
+
+                    this.m.Text = ToolsButtonText + " (Building)";
+                    this.m.Enabled = false;
+                };
+
+                this.dte.Events.BuildEvents.OnBuildDone += (d, g) =>
+                {
+                    this.m.Text = ToolsButtonText;
+                    this.m.Enabled = true;
+                };
             }
 
             if (this.outputPane == null)
@@ -54,26 +108,59 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             }
         }
 
-        private void MenuItemCallback(object sender, EventArgs e)
+        private IEnumerable<Project> Projects()
         {
-            new System.Threading.Tasks.Task(() =>
+            if (this.dte.Solution.IsOpen && this.dte.Solution.Projects.Count > 0)
             {
-                if (this.dte.Solution.IsOpen && this.dte.Solution.Projects.Count > 0)
+                for (var i = 1; i <= this.dte.Solution.Projects.Count; i++)
                 {
-                    for (var i = 1; i <= this.dte.Solution.Projects.Count; i++)
-                    {
-                        var project = this.dte.Solution.Projects.Item(i);
-
-                        if (System.IO.Path.GetExtension(project.FileName) == ".fsproj")
-                        {
-                            FSharpLint.Console.ProjectFile.parseProject(
-                                project.FileName,
-                                this.OutputProgress,
-                                this.AddError(project));
-                        }
-                    }
+                    yield return this.dte.Solution.Projects.Item(i);
                 }
-            }).Start();
+            }
+        }
+
+        private async void MenuItemCallbackAsync(object sender, EventArgs e)
+        {
+            this.m.Text = ToolsButtonText + " (Running)";
+            this.m.Enabled = false;
+
+            foreach (var error in errorsDisplayed)
+            {
+                this.errorListProvider.Tasks.Remove(error);
+            }
+
+            this.cts = new CancellationTokenSource();
+
+            try
+            {
+                await System.Threading.Tasks.Task.Run(() => this.RunLint(cts.Token));
+            }
+            catch (OperationCanceledException)
+            {
+                this.outputPane.OutputString("Stopped running - you probably started building a project.");
+            }
+
+            this.m.Text = ToolsButtonText;
+            this.m.Enabled = true;
+        }
+
+        private void RunLint(CancellationToken token)
+        {
+            Func<bool> endEarly = () => token.IsCancellationRequested;
+
+            foreach (var project in this.Projects().Where(this.IsProjectFSharpProject))
+            {
+                if (!endEarly())
+                {
+                    FSharpLint.Console.ProjectFile.parseProject(
+                        endEarly,
+                        project.FileName,
+                        this.OutputProgress,
+                        this.AddError(project));
+                }
+
+                token.ThrowIfCancellationRequested();
+            }
         }
 
         private void OutputProgress(FSharpLint.Console.ProjectFile.ParserProgress progress)
@@ -114,6 +201,8 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             };
 
             errorTask.Navigate += ErrorTaskNavigate;
+
+            this.errorsDisplayed.Add(errorTask);
 
             this.errorListProvider.Tasks.Add(errorTask);
         }

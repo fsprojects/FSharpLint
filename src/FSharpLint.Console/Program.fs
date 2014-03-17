@@ -52,7 +52,7 @@ let Dog = 7"""
                     Input = input
                 })
 
-        let config = Map.ofList [ ("", { Rules = Map.ofList [ ("", { Settings = [] }) ] }) ]
+        let config = loadDefaultConfiguration()
 
         let visitorInfo = 
             {

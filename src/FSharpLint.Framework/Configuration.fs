@@ -28,14 +28,12 @@ module Configuration =
             <Rules>
                 <Rule Name="InterfaceNamesMustBeginWithI">
                     <RuleSettings>
-                        <BooleanProperty Name="Enabled">True</BooleanProperty>
-                        <BooleanProperty Name="Enabled">True</BooleanProperty>
-                        <StringProperty Name="Enabled">True</StringProperty>
+                        <Property name="Enabled">True</Property>
                     </RuleSettings>
                 </Rule>
                 <Rule Name="InterfaceNamesMustBeginWithI">
                     <RuleSettings>
-                        <BooleanProperty Name="Enabled">True</BooleanProperty>
+                        <Property name="Enabled">True</Property>
                     </RuleSettings>
                 </Rule>
             </Rules>
@@ -45,7 +43,8 @@ module Configuration =
             <Rules>
                 <Rule Name="InterfaceNamesMustBeginWithI">
                     <RuleSettings>
-                        <BooleanProperty Name="Enabled">True</BooleanProperty>
+                        <Property name="Enabled">True</Property>
+                        <Property name="Lines">5</Property>
                     </RuleSettings>
                 </Rule>
             </Rules>
@@ -54,36 +53,39 @@ module Configuration =
     </Analyzers>
 </FSharpLintSettings>""">
 
-    type RuleSetting =
-        | Enabled of bool
+    exception ConfigurationException of string
 
-    let areSameRule lhs rhs =
-        match lhs, rhs with
-            | Enabled(_), Enabled(_) -> true
+    type Property =
+        | Enabled of bool
+        | Lines of int
 
     type Rule = 
         {
-            Settings: RuleSetting list
+            Settings: Map<string, Property>
         }
 
-        member this.IsEnabled() =
-            let isSettingEnabled = function
-                | Enabled(true) -> true
-                | _ -> false
-
-            this.Settings |> List.find isSettingEnabled
-
     type Analyser = { Rules: Map<string, Rule> }
+
+    let private parseProperty (property:Config.DomainTypes.Property) =
+        match property.Name with
+            | "Enabled" when property.BooleanValue.IsSome -> 
+                Some(Enabled(property.BooleanValue.Value))
+            | "Lines" when property.NumberValue.IsSome -> 
+                Some(Lines(property.NumberValue.Value))
+            | _ -> 
+                None
         
     let private parseRule (rule:Config.DomainTypes.Rule) =
         {
-            Settings =
-                [
-                    for setting in rule.RuleSettings.GetBooleanProperties() do
-                        match setting.Name with
-                            | "Enabled" -> yield Enabled(setting.Value)
-                            | _ -> ()
+            Settings = 
+                [ 
+                    for property in rule.RuleSettings.GetProperties() do 
+                        match parseProperty property with
+                            | Some(propertyVal) -> 
+                                yield (property.Name, propertyVal) 
+                            | None -> ()
                 ]
+                    |> Map.ofList
         }
 
     let private getRules (analyser:Config.DomainTypes.Analyzer) =
@@ -112,18 +114,10 @@ module Configuration =
         ]
             |> Map.ofList
 
-    let private overrideRule oldRule newRule =
-        {
-            Settings =
-                [
-                    for oldRule in oldRule.Settings do
-                        let rule = newRule.Settings |> List.tryFind (areSameRule oldRule)
+    let private overrideRuleSettings oldProperty newProperty = newProperty
 
-                        match rule with
-                            | Some(rule) -> yield rule
-                            | None -> yield oldRule
-                ]
-        }
+    let private overrideRule oldRule newRule =
+        { Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings }
 
     let private overrideRules oldRules newRules =
         { Rules = overwriteMap oldRules.Rules newRules.Rules overrideRule }

@@ -1,61 +1,138 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FSharpLintSettings>
   <Analyzers>
-    <Analyzer AnalyzerId="FSharpLint.NamingRules">
+    <Analyzer AnalyzerId="FSharpLint.NameConventions">
       <Rules>
         <Rule Name="InterfaceNamesMustBeginWithI">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="ExceptionNamesMustEndWithException">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="TypeNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="RecordFieldNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="EnumNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="ModuleNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="LiteralNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="NamespaceNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="MemberNamesMustBePascalCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="PublicLetBindingsPascalOrCamelCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
           </RuleSettings>
         </Rule>
         <Rule Name="NonPublicLetBindingsCamelCase">
           <RuleSettings>
-            <BooleanProperty Name="Enabled">True</BooleanProperty>
+            <Enabled>True</Enabled>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyzerSettings />
+    </Analyzer>
+    <Analyzer AnalyzerId="FSharpLint.SourceLength">
+      <Rules>
+        <Rule Name="MaxLinesInFunction">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInLambdaFunction">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>5</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInMatchLambdaFunction">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInValue">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInConstructor">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInMember">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInProperty">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>70</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInClass">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>500</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInEnum">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>500</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInUnion">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>500</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInRecord">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>500</Lines>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxLinesInModule">
+          <RuleSettings>
+            <Enabled>True</Enabled>
+            <Lines>1000</Lines>
           </RuleSettings>
         </Rule>
       </Rules>

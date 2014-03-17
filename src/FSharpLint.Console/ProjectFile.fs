@@ -160,8 +160,10 @@ module ProjectFile =
     /// <param name="projectFile">Absolute path to the .fsproj file.</param>
     /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
     /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    let parseProject (finishEarly, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
+    let parseProject (finishEarly: System.Func<bool>, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
         let projectFileValues = getProjectFiles projectFile
+
+        let finishEarly = fun _ -> finishEarly.Invoke()
 
         let checker = InteractiveChecker.Create()
         
@@ -219,6 +221,7 @@ module ProjectFile =
                     FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
                     FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
                     FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
+                    FSharpLint.Rules.SourceLength.visitor visitorInfo
                 ]
 
                 progress.Invoke(Starting(file))

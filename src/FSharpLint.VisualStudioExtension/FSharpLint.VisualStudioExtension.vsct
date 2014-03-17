@@ -64,6 +64,9 @@
       <Button guid="guidFSharpLint_VisualStudioExtensionCmdSet" id="menuRunFSharpLint" priority="0x0100" type="Button">
         <Parent guid="guidFSharpLint_VisualStudioExtensionCmdSet" id="MenuGroup" />
         <Icon guid="guidImages" id="bmpPic1" />
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
           <ButtonText>Run FSharpLint on open projects.</ButtonText>
         </Strings>

@@ -43,8 +43,13 @@
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
-    <Reference Include="fsharplint">
-      <HintPath>..\src\FSharpLint.Console\bin\fsharplint.exe</HintPath>
+    <Reference Include="FSharp.Data, Version=1.1.10.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\FSharp.Data.1.1.10\lib\net40\FSharp.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="fsharplint, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\FSharpLint.Console\bin\fsharplint.exe</HintPath>
     </Reference>
     <Reference Include="FSharpLint.Framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -162,6 +167,7 @@
   <ItemGroup>
     <VSCTCompile Include="FSharpLint.VisualStudioExtension.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
+      <SubType>Designer</SubType>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>

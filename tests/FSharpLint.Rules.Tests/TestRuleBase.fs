@@ -25,13 +25,17 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 
 [<AbstractClass>]
-type TestRuleBase(visitor) =
+type TestRuleBase(visitor, ?config:Map<string, Analyser>) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
-    let config = Map.ofList [ ("", { Rules = Map.ofList [ ("", { Settings = [] }) ] }) ]
+    let config = 
+        match config with
+            | Some(c) -> c
+            | None ->
+                Map.ofList [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ] }) ]
 
     member this.Parse input = parseInput input [visitor { PostError = postError; Config = config }]
 

@@ -25,6 +25,7 @@ module SourceLength =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.TypeChecking
+    open FSharpLint.Framework.Configuration
 
     let (|Member|Function|Value|Constructor|Property|) = function
         | SynValData.SynValData(memberFlags, valInfo, _) -> 
@@ -39,50 +40,52 @@ module SourceLength =
                         | MemberKind.PropertyGetSet(_) -> Property
                 | None when valInfo.ArgInfos.Length = 0 -> Value
                 | None -> Function
-        
-    // Change this to be retrieved from a config file.
-    [<Literal>]
-    let FunctionLength = 70
 
-    [<Literal>]
-    let LambdaFunctionLength = 10
+    let configRuleSettings (config:Map<string,Analyser>) ruleName =
+        if not <| config.ContainsKey "FSharpLint.SourceLength" then
+            raise <| ConfigurationException("Expected FSharpLint.SourceLength analyser in config.")
 
-    [<Literal>]
-    let ValueLength = 70
+        let rules = config.["FSharpLint.SourceLength"].Rules
 
-    [<Literal>]
-    let MemberLength = 70
+        if not <| rules.ContainsKey ruleName then 
+            let error = sprintf "Expected rule %s for FSharpLint.SourceLength analyser in config." ruleName
+            raise <| ConfigurationException(error)
 
-    [<Literal>]
-    let ConstructorLength = 70
+        let ruleSettings = rules.[ruleName].Settings
 
-    [<Literal>]
-    let PropertyLength = 70
+        let isEnabled = 
+            match ruleSettings.["Enabled"] with 
+                | Enabled(e) when true -> true
+                | _ -> false
 
-    [<Literal>]
-    let ClassLength = 70
+        if isEnabled then
+            match ruleSettings.["Lines"] with
+                | Lines(l) -> Some(l)
+                | _ -> None
+        else
+            None
 
-    [<Literal>]
-    let EnumLength = 70
-
-    [<Literal>]
-    let UnionLength = 70
-
-    [<Literal>]
-    let RecordLength = 70
-
-    [<Literal>]
-    let ModuleLength = 70
-
-    let error name i actual = sprintf "%ss should be less than %d lines long, was %d lines long." name i actual
+    let error name i actual = 
+        sprintf "%ss should be less than %d lines long, was %d lines long." name i actual
 
     let inline length (range:range) = range.EndLine - range.StartLine
+
+    let expectMaxLines visitorInfo range configRuleName errorName =
+        let actualLines = length range
+
+        match configRuleSettings visitorInfo.Config configRuleName with
+            | Some(expectedMaxLines) when actualLines > expectedMaxLines ->
+                visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
+            | _ -> ()
     
     let rec visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Expression(SynExpr.Lambda(c, _, _, _, range)) -> 
-                if length range > LambdaFunctionLength then
-                    visitorInfo.PostError range (error "Lambda Function" LambdaFunctionLength (length range))
+            | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
+                expectMaxLines visitorInfo range "MaxLinesInLambdaFunction" "Lambda Function"
+
+                Continue
+            | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
+                expectMaxLines visitorInfo range "MaxLinesInMatchLambdaFunction" "Match Lambda Function"
 
                 Continue
             | AstNode.Binding(binding) ->
@@ -90,23 +93,24 @@ module SourceLength =
                     | SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _) -> 
                         let length = length binding.RangeOfBindingAndRhs
 
+                        let expectMaxLines = expectMaxLines visitorInfo binding.RangeOfBindingAndRhs
+
                         match valData with
-                            | Value when length > ValueLength -> 
-                                visitorInfo.PostError binding.RangeOfBindingAndRhs (error "Value" ValueLength length)
-                            | Function when length > FunctionLength -> 
-                                visitorInfo.PostError binding.RangeOfBindingAndRhs (error "Function" FunctionLength length)
-                            | Member when length > MemberLength -> 
-                                visitorInfo.PostError binding.RangeOfBindingAndRhs (error "Member" MemberLength length)
-                            | Constructor when length > ConstructorLength -> 
-                                visitorInfo.PostError binding.RangeOfBindingAndRhs (error "Constructor" ConstructorLength length)
-                            | Property when length > PropertyLength -> 
-                                visitorInfo.PostError binding.RangeOfBindingAndRhs (error "Property" PropertyLength length)
+                            | Value -> 
+                                expectMaxLines "MaxLinesInValue" "Value" 
+                            | Function -> 
+                                expectMaxLines "MaxLinesInFunction" "Function" 
+                            | Member -> 
+                                expectMaxLines "MaxLinesInMember" "Member" 
+                            | Constructor -> 
+                                expectMaxLines "MaxLinesInConstructor" "Constructor" 
+                            | Property -> 
+                                expectMaxLines "MaxLinesInProperty" "Property"
                             | _ -> ()
 
                         Continue
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, range)) when isModule -> 
-                if length range > FunctionLength then
-                    visitorInfo.PostError range (error "Module" ModuleLength (length range))
+                expectMaxLines visitorInfo range "MaxLinesInModule" "Module"
 
                 Continue
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
@@ -114,18 +118,14 @@ module SourceLength =
                     | SynTypeDefnRepr.Simple(simpleRepr, _) ->
                         match simpleRepr with
                             | SynTypeDefnSimpleRepr.Record(_) -> 
-                                if length range > RecordLength then
-                                    visitorInfo.PostError range (error "Record" RecordLength (length range))
+                                expectMaxLines visitorInfo range "MaxLinesInRecord" "Record"
                             | SynTypeDefnSimpleRepr.Enum(_) -> 
-                                if length range > EnumLength then
-                                    visitorInfo.PostError range (error "Enum" EnumLength (length range))
+                                expectMaxLines visitorInfo range "MaxLinesInEnum" "Enum"
                             | SynTypeDefnSimpleRepr.Union(_) -> 
-                                if length range > UnionLength then
-                                    visitorInfo.PostError range (error "Union" UnionLength (length range))
+                                expectMaxLines visitorInfo range "MaxLinesInUnion" "Union"
                             | _ -> ()
                     | SynTypeDefnRepr.ObjectModel(_) -> 
-                        if length range > ClassLength then
-                            visitorInfo.PostError range (error "Classes and interface" ClassLength (length range))
+                        expectMaxLines visitorInfo range "MaxLinesInClass" "Classes and interface"
 
                 Continue
             | _ -> Continue

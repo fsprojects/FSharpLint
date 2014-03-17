@@ -20,13 +20,120 @@ module TestSourceLengthRules
 
 open NUnit.Framework
 open FSharpLint.Rules.SourceLength
+open FSharpLint.Framework.Configuration
+
+let config = 
+    Map.ofList 
+        [ 
+            ("FSharpLint.SourceLength", 
+                { Rules = Map.ofList 
+                    [ 
+                        ("MaxLinesInFunction", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInLambdaFunction", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(5)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInMatchLambdaFunction", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInValue", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInConstructor", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInMember", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInProperty", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(70))
+                                    ] 
+                            }) 
+                        ("MaxLinesInClass", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(500)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInEnum", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(500)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInUnion", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(500)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInRecord", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(500)) 
+                                    ] 
+                            }) 
+                        ("MaxLinesInModule", 
+                            { 
+                                Settings = Map.ofList 
+                                    [ 
+                                        ("Enabled", Enabled(true)) 
+                                        ("Lines", Lines(1000)) 
+                                    ] 
+                            }) 
+                    ] 
+                }) 
+        ]
 
 let generateNewLines numNewLines =
     [ for i in 1..numNewLines do yield "\n" ] |> String.concat ""
 
 [<TestFixture>]
 type TestSourceLengthRules() =
-    inherit TestRuleBase.TestRuleBase(visitor)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.ModuleTooManyLines() = 
@@ -34,7 +141,7 @@ type TestSourceLengthRules() =
 module Program
 %s
 // Some exception.
-exception SomeException of string""" (generateNewLines (ModuleLength)))
+exception SomeException of string""" (generateNewLines (1000)))
 
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
 
@@ -44,7 +151,7 @@ exception SomeException of string""" (generateNewLines (ModuleLength)))
 module Program
 %s
 // Some exception.
-exception SomeException of string""" (generateNewLines (ModuleLength - 4)))
+exception SomeException of string""" (generateNewLines (1000 - 4)))
 
         Assert.IsFalse(this.ErrorExistsAt(2, 0))
 
@@ -55,7 +162,7 @@ module Program
 
 let dog x =
     %s
-    ()""" (generateNewLines FunctionLength))
+    ()""" (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -66,7 +173,7 @@ module Program
 
 let dog x =
     %s
-    ()""" (generateNewLines (FunctionLength - 4)))
+    ()""" (generateNewLines (70 - 4)))
 
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
@@ -77,7 +184,7 @@ module Program
 
 let dog =
     %s
-    ()""" (generateNewLines ValueLength))
+    ()""" (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -88,7 +195,7 @@ module Program
 
 let dog =
     %s
-    ()""" (generateNewLines (ValueLength - 4)))
+    ()""" (generateNewLines (70 - 4)))
 
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
@@ -101,7 +208,7 @@ let dog = function
 | Some(x) ->
     %s
     ()
-| None -> ()""" (generateNewLines FunctionLength))
+| None -> ()""" (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -114,7 +221,7 @@ let dog = function
 | Some(x) ->
     %s
     ()
-| None -> ()""" (generateNewLines (FunctionLength - 5)))
+| None -> ()""" (generateNewLines (70 - 5)))
 
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
@@ -129,7 +236,7 @@ let dog = fun x ->
             %s
             ()
         | None -> ()
-        """ (generateNewLines FunctionLength))
+        """ (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
@@ -153,7 +260,7 @@ let dog = fun x ->
 module Program
   type MyClass2() as this =
     %s
-    member this.PrintMessage() = ()""" (generateNewLines ClassLength))
+    member this.PrintMessage() = ()""" (generateNewLines 500))
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -172,7 +279,7 @@ module Program
 module Program
   type IPrintable =
     %s
-    abstract member Print : unit -> unit""" (generateNewLines ClassLength))
+    abstract member Print : unit -> unit""" (generateNewLines 500))
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -193,7 +300,7 @@ type MyClass(x) =
     new() = 
       %s
       MyClass(0)
-      """ (generateNewLines ConstructorLength))
+      """ (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -214,7 +321,7 @@ module Program
     {
       %s 
       dog: int 
-    }""" (generateNewLines RecordLength))
+    }""" (generateNewLines 500))
 
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
@@ -235,7 +342,7 @@ module Program
     let mutable value = 10
     member this.Property1 with get() = 
         %s
-        value""" (generateNewLines PropertyLength))
+        value""" (generateNewLines 70))
 
         Assert.IsTrue(this.ErrorExistsAt(5, 31))
 

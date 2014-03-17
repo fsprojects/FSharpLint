@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="ef97a4ac-9d42-4f6c-93c2-b33a75264787" Version="0.0.1" Language="en-US" Publisher="Matt Mcveigh" />
+    <Identity Id="ef97a4ac-9d42-4f6c-93c2-b33a75264787" Version="0.0.0.1" Language="en-US" Publisher="Matt Mcveigh" />
     <DisplayName>FSharpLint</DisplayName>
-    <Description>FSharpLint, a lint tool for F#.</Description>
+    <Description xml:space="preserve">FSharpLint, a work in progress on creating a lint tool for F#.</Description>
+    <MoreInfo>https://github.com/duckmatt/FSharpLint</MoreInfo>
+    <Tags>f# lint style fsharp fsharplint</Tags>
   </Metadata>
   <Installation InstalledByMsi="false">
     <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="11.0" />
