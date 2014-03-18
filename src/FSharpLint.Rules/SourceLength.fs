@@ -54,11 +54,14 @@ module SourceLength =
         let ruleSettings = rules.[ruleName].Settings
 
         let isEnabled = 
-            match ruleSettings.["Enabled"] with 
-                | Enabled(e) when true -> true
-                | _ -> false
+            if ruleSettings.ContainsKey "Enabled" then
+                match ruleSettings.["Enabled"] with 
+                    | Enabled(e) when true -> true
+                    | _ -> false
+            else
+                false
 
-        if isEnabled then
+        if isEnabled && ruleSettings.ContainsKey "Lines" then
             match ruleSettings.["Lines"] with
                 | Lines(l) -> Some(l)
                 | _ -> None

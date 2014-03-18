@@ -67,7 +67,7 @@ let Dog = 7"""
             FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
             FSharpLint.Rules.SourceLength.visitor visitorInfo
         ]
-
+         
         try
             parseInput input visitors |> ignore
         with 
