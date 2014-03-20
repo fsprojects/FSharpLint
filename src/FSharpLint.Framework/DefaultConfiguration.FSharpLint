@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FSharpLintSettings>
-  <Analyzers>
-    <Analyzer AnalyzerId="FSharpLint.NameConventions">
+  <Analysers>
+    <Analyser AnalyserId="FSharpLint.NameConventions">
       <Rules>
         <Rule Name="InterfaceNamesMustBeginWithI">
           <RuleSettings>
@@ -59,9 +59,9 @@
           </RuleSettings>
         </Rule>
       </Rules>
-      <AnalyzerSettings />
-    </Analyzer>
-    <Analyzer AnalyzerId="FSharpLint.SourceLength">
+      <AnalyserSettings />
+    </Analyser>
+    <Analyser AnalyserId="FSharpLint.SourceLength">
       <Rules>
         <Rule Name="MaxLinesInFunction">
           <RuleSettings>
@@ -136,7 +136,14 @@
           </RuleSettings>
         </Rule>
       </Rules>
-      <AnalyzerSettings />
-    </Analyzer>
-  </Analyzers>
+      <AnalyserSettings />
+    </Analyser>
+    <Analyser AnalyserId="FSharpLint.FunctionParametersLength">
+      <Rules />
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+        <Property name="MaxParameters">8</Property>
+      </AnalyserSettings>
+    </Analyser>
+  </Analysers>
 </FSharpLintSettings>

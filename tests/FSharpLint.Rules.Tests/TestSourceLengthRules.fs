@@ -62,105 +62,107 @@ let config =
     Map.ofList 
         [ 
             ("FSharpLint.SourceLength", 
-                { Rules = Map.ofList 
-                    [ 
-                        ("MaxLinesInFunction", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(FunctionLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInLambdaFunction", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(LambdaFunctionLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInMatchLambdaFunction", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(MatchLambdaFunctionLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInValue", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(ValueLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInConstructor", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(ConstructorLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInMember", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(MemberLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInProperty", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(PropertyLength))
-                                    ] 
-                            }) 
-                        ("MaxLinesInClass", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(ClassLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInEnum", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(EnumLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInUnion", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(UnionLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInRecord", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(RecordLength)) 
-                                    ] 
-                            }) 
-                        ("MaxLinesInModule", 
-                            { 
-                                Settings = Map.ofList 
-                                    [ 
-                                        ("Enabled", Enabled(true)) 
-                                        ("Lines", Lines(ModuleLength)) 
-                                    ] 
-                            }) 
-                    ] 
+                { 
+                    Rules = Map.ofList 
+                        [ 
+                            ("MaxLinesInFunction", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(FunctionLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInLambdaFunction", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(LambdaFunctionLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInMatchLambdaFunction", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(MatchLambdaFunctionLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInValue", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(ValueLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInConstructor", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(ConstructorLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInMember", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(MemberLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInProperty", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(PropertyLength))
+                                        ] 
+                                }) 
+                            ("MaxLinesInClass", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(ClassLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInEnum", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(EnumLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInUnion", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(UnionLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInRecord", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(RecordLength)) 
+                                        ] 
+                                }) 
+                            ("MaxLinesInModule", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("Lines", Lines(ModuleLength)) 
+                                        ] 
+                                }) 
+                        ] 
+                    Settings = Map.ofList []
                 }) 
         ]
 

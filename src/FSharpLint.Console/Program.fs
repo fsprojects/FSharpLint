@@ -42,6 +42,8 @@ let Goat2() =
 
     Cat
 
+let meow a b c d e f g h i = ()
+
 let Dog = 7"""
 
         let postError range error =
@@ -71,8 +73,9 @@ let Dog = 7"""
         try
             parseInput input visitors |> ignore
         with 
-            | :? ParseException as e -> 
-                System.Console.WriteLine(e.Message)
+            | ParseException(e)
+            | ConfigurationException(e) ->
+                System.Console.WriteLine(e)
 
     let help () =
         System.Console.WriteLine("Use -f followed by the absolute path of the .fsproj \

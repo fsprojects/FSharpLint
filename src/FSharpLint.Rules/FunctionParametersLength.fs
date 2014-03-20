@@ -25,10 +25,28 @@ module FunctionParametersLength =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.Configuration
 
-    // Change this to be retrieved from a config file.
-    [<Literal>]
-    let MaxParameters = 5
+    let maxParametersFromConfig (config:Map<string,Analyser>) =
+        if not <| config.ContainsKey "FSharpLint.FunctionParametersLength" then
+            raise <| ConfigurationException("Expected FSharpLint.FunctionParametersLength analyser in config.")
+
+        let analyserSettings = config.["FSharpLint.FunctionParametersLength"].Settings
+
+        let isEnabled = 
+            if analyserSettings.ContainsKey "Enabled" then
+                match analyserSettings.["Enabled"] with 
+                    | Enabled(e) when true -> true
+                    | _ -> false
+            else
+                false
+
+        if isEnabled && analyserSettings.ContainsKey "MaxParameters" then
+            match analyserSettings.["MaxParameters"] with
+                | MaxParameters(p) -> Some(p)
+                | _ -> None
+        else
+            None
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
@@ -36,12 +54,15 @@ module FunctionParametersLength =
         match astNode.Node with
             | AstNode.Pattern(pattern) ->
                 match pattern with
-                    | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) -> 
-                        match constructorArguments with
-                            | SynConstructorArgs.Pats(patterns) when List.length patterns >= MaxParameters -> 
-                                let failedPattern = patterns.[MaxParameters - 1]
-                                visitorInfo.PostError failedPattern.Range (error MaxParameters)
-                            | _ -> ()
+                    | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) ->
+                        match maxParametersFromConfig visitorInfo.Config with
+                            | Some(maxParameters) ->
+                                match constructorArguments with
+                                    | SynConstructorArgs.Pats(patterns) when List.length patterns >= maxParameters -> 
+                                        let failedPattern = patterns.[maxParameters - 1]
+                                        visitorInfo.PostError failedPattern.Range (error maxParameters)
+                                    | _ -> ()
+                            | None -> ()
                     | _ -> ()
             | _ -> ()
 

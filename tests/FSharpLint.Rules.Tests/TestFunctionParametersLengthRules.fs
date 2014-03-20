@@ -20,10 +20,25 @@ module TestFunctionParametersLengthRules
 
 open NUnit.Framework
 open FSharpLint.Rules.FunctionParametersLength
+open FSharpLint.Framework.Configuration
+
+let config = 
+    Map.ofList 
+        [ 
+            ("FSharpLint.FunctionParametersLength", 
+                { 
+                    Rules = Map.ofList []
+                    Settings = Map.ofList 
+                        [
+                            ("Enabled", Enabled(true)) 
+                            ("MaxParameters", MaxParameters(5)) 
+                        ]
+                }) 
+        ]
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.FiveParameters() = 

@@ -109,7 +109,6 @@ module SourceLength =
                                 expectMaxLines "MaxLinesInConstructor" "Constructor" 
                             | Property -> 
                                 expectMaxLines "MaxLinesInProperty" "Property"
-                            | _ -> ()
 
                         Continue
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, range)) when isModule -> 
