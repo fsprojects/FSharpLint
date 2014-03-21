@@ -35,6 +35,8 @@ type Goat =
 
     member this.Cat() = ()
 
+exception Dog of string
+
 type Class() =
     let mutable value = 10
 let Goat2() =

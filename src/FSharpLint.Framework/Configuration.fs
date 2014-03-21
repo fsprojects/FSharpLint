@@ -34,6 +34,7 @@ module Configuration =
                 <Rule Name="InterfaceNamesMustBeginWithI">
                     <RuleSettings>
                         <Property name="Enabled">True</Property>
+                        <Property name="Enabled">True</Property>
                     </RuleSettings>
                 </Rule>
             </Rules>
@@ -67,14 +68,14 @@ module Configuration =
             Settings: Map<string, Property>
         }
 
-    let private parseProperty (property:Config.DomainTypes.Property) =
+    let private parseProperty (property:Config.Property) =
         match property.Name with
-            | "Enabled" when property.BooleanValue.IsSome -> 
-                Some(Enabled(property.BooleanValue.Value))
-            | "Lines" when property.NumberValue.IsSome -> 
-                Some(Lines(property.NumberValue.Value))
-            | "MaxParameters" when property.NumberValue.IsSome -> 
-                Some(MaxParameters(property.NumberValue.Value)) 
+            | "Enabled" when property.Boolean.IsSome -> 
+                Some(Enabled(property.Boolean.Value))
+            | "Lines" when property.Number.IsSome -> 
+                Some(Lines(property.Number.Value))
+            | "MaxParameters" when property.Number.IsSome -> 
+                Some(MaxParameters(property.Number.Value)) 
             | _ -> 
                 None
 
@@ -87,26 +88,21 @@ module Configuration =
                     | None -> ()
         ]
         
-    let private parseRule (rule:Config.DomainTypes.Rule) : Rule =
+    let private parseRule (rule:Config.Rule) : Rule =
         {
             Settings = 
                 [ 
-                    let ruleSettings = rule.GetRuleSettings()
+                    let ruleSettings = rule.RuleSettings
 
-                    if ruleSettings.Length <> 1 then
-                        let error = "Rule elements must only include one RuleSettings element. Rule " + rule.Name + " contained more than one."
-                        raise (ConfigurationException(error)) 
-                    else
-                        yield! ruleSettings.[0].GetProperties() |> parseSettings
+                    yield! ruleSettings.Properties |> parseSettings
                 ]
                     |> Map.ofList
         }
 
-    let private getRules (analyser:Config.DomainTypes.Analyser) =
+    let private getRules (analyser:Config.Analysers) =
         [ 
-            for rules in analyser.GetRules() do 
-                for rule in rules.GetRules() do
-                    yield (rule.Name, parseRule rule) 
+            for rule in analyser.Rules.Rules do
+                yield (rule.Name, parseRule rule) 
         ]
             |> Map.ofList
 
@@ -114,16 +110,10 @@ module Configuration =
     let configuration file = 
         let config = Config.Parse(file)
         [ 
-            for analyser in config.Analysers.GetAnalysers() do 
-                let analyserSettings = analyser.GetAnalyserSettings()
+            for analyser in config.Analysers do 
+                let settings = analyser.AnalyserSettings.Properties |> parseSettings |> Map.ofList
 
-                if analyserSettings.Length <> 1 then
-                    let error = "Analyser elements must only include one AnalyserSettings element. Analyser " + analyser.AnalyserId + " contained more than one."
-                    raise (ConfigurationException(error)) 
-                else
-                    let settings = analyserSettings.[0].GetProperties() |> parseSettings |> Map.ofList
-
-                    yield (analyser.AnalyserId, { Rules = getRules analyser; Settings = settings }) 
+                yield (analyser.AnalyserId, { Rules = getRules analyser; Settings = settings }) 
         ]
             |> Map.ofList
 
