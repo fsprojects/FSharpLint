@@ -25,6 +25,37 @@ module XmlDocumentation =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.Configuration
+
+    [<Literal>]
+    let AnalyserName = "FSharpLint.XmlDocumentation"
+
+    let checkExceptionHeader (config:Map<string,Analyser>) =
+        if not <| config.ContainsKey AnalyserName then
+            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
+
+        let analyserSettings = config.[AnalyserName].Settings
+
+        let isEnabled = 
+            if analyserSettings.ContainsKey "Enabled" then
+                match analyserSettings.["Enabled"] with 
+                    | Enabled(e) when true -> true
+                    | _ -> false
+            else
+                true
+
+        let rules = config.[AnalyserName].Rules
+
+        if isEnabled && rules.ContainsKey "ExceptionDefinitionHeader" then
+            let ruleSettings = rules.["ExceptionDefinitionHeader"].Settings
+            if ruleSettings.ContainsKey "Enabled" then
+                match ruleSettings.["Enabled"] with
+                    | Enabled(b) when b = true -> true
+                    | _ -> false
+            else
+                false
+        else
+            false
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
@@ -34,8 +65,9 @@ module XmlDocumentation =
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
-                if isPreXmlDocEmpty xmlDoc then
-                    visitorInfo.PostError range "Expected exception type to have xml documentation."
+                if checkExceptionHeader visitorInfo.Config then
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range "Expected exception type to have xml documentation."
             | _ -> ()
 
         Continue

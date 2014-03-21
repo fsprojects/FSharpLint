@@ -5,57 +5,57 @@
       <Rules>
         <Rule Name="InterfaceNamesMustBeginWithI">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="ExceptionNamesMustEndWithException">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="TypeNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="RecordFieldNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="EnumNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="ModuleNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="LiteralNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="NamespaceNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="MemberNamesMustBePascalCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="PublicLetBindingsPascalOrCamelCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
         <Rule Name="NonPublicLetBindingsCamelCase">
           <RuleSettings>
-            <Enabled>True</Enabled>
+            <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
       </Rules>
@@ -65,74 +65,74 @@
       <Rules>
         <Rule Name="MaxLinesInFunction">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInLambdaFunction">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>5</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">5</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInMatchLambdaFunction">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInValue">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInConstructor">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInMember">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInProperty">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>70</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">70</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInClass">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>500</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">500</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInEnum">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>500</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">500</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInUnion">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>500</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">500</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInRecord">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>500</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">500</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="MaxLinesInModule">
           <RuleSettings>
-            <Enabled>True</Enabled>
-            <Lines>1000</Lines>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">1000</Property>>
           </RuleSettings>
         </Rule>
       </Rules>
@@ -144,6 +144,22 @@
         <Property name="Enabled">True</Property>
         <Property name="MaxParameters">8</Property>
       </AnalyserSettings>
+    </Analyser>
+    <Analyser AnalyserId="FSharpLint.FavourIgnoreOverLetWild">
+      <Rules />
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+      </AnalyserSettings>
+    </Analyser>
+    <Analyser AnalyserId="FSharpLint.XmlDocumentation">
+      <Rules>
+        <Rule Name="ExceptionDefinitionHeader">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyserSettings />
     </Analyser>
   </Analysers>
 </FSharpLintSettings>

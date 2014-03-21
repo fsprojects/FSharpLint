@@ -27,6 +27,9 @@ module SourceLength =
     open FSharpLint.Framework.TypeChecking
     open FSharpLint.Framework.Configuration
 
+    [<Literal>]
+    let AnalyserName = "FSharpLint.SourceLength"
+
     let (|Member|Function|Value|Constructor|Property|) = function
         | SynValData.SynValData(memberFlags, valInfo, _) -> 
             match memberFlags with
@@ -42,10 +45,10 @@ module SourceLength =
                 | None -> Function
 
     let configRuleSettings (config:Map<string,Analyser>) ruleName =
-        if not <| config.ContainsKey "FSharpLint.SourceLength" then
-            raise <| ConfigurationException("Expected FSharpLint.SourceLength analyser in config.")
+        if not <| config.ContainsKey AnalyserName then
+            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
 
-        let rules = config.["FSharpLint.SourceLength"].Rules
+        let rules = config.[AnalyserName].Rules
 
         if not <| rules.ContainsKey ruleName then 
             let error = sprintf "Expected rule %s for FSharpLint.SourceLength analyser in config." ruleName

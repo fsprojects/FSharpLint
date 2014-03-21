@@ -61,7 +61,7 @@ let ModuleLength = 1000
 let config = 
     Map.ofList 
         [ 
-            ("FSharpLint.SourceLength", 
+            (AnalyserName, 
                 { 
                     Rules = Map.ofList 
                         [ 

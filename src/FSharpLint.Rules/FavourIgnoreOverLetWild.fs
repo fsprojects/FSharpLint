@@ -25,17 +25,35 @@ module FavourIgnoreOverLetWild =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.Configuration
+
+    [<Literal>]
+    let AnalyserName = "FSharpLint.FavourIgnoreOverLetWild"
+
+    let isEnabled (config:Map<string,Analyser>) =
+        if not <| config.ContainsKey AnalyserName then
+            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
+
+        let analyserSettings = config.[AnalyserName].Settings
+
+        if analyserSettings.ContainsKey "Enabled" then
+            match analyserSettings.["Enabled"] with 
+                | Enabled(e) when true -> true
+                | _ -> false
+        else
+            false
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.Binding(SynBinding.Binding(identifier, _, _, _, _, _, _, pattern, _, _, range, _)) -> 
-                let rec findWildAndIgnoreParens = function
-                | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
-                | SynPat.Wild(_) -> true
-                | _ -> false
+                if isEnabled visitorInfo.Config then
+                    let rec findWildAndIgnoreParens = function
+                    | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
+                    | SynPat.Wild(_) -> true
+                    | _ -> false
                 
-                if findWildAndIgnoreParens pattern then
-                    visitorInfo.PostError range "Favour using the ignore function rather than let _ = ..."
+                    if findWildAndIgnoreParens pattern then
+                        visitorInfo.PostError range "Favour using the ignore function rather than let _ = ..."
             | _ -> ()
 
         Continue

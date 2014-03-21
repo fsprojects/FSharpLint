@@ -27,11 +27,14 @@ module FunctionParametersLength =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
 
-    let maxParametersFromConfig (config:Map<string,Analyser>) =
-        if not <| config.ContainsKey "FSharpLint.FunctionParametersLength" then
-            raise <| ConfigurationException("Expected FSharpLint.FunctionParametersLength analyser in config.")
+    [<Literal>]
+    let AnalyserName = "FSharpLint.FunctionParametersLength"
 
-        let analyserSettings = config.["FSharpLint.FunctionParametersLength"].Settings
+    let maxParametersFromConfig (config:Map<string,Analyser>) =
+        if not <| config.ContainsKey AnalyserName then
+            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
+
+        let analyserSettings = config.[AnalyserName].Settings
 
         let isEnabled = 
             if analyserSettings.ContainsKey "Enabled" then

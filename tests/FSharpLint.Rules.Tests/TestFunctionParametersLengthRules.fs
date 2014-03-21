@@ -25,7 +25,7 @@ open FSharpLint.Framework.Configuration
 let config = 
     Map.ofList 
         [ 
-            ("FSharpLint.FunctionParametersLength", 
+            (AnalyserName, 
                 { 
                     Rules = Map.ofList []
                     Settings = Map.ofList 

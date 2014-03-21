@@ -20,10 +20,30 @@ module TestXmlDocumentationRules
 
 open NUnit.Framework
 open FSharpLint.Rules.XmlDocumentation
+open FSharpLint.Framework.Configuration
+
+let config = 
+    Map.ofList 
+        [ 
+            (AnalyserName, 
+                { 
+                    Rules = Map.ofList 
+                        [ 
+                            ("ExceptionDefinitionHeader", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                        ]
+                    Settings = Map.ofList []
+                })
+            ]
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.ExceptionWithDoubleDashComment() = 

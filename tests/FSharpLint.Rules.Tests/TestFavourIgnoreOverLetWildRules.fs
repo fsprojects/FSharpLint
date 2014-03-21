@@ -20,10 +20,24 @@ module TestFavourIgnoreOverLetWildRules
 
 open NUnit.Framework
 open FSharpLint.Rules.FavourIgnoreOverLetWild
+open FSharpLint.Framework.Configuration
+
+let config = 
+    Map.ofList 
+        [ 
+            (AnalyserName, 
+                { 
+                    Rules = Map.ofList []
+                    Settings = Map.ofList 
+                        [
+                            ("Enabled", Enabled(true))
+                        ]
+                }) 
+        ]
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.LetWildcardUnitValue() = 
