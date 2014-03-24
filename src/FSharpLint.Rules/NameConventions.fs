@@ -28,116 +28,7 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.TypeChecking
-
-    let operatorIdentifiers = [
-        "op_Nil"
-        "op_ColonColon"
-        "op_Addition"
-        "op_Splice"
-        "op_SpliceUntyped"
-        "op_Increment"
-        "op_Decrement"
-        "op_Subtraction"
-        "op_Multiply"
-        "op_Exponentiation"
-        "op_Division"
-        "op_Append"
-        "op_Concatenate"
-        "op_Modulus"
-        "op_BitwiseAnd"
-        "op_BitwiseOr"
-        "op_ExclusiveOr"
-        "op_LeftShift"
-        "op_LogicalNot"
-        "op_RightShift"
-        "op_UnaryPlus"
-        "op_UnaryNegation"
-        "op_AddressOf"
-        "op_IntegerAddressOf"
-        "op_BooleanAnd"
-        "op_BooleanOr"
-        "op_LessThanOrEqual"
-        "op_Equality"
-        "op_Inequality"
-        "op_GreaterThanOrEqual"
-        "op_LessThan"
-        "op_GreaterThan"
-        "op_PipeRight"
-        "op_PipeRight2"
-        "op_PipeRight3"
-        "op_PipeLeft"
-        "op_PipeLeft2"
-        "op_PipeLeft3"
-        "op_Dereference"
-        "op_ComposeRight"
-        "op_ComposeLeft"
-        "op_TypedQuotationUnicode"
-        "op_ChevronsBar"
-        "op_Quotation"
-        "op_QuotationUntyped"
-        "op_AdditionAssignment"
-        "op_SubtractionAssignment"
-        "op_MultiplyAssignment"
-        "op_DivisionAssignment"
-        "op_Range"
-        "op_RangeStep"
-        "op_Dynamic"
-        "op_DynamicAssignment"
-        "op_ArrayLookup"
-        "op_ArrayAssign"
-    ]    
-
-    /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
-    let operators = [ 
-        "Greater"
-        "Less" 
-        "Plus"
-        "Minus"
-        "Multiply"
-        "Equals"
-        "Twiddle"
-        "Percent"
-        "Dot"
-        "Dollar"
-        "Amp"
-        "Bar"
-        "At"
-        "Hash"
-        "Hat"
-        "Bang"
-        "Qmark"
-        "Divide"
-        "Colon"
-        "LParen"
-        "Comma"
-        "RParen"
-        "Space"
-        "LBrack"
-        "RBrack" 
-    ]
-
-    let rec isSequenceOfOperators (str:string) =
-        if Seq.isEmpty str then
-            true
-        else
-            let operator = operators |> List.tryFind (fun op -> str.StartsWith(op))
-
-            match operator with
-            | Some(operator) -> str.Substring(operator.Length) |> isSequenceOfOperators
-            | None -> false
-
-    /// Is an identifier an operator overload?
-    let isOperator (identifier:string) =
-        if operatorIdentifiers |> List.exists (fun x -> x = identifier) then
-            true
-        else
-            if identifier.StartsWith("op_") && identifier.Length > 3 then
-                let identifier = identifier.Substring(3)
-
-                isSequenceOfOperators identifier
-            else
-                false
+    open FSharpLint.Framework.AstInfo
 
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 
@@ -170,22 +61,67 @@ module NameConventions =
     /// Checks an identifier is pascal case, if not an error is posted.
     let expectPascalCase = expect isPascalCase pascalCaseError
 
+    module CheckIdentifiers =
+        let checkNonPublicValue postError identifier =
+            expectCamelCase postError identifier
+
+        let checkPublicValue postError identifier =
+            ()
+
+        let checkMember postError identifier =
+            expectPascalCase postError identifier
+
+        let checkNamespace postError identifier =
+            expectPascalCase postError identifier
+
+        let checkLiteral postError identifier =
+            expectPascalCase postError identifier
+
+        let checkModule postError identifier =
+            expectPascalCase postError identifier
+
+        let checkEnumCase postError identifier =
+            expectPascalCase postError identifier
+
+        let checkUnionCase postError identifier =
+            expectPascalCase postError identifier
+
+        let checkRecordField postError identifier =
+            expectPascalCase postError identifier
+
+        let checkTypeName postError identifier =
+            expectPascalCase postError identifier
+
+        let checkParameter postError identifier =
+            expectCamelCase postError identifier
+
+        let checkActivePattern postError (identifier:Ident) =
+            let error ident =
+                if containsUnderscore ident then
+                    let error = sprintf "Identifiers should not contain underscores, but one was found in: %s" ident
+                    postError identifier.idRange error
+
+            identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
+                |> Seq.iter error
+
+        let checkException postError identifier =
+            expectPascalCase postError identifier
+            if not <| identifier.idText.EndsWith("Exception") then
+                let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
+                postError identifier.idRange error
+
+        let checkInterface postError identifier =
+            expectPascalCase postError identifier
+            if not <| identifier.idText.StartsWith("I") then
+                let error = "Interface identifiers should begin with the letter I found interface " + identifier.idText
+                postError identifier.idRange error
+
     let isSymbolAnInterface = function
         | Some(symbol:FSharpSymbol) ->
             match symbol with
             | :? FSharpEntity as entity when entity.IsInterface -> true
             | _ -> false
         | None -> false
-
-    /// Validate the name conventions of an active pattern definition (for example '|Dog|Cat|').
-    let expectValidActivePatternDefinition postError (identifier:Ident) =
-        let error ident =
-            if containsUnderscore ident then
-                let error = sprintf "Identifiers should not contain underscores, but one was found in: %s" ident
-                postError identifier.idRange error
-
-        identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
-            |> Seq.iter error
 
     let checkComponentInfo postError (checkFile:CheckFileResults) (identifier:LongIdent) =
         let interfaceIdentifier = identifier.[List.length identifier - 1]
@@ -205,49 +141,13 @@ module NameConventions =
                     | _ -> false
             | None -> false
                 
-        if not <| isSymbolAnExtensionType symbol then
-            identifier |> List.iter (expectPascalCase postError)
-
         if isSymbolAnInterface symbol then 
-            if not <| interfaceIdentifier.idText.StartsWith("I") then
-                let error = "Interface identifiers should begin with the letter I found interface " + interfaceIdentifier.idText
-                postError interfaceRange error
-
-    let checkException postError (checkFile:CheckFileResults) = function
-        | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
-            if not <| identifier.idText.EndsWith("Exception") then
-                let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
-                postError identifier.idRange error
-
-    let isNamedPatternActivePattern (checkFile:CheckFileResults) (identifier:Ident) =
-        let line, endColumn, ident = identifier.idRange.EndLine, identifier.idRange.EndColumn, identifier.idText
-
-        let symbol = checkFile.GetSymbolAtLocation(line - 1, endColumn, "", [ident])
-
-        let isActivePattern = function
-            | Some(symbol:FSharpSymbol) ->
-                match symbol with
-                    | :? FSharpMemberFunctionOrValue as memberFunctionOrValue when memberFunctionOrValue.IsActivePattern -> 
-                        true
-                    | _ -> false
-            | None -> false
-
-        symbol |> isActivePattern
-
-    let checkNamedPattern postError (checkFile:CheckFileResults) (identifier:Ident) =
-        if isNamedPatternActivePattern checkFile identifier then
-            expectValidActivePatternDefinition postError identifier
-        else
-            expectCamelCase postError identifier
-
-    let checkLongIdentPattern postError (checkFile:CheckFileResults) (longIdentifier:LongIdentWithDots) (identifier:Ident option) =
-        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-
-        match longIdentPatternType longIdentifier identifier checkFile with
-            | Member when lastIdent.idText <> "new" -> expectPascalCase postError lastIdent
-            | ValueOrFunction -> expectCamelCase postError lastIdent
-            | ActivePatternDefinition -> expectValidActivePatternDefinition postError lastIdent
-            | _ -> ()
+            CheckIdentifiers.checkInterface postError interfaceIdentifier
+        else if not <| isSymbolAnExtensionType symbol then
+            identifier |> List.iter (expectPascalCase postError)
+            
+    let isActivePattern (identifier:Ident) =
+        Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
     let isLiteral (attributes:SynAttributes) (checkFile:CheckFileResults) = 
         let isLiteralAttribute (attribute:SynAttribute) =
@@ -269,61 +169,65 @@ module NameConventions =
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
     let rec visitor visitorInfo checkFile astNode = 
-        let expectCamelCase, expectPascalCase = expectCamelCase visitorInfo.PostError, expectPascalCase visitorInfo.PostError
-
         match astNode.Node with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, _, _, _, _, _)) -> 
-                identifier |> List.iter expectPascalCase
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, _)) -> 
+                let checkIdent = 
+                    if isModule then CheckIdentifiers.checkModule visitorInfo.PostError
+                    else CheckIdentifiers.checkNamespace visitorInfo.PostError
+                        
+                identifier |> List.iter checkIdent
                 Continue
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
-                expectPascalCase identifier
+                CheckIdentifiers.checkUnionCase visitorInfo.PostError identifier
                 Continue
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
-                identifier |> Option.iter expectPascalCase
+                identifier |> Option.iter (CheckIdentifiers.checkRecordField visitorInfo.PostError)
                 Continue
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
-                expectPascalCase identifier
+                CheckIdentifiers.checkEnumCase visitorInfo.PostError identifier
                 Continue
             | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
                 checkComponentInfo visitorInfo.PostError checkFile identifier
                 Continue
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
-                checkException visitorInfo.PostError checkFile unionCase
+                match unionCase with
+                    | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
+                        CheckIdentifiers.checkException visitorInfo.PostError identifier
                 Continue
             | AstNode.Expression(expr) ->
                 match expr with
                     | SynExpr.For(_, identifier, _, _, _, _, _) ->
-                        expectCamelCase identifier
+                        CheckIdentifiers.checkNonPublicValue visitorInfo.PostError identifier
                     | _ -> ()
                 Continue
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                     | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
-                        expectPascalCase identifier
+                        CheckIdentifiers.checkMember visitorInfo.PostError identifier
                     | _ -> ()
                 Continue
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        checkLongIdentPattern visitorInfo.PostError checkFile longIdentifier identifier
-                    | SynPat.Named(_, identifier, _, _, _) -> 
-                        checkNamedPattern visitorInfo.PostError checkFile identifier
+                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
+                        CheckIdentifiers.checkNonPublicValue visitorInfo.PostError lastIdent
+                    | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
+                        CheckIdentifiers.checkParameter visitorInfo.PostError identifier
                     | _ -> ()
                 Continue
             | AstNode.SimplePattern(pattern) ->
                 match pattern with
-                    | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
-                        if not <| isCompilerGenerated then
-                            expectCamelCase identifier
+                    | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) when not isCompilerGenerated ->
+                        CheckIdentifiers.checkParameter visitorInfo.PostError identifier
                     | _ -> ()
                 Continue
             | AstNode.Binding(binding) ->
                 match binding with
-                    | SynBinding.Binding(_, _, _, _, attributes, _, _, pattern, _, _, _, _) -> 
+                    | SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _) -> 
                         if isLiteral attributes checkFile then
                             match pattern with
                                 | SynPat.Named(_, identifier, _, _, _) -> 
-                                    expectPascalCase identifier
+                                    CheckIdentifiers.checkLiteral visitorInfo.PostError identifier
                                 | _ -> ()
 
                             Stop
@@ -331,45 +235,37 @@ module NameConventions =
                             let getVisitorForChild i child =
                                 match child with
                                     | Pattern(_) ->
-                                        Some(bindingPatternVisitor visitorInfo checkFile)
+                                        Some(bindingPatternVisitor visitorInfo checkFile valData)
                                     | _ -> 
                                         Some(visitor visitorInfo checkFile)
 
                             ContinueWithVisitorsForChildren(getVisitorForChild)
             | _ -> Continue
     and 
-        bindingPatternVisitor visitorInfo checkFile astNode = 
+        bindingPatternVisitor visitorInfo checkFile valData astNode = 
             match astNode.Node with
                 | AstNode.Pattern(pattern) ->
                     match pattern with
                         | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
                             let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-                            match longIdentPatternType longIdentifier identifier checkFile with
-                                | Member when lastIdent.idText <> "new" -> 
-                                    expectPascalCase visitorInfo.PostError lastIdent
+                            match valData with
+                                | Value | Function when isActivePattern lastIdent ->
+                                    CheckIdentifiers.checkActivePattern visitorInfo.PostError lastIdent
                                     Continue
-                                | ValueOrFunction when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
-                                    expectNoUnderscore visitorInfo.PostError lastIdent
+                                | Value | Function when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
+                                    CheckIdentifiers.checkPublicValue visitorInfo.PostError lastIdent
                                     ContinueWithVisitor(visitor visitorInfo checkFile)
-                                | ValueOrFunction -> 
-                                    expectCamelCase visitorInfo.PostError lastIdent
+                                | Value | Function ->
+                                    CheckIdentifiers.checkNonPublicValue visitorInfo.PostError lastIdent
                                     Continue
-                                | ActivePatternDefinition -> 
-                                    expectValidActivePatternDefinition visitorInfo.PostError lastIdent
+                                | Member | Property -> 
+                                    CheckIdentifiers.checkMember visitorInfo.PostError lastIdent
                                     Continue
                                 | _ -> Continue
-                        | SynPat.Named(_, identifier, _, _, _) -> 
-                            if isNamedPatternActivePattern checkFile identifier then
-                                expectValidActivePatternDefinition visitorInfo.PostError identifier
-                            else
-                                expectNoUnderscore visitorInfo.PostError identifier
+                        | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
+                            if isActivePattern identifier then
+                                CheckIdentifiers.checkActivePattern visitorInfo.PostError identifier
                             Continue
                         | _ -> Continue
-                | AstNode.SimplePattern(pattern) ->
-                    match pattern with
-                        | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) ->
-                            expectNoUnderscore visitorInfo.PostError identifier
-                        | _ -> ()
-                    Continue
                 | _ -> Continue

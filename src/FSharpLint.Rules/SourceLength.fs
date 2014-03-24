@@ -24,25 +24,11 @@ module SourceLength =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.TypeChecking
+    open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
 
     [<Literal>]
     let AnalyserName = "FSharpLint.SourceLength"
-
-    let (|Member|Function|Value|Constructor|Property|) = function
-        | SynValData.SynValData(memberFlags, valInfo, _) -> 
-            match memberFlags with
-                | Some(memberFlags) -> 
-                    match memberFlags.MemberKind with
-                        | MemberKind.Constructor(_)
-                        | MemberKind.ClassConstructor(_) -> Constructor
-                        | MemberKind.Member(_) -> Member
-                        | MemberKind.PropertyGet(_)
-                        | MemberKind.PropertySet(_)
-                        | MemberKind.PropertyGetSet(_) -> Property
-                | None when valInfo.ArgInfos.Length = 0 -> Value
-                | None -> Function
 
     let configRuleSettings (config:Map<string,Analyser>) ruleName =
         if not <| config.ContainsKey AnalyserName then

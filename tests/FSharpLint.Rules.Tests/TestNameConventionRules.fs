@@ -48,18 +48,6 @@ type TestNameConventionRules() =
         Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
-    member this.IsOperator() = 
-        Assert.IsTrue(isOperator "op_LeftShift")
-
-        Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")
-
-        Assert.IsFalse(isOperator "TwiddleEqualsDivideComma")
-
-        Assert.IsFalse(isOperator "op_fTwiddleEqualsDivideComma")
-
-        Assert.IsFalse(isOperator "op_TwiddleEqualsDivideCommaf")
-
-    [<Test>]
     member this.ClassNameIsPascalCase() = 
         this.Parse """
 module Program
@@ -307,10 +295,9 @@ module program
     member this.PrivateTupleIsPascalCase() = 
         this.Parse """
 module program
-  let main = 
-    let private (Cat, _) = 1, 0"""
+  let private Cat, private dog = 1, 0"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 17))
+        Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
     member this.PublicTupleIsCamelCase() = 

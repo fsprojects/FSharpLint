@@ -48,6 +48,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="README.md" />
+    <Compile Include="TestAstInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
