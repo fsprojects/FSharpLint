@@ -20,10 +20,114 @@ module TestNameConventionRules
 
 open NUnit.Framework
 open FSharpLint.Rules.NameConventions
+open FSharpLint.Framework.Configuration
+
+let config = 
+    Map.ofList 
+        [ 
+            (AnalyserName, 
+                { 
+                    Rules = Map.ofList 
+                        [ 
+                            ("IdentifiersMustNotContainUnderscores", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("InterfaceNamesMustBeginWithI", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("ExceptionNamesMustEndWithException", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("TypeNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("ParameterMustBeCamelCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("RecordFieldNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("EnumCasesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("ModuleNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("LiteralNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("NamespaceNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("MemberNamesMustBePascalCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("PublicValuesPascalOrCamelCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("NonPublicValuesCamelCase", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                        ] 
+                    Settings = Map.ofList []
+                }) 
+        ]
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.IsPascalCase() = 

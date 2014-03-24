@@ -3,6 +3,11 @@
   <Analysers>
     <Analyser AnalyserId="FSharpLint.NameConventions">
       <Rules>
+        <Rule Name="IdentifiersMustNotContainUnderscores">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
         <Rule Name="InterfaceNamesMustBeginWithI">
           <RuleSettings>
             <Property name="Enabled">True</Property>
@@ -23,7 +28,7 @@
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
-        <Rule Name="EnumNamesMustBePascalCase">
+        <Rule Name="EnumCasesMustBePascalCase">
           <RuleSettings>
             <Property name="Enabled">True</Property>
           </RuleSettings>
@@ -48,12 +53,12 @@
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
-        <Rule Name="PublicLetBindingsPascalOrCamelCase">
+        <Rule Name="PublicValuesPascalOrCamelCase">
           <RuleSettings>
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
-        <Rule Name="NonPublicLetBindingsCamelCase">
+        <Rule Name="NonPublicValuesCamelCase">
           <RuleSettings>
             <Property name="Enabled">True</Property>
           </RuleSettings>
