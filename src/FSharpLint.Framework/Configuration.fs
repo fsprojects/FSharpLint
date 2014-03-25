@@ -146,4 +146,10 @@ module Configuration =
         overwriteMap configToOverride newAnalysers overrideAnalysers
         
     let loadDefaultConfiguration () =
-        System.IO.File.ReadAllText("DefaultConfiguration.FSharpLint") |> configuration
+        let assembly = System.Reflection.Assembly.GetExecutingAssembly()
+        let resourceName = "DefaultConfiguration.FSharpLint"
+
+        use stream = assembly.GetManifestResourceStream(resourceName)
+        use reader = new System.IO.StreamReader(stream)
+
+        reader.ReadToEnd() |> configuration

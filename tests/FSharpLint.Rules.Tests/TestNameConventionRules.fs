@@ -365,7 +365,6 @@ namespace matt.dog.cat"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
-    /// We're not going to bother checking this as the compiler issues a warning for it.
     [<Test>]
     member this.VariablePatternMatchIsPascalCase() = 
         this.Parse """
@@ -374,7 +373,7 @@ module program
     match true with
     | Dog -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 6))
+        Assert.IsTrue(this.ErrorExistsAt(5, 6))
 
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 

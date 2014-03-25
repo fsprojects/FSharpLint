@@ -37,16 +37,15 @@
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="Configuration.fs" />
     <Compile Include="Tokeniser.fs" />
     <Compile Include="LexRuleMatching.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
-    <None Include="DefaultConfiguration.FSharpLint">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="README.md" />
+    <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -65,7 +64,6 @@
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
