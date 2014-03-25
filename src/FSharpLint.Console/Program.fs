@@ -27,26 +27,14 @@ module Program =
         let input = """
 module goat
 
-let dog = fun x ->
-    ()
-
 type Goat =
     | Dog
+    | Fart
 
-    member this.Cat() = ()
-
-exception Dog of string
-
-type Class() =
-    let mutable value = 10
-let Goat2() =
-    let Cat = 5
-
-    Cat
-
-let meow a b c d e f g h i = ()
-
-let Dog = 7"""
+let meow a b c d e f g h i = 
+    match a with
+    | Dog -> ()
+    | Fart -> ()"""
 
         let postError range error =
             ErrorHandling.errorHandler.Post(

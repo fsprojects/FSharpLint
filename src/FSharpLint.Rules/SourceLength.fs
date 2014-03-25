@@ -87,7 +87,7 @@ module SourceLength =
 
                         let expectMaxLines = expectMaxLines visitorInfo binding.RangeOfBindingAndRhs
 
-                        match valData with
+                        match identifierTypeFromValData valData with
                             | Value -> 
                                 expectMaxLines "MaxLinesInValue" "Value" 
                             | Function -> 
@@ -98,6 +98,7 @@ module SourceLength =
                                 expectMaxLines "MaxLinesInConstructor" "Constructor" 
                             | Property -> 
                                 expectMaxLines "MaxLinesInProperty" "Property"
+                            | Other -> ()
 
                         Continue
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, range)) when isModule -> 

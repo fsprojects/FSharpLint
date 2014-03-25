@@ -21,8 +21,34 @@ namespace FSharpLint.Framework
 module AstInfo =
 
     open Microsoft.FSharp.Compiler.Ast
-    
-    let (|Member|Function|Value|Constructor|Property|) = function
+    open Microsoft.FSharp.Compiler.SourceCodeServices
+
+    let isValue (identifier:LongIdent) (checkFile:CheckFileResults) =
+        if System.Char.IsUpper(identifier.Head.idText.[0]) && identifier.Length = 1 then
+            let identifier = identifier.Head
+
+            let startLine, endColumn = identifier.idRange.StartLine, identifier.idRange.EndColumn
+
+            let symbol = checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [identifier.idText])
+
+            match symbol with
+                | Some(symbol:FSharpSymbol) ->
+                    match symbol with
+                        | :? FSharpMemberFunctionOrValue -> true
+                        | _ -> false
+                | None -> false
+        else 
+            identifier.Length = 1
+
+    type IdentifierType =
+        | Member
+        | Function
+        | Value
+        | Constructor
+        | Property
+        | Other
+
+    let identifierTypeFromValData = function
         | SynValData.SynValData(memberFlags, valInfo, _) -> 
             match memberFlags with
                 | Some(memberFlags) -> 
@@ -35,6 +61,15 @@ module AstInfo =
                         | MemberKind.PropertyGetSet(_) -> Property
                 | None when valInfo.ArgInfos.Length = 0 -> Value
                 | None -> Function
+    
+    let identifierType (identifier:LongIdent) (checkFile:CheckFileResults) valData =
+        match identifierTypeFromValData valData with
+            | Value -> 
+                if isValue identifier checkFile then
+                    Value
+                else
+                    Other
+            | identifierType -> identifierType
 
     let operatorIdentifiers = [
         "op_Nil"

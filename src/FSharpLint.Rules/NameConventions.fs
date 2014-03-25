@@ -95,20 +95,23 @@ module NameConventions =
             if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config then
                 expectNoUnderscore visitorInfo.PostError identifier
 
-        let checkNonPublicValue visitorInfo identifier =
-            if "NonPublicValuesCamelCase" |> isRuleEnabled visitorInfo.Config then
-                expectCamelCase visitorInfo.PostError identifier
+        let checkNonPublicValue visitorInfo (identifier:Ident) =
+            if not <| isOperator identifier.idText then
+                if "NonPublicValuesCamelCase" |> isRuleEnabled visitorInfo.Config then
+                    expectCamelCase visitorInfo.PostError identifier
 
-            expectNoUnderscore visitorInfo identifier
+                expectNoUnderscore visitorInfo identifier
 
-        let checkPublicValue visitorInfo identifier =
-            expectNoUnderscore visitorInfo identifier
+        let checkPublicValue visitorInfo (identifier:Ident) =
+            if not <| isOperator identifier.idText then
+                expectNoUnderscore visitorInfo identifier
 
-        let checkMember visitorInfo identifier =
-            if "MemberNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
-                expectPascalCase visitorInfo.PostError identifier
+        let checkMember visitorInfo (identifier:Ident) =
+            if not <| isOperator identifier.idText then
+                if "MemberNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+                    expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+                expectNoUnderscore visitorInfo identifier
 
         let checkNamespace visitorInfo identifier =
             if "NamespaceNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
@@ -278,8 +281,8 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
-                        CheckIdentifiers.checkNonPublicValue visitorInfo lastIdent
+                        if isValue longIdentifier.Lid checkFile then
+                            CheckIdentifiers.checkNonPublicValue visitorInfo longIdentifier.Lid.Head
                     | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                         CheckIdentifiers.checkParameter visitorInfo identifier
                     | _ -> ()
@@ -318,7 +321,7 @@ module NameConventions =
                         | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
                             let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-                            match valData with
+                            match identifierType longIdentifier.Lid checkFile valData with
                                 | Value | Function when isActivePattern lastIdent ->
                                     CheckIdentifiers.checkActivePattern visitorInfo lastIdent
                                     Continue
