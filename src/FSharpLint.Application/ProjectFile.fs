@@ -193,8 +193,10 @@ module ProjectFile =
         let projectConfigPath = System.IO.Path.GetDirectoryName(projectFile)
 
         let config = 
-            if projectConfigPath <> null && System.IO.File.Exists(projectConfigPath + "/" + SettingsFileName) then
-                overrideConfiguration config (projectConfigPath + "/" + SettingsFileName)
+            let filename = System.IO.Path.Combine(projectConfigPath, SettingsFileName)
+
+            if projectConfigPath <> null && System.IO.File.Exists(filename) then
+                overrideConfiguration config filename
             else
                 config
 

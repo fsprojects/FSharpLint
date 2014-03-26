@@ -41,15 +41,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
+      <HintPath>..\..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Data, Version=1.1.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\FSharp.Data\FSharp.Data.dll</HintPath>
     </Reference>
-    <Reference Include="fsharplint, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\FSharpLint.Console\bin\fsharplint.exe</HintPath>
+    <Reference Include="FSharpLint.Application">
+      <HintPath>..\FSharpLint.Application\bin\Debug\FSharpLint.Application.dll</HintPath>
     </Reference>
     <Reference Include="FSharpLint.Framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

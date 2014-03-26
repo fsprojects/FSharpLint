@@ -74,19 +74,26 @@ let meow a b c d e f g h i =
     
     [<EntryPoint>]
     let main argv = 
+        (*
         parseLiteralString()
         System.Console.ReadKey() |> ignore
 
-        (*
+        *)
+
+        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharp.Data\src\FSharp.Data.DesignTime.fsproj" |]
+
         if argv.Length < 2 then
             help()
         else
             match argv.[0] with
             | "-f" -> 
-                ProjectFile.parseProject argv.[1]
+                let finishEarly = System.Func<_>(fun _ -> false)
+                let action = System.Action<_>(fun _ -> ())
+
+                ignore <|
+                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, action)
                 System.Console.WriteLine("Finished.")
                 System.Console.ReadKey() |> ignore
             | _ -> help()
-        *)
 
         0

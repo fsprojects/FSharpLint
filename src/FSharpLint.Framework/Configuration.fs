@@ -114,8 +114,10 @@ module Configuration =
             Settings = overwriteMap oldRules.Settings newRules.Settings overrideRuleSettings
         }
 
+    let loadFileFromFileSystem path = System.IO.File.ReadAllText(path)
+
     let overrideConfiguration configToOverride file =
-        let newAnalysers = configuration file
+        let newAnalysers = loadFileFromFileSystem file |> configuration
 
         overwriteMap configToOverride newAnalysers overrideAnalysers
         

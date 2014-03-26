@@ -420,7 +420,8 @@ module Ast =
                         | SynPat.Paren(pattern, _) -> 
                             yield Pattern(pattern)
                         | SynPat.Record(patternsAndIdentifier, _) -> 
-                            for x in patternsAndIdentifier do yield Pattern(pattern)
+                            for (_, x) in patternsAndIdentifier do 
+                                yield Pattern(x)
                         | SynPat.Null(_) -> ()
                         | SynPat.OptionalVal(identifier, _) -> ()
                         | SynPat.IsInst(synType, _) -> 

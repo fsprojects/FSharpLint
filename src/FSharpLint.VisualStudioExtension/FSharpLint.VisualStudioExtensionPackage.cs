@@ -152,7 +152,7 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             {
                 if (!endEarly())
                 {
-                    FSharpLint.Console.ProjectFile.parseProject(
+                    FSharpLint.Application.ProjectFile.parseProject(
                         endEarly,
                         project.FileName,
                         this.OutputProgress,
@@ -163,7 +163,7 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             }
         }
 
-        private void OutputProgress(FSharpLint.Console.ProjectFile.ParserProgress progress)
+        private void OutputProgress(FSharpLint.Application.ProjectFile.ParserProgress progress)
         {
             if (progress.IsStarting)
             {
@@ -216,7 +216,7 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
             errorTask.Line -= 1; // Restore the index start
         }
 
-        private Action<FSharpLint.Console.ErrorHandling.Error> AddError(EnvDTE.Project project)
+        private Action<FSharpLint.Application.ErrorHandling.Error> AddError(EnvDTE.Project project)
         {
             return error =>
             {
