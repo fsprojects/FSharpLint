@@ -5,26 +5,22 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>ffb38d12-8e91-42c9-aba6-2aae5c60f805</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>MattMcveigh.FSharpLint</RootNamespace>
-    <AssemblyName>fsharplint</AssemblyName>
+    <ProjectGuid>1173ca4a-b636-4945-96c8-6f7e92f6a3f6</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>FSharpLint.Application</RootNamespace>
+    <AssemblyName>FSharpLint.Application</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>FSharpLint.Console</Name>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <Name>FSharpLint.Application</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <Tailcalls>false</Tailcalls>
-    <OutputPath>bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\MattMcveigh.FSharpLint.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Debug\FSharpLint.Application.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,24 +29,17 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\MattMcveigh.FSharpLint.XML</DocumentationFile>
-    <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>bin\Release\FSharpLint.Application.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
-  <ItemGroup>
-    <Compile Include="Program.fs" />
-    <None Include="App.config" />
-    <None Include="packages.config" />
-    <None Include="README.md" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
+      <HintPath>..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Tasks.v4.0" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -60,11 +49,10 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Application\FSharpLint.Application.fsproj">
-      <Name>FSharpLint.Application</Name>
-      <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
+    <Compile Include="ErrorHandling.fs" />
+    <Compile Include="ProjectFile.fs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Framework\FSharpLint.Framework.fsproj">
       <Name>FSharpLint.Framework</Name>
       <Project>{94220ba0-e632-4f4f-8f6d-a11a5aa52636}</Project>
@@ -76,7 +64,10 @@
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint.Console
+namespace FSharpLint.Application
 
 /// <summary>Runs the lint on an entire project using a .fsproj file.</summary>
 /// <remarks>

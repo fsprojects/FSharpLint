@@ -22,33 +22,7 @@ open FSharp.Data
 
 module Configuration =
 
-    type Config = XmlProvider<"""<FSharpLintSettings>
-    <Analysers>
-        <Analyser AnalyserId="FSharpLint.NamingRules">
-            <Rules>
-                <Rule Name="InterfaceNamesMustBeginWithI">
-                    <RuleSettings>
-                        <Property name="Enabled">True</Property>
-                    </RuleSettings>
-                </Rule>
-                <Rule Name="InterfaceNamesMustBeginWithI">
-                    <RuleSettings>
-                        <Property name="Enabled">True</Property>
-                        <Property name="Enabled">True</Property>
-                    </RuleSettings>
-                </Rule>
-            </Rules>
-            <AnalyserSettings />
-        </Analyser>
-        <Analyser AnalyserId="FSharpLint.NamingRules">
-            <Rules />
-            <AnalyserSettings>
-                <Property name="Enabled">True</Property>
-                <Property name="MaxParameters">8</Property>
-            </AnalyserSettings>
-        </Analyser>
-    </Analysers>
-</FSharpLintSettings>""", Global = true>
+    type Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
 
     exception ConfigurationException of string
 

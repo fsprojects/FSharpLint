@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint.Console
+namespace FSharpLint.Application
 
 /// Contains the functionality for reporting lint errors.
 module ErrorHandling =

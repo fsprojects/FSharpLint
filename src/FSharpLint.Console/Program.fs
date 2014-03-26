@@ -22,6 +22,7 @@ module Program =
 
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Application.ErrorHandling
 
     let parseLiteralString () = 
         let input = """
@@ -37,7 +38,7 @@ let meow a b c d e f g h i =
     | Fart -> ()"""
 
         let postError range error =
-            ErrorHandling.errorHandler.Post(
+            errorHandler.Post(
                 {
                     Info = error
                     Range = range

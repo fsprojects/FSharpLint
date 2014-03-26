@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41975D
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Application", "src\FSharpLint.Application\FSharpLint.Application.fsproj", "{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
