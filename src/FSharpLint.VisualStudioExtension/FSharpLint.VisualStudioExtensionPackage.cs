@@ -131,14 +131,7 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
 
             this.cts = new CancellationTokenSource();
 
-            try
-            {
-                await System.Threading.Tasks.Task.Run(() => this.RunLint(cts.Token));
-            }
-            catch (OperationCanceledException)
-            {
-                this.outputPane.OutputString("Stopped running - you probably started building a project.");
-            }
+            await System.Threading.Tasks.Task.Run(() => this.RunLint(cts.Token));
 
             this.m.Text = ToolsButtonText;
             this.m.Enabled = true;
@@ -148,18 +141,25 @@ namespace MattMcveigh.FSharpLint_VisualStudioExtension
         {
             Func<bool> endEarly = () => token.IsCancellationRequested;
 
-            foreach (var project in this.Projects().Where(this.IsProjectFSharpProject))
+            try
             {
-                if (!endEarly())
+                foreach (var project in this.Projects().Where(this.IsProjectFSharpProject))
                 {
-                    FSharpLint.Application.ProjectFile.parseProject(
-                        endEarly,
-                        project.FileName,
-                        this.OutputProgress,
-                        this.AddError(project));
-                }
+                    if (!endEarly())
+                    {
+                        FSharpLint.Application.ProjectFile.parseProject(
+                            endEarly,
+                            project.FileName,
+                            this.OutputProgress,
+                            this.AddError(project));
+                    }
 
-                token.ThrowIfCancellationRequested();
+                    token.ThrowIfCancellationRequested();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                this.outputPane.OutputString("Stopped running - you probably started building a project or closed visual studio.");
             }
         }
 

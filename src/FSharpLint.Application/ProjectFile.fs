@@ -89,6 +89,11 @@ module ProjectFile =
         let frameworkMoniker = System.Runtime.Versioning.FrameworkName(".NETFramework", System.Version(projectInstance.ToolsVersion))
         let referenceAssemblies = Microsoft.Build.Utilities.ToolLocationHelper.GetPathToReferenceAssemblies(frameworkMoniker)
 
+        let fsharpCoreDirectory = Microsoft.Build.Utilities.ToolLocationHelper.GetProgramFilesReferenceAssemblyRoot() 
+                                      + @"\..\FSharp\3.0\Runtime\v4.0"
+
+        referenceAssemblies.Add(fsharpCoreDirectory)
+
         resolve.TargetFrameworkDirectories <- referenceAssemblies.ToArray()
         
         resolve.Execute() |> ignore

@@ -5,6 +5,8 @@
     <DisplayName>FSharpLint</DisplayName>
     <Description xml:space="preserve">FSharpLint, a work in progress on creating a lint tool for F#.</Description>
     <MoreInfo>https://github.com/duckmatt/FSharpLint</MoreInfo>
+    <License>LICENSE.txt</License>
+    <ReleaseNotes>Very early version, very likely to have problems</ReleaseNotes>
     <Tags>f# lint style fsharp fsharplint</Tags>
   </Metadata>
   <Installation InstalledByMsi="false">

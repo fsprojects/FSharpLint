@@ -80,7 +80,7 @@ let meow a b c d e f g h i =
 
         *)
 
-        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharp.Data\src\FSharp.Data.DesignTime.fsproj" |]
+        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharp.Data\src\FSharp.Data.fsproj" |]
 
         if argv.Length < 2 then
             help()
