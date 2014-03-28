@@ -1,23 +1,42 @@
-# FSharpLint
+#FSharpLint
 
-Attempt at a lint tool for F#.
+###About
 
-## Rules somewhat covered right now:
+FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
+The tool is configurable via XML and can be run from a console app, or inside Visual Studio using the Visual Studio extension.
 
-* Naming conventions following FSharp guidelines, further improvements to be made: any public value/function should be camel case or pascal case (right now restricted to camel case), and the spelling of words should be checked against a dictionary.
-* Suggests to use the ignore function over 'let _ = expr'
-* Restricts the number of parameters a function can have (right now it's set as 5 params, but this should be configurable).
+While the tool runnable right now, it has a limited set of rules and is probably not stable or well supported across systems - it's very early in development.
 
-At the moment there is no configuration, however when it is introduced I'm planning on using the same format as StyleCop.
+###Documentation
 
-## Project Layout
+Documentation is a work in progress at the moment, each project directory will contain a 
+README.md file with a brief technical overview of the code. The [wiki](https://github.com/duckmatt/FSharpLint/wiki) 
+will contain an overview of the tool and how to use it.
 
-* src/FSharpLint.Console is a console app project that at the moment runs the rules against a literal string as a fs script file and displays any errors on the console.
-* src/FSharpLint.Rules is where each rule is implemented inside of its own module.
-* src/FSharpLint.Framework contains common functions and types.
+###Support
 
-## Some documents to go off of:
+####Lint
 
-* FSharp guidelines: http://research.microsoft.com/en-us/um/cambridge/projects/fsharp/manual/fsharp-component-design-guidelines.pdf
-* OCaml guidelines: http://caml.inria.fr/resources/doc/guides/guidelines.en.html
-* Mascot (an OCaml lint) documentation: https://forge.ocamlcore.org/frs/download.php/988/mascot.pdf
+* Windows 7 and 8
+* FSharp 3.0
+
+####Visual Studio Extension
+
+* Windows 7 and 8
+* FSharp 3.0
+* Visual Studio 2012
+
+###Dependencies
+
+* NUnit
+* FSharp.Data (a built dll is included, reason is that I want to be able to build this project on Windows 7)
+* FSharp.Compiler.Services (a built dll is included, but this will be changed to the nuget package)
+
+###Licensing
+
+The project is licensed under GPLv3. For more information on the license see the LICENSE file and http://www.gnu.org/licenses/quick-guide-gplv3.html.
+
+###Contact
+
+Feel free to post an issue on [github](https://github.com/duckmatt/FSharpLint/issues) if you have any questions, have suggestions, or have found a defect.
+Aslo I can be contacted via email at [p4rk0ur@hotmail.co.uk](mailto:p4rk0ur@hotmail.co.uk)
