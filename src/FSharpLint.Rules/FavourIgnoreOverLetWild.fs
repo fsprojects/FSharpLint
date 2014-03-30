@@ -31,17 +31,9 @@ module FavourIgnoreOverLetWild =
     let AnalyserName = "FSharpLint.FavourIgnoreOverLetWild"
 
     let isEnabled (config:Map<string,Analyser>) =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let analyserSettings = config.[AnalyserName].Settings
-
-        if analyserSettings.ContainsKey "Enabled" then
-            match analyserSettings.["Enabled"] with 
-                | Enabled(e) when true -> true
-                | _ -> false
-        else
-            false
+        match isAnalyserEnabled config AnalyserName with
+            | Some(_) -> true
+            | None -> false
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with

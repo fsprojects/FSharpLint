@@ -31,25 +31,13 @@ module NestedStatements =
     let AnalyserName = "FSharpLint.NestedStatements"
 
     let configDepth (config:Map<string,Analyser>) =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let analyserSettings = config.[AnalyserName].Settings
-
-        let isEnabled = 
-            if analyserSettings.ContainsKey "Enabled" then
-                match analyserSettings.["Enabled"] with 
-                    | Enabled(e) when true -> true
-                    | _ -> false
-            else
-                false
-
-        if isEnabled && analyserSettings.ContainsKey "Depth" then
-            match analyserSettings.["Depth"] with
-                | Depth(l) -> Some(l)
-                | _ -> None
-        else
-            None
+        match isAnalyserEnabled config AnalyserName with
+            | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
+                match analyserSettings.["Depth"] with
+                    | Depth(l) -> Some(l)
+                    | _ -> None
+            | Some(_)
+            | None -> None
 
     let error depth =
         sprintf "Code should not be nested more deeply than a depth of %d" depth

@@ -45,14 +45,3 @@ module ErrorHandling =
             /// Entire input file, needed to display where in the file the error occurred.
             Input: string
         }
-
-    /// Agent that handles the application's errors.
-    /// Post errors as messages to report errors.
-    let errorHandler = MailboxProcessor.Start(fun agent -> 
-        let rec loop () = async {
-            let! error = agent.Receive()
-            Console.WriteLine(error.Info)
-            Console.WriteLine(errorInfoLine error.Range error.Input)
-            return! loop()
-        }
-        loop())

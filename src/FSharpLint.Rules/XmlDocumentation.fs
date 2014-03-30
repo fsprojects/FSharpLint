@@ -30,32 +30,14 @@ module XmlDocumentation =
     [<Literal>]
     let AnalyserName = "FSharpLint.XmlDocumentation"
 
-    let checkExceptionHeader (config:Map<string,Analyser>) =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let analyserSettings = config.[AnalyserName].Settings
-
-        let isEnabled = 
-            if analyserSettings.ContainsKey "Enabled" then
-                match analyserSettings.["Enabled"] with 
-                    | Enabled(e) when true -> true
-                    | _ -> false
-            else
-                true
-
-        let rules = config.[AnalyserName].Rules
-
-        if isEnabled && rules.ContainsKey "ExceptionDefinitionHeader" then
-            let ruleSettings = rules.["ExceptionDefinitionHeader"].Settings
-            if ruleSettings.ContainsKey "Enabled" then
+    let configExceptionHeader (config:Map<string,Analyser>) =
+        match isRuleEnabled config AnalyserName "ExceptionDefinitionHeader" with
+            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Enabled" ->
                 match ruleSettings.["Enabled"] with
                     | Enabled(b) when b = true -> true
                     | _ -> false
-            else
-                false
-        else
-            false
+            | Some(_)
+            | None -> false
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
@@ -65,7 +47,7 @@ module XmlDocumentation =
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
-                if checkExceptionHeader visitorInfo.Config then
+                if configExceptionHeader visitorInfo.Config then
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range "Expected exception type to have xml documentation."
             | _ -> ()

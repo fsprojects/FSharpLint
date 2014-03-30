@@ -24,62 +24,12 @@ module Program =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Application.ErrorHandling
 
-    let parseLiteralString () = 
-        let input = """
-module goat
-
-type Goat =
-    | Dog
-    | Meow
-
-let meow a b c d e f g h i = 
-    match a with
-    | Dog -> ()
-    | Meow -> ()"""
-
-        let postError range error =
-            errorHandler.Post(
-                {
-                    Info = error
-                    Range = range
-                    Input = input
-                })
-
-        let config = loadDefaultConfiguration()
-
-        let visitorInfo = 
-            {
-                Config = config
-                PostError = postError
-            }
-
-        let visitors = [
-            FSharpLint.Rules.NameConventions.visitor visitorInfo
-            FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
-            FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
-            FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
-            FSharpLint.Rules.SourceLength.visitor visitorInfo
-        ]
-         
-        try
-            parseInput input visitors |> ignore
-        with 
-            | ParseException(e)
-            | ConfigurationException(e) ->
-                System.Console.WriteLine(e)
-
     let help () =
         System.Console.WriteLine("Use -f followed by the absolute path of the .fsproj \
         file of the project to lint to run the tool.")
     
     [<EntryPoint>]
     let main argv = 
-        (*
-        parseLiteralString()
-        System.Console.ReadKey() |> ignore
-
-        *)
-
         let argv = [| "-f"; @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Rules\FSharpLint.Rules.fsproj" |]
 
         if argv.Length < 2 then

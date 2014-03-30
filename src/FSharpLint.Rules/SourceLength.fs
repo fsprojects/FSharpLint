@@ -30,32 +30,14 @@ module SourceLength =
     [<Literal>]
     let AnalyserName = "FSharpLint.SourceLength"
 
-    let configRuleSettings (config:Map<string,Analyser>) ruleName =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let rules = config.[AnalyserName].Rules
-
-        if not <| rules.ContainsKey ruleName then 
-            let error = sprintf "Expected rule %s for FSharpLint.SourceLength analyser in config." ruleName
-            raise <| ConfigurationException(error)
-
-        let ruleSettings = rules.[ruleName].Settings
-
-        let isEnabled = 
-            if ruleSettings.ContainsKey "Enabled" then
-                match ruleSettings.["Enabled"] with 
-                    | Enabled(e) when true -> true
-                    | _ -> false
-            else
-                false
-
-        if isEnabled && ruleSettings.ContainsKey "Lines" then
-            match ruleSettings.["Lines"] with
-                | Lines(l) -> Some(l)
-                | _ -> None
-        else
-            None
+    let configLines (config:Map<string,Analyser>) ruleName =
+        match isRuleEnabled config AnalyserName ruleName with
+            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
+                match ruleSettings.["Lines"] with
+                    | Lines(l) -> Some(l)
+                    | _ -> None
+            | Some(_)
+            | None -> None
 
     let error name i actual = 
         sprintf "%ss should be less than %d lines long, was %d lines long." name i actual
@@ -65,7 +47,7 @@ module SourceLength =
     let expectMaxLines visitorInfo range configRuleName errorName =
         let actualLines = length range
 
-        match configRuleSettings visitorInfo.Config configRuleName with
+        match configLines visitorInfo.Config configRuleName with
             | Some(expectedMaxLines) when actualLines > expectedMaxLines ->
                 visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
             | _ -> ()

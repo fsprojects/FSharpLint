@@ -34,24 +34,10 @@ module NameConventions =
     [<Literal>]
     let AnalyserName = "FSharpLint.NameConventions"
 
-    let isRuleEnabled (config:Map<string,Analyser>) ruleName =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let rules = config.[AnalyserName].Rules
-
-        if not <| rules.ContainsKey ruleName then 
-            let error = sprintf "Expected rule %s for %s analyser in config." ruleName AnalyserName
-            raise <| ConfigurationException(error)
-
-        let ruleSettings = rules.[ruleName].Settings
-
-        if ruleSettings.ContainsKey "Enabled" then
-            match ruleSettings.["Enabled"] with 
-                | Enabled(e) when true -> true
-                | _ -> false
-        else
-            false
+    let isRuleEnabled config ruleName =
+        match isRuleEnabled config AnalyserName ruleName with
+            | Some(_) -> true
+            | None -> false
 
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 

@@ -30,26 +30,14 @@ module FunctionParametersLength =
     [<Literal>]
     let AnalyserName = "FSharpLint.FunctionParametersLength"
 
-    let maxParametersFromConfig (config:Map<string,Analyser>) =
-        if not <| config.ContainsKey AnalyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." AnalyserName)
-
-        let analyserSettings = config.[AnalyserName].Settings
-
-        let isEnabled = 
-            if analyserSettings.ContainsKey "Enabled" then
-                match analyserSettings.["Enabled"] with 
-                    | Enabled(e) when true -> true
-                    | _ -> false
-            else
-                false
-
-        if isEnabled && analyserSettings.ContainsKey "MaxParameters" then
-            match analyserSettings.["MaxParameters"] with
-                | MaxParameters(p) -> Some(p)
-                | _ -> None
-        else
-            None
+    let configMaxParameters (config:Map<string,Analyser>) =
+        match isAnalyserEnabled config AnalyserName with
+            | Some(analyserSettings) when analyserSettings.ContainsKey "MaxParameters" ->
+                match analyserSettings.["MaxParameters"] with
+                    | MaxParameters(p) -> Some(p)
+                    | _ -> None
+            | Some(_)
+            | None -> None
 
     let error i = sprintf "Functions should have less than %d parameters" i
     
@@ -58,7 +46,7 @@ module FunctionParametersLength =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, constructorArguments, access, range) ->
-                        match maxParametersFromConfig visitorInfo.Config with
+                        match configMaxParameters visitorInfo.Config with
                             | Some(maxParameters) ->
                                 match constructorArguments with
                                     | SynConstructorArgs.Pats(patterns) when List.length patterns >= maxParameters -> 
