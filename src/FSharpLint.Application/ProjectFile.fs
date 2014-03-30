@@ -229,6 +229,7 @@ module ProjectFile =
                     FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
                     FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
                     FSharpLint.Rules.SourceLength.visitor visitorInfo
+                    FSharpLint.Rules.NestedStatements.visitor visitorInfo
                 ]
 
                 progress.Invoke(Starting(file))
@@ -245,6 +246,7 @@ module ProjectFile =
         try
             projectFileValues.FSharpFiles |> List.iter parseFile
         with 
+            | FSharpLint.Framework.Configuration.ConfigurationException(message)
             | FSharpLint.Framework.Ast.ParseException(message) -> 
                 System.Console.WriteLine(message)
 

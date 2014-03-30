@@ -30,12 +30,12 @@ module goat
 
 type Goat =
     | Dog
-    | Fart
+    | Meow
 
 let meow a b c d e f g h i = 
     match a with
     | Dog -> ()
-    | Fart -> ()"""
+    | Meow -> ()"""
 
         let postError range error =
             errorHandler.Post(
@@ -80,7 +80,7 @@ let meow a b c d e f g h i =
 
         *)
 
-        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharp.Data\src\FSharp.Data.fsproj" |]
+        let argv = [| "-f"; @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Rules\FSharpLint.Rules.fsproj" |]
 
         if argv.Length < 2 then
             help()
@@ -89,9 +89,12 @@ let meow a b c d e f g h i =
             | "-f" -> 
                 let finishEarly = System.Func<_>(fun _ -> false)
                 let action = System.Action<_>(fun _ -> ())
+                let error = System.Action<Error>(fun error -> 
+                    System.Console.WriteLine(error.Info)
+                    System.Console.WriteLine(errorInfoLine error.Range error.Input))
 
                 ignore <|
-                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, action)
+                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
                 System.Console.WriteLine("Finished.")
                 System.Console.ReadKey() |> ignore
             | _ -> help()

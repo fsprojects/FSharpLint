@@ -148,6 +148,13 @@
       </Rules>
       <AnalyserSettings />
     </Analyser>
+    <Analyser AnalyserId="FSharpLint.NestedStatements">
+      <Rules />
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+        <Property name="Depth">8</Property>
+      </AnalyserSettings>
+    </Analyser>
     <Analyser AnalyserId="FSharpLint.FunctionParametersLength">
       <Rules />
       <AnalyserSettings>

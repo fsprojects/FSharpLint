@@ -44,6 +44,7 @@
     <Compile Include="TestFunctionParametersLengthRules.fs" />
     <Compile Include="TestXmlDocumentationRules.fs" />
     <Compile Include="TestSourceLengthRules.fs" />
+    <Compile Include="TestNestedStatementsRules.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
   </ItemGroup>

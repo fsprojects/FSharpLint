@@ -41,6 +41,7 @@
     <Compile Include="FavourIgnoreOverLetWild.fs" />
     <Compile Include="XmlDocumentation.fs" />
     <Compile Include="SourceLength.fs" />
+    <Compile Include="NestedStatements.fs" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
