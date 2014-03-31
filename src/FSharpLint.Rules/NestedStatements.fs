@@ -26,6 +26,7 @@ module NestedStatements =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Framework.LoadAnalysers
 
     [<Literal>]
     let AnalyserName = "FSharpLint.NestedStatements"
@@ -44,7 +45,7 @@ module NestedStatements =
 
     exception UnexpectedNodeTypeException of string
     
-    let rec recVisitor depth (visitorInfo:VisitorInfo) (checkFile:CheckFileResults) astNode = 
+    let rec visitor depth (visitorInfo:VisitorInfo) (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
             | AstNode.Binding(SynBinding.Binding(_))
             | AstNode.Expression(SynExpr.Lambda(_))
@@ -75,9 +76,17 @@ module NestedStatements =
                         visitorInfo.PostError (range()) (error errorDepth)
                         Stop
                     | Some(_) ->
-                        ContinueWithVisitor(recVisitor (depth + 1) visitorInfo checkFile)
+                        ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
                     | None -> 
                         Stop
             | _ -> Continue
 
-    let visitor = recVisitor 0
+    type RegisterXmlDocumentationAnalyser() = 
+        let plugin =
+            {
+                Name = AnalyserName
+                Analyser = Ast(visitor 0)
+            }
+
+        interface IRegisterPlugin with
+            member this.RegisterPlugin with get() = plugin

@@ -44,6 +44,7 @@
     <Compile Include="LexRuleMatching.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
+    <Compile Include="LoadAnalysers.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />
@@ -51,7 +52,6 @@
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.43\lib\net40\FSharp.Compiler.Service.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>..\..\lib\FSharp.Data\FSharp.Data.dll</HintPath>

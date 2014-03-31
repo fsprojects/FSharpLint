@@ -159,6 +159,22 @@ module ProjectFile =
                 | Starting(f) 
                 | ReachedEnd(f)
                 | Failed(f) -> f
+
+    let astVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
+        [ for plugin in plugins do
+            match plugin.Analyser with
+                | FSharpLint.Framework.LoadAnalysers.Ast(visitor) -> 
+                    yield visitor visitorInfo
+                | FSharpLint.Framework.LoadAnalysers.PlainText(_) -> ()
+        ]
+
+    let plainTextVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
+        [ for plugin in plugins do
+            match plugin.Analyser with
+                | FSharpLint.Framework.LoadAnalysers.Ast(_) -> ()
+                | FSharpLint.Framework.LoadAnalysers.PlainText(visitor) -> 
+                    yield visitor visitorInfo
+        ]
         
     /// <summary>Parses and runs the linter on all the files in a project.</summary>
     /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
@@ -205,6 +221,9 @@ module ProjectFile =
             else
                 config
 
+        let rulesAssembly = System.Reflection.Assembly.Load("FSharpLint.Rules")
+        let plugins = FSharpLint.Framework.LoadAnalysers.loadPlugins rulesAssembly
+
         let parseFile file =
             if not <| finishEarly() then
                 let input = System.IO.File.ReadAllText(file)
@@ -223,23 +242,27 @@ module ProjectFile =
                         FSharpLint.Framework.Ast.PostError = postError
                     }
 
-                let visitors = [
-                    FSharpLint.Rules.NameConventions.visitor visitorInfo
-                    FSharpLint.Rules.FavourIgnoreOverLetWild.visitor visitorInfo
-                    FSharpLint.Rules.FunctionParametersLength.visitor visitorInfo
-                    FSharpLint.Rules.XmlDocumentation.visitor visitorInfo
-                    FSharpLint.Rules.SourceLength.visitor visitorInfo
-                    FSharpLint.Rules.NestedStatements.visitor visitorInfo
-                ]
-
                 progress.Invoke(Starting(file))
 
-                try
-                    FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
-                with 
-                    | FSharpLint.Framework.Ast.ParseException(message) -> 
-                        progress.Invoke(Failed(file))
-                        reraise()
+                let visitPlainText = async {
+                        for visitor in plainTextVisitors plugins visitorInfo do
+                            visitor input
+                    }
+
+                let visitAst = async {
+                        try
+                            let visitors = astVisitors plugins visitorInfo
+
+                            FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
+                        with 
+                            | FSharpLint.Framework.Ast.ParseException(message) -> 
+                                progress.Invoke(Failed(file))
+                    }
+
+                [visitAst; visitPlainText]
+                    |> Async.Parallel
+                    |> Async.RunSynchronously
+                    |> ignore
 
                 progress.Invoke(ReachedEnd(file))
 

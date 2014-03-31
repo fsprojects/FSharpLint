@@ -26,6 +26,7 @@ module FavourIgnoreOverLetWild =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Framework.LoadAnalysers
 
     [<Literal>]
     let AnalyserName = "FSharpLint.FavourIgnoreOverLetWild"
@@ -49,3 +50,13 @@ module FavourIgnoreOverLetWild =
             | _ -> ()
 
         Continue
+
+    type RegisterXmlDocumentationAnalyser() = 
+        let plugin =
+            {
+                Name = AnalyserName
+                Analyser = Ast(visitor)
+            }
+
+        interface IRegisterPlugin with
+            member this.RegisterPlugin with get() = plugin

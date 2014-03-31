@@ -26,7 +26,7 @@ module Ast =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Tokeniser
-
+    
     type VisitorInfo =
         {
             Config: Map<string, Configuration.Analyser>

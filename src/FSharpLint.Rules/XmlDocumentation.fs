@@ -26,6 +26,7 @@ module XmlDocumentation =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Framework.LoadAnalysers
 
     [<Literal>]
     let AnalyserName = "FSharpLint.XmlDocumentation"
@@ -44,7 +45,7 @@ module XmlDocumentation =
             | XmlDoc(lines) when Array.length lines = 0 -> true
             | _ -> false
 
-    let visitor visitorInfo checkFile astNode = 
+    let visitor visitorInfo (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 if configExceptionHeader visitorInfo.Config then
@@ -53,3 +54,13 @@ module XmlDocumentation =
             | _ -> ()
 
         Continue
+
+    type RegisterXmlDocumentationAnalyser() = 
+        let plugin =
+            {
+                Name = AnalyserName
+                Analyser = Ast(visitor)
+            }
+
+        interface IRegisterPlugin with
+            member this.RegisterPlugin with get() = plugin

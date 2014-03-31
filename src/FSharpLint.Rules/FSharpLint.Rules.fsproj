@@ -44,6 +44,7 @@
     <Compile Include="XmlDocumentation.fs" />
     <Compile Include="SourceLength.fs" />
     <Compile Include="NestedStatements.fs" />
+    <Compile Include="Typography.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
   </ItemGroup>
