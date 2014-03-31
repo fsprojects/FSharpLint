@@ -513,7 +513,7 @@ module Ast =
 
     /// Parse a file.
     let parse finishEarly (checker:InteractiveChecker) projectOptions file input visitors =
-        let parseFileResults = checker.ParseFileInProject(file, input, projectOptions)
+        let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match parseFileResults.ParseTree with
         | Some tree -> 
             let checkFileResults = 
@@ -535,6 +535,6 @@ module Ast =
 
         let file = "/home/user/Dog.test.fsx"
         
-        let projectOptions = checker.GetProjectOptionsFromScript(file, input)
+        let projectOptions = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
 
         parse (fun _ -> false) checker projectOptions file input visitors |> ignore

@@ -30,7 +30,7 @@ will contain an overview of the tool and how to use it.
 
 * NUnit
 * FSharp.Data (a built dll is included, reason is that I want to be able to build this project on Windows 7)
-* FSharp.Compiler.Services (a built dll is included, but this will be changed to the nuget package)
+* FSharp.Compiler.Services
 
 ###Licensing
 

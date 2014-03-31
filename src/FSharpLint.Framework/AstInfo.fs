@@ -29,11 +29,12 @@ module AstInfo =
 
             let startLine, endColumn = identifier.idRange.StartLine, identifier.idRange.EndColumn
 
-            let symbol = checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [identifier.idText])
+            let symbol = checkFile.GetSymbolUseAtLocation(startLine, endColumn, "", [identifier.idText])
+                            |> Async.RunSynchronously
 
             match symbol with
-                | Some(symbol:FSharpSymbol) ->
-                    match symbol with
+                | Some(symbol) ->
+                    match symbol.Symbol with
                         | :? FSharpMemberFunctionOrValue -> true
                         | _ -> false
                 | None -> false

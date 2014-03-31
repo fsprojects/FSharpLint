@@ -50,7 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\..\lib\FSharp.Compiler.Service\FSharp.Compiler.Service.dll</HintPath>
+      <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.43\lib\net40\FSharp.Compiler.Service.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">
       <HintPath>..\..\lib\FSharp.Data\FSharp.Data.dll</HintPath>

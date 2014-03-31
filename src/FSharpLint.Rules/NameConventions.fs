@@ -175,8 +175,8 @@ module NameConventions =
                 visitorInfo.PostError identifier.idRange error
 
     let isSymbolAnInterface = function
-        | Some(symbol:FSharpSymbol) ->
-            match symbol with
+        | Some(symbol:FSharpSymbolUse) ->
+            match symbol.Symbol with
             | :? FSharpEntity as entity when entity.IsInterface -> true
             | _ -> false
         | None -> false
@@ -187,12 +187,13 @@ module NameConventions =
 
         let startLine, endColumn = interfaceRange.StartLine, interfaceRange.EndColumn
 
-        let symbol = checkFile.GetSymbolAtLocation(startLine - 1, endColumn, "", [interfaceIdentifier.idText])
+        let symbol = checkFile.GetSymbolUseAtLocation(startLine, endColumn, "", [interfaceIdentifier.idText])
+                                |> Async.RunSynchronously
 
         /// Is symbol the same identifier but declared elsewhere?
         let isSymbolAnExtensionType = function
-            | Some(symbol:FSharpSymbol) ->
-                match symbol with
+            | Some(symbol:FSharpSymbolUse) ->
+                match symbol.Symbol with
                     | :? FSharpEntity as entity -> 
                         entity.DeclarationLocation.Start <> interfaceRange.Start
                         && entity.DisplayName = (interfaceIdentifier).idText
@@ -211,11 +212,19 @@ module NameConventions =
         let isLiteralAttribute (attribute:SynAttribute) =
             let range = attribute.TypeName.Range
             let names = attribute.TypeName.Lid |> List.map (fun x -> x.idText)
-            let symbol = checkFile.GetSymbolAtLocation(range.EndLine, range.EndColumn, "", names)
+            let symbol = checkFile.GetSymbolUseAtLocation(range.EndLine + 1, range.EndColumn, "", names)
+                            |> Async.RunSynchronously
             match symbol with
                 | Some(symbol) -> 
-                    match symbol with
-                        | :? FSharpEntity as entity when entity.DisplayName = "LiteralAttribute" -> 
+                    match symbol.Symbol with
+                        | :? FSharpEntity as entity when 
+                                entity.IsFSharpAbbreviation &&
+                                entity.AbbreviatedType.TypeDefinition.DisplayName = "LiteralAttribute" -> 
+                            match entity.AbbreviatedType.TypeDefinition.Namespace with
+                                | Some(name) when name.EndsWith("FSharp.Core") -> true
+                                | _ -> false
+                        | :? FSharpEntity as entity when 
+                                entity.IsClass && entity.DisplayName = "LiteralAttribute" -> 
                             match entity.Namespace with
                                 | Some(name) when name.EndsWith("FSharp.Core") -> true
                                 | _ -> false
