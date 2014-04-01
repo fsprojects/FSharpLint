@@ -41,10 +41,11 @@
     <Compile Include="TestRuleBase.fs" />
     <Compile Include="TestNameConventionRules.fs" />
     <Compile Include="TestFavourIgnoreOverLetWildRules.fs" />
-    <Compile Include="TestFunctionParametersLengthRules.fs" />
+    <Compile Include="TestNumberOfItemsRules.fs" />
     <Compile Include="TestXmlDocumentationRules.fs" />
     <Compile Include="TestSourceLengthRules.fs" />
     <Compile Include="TestNestedStatementsRules.fs" />
+    <Compile Include="TestTypographyRules.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
   </ItemGroup>

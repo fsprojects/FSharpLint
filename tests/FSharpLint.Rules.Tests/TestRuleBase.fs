@@ -23,6 +23,7 @@ open System.Linq
 open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.LoadAnalysers
 
 let emptyConfig =
     Map.ofList 
@@ -34,7 +35,7 @@ let emptyConfig =
         ]
 
 [<AbstractClass>]
-type TestRuleBase(visitor, ?config:Map<string, Analyser>) =
+type TestRuleBase(analyser:AnalyserType, ?config:Map<string, Analyser>) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
@@ -45,7 +46,14 @@ type TestRuleBase(visitor, ?config:Map<string, Analyser>) =
             | Some(c) -> c
             | None -> emptyConfig
 
-    member this.Parse input = parseInput input [visitor { PostError = postError; Config = config }]
+    member this.Parse input = 
+        let visitorInfo = { PostError = postError; Config = config }
+
+        match analyser with
+            | Ast(visitor) ->
+                parseInput input [visitor visitorInfo]
+            | PlainText(visitor) -> 
+                visitor visitorInfo input ""
 
     member this.ErrorExistsAt(startLine, startColumn) =
         errorRanges.Any(fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)

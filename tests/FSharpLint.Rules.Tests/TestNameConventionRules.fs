@@ -21,6 +21,7 @@ module TestNameConventionRules
 open NUnit.Framework
 open FSharpLint.Rules.NameConventions
 open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.LoadAnalysers
 
 let config = 
     Map.ofList 
@@ -127,7 +128,7 @@ let config =
 
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
 
     [<Test>]
     member this.IsPascalCase() = 

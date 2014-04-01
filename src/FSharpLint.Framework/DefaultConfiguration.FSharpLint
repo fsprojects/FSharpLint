@@ -148,6 +148,40 @@
       </Rules>
       <AnalyserSettings />
     </Analyser>
+    <Analyser AnalyserId="FSharpLint.Typography">
+      <Rules>
+        <Rule Name="MaxLinesInFile">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="Lines">1000</Property>>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxCharactersOnLine">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="Length">80</Property>>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="NoTabCharacters">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="TrailingNewLineInFile">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="TrailingWhitespaceOnLine">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyserSettings>
+        <Property name="Enabled">False</Property>
+      </AnalyserSettings>
+    </Analyser>
     <Analyser AnalyserId="FSharpLint.NestedStatements">
       <Rules />
       <AnalyserSettings>
@@ -155,12 +189,28 @@
         <Property name="Depth">8</Property>
       </AnalyserSettings>
     </Analyser>
-    <Analyser AnalyserId="FSharpLint.FunctionParametersLength">
-      <Rules />
-      <AnalyserSettings>
-        <Property name="Enabled">True</Property>
-        <Property name="MaxParameters">8</Property>
-      </AnalyserSettings>
+    <Analyser AnalyserId="FSharpLint.NumberOfItems">
+      <Rules>
+        <Rule Name="MaxNumberOfFunctionParameters">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="MaxItems">5</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxNumberOfMembers">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="MaxItems">32</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="MaxNumberOfItemsInTuple">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="MaxItems">4</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyserSettings />
     </Analyser>
     <Analyser AnalyserId="FSharpLint.FavourIgnoreOverLetWild">
       <Rules />

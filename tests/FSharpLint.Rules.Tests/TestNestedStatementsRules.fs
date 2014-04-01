@@ -21,6 +21,7 @@ module TestNestedStatements
 open NUnit.Framework
 open FSharpLint.Rules.NestedStatements
 open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.LoadAnalysers
 
 let config = 
     Map.ofList 
@@ -38,7 +39,7 @@ let config =
 
 [<TestFixture>]
 type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(visitor 0, config)
+    inherit TestRuleBase.TestRuleBase(Ast(visitor 0), config)
 
     [<Test>]
     member this.NestedTooDeep() = 

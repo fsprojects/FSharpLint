@@ -30,7 +30,8 @@ module Configuration =
         | Enabled of bool
         | Lines of int
         | Depth of int
-        | MaxParameters of int
+        | MaxItems of int
+        | Length of int
 
     type Rule = 
         {
@@ -51,8 +52,10 @@ module Configuration =
                 Some(Lines(property.Number.Value))
             | "Depth" when property.Number.IsSome -> 
                 Some(Depth(property.Number.Value))
-            | "MaxParameters" when property.Number.IsSome -> 
-                Some(MaxParameters(property.Number.Value)) 
+            | "Length" when property.Number.IsSome -> 
+                Some(Length(property.Number.Value))
+            | "MaxItems" when property.Number.IsSome -> 
+                Some(MaxItems(property.Number.Value)) 
             | _ -> 
                 None
 

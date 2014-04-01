@@ -27,29 +27,77 @@ module Typography =
     [<Literal>]
     let AnalyserName = "FSharpLint.Typography"
 
-    let createRange () =
-        mkRange "" (mkPos 1 1) (mkPos 1 1)
+    let isAnalyserEnabled config =
+        (isAnalyserEnabled config AnalyserName).IsSome
+
+    let isEnabled ruleName config =
+        match isRuleEnabled config AnalyserName ruleName with
+            | Some(_) -> true
+            | None -> false
+
+    let maxCharactersOnLine config =
+        match isRuleEnabled config AnalyserName "MaxCharactersOnLine" with
+            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Length" -> 
+                match ruleSettings.["Length"] with
+                    | Length(length) -> Some(length)
+                    | _ -> None
+            | _ -> None
+
+    let maxLinesInFile config =
+        match isRuleEnabled config AnalyserName "MaxLinesInFile" with
+            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
+                match ruleSettings.["Lines"] with
+                    | Lines(lines) -> Some(lines)
+                    | _ -> None
+            | _ -> None
+
+    let endsWithWhitespace (str:string) =
+        str.Length > 0 && System.Char.IsWhiteSpace(str.[str.Length - 1])
+
+    let lengthOfWhitespaceOnEnd (str:string) =
+        str.Length - str.TrimEnd().Length
+
+    let analyseLine (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) mkRange lineNumber (line:string) = 
+        let lineNumber = lineNumber + 1
+
+        maxCharactersOnLine visitorInfo.Config
+            |> Option.iter (fun maxCharacters ->
+                if line.Length > maxCharacters then
+                    let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber line.Length)
+                    let error = sprintf "Lines should be less than %d characters long." (maxCharacters + 1)
+                    visitorInfo.PostError range error)
+
+        if isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config && endsWithWhitespace line then
+            let whitespaceLength = lengthOfWhitespaceOnEnd line
+            let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
+            visitorInfo.PostError range "Lines should not have trailing whitespace."
+                
+        if isEnabled "NoTabCharacters" visitorInfo.Config then
+            let indexOfTab = line.IndexOf('\t')
+
+            if indexOfTab >= 0 then
+                let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
+                visitorInfo.PostError range "File should not contain tab characters."
     
-    let visitor (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) (file:string) = 
-        if file.Contains("\t") then
-            visitorInfo.PostError (createRange()) "File should not contain tab characters."
+    let visitor (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) (file:string) filename = 
+        if isAnalyserEnabled visitorInfo.Config then
+            let mkRange = mkRange filename
 
-        if file.EndsWith("\n") then
-            visitorInfo.PostError (createRange()) "File should not have a trailing new line."
+            let lines = file.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
 
-        let lines = file.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
+            if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
+                let range = mkRange (mkPos lines.Length 0) (mkPos lines.Length 0)
+                visitorInfo.PostError range "File should not have a trailing new line."
 
-        lines |> Array.iter (fun x -> 
-            if x.Length > 80 then
-                visitorInfo.PostError (createRange()) "Lines should be less than 80 characters long."
+            lines |> Array.iteri (analyseLine visitorInfo mkRange)
 
-            if lines |> Array.exists (fun x -> x.Length > 0 && System.Char.IsWhiteSpace(x.[x.Length - 1])) then
-                visitorInfo.PostError (createRange()) "Lines should not have trailing whitespace.")
+            maxLinesInFile visitorInfo.Config
+                |> Option.iter (fun maxLines ->
+                    if lines.Length > maxLines then
+                        let range = mkRange (mkPos (maxLines + 1) 0) (mkPos lines.Length lines.[lines.Length - 1].Length)
+                        let error = sprintf "Files should be less than %d lines long." (maxLines + 1)
+                        visitorInfo.PostError range error)
 
-        if lines.Length > 500 then
-            visitorInfo.PostError (createRange()) "Files should be less than 500 lines long."
-
-    (*
     type RegisterXmlDocumentationAnalyser() = 
         let plugin =
             {
@@ -59,4 +107,3 @@ module Typography =
 
         interface IRegisterPlugin with
             member this.RegisterPlugin with get() = plugin
-    *)

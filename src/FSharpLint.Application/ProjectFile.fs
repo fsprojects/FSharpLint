@@ -246,7 +246,7 @@ module ProjectFile =
 
                 let visitPlainText = async {
                         for visitor in plainTextVisitors plugins visitorInfo do
-                            visitor input
+                            visitor input file
                     }
 
                 let visitAst = async {

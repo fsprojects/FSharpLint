@@ -27,7 +27,7 @@ module LoadAnalysers =
 
     type AnalyserVisitor = Ast.VisitorInfo -> CheckFileResults -> Ast.Visitor
 
-    type PlainTextVisitor = Ast.VisitorInfo -> string -> unit
+    type PlainTextVisitor = Ast.VisitorInfo -> string -> string -> unit
 
     type AnalyserType =
         | Ast of AnalyserVisitor

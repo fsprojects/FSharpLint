@@ -21,6 +21,7 @@ module TestSourceLengthRules
 open NUnit.Framework
 open FSharpLint.Rules.SourceLength
 open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.LoadAnalysers
 
 [<Literal>]
 let FunctionLength = 70
@@ -171,7 +172,7 @@ let generateNewLines numNewLines =
 
 [<TestFixture>]
 type TestSourceLengthRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
 
     [<Test>]
     member this.ModuleTooManyLines() = 
