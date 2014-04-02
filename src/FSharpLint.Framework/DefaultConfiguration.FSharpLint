@@ -218,6 +218,12 @@
         <Property name="Enabled">True</Property>
       </AnalyserSettings>
     </Analyser>
+    <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
+      <Rules />
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+      </AnalyserSettings>
+    </Analyser>
     <Analyser AnalyserId="FSharpLint.XmlDocumentation">
       <Rules>
         <Rule Name="ExceptionDefinitionHeader">

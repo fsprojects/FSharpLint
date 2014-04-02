@@ -46,6 +46,7 @@
     <Compile Include="TestSourceLengthRules.fs" />
     <Compile Include="TestNestedStatementsRules.fs" />
     <Compile Include="TestTypographyRules.fs" />
+    <Compile Include="TestFunctionReimplementationRules.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
   </ItemGroup>

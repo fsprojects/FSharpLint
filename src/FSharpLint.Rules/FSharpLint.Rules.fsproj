@@ -45,6 +45,7 @@
     <Compile Include="SourceLength.fs" />
     <Compile Include="NestedStatements.fs" />
     <Compile Include="Typography.fs" />
+    <Compile Include="FunctionReimplementation.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
   </ItemGroup>
