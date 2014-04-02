@@ -184,6 +184,45 @@ type Test() =
         Assert.IsFalse(this.ErrorExistsAt(9, 11))
 
     [<Test>]
+    member this.SixTupleItemsExpressionConstructor() = 
+        this.Parse """
+module Program
+
+type Test(a,b,c,d,e,f) =
+    member this.One() = ()
+
+let dog = Test(1,2,3,4,5,6)"""
+
+        Assert.IsFalse(this.ErrorExistsAt(7, 25))
+
+    [<Test>]
+    member this.SixTupleItemsExpressionConstructorWithNew() = 
+        this.Parse """
+module Program
+
+type Test(a,b,c,d,e,f) =
+    member this.One() = ()
+
+let dog = new Test(1,2,3,4,5,6)"""
+
+        Assert.IsFalse(this.ErrorExistsAt(7, 29))
+
+    [<Test>]
+    member this.SixTupleItemsExpressionCallingMethod() = 
+        this.Parse """
+module Program
+
+type Test() =
+    member this.One(a,b,c,d,e,f) = ()
+
+let test = Test()
+
+let dog =
+    test.One(1,2,3,4,5,6)"""
+
+        Assert.IsFalse(this.ErrorExistsAt(10, 23))
+
+    [<Test>]
     member this.SixTupleItemsExpression() = 
         this.Parse """
 module Program

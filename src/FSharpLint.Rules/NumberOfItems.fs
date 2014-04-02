@@ -85,6 +85,26 @@ module NumberOfItems =
                 if List.length members > maxMembers then
                     let error = sprintf "Class must have a maximum of %d members" maxMembers
                     visitorInfo.PostError (members.[maxMembers].Range) error)
+
+    let isTupleAppliedToMember astNode =
+        let rec getApplicationNode = function
+            | node :: parents ->
+                match node with
+                    | AstNode.Expression(SynExpr.Paren(_)) ->
+                        getApplicationNode parents
+                    | AstNode.Expression(SynExpr.App(_) as application)
+                    | AstNode.Expression(SynExpr.New(_) as application) ->
+                        Some(application)
+                    | _ -> 
+                        None
+            | [] -> 
+                None
+
+        match astNode.Breadcrumbs |> getApplicationNode with
+            | Some(SynExpr.App(flag, _, _, _, _)) when flag = ExprAtomicFlag.Atomic -> true
+            | Some(SynExpr.New(_)) -> true
+            | Some(_)
+            | None -> false
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
@@ -96,7 +116,8 @@ module NumberOfItems =
             | AstNode.Expression(expression) ->
                 match expression with
                     | SynExpr.Tuple(expressions, _, _) ->
-                        validateTuple expressions visitorInfo
+                        if not <| isTupleAppliedToMember astNode then
+                            validateTuple expressions visitorInfo
                     | _ -> ()
             | AstNode.TypeDefinition(typeDefinition) ->
                 match typeDefinition with
