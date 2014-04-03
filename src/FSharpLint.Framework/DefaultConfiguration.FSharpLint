@@ -209,6 +209,12 @@
             <Property name="MaxItems">4</Property>
           </RuleSettings>
         </Rule>
+        <Rule Name="MaxNumberOfBooleanOperatorsInCondition">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+            <Property name="MaxItems">4</Property>
+          </RuleSettings>
+        </Rule>
       </Rules>
       <AnalyserSettings />
     </Analyser>

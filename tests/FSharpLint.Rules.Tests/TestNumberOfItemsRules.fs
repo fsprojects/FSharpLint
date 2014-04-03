@@ -54,6 +54,14 @@ let config =
                                             ("MaxItems", MaxItems(5)) 
                                         ] 
                                 }) 
+                            ("MaxNumberOfBooleanOperatorsInCondition", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                            ("MaxItems", MaxItems(4)) 
+                                        ] 
+                                }) 
                         ]
                     Settings = Map.ofList []
                 }) 
@@ -239,3 +247,23 @@ module Program
 let foo = (1, 2, 3, 4, 5)"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 23))
+
+    [<Test>]
+    member this.FourBooleanOperators() = 
+        this.Parse """
+module Program
+
+if not true && (false && false) || true then
+    ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 3))
+
+    [<Test>]
+    member this.FiveBooleanOperators() = 
+        this.Parse """
+module Program
+
+if not true && (false && false) || true (&&) (false) then
+    ()"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 3))

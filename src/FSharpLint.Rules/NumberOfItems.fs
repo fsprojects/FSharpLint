@@ -105,6 +105,28 @@ module NumberOfItems =
             | Some(SynExpr.New(_)) -> true
             | Some(_)
             | None -> false
+
+    let validateCondition condition visitorInfo =
+        let rec countBooleanOperators total = function
+            | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
+            | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) -> 
+                if List.exists ((=) ident.idText) ["op_BooleanOr"; "op_BooleanAnd"; "not"] then
+                    countBooleanOperators (total + 1) expr
+                else
+                    countBooleanOperators total expr
+            | SynExpr.App(_, _, expr, expr2, _) as application ->
+                total + countBooleanOperators 0 expr + countBooleanOperators 0 expr2
+            | SynExpr.Paren(expr, _, _, _) ->
+                countBooleanOperators total expr
+            | _ -> total
+
+        maxItemsForRule visitorInfo.Config "MaxNumberOfBooleanOperatorsInCondition"
+            |> Option.iter (fun maxBooleanOperators ->
+                let numberOfBooleanOperators = countBooleanOperators 0 condition
+
+                if numberOfBooleanOperators > maxBooleanOperators then
+                    let error = sprintf "Conditions should contain at most %d boolean operators" maxBooleanOperators
+                    visitorInfo.PostError condition.Range error)
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
@@ -118,6 +140,15 @@ module NumberOfItems =
                     | SynExpr.Tuple(expressions, _, _) ->
                         if not <| isTupleAppliedToMember astNode then
                             validateTuple expressions visitorInfo
+                    | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
+                    | SynExpr.While(_, condition, _, _)
+                    | SynExpr.Assert(condition, _) ->
+                        validateCondition condition visitorInfo
+                    | _ -> ()
+            | AstNode.Match(matchClause) ->
+                match matchClause with
+                    | SynMatchClause.Clause(_, whenExpr, _, _, _) when whenExpr.IsSome ->
+                        validateCondition whenExpr.Value visitorInfo
                     | _ -> ()
             | AstNode.TypeDefinition(typeDefinition) ->
                 match typeDefinition with
