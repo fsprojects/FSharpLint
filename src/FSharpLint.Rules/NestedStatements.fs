@@ -81,7 +81,7 @@ module NestedStatements =
                         Stop
             | _ -> Continue
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterNestedStatementsAnalyser() = 
         let plugin =
             {
                 Name = AnalyserName

@@ -14,7 +14,7 @@ An analyser can analyse either the plaintext in a file or the abstract syntax tr
     
 The second parameter is the content of the file, the third is the absolute path of the file.
 
-######Function definition of a AST analyser:
+#####Function definition of a AST analyser:
 
     FSharpLint.Framework.Ast.VisitorInfo -> FSharpLint.Framework.Ast.CurrentNode -> FSharpLint.Framework.Ast.VisitorResult
     

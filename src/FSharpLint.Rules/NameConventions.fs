@@ -338,7 +338,7 @@ module NameConventions =
                         | _ -> Continue
                 | _ -> Continue
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterNameConventionsAnalyser() = 
         let plugin =
             {
                 Name = AnalyserName

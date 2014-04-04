@@ -38,12 +38,12 @@ module FavourIgnoreOverLetWild =
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Binding(SynBinding.Binding(identifier, _, _, _, _, _, _, pattern, _, _, range, _)) -> 
+            | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, _, range, _)) -> 
                 if isEnabled visitorInfo.Config then
                     let rec findWildAndIgnoreParens = function
-                    | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
-                    | SynPat.Wild(_) -> true
-                    | _ -> false
+                        | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
+                        | SynPat.Wild(_) -> true
+                        | _ -> false
                 
                     if findWildAndIgnoreParens pattern then
                         visitorInfo.PostError range "Favour using the ignore function rather than let _ = ..."
@@ -51,7 +51,7 @@ module FavourIgnoreOverLetWild =
 
         Continue
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterFavourIgnoreOverLetWildAnalyser() = 
         let plugin =
             {
                 Name = AnalyserName

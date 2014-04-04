@@ -105,7 +105,7 @@ module SourceLength =
                 Continue
             | _ -> Continue
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterSourceLengthAnalyser() = 
         let plugin =
             {
                 Name = AnalyserName

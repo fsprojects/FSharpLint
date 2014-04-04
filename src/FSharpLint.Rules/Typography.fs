@@ -98,7 +98,7 @@ module Typography =
                         let error = sprintf "Files should be less than %d lines long." (maxLines + 1)
                         visitorInfo.PostError range error)
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterTypographyAnalyser() = 
         let plugin =
             {
                 Name = AnalyserName
