@@ -25,7 +25,6 @@ module Ast =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open Tokeniser
     
     type VisitorInfo =
         {

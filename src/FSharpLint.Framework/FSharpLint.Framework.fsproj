@@ -40,8 +40,6 @@
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
     <Compile Include="Configuration.fs" />
-    <Compile Include="Tokeniser.fs" />
-    <Compile Include="LexRuleMatching.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
     <Compile Include="LoadAnalysers.fs" />
