@@ -43,11 +43,20 @@
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
     <Compile Include="LoadAnalysers.fs" />
+    <Compile Include="HintParser.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FParsec">
+      <HintPath>..\..\packages\FParsec.1.0.1\lib\net40-client\FParsec.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FParsecCS">
+      <HintPath>..\..\packages\FParsec.1.0.1\lib\net40-client\FParsecCS.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.43\lib\net40\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
