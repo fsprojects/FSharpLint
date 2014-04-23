@@ -53,6 +53,125 @@ module HintParser =
             Suggestion: Item
         }
 
+    let charListToString charList =
+        Seq.fold (fun x y -> x + y.ToString()) "" charList
+
+    module Identifiers =
+        ()
+
+    module StringAndCharacterLiterals =
+        ()
+
+    module Operators =
+        ()
+
+    /// Not supporting hex single and hex float right now.
+    /// Decimal float currently will lose precision.
+    module NumericLiterals =
+        let private pminus = pchar '-'
+
+        let private minusString (minus:char option, charList) =
+            if minus.IsSome then '-' :: charList else charList
+                |> charListToString
+
+        let private phexint =
+            pchar '0' 
+                >>. (pchar 'x' <|> pchar 'X')
+                >>. many1 hex
+                >>= fun x -> preturn ('0'::'x'::x)
+
+        let private poctalint =
+            pchar '0'
+                >>. (pchar 'o' <|> pchar 'O')
+                >>. many1 octal
+                >>= fun x -> preturn ('0'::'o'::x)
+
+        let private pbinaryint =
+            pchar '0'
+                >>. (pchar 'b' <|> pchar 'B')
+                >>. many1 (pchar '0' <|> pchar '1')
+                >>= fun x -> preturn ('0'::'b'::x)
+
+        let private pint =
+            choice
+                [
+                    attempt phexint
+                    attempt poctalint
+                    attempt pbinaryint
+                    many1 digit
+                ]
+
+        let psbyte = 
+            (opt pminus) .>>. pint .>> pchar 'y'
+                >>= fun x -> preturn (sbyte(minusString x))
+
+        let pbyte = 
+            pint .>> pstring "uy"
+                >>= fun x -> preturn (byte(charListToString x))
+
+        let pint16 = 
+            (opt pminus) .>>. pint .>> pchar 's'
+                >>= fun x -> preturn (int16(minusString x))
+
+        let puint16 = 
+            pint .>> pstring "us"
+                >>= fun x -> preturn (uint16(charListToString x))
+
+        let pint32 = 
+            (opt pminus) .>>. pint .>> optional (pchar 'l')
+                >>= fun x -> preturn (int32(minusString x))
+
+        let puint32 = 
+            pint .>> (pstring "u" <|> pstring "ul")
+                >>= fun x -> preturn (uint32(charListToString x))
+
+        let pnativeint = 
+            (opt pminus) .>>. pint .>> pchar 'n'
+                >>= fun x -> preturn (nativeint(int64(minusString x)))
+
+        let punativeint = 
+            pint .>> pstring "un"
+                >>= fun x -> preturn (unativeint(uint64(charListToString x)))
+
+        let pint64 = 
+            (opt pminus) .>>. pint .>> pchar 'L'
+                >>= fun x -> preturn (int64(minusString x))
+
+        let puint64 = 
+            pint .>> (pstring "UL" <|> pstring "uL")
+                >>= fun x -> preturn (uint64(charListToString x))
+
+        let psingle =
+            (opt pminus) .>>. 
+                pfloat .>> (pchar 'F' <|> pchar 'f')
+                    >>= fun (minus, x) -> preturn (if minus.IsSome then -float32(x) else float32(x))
+
+        let pdouble =
+            (opt pminus) .>>. 
+                pfloat >>= fun (minus, x) -> preturn (if minus.IsSome then -x else x)
+
+        let pbignum: Parser<bigint, unit> =
+            (opt pminus) .>>. pint .>> anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
+                >>= fun x -> preturn (bigint.Parse(minusString x))
+
+        let pdecimal: Parser<decimal, unit> =
+            let pdecimalint =
+                (opt pminus) .>>. pint .>> (pchar 'M' <|> pchar 'm')
+                    >>= fun x -> preturn (decimal (minusString x))
+
+            let pdecimalfloat =
+                (opt pminus) .>>. pfloat .>> (pchar 'M' <|> pchar 'm')
+                    >>= fun (minus, x) -> preturn (decimal (if minus.IsSome then -x else x))
+
+            choice 
+                [
+                    attempt pdecimalint
+                    pdecimalfloat
+                ]
+
+
+
+
     let pwildcard = pstring "_" >>% Wildcard
 
     let pargumentwildcard = pstring "_" >>% Argument.Wildcard
@@ -85,7 +204,7 @@ module HintParser =
     let poperator: Parser<Item, unit> = 
         many1 (satisfy isOperator) 
             >>= fun x -> 
-                if Seq.fold (fun x y -> x + y.ToString()) "" x = "===>" then 
+                if charListToString x = "===>" then 
                     fail "Found ===>" 
                 else 
                     preturn (Item.Operator(x))

@@ -23,6 +23,159 @@ open FSharpLint.Framework.HintParser
 open FParsec
 
 [<TestFixture>]
+type TestHintParserNumericLiterals() =
+
+    [<Test>]
+    member this.ByteMin() = 
+        match run NumericLiterals.pbyte "0b0uy" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Byte.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.ByteMax() = 
+        match run NumericLiterals.pbyte "0b11111111uy" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Byte.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.SignedByteMax() = 
+        match run NumericLiterals.psbyte "-128y" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.SByte.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.SignedByteMin() = 
+        match run NumericLiterals.psbyte "127y" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.SByte.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int16Min() = 
+        match run NumericLiterals.pint16 "-32768s" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int16.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int16Max() = 
+        match run NumericLiterals.pint16 "32767s" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int16.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint16Min() = 
+        match run NumericLiterals.puint16 "0us" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.UInt16.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint16Max() = 
+        match run NumericLiterals.puint16 "65535us" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.UInt16.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int32Withl() = 
+        match run NumericLiterals.pint32 "-2147483648l" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int32.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int32Max() = 
+        match run NumericLiterals.pint32 "2147483647" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int32.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint32() = 
+        match run NumericLiterals.puint32 "984u" with
+            | Success(hint, _, _) -> Assert.AreEqual(984u, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint32Max() = 
+        match run NumericLiterals.puint32 "0xFFFFFFFFu" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.UInt32.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int64Min() = 
+        match run NumericLiterals.pint64 "-9223372036854775808L" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int64.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Int64Max() = 
+        match run NumericLiterals.pint64 "9223372036854775807L" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Int64.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint64() = 
+        match run NumericLiterals.puint64 "984UL" with
+            | Success(hint, _, _) -> Assert.AreEqual(984UL, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Uint64Max() = 
+        match run NumericLiterals.puint64 "0xFFFFFFFFFFFFFFFFuL" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.UInt64.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.SingleMax() = 
+        match run NumericLiterals.psingle "3.40282347e+38f" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Single.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.SingleMin() = 
+        match run NumericLiterals.psingle "-3.40282347e+38f" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Single.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.DoubleLarge() = 
+        match run NumericLiterals.pdouble "1.7E+308" with
+            | Success(hint, _, _) -> Assert.AreEqual(1.7E+308, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.DoubleSmall() = 
+        match run NumericLiterals.pdouble "-1.7E+308" with
+            | Success(hint, _, _) -> Assert.AreEqual(-1.7E+308, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.BigNum() = 
+        match run NumericLiterals.pbignum "1243124124124124124124214214124124124I" with
+            | Success(hint, _, _) -> Assert.AreEqual(1243124124124124124124214214124124124I, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.FloatingDecimal() = 
+        match run NumericLiterals.pdecimal "1.7E+10m" with
+            | Success(hint, _, _) -> Assert.AreEqual(1.7E+10m, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.DecimalMax() = 
+        match run NumericLiterals.pdecimal "79228162514264337593543950335m" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Decimal.MaxValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.DecimalMin() = 
+        match run NumericLiterals.pdecimal "-79228162514264337593543950335m" with
+            | Success(hint, _, _) -> Assert.AreEqual(System.Decimal.MinValue, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.DecimalInt() = 
+        match run NumericLiterals.pdecimal "55m" with
+            | Success(hint, _, _) -> Assert.AreEqual(55m, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+[<TestFixture>]
 type TestHintParser() =
 
     [<Test>]
