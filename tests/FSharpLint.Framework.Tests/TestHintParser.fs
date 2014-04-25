@@ -23,6 +23,66 @@ open FSharpLint.Framework.HintParser
 open FParsec
 
 [<TestFixture>]
+type TestHintIdentifiers() =
+
+    [<Test>]
+    member this.Identifier() = 
+        match run Identifiers.pident "duck" with
+            | Success(hint, _, _) -> Assert.AreEqual("duck", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.BackTickedIdentifier() = 
+        match run Identifiers.pident "``du+ck``" with
+            | Success(hint, _, _) -> Assert.AreEqual("du+ck", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+[<TestFixture>]
+type TestHintStringAndCharacterLiterals() =
+
+    [<Test>]
+    member this.ByteCharacter() = 
+        match run StringAndCharacterLiterals.pcharacter "'x'B" with
+            | Success(hint, _, _) -> Assert.AreEqual('x'B, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.ByteArray() = 
+        match run StringAndCharacterLiterals.pcharacter "\"dog\"B" with
+            | Success(hint, _, _) -> Assert.AreEqual("dog"B, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Character() = 
+        match run StringAndCharacterLiterals.pcharacter "'x'" with
+            | Success(hint, _, _) -> Assert.AreEqual('x', hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.UnicodeCharacter() = 
+        match run StringAndCharacterLiterals.pcharacter "'\\u0040'" with
+            | Success(hint, _, _) -> Assert.AreEqual('@', hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.EscapeCharacter() = 
+        match run StringAndCharacterLiterals.pcharacter "'\\n'" with
+            | Success(hint, _, _) -> Assert.AreEqual('\n', hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.TrigraphCharacter() = 
+        match run StringAndCharacterLiterals.pcharacter "'\\064'" with
+            | Success(hint, _, _) -> Assert.AreEqual('@', hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.String() = 
+        match run StringAndCharacterLiterals.pliteralstring "\"d\tog\\064\\u0040\\U00000040goat\"" with
+            | Success(hint, _, _) -> Assert.AreEqual("d\tog@@@goat", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+[<TestFixture>]
 type TestHintParserNumericLiterals() =
 
     [<Test>]
