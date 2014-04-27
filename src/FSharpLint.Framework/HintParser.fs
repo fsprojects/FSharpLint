@@ -62,6 +62,22 @@ module HintParser =
     let pnotchar chars =
         satisfy (fun x -> not <| List.exists ((=) x) chars)
 
+    module Operators =
+
+        let private pfirstopchar =
+            pischar ['!';'%';'&';'*';'+';'-';'.';'/';'<';'=';'>';'@';'^';'|';'~']
+
+        let private popchar =
+            pischar 
+                [
+                    '>';'<';'+';'-';'*';'=';'~';'%';'.';'&';'|';'@'
+                    '#';'^';'!';'?';'/';'.';':';',';//'(';')';'[';']'
+                ]
+
+        let poperator =
+            pfirstopchar .>>. many popchar
+                >>= fun (x, rest) -> preturn (x::rest)
+
     /// Need to change isLetter so that it's using unicode character classes.
     module Identifiers =
         let private pidentstartchar =
@@ -86,9 +102,45 @@ module HintParser =
             choice
                 [
                     pidenttext
-                    pstring "``" 
-                        >>. many1 (pnotchar chars <|> (pchar '`' >>. pnotchar chars)) 
-                        .>> pstring "``"
+                    skipString "``" 
+                        >>. many1
+                                (choice
+                                    [
+                                        attempt (pnotchar chars)
+                                        attempt (pchar '`' >>. pnotchar chars)
+                                    ])
+                        .>> skipString "``"
+                ]
+
+        let plongident = 
+            choice
+                [
+                    attempt (sepBy pident (skipChar '.'))
+                    pident >>= fun x -> preturn [x]
+                ]
+
+        let pidentorop =
+            choice
+                [
+                    attempt pident
+                    skipChar '(' 
+                        .>> spaces
+                        >>. Operators.poperator 
+                        .>> spaces
+                        .>> skipChar ')'
+                ]
+
+        let plongidentorop = 
+            choice
+                [
+                    attempt 
+                        (
+                            many (pident .>> skipChar '.') .>>. pidentorop
+                                >>= fun (identifiers, identifierOrOp) -> 
+                                        preturn (identifiers@[identifierOrOp])
+                        )
+                    attempt (pidentorop >>= fun x -> preturn [x])
+                    plongident
                 ]
 
     module StringAndCharacterLiterals =
@@ -98,16 +150,34 @@ module HintParser =
         let private decimalToCharacter dec =
             char(System.Convert.ToInt32(dec, 10))
 
+        let private escapeMap =
+            [ 
+                ('"', '\"')
+                ('\\', '\\')
+                ('\'', '\'')
+                ('n', '\n')
+                ('t', '\t')
+                ('b', '\b')
+                ('r', '\r')
+                ('a', '\a')
+                ('f', '\f')
+                ('v', '\v')
+            ] |> Map.ofList
+
         let private pescapechar: Parser<char, unit> = 
             skipChar '\\'
                 >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
+                >>= fun x -> preturn (Map.find x escapeMap)
 
         let private pnonescapechars =
             skipChar '\\'
-                >>. pischar ['^';'"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
+                >>. pnotchar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
 
         let private psimplecharchar =
             pnotchar ['\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
+
+        let private psimplestringchar =
+            pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
 
         let private punicodegraphshort = 
             skipString "\\u"
@@ -151,12 +221,12 @@ module HintParser =
         let private pstringchar =
             choice
                 [
-                    attempt psimplecharchar
-                    attempt pescapechar
-                    attempt pnonescapechars
+                    attempt psimplestringchar
                     attempt ptrigraph
                     attempt punicodegraphlong
                     attempt punicodegraphshort
+                    attempt pescapechar
+                    attempt pnonescapechars
                     pnewline
                 ]
 
@@ -173,6 +243,7 @@ module HintParser =
 
         let pliteralstring =
             skipChar '"' >>. many pstringchar .>> skipChar '"'
+                >>= fun x -> preturn (charListToString x)
 
         let private pverbatimstringchar =
             choice
@@ -195,18 +266,17 @@ module HintParser =
 
         let pbytechar =
             skipChar '\'' >>. psimpleorescapechar .>> skipString "'B"
+                >>= fun x -> preturn (byte x)
 
         let pbytearray = 
             skipChar '"' >>. many pstringchar .>> skipString "\"B"
+                >>= fun x -> preturn (System.Text.Encoding.Default.GetBytes(charListToString x))
 
         let pverbatimbytearray = 
             skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
 
         let ptriplequotedstring =
             skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
-
-    module Operators =
-        ()
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.

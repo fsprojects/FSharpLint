@@ -23,6 +23,21 @@ open FSharpLint.Framework.HintParser
 open FParsec
 
 [<TestFixture>]
+type TestHintOperators() =
+
+    [<Test>]
+    member this.Plus() = 
+        match run Operators.poperator "+" with
+            | Success(hint, _, _) -> Assert.AreEqual("+", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.PlusMinus() = 
+        match run Operators.poperator "+-" with
+            | Success(hint, _, _) -> Assert.AreEqual("+-", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+[<TestFixture>]
 type TestHintIdentifiers() =
 
     [<Test>]
@@ -37,18 +52,42 @@ type TestHintIdentifiers() =
             | Success(hint, _, _) -> Assert.AreEqual("du+ck", hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
+    [<Test>]
+    member this.LongIdent() = 
+        match run Identifiers.plongident "Dog.``du+ck``.goats" with
+            | Success(hint, _, _) -> Assert.AreEqual(["Dog";"du+ck";"goats"], hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.LongIdentWithOperator() = 
+        match run Identifiers.plongidentorop "Dog.``du+ ck``.cat.(+)" with
+            | Success(hint, _, _) -> Assert.AreEqual(["Dog";"du+ ck";"cat";"+"], hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.OperatorIdentifier() = 
+        match run Identifiers.pidentorop "(+)" with
+            | Success(hint, _, _) -> Assert.AreEqual("+", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.OperatorIdentifierWithWhitespace() = 
+        match run Identifiers.pidentorop "(  +-?  )" with
+            | Success(hint, _, _) -> Assert.AreEqual("+-?", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
 [<TestFixture>]
 type TestHintStringAndCharacterLiterals() =
 
     [<Test>]
     member this.ByteCharacter() = 
-        match run StringAndCharacterLiterals.pcharacter "'x'B" with
+        match run StringAndCharacterLiterals.pbytechar "'x'B" with
             | Success(hint, _, _) -> Assert.AreEqual('x'B, hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member this.ByteArray() = 
-        match run StringAndCharacterLiterals.pcharacter "\"dog\"B" with
+        match run StringAndCharacterLiterals.pbytearray "\"dog\"B" with
             | Success(hint, _, _) -> Assert.AreEqual("dog"B, hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
@@ -78,7 +117,7 @@ type TestHintStringAndCharacterLiterals() =
 
     [<Test>]
     member this.String() = 
-        match run StringAndCharacterLiterals.pliteralstring "\"d\tog\\064\\u0040\\U00000040goat\"" with
+        match run StringAndCharacterLiterals.pliteralstring "\"d\\tog\\064\\u0040\\U00000040goat\"" with
             | Success(hint, _, _) -> Assert.AreEqual("d\tog@@@goat", hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
