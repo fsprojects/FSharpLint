@@ -23,10 +23,27 @@ open FParsec
 module HintParser =
 
     type Constant =
-        | Float of float
+        | Byte of byte
+        | Bytes of byte[]
+        | Char of char
+        | Decimal of decimal
+        | Double of double
+        | Int16 of int16
+        | Int32 of int32
+        | Int64 of int64
+        | IntPtr of nativeint
+        | SByte of sbyte
+        | Single of single
+        | UInt16 of uint16
+        | UInt32 of uint32
+        | UInt64 of uint64
+        | UIntPtr of unativeint
+        | UserNum of bigint * char
+        | String of string
         | Unit
         | Bool of bool
-
+        
+    [<RequireQualifiedAccess>]
     type Argument = 
         | Wildcard
         | Variable of char
@@ -37,20 +54,22 @@ module HintParser =
             Body: 't
         }
 
-    type Item =
+    [<RequireQualifiedAccess>]
+    type Expression =
+        | InfixOperator of string * Expression * Expression
+        | PrefixOperator of string * Expression
+        | FunctionApplication of Expression list
         | Wildcard
-        | Operator of char list
         | Variable of char
         | Identifier of string list
         | Constant of Constant
-        | Expression of Item list
-        | Parentheses of Item
-        | Lambda of Lambda<Item>
+        | Parentheses of Expression
+        | Lambda of Lambda<Expression>
 
     type Hint =
         {
-            Match: Item
-            Suggestion: Item
+            Match: Expression
+            Suggestion: Expression
         }
 
     let charListToString charList =
@@ -63,20 +82,18 @@ module HintParser =
         satisfy (fun x -> not <| List.exists ((=) x) chars)
 
     module Operators =
-
         let private pfirstopchar =
             pischar ['!';'%';'&';'*';'+';'-';'.';'/';'<';'=';'>';'@';'^';'|';'~']
 
-        let private popchar =
-            pischar 
+        let private opchars =
                 [
                     '>';'<';'+';'-';'*';'=';'~';'%';'.';'&';'|';'@'
                     '#';'^';'!';'?';'/';'.';':';',';//'(';')';'[';']'
                 ]
 
         let poperator =
-            pfirstopchar .>>. many popchar
-                >>= fun (x, rest) -> preturn (x::rest)
+            pfirstopchar .>>. many (pischar opchars)
+                |>> fun (x, rest) -> x::rest
 
     /// Need to change isLetter so that it's using unicode character classes.
     module Identifiers =
@@ -94,9 +111,9 @@ module HintParser =
 
         let private pidenttext = 
             pidentstartchar .>>. many pidentchar
-                >>= fun (start, rest) -> preturn (start::rest)
+                |>> fun (start, rest) -> start::rest
 
-        let pident = 
+        let private pident = 
             let chars = ['`'; '\n'; '\r'; '\t']
 
             choice
@@ -112,14 +129,14 @@ module HintParser =
                         .>> skipString "``"
                 ]
 
-        let plongident = 
+        let private plongident = 
             choice
                 [
-                    attempt (sepBy pident (skipChar '.'))
-                    pident >>= fun x -> preturn [x]
+                    attempt (sepBy1 pident (skipChar '.'))
+                    pident |>> fun x -> [x]
                 ]
 
-        let pidentorop =
+        let private pidentorop =
             choice
                 [
                     attempt pident
@@ -133,15 +150,19 @@ module HintParser =
         let plongidentorop = 
             choice
                 [
-                    attempt 
-                        (
-                            many (pident .>> skipChar '.') .>>. pidentorop
-                                >>= fun (identifiers, identifierOrOp) -> 
-                                        preturn (identifiers@[identifierOrOp])
-                        )
-                    attempt (pidentorop >>= fun x -> preturn [x])
+                    attempt pident 
+                        .>>. many (attempt (skipChar '.' >>. pident))
+                        .>>. opt (skipChar '.' >>. pidentorop)
+                        |>> fun ((startIdent, idents), operator) -> 
+                                let identifiers = startIdent::idents
+                                match operator with
+                                    | Some(operator) ->
+                                        identifiers@[operator]
+                                    | None -> identifiers
+                    attempt (pidentorop |>> fun x -> [x])
                     plongident
                 ]
+                    |>> List.map charListToString
 
     module StringAndCharacterLiterals =
         let private hexToCharacter hex =
@@ -167,7 +188,7 @@ module HintParser =
         let private pescapechar: Parser<char, unit> = 
             skipChar '\\'
                 >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
-                >>= fun x -> preturn (Map.find x escapeMap)
+                |>> fun x -> Map.find x escapeMap
 
         let private pnonescapechars =
             skipChar '\\'
@@ -230,7 +251,7 @@ module HintParser =
                     pnewline
                 ]
 
-        let pstringelem, private pstringelemImpl = createParserForwardedToRef()
+        let private pstringelem, private pstringelemImpl = createParserForwardedToRef()
         do pstringelemImpl :=
             choice
                 [
@@ -240,10 +261,11 @@ module HintParser =
 
         let pcharacter =
             skipChar '\'' >>. pcharchar .>> pchar '\''
+                |>> Char
 
         let pliteralstring =
             skipChar '"' >>. many pstringchar .>> skipChar '"'
-                >>= fun x -> preturn (charListToString x)
+                |>> fun x -> String(charListToString x)
 
         let private pverbatimstringchar =
             choice
@@ -257,6 +279,7 @@ module HintParser =
 
         let pverbatimstring =
             pstring "@\"" >>. many pverbatimstringchar .>> pchar '"'
+                |>> fun x -> String(charListToString x)
 
         let private psimplechar =
             pnotchar ['\n';'\t';'\r';'\b';'\'';'\\';'"']
@@ -266,17 +289,19 @@ module HintParser =
 
         let pbytechar =
             skipChar '\'' >>. psimpleorescapechar .>> skipString "'B"
-                >>= fun x -> preturn (byte x)
+                |>> fun x -> Byte(byte x)
 
         let pbytearray = 
             skipChar '"' >>. many pstringchar .>> skipString "\"B"
-                >>= fun x -> preturn (System.Text.Encoding.Default.GetBytes(charListToString x))
+                |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
 
         let pverbatimbytearray = 
             skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
+                |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
 
         let ptriplequotedstring =
             skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
+                |>> fun x -> String(charListToString x)
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.
@@ -291,19 +316,19 @@ module HintParser =
             skipChar '0' 
                 >>. (skipChar 'x' <|> skipChar 'X')
                 >>. many1 hex
-                >>= fun x -> preturn ('0'::'x'::x)
+                |>> fun x -> '0'::'x'::x
 
         let private poctalint =
             skipChar '0'
                 >>. (skipChar 'o' <|> skipChar 'O')
                 >>. many1 octal
-                >>= fun x -> preturn ('0'::'o'::x)
+                |>> fun x -> '0'::'o'::x
 
         let private pbinaryint =
             skipChar '0'
                 >>. (skipChar 'b' <|> skipChar 'B')
                 >>. many1 (pchar '0' <|> pchar '1')
-                >>= fun x -> preturn ('0'::'b'::x)
+                |>> fun x -> '0'::'b'::x
 
         let private pint =
             choice
@@ -316,65 +341,72 @@ module HintParser =
 
         let psbyte = 
             (opt pminus) .>>. pint .>> skipChar 'y'
-                >>= fun x -> preturn (sbyte(minusString x))
+                |>> fun x -> SByte(sbyte(minusString x))
 
         let pbyte = 
             pint .>> skipString "uy"
-                >>= fun x -> preturn (byte(charListToString x))
+                |>> fun x -> Byte(byte(charListToString x))
 
         let pint16 = 
             (opt pminus) .>>. pint .>> skipChar 's'
-                >>= fun x -> preturn (int16(minusString x))
+                |>> fun x -> Int16(int16(minusString x))
 
         let puint16 = 
             pint .>> skipString "us"
-                >>= fun x -> preturn (uint16(charListToString x))
-
-        let pint32 = 
-            (opt pminus) .>>. pint .>> optional (skipChar 'l')
-                >>= fun x -> preturn (int32(minusString x))
+                |>> fun x -> UInt16(uint16(charListToString x))
 
         let puint32 = 
             pint .>> (skipString "u" <|> skipString "ul")
-                >>= fun x -> preturn (uint32(charListToString x))
+                |>> fun x -> UInt32(uint32(charListToString x))
 
         let pnativeint = 
             (opt pminus) .>>. pint .>> skipChar 'n'
-                >>= fun x -> preturn (nativeint(int64(minusString x)))
+                |>> fun x -> IntPtr(nativeint(int64(minusString x)))
 
         let punativeint = 
             pint .>> pstring "un"
-                >>= fun x -> preturn (unativeint(uint64(charListToString x)))
+                |>> fun x -> UIntPtr(unativeint(uint64(charListToString x)))
 
         let pint64 = 
             (opt pminus) .>>. pint .>> skipChar 'L'
-                >>= fun x -> preturn (int64(minusString x))
+                |>> fun x -> Int64(int64(minusString x))
 
         let puint64 = 
             pint .>> (skipString "UL" <|> skipString "uL")
-                >>= fun x -> preturn (uint64(charListToString x))
+                >>= fun x -> preturn (UInt64(uint64(charListToString x)))
 
         let psingle =
             (opt pminus) .>>. 
                 pfloat .>> (skipChar 'F' <|> skipChar 'f')
-                    >>= fun (minus, x) -> preturn (if minus.IsSome then -float32(x) else float32(x))
+                    |>> fun (minus, x) -> Single(if minus.IsSome then -float32(x) else float32(x))
 
-        let pdouble =
-            (opt pminus) .>>. 
-                pfloat >>= fun (minus, x) -> preturn (if minus.IsSome then -x else x)
+        let private numberFormat = 
+            NumberLiteralOptions.AllowMinusSign
+            ||| NumberLiteralOptions.AllowFraction
+            ||| NumberLiteralOptions.AllowExponent
 
-        let pbignum: Parser<bigint, unit> =
-            (opt pminus) .>>. pint .>> anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
-                >>= fun x -> preturn (bigint.Parse(minusString x))
+        let private pnumber =
+            numberLiteral numberFormat "number"
+            |>> fun nl ->
+                    if nl.IsInteger then Int32(int32 nl.String)
+                    else Double(double nl.String)
 
-        let pdecimal: Parser<decimal, unit> =
+        let pint32 = pnumber .>> optional (skipChar 'l')
+
+        let pdouble = pnumber
+
+        let pbignum =
+            (opt pminus) .>>. pint .>>. anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
+                |>> fun (x, t) -> UserNum(bigint.Parse(minusString x), t)
+
+        let pdecimal =
             let pdecimalint =
                 (opt pminus) .>>. pint .>> (skipChar 'M' <|> skipChar 'm')
-                    >>= fun x -> preturn (decimal (minusString x))
+                    |>> fun x -> Decimal(decimal (minusString x))
 
             let pdecimalfloat =
                 (opt pminus) .>>. pfloat .>> (skipChar 'M' <|> skipChar 'm')
-                    >>= fun (minus, x) -> preturn (decimal (if minus.IsSome then -x else x))
+                    |>> fun (minus, x) -> Decimal(decimal (if minus.IsSome then -x else x))
 
             choice 
                 [
@@ -382,105 +414,217 @@ module HintParser =
                     pdecimalfloat
                 ]
 
+    module Constants =
+        let private pbool = 
+            choice
+                [
+                    skipString "true" >>% Bool(true)
+                    skipString "false" >>% Bool(false)
+                ]
+
+        let private punit = 
+            skipString "(" 
+                >>. (spaces >>. skipString ")") <|> skipString ")"
+                >>% Unit
+
+        let pconstant = 
+            choice
+                [
+                    attempt pbool
+                    attempt punit
+                    attempt StringAndCharacterLiterals.pcharacter
+                    attempt StringAndCharacterLiterals.pliteralstring
+                    attempt StringAndCharacterLiterals.pverbatimstring
+                    attempt StringAndCharacterLiterals.pbytechar
+                    attempt StringAndCharacterLiterals.pbytearray
+                    attempt StringAndCharacterLiterals.pverbatimbytearray
+                    attempt StringAndCharacterLiterals.ptriplequotedstring
+                    attempt NumericLiterals.psbyte
+                    attempt NumericLiterals.pbyte
+                    attempt NumericLiterals.pint16
+                    attempt NumericLiterals.puint16
+                    attempt NumericLiterals.puint32
+                    attempt NumericLiterals.pnativeint
+                    attempt NumericLiterals.punativeint
+                    attempt NumericLiterals.pint64
+                    attempt NumericLiterals.puint64
+                    attempt NumericLiterals.psingle
+                    attempt NumericLiterals.pbignum
+                    attempt NumericLiterals.pdecimal
+                    attempt NumericLiterals.pdouble
+                    NumericLiterals.pint32
+                ] |>> Expression.Constant
+
     module Expressions =
-        ()
 
-    let pwildcard = skipString "_" >>% Wildcard
+        let pwildcard = skipString "_" >>% Expression.Wildcard
 
-    let pargumentwildcard = skipString "_" >>% Argument.Wildcard
+        let pargumentwildcard = skipString "_" >>% Argument.Wildcard
 
-    let pidentifier = 
-        sepBy1 (identifier (IdentifierOptions())) (pstring ".")
-            >>= fun x -> preturn (Item.Identifier(x))
+        let pvariable = 
+            satisfy isLetter 
+                .>> notFollowedBy (satisfy isLetter)
+                |>> Expression.Variable
 
-    let pbool = (skipString "true" >>% Bool(true)) <|> (skipString "false" >>% Bool(false))
+        let pargumentvariable = satisfy isLetter |>> Argument.Variable
 
-    let punit = 
-        skipString "(" >>. ((spaces >>. skipString ")") <|> skipString ")") >>% Unit
+        let plambdaarguments = sepEndBy1 (pargumentvariable <|> pargumentwildcard) spaces1
 
-    let isOperator character =
-        let operators =
-            [
-                '+'
-                '*'
-                '/'
-                '%'
-                '&'
-                '|'
-                '='
-                '<'
-                '>'
-            ]
+        let pexpression, private pexpressionImpl = createParserForwardedToRef()
 
-        List.exists ((=) character) operators
-
-    let poperator: Parser<Item, unit> = 
-        many1 (satisfy isOperator) 
-            >>= fun x -> 
-                if charListToString x = "===>" then 
-                    fail "Found ===>" 
-                else 
-                    preturn (Item.Operator(x))
-
-    let pconstant = 
-        choice
-            [
-                pbool
-                pfloat >>= fun x -> preturn (Float(x))
-                punit
-            ] >>= fun x -> preturn (Constant(x))
-
-    let pvariable = 
-        satisfy isLetter 
-            .>> notFollowedBy (satisfy isLetter)
-            >>= fun x -> preturn (Item.Variable(x))
-
-    let pargumentvariable = satisfy isLetter >>= fun x -> preturn (Argument.Variable(x))
-
-    let plambdaarguments = sepEndBy1 (pargumentvariable <|> pargumentwildcard) spaces1
-
-    let pexpression, private pexpressionImpl = createParserForwardedToRef()
-
-    let pparentheses = skipChar '(' >>. pexpression .>> skipChar ')' >>= fun x -> preturn (Parentheses(x))
+        let pparentheses = skipChar '(' >>. pexpression .>> skipChar ')' |>> Expression.Parentheses
     
-    let plambda = parse {
-            let! arguments =
+        let private plambdastart = 
+            skipString "fun"
+                >>. spaces1
+                >>. plambdaarguments
+
+        let private plambdaend =
+            skipString "->" 
+                >>. spaces
+                >>. pexpression
+
+        let plambda = 
+            let plambdastart = 
                 skipString "fun"
                     >>. spaces1
                     >>. plambdaarguments
 
-            let! body = 
+            let plambdaend =
                 skipString "->" 
                     >>. spaces
                     >>. pexpression
 
-            return Lambda({ Arguments = arguments; Body = body })
-        }
+            parse {
+                let! arguments = plambdastart
 
-    do pexpressionImpl := 
-            let item = 
-                choice
-                    [
-                        attempt pconstant
-                        plambda
-                        attempt pvariable
-                        pwildcard
-                        pidentifier
-                        attempt poperator
-                        pparentheses
-                    ]
+                let! body = plambdaend
 
-            sepEndBy item spaces1 >>= fun x -> preturn (Expression(x))
+                return Expression.Lambda({ Arguments = arguments; Body = body })
+            }
+
+        let papplication =
+            choice 
+                [
+                    attempt Constants.pconstant
+                    attempt pvariable
+                    pwildcard
+                    Identifiers.plongidentorop |>> Expression.Identifier
+                    pparentheses
+                ]
+
+        let pfunctionapplication =
+            Identifiers.plongidentorop 
+                |>> Expression.Identifier
+                .>> spaces
+                .>>. sepEndBy1 papplication spaces
+                |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
+
+        let symbolicOperatorChars = "!%&*+-./<=>@^|~?"
+
+        let isSymbolicOperatorChar = isAnyOf symbolicOperatorChars
+
+        let opp = OperatorPrecedenceParser<Expression, string, unit>()
+
+        opp.TermParser <- 
+            spaces >>.
+            choice 
+                [
+                    attempt Constants.pconstant
+                    plambda
+                    attempt pvariable
+                    pwildcard
+                    attempt pfunctionapplication
+                    Identifiers.plongidentorop |>> Expression.Identifier
+                    pparentheses
+                ] .>> spaces
+
+        // a helper function for adding infix operators to opp
+        let addInfixOperator prefix precedence associativity =
+            let remainingOpChars_ws = 
+                if prefix = "=" then
+                    notFollowedBy (pstring "==>") |>> fun _ -> ""
+                else
+                    manySatisfy isSymbolicOperatorChar
+
+            let op = InfixOperator(prefix, remainingOpChars_ws,
+                                   precedence, associativity, (),
+                                   fun remOpChars expr1 expr2 ->
+                                        Expression.InfixOperator(prefix + remOpChars, expr1, expr2))
+            opp.AddOperator(op)
+
+        let addPrefixOperator op precedence =
+            opp.AddOperator(PrefixOperator(op, preturn "", precedence, true, id))
+
+        do
+            addInfixOperator ";"  1 Associativity.Right
+
+            addInfixOperator "->"  2 Associativity.Right
+
+            addInfixOperator ":="  3 Associativity.Right
+
+            addInfixOperator ","  4 Associativity.None
+
+            addInfixOperator "or"  5 Associativity.Left
+            addInfixOperator "||"  5 Associativity.Left
+
+            addInfixOperator "&"  6 Associativity.Left
+            addInfixOperator "&&"  6 Associativity.Left
+
+            addInfixOperator "<"  7 Associativity.Left
+            addInfixOperator ">"  7 Associativity.Left
+            addInfixOperator "="  7 Associativity.Left
+            addInfixOperator "|"  7 Associativity.Left
+            for i in symbolicOperatorChars do
+                if i <> '&' then
+                    addInfixOperator ("&" + i.ToString())  7 Associativity.Left
+
+            addInfixOperator "&&&"  8 Associativity.Left
+            addInfixOperator "|||"  8 Associativity.Left
+            addInfixOperator "^^^"  8 Associativity.Left
+            addInfixOperator "~~~"  8 Associativity.Left
+            addInfixOperator "<<<"  8 Associativity.Left
+            addInfixOperator ">>>"  8 Associativity.Left
+
+            addInfixOperator "^"  9 Associativity.Right
+
+            addInfixOperator "::"  10 Associativity.Right
+
+            addInfixOperator ":?>"  11 Associativity.None
+            addInfixOperator ":?"  11 Associativity.None
+
+            addInfixOperator "-"  12 Associativity.Left
+            addInfixOperator "+"  12 Associativity.Left
+
+            addInfixOperator "*"  13 Associativity.Left
+            addInfixOperator "/"  13 Associativity.Left
+            addInfixOperator "%"  13 Associativity.Left
+
+            addInfixOperator "**" 14 Associativity.Right
+            
+            addPrefixOperator "+" 15
+            addPrefixOperator "-" 15
+            addPrefixOperator "%" 15
+            addPrefixOperator "%%" 15
+            addPrefixOperator "&" 15
+            addPrefixOperator "&&" 15
+            addPrefixOperator "!" 15
+            addPrefixOperator "~" 15
+
+            pexpressionImpl := opp.ExpressionParser
 
     let phint: Parser<Hint, unit> = 
-        parse {
-            let! m = pexpression 
-
-            do! spaces 
+        let phintcenter = 
+            spaces 
                 .>> skipString "===>"
                 .>> spaces
 
-            let! s = pexpression
+        parse {
+            let! m = Expressions.pexpression 
+
+            do! phintcenter
+
+            let! s = Expressions.pexpression
 
             return { Match = m; Suggestion = s }
         }
