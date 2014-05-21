@@ -82,12 +82,12 @@ module HintParser =
         satisfy (fun x -> not <| List.exists ((=) x) chars)
 
     module Operators =
-        let private pfirstopchar =
+        let pfirstopchar =
             pischar ['!';'%';'&';'*';'+';'-';'.';'/';'<';'=';'>';'@';'^';'|';'~']
 
-        let private opchars =
+        let opchars =
                 [
-                    '>';'<';'+';'-';'*';'=';'~';'%';'.';'&';'|';'@'
+                    '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
                     '#';'^';'!';'?';'/';'.';':';',';//'(';')';'[';']'
                 ]
 
@@ -520,10 +520,6 @@ module HintParser =
                 .>>. sepEndBy1 papplication spaces
                 |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
 
-        let symbolicOperatorChars = "!%&*+-./<=>@^|~?"
-
-        let isSymbolicOperatorChar = isAnyOf symbolicOperatorChars
-
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
         opp.TermParser <- 
@@ -537,6 +533,7 @@ module HintParser =
                     attempt pfunctionapplication
                     Identifiers.plongidentorop |>> Expression.Identifier
                     pparentheses
+                    opp.ExpressionParser
                 ] .>> spaces
 
         // a helper function for adding infix operators to opp
@@ -545,7 +542,7 @@ module HintParser =
                 if prefix = "=" then
                     notFollowedBy (pstring "==>") |>> fun _ -> ""
                 else
-                    manySatisfy isSymbolicOperatorChar
+                    manySatisfy (isAnyOf Operators.opchars)
 
             let op = InfixOperator(prefix, remainingOpChars_ws,
                                    precedence, associativity, (),
@@ -554,7 +551,9 @@ module HintParser =
             opp.AddOperator(op)
 
         let addPrefixOperator op precedence =
-            opp.AddOperator(PrefixOperator(op, preturn "", precedence, true, id))
+            opp.AddOperator(PrefixOperator(op, preturn "", precedence, true, 
+                                                fun expr ->
+                                                    Expression.PrefixOperator(op, expr)))
 
         do
             addInfixOperator ";"  1 Associativity.Right
@@ -575,7 +574,7 @@ module HintParser =
             addInfixOperator ">"  7 Associativity.Left
             addInfixOperator "="  7 Associativity.Left
             addInfixOperator "|"  7 Associativity.Left
-            for i in symbolicOperatorChars do
+            for i in Operators.opchars do
                 if i <> '&' then
                     addInfixOperator ("&" + i.ToString())  7 Associativity.Left
 

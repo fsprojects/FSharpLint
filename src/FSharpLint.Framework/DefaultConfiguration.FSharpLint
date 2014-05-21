@@ -1,6 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FSharpLintSettings>
   <Analysers>
+    <Analyser AnalyserId="FSharpLint.Hints">
+      <Rules>
+        <Rule Name="Hints">
+          <RuleSettings>
+            <Property name="Hints">
+              <![CDATA[
+                not (a = b) ===> a <> b
+              ]]>
+            </Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+      </AnalyserSettings>
+    </Analyser>
+    
     <Analyser AnalyserId="FSharpLint.NameConventions">
       <Rules>
         <Rule Name="IdentifiersMustNotContainUnderscores">

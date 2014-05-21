@@ -46,7 +46,12 @@ type TestRuleBase(analyser:AnalyserType, ?config:Map<string, Analyser>) =
             | Some(c) -> c
             | None -> emptyConfig
 
-    member this.Parse input = 
+    member this.Parse(input, ?overrideConfig:Map<string, Analyser>) = 
+        let config =
+            match overrideConfig with
+                | Some(config) -> config
+                | None -> config
+
         let visitorInfo = { PostError = postError; Config = config }
 
         match analyser with

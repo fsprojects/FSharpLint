@@ -24,14 +24,12 @@ module Program =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Application.ErrorHandling
 
-    let help () =
+    let private help () =
         System.Console.WriteLine("Use -f followed by the absolute path of the .fsproj \
         file of the project to lint to run the tool.")
     
     [<EntryPoint>]
     let main argv = 
-        let argv = [| "-f"; @"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Rules\FSharpLint.Rules.fsproj" |]
-
         if argv.Length < 2 then
             help()
         else

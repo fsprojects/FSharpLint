@@ -401,6 +401,25 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
+    member this.ExpressionPrefixOperator() = 
+        let expected = Expression.PrefixOperator("&", Expression.Constant(Constant.Int32(4)))
+
+        match run Expressions.pexpression "&4" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.ExpressionPrefixAddition() = 
+        let expected =
+            Expression.InfixOperator("+",
+                Expression.Constant(Constant.Int32(4)),
+                Expression.PrefixOperator("+", Expression.Constant(Constant.Int32(4))))
+
+        match run Expressions.pexpression "4 + +4" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
     member this.ExpressionBracketedAddAndMultiply() = 
         let expected =
             Expression.InfixOperator("*",

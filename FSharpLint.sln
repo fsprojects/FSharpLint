@@ -27,6 +27,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41975D
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Application", "src\FSharpLint.Application\FSharpLint.Application.fsproj", "{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest", "tests\FSharpLint.FunctionalTest\FSharpLint.FunctionalTest.fsproj", "{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject", "tests\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj", "{3C435732-06B5-4406-AD79-BDD1F5124B12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

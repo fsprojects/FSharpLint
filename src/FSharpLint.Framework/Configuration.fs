@@ -32,6 +32,7 @@ module Configuration =
         | Depth of int
         | MaxItems of int
         | Length of int
+        | Hints of string list
 
     type Rule = 
         {
@@ -56,6 +57,8 @@ module Configuration =
                 Some(Length(property.Number.Value))
             | "MaxItems" when property.Number.IsSome -> 
                 Some(MaxItems(property.Number.Value)) 
+            | "Hints" when property.String.IsSome ->
+                Some(Hints(property.String.Value.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList))
             | _ -> 
                 None
 
