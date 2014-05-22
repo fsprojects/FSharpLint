@@ -520,3 +520,24 @@ type TestHintParser() =
         match run phint "fun x -> x ===> id" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
             | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.MultipleFunctionApplicationsHint() = 
+        let expected = 
+            {
+                Match = Expression.FunctionApplication(
+                            [
+                                Expression.Identifier(["List";"head"])
+                                Expression.Parentheses(
+                                    Expression.FunctionApplication(
+                                        [
+                                            Expression.Identifier(["List";"sort"])
+                                            Expression.Variable('x')
+                                        ]))
+                            ])
+                Suggestion = Expression.FunctionApplication([Expression.Identifier(["List";"min"]);Expression.Variable('x')])
+            }
+
+        match run phint "List.head (List.sort x) ===> List.min x" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)

@@ -424,7 +424,7 @@ module HintParser =
 
         let private punit = 
             skipString "(" 
-                >>. (spaces >>. skipString ")") <|> skipString ")"
+                >>. ((spaces >>. skipString ")") <|> skipString ")")
                 >>% Unit
 
         let pconstant = 
@@ -508,8 +508,8 @@ module HintParser =
                 [
                     attempt Constants.pconstant
                     attempt pvariable
-                    pwildcard
-                    Identifiers.plongidentorop |>> Expression.Identifier
+                    attempt pwildcard
+                    attempt Identifiers.plongidentorop |>> Expression.Identifier
                     pparentheses
                 ]
 
@@ -527,12 +527,12 @@ module HintParser =
             choice 
                 [
                     attempt Constants.pconstant
-                    plambda
+                    attempt plambda
                     attempt pvariable
-                    pwildcard
+                    attempt pwildcard
                     attempt pfunctionapplication
-                    Identifiers.plongidentorop |>> Expression.Identifier
-                    pparentheses
+                    attempt Identifiers.plongidentorop |>> Expression.Identifier
+                    attempt pparentheses
                     opp.ExpressionParser
                 ] .>> spaces
 

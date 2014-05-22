@@ -168,3 +168,15 @@ module Goat
 [1;2;3] |> List.fold (+) 0""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchMultipleFunctionApplications() = 
+        let config = generateHintConfig ["List.head (List.sort x) ===> List.min x"]
+
+        this.Parse("""
+module Goat
+
+[1;2;3] |> List.sort |> List.head""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
