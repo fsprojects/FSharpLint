@@ -41,8 +41,9 @@ module Program =
                     System.Console.WriteLine(error.Info)
                     System.Console.WriteLine(errorInfoLine error.Range error.Input))
 
-                ignore <|
-                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
+                FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
+                    |> ignore
+
                 System.Console.WriteLine("Finished.")
                 System.Console.ReadKey() |> ignore
             | _ -> help()

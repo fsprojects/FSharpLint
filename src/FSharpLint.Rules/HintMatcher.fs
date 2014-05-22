@@ -72,20 +72,20 @@ module HintMatcher =
 
     let matchLambdaArguments arguments lambdaExpr =
         let rec matchLambdaArguments arguments matches = function
-            | SynExpr.Lambda(_, hasAllArguments, argument, expr, _) -> 
+            | SynExpr.Lambda(_, _, argument, expr, _) -> 
                 match arguments with
                     | head :: tail ->
-                        let atEndOfBothArgumentLists = hasAllArguments && List.isEmpty tail
+                        let atEndOfArguments = List.isEmpty tail
                     
                         match matchLambdaArgument argument head with
                             | LambdaArgumentMatch.Variable(var, ident) ->
                                 let matches = (var, ident)::matches
-                                if atEndOfBothArgumentLists then
+                                if atEndOfArguments then
                                     LambdaMatch.Match(expr, matches)
                                 else
                                     matchLambdaArguments tail matches expr
                             | LambdaArgumentMatch.Wildcard ->
-                                if atEndOfBothArgumentLists then
+                                if atEndOfArguments then
                                     LambdaMatch.Match(expr, matches)
                                 else
                                     matchLambdaArguments tail matches expr
@@ -242,8 +242,8 @@ module HintMatcher =
         let parseHint hint =
             match run phint hint with
                 | Success(hint, _, _) -> hint
-                | _ -> 
-                    raise <| ConfigurationException("Failed to parse hint: " + hint)
+                | Failure(error, _, _) -> 
+                    raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
 
         match Map.find "Hints" hintRule.Settings with
             | Hints(stringHints) -> 

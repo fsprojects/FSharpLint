@@ -7,7 +7,31 @@
           <RuleSettings>
             <Property name="Hints">
               <![CDATA[
-                not (a = b) ===> a <> b
+                not (a =  b) ===> a <> b
+                not (a <> b) ===> a =  b
+                not (a >  b) ===> a <= b
+                not (a >= b) ===> a <  b
+                not (a <  b) ===> a >= b
+                not (a <= b) ===> a >  b
+                
+                x = true ===> x
+                x = false ===> not x
+                true = a ===> a
+                false = a ===> not a
+                a <> true ===> not a
+                a <> false ===> a
+                true <> a ===> not a
+                false <> a ===> a
+                
+                not true ===> false
+                not false ===> true
+                
+                List.fold (+) 0 ===> List.sum
+                
+                fun x -> x ===> id
+                id x ===> x
+                
+                sin x / cos x ===> tan x
               ]]>
             </Property>
           </RuleSettings>
