@@ -33,3 +33,5 @@ module Tests =
             app.StartInfo.FileName <- @"..\..\..\..\src\FSharpLint.Console\bin\fsharplint.exe"
             app.StartInfo.Arguments <- arguments
             app.Start() |> ignore
+
+            Assert.Fail()

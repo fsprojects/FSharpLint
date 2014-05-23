@@ -28,6 +28,8 @@
                 
                 List.fold (+) 0 ===> List.sum
                 
+                List.head (List.sort x) ===> List.min x
+                
                 fun x -> x ===> id
                 id x ===> x
                 

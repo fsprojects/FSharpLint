@@ -1,7 +1,9 @@
 ﻿module FSharpLint.FunctionalTest.TestedProject
 
 let main () =
-    let meow = not (1 = 1) |> ignore
+    let x,y,z = 1,2,3
+
+    not ((x * y) = z) |> ignore
 
     let meow = not (1 <> 1)
 
@@ -13,10 +15,15 @@ let main () =
 
     let sum = [1;2;3] |> List.fold (+) 0
 
-
     let x = true
 
     if x <> true then
         ()
 
+    let meow = sin 4.0 / cos 4.0
+
+    let woof = [1;2;3] |> List.sort |> List.head
+
     ()
+
+exception Dog of string

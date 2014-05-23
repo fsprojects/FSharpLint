@@ -148,6 +148,17 @@ let f = fun x -> x""", config)
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.DontMatchIdLambda() = 
+        let config = generateHintConfig ["fun x -> x ===> id"]
+
+        this.Parse("""
+module Goat
+
+let f = fun x -> 1""", config)
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
     member this.MatchFunctionApplicationWithBackwardPipe() = 
         let config = generateHintConfig ["(+) 1 x ===> x"]
 
