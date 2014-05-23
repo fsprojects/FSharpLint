@@ -7,6 +7,8 @@ The tool is configurable via XML and can be run from a console app, or inside Vi
 
 While the tool runnable right now, it has a limited set of rules and is probably not stable or well supported across systems - it's very early in development.
 
+The project aims to let the user know of problems through [matching user defined hints](https://github.com/duckmatt/FSharpLint/wiki/Hints) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
+
 ###Documentation
 
 Documentation is a work in progress at the moment, each project directory will contain a 
