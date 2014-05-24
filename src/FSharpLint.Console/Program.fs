@@ -34,18 +34,17 @@ module Program =
             help()
         else
             match argv.[0] with
-            | "-f" -> 
-                let finishEarly = System.Func<_>(fun _ -> false)
-                let action = System.Action<_>(fun _ -> ())
-                let error = System.Action<Error>(fun error -> 
-                    System.Console.WriteLine(error.Info)
-                    System.Console.WriteLine(errorInfoLine error.Range error.Input))
+                | "-f" -> 
+                    let finishEarly = System.Func<_>(fun _ -> false)
+                    let action = System.Action<_>(fun _ -> ())
+                    let error = System.Action<Error>(fun error -> 
+                        System.Console.WriteLine(error.Info)
+                        System.Console.WriteLine(errorInfoLine error.Range error.Input))
 
-                FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
-                    |> ignore
+                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
+                        |> ignore
 
-                System.Console.WriteLine("Finished.")
-                System.Console.ReadKey() |> ignore
-            | _ -> help()
+                    System.Console.WriteLine("Finished.")
+                | _ -> help()
 
         0

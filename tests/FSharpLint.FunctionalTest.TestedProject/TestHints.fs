@@ -25,5 +25,3 @@ let main () =
     let woof = [1;2;3] |> List.sort |> List.head
 
     ()
-
-exception Dog of string
