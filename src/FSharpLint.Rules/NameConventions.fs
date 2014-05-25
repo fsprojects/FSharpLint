@@ -47,14 +47,17 @@ module NameConventions =
     let containsUnderscore (identifier:string) = identifier.Contains("_")
 
     let pascalCaseError (identifier:string) = 
-        sprintf "Expected pascal case identifier but was %s" identifier
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsPascalCaseError")
+        System.String.Format(errorFormatString, identifier)
 
     let camelCaseError (identifier:string) = 
-        sprintf "Expected camel case identifier but was %s" identifier
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsCamelCaseError")
+        System.String.Format(errorFormatString, identifier)
 
     let expectNoUnderscore postError (identifier:Ident) =
         if containsUnderscore identifier.idText then
-            let error = sprintf "Identifiers should not contain underscores, but one was found in %s" identifier.idText
+            let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
+            let error = System.String.Format(errorFormatString, identifier.idText)
             postError identifier.idRange error
 
     let expect predicate getError postError (identifier:Ident) =
@@ -149,7 +152,8 @@ module NameConventions =
             if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config then
                 let error ident =
                     if containsUnderscore ident then
-                        let error = sprintf "Identifiers should not contain underscores, but one was found in: %s" ident
+                        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
+                        let error = System.String.Format(errorFormatString, ident)
                         visitorInfo.PostError identifier.idRange error
 
                 identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
@@ -162,7 +166,8 @@ module NameConventions =
             expectNoUnderscore visitorInfo identifier
 
             if "ExceptionNamesMustEndWithException" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.EndsWith("Exception") then
-                let error = sprintf "Exception identifier should end with 'Exception', but was %s" identifier.idText
+                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsExceptionError")
+                let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError identifier.idRange error
 
         let checkInterface visitorInfo identifier =
@@ -172,7 +177,8 @@ module NameConventions =
             expectNoUnderscore visitorInfo identifier
 
             if "InterfaceNamesMustBeginWithI" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.StartsWith("I") then
-                let error = "Interface identifiers should begin with the letter I found interface " + identifier.idText
+                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsInterfaceError")
+                let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError identifier.idRange error
 
     let isSymbolAnInterface = function

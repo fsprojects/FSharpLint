@@ -27,7 +27,8 @@ module ErrorHandling =
     /// Generates error reporting information on where in a file an error has occured.
     let errorInfoLine (range:range) (input:string) =
         let errorenousLine = input.Split([|'\n'|]).[range.StartLine - 1].TrimEnd()
-        let firstLine = sprintf "Error in file %s on line %d starting at column %d" range.FileName range.StartLine range.StartColumn
+        let error = FSharpLint.Framework.Resources.GetString("LintError")
+        let firstLine = System.String.Format(error, range.FileName, range.StartLine, range.StartColumn)
         let highlightColumnLine = 
             errorenousLine 
                 |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")

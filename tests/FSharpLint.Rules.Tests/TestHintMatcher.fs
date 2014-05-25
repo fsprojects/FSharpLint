@@ -137,6 +137,28 @@ let f = fun x y z -> x + z""", config)
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.MatchWildcardLambda() = 
+        let config = generateHintConfig ["fun _ -> 1 ===> id"]
+
+        this.Parse("""
+module Goat
+
+let f = fun _ -> 1""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.MatchMultipleWildcardLambda() = 
+        let config = generateHintConfig ["fun _ _ -> 1 ===> id"]
+
+        this.Parse("""
+module Goat
+
+let f = fun _ _ -> 1""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
     member this.MatchIdLambda() = 
         let config = generateHintConfig ["fun x -> x ===> id"]
 

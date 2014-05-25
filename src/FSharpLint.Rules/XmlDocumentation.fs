@@ -50,7 +50,7 @@ module XmlDocumentation =
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 if configExceptionHeader visitorInfo.Config then
                     if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range "Expected exception type to have xml documentation."
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationExceptionError"))
             | _ -> ()
 
         Continue

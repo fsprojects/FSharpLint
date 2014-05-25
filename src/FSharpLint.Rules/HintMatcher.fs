@@ -333,7 +333,9 @@ module HintMatcher =
                         if matchHintExpr (Map.ofList []) (expr, hint.Match) then
                             let matched = hintToString hint.Match
                             let suggestion = hintToString hint.Suggestion
-                            let error = sprintf "%s can be refactored into %s" matched suggestion
+
+                            let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesHintRefactor")
+                            let error = System.String.Format(errorFormatString, matched, suggestion)
 
                             visitorInfo.PostError expr.Range error
 

@@ -44,7 +44,8 @@ module NumberOfItems =
         maxItemsForRule visitorInfo.Config "MaxNumberOfItemsInTuple"
             |> Option.iter (fun maxItems ->
                 if List.length items > maxItems then
-                    let error = sprintf "Tuple should have a maximum of %d items" maxItems
+                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsTupleError")
+                    let error = System.String.Format(errorFormatString, maxItems)
                     visitorInfo.PostError (items.[maxItems].Range) error)
 
     let validateFunction (constructorArguments:SynConstructorArgs) visitorInfo = 
@@ -52,7 +53,8 @@ module NumberOfItems =
             |> Option.iter (fun maxParameters ->
                 match constructorArguments with
                     | SynConstructorArgs.Pats(parameters) when List.length parameters > maxParameters -> 
-                        let error = sprintf "Functions should have a maximum of %d parameters" maxParameters 
+                        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsFunctionError")
+                        let error = System.String.Format(errorFormatString, maxParameters)
                         visitorInfo.PostError parameters.[maxParameters].Range error
                     | _ -> ())
 
@@ -83,7 +85,8 @@ module NumberOfItems =
         maxItemsForRule visitorInfo.Config "MaxNumberOfMembers"
             |> Option.iter (fun maxMembers ->
                 if List.length members > maxMembers then
-                    let error = sprintf "Class must have a maximum of %d members" maxMembers
+                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsClassMembersError")
+                    let error = System.String.Format(errorFormatString, maxMembers)
                     visitorInfo.PostError (members.[maxMembers].Range) error)
 
     let isTupleAppliedToMember astNode =
@@ -125,7 +128,8 @@ module NumberOfItems =
                 let numberOfBooleanOperators = countBooleanOperators 0 condition
 
                 if numberOfBooleanOperators > maxBooleanOperators then
-                    let error = sprintf "Conditions should contain at most %d boolean operators" maxBooleanOperators
+                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
+                    let error = System.String.Format(errorFormatString, maxBooleanOperators)
                     visitorInfo.PostError condition.Range error)
     
     let visitor visitorInfo checkFile astNode = 

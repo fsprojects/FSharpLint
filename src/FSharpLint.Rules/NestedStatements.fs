@@ -40,8 +40,9 @@ module NestedStatements =
             | Some(_)
             | None -> None
 
-    let error depth =
-        sprintf "Code should not be nested more deeply than a depth of %d" depth
+    let error (depth:int) =
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNestedStatementsError")
+        System.String.Format(errorFormatString, depth)
 
     exception UnexpectedNodeTypeException of string
     

@@ -25,8 +25,7 @@ module Program =
     open FSharpLint.Application.ErrorHandling
 
     let private help () =
-        System.Console.WriteLine("Use -f followed by the absolute path of the .fsproj \
-        file of the project to lint to run the tool.")
+        System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleHelp"))
     
     [<EntryPoint>]
     let main argv = 
@@ -44,7 +43,7 @@ module Program =
                     FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
                         |> ignore
 
-                    System.Console.WriteLine("Finished.")
+                    System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleFinished"))
                 | _ -> help()
 
         0

@@ -64,20 +64,21 @@ module Typography =
             |> Option.iter (fun maxCharacters ->
                 if line.Length > maxCharacters then
                     let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber line.Length)
-                    let error = sprintf "Lines should be less than %d characters long." (maxCharacters + 1)
+                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesTypographyLineLengthError")
+                    let error = System.String.Format(errorFormatString, (maxCharacters + 1))
                     visitorInfo.PostError range error)
 
         if isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config && endsWithWhitespace line then
             let whitespaceLength = lengthOfWhitespaceOnEnd line
             let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
-            visitorInfo.PostError range "Lines should not have trailing whitespace."
+            visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingWhitespaceError"))
                 
         if isEnabled "NoTabCharacters" visitorInfo.Config then
             let indexOfTab = line.IndexOf('\t')
-
+            
             if indexOfTab >= 0 then
                 let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                visitorInfo.PostError range "File should not contain tab characters."
+                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTabCharacterError"))
     
     let visitor (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) (file:string) filename = 
         if isAnalyserEnabled visitorInfo.Config then
@@ -87,7 +88,7 @@ module Typography =
 
             if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
                 let range = mkRange (mkPos lines.Length 0) (mkPos lines.Length 0)
-                visitorInfo.PostError range "File should not have a trailing new line."
+                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingLineError"))
 
             lines |> Array.iteri (analyseLine visitorInfo mkRange)
 
@@ -95,7 +96,8 @@ module Typography =
                 |> Option.iter (fun maxLines ->
                     if lines.Length > maxLines then
                         let range = mkRange (mkPos (maxLines + 1) 0) (mkPos lines.Length lines.[lines.Length - 1].Length)
-                        let error = sprintf "Files should be less than %d lines long." (maxLines + 1)
+                        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesTypographyFileLengthError")
+                        let error = System.String.Format(errorFormatString, (maxLines + 1))
                         visitorInfo.PostError range error)
 
     type RegisterTypographyAnalyser() = 

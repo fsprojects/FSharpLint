@@ -41,7 +41,8 @@ module SourceLength =
             | None -> None
 
     let error name i actual = 
-        sprintf "%ss should be less than %d lines long, was %d lines long." name i actual
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesSourceLengthError")
+        System.String.Format(errorFormatString, name, i, actual)
 
     let inline length (range:range) = range.EndLine - range.StartLine
 

@@ -44,9 +44,13 @@
     <Compile Include="AstInfo.fs" />
     <Compile Include="LoadAnalysers.fs" />
     <Compile Include="HintParser.fs" />
+    <Compile Include="Resources.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\Text.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

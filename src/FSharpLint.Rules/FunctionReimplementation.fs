@@ -50,7 +50,8 @@ module FunctionReimplementation =
 
         isFunctionPointless expression parameters 
             |> Option.iter (fun identifier ->
-                let error = sprintf "Pointless function redefines %s" identifier.idText
+                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesFunctionReimplementationError")
+                let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError range error)
 
     let rec simplePatternsLength = function

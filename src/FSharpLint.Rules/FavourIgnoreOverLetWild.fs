@@ -46,7 +46,7 @@ module FavourIgnoreOverLetWild =
                         | _ -> false
                 
                     if findWildAndIgnoreParens pattern then
-                        visitorInfo.PostError range "Favour using the ignore function rather than let _ = ..."
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
             | _ -> ()
 
         Continue
