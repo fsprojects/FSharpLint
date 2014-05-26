@@ -1,5 +1,7 @@
 #FSharpLint
 
+![CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")
+
 ###About
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
