@@ -75,6 +75,15 @@ module ProjectFile =
             "{RawFileName}"
         ] @ extraSearchPaths |> List.toArray
 
+    let DotNetFrameworkReferenceAssembliesRootDirectory = 
+        // Note that ProgramFilesX86 is correct for both x86 and x64 architectures (the reference assemblies are always in the 32-bit location, which is PF(x86) on an x64 machine)
+        let PF = 
+            //System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) // This API is not available to bootstrap compiler
+            match System.Environment.GetEnvironmentVariable("ProgramFiles(x86)") with
+            | null -> System.Environment.GetEnvironmentVariable("ProgramFiles")  // if PFx86 is null, then we are 32-bit and just get PF
+            | s -> s 
+        PF + @"\Reference Assemblies\Microsoft\Framework\.NETFramework"
+
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
     let private resolveReferences (projectInstance:ProjectInstance) outputPath references =
         let resolve = ResolveAssemblyReference()
@@ -86,15 +95,16 @@ module ProjectFile =
 
         resolve.Assemblies <- references |> Seq.map (fun x -> (x :> ITaskItem)) |> Seq.toArray
 
-        let frameworkMoniker = System.Runtime.Versioning.FrameworkName(".NETFramework", System.Version(projectInstance.ToolsVersion))
-        let referenceAssemblies = Microsoft.Build.Utilities.ToolLocationHelper.GetPathToReferenceAssemblies(frameworkMoniker)
+        let frameworkDirectory = DotNetFrameworkReferenceAssembliesRootDirectory + "\\v" + projectInstance.ToolsVersion
 
-        let fsharpCoreDirectory = Microsoft.Build.Utilities.ToolLocationHelper.GetProgramFilesReferenceAssemblyRoot() 
-                                      + @"\..\FSharp\3.0\Runtime\v4.0"
+        let fsharpCoreDirectory = DotNetFrameworkReferenceAssembliesRootDirectory
+                                      + @"\..\..\FSharp\3.0\Runtime\v4.0"
 
-        referenceAssemblies.Add(fsharpCoreDirectory)
-
-        resolve.TargetFrameworkDirectories <- referenceAssemblies.ToArray()
+        resolve.TargetFrameworkDirectories <- 
+            [|
+                frameworkDirectory
+                fsharpCoreDirectory
+            |]
         
         resolve.Execute() |> ignore
 
