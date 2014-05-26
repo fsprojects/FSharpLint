@@ -4,17 +4,11 @@ env:
  global:
   - EnableNuGetPackageRestore=true
   - MONO_VER=3.4.0
-  - FSHARP_VERSION=3.1.1.11
 
 install:
-  - wget "http://download.mono-project.com/archive/${MONO_VER}/macos-10-x86/MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.pkg"
-  - sudo installer -pkg "MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.pkg" -target /
-  - wget "https://github.com/fsharp/fsharp/archive/${FSHARP_VERSION}.tar.gz" -O /tmp/fsharp-${FSHARP_VERSION}.tar.gz
-  - (cd /tmp; tar xf fsharp-${FSHARP_VERSION}.tar.gz) && pushd /tmp/fsharp-${FSHARP_VERSION}
-  - ./autogen.sh --prefix=/Library/Frameworks/Mono.framework/Versions/${MONO_VER}
-  - make
-  - sudo make install
-  - popd
+ - wget "http://download.mono-project.com/archive/${MONO_VER}/macos-10-x86/MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.dmg"
+ - hdid "MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.dmg"
+ - sudo installer -pkg "/Volumes/Mono Framework MDK ${MONO_VER}/MonoFramework-MDK-${MONO_VER}.macos10.xamarin.x86.pkg" -target /
   - mozroots --import --sync
 
 script:
