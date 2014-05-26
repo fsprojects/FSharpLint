@@ -1,6 +1,6 @@
 #FSharpLint
 
-![CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")
+[![CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/duckmatt/FSharpLint)
 
 ###About
 
