@@ -11,4 +11,4 @@ install:
   - mozroots --import --sync
 
 script:
- - xbuild FSharpLint.sln
+ - sh build.sh
