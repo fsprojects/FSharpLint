@@ -33,9 +33,16 @@ module Tests =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
 
     let runConsoleApp arguments =
+        let filename = 
+            #if DEBUG
+                @"..\..\..\..\src\FSharpLint.Console\bin\fsharplint.exe"
+            #else
+                @"..\..\..\..\bin\fsharplint.exe"
+            #endif
+
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
-                                    FileName = @"..\..\..\..\src\FSharpLint.Console\bin\fsharplint.exe",
+                                    FileName = filename,
                                     Arguments = arguments,
                                     RedirectStandardOutput = true,
                                     UseShellExecute = false)
