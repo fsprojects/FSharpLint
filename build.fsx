@@ -94,6 +94,15 @@ Target "RunTests" (fun _ ->
             OutputFile = "TestResults.xml" })
 )
 
+Target "RunFunctionalTests" (fun _ ->
+    !! "tests/**/bin/Release/*FunctionalTest*.dll" 
+    |> NUnit (fun p ->
+        { p with
+            DisableShadowCopy = true
+            TimeOut = TimeSpan.FromMinutes 20.
+            OutputFile = "TestResults.xml" })
+)
+
 // --------------------------------------------------------------------------------------
 // Run all targets by default. Invoke 'build <Target>' to override
 
@@ -104,6 +113,7 @@ Target "All" DoNothing
   ==> "AssemblyInfo"
   ==> "Build"
   ==> "RunTests"
+  ==> "RunFunctionalTests"
   ==> "All"
 
 RunTargetOrDefault "All"
