@@ -7,4 +7,3 @@ if not exist tools\NUnit.Runners\tools\nunit-console.exe (
   .nuget\nuget.exe install NUnit.Runners -OutputDirectory tools -ExcludeVersion
 )
 packages\FAKE\tools\FAKE.exe build.fsx %*
-pause
