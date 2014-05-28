@@ -1,6 +1,7 @@
 #FSharpLint
 
-[![CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/duckmatt/FSharpLint)
+[![Mono CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/duckmatt/FSharpLint)
+[![Windows CI Build status](https://ci.appveyor.com/api/projects/status/y720rs0ek67vxumf)](https://ci.appveyor.com/project/duckmatt/FSharpLint)
 
 ###About
 
