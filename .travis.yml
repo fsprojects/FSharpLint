@@ -11,4 +11,4 @@ install:
   - mozroots --import --sync
 
 script:
- - sh build.sh
+  - sh build.sh
