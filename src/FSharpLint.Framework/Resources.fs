@@ -18,9 +18,15 @@
 
 namespace FSharpLint.Framework
 
-[<System.Diagnostics.DebuggerNonUserCodeAttribute()>]
 type Resources() =
-    static let resourceManager = System.Resources.ResourceManager("Resources.Text", typeof<Resources>.Assembly)
+    static let resourceName =
+        let isRunningOnMono = System.Type.GetType("Mono.Runtime") <> null
+        if isRunningOnMono then
+            "Text"
+        else
+            "Resources.Text"
+
+    static let resourceManager = System.Resources.ResourceManager(resourceName, typeof<Resources>.Assembly)
 
     static member GetString(str) = resourceManager.GetString(str)
 
