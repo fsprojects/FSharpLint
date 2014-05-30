@@ -6,11 +6,13 @@
 ###About
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
-The tool is configurable via XML and can be run from a console app, or inside Visual Studio using the Visual Studio extension.
-
-While the tool runnable right now, it has a limited set of rules and is probably not stable or well supported across systems - it's very early in development.
+The tool is configurable via XML and can be run from a console app, as an MSBuild task, or inside Visual Studio using the Visual Studio extension.
 
 The project aims to let the user know of problems through [matching user defined hints](https://github.com/duckmatt/FSharpLint/wiki/Hints) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
+
+The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to true):
+
+![Example](http://i.imgur.com/D4c9g1m.png)
 
 ###Documentation
 
