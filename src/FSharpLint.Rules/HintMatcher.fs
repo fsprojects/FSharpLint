@@ -54,16 +54,19 @@ module HintMatcher =
     let matchLambdaArgument argument argumentToMatch = 
         let simplePatterns = extractSimplePatterns argument
 
-        let identifier, isCompilerGenerated = List.head simplePatterns |> extractIdent
+        if not(List.isEmpty simplePatterns) then
+            let identifier, isCompilerGenerated = List.head simplePatterns |> extractIdent
 
-        let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
+            let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
 
-        match argumentToMatch with
-            | Argument.Variable(variable) when not isWildcard -> 
-                LambdaArgumentMatch.Variable(variable, identifier.idText)
-            | Argument.Wildcard -> 
-                LambdaArgumentMatch.Wildcard(isWildcard)
-            | _ -> LambdaArgumentMatch.NoMatch
+            match argumentToMatch with
+                | Argument.Variable(variable) when not isWildcard -> 
+                    LambdaArgumentMatch.Variable(variable, identifier.idText)
+                | Argument.Wildcard -> 
+                    LambdaArgumentMatch.Wildcard(isWildcard)
+                | _ -> LambdaArgumentMatch.NoMatch
+        else
+            LambdaArgumentMatch.NoMatch
             
     [<RequireQualifiedAccess>]
     type LambdaMatch =
