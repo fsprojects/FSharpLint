@@ -22,7 +22,6 @@ namespace FSharpLint.Application
 module ProjectFile =
 
     open System.Linq
-    open Microsoft.Build.Execution
     open Microsoft.Build.Tasks
     open Microsoft.Build.Framework
     open Microsoft.Build.BuildEngine
@@ -33,9 +32,9 @@ module ProjectFile =
     let SettingsFileName = "Settings.FSharpLint"
 
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
-    let private resolveReferences (projectInstance:ProjectInstance) outputPath references =
+    let private resolveReferences (projectInstance:Microsoft.Build.Evaluation.Project) outputPath references =
         let references = references 
-                            |> Seq.map (fun (x:Microsoft.Build.Execution.ProjectItemInstance) -> (x.EvaluatedInclude, ""))
+                            |> Seq.map (fun (x:Microsoft.Build.Evaluation.ProjectItem) -> (x.EvaluatedInclude, ""))
                             |> Seq.toArray
 
         let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
@@ -70,14 +69,16 @@ module ProjectFile =
             FSharpFiles: string list
         }
 
-    let getProjectReferences (projectInstance:ProjectInstance) projectPath =
+    let getProjectReferences (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
         projectInstance.GetItems("ProjectReference")
-            |> Seq.collect (fun x -> ProjectInstance(System.IO.Path.Combine(projectPath, x.ToString())).Items)
+            |> Seq.collect (fun x -> 
+                let xmlReader = System.Xml.XmlReader.Create(System.IO.Path.Combine(projectPath, x.ToString()))
+                Microsoft.Build.Evaluation.Project(xmlReader).Items)
             |> Seq.filter (fun x -> x.ItemType = "BuiltProjectOutputGroupKeyOutput")
             |> Seq.map (fun x -> x.ToString())
 
     /// Gets a list of the .fs and .fsi files in the project.
-    let getFSharpFiles (projectInstance:ProjectInstance) projectPath =
+    let getFSharpFiles (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
         projectInstance.GetItems("Compile")
             |> Seq.map (fun item -> item.EvaluatedInclude)
             |> Seq.toList
@@ -88,7 +89,9 @@ module ProjectFile =
     let getProjectFiles (projectFile:string) =
         let projectPath = System.IO.Path.GetDirectoryName(projectFile)
 
-        let projectInstance = ProjectInstance(projectFile)
+        let xmlReader = System.Xml.XmlReader.Create(projectFile)
+
+        let projectInstance = Microsoft.Build.Evaluation.Project(xmlReader)
 
         let references = projectInstance.GetItems("Reference")
 
