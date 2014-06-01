@@ -71,10 +71,10 @@ module ProjectFile =
         }
 
     let getOutputRelativePath (projectInstance:ProjectInstance) =
-        projectInstance.Items 
-            |> Seq.filter (fun x -> x.ItemType = "_OutputPathItem") 
-            |> Seq.head 
-            |> fun x -> x.ToString()
+        projectInstance.Properties
+            |> Seq.filter (fun x -> x.Name = "OutputPath")
+            |> Seq.head
+            |> fun x -> x.EvaluatedValue
 
     let getProjectReferences (projectInstance:ProjectInstance) projectPath =
         projectInstance.Items 
