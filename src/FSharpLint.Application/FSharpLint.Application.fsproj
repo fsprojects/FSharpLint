@@ -40,6 +40,8 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="ErrorHandling.fs" />
+    <Compile Include="ReferenceResolution.fsi" />
+    <Compile Include="ReferenceResolution.fs" />
     <Compile Include="ProjectFile.fs" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -18,15 +18,7 @@
 
 namespace FSharpLint.Application
 
-/// <summary>Runs the lint on an entire project using a .fsproj file.</summary>
-/// <remarks>
-/// Depends on MSBuild classes that are appearantly obselete.
-/// Probably doesn't handle all cases, as such this is temporary
-/// just so that the lint is a workable tool, will be reworked
-/// once there's a fair amount of rules completed as those have 
-/// a higher priority. Probably end up using ReferenceResolution.fs
-/// from fsharp.
-/// </remarks>
+/// Runs the lint on an entire project using a .fsproj file.
 module ProjectFile =
 
     open System.Linq
@@ -39,76 +31,36 @@ module ProjectFile =
 
     [<Literal>]
     let SettingsFileName = "Settings.FSharpLint"
-    
-    /// An instance of the IBuildEngine is required for ResolveAssemblyReference.
-    /// We don't need it to do anything.
-    let stubBuildEngine = 
-        { new IBuildEngine with
-            member this.BuildProjectFile(_, _, _, _) = true
-
-            member this.ColumnNumberOfTaskNode with get() = 0
-
-            member this.ContinueOnError with get() = false
-
-            member this.LineNumberOfTaskNode with get() = 0
-
-            member this.ProjectFileOfTaskNode with get() = ""
-
-            member this.LogCustomEvent(_) = ()
-
-            member this.LogErrorEvent(_) = ()
-
-            member this.LogMessageEvent(_) = ()
-
-            member this.LogWarningEvent(_) = ()
-        }
-
-    /// Default paths to looks for references within. Used by ResolveAssemblyReference.
-    let defaultSearchPaths extraSearchPaths =
-        [
-            "{CandidateAssemblyFiles}"
-            "{HintPathFromItem}"
-            "{TargetFrameworkDirectory}"
-            "{Registry:$(FrameworkRegistryBase),$(TargetFrameworkVersion),$(AssemblyFoldersSuffix)$(AssemblyFoldersExConditions)}"
-            "{AssemblyFolders}"
-            "{GAC}"
-            "{RawFileName}"
-        ] @ extraSearchPaths |> List.toArray
-
-    let DotNetFrameworkReferenceAssembliesRootDirectory = 
-        // Note that ProgramFilesX86 is correct for both x86 and x64 architectures (the reference assemblies are always in the 32-bit location, which is PF(x86) on an x64 machine)
-        let PF = 
-            //System.Environment.GetFolderPath(System.Environment.SpecialFolder.ProgramFilesX86) // This API is not available to bootstrap compiler
-            match System.Environment.GetEnvironmentVariable("ProgramFiles(x86)") with
-            | null -> System.Environment.GetEnvironmentVariable("ProgramFiles")  // if PFx86 is null, then we are 32-bit and just get PF
-            | s -> s 
-        PF + @"\Reference Assemblies\Microsoft\Framework\.NETFramework"
 
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
     let private resolveReferences (projectInstance:ProjectInstance) outputPath references =
-        let resolve = ResolveAssemblyReference()
-        resolve.BuildEngine <- stubBuildEngine
+        let references = references 
+                            |> Seq.map (fun (x:Microsoft.Build.Execution.ProjectItemInstance) -> (x.EvaluatedInclude, ""))
+                            |> Seq.toArray
 
-        resolve.TargetFrameworkVersion <- projectInstance.ToolsVersion
-
-        resolve.SearchPaths <- defaultSearchPaths [outputPath]
-
-        resolve.Assemblies <- references |> Seq.map (fun x -> (x :> ITaskItem)) |> Seq.toArray
-
-        let frameworkDirectory = DotNetFrameworkReferenceAssembliesRootDirectory + "\\v" + projectInstance.ToolsVersion
-
-        let fsharpCoreDirectory = DotNetFrameworkReferenceAssembliesRootDirectory
+        let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
                                       + @"\..\..\FSharp\3.0\Runtime\v4.0"
 
-        resolve.TargetFrameworkDirectories <- 
-            [|
-                frameworkDirectory
-                fsharpCoreDirectory
-            |]
-        
-        resolve.Execute() |> ignore
+        let resolvedReferences = 
+            Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(
+                    Microsoft.FSharp.Compiler.MSBuildResolver.CompileTimeLike, 
+                    references,
+                    "v" + projectInstance.ToolsVersion,
+                    [],
+                    "",
+                    outputPath,
+                    fsharpCoreDirectory,
+                    [],
+                    "",
+                    "",
+                    "",
+                    "",
+                    (fun _ -> ()),
+                    (fun _ _ -> ()),
+                    (fun _ _ -> ())
+                )
 
-        resolve.ResolvedFiles |> Seq.map (fun x -> x.ItemSpec.ToString()) |> Seq.toList
+        resolvedReferences.resolvedFiles |> Seq.map (fun x -> x.itemSpec) |> Seq.toList
 
     /// Paths of all required files used to construct project options (must be absolute paths).
     type ProjectFile = 
