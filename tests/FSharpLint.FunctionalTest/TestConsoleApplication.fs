@@ -68,7 +68,7 @@ module Tests =
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
-            let arguments = @"-f ..\..\..\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
             let errors = runConsoleApp arguments
 
