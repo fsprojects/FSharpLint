@@ -70,43 +70,39 @@ module ProjectFile =
             FSharpFiles: string list
         }
 
-    let getOutputRelativePath (projectInstance:ProjectInstance) =
-        projectInstance.Properties
-            |> Seq.filter (fun x -> x.Name = "OutputPath")
-            |> Seq.head
-            |> fun x -> x.EvaluatedValue
-
     let getProjectReferences (projectInstance:ProjectInstance) projectPath =
-        projectInstance.Items 
-            |> Seq.filter (fun x -> x.ItemType = "ProjectReference")
+        projectInstance.GetItems("ProjectReference")
             |> Seq.collect (fun x -> ProjectInstance(System.IO.Path.Combine(projectPath, x.ToString())).Items)
             |> Seq.filter (fun x -> x.ItemType = "BuiltProjectOutputGroupKeyOutput")
             |> Seq.map (fun x -> x.ToString())
 
-    let getReferences (projectInstance:ProjectInstance) =
-        projectInstance.Items |> Seq.filter (fun x -> x.ItemType = "Reference")
-
     /// Gets a list of the .fs and .fsi files in the project.
     let getFSharpFiles (projectInstance:ProjectInstance) projectPath =
-        projectInstance.Items 
-            |> Seq.filter (fun item -> item.ItemType = "Compile")
-            |> Seq.map (fun item -> item.EvaluatedInclude.ToString())
+        projectInstance.GetItems("Compile")
+            |> Seq.map (fun item -> item.EvaluatedInclude)
             |> Seq.toList
             |> List.map (fun x -> System.IO.Path.Combine(projectPath, x.ToString()))
+
+    exception ResolveReferenceException of string
 
     let getProjectFiles (projectFile:string) =
         let projectPath = System.IO.Path.GetDirectoryName(projectFile)
 
         let projectInstance = ProjectInstance(projectFile)
 
-        let references = getReferences projectInstance
+        let references = projectInstance.GetItems("Reference")
 
         let projectReferences = getProjectReferences projectInstance projectPath
 
-        let outputAbsolutePath = System.IO.Path.Combine(projectPath, getOutputRelativePath projectInstance)
+        let outputProperty = projectInstance.GetProperty("OutputPath")
+
+        if outputProperty = null then
+            raise <| ResolveReferenceException "Unable to retrieve project's output target directory."
+
+        let outputAbsolutePath = System.IO.Path.Combine(projectPath, outputProperty.EvaluatedValue)
 
         {
-            References = getReferences projectInstance |> resolveReferences projectInstance outputAbsolutePath
+            References = references |> resolveReferences projectInstance outputAbsolutePath
             ProjectReferences = projectReferences |> Seq.toList
             FSharpFiles = getFSharpFiles projectInstance projectPath
         }
