@@ -35,9 +35,9 @@ module Tests =
     let runConsoleApp arguments =
         let filename = 
             #if DEBUG
-                @"..\..\..\..\src\FSharpLint.Console\bin\fsharplint.exe"
+                @"../../../../src/FSharpLint.Console/bin/fsharplint.exe"
             #else
-                @"..\..\..\..\bin\fsharplint.exe"
+                @"../../../../bin/fsharplint.exe"
             #endif
 
         let startInfo = System.Diagnostics.ProcessStartInfo
