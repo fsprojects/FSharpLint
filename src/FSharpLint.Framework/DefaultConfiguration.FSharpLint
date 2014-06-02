@@ -32,8 +32,6 @@
                 
                 fun x -> x ===> id
                 id x ===> x
-                
-                sin x / cos x ===> tan x
               ]]>
             </Property>
           </RuleSettings>
