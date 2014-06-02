@@ -26,6 +26,16 @@ module Program =
 
     let private help () =
         System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleHelp"))
+
+    let private runLint projectFile =
+        let finishEarly = System.Func<_>(fun _ -> false)
+        let action = System.Action<_>(fun _ -> ())
+        let error = System.Action<Error>(fun error -> 
+            System.Console.WriteLine(error.Info)
+            System.Console.WriteLine(errorInfoLine error.Range error.Input))
+
+        FSharpLint.Application.ProjectFile.parseProject(finishEarly, projectFile, action, error)
+            |> ignore
     
     [<EntryPoint>]
     let main argv = 
@@ -34,16 +44,15 @@ module Program =
         else
             match argv.[0] with
                 | "-f" -> 
-                    let finishEarly = System.Func<_>(fun _ -> false)
-                    let action = System.Action<_>(fun _ -> ())
-                    let error = System.Action<Error>(fun error -> 
-                        System.Console.WriteLine(error.Info)
-                        System.Console.WriteLine(errorInfoLine error.Range error.Input))
+                    let projectFile = argv.[1]
 
-                    FSharpLint.Application.ProjectFile.parseProject(finishEarly, argv.[1], action, error)
-                        |> ignore
+                    if System.IO.File.Exists(projectFile) then
+                        runLint projectFile
 
-                    System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleFinished"))
+                        System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleFinished"))
+                    else
+                        let formatString = FSharpLint.Framework.Resources.GetString("ConsoleCouldNotFindFile")
+                        System.Console.WriteLine(System.String.Format(formatString, projectFile))
                 | _ -> help()
 
         0
