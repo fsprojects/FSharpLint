@@ -110,13 +110,8 @@ module Tests =
                         Code = "    if x <> true then"
                     }
                     { 
-                        Description = "sin x/cos x can be refactored into tan x" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 23 starting at column 15"
-                        Code = "    let meow = sin 4.0 / cos 4.0"
-                    }
-                    { 
                         Description = "List.head (List.sort x) can be refactored into List.min x" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 25 starting at column 15"
+                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 23 starting at column 15"
                         Code = "    let woof = [1;2;3] |> List.sort |> List.head"
                     }
                 ]

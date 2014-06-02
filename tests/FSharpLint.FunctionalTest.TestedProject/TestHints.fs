@@ -20,8 +20,6 @@ let main () =
     if x <> true then
         ()
 
-    let meow = sin 4.0 / cos 4.0
-
     let woof = [1;2;3] |> List.sort |> List.head
 
     ()
