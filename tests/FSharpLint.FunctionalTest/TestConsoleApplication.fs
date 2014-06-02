@@ -65,6 +65,8 @@ module Tests =
             }
         ], output
 
+    let toUnixPath error = { error with Description = error.Description.Replace('\\', '/') }
+
     [<TestFixture>]
     type TestConsoleApplication() =
 
@@ -119,6 +121,9 @@ module Tests =
                 ]
 
             expectedErrors 
+                |> List.map (fun x -> 
+                                    let isRunningOnMono = System.Type.GetType("Mono.Runtime") <> null
+                                    if isRunningOnMono then toUnixPath x else x)
                 |> List.iter (fun x -> Assert.True(List.exists ((=) x) errors, 
                                                    "Errors did not contain expected error:\n" + x.ToString() +
                                                    ". Program output:\n" + output))
