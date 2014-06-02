@@ -38,7 +38,13 @@ module ProjectFile =
                             |> Seq.toArray
 
         let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
-                                      + @"\..\..\FSharp\3.0\Runtime\v4.0"
+                                      + @"\..\..\FSharp\{0}\Runtime\v4.0"
+
+        let fsharpCoreDirectory =
+            if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.1")) then
+                System.String.Format(fsharpCoreDirectory, "3.1")
+            else
+                System.String.Format(fsharpCoreDirectory, "3.0")
 
         let resolvedReferences = 
             Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(

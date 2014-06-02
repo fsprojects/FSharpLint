@@ -65,7 +65,15 @@ module Tests =
             }
         ], output
 
-    let toUnixPath error = { error with Description = error.Description.Replace('\\', '/') }
+    let isRunningOnUnixBasedSystem =
+        System.Environment.OSVersion.Platform = System.PlatformID.MacOSX ||
+        System.Environment.OSVersion.Platform = System.PlatformID.Unix
+
+    let toPlatformSpecificPath error = 
+        if isRunningOnUnixBasedSystem then
+            { error with Location = error.Location.Replace('\\', '/') }
+        else
+            error
 
     [<TestFixture>]
     type TestConsoleApplication() =
@@ -121,9 +129,7 @@ module Tests =
                 ]
 
             expectedErrors 
-                |> List.map (fun x -> 
-                                    let isRunningOnMono = System.Type.GetType("Mono.Runtime") <> null
-                                    if isRunningOnMono then toUnixPath x else x)
+                |> List.map toPlatformSpecificPath
                 |> List.iter (fun x -> Assert.True(List.exists ((=) x) errors, 
                                                    "Errors did not contain expected error:\n" + x.ToString() +
                                                    ". Program output:\n" + output))
