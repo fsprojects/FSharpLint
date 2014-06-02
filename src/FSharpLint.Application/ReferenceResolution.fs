@@ -317,9 +317,9 @@ module internal MSBuildResolver =
             referenceDependencyPaths = [| for p in rar.ResolvedDependencyFiles -> p.ItemSpec |]
             relatedPaths = [| for p in rar.RelatedFiles -> p.ItemSpec |]
             referenceSatellitePaths = [| for p in rar.SatelliteFiles -> p.ItemSpec |]
-            referenceScatterPaths = [| for p in rar.ScatterFiles -> p.ItemSpec |]
-            referenceCopyLocalPaths = [| for p in rar.CopyLocalFiles -> p.ItemSpec |]
-            suggestedBindingRedirects = [| for p in rar.SuggestedRedirects -> p.ItemSpec |]
+            referenceScatterPaths = [|  |]
+            referenceCopyLocalPaths = [|  |]
+            suggestedBindingRedirects = [|  |]
         }
 
     let Resolve(

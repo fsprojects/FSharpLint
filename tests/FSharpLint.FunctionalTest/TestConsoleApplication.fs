@@ -51,17 +51,19 @@ module Tests =
                 
         app.WaitForExit()
 
-        let output = app.StandardOutput.ReadToEnd().Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
+        let output = app.StandardOutput.ReadToEnd()
+        
+        let splitOutput = output.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
 
-        let errorIndexes = seq { for i in 0..output.Length / 4 - 1 -> 4 * i }
+        let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
 
         [ for i in errorIndexes -> 
             {
-                Description = output.[i]
-                Location = output.[i + 1]
-                Code = output.[i + 2]
+                Description = splitOutput.[i]
+                Location = splitOutput.[i + 1]
+                Code = splitOutput.[i + 2]
             }
-        ]
+        ], output
 
     [<TestFixture>]
     type TestConsoleApplication() =
@@ -70,7 +72,7 @@ module Tests =
         member this.FunctionalTestConsoleApplication() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
-            let errors = runConsoleApp arguments
+            let (errors, output) = runConsoleApp arguments
 
             let expectedErrors =
                 [
@@ -117,6 +119,8 @@ module Tests =
                 ]
 
             expectedErrors 
-                |> List.iter (fun x -> Assert.True(List.exists ((=) x) errors, "Errors did not contain expected error:\n" + x.ToString()))
+                |> List.iter (fun x -> Assert.True(List.exists ((=) x) errors, 
+                                                   "Errors did not contain expected error:\n" + x.ToString() +
+                                                   ". Program output:\n" + output))
 
             Assert.AreEqual(expectedErrors.Length, errors.Length)
