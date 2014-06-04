@@ -19,7 +19,3 @@ Contains the core functionality of the solution, this includes walking an abstra
 ###FSharpLint.Rules
 
 Each file should contain a set of related lint rules e.g. checking code follows standard naming conventions. The rules are implemented using a visitor function which is then applied to each node in an abstract syntax tree, the walking of the tree can be controlled through the return value of the visitor function.
-
-###FSharpLint.VisualStudioExtension
-
-Visual studio 2012 extension. When installed it consists of a button that can be found in the "Tools" drop down menu labeled "Run FSharpLint on open projects.", clicking this asynchronously runs the lint against all the F# files in the open solution's projects. Any errors are output as warnings in the "Error List" window, and the progress of the parser can be seen in the "Output" window when showing output from "FSharpLint".
