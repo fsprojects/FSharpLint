@@ -27,14 +27,48 @@ module Program =
     let private help () =
         System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleHelp"))
 
+    let private printException (e:System.Exception) =
+        System.Console.WriteLine("Exception Message:")
+        System.Console.WriteLine(e.Message)
+        System.Console.WriteLine("Exception Stack Trace:")
+        System.Console.WriteLine(e.StackTrace)
+
+    let private configurationError file configurationException =
+        System.Console.WriteLine("Failed to load configuration file for project: " + file)
+        printException configurationException
+
+    let private projectFileError file projectFileException =
+        System.Console.WriteLine("Failed to load project file: " + file)
+        printException projectFileException
+
+    let private failedToParseFileError file parseException =
+        System.Console.WriteLine("Failed to parse file: " + file)
+        printException parseException
+
+    let private parserProgress = function
+        | FSharpLint.Application.ProjectFile.Starting(_)
+        | FSharpLint.Application.ProjectFile.ReachedEnd(_) -> ()
+        | FSharpLint.Application.ProjectFile.Failed(file, parseException) ->
+            failedToParseFileError file parseException
+        | FSharpLint.Application.ProjectFile.FailedToLoadProjectFile(file, projectFileException) ->
+            let e = 
+                match projectFileException with 
+                    | FSharpLint.Application.ProjectFile.FileNotFound(e) -> e :> System.Exception
+                    | FSharpLint.Application.ProjectFile.InvalidFile(e) -> e :> System.Exception
+            projectFileError file e
+        | FSharpLint.Application.ProjectFile.FailedToLoadConfigurationFile(file, configurationException) -> 
+            configurationError file configurationException
+
     let private runLint projectFile =
         let finishEarly = System.Func<_>(fun _ -> false)
-        let action = System.Action<_>(fun _ -> ())
+
+        let parserProgress = System.Action<FSharpLint.Application.ProjectFile.ParserProgress>(parserProgress)
+
         let error = System.Action<Error>(fun error -> 
             System.Console.WriteLine(error.Info)
             System.Console.WriteLine(errorInfoLine error.Range error.Input))
 
-        FSharpLint.Application.ProjectFile.parseProject(finishEarly, projectFile, action, error)
+        FSharpLint.Application.ProjectFile.parseProject(finishEarly, projectFile, parserProgress, error)
             |> ignore
     
     [<EntryPoint>]

@@ -78,7 +78,7 @@ module ProjectFile =
     let getProjectReferences (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
         projectInstance.GetItems("ProjectReference")
             |> Seq.collect (fun x -> 
-                let xmlReader = System.Xml.XmlReader.Create(System.IO.Path.Combine(projectPath, x.ToString()))
+                let xmlReader = System.Xml.XmlReader.Create(System.IO.Path.Combine(projectPath, x.EvaluatedInclude))
                 Microsoft.Build.Evaluation.Project(xmlReader).Items)
             |> Seq.filter (fun x -> x.ItemType = "BuiltProjectOutputGroupKeyOutput")
             |> Seq.map (fun x -> x.ToString())
@@ -116,16 +116,24 @@ module ProjectFile =
             FSharpFiles = getFSharpFiles projectInstance projectPath
         }
 
+    type LoadProjectFileException =
+        | InvalidFile of InvalidProjectFileException
+        | FileNotFound of System.IO.FileNotFoundException
+
     type ParserProgress =
         | Starting of string
         | ReachedEnd of string
-        | Failed of string
+        | Failed of string * FSharpLint.Framework.Ast.ParseException
+        | FailedToLoadProjectFile of string * LoadProjectFileException
+        | FailedToLoadConfigurationFile of string * FSharpLint.Framework.Configuration.ConfigurationException
 
         member this.Filename() =
             match this with 
                 | Starting(f) 
                 | ReachedEnd(f)
-                | Failed(f) -> f
+                | Failed(f, _) 
+                | FailedToLoadProjectFile(f, _)
+                | FailedToLoadConfigurationFile(f, _) -> f
 
     let astVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
         [ for plugin in plugins do
@@ -149,95 +157,102 @@ module ProjectFile =
     /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
     /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
     let parseProject (finishEarly: System.Func<bool>, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
-        let projectFileValues = getProjectFiles projectFile
-
-        let finishEarly = fun _ -> finishEarly.Invoke()
-
-        let checker = InteractiveChecker.Create()
-        
-        let projectOptions = 
-            checker.GetProjectOptionsFromCommandLineArgs
-               (projectFile,
-                [| yield "--simpleresolution" 
-                   yield "--noframework" 
-                   yield "--debug:full" 
-                   yield "--define:DEBUG" 
-                   yield "--optimize-" 
-                   yield "--out:" + "dog.exe"
-                   yield "--doc:test.xml" 
-                   yield "--warn:3" 
-                   yield "--fullpaths" 
-                   yield "--flaterrors" 
-                   yield "--target:exe" 
-                   yield! projectFileValues.FSharpFiles
-                   for r in projectFileValues.References do yield "-r:" + r
-                   for r in projectFileValues.ProjectReferences do yield "-r:" + r
-                |])
-
-        let errors = System.Collections.Generic.List<ErrorHandling.Error>()
-
-        let config = loadDefaultConfiguration()
-        
-        let projectConfigPath = System.IO.Path.GetDirectoryName(projectFile)
-
-        let config = 
-            let filename = System.IO.Path.Combine(projectConfigPath, SettingsFileName)
-
-            if projectConfigPath <> null && System.IO.File.Exists(filename) then
-                overrideConfiguration config filename
-            else
-                config
-
-        let rulesAssembly = System.Reflection.Assembly.Load("FSharpLint.Rules")
-        let plugins = FSharpLint.Framework.LoadAnalysers.loadPlugins rulesAssembly
-
-        let parseFile file =
-            if not <| finishEarly() then
-                let input = System.IO.File.ReadAllText(file)
-
-                let postError range error =
-                    errorReceived.Invoke(
-                        {
-                            Info = error
-                            Range = range
-                            Input = input
-                        })
-
-                let visitorInfo = 
-                    {
-                        FSharpLint.Framework.Ast.Config = config
-                        FSharpLint.Framework.Ast.PostError = postError
-                    }
-
-                progress.Invoke(Starting(file))
-
-                let visitPlainText = async {
-                        for visitor in plainTextVisitors plugins visitorInfo do
-                            visitor input file
-                    }
-
-                let visitAst = async {
-                        try
-                            let visitors = astVisitors plugins visitorInfo
-
-                            FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
-                        with 
-                            | FSharpLint.Framework.Ast.ParseException(message) -> 
-                                progress.Invoke(Failed(file))
-                    }
-
-                [visitAst; visitPlainText]
-                    |> Async.Parallel
-                    |> Async.RunSynchronously
-                    |> ignore
-
-                progress.Invoke(ReachedEnd(file))
-
         try
-            projectFileValues.FSharpFiles |> List.iter parseFile
-        with 
-            | FSharpLint.Framework.Configuration.ConfigurationException(message)
-            | FSharpLint.Framework.Ast.ParseException(message) -> 
-                System.Console.WriteLine(message)
+            let projectFileValues = getProjectFiles projectFile
 
-        errors
+            let finishEarly = fun _ -> finishEarly.Invoke()
+
+            let checker = InteractiveChecker.Create()
+        
+            let projectOptions = 
+                checker.GetProjectOptionsFromCommandLineArgs
+                   (projectFile,
+                    [| yield "--simpleresolution" 
+                       yield "--noframework" 
+                       yield "--debug:full" 
+                       yield "--define:DEBUG" 
+                       yield "--optimize-" 
+                       yield "--out:" + "dog.exe"
+                       yield "--doc:test.xml" 
+                       yield "--warn:3" 
+                       yield "--fullpaths" 
+                       yield "--flaterrors" 
+                       yield "--target:exe" 
+                       yield! projectFileValues.FSharpFiles
+                       for r in projectFileValues.References do yield "-r:" + r
+                       for r in projectFileValues.ProjectReferences do yield "-r:" + r
+                    |])
+
+            let errors = System.Collections.Generic.List<ErrorHandling.Error>()
+
+            let config = loadDefaultConfiguration()
+        
+            let projectConfigPath = System.IO.Path.GetDirectoryName(projectFile)
+
+            let config = 
+                let filename = System.IO.Path.Combine(projectConfigPath, SettingsFileName)
+
+                if projectConfigPath <> null && System.IO.File.Exists(filename) then
+                    overrideConfiguration config filename
+                else
+                    config
+
+            let rulesAssembly = System.Reflection.Assembly.Load("FSharpLint.Rules")
+            let plugins = FSharpLint.Framework.LoadAnalysers.loadPlugins rulesAssembly
+
+            let parseFile file =
+                if not <| finishEarly() then
+                    let input = System.IO.File.ReadAllText(file)
+
+                    let postError range error =
+                        errorReceived.Invoke(
+                            {
+                                Info = error
+                                Range = range
+                                Input = input
+                            })
+
+                    let visitorInfo = 
+                        {
+                            FSharpLint.Framework.Ast.Config = config
+                            FSharpLint.Framework.Ast.PostError = postError
+                        }
+
+                    progress.Invoke(Starting(file))
+
+                    let visitPlainText = async {
+                            for visitor in plainTextVisitors plugins visitorInfo do
+                                visitor input file
+                        }
+
+                    let visitAst = async {
+                            try
+                                let visitors = astVisitors plugins visitorInfo
+
+                                FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
+                            with 
+                                | :? FSharpLint.Framework.Ast.ParseException as e -> 
+                                    progress.Invoke(Failed(file, e))
+                        }
+
+                    [visitAst; visitPlainText]
+                        |> Async.Parallel
+                        |> Async.RunSynchronously
+                        |> ignore
+
+                    progress.Invoke(ReachedEnd(file))
+
+            try
+                projectFileValues.FSharpFiles |> List.iter parseFile
+            with 
+                | :? FSharpLint.Framework.Configuration.ConfigurationException as e -> 
+                    progress.Invoke(FailedToLoadConfigurationFile(projectFile, e))
+
+            errors
+        with
+            | :? InvalidProjectFileException as e ->
+                progress.Invoke(FailedToLoadProjectFile(projectFile, InvalidFile(e)))
+                System.Collections.Generic.List<ErrorHandling.Error>()
+            | :? System.IO.FileNotFoundException as e ->
+                progress.Invoke(FailedToLoadProjectFile(projectFile, FileNotFound(e)))
+                System.Collections.Generic.List<ErrorHandling.Error>()
