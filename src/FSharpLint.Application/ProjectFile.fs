@@ -40,11 +40,15 @@ module ProjectFile =
         let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
                                       + @"\..\..\FSharp\{0}\Runtime\v4.0"
 
+        // This really needs to be refactored into something a bit more intelligent.
         let fsharpCoreDirectory =
             if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.1")) then
                 System.String.Format(fsharpCoreDirectory, "3.1")
-            else
+            else if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.0")) then
                 System.String.Format(fsharpCoreDirectory, "3.0")
+            else
+                Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
+                    + @"\..\..\FSharp\.NETFramework\v4.0\4.3.0.0\"
 
         let resolvedReferences = 
             Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(
