@@ -120,11 +120,41 @@
   <data name="ConsoleCouldNotFindFile" xml:space="preserve">
     <value>Could not find the project file: {0} on disk.</value>
   </data>
+  <data name="ConsoleFailedToLoadConfig" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="ConsoleFailedToParseFile" xml:space="preserve">
+    <value>Failed to parse file {0}</value>
+  </data>
+  <data name="ConsoleFailedToResolveReferences" xml:space="preserve">
+    <value>Failed to resolve references.</value>
+  </data>
   <data name="ConsoleFinished" xml:space="preserve">
     <value>Finished.</value>
   </data>
   <data name="ConsoleHelp" xml:space="preserve">
     <value>Use -f followed by the absolute path of the .fsproj file of the project to lint to run the tool.</value>
+  </data>
+  <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
+    <value>MSBuild could not load the project file {0} because: {1}</value>
+  </data>
+  <data name="ConsoleMSBuildFailedToLoadReferencedProjectFile" xml:space="preserve">
+    <value>MSBuild could not load a referenced project file {0} because: {1}</value>
+  </data>
+  <data name="ConsoleProjectFileCouldNotBeFound" xml:space="preserve">
+    <value>{0} could not be found on disk.</value>
+  </data>
+  <data name="ConsoleRunTimeConfigError" xml:space="preserve">
+    <value>Failed while reading from config at run time.</value>
+  </data>
+  <data name="ConsoleUnableToFindFSharpCoreDirectory" xml:space="preserve">
+    <value>Could not locate your FSharp core directory.</value>
+  </data>
+  <data name="ConsoleUnableToFindProjectOutputPath" xml:space="preserve">
+    <value>MSBuild failed to get the output path for project file {0}</value>
+  </data>
+  <data name="ConsoleUnableToFindReferencedProject" xml:space="preserve">
+    <value>Referenced project {0} could not be found on disk.</value>
   </data>
   <data name="LintError" xml:space="preserve">
     <value>Error in file {0} on line {1} starting at column {2}</value>

@@ -20,12 +20,13 @@ namespace FSharpLint.Console
 
 module Program =
 
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Application.ErrorHandling
+    open FSharpLint.Application
 
     let private help () =
-        System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleHelp"))
+        System.Console.WriteLine(Resources.GetString("ConsoleHelp"))
 
     let private printException (e:System.Exception) =
         System.Console.WriteLine("Exception Message:")
@@ -33,43 +34,61 @@ module Program =
         System.Console.WriteLine("Exception Stack Trace:")
         System.Console.WriteLine(e.StackTrace)
 
-    let private configurationError file configurationException =
-        System.Console.WriteLine("Failed to load configuration file for project: " + file)
-        printException configurationException
-
-    let private projectFileError file projectFileException =
-        System.Console.WriteLine("Failed to load project file: " + file)
-        printException projectFileException
-
-    let private failedToParseFileError file parseException =
-        System.Console.WriteLine("Failed to parse file: " + file)
+    let private failedToParseFileError (file:string) parseException =
+        let formatString = Resources.GetString("ConsoleFailedToParseFile")
+        System.Console.WriteLine(System.String.Format(formatString, file))
         printException parseException
 
     let private parserProgress = function
-        | FSharpLint.Application.ProjectFile.Starting(_)
-        | FSharpLint.Application.ProjectFile.ReachedEnd(_) -> ()
-        | FSharpLint.Application.ProjectFile.Failed(file, parseException) ->
+        | FSharpLint.Application.RunLint.Starting(_)
+        | FSharpLint.Application.RunLint.ReachedEnd(_) -> ()
+        | FSharpLint.Application.RunLint.Failed(file, parseException) ->
             failedToParseFileError file parseException
-        | FSharpLint.Application.ProjectFile.FailedToLoadProjectFile(file, projectFileException) ->
-            let e = 
-                match projectFileException with 
-                    | FSharpLint.Application.ProjectFile.FileNotFound(e) -> e :> System.Exception
-                    | FSharpLint.Application.ProjectFile.InvalidFile(e) -> e :> System.Exception
-            projectFileError file e
-        | FSharpLint.Application.ProjectFile.FailedToLoadConfigurationFile(file, configurationException) -> 
-            configurationError file configurationException
 
     let private runLint projectFile =
         let finishEarly = System.Func<_>(fun _ -> false)
 
-        let parserProgress = System.Action<FSharpLint.Application.ProjectFile.ParserProgress>(parserProgress)
+        let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
 
-        let error = System.Action<Error>(fun error -> 
+        let error = System.Action<ErrorHandling.Error>(fun error -> 
             System.Console.WriteLine(error.Info)
-            System.Console.WriteLine(errorInfoLine error.Range error.Input))
+            System.Console.WriteLine(ErrorHandling.errorInfoLine error.Range error.Input))
 
-        FSharpLint.Application.ProjectFile.parseProject(finishEarly, projectFile, parserProgress, error)
-            |> ignore
+        RunLint.parseProject(finishEarly, projectFile, parserProgress, error)
+
+    let private printFailedDescription = function
+        | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
+            let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
+            System.Console.WriteLine(System.String.Format(formatString, projectPath))
+
+        | ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e) ->
+            let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
+            System.Console.WriteLine(System.String.Format(formatString, projectPath, e.Message))
+
+        | ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e) ->
+            let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadReferencedProjectFile")
+            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath, e.Message))
+
+        | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
+            let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
+            System.Console.WriteLine(System.String.Format(formatString, projectPath))
+
+        | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
+            let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
+            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath))
+
+        | ProjectFile.UnableToFindFSharpCoreDirectory ->
+            System.Console.WriteLine(Resources.GetString("ConsoleUnableToFindFSharpCoreDirectory"))
+
+        | ProjectFile.FailedToLoadConfig(message) ->
+            let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
+            System.Console.WriteLine(System.String.Format(formatString, message))
+
+        | ProjectFile.RunTimeConfigError ->
+            System.Console.WriteLine(Resources.GetString("ConsoleRunTimeConfigError"))
+
+        | ProjectFile.FailedToResolveReferences ->
+            System.Console.WriteLine(Resources.GetString("ConsoleFailedToResolveReferences"))
     
     [<EntryPoint>]
     let main argv = 
@@ -81,11 +100,13 @@ module Program =
                     let projectFile = argv.[1]
 
                     if System.IO.File.Exists(projectFile) then
-                        runLint projectFile
-
-                        System.Console.WriteLine(FSharpLint.Framework.Resources.GetString("ConsoleFinished"))
+                        match runLint projectFile with
+                            | RunLint.Success ->
+                                System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
+                            | RunLint.Failure(error) ->
+                                printFailedDescription error
                     else
-                        let formatString = FSharpLint.Framework.Resources.GetString("ConsoleCouldNotFindFile")
+                        let formatString = Resources.GetString("ConsoleCouldNotFindFile")
                         System.Console.WriteLine(System.String.Format(formatString, projectFile))
                 | _ -> help()
 

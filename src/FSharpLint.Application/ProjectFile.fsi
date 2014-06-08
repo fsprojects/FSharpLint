@@ -18,38 +18,30 @@
 
 namespace FSharpLint.Application
 
-/// Runs the lint on an entire project using a .fsproj file.
 module ProjectFile =
 
-    open System.Linq
-    open Microsoft.Build.Tasks
-    open Microsoft.Build.Framework
-    open Microsoft.Build.BuildEngine
-    open Microsoft.FSharp.Compiler.SourceCodeServices 
-    open FSharpLint.Framework.Configuration
+    type Error =
+        | ProjectFileCouldNotBeFound of string
+        | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | MSBuildFailedToLoadReferencedProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | UnableToFindProjectOutputPath of string
+        | UnableToFindReferencedProject of string
+        | UnableToFindFSharpCoreDirectory
+        | FailedToLoadConfig of string
+        | RunTimeConfigError
+        | FailedToResolveReferences
 
-    exception ResolveReferenceException of string
+    type internal Result<'TSuccess> = 
+        | Success of 'TSuccess
+        | Failure of Error
 
-    type LoadProjectFileException =
-        | InvalidFile of InvalidProjectFileException
-        | FileNotFound of System.IO.FileNotFoundException
+    type internal ProjectFile = 
+        {
+            Path: string
+            References: string list
+            ProjectReferences: string list
+            FSharpFiles: string list
+            Config: Map<string, FSharpLint.Framework.Configuration.Analyser>
+        }
 
-    type ParserProgress =
-        | Starting of string
-        | ReachedEnd of string
-        | Failed of string * FSharpLint.Framework.Ast.ParseException
-        | FailedToLoadProjectFile of string * LoadProjectFileException
-        | FailedToLoadConfigurationFile of string * FSharpLint.Framework.Configuration.ConfigurationException
-
-        member Filename : unit -> string
-        
-    /// <summary>Parses and runs the linter on all the files in a project.</summary>
-    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
-    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
-    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    val parseProject :
-        finishEarly: System.Func<bool> * 
-        projectFile:string *
-        progress: System.Action<ParserProgress> *
-        errorReceived: System.Action<ErrorHandling.Error> -> System.Collections.Generic.List<ErrorHandling.Error>
+    val internal loadProjectFile : string -> Result<ProjectFile>

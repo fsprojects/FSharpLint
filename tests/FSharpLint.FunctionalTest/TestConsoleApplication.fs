@@ -51,8 +51,9 @@ module Tests =
                 
         app.WaitForExit()
 
-        let output = app.StandardOutput.ReadToEnd()
-        
+        app.StandardOutput.ReadToEnd()
+
+    let getErrorsFromOutput (output:string) = 
         let splitOutput = output.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
 
         let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
@@ -63,7 +64,7 @@ module Tests =
                 Location = splitOutput.[i + 1]
                 Code = splitOutput.[i + 2]
             }
-        ], output
+        ]
 
     let isRunningOnUnixBasedSystem =
         System.Environment.OSVersion.Platform = System.PlatformID.MacOSX ||
@@ -77,12 +78,69 @@ module Tests =
 
     [<TestFixture>]
     type TestConsoleApplication() =
+        [<Test>]
+        member this.InvalidConfig() = 
+            let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
+
+            System.IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
+
+            let output = runConsoleApp arguments
+
+            System.IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
+
+            Assert.IsTrue(output.Contains("Failed to load config file"))
+
+        [<Test>]
+        member this.InvalidReferencedProjectFile() = 
+            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesInvalidProject.fsproj"
+
+            let arguments = sprintf "-f %s" projectFile
+
+            let output = runConsoleApp arguments
+
+            Assert.IsTrue(
+                output.Contains("MSBuild could not load a referenced project file") && 
+                output.Contains("invalidProjectFile.fsproj"))
+
+        [<Test>]
+        member this.InvalidProjectFile() = 
+            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/invalidProjectFile.fsproj"
+
+            let arguments = sprintf "-f %s" projectFile
+
+            let output = runConsoleApp arguments
+            
+            Assert.IsTrue(output.Contains(sprintf "MSBuild could not load the project file %s" projectFile))
+
+        [<Test>]
+        member this.UnableToFindProjectFile() = 
+            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/iuniubi.fsproj"
+
+            let arguments = sprintf "-f %s" projectFile
+
+            let output = runConsoleApp arguments
+
+            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile))
+
+        [<Test>]
+        member this.UnableToFindReferencedProjectFile() = 
+            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesNonExistantProject.fsproj"
+
+            let arguments = sprintf "-f %s" projectFile
+
+            let output = runConsoleApp arguments
+
+            Assert.IsTrue(
+                output.Contains("Referenced project") && 
+                output.Contains("doesntexist.fsproj could not be found on disk"))
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
-            let (errors, output) = runConsoleApp arguments
+            let output = runConsoleApp arguments
+
+            let errors = getErrorsFromOutput output
 
             let expectedErrors =
                 [

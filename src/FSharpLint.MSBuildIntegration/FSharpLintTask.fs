@@ -57,7 +57,7 @@ type FSharpLintTask() =
         currentDomain.add_AssemblyResolve(handler)
 
         try
-            FSharpLint.Application.ProjectFile.parseProject(finishEarly, this.Project, action, error)
+            FSharpLint.Application.RunLint.parseProject(finishEarly, this.Project, action, error)
                 |> ignore
         with
             | e -> 

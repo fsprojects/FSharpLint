@@ -18,7 +18,6 @@
 
 namespace FSharpLint.Application
 
-/// Runs the lint on an entire project using a .fsproj file.
 module ProjectFile =
 
     open System.Linq
@@ -31,6 +30,31 @@ module ProjectFile =
     [<Literal>]
     let SettingsFileName = "Settings.FSharpLint"
 
+    type Error =
+        | ProjectFileCouldNotBeFound of string
+        | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | MSBuildFailedToLoadReferencedProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | UnableToFindProjectOutputPath of string
+        | UnableToFindReferencedProject of string
+        | UnableToFindFSharpCoreDirectory
+        | FailedToLoadConfig of string
+        | RunTimeConfigError
+        | FailedToResolveReferences
+
+    type Result<'TSuccess> = 
+        | Success of 'TSuccess
+        | Failure of Error
+
+    /// Paths of all required files used to construct project options (must be absolute paths).
+    type ProjectFile = 
+        {
+            Path: string
+            References: string list
+            ProjectReferences: string list
+            FSharpFiles: string list
+            Config: Map<string,Analyser>
+        }
+
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
     let private resolveReferences (projectInstance:Microsoft.Build.Evaluation.Project) outputPath references =
         let references = references 
@@ -40,223 +64,158 @@ module ProjectFile =
         let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
                                       + @"\..\..\FSharp\{0}\Runtime\v4.0"
 
-        // This really needs to be refactored into something a bit more intelligent.
+        let altDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
+                                + @"\..\..\FSharp\.NETFramework\v4.0\4.3.0.0\"
+
+        let isRunningOnMono() = System.Type.GetType("Mono.Runtime") <> null
+
         let fsharpCoreDirectory =
             if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.1")) then
-                System.String.Format(fsharpCoreDirectory, "3.1")
+                Success(System.String.Format(fsharpCoreDirectory, "3.1"))
             else if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.0")) then
-                System.String.Format(fsharpCoreDirectory, "3.0")
+                Success(System.String.Format(fsharpCoreDirectory, "3.0"))
+            else if System.IO.Directory.Exists(altDirectory) then
+                Success(altDirectory)
+            else if isRunningOnMono() then
+                Success("")
             else
-                Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
-                    + @"\..\..\FSharp\.NETFramework\v4.0\4.3.0.0\"
+                Failure(UnableToFindFSharpCoreDirectory)
 
-        let resolvedReferences = 
-            Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(
-                    Microsoft.FSharp.Compiler.MSBuildResolver.CompileTimeLike, 
-                    references,
-                    "v" + projectInstance.ToolsVersion,
-                    [],
-                    "",
-                    outputPath,
-                    fsharpCoreDirectory,
-                    [],
-                    "",
-                    "",
-                    "",
-                    "",
-                    (fun _ -> ()),
-                    (fun _ _ -> ()),
-                    (fun _ _ -> ())
-                )
+        match fsharpCoreDirectory with
+            | Success(fsharpCoreDirectory) ->
+                let resolvedReferences = 
+                    try
+                        Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(
+                                Microsoft.FSharp.Compiler.MSBuildResolver.CompileTimeLike, 
+                                references,
+                                "v" + projectInstance.ToolsVersion,
+                                [],
+                                "",
+                                outputPath,
+                                fsharpCoreDirectory,
+                                [],
+                                "",
+                                "",
+                                "",
+                                "",
+                                (fun _ -> ()),
+                                (fun _ _ -> ()),
+                                (fun _ _ -> ())
+                            ) |> Success
+                    with
+                        | :? Microsoft.FSharp.Compiler.MSBuildResolver.ResolutionFailure ->
+                            Failure(FailedToResolveReferences)
 
-        resolvedReferences.resolvedFiles |> Seq.map (fun x -> x.itemSpec) |> Seq.toList
+                match resolvedReferences with
+                    | Success(resolvedReferences) ->
+                        resolvedReferences.resolvedFiles 
+                            |> Seq.map (fun x -> x.itemSpec) 
+                            |> Seq.toList
+                            |> Success
+                    | Failure(x) -> Failure(x)
+            | Failure(x) -> Failure(x)
 
-    /// Paths of all required files used to construct project options (must be absolute paths).
-    type ProjectFile = 
-        {
-            References: string list
-            ProjectReferences: string list
-            FSharpFiles: string list
-        }
+    let openProjectFile (projectFile:string) =
+        try
+            let xmlReader = System.Xml.XmlReader.Create(projectFile)
+
+            Microsoft.Build.Evaluation.Project(xmlReader) |> Success
+        with
+            | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
+                Failure(MSBuildFailedToLoadProjectFile(projectFile, e))
+            | :? System.Security.SecurityException
+            | :? System.IO.FileNotFoundException
+            | :? System.UriFormatException ->
+                Failure(ProjectFileCouldNotBeFound(projectFile))
+
+    exception ReferencedProjectFileException of Error
 
     let getProjectReferences (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
-        projectInstance.GetItems("ProjectReference")
-            |> Seq.collect (fun x -> 
-                let xmlReader = System.Xml.XmlReader.Create(System.IO.Path.Combine(projectPath, x.EvaluatedInclude))
-                Microsoft.Build.Evaluation.Project(xmlReader).Items)
-            |> Seq.filter (fun x -> x.ItemType = "BuiltProjectOutputGroupKeyOutput")
-            |> Seq.map (fun x -> x.ToString())
+        try 
+            let getReferencedProjectOutputItems (x:Microsoft.Build.Evaluation.ProjectItem) =
+                let openedProject = System.IO.Path.Combine(projectPath, x.EvaluatedInclude) |> openProjectFile
+
+                match openedProject with
+                    | Success(project) ->
+                        project.GetItems("BuiltProjectOutputGroupKeyOutput") |> Seq.toList
+                    | Failure(error) -> 
+                        raise <| ReferencedProjectFileException error
+
+            projectInstance.GetItems("ProjectReference")
+                |> Seq.toList
+                |> List.collect getReferencedProjectOutputItems
+                |> List.map (fun x -> x.ToString())
+                |> Success
+        with
+            | ReferencedProjectFileException(error) ->
+                Failure <|
+                    match error with
+                        | MSBuildFailedToLoadProjectFile(p, e) -> MSBuildFailedToLoadReferencedProjectFile(p, e)
+                        | ProjectFileCouldNotBeFound(p) -> UnableToFindReferencedProject(p)
+                        | x -> x
 
     /// Gets a list of the .fs and .fsi files in the project.
     let getFSharpFiles (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
         projectInstance.GetItems("Compile")
-            |> Seq.map (fun item -> item.EvaluatedInclude)
+            |> Seq.map (fun item -> System.IO.Path.Combine(projectPath, item.EvaluatedInclude))
             |> Seq.toList
-            |> List.map (fun x -> System.IO.Path.Combine(projectPath, x.ToString()))
 
-    exception ResolveReferenceException of string
+    let loadConfigForProject projectFilePath =
+        let config = 
+            try
+                loadDefaultConfiguration() |> Success
+            with
+                | ConfigurationException(message) ->
+                    Failure(FailedToLoadConfig ("Failed to load default config: " + message))
 
-    let getProjectFiles (projectFile:string) =
-        let projectPath = System.IO.Path.GetDirectoryName(projectFile)
+        match config with
+            | Success(config) ->
+                let projectConfigPath = System.IO.Path.GetDirectoryName(projectFilePath)
 
-        let xmlReader = System.Xml.XmlReader.Create(projectFile)
-
-        let projectInstance = Microsoft.Build.Evaluation.Project(xmlReader)
-
-        let references = projectInstance.GetItems("Reference")
-
-        let projectReferences = getProjectReferences projectInstance projectPath
-
-        let outputProperty = projectInstance.GetProperty("OutputPath")
-
-        if outputProperty = null then
-            raise <| ResolveReferenceException "Unable to retrieve project's output target directory."
-
-        let outputAbsolutePath = System.IO.Path.Combine(projectPath, outputProperty.EvaluatedValue)
-
-        {
-            References = references |> resolveReferences projectInstance outputAbsolutePath
-            ProjectReferences = projectReferences |> Seq.toList
-            FSharpFiles = getFSharpFiles projectInstance projectPath
-        }
-
-    type LoadProjectFileException =
-        | InvalidFile of InvalidProjectFileException
-        | FileNotFound of System.IO.FileNotFoundException
-
-    type ParserProgress =
-        | Starting of string
-        | ReachedEnd of string
-        | Failed of string * FSharpLint.Framework.Ast.ParseException
-        | FailedToLoadProjectFile of string * LoadProjectFileException
-        | FailedToLoadConfigurationFile of string * FSharpLint.Framework.Configuration.ConfigurationException
-
-        member this.Filename() =
-            match this with 
-                | Starting(f) 
-                | ReachedEnd(f)
-                | Failed(f, _) 
-                | FailedToLoadProjectFile(f, _)
-                | FailedToLoadConfigurationFile(f, _) -> f
-
-    let astVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
-        [ for plugin in plugins do
-            match plugin.Analyser with
-                | FSharpLint.Framework.LoadAnalysers.Ast(visitor) -> 
-                    yield visitor visitorInfo
-                | FSharpLint.Framework.LoadAnalysers.PlainText(_) -> ()
-        ]
-
-    let plainTextVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
-        [ for plugin in plugins do
-            match plugin.Analyser with
-                | FSharpLint.Framework.LoadAnalysers.Ast(_) -> ()
-                | FSharpLint.Framework.LoadAnalysers.PlainText(visitor) -> 
-                    yield visitor visitorInfo
-        ]
-        
-    /// <summary>Parses and runs the linter on all the files in a project.</summary>
-    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
-    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
-    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    let parseProject (finishEarly: System.Func<bool>, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
-        try
-            let projectFileValues = getProjectFiles projectFile
-
-            let finishEarly = fun _ -> finishEarly.Invoke()
-
-            let checker = InteractiveChecker.Create()
-        
-            let projectOptions = 
-                checker.GetProjectOptionsFromCommandLineArgs
-                   (projectFile,
-                    [| yield "--simpleresolution" 
-                       yield "--noframework" 
-                       yield "--debug:full" 
-                       yield "--define:DEBUG" 
-                       yield "--optimize-" 
-                       yield "--out:" + "dog.exe"
-                       yield "--doc:test.xml" 
-                       yield "--warn:3" 
-                       yield "--fullpaths" 
-                       yield "--flaterrors" 
-                       yield "--target:exe" 
-                       yield! projectFileValues.FSharpFiles
-                       for r in projectFileValues.References do yield "-r:" + r
-                       for r in projectFileValues.ProjectReferences do yield "-r:" + r
-                    |])
-
-            let errors = System.Collections.Generic.List<ErrorHandling.Error>()
-
-            let config = loadDefaultConfiguration()
-        
-            let projectConfigPath = System.IO.Path.GetDirectoryName(projectFile)
-
-            let config = 
                 let filename = System.IO.Path.Combine(projectConfigPath, SettingsFileName)
 
                 if projectConfigPath <> null && System.IO.File.Exists(filename) then
-                    overrideConfiguration config filename
+                    try
+                        overrideConfiguration config filename |> Success
+                    with
+                        | ConfigurationException(message) ->
+                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
+                        | :? System.Xml.XmlException as e ->
+                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename e.Message))
                 else
-                    config
+                    Success(config)
+            | x -> x
 
-            let rulesAssembly = System.Reflection.Assembly.Load("FSharpLint.Rules")
-            let plugins = FSharpLint.Framework.LoadAnalysers.loadPlugins rulesAssembly
+    let loadProjectFile (projectFile:string) =
+        match openProjectFile projectFile with
+            | Success(projectInstance) ->
+                let projectPath = System.IO.Path.GetDirectoryName(projectFile)
 
-            let parseFile file =
-                if not <| finishEarly() then
-                    let input = System.IO.File.ReadAllText(file)
+                match getProjectReferences projectInstance projectPath with
+                    | Success(projectReferences) ->
 
-                    let postError range error =
-                        errorReceived.Invoke(
-                            {
-                                Info = error
-                                Range = range
-                                Input = input
-                            })
+                        let outputProperty = projectInstance.GetProperty("OutputPath")
 
-                    let visitorInfo = 
-                        {
-                            FSharpLint.Framework.Ast.Config = config
-                            FSharpLint.Framework.Ast.PostError = postError
-                        }
+                        if outputProperty = null then
+                            Failure(UnableToFindProjectOutputPath projectFile)
+                        else
+                            let outputAbsolutePath = System.IO.Path.Combine(projectPath, outputProperty.EvaluatedValue)
 
-                    progress.Invoke(Starting(file))
+                            let config = loadConfigForProject projectFile
 
-                    let visitPlainText = async {
-                            for visitor in plainTextVisitors plugins visitorInfo do
-                                visitor input file
-                        }
+                            match loadConfigForProject projectFile with
+                                | Success(config) ->
+                                    match projectInstance.GetItems("Reference") |> resolveReferences projectInstance outputAbsolutePath with
+                                        | Success(references) ->
+                                            {
+                                                Path = projectFile
+                                                References = references
+                                                ProjectReferences = projectReferences
+                                                FSharpFiles = getFSharpFiles projectInstance projectPath
+                                                Config = config
+                                            } |> Success
 
-                    let visitAst = async {
-                            try
-                                let visitors = astVisitors plugins visitorInfo
-
-                                FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input visitors
-                            with 
-                                | :? FSharpLint.Framework.Ast.ParseException as e -> 
-                                    progress.Invoke(Failed(file, e))
-                        }
-
-                    [visitAst; visitPlainText]
-                        |> Async.Parallel
-                        |> Async.RunSynchronously
-                        |> ignore
-
-                    progress.Invoke(ReachedEnd(file))
-
-            try
-                projectFileValues.FSharpFiles |> List.iter parseFile
-            with 
-                | :? FSharpLint.Framework.Configuration.ConfigurationException as e -> 
-                    progress.Invoke(FailedToLoadConfigurationFile(projectFile, e))
-
-            errors
-        with
-            | :? InvalidProjectFileException as e ->
-                progress.Invoke(FailedToLoadProjectFile(projectFile, InvalidFile(e)))
-                System.Collections.Generic.List<ErrorHandling.Error>()
-            | :? System.IO.FileNotFoundException as e ->
-                progress.Invoke(FailedToLoadProjectFile(projectFile, FileNotFound(e)))
-                System.Collections.Generic.List<ErrorHandling.Error>()
+                                        | Failure(error) -> Failure(error)
+                                | Failure(error) -> Failure(error)
+                    | Failure(error) -> Failure(error)
+            | Failure(error) -> Failure(error)
