@@ -275,7 +275,7 @@
       <Rules>
         <Rule Name="ExceptionDefinitionHeader">
           <RuleSettings>
-            <Property name="Enabled">True</Property>
+            <Property name="Enabled">False</Property>
           </RuleSettings>
         </Rule>
       </Rules>
