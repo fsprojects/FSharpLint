@@ -77,7 +77,7 @@ module ProjectFile =
             else if System.IO.Directory.Exists(altDirectory) then
                 Success(altDirectory)
             else if isRunningOnMono() then
-                Success("")
+                Success(System.String.Format(fsharpCoreDirectory, "3.1"))
             else
                 Failure(UnableToFindFSharpCoreDirectory)
 
