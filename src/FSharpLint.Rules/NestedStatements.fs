@@ -45,6 +45,23 @@ module NestedStatements =
         System.String.Format(errorFormatString, depth)
 
     exception UnexpectedNodeTypeException of string
+
+    /// Lambda arguments (after the first argument) are curried and represented as such internally.
+    /// e.g. fun x y -> () will be represented in the AST as fun x -> fun y -> ().
+    /// This function returns true if the given lambda is an argument.
+    let isLambdaALambdaArgument = function
+        | AstNode.Expression(SynExpr.Lambda(_, _, _, SynExpr.Lambda(_, _, _, _, nestedRange), range)) -> 
+            range.StartLine = nestedRange.StartLine && range.StartColumn = nestedRange.StartColumn
+        | _ -> false
+
+    /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
+    /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
+    /// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
+    let isCompilerGeneratedMatch = function
+        | AstNode.Expression(SynExpr.Match(_, SynExpr.Ident(ident), _, _, _)) 
+                when ident.idText.StartsWith("_arg") ->
+            true
+        | _ -> false
     
     let rec visitor depth (visitorInfo:VisitorInfo) (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
@@ -62,7 +79,9 @@ module NestedStatements =
             | AstNode.Expression(SynExpr.Quote(_))
             | AstNode.Expression(SynExpr.While(_))
             | AstNode.Expression(SynExpr.For(_))
-            | AstNode.Expression(SynExpr.ForEach(_)) as node -> 
+            | AstNode.Expression(SynExpr.ForEach(_)) as node 
+                    when not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
+
                 let range () =
                     match node with 
                         | AstNode.Expression(node) ->

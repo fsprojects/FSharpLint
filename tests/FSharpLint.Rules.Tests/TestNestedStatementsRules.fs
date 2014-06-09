@@ -56,4 +56,31 @@ let dog =
                             ()
     ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(9, 20))
+        Assert.IsTrue(this.ErrorExistsAt(9, 20)) 
+        
+    [<Test>]
+    member this.LambdaWildcardArgumentsMustNotCountAsANestedStatement() = 
+        this.Parse """
+module Program
+
+let dog = (fun _ _ _ _ _ _ _ _ -> ())"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(4))
+
+    [<Test>]
+    member this.LambdaArgumentsMustNotCountAsANestedStatement() = 
+        this.Parse """
+module Program
+
+let dog = (fun a b c d e f g h i j -> ())"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(4))
+
+    [<Test>]
+    member this.NestedLambdasCountedCorrectly() = 
+        this.Parse """
+module Program
+
+let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 47))

@@ -66,6 +66,9 @@ type TestRuleBase(analyser:AnalyserType, ?config:Map<string, Analyser>) =
     member this.ErrorsAt(startLine, startColumn) =
         errorRanges.Where(fun (r:range, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
 
+    member this.ErrorExistsOnLine(startLine) =
+        errorRanges.Any(fun (r:range, _) -> r.StartLine = startLine)
+
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         (this.ErrorsAt(startLine, startColumn)).Any(fun (_, e) -> e = message)
 
