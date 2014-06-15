@@ -259,8 +259,19 @@
       </Rules>
       <AnalyserSettings />
     </Analyser>
-    <Analyser AnalyserId="FSharpLint.FavourIgnoreOverLetWild">
-      <Rules />
+    <Analyser AnalyserId="FSharpLint.Binding">
+      <Rules>
+        <Rule Name="FavourIgnoreOverLetWild">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="UselessBinding">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
       <AnalyserSettings>
         <Property name="Enabled">True</Property>
       </AnalyserSettings>

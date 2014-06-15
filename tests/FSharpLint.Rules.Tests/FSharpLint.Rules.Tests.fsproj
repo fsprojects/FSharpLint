@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="TestRuleBase.fs" />
     <Compile Include="TestNameConventionRules.fs" />
-    <Compile Include="TestFavourIgnoreOverLetWildRules.fs" />
+    <Compile Include="TestBindingRules.fs" />
     <Compile Include="TestNumberOfItemsRules.fs" />
     <Compile Include="TestXmlDocumentationRules.fs" />
     <Compile Include="TestSourceLengthRules.fs" />

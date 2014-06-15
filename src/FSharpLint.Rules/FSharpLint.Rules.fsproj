@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="NameConventions.fs" />
     <Compile Include="NumberOfItems.fs" />
-    <Compile Include="FavourIgnoreOverLetWild.fs" />
+    <Compile Include="Binding.fs" />
     <Compile Include="XmlDocumentation.fs" />
     <Compile Include="SourceLength.fs" />
     <Compile Include="NestedStatements.fs" />

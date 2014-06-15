@@ -216,6 +216,9 @@
   <data name="RulesTypographyTrailingWhitespaceError" xml:space="preserve">
     <value>Lines should not have trailing whitespace.</value>
   </data>
+  <data name="RulesUselessBindingError" xml:space="preserve">
+    <value>Useless binding.</value>
+  </data>
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>

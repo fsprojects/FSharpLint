@@ -16,10 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-module TestFavourIgnoreOverLetWildRules
+module TestBindingRules
 
 open NUnit.Framework
-open FSharpLint.Rules.FavourIgnoreOverLetWild
+open FSharpLint.Rules.Binding
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadAnalysers
 
@@ -28,7 +28,19 @@ let config =
         [ 
             (AnalyserName, 
                 { 
-                    Rules = Map.ofList []
+                    Rules = Map.ofList 
+                        [
+                            ("FavourIgnoreOverLetWild", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
+                            ("UselessBinding", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
+                        ]
                     Settings = Map.ofList 
                         [
                             ("Enabled", Enabled(true))
@@ -37,7 +49,7 @@ let config =
         ]
 
 [<TestFixture>]
-type TestNameConventionRules() =
+type TestBindingRules() =
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
 
     [<Test>]
@@ -77,3 +89,23 @@ module Program
 let a = List.iter (fun x -> ()) []"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
+
+    [<Test>]
+    member this.UslessBinding() = 
+        this.Parse """
+module Program
+
+let a = 10
+let a = a"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+    [<Test>]
+    member this.UslessBindingWithParens() = 
+        this.Parse """
+module Program
+
+let a = 10
+let ((a)) = ((a))"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
