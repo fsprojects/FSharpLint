@@ -292,5 +292,13 @@
       </Rules>
       <AnalyserSettings />
     </Analyser>
+    <Analyser AnalyserId="FSharpLint.CyclomaticComplexity">
+      <Rules />
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+        <Property name="MaxCyclomaticComplexity">10</Property>
+        <Property name="IncludeMatchStatements">True</Property>
+      </AnalyserSettings>
+    </Analyser>
   </Analysers>
 </FSharpLintSettings>

@@ -469,43 +469,69 @@ module Ast =
             | Stop
             | ContinueWithVisitor of Visitor
             | ContinueWithVisitorsForChildren of GetVisitorForChild
+            | StartWalk
+            | WalkWithVisitor of Visitor * (unit -> unit)
 
-    /// Visits a node with a single visitor, and returns each visitor to be used for each child node.
-    /// This allows a visitor to decide how the children of the visited node shall be visited.
-    let visit node visitor =
-         match visitor node with
-            | Continue -> 
-                node.ChildNodes |> List.map (fun _ -> Some(visitor))
-            | Stop -> 
-                node.ChildNodes |> List.map (fun _ -> None)
-            | ContinueWithVisitor(visitor) -> 
-                node.ChildNodes |> List.map (fun _ -> Some(visitor))
-            | ContinueWithVisitorsForChildren(getVisitorForChild) -> 
-                node.ChildNodes |> List.mapi (fun i child -> getVisitorForChild i child)
+    let getVisitorsForChildren children visitor = function
+        | StartWalk
+        | Continue -> 
+            children |> List.map (fun _ -> Some(visitor))
+        | Stop -> 
+            children |> List.map (fun _ -> None)
+        | ContinueWithVisitor(visitor) -> 
+            children |> List.map (fun _ -> Some(visitor))
+        | ContinueWithVisitorsForChildren(getVisitorForChild) -> 
+            children |> List.mapi (fun i child -> getVisitorForChild i child)
+        | WalkWithVisitor(visitor, _) ->
+            children |> List.map (fun _ -> None)
         
     /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
     /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
-    let rec walk finishEarly breadcrumbs visitors node = 
+    let rec walk finishEarly breadcrumbs node visitor = 
         let walk = walk finishEarly (node :: breadcrumbs)
 
         let children = traverseNode node
 
         let currentNode = { Node = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
 
-        let visitorsForChildren = visitors |> List.map (visit currentNode)
+        let visitChild child = function
+            | Some(visitor) when not <| finishEarly() -> walk child visitor
+            | Some(_) | None -> ()
 
-        if not <| finishEarly() then
-            children |> List.iteri (fun i child ->
-                let visitors = 
-                    visitorsForChildren 
-                        |> List.map (fun v -> v.[i])
-                        |> List.choose id
+        let visitChildMethod = visitor currentNode
 
-                walk visitors child)
+        let visitorsForChildren = getVisitorsForChildren currentNode.ChildNodes visitor visitChildMethod
+
+        let rec walkChildren walkVisitor = function
+            | (child :: children, visitor :: visitors) -> 
+                match walkVisitor with
+                    | Some(_) ->
+                        visitChild child walkVisitor
+                    | None ->
+                        visitChild child visitor
+
+                match visitChildMethod with
+                    | WalkWithVisitor(visitor, _) ->
+                        walkChildren (Some(visitor)) (children, visitors)
+                    | _ -> 
+                        walkChildren walkVisitor (children, visitors)
+            | [], [] -> 
+                // Call end function if current is start walk
+                () 
+            | _ -> assert false
+
+        walkChildren None (children, visitorsForChildren)
 
     let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
-            moduleOrNamespaces |> List.iter (fun x -> walk finishEarly [] visitors (ModuleOrNamespace(x)))
+            for moduleOrNamespace in moduleOrNamespaces do
+                Async.Parallel 
+                    [
+                        for visitor in visitors -> 
+                            async { return walk finishEarly [] (ModuleOrNamespace(moduleOrNamespace)) visitor }
+                    ] 
+                    |> Async.RunSynchronously 
+                    |> ignore
         | ParsedInput.SigFile _ -> ()
 
     exception ParseException of string
