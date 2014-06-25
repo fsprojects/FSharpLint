@@ -12,3 +12,7 @@ install:
 
 script:
   - sh build.sh
+
+branches:
+ only:
+  - master
