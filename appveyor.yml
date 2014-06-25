@@ -1,3 +1,6 @@
+branches:
+  only:
+    - master
 build_script:
   - ps: .\build.cmd
 test: off
