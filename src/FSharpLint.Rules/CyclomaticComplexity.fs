@@ -72,8 +72,8 @@ module CyclomaticComplexity =
                     | SynExpr.Match(_, _, matchClauses, _, _) 
                             when configIncludeMatchStatements visitorInfo.Config -> 
 
-                        let x = List.length matchClauses - 1
-                        WalkWithVisitor(visitor (count + x), finishedWalk (count + x))
+                        let count = count + List.length matchClauses - 1
+                        WalkWithVisitor(visitor count, finishedWalk count)
                     | _ -> 
                         WalkWithVisitor(visitor count, finishedWalk count)
             | _ -> 
@@ -90,11 +90,11 @@ module CyclomaticComplexity =
     and 
         findBindingVisitor visitorInfo checkFile astNode : VisitorResult =
             match astNode.Node with
-                | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, _, range, _)) ->
+                | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) ->
                     let getVisitorForChild _ child =
                         match child with
                             | AstNode.Pattern(_) ->
-                                Some(countDecisionPathsVisitor visitorInfo checkFile range 0)
+                                Some(countDecisionPathsVisitor visitorInfo checkFile expr.Range 0)
                             | _ -> 
                                 Some(findBindingVisitor visitorInfo checkFile)
 

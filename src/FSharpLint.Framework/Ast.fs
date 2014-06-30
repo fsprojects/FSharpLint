@@ -471,18 +471,6 @@ module Ast =
             | ContinueWithVisitorsForChildren of GetVisitorForChild
             | WalkWithVisitor of Visitor * (unit -> unit)
 
-    let getVisitorsForChildren children visitor = function
-        | Continue -> 
-            children |> List.map (fun _ -> Some(visitor))
-        | Stop -> 
-            children |> List.map (fun _ -> None)
-        | ContinueWithVisitor(visitor) -> 
-            children |> List.map (fun _ -> Some(visitor))
-        | ContinueWithVisitorsForChildren(getVisitorForChild) -> 
-            children |> List.mapi (fun i child -> getVisitorForChild i child)
-        | WalkWithVisitor(visitor, _) ->
-            children |> List.map (fun _ -> None)
-
     /// Check if the return value of walking children is the end of a visitor walk.
     let checkAtEndOfWalk visitChildrenMethod walkChildrenReturnValue =
         match visitChildrenMethod, walkChildrenReturnValue with

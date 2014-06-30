@@ -26,7 +26,7 @@ open FSharpLint.Framework.LoadAnalysers
 [<Literal>]
 let MaxComplexity = 1
 
-let config = 
+let config includeMatchStatements = 
     Map.ofList 
         [ 
             (AnalyserName, 
@@ -36,14 +36,14 @@ let config =
                         [ 
                             ("Enabled", Enabled(true))
                             ("MaxCyclomaticComplexity", MaxCyclomaticComplexity(MaxComplexity))
-                            ("IncludeMatchStatements", IncludeMatchStatements(true))
+                            ("IncludeMatchStatements", IncludeMatchStatements(includeMatchStatements))
                         ]
                 })
             ]
 
 [<TestFixture>]
 type TestFunctionReimplementationRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(findBindingVisitor), config)
+    inherit TestRuleBase.TestRuleBase(Ast(findBindingVisitor))
 
     member this.AssertComplexityOf(cyclomaticComplexity, startLine, startColumn) =
         let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesCyclomaticComplexityError")
@@ -52,7 +52,7 @@ type TestFunctionReimplementationRules() =
 
     [<Test>]
     member this.CyclomaticComplexityOfFunction() = 
-        this.Parse """
+        this.Parse("""
 module Program
 
 let x () =
@@ -64,6 +64,54 @@ let x () =
     else
         for i in [] do
             ()
-"""
+""", config true)
 
-        this.AssertComplexityOf(3, 4, 4)
+        this.AssertComplexityOf(3, 5, 4)
+
+    [<Test>]
+    member this.CyclomaticComplexityWithMatchStatement() = 
+        this.Parse("""
+module Program
+
+let x y =
+    if true then
+        if true then
+            ()
+        else
+            match y with
+                | Some(y) when y > 0 -> ()
+                | Some(_) -> ()
+                | None -> ()
+    else
+        for i in [] do
+            match y with
+                | Some(y) when y > 0 -> ()
+                | Some(_) -> ()
+                | None -> ()
+""", config true)
+
+        this.AssertComplexityOf(7, 5, 4)
+
+    [<Test>]
+    member this.CyclomaticComplexityWithMatchStatementWithMatchStatementsNotIncluded() = 
+        this.Parse("""
+module Program
+
+let x y =
+    if true then
+        if true then
+            ()
+        else
+            match y with
+                | Some(y) when y > 0 -> ()
+                | Some(_) -> ()
+                | None -> ()
+    else
+        for i in [] do
+            match y with
+                | Some(y) when y > 0 -> ()
+                | Some(_) -> ()
+                | None -> ()
+""", config false)
+
+        this.AssertComplexityOf(3, 5, 4)
