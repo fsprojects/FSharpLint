@@ -160,12 +160,12 @@ module Tests =
                         Code = "    let id = fun x -> x"
                     }
                     { 
-                        Description = "not True can be refactored into False" 
+                        Description = "not true can be refactored into false" 
                         Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 12 starting at column 14"
                         Code = "    let dog = not true"
                     }
                     { 
-                        Description = "not False can be refactored into True" 
+                        Description = "not false can be refactored into true" 
                         Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 14 starting at column 14"
                         Code = "    let dog = not false"
                     }
@@ -175,7 +175,7 @@ module Tests =
                         Code = "    let sum = [1;2;3] |> List.fold (+) 0"
                     }
                     { 
-                        Description = "a<>True can be refactored into not a" 
+                        Description = "a<>true can be refactored into not a" 
                         Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 20 starting at column 7"
                         Code = "    if x <> true then"
                     }
