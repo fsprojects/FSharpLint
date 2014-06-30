@@ -23,6 +23,9 @@ open FSharpLint.Rules.CyclomaticComplexity
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadAnalysers
 
+[<Literal>]
+let MaxComplexity = 1
+
 let config = 
     Map.ofList 
         [ 
@@ -32,7 +35,7 @@ let config =
                     Settings = Map.ofList 
                         [ 
                             ("Enabled", Enabled(true))
-                            ("MaxCyclomaticComplexity", MaxCyclomaticComplexity(10))
+                            ("MaxCyclomaticComplexity", MaxCyclomaticComplexity(MaxComplexity))
                             ("IncludeMatchStatements", IncludeMatchStatements(true))
                         ]
                 })
@@ -42,6 +45,25 @@ let config =
 type TestFunctionReimplementationRules() =
     inherit TestRuleBase.TestRuleBase(Ast(findBindingVisitor), config)
 
+    member this.AssertComplexityOf(cyclomaticComplexity, startLine, startColumn) =
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesCyclomaticComplexityError")
+        let error = System.String.Format(errorFormatString, cyclomaticComplexity, MaxComplexity)
+        Assert.IsTrue(this.ErrorWithMessageExistsAt(error, startLine, startColumn))
+
     [<Test>]
-    member this.Meow() = 
-        Assert.Fail()
+    member this.CyclomaticComplexityOfFunction() = 
+        this.Parse """
+module Program
+
+let x () =
+    if true then
+        if true then
+            ()
+        else
+            ()
+    else
+        for i in [] do
+            ()
+"""
+
+        this.AssertComplexityOf(3, 4, 4)
