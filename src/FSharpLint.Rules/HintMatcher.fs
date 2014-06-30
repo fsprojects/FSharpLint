@@ -306,7 +306,7 @@ module HintMatcher =
             |> String.concat " "
 
     let constantToString = function
-        | Constant.Bool(x) -> x.ToString()
+        | Constant.Bool(x) -> if x then "true" else "false"
         | Constant.Int16(x) -> x.ToString() + "s"
         | Constant.Int32(x) -> x.ToString()
         | Constant.Int64(x) -> x.ToString() + "L"

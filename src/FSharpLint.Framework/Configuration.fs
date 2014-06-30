@@ -33,6 +33,8 @@ module Configuration =
         | MaxItems of int
         | Length of int
         | Hints of string list
+        | MaxCyclomaticComplexity of int
+        | IncludeMatchStatements of bool
 
     type Rule = 
         {
@@ -57,6 +59,10 @@ module Configuration =
                 Some(Length(property.Number.Value))
             | "MaxItems" when property.Number.IsSome -> 
                 Some(MaxItems(property.Number.Value)) 
+            | "MaxCyclomaticComplexity" when property.Number.IsSome -> 
+                Some(MaxCyclomaticComplexity(property.Number.Value)) 
+            | "IncludeMatchStatements" when property.Boolean.IsSome -> 
+                Some(IncludeMatchStatements(property.Boolean.Value)) 
             | "Hints" when property.String.IsSome ->
                 Some(Hints(property.String.Value.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList))
             | _ -> 

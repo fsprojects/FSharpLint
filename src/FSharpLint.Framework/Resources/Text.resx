@@ -159,6 +159,9 @@
   <data name="LintError" xml:space="preserve">
     <value>Error in file {0} on line {1} starting at column {2}</value>
   </data>
+  <data name="RulesCyclomaticComplexityError" xml:space="preserve">
+    <value>Binding with cyclomatic complexity of {0} found, expecting bindings to have a cyclomatic complexity of less than {1}.</value>
+  </data>
   <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
     <value>Favour using the ignore function rather than let _ = ...</value>
   </data>
