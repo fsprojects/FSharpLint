@@ -51,8 +51,8 @@ module Program =
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
 
         let error = System.Action<ErrorHandling.Error>(fun error -> 
-            System.Console.WriteLine(error.Info)
-            System.Console.WriteLine(ErrorHandling.errorInfoLine error.Range error.Input))
+            let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input
+            System.Console.WriteLine(output))
 
         RunLint.parseProject(finishEarly, projectFile, parserProgress, error)
 
