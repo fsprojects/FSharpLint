@@ -462,13 +462,20 @@ module Ast =
         /// specific visitors for the node its visiting's children
         GetVisitorForChild = int -> AstNode -> Visitor option
     and 
-        /// The return value of a visitor that lets the it specify how the 
-        /// children of a visited node should be visited.
+        /// The return value of a visitor that lets the it specify how other nodes should be visited.
+        /// Using partial application you can apply state to each visitor returned, 
+        /// allowing for things such as summing the number of if statements in a function to be done purely.
         VisitorResult =
+            /// Visit children with the current visitor.
             | Continue
+            /// Do not visit any children.
             | Stop
+            /// Enables state to be passed down to children.
             | ContinueWithVisitor of Visitor
+            /// Enables state to be passed down to certain children.
             | ContinueWithVisitorsForChildren of GetVisitorForChild
+            /// Enables state to be passed along a walk of a tree. 
+            /// e.g. to sum the number of if statements in a function.
             | WalkWithVisitor of Visitor * (unit -> unit)
 
     /// Check if the return value of walking children is the end of a visitor walk.
@@ -481,58 +488,69 @@ module Ast =
                 None
             | _ -> 
                 walkChildrenReturnValue
+
+    /// Work out which visitor to use to visit a given child.
+    let (|Visitor|UseExisting|End|) (visitChildrenMethod, currentWalkVisitor, childi, child)  =
+        match visitChildrenMethod, currentWalkVisitor with
+            | _, Some(WalkWithVisitor(visitor, _)) -> Visitor(visitor)
+            | Continue, _ -> UseExisting
+            | Stop, _ -> End
+            | ContinueWithVisitor(visitor), _ -> Visitor(visitor)
+            | ContinueWithVisitorsForChildren(getVisitorForChild), _ -> 
+                match getVisitorForChild childi child with
+                    | Some(visitor) -> Visitor(visitor)
+                    | None -> End
+            | WalkWithVisitor(visitor, _), _ -> Visitor(visitor)
         
     /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
-    /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
-    let rec walk finishEarly breadcrumbs node visitor currentVisitMethod = 
-        let walk = walk finishEarly (node :: breadcrumbs)
+    let walk finishEarly node visitor =
+        /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
+        let rec walk finishEarly breadcrumbs node visitor currentVisitMethod = 
+            let walk = walk finishEarly (node :: breadcrumbs)
 
-        let children = traverseNode node
+            let children = traverseNode node
 
-        let currentNode = { Node = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
+            let currentNode = { Node = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
 
-        let visitChildrenMethod = visitor currentNode
+            let visitChildrenMethod = visitor currentNode
 
-        let visitChild child = function
-            | visitor when not <| finishEarly() -> 
-                let result = walk child visitor visitChildrenMethod
-                match currentVisitMethod, result with
-                    | _, Some(WalkWithVisitor(_)) -> result
-                    | _ -> Some(currentVisitMethod)
-            | _ -> None
+            /// If the child returns a walk visitor then that walk visitor is returned;
+            /// otherwise the current visit method is returned.
+            let visitChild child = function
+                | visitor when not <| finishEarly() -> 
+                    let result = walk child visitor visitChildrenMethod
+                    match currentVisitMethod, result with
+                        | _, Some(WalkWithVisitor(_)) -> result
+                        | _ -> Some(currentVisitMethod)
+                | _ -> None
 
-        let rec walkChildren walkVisitor childi = function
-            | child :: children -> 
-                let walkChildReturnValue =
-                    match visitChildrenMethod, walkVisitor with
-                        | _, Some(WalkWithVisitor(visitor, _)) ->
-                            visitChild child visitor
-                        | Continue, _ -> 
-                            visitChild child visitor
-                        | Stop, _ -> 
-                            None
-                        | ContinueWithVisitor(visitor), _ -> 
-                            visitChild child visitor
-                        | ContinueWithVisitorsForChildren(getVisitorForChild), _ -> 
-                            match getVisitorForChild childi child with
-                                | Some(visitor) -> visitChild child visitor
-                                | None -> None
-                        | WalkWithVisitor(visitor, _), _ ->
-                            visitChild child visitor
+            let rec walkChildren walkVisitor childi = function
+                | child :: children -> 
+                    let walkChildReturnValue =
+                        match visitChildrenMethod, walkVisitor, childi, child with
+                            | UseExisting -> visitChild child visitor
+                            | Visitor(visitor) -> visitChild child visitor
+                            | End -> None
 
-                match walkChildReturnValue with
-                    | Some(WalkWithVisitor(_)) ->
-                        walkChildren walkChildReturnValue (childi + 1) children
-                    | _ -> 
-                        walkChildren walkVisitor (childi + 1) children
-            | [] -> 
-                checkAtEndOfWalk visitChildrenMethod walkVisitor
+                    /// If the result of walking the previous child was a walk visitor
+                    ///     Then pass that walk visitor to the sibling.
+                    match walkChildReturnValue with
+                        | Some(WalkWithVisitor(_)) ->
+                            walkChildren walkChildReturnValue (childi + 1) children
+                        | _ -> 
+                            walkChildren walkVisitor (childi + 1) children
+                | [] -> 
+                    checkAtEndOfWalk visitChildrenMethod walkVisitor
 
-        match children with
-            | [] ->
-                Some(visitChildrenMethod)
-            | children ->
-                walkChildren None 0 children
+            match children with
+                | [] ->
+                    /// We need this case for when we have walked down to a leaf node, 
+                    /// and that leaf node returns a walk visitor.
+                    Some(visitChildrenMethod)
+                | children ->
+                    walkChildren None 0 children
+
+        walk finishEarly [] node visitor Continue
 
     let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
@@ -540,7 +558,7 @@ module Ast =
                 Async.Parallel 
                     [
                         for visitor in visitors -> 
-                            async { return walk finishEarly [] (ModuleOrNamespace(moduleOrNamespace)) visitor Continue }
+                            async { return walk finishEarly (ModuleOrNamespace(moduleOrNamespace)) visitor }
                     ] 
                     |> Async.RunSynchronously 
                     |> ignore
