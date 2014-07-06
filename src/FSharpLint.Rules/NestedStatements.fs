@@ -62,6 +62,14 @@ module NestedStatements =
                 when ident.idText.StartsWith("_arg") ->
             true
         | _ -> false
+
+    let elseIfVisitor visitor depth visitorInfo checkFile =
+        ContinueWithVisitorsForChildren (fun childi childNode ->
+            match (childi, childNode) with
+                | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
+                    Some(visitor depth visitorInfo checkFile)
+                | _ -> 
+                    Some(visitor (depth + 1) visitorInfo checkFile))
     
     let rec visitor depth (visitorInfo:VisitorInfo) (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
@@ -96,7 +104,11 @@ module NestedStatements =
                         visitorInfo.PostError (range()) (error errorDepth)
                         Stop
                     | Some(_) ->
-                        ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
+                        match astNode.Node with
+                            | AstNode.Expression(SynExpr.IfThenElse(_)) ->
+                                elseIfVisitor visitor depth visitorInfo checkFile
+                            | _ ->
+                                ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
                     | None -> 
                         Stop
             | _ -> Continue

@@ -57,6 +57,35 @@ let dog =
     ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(9, 20)) 
+
+    [<Test>]
+    member this.ElseIfsShouldNotCountAsNested() = 
+        this.Parse """
+module Program
+
+let dog =
+    if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else if true then
+        ()
+    else 
+        ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(13, 4)) 
         
     [<Test>]
     member this.LambdaWildcardArgumentsMustNotCountAsANestedStatement() = 
