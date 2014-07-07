@@ -42,12 +42,36 @@ module LoadAnalysers =
     type IRegisterPlugin =
         abstract RegisterPlugin : AnalyserPlugin with get
 
+    [<RequireQualifiedAccess>]
+    type CheckConfigResult =
+        | Failed of string
+        | Success
+
+    type IRegisterPluginWithConfigChecker =
+        abstract CheckConfig : Map<string, Configuration.Analyser> -> CheckConfigResult
+
+        inherit IRegisterPlugin
+
+    let loadConfigCheckers (assembly:System.Reflection.Assembly) =
+        assembly.GetTypes()
+                |> Array.filter (fun (t:System.Type) -> 
+                                    t.GetInterfaces().Contains(typeof<IRegisterPluginWithConfigChecker>)
+                                    && t.GetConstructor(System.Type.EmptyTypes) <> null)
+                |> Array.toList
+
+    let checkConfigsForFailures config checkConfigs =
+        checkConfigs
+            |> List.map (fun (t:System.Type) -> System.Activator.CreateInstance(t) :?> IRegisterPluginWithConfigChecker)
+            |> List.map (fun (x:IRegisterPluginWithConfigChecker) -> x.CheckConfig(config))
+            |> List.choose (function 
+                | CheckConfigResult.Failed(failMessage) -> Some(failMessage) 
+                | CheckConfigResult.Success -> None)
+
     let loadPlugins (assembly:System.Reflection.Assembly) =
         assembly.GetTypes()
-            .Where(fun (t:System.Type) -> 
-                t.GetInterfaces().Contains(typeof<IRegisterPlugin>)
-                && t.GetConstructor(System.Type.EmptyTypes) <> null)
-            .Select(fun (t:System.Type) -> 
-                System.Activator.CreateInstance(t) :?> IRegisterPlugin)
-            .Select(fun (x:IRegisterPlugin) -> x.RegisterPlugin)
-                |> List.ofSeq
+                |> Array.filter (fun (t:System.Type) -> 
+                                    t.GetInterfaces().Contains(typeof<IRegisterPlugin>)
+                                    && t.GetConstructor(System.Type.EmptyTypes) <> null)
+                |> Array.map (fun (t:System.Type) -> System.Activator.CreateInstance(t) :?> IRegisterPlugin)
+                |> Array.map (fun (x:IRegisterPlugin) -> x.RegisterPlugin)
+                |> Array.toList

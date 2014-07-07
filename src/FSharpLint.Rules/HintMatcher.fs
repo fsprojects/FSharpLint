@@ -372,5 +372,13 @@ module HintMatcher =
                 Analyser = Ast(visitor getHintsFromConfig)
             }
 
-        interface IRegisterPlugin with
+        interface IRegisterPluginWithConfigChecker with
             member this.RegisterPlugin with get() = plugin
+
+            member this.CheckConfig config = 
+                try
+                    getHintsFromConfig config |> ignore
+                    CheckConfigResult.Success
+                with
+                    | ConfigurationException(message) ->
+                        CheckConfigResult.Failed(message)

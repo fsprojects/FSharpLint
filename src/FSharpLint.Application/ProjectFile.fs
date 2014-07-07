@@ -161,9 +161,23 @@ module ProjectFile =
             |> Seq.toList
 
     let loadConfigForProject projectFilePath =
+        let configCheckers = 
+            System.Reflection.Assembly.Load("FSharpLint.Rules")
+                |> FSharpLint.Framework.LoadAnalysers.loadConfigCheckers
+
+        let checkConfig config =
+            let configFailures = configCheckers 
+                                    |> (FSharpLint.Framework.LoadAnalysers.checkConfigsForFailures config)
+
+            if List.length configFailures = 0 then
+                config |> Success
+            else
+                Failure(FailedToLoadConfig(List.head configFailures))
+
+
         let config = 
             try
-                loadDefaultConfiguration() |> Success
+                loadDefaultConfiguration() |> checkConfig
             with
                 | ConfigurationException(message) ->
                     Failure(FailedToLoadConfig ("Failed to load default config: " + message))
@@ -176,7 +190,7 @@ module ProjectFile =
 
                 if projectConfigPath <> null && System.IO.File.Exists(filename) then
                     try
-                        overrideConfiguration config filename |> Success
+                        overrideConfiguration config filename |> checkConfig
                     with
                         | ConfigurationException(message) ->
                             Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
