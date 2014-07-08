@@ -21,7 +21,7 @@ module TestSourceLengthRules
 open NUnit.Framework
 open FSharpLint.Rules.SourceLength
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 [<Literal>]
 let FunctionLength = 70

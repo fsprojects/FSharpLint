@@ -21,7 +21,7 @@ module TestCyclomaticComplexity
 open NUnit.Framework
 open FSharpLint.Rules.CyclomaticComplexity
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 [<Literal>]
 let MaxComplexity = 1

@@ -26,7 +26,7 @@ module XmlDocumentation =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.XmlDocumentation"
@@ -55,11 +55,11 @@ module XmlDocumentation =
 
         Continue
 
-    type RegisterXmlDocumentationAnalyser() = 
+    type RegisterXmlDocumentationVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor)
+                Visitor = Ast(visitor)
             }
 
         interface IRegisterPlugin with

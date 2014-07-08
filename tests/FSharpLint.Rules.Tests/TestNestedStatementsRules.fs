@@ -21,7 +21,7 @@ module TestNestedStatements
 open NUnit.Framework
 open FSharpLint.Rules.NestedStatements
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 

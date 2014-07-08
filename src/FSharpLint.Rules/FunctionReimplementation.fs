@@ -27,7 +27,7 @@ module FunctionReimplementation =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.FunctionReimplementation"
@@ -97,11 +97,11 @@ module FunctionReimplementation =
 
         Continue
 
-    type RegisterFunctionReimplementationAnalyser() = 
+    type RegisterFunctionReimplementationVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor)
+                Visitor = Ast(visitor)
             }
 
         interface IRegisterPlugin with

@@ -21,7 +21,7 @@ module TestBindingRules
 open NUnit.Framework
 open FSharpLint.Rules.Binding
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 

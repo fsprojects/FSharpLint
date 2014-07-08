@@ -25,7 +25,7 @@ module CyclomaticComplexity =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.CyclomaticComplexity"
@@ -101,11 +101,11 @@ module CyclomaticComplexity =
                     ContinueWithVisitorsForChildren(getVisitorForChild)
                 | _ -> Continue
 
-    type RegisterCyclomaticComplexityAnalyser() = 
+    type RegisterCyclomaticComplexityVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(findBindingVisitor)
+                Visitor = Ast(findBindingVisitor)
             }
 
         interface IRegisterPlugin with

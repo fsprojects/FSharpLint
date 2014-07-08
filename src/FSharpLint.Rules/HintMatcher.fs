@@ -26,7 +26,7 @@ module HintMatcher =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.HintParser
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.Hints"
@@ -365,11 +365,11 @@ module HintMatcher =
         else
             Stop
 
-    type RegisterHintAnalyser() = 
+    type RegisterHintVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor getHintsFromConfig)
+                Visitor = Ast(visitor getHintsFromConfig)
             }
 
         interface IRegisterPluginWithConfigChecker with

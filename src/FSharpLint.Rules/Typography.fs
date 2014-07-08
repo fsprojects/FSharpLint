@@ -21,7 +21,7 @@ namespace FSharpLint.Rules
 module Typography =
 
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
     open Microsoft.FSharp.Compiler.Range
 
     [<Literal>]
@@ -100,11 +100,11 @@ module Typography =
                         let error = System.String.Format(errorFormatString, (maxLines + 1))
                         visitorInfo.PostError range error)
 
-    type RegisterTypographyAnalyser() = 
+    type RegisterTypographyVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = PlainText(visitor)
+                Visitor = PlainText(visitor)
             }
 
         interface IRegisterPlugin with

@@ -30,7 +30,7 @@ module NameConventions =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.NameConventions"
@@ -344,11 +344,11 @@ module NameConventions =
                         | _ -> Continue
                 | _ -> Continue
 
-    type RegisterNameConventionsAnalyser() = 
+    type RegisterNameConventionsVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor)
+                Visitor = Ast(visitor)
             }
 
         interface IRegisterPlugin with

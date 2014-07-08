@@ -48,7 +48,7 @@
     <Compile Include="Configuration.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
-    <Compile Include="LoadAnalysers.fs" />
+    <Compile Include="LoadVisitors.fs" />
     <Compile Include="HintParser.fs" />
     <Compile Include="Resources.fs" />
     <None Include="README.md" />

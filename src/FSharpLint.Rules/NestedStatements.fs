@@ -26,7 +26,7 @@ module NestedStatements =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.NestedStatements"
@@ -113,11 +113,11 @@ module NestedStatements =
                         Stop
             | _ -> Continue
 
-    type RegisterNestedStatementsAnalyser() = 
+    type RegisterNestedStatementsVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor 0)
+                Visitor = Ast(visitor 0)
             }
 
         interface IRegisterPlugin with

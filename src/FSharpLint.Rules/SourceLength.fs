@@ -26,7 +26,7 @@ module SourceLength =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FSharpLint.SourceLength"
@@ -106,11 +106,11 @@ module SourceLength =
                 Continue
             | _ -> Continue
 
-    type RegisterSourceLengthAnalyser() = 
+    type RegisterSourceLengthVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor)
+                Visitor = Ast(visitor)
             }
 
         interface IRegisterPlugin with

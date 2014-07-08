@@ -163,11 +163,11 @@ module ProjectFile =
     let loadConfigForProject projectFilePath =
         let configCheckers = 
             System.Reflection.Assembly.Load("FSharpLint.Rules")
-                |> FSharpLint.Framework.LoadAnalysers.loadConfigCheckers
+                |> FSharpLint.Framework.LoadVisitors.loadConfigCheckers
 
         let checkConfig config =
             let configFailures = configCheckers 
-                                    |> (FSharpLint.Framework.LoadAnalysers.checkConfigsForFailures config)
+                                    |> (FSharpLint.Framework.LoadVisitors.checkConfigsForFailures config)
 
             if List.length configFailures = 0 then
                 config |> Success

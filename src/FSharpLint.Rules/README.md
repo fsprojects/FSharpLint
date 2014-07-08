@@ -26,17 +26,17 @@ An instance of ```FSharpLint.Framework.Ast.VisitorInfo``` is passed as a paramet
 
 ###Registering an Analyser
 
-Registering rules follows the [Hollywood Principle](http://en.wikipedia.org/wiki/Hollywood_principle), you must implement ```IRegisterPlugin``` from ```FSharpLint.Framework.LoadAnalysers``` with the ```RegisterPlugin``` returning your plugin. No more needs to be done.
+Registering rules follows the [Hollywood Principle](http://en.wikipedia.org/wiki/Hollywood_principle), you must implement ```IRegisterPlugin``` from ```FSharpLint.Framework.LoadVisitors``` with the ```RegisterPlugin``` returning your plugin. No more needs to be done.
 
 An example of registering an analyser's visitor:
 
-    open FSharpLint.Framework.LoadAnalysers
+    open FSharpLint.Framework.LoadVisitors
 
-    type RegisterAnalyser() = 
+    type RegisterVisitor() = 
         let plugin =
             {
                 Name = AnalyserName
-                Analyser = Ast(visitor)
+                Visitor = Ast(visitor)
             }
 
         interface IRegisterPlugin with

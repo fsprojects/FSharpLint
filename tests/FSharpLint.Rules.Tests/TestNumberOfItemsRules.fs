@@ -21,7 +21,7 @@ module TestNumberOfItemsRules
 open NUnit.Framework
 open FSharpLint.Rules.NumberOfItems
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 

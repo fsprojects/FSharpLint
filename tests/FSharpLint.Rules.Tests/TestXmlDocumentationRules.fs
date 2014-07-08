@@ -21,7 +21,7 @@ module TestXmlDocumentationRules
 open NUnit.Framework
 open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 

@@ -37,21 +37,21 @@ module RunLint =
 
     let loadPlugins () =
         System.Reflection.Assembly.Load("FSharpLint.Rules")
-            |> FSharpLint.Framework.LoadAnalysers.loadPlugins
+            |> FSharpLint.Framework.LoadVisitors.loadPlugins
 
-    let astVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
+    let astVisitors (plugins:FSharpLint.Framework.LoadVisitors.VisitorPlugin list) visitorInfo =
         [ for plugin in plugins do
-            match plugin.Analyser with
-                | FSharpLint.Framework.LoadAnalysers.Ast(visitor) -> 
+            match plugin.Visitor with
+                | FSharpLint.Framework.LoadVisitors.Ast(visitor) -> 
                     yield visitor visitorInfo
-                | FSharpLint.Framework.LoadAnalysers.PlainText(_) -> ()
+                | FSharpLint.Framework.LoadVisitors.PlainText(_) -> ()
         ]
 
-    let plainTextVisitors (plugins:FSharpLint.Framework.LoadAnalysers.AnalyserPlugin list) visitorInfo =
+    let plainTextVisitors (plugins:FSharpLint.Framework.LoadVisitors.VisitorPlugin list) visitorInfo =
         [ for plugin in plugins do
-            match plugin.Analyser with
-                | FSharpLint.Framework.LoadAnalysers.Ast(_) -> ()
-                | FSharpLint.Framework.LoadAnalysers.PlainText(visitor) -> 
+            match plugin.Visitor with
+                | FSharpLint.Framework.LoadVisitors.Ast(_) -> ()
+                | FSharpLint.Framework.LoadVisitors.PlainText(visitor) -> 
                     yield visitor visitorInfo
         ]
 

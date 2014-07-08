@@ -18,40 +18,49 @@
 
 namespace FSharpLint.Framework
 
-module LoadAnalysers =
+/// Dynamically loads visitors (plugins) from an assembly.
+/// Used so that visitors can easily be registered using the Hollywood principle 
+/// by implementing IRegisterPlugin, this means a new visitor can be added 
+/// by just adding a single new file to a project without having to modify any other files.
+module LoadVisitors =
 
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
     open System.Linq
 
-    type AnalyserVisitor = Ast.VisitorInfo -> CheckFileResults -> Ast.Visitor
+    /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
+    type AstVisitor = Ast.VisitorInfo -> CheckFileResults -> Ast.Visitor
 
+    /// Visitor that visists the plain text of the F# files in a project.
     type PlainTextVisitor = Ast.VisitorInfo -> string -> string -> unit
 
-    type AnalyserType =
-        | Ast of AnalyserVisitor
+    type VisitorType =
+        | Ast of AstVisitor
         | PlainText of PlainTextVisitor
 
-    type AnalyserPlugin =
+    type VisitorPlugin =
         {
             Name: string
-            Analyser: AnalyserType
+            Visitor: VisitorType
         }
 
+    /// Interface to be implemented to register a plugin.
     type IRegisterPlugin =
-        abstract RegisterPlugin : AnalyserPlugin with get
+        abstract RegisterPlugin : VisitorPlugin with get
 
     [<RequireQualifiedAccess>]
     type CheckConfigResult =
         | Failed of string
         | Success
 
+    /// Extension of IRegisterPlugin that gets passed a configuration file before the plugin is registered. 
     type IRegisterPluginWithConfigChecker =
         abstract CheckConfig : Map<string, Configuration.Analyser> -> CheckConfigResult
 
         inherit IRegisterPlugin
 
+    /// Loads all implementations of IRegisterPluginWithConfigChecker from a given assembly.
     let loadConfigCheckers (assembly:System.Reflection.Assembly) =
         assembly.GetTypes()
                 |> Array.filter (fun (t:System.Type) -> 
@@ -59,6 +68,10 @@ module LoadAnalysers =
                                     && t.GetConstructor(System.Type.EmptyTypes) <> null)
                 |> Array.toList
 
+    /// <summary>
+    /// Gets a list of failures that occurred when checking a given config file using a given list of checkConfigs.
+    /// </summary>
+    /// <param name="checkConfigs">List of config checkers, these can be loaded from an assembly using loadConfigCheckers</param>
     let checkConfigsForFailures config checkConfigs =
         checkConfigs
             |> List.map (fun (t:System.Type) -> System.Activator.CreateInstance(t) :?> IRegisterPluginWithConfigChecker)
@@ -67,6 +80,7 @@ module LoadAnalysers =
                 | CheckConfigResult.Failed(failMessage) -> Some(failMessage) 
                 | CheckConfigResult.Success -> None)
 
+    /// Loads all registered visitors (files containing a class implementing IRegisterPlugin) from a given assembly.
     let loadPlugins (assembly:System.Reflection.Assembly) =
         assembly.GetTypes()
                 |> Array.filter (fun (t:System.Type) -> 

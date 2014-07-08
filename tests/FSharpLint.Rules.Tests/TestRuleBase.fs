@@ -23,7 +23,7 @@ open System.Linq
 open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let emptyConfig =
     Map.ofList 
@@ -35,7 +35,7 @@ let emptyConfig =
         ]
 
 [<AbstractClass>]
-type TestRuleBase(analyser:AnalyserType, ?config:Map<string, Analyser>) =
+type TestRuleBase(analyser:VisitorType, ?config:Map<string, Analyser>) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =

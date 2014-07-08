@@ -25,7 +25,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.HintMatcher
-open FSharpLint.Framework.LoadAnalysers
+open FSharpLint.Framework.LoadVisitors
 
 let generateHintConfig hints =
     Map.ofList 
