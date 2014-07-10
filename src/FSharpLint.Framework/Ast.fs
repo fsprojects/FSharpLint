@@ -18,6 +18,8 @@
 
 namespace FSharpLint.Framework
 
+/// Used to walk the FSharp Compiler's abstract syntax tree,
+/// so that each node can be visited by a list of visitors.
 module Ast =
 
     open System
@@ -26,12 +28,17 @@ module Ast =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
     
+    /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
     type VisitorInfo =
         {
+            /// The current lint config to be used by visitors.
             Config: Map<string, Configuration.Analyser>
+
+            /// Used by visitors to report errors.
             PostError: range -> string -> unit
         }
 
+    /// Nodes in the AST to be visited.
     type AstNode =
         | Expression of SynExpr
         | Pattern of SynPat
@@ -55,87 +62,9 @@ module Ast =
         | ConstructorArguments of SynConstructorArgs
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
-        
-    let isPublic path =
-        let isSynAccessPublic = function
-            | Some(SynAccess.Public) -> true
-            | None -> true
-            | _ -> false
 
-        let rec isPublic publicSoFar isBinding = function
-            | node :: path when publicSoFar ->
-                match node with
-                    | Pattern(pattern) ->
-                        match pattern with
-                            | SynPat.Named(_, _, _, access, _)
-                            | SynPat.LongIdent(_, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                            | _ -> true
-                    | Binding(binding) ->
-                        match binding with
-                            | SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _) ->
-                                isPublic (isSynAccessPublic access) true path
-                    | TypeSimpleRepresentation(typeSimpleRepresentation) ->
-                        match typeSimpleRepresentation with
-                            | SynTypeDefnSimpleRepr.Record(access, _, _)
-                            | SynTypeDefnSimpleRepr.Union(access, _, _) -> 
-                                isPublic (isSynAccessPublic access) isBinding path
-                            | _ -> true
-                    | UnionCase(unionCase) ->
-                        match unionCase with
-                            | SynUnionCase.UnionCase(_, _, _, _, access, _) -> 
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | Field(field) ->
-                        match field with
-                            | SynField.Field(_, _, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | ComponentInfo(componentInfo) ->
-                        match componentInfo with
-                            | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | MemberDefinition(memberDefinition) ->
-                        match memberDefinition with
-                        | SynMemberDefn.NestedType(_, access, _)
-                        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _)
-                        | SynMemberDefn.ImplicitCtor(access, _, _, _, _)
-                        | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                        | _ -> isPublic publicSoFar isBinding path
-                    | ExceptionRepresentation(exceptionRepresentation) ->
-                        match exceptionRepresentation with
-                            | SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | ModuleOrNamespace (moduleOrNamespace) ->
-                        match moduleOrNamespace with
-                            | SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | ExceptionDefinition(_)
-                    | EnumCase(_)
-                    | TypeRepresentation(_)
-                    | Type(_)
-                    | Match(_)
-                    | ConstructorArguments(_)
-                    | TypeParameter(_)
-                    | InterfaceImplementation(_)
-                    | ModuleDeclaration(_)
-                    | SimplePattern(_)
-                    | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
-                    | TypeDefinition(_) -> 
-                        if isBinding then
-                            false
-                        else
-                            isPublic publicSoFar isBinding path
-                    | Expression(_) ->
-                        if isBinding then
-                            false
-                        else
-                            isPublic publicSoFar isBinding path
-            | [] -> publicSoFar
-            | _ -> false
-
-        isPublic true false path
-
-    let traverseNode node =
+    /// Extracts the child nodes to be visited from a given node.
+    let private traverseNode node =
         [
             match node with
                 | ModuleDeclaration(moduleDeclaration) ->
@@ -448,10 +377,13 @@ module Ast =
                         | SynTypar.Typar(_, _, _) -> ()
         ]
 
+    /// Contains information on the current node being visited.
     type CurrentNode =
         {
             Node: AstNode
             ChildNodes: AstNode list
+
+            /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
             Breadcrumbs: AstNode list
         }
 
@@ -479,7 +411,7 @@ module Ast =
             | WalkWithVisitor of Visitor * (unit -> unit)
 
     /// Check if the return value of walking children is the end of a visitor walk.
-    let checkAtEndOfWalk visitChildrenMethod walkChildrenReturnValue =
+    let private checkAtEndOfWalk visitChildrenMethod walkChildrenReturnValue =
         match visitChildrenMethod, walkChildrenReturnValue with
             | WalkWithVisitor(_), _ -> 
                 walkChildrenReturnValue
@@ -490,7 +422,7 @@ module Ast =
                 walkChildrenReturnValue
 
     /// Work out which visitor to use to visit a given child.
-    let (|Visitor|UseExisting|End|) (visitChildrenMethod, currentWalkVisitor, childi, child)  =
+    let private (|Visitor|UseExisting|End|) (visitChildrenMethod, currentWalkVisitor, childi, child)  =
         match visitChildrenMethod, currentWalkVisitor with
             | _, Some(WalkWithVisitor(visitor, _)) -> Visitor(visitor)
             | Continue, _ -> UseExisting
@@ -502,8 +434,12 @@ module Ast =
                     | None -> End
             | WalkWithVisitor(visitor, _), _ -> Visitor(visitor)
         
+    /// <summary>
+    /// Walks an abstract syntax tree from a given root node and applies a visitor to each node in the tree.
+    /// Maintains state of visitors using the visitor's return value.
+    /// </summary>
     /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
-    let walk finishEarly node visitor =
+    let walk finishEarly rootNode visitor =
         /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
         let rec walk finishEarly breadcrumbs node visitor currentVisitMethod = 
             let walk = walk finishEarly (node :: breadcrumbs)
@@ -550,7 +486,7 @@ module Ast =
                 | children ->
                     walkChildren None 0 children
 
-        walk finishEarly [] node visitor Continue
+        walk finishEarly [] rootNode visitor Continue
 
     let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
@@ -570,19 +506,19 @@ module Ast =
     let parse finishEarly (checker:InteractiveChecker) projectOptions file input visitors =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match parseFileResults.ParseTree with
-        | Some tree -> 
-            let checkFileResults = 
-                checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
-                |> Async.RunSynchronously
+            | Some tree -> 
+                let checkFileResults = 
+                    checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
+                        |> Async.RunSynchronously
 
-            match checkFileResults with
-            | CheckFileAnswer.Succeeded(res) -> 
-                let visitors = visitors |> List.map (fun visitor -> visitor res)
-                walkFile finishEarly visitors tree
-            | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
-        | None -> 
-            let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
-            raise <| ParseException(error) 
+                match checkFileResults with
+                    | CheckFileAnswer.Succeeded(res) -> 
+                        let visitors = visitors |> List.map (fun visitor -> visitor res)
+                        walkFile finishEarly visitors tree
+                    | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
+            | None -> 
+                let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
+                raise <| ParseException(error) 
 
     /// Parse a single string.
     let parseInput input visitors =

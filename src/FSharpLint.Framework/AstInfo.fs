@@ -22,6 +22,86 @@ module AstInfo =
 
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open Ast
+    
+    let isPublic path =
+        let isSynAccessPublic = function
+            | Some(SynAccess.Public) -> true
+            | None -> true
+            | _ -> false
+
+        let rec isPublic publicSoFar isBinding = function
+            | node :: path when publicSoFar ->
+                match node with
+                    | Pattern(pattern) ->
+                        match pattern with
+                            | SynPat.Named(_, _, _, access, _)
+                            | SynPat.LongIdent(_, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                            | _ -> true
+                    | Binding(binding) ->
+                        match binding with
+                            | SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _) ->
+                                isPublic (isSynAccessPublic access) true path
+                    | TypeSimpleRepresentation(typeSimpleRepresentation) ->
+                        match typeSimpleRepresentation with
+                            | SynTypeDefnSimpleRepr.Record(access, _, _)
+                            | SynTypeDefnSimpleRepr.Union(access, _, _) -> 
+                                isPublic (isSynAccessPublic access) isBinding path
+                            | _ -> true
+                    | UnionCase(unionCase) ->
+                        match unionCase with
+                            | SynUnionCase.UnionCase(_, _, _, _, access, _) -> 
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | Field(field) ->
+                        match field with
+                            | SynField.Field(_, _, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ComponentInfo(componentInfo) ->
+                        match componentInfo with
+                            | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | MemberDefinition(memberDefinition) ->
+                        match memberDefinition with
+                        | SynMemberDefn.NestedType(_, access, _)
+                        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _)
+                        | SynMemberDefn.ImplicitCtor(access, _, _, _, _)
+                        | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                        | _ -> isPublic publicSoFar isBinding path
+                    | ExceptionRepresentation(exceptionRepresentation) ->
+                        match exceptionRepresentation with
+                            | SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ModuleOrNamespace (moduleOrNamespace) ->
+                        match moduleOrNamespace with
+                            | SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _) ->
+                                isPublic (isSynAccessPublic access) isBinding path
+                    | ExceptionDefinition(_)
+                    | EnumCase(_)
+                    | TypeRepresentation(_)
+                    | Type(_)
+                    | Match(_)
+                    | ConstructorArguments(_)
+                    | TypeParameter(_)
+                    | InterfaceImplementation(_)
+                    | ModuleDeclaration(_)
+                    | SimplePattern(_)
+                    | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
+                    | TypeDefinition(_) -> 
+                        if isBinding then
+                            false
+                        else
+                            isPublic publicSoFar isBinding path
+                    | Expression(_) ->
+                        if isBinding then
+                            false
+                        else
+                            isPublic publicSoFar isBinding path
+            | [] -> publicSoFar
+            | _ -> false
+
+        isPublic true false path
 
     let isValue (identifier:LongIdent) (checkFile:CheckFileResults) =
         if System.Char.IsUpper(identifier.Head.idText.[0]) && identifier.Length = 1 then
