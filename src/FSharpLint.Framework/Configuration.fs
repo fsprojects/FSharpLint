@@ -20,9 +20,14 @@ namespace FSharpLint.Framework
 
 open FSharp.Data
 
+/// Loads configuration files from xml into an object.
+/// When a configuration file has already been loaded, loading another one overwrites the existing configuration.
+/// The overwrite works by only changing existing properties with properties from the new file, 
+/// so properties in the original configuration file not in the new configuration file will remain.
 module Configuration =
 
-    type Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
+    /// Represents a configuration XML file.
+    type private Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
 
     exception ConfigurationException of string
 
@@ -41,6 +46,7 @@ module Configuration =
             Settings: Map<string, Property>
         }
 
+    /// An analyser groups together related rules in the configuration file.
     type Analyser = 
         { 
             Rules: Map<string, Rule> 
@@ -129,13 +135,20 @@ module Configuration =
             Settings = overwriteMap oldRules.Settings newRules.Settings overrideRuleSettings
         }
 
-    let loadFileFromFileSystem path = System.IO.File.ReadAllText(path)
-
+    /// <summary>
+    /// Loads a "higher precedence" configuration file. All the properties in the file we're loading overwrite 
+    /// the same properties in our previous configuration with the new values, any properties that don't exist 
+    /// in the previous configuration are added, and any properties that don't exist in the configuration being 
+    /// loaded are left alone.
+    /// </summary>
+    /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride file =
-        let newAnalysers = loadFileFromFileSystem file |> configuration
+        let newAnalysers = System.IO.File.ReadAllText(file) |> configuration
 
         overwriteMap configToOverride newAnalysers overrideAnalysers
         
+    /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
+    /// This function loads and returns this default configuration.
     let loadDefaultConfiguration () =
         let assembly = System.Reflection.Assembly.GetExecutingAssembly()
         let resourceName = "DefaultConfiguration.FSharpLint"
@@ -145,6 +158,8 @@ module Configuration =
 
         reader.ReadToEnd() |> configuration
 
+    /// Checks if a analyser in the configuration is enabled.
+    /// Returns the analyser settings if the analyser was enabled; None otherwise.
     let isAnalyserEnabled (config:Map<string,Analyser>) analyserName =
         if not <| config.ContainsKey analyserName then
             raise <| ConfigurationException(sprintf "Expected %s analyser in config." analyserName)
@@ -158,7 +173,9 @@ module Configuration =
         else
             Some(analyserSettings)
 
-    let isRuleEnabled (config:Map<string,Analyser>) analyserName ruleName =
+    /// Checks if a rule in the configuration is enabled and the analyser it's within is also enabled.
+    /// Returns the analyser settings and rule settings if the rule was enabled; None otherwise.
+    let isRuleEnabled config analyserName ruleName =
         match isAnalyserEnabled config analyserName with
             | Some(analyserSettings) ->
                 let rules = config.[analyserName].Rules
