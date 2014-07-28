@@ -1,3 +1,5 @@
+#FSharpLint
+
 FSharpLint is a lint tool for F#. It can be ran as a MSBuild task, or as a console application.
 
 > The term [lint] is now applied generically to tools that flag suspicious usage in software written in any computer language - [_Wikipedia_](http://en.wikipedia.org/wiki/Lint_(software))
@@ -71,28 +73,28 @@ On windows run `build.cmd` and on unix based systems run `build.sh`. These will 
 
 The tool can be run from the command line, or as an MSBuild task. 
 
-* [Using the command line tool](https://github.com/duckmatt/FSharpLint/wiki/Console-Application).
-* [Using the MSBuild task](https://github.com/duckmatt/FSharpLint/wiki/MSBuild-Task).
+* [Using the command line tool](Console-Application.md).
+* [Using the MSBuild task](MSBuild-Task.md).
 
 ####Rules
 
 | Analysers     |
 | ------------- |
-| [FSharpLint.Hints](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.Hints) |
-| [FSharpLint.NameConventions](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.NameConventions) |
-| [FSharpLint.SourceLength](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.SourceLength) |
-| [FSharpLint.Typography](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.Typography) |
-| [FSharpLint.NestedStatements](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.NestedStatements) |
-| [FSharpLint.NumberOfItems](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.NumberOfItems) |
-| [FSharpLint.FavourIgnoreOverLetWild](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.FavourIgnoreOverLetWild) |
-| [FSharpLint.FunctionReimplementation](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.FunctionReimplementation) |
-| [FSharpLint.XmlDocumentation](https://github.com/duckmatt/FSharpLint/wiki/FSharpLint.XmlDocumentation) |
+| [FSharpLint.Hints](FSharpLint.Hints.md) |
+| [FSharpLint.NameConventions](FSharpLint.NameConventions.md) |
+| [FSharpLint.SourceLength](FSharpLint.SourceLength.md) |
+| [FSharpLint.Typography](FSharpLint.Typography.md) |
+| [FSharpLint.NestedStatements](FSharpLint.NestedStatements.md) |
+| [FSharpLint.NumberOfItems](FSharpLint.NumberOfItems.md) |
+| [FSharpLint.FavourIgnoreOverLetWild](FSharpLint.FavourIgnoreOverLetWild.md) |
+| [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.md) |
+| [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.md) |
 
 Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
 
 ####Configuration Files
 
-Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must have the extension: `.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](https://github.com/duckmatt/FSharpLint/blob/master/src/FSharpLint.Framework/DefaultConfiguration.FSharpLint), these rules can then be overridden by creating new files in the directories of projects to be analysed (should be in the same directory as the .fsproj files). The rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
+Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must have the extension: `.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](../src/FSharpLint.Framework/DefaultConfiguration.FSharpLint), these rules can then be overridden by creating new files in the directories of projects to be analysed (should be in the same directory as the .fsproj files). The rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
 
     <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
       <Rules />

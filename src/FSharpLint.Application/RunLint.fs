@@ -18,15 +18,22 @@
 
 namespace FSharpLint.Application
 
+/// Runs the lint on an entire project using a .fsproj file.
 module RunLint =
 
     type Result = 
         | Success
         | Failure of ProjectFile.Error
 
+    /// Provides information on what the linter is currently doing.
     type ParserProgress =
+        /// Started parsing a file.
         | Starting of string
+
+        /// Finished parsing a file.
         | ReachedEnd of string
+
+        /// Failed to parse a file.
         | Failed of string * FSharpLint.Framework.Ast.ParseException
 
         member this.Filename() =
@@ -35,10 +42,12 @@ module RunLint =
                 | ReachedEnd(f)
                 | Failed(f, _) -> f
 
+    /// Loads visitors implementing lint rules.
     let loadPlugins () =
         System.Reflection.Assembly.Load("FSharpLint.Rules")
             |> FSharpLint.Framework.LoadVisitors.loadPlugins
 
+    /// Extracts a list of ast visitors from a general list of visitors.
     let astVisitors (plugins:FSharpLint.Framework.LoadVisitors.VisitorPlugin list) visitorInfo =
         [ for plugin in plugins do
             match plugin.Visitor with
@@ -46,7 +55,8 @@ module RunLint =
                     yield visitor visitorInfo
                 | FSharpLint.Framework.LoadVisitors.PlainText(_) -> ()
         ]
-
+        
+    /// Extracts a list of plain text visitors from a general list of visitors.
     let plainTextVisitors (plugins:FSharpLint.Framework.LoadVisitors.VisitorPlugin list) visitorInfo =
         [ for plugin in plugins do
             match plugin.Visitor with
@@ -96,6 +106,7 @@ module RunLint =
 
             progress.Invoke(ReachedEnd(file))
 
+    /// Creates a project options object that is required by the compiler.
     let loadProjectOptions (projectFile:ProjectFile.ProjectFile) (checker:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker) = 
         checker.GetProjectOptionsFromCommandLineArgs
             (projectFile.Path,

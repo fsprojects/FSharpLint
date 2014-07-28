@@ -21,9 +21,15 @@ namespace FSharpLint.Application
 /// Runs the lint on an entire project using a .fsproj file.
 module RunLint =
 
+    /// Provides information on what the linter is currently doing.
     type ParserProgress =
+        /// Started parsing a file.
         | Starting of string
+
+        /// Finished parsing a file.
         | ReachedEnd of string
+
+        /// Failed to parse a file.
         | Failed of string * FSharpLint.Framework.Ast.ParseException
 
         member Filename : unit -> string
