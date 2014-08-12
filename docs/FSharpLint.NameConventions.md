@@ -10,19 +10,19 @@ N/A
 
 |Rules|
 |---|
-|[IdentifiersMustNotContainUnderscores](#IdentifiersMustNotContainUnderscores)|
-|[InterfaceNamesMustBeginWithI](#InterfaceNamesMustBeginWithI)|
-|[ExceptionNamesMustEndWithException](#ExceptionNamesMustEndWithException)|
-|[TypeNamesMustBePascalCase](#TypeNamesMustBePascalCase)|
-|[RecordFieldNamesMustBePascalCase](#RecordFieldNamesMustBePascalCase)|
-|[EnumCasesMustBePascalCase](#EnumCasesMustBePascalCase)||
-|[ModuleNamesMustBePascalCase](#ModuleNamesMustBePascalCase)|
-|[LiteralNamesMustBePascalCase](#LiteralNamesMustBePascalCase)|
-|[NamespaceNamesMustBePascalCase](#NamespaceNamesMustBePascalCase)|
-|[MemberNamesMustBePascalCase](#MemberNamesMustBePascalCase)|
-|[ParameterMustBeCamelCase](#ParameterMustBeCamelCase)|
-|[PublicValuesPascalOrCamelCase](#PublicValuesPascalOrCamelCase)|
-|[NonPublicValuesCamelCase](#NonPublicValuesCamelCase)|
+|[IdentifiersMustNotContainUnderscores](#identifiersmustnotcontainunderscores)|
+|[InterfaceNamesMustBeginWithI](#interfacenamesmustbeginwithi)|
+|[ExceptionNamesMustEndWithException](#exceptionnamesmustendwithexception)|
+|[TypeNamesMustBePascalCase](#typenamesmustbepascalcase)|
+|[RecordFieldNamesMustBePascalCase](#recordfieldnamesmustbepascalcase)|
+|[EnumCasesMustBePascalCase](#enumcasesmustbepascalcase)||
+|[ModuleNamesMustBePascalCase](#modulenamesmustbepascalcase)|
+|[LiteralNamesMustBePascalCase](#literalnamesmustbepascalcase)|
+|[NamespaceNamesMustBePascalCase](#namespacenamesmustbepascalcase)|
+|[MemberNamesMustBePascalCase](#membernamesmustbepascalcase)|
+|[ParameterMustBeCamelCase](#parametermustbecamelcase)|
+|[PublicValuesPascalOrCamelCase](#publicvaluespascalorcamelcase)|
+|[NonPublicValuesCamelCase](#nonpublicvaluescamelcase)|
 
 ####IdentifiersMustNotContainUnderscores
 
