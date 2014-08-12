@@ -99,11 +99,6 @@
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
-        <Rule Name="PublicValuesPascalOrCamelCase">
-          <RuleSettings>
-            <Property name="Enabled">True</Property>
-          </RuleSettings>
-        </Rule>
         <Rule Name="NonPublicValuesCamelCase">
           <RuleSettings>
             <Property name="Enabled">True</Property>
