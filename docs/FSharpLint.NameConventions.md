@@ -21,7 +21,6 @@ N/A
 |[NamespaceNamesMustBePascalCase](#namespacenamesmustbepascalcase)|
 |[MemberNamesMustBePascalCase](#membernamesmustbepascalcase)|
 |[ParameterMustBeCamelCase](#parametermustbecamelcase)|
-|[PublicValuesPascalOrCamelCase](#publicvaluespascalorcamelcase)|
 |[NonPublicValuesCamelCase](#nonpublicvaluescamelcase)|
 
 ####IdentifiersMustNotContainUnderscores
