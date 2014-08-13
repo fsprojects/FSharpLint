@@ -89,6 +89,7 @@ The tool can be run from the command line, or as an MSBuild task.
 | [FSharpLint.FavourIgnoreOverLetWild](FSharpLint.FavourIgnoreOverLetWild.md) |
 | [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.md) |
 | [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.md) |
+| [FSharpLint.Binding](FSharpLint.Binding.md) |
 
 Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
 
