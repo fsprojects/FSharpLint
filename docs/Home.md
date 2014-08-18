@@ -82,8 +82,8 @@ The tool can be run from the command line, or as an MSBuild task.
 | ------------- |
 | FSharpLint.Hints |
 | [FSharpLint.NameConventions](FSharpLint.NameConventions.md) |
-| FSharpLint.SourceLength |
-| FSharpLint.Typography |
+| [FSharpLint.SourceLength](FSharpLint.SourceLength.md) |
+| [FSharpLint.Typography](FSharpLint.Typography.md) |
 | [FSharpLint.NestedStatements](FSharpLint.NestedStatements.md) |
 | [FSharpLint.NumberOfItems](FSharpLint.NumberOfItems.md) |
 | [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.md) |
