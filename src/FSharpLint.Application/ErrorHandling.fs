@@ -30,9 +30,12 @@ module ErrorHandling =
         let error = FSharpLint.Framework.Resources.GetString("LintError")
         let firstLine = System.String.Format(error, range.FileName, range.StartLine, range.StartColumn)
         let highlightColumnLine = 
-            errorenousLine 
-                |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")
-                |> Seq.reduce (+)
+            if String.length errorenousLine = 0 then
+                "^"
+            else
+                errorenousLine 
+                    |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")
+                    |> Seq.reduce (+)
 
         firstLine + Environment.NewLine + errorenousLine + Environment.NewLine + highlightColumnLine
 
