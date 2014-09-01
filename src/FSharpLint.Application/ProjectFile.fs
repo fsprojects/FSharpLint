@@ -20,6 +20,7 @@ namespace FSharpLint.Application
 
 module ProjectFile =
 
+    open System.IO
     open System.Linq
     open Microsoft.Build.Tasks
     open Microsoft.Build.Framework
@@ -160,6 +161,45 @@ module ProjectFile =
             |> Seq.map (fun item -> System.IO.Path.Combine(projectPath, item.EvaluatedInclude))
             |> Seq.toList
 
+    /// Gets all the parent directories of a given path - includes the original path directory too.
+    let private getParentDirectories path =
+        let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
+            if directoryInfo = null then
+                parentDirectories
+            else
+                getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
+
+        DirectoryInfo(path) |> getParentDirectories []
+
+    /// Overrides the default config with user defined config files.
+    /// The configs can be in any directory between the root directory and the projects directory.
+    /// The closer they are to the project directory the higher precedence they have.
+    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in 
+    /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
+    let private overideDefaultConfig projectFilePath defaultConfig checkConfig =
+        let subdirectories = getParentDirectories projectFilePath |> List.map (fun x -> x.FullName)
+
+        let rec loadAllConfigs configToOveride = function
+            | path::paths ->
+                let filename = Path.Combine(path, SettingsFileName)
+
+                if File.Exists(filename) then
+                    try
+                        match overrideConfiguration configToOveride filename |> checkConfig with
+                            | Success(config) -> loadAllConfigs config paths
+                            | failure -> failure
+                    with
+                        | ConfigurationException(message) ->
+                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
+                        | :? System.Xml.XmlException as e ->
+                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename e.Message))
+                else
+                    loadAllConfigs configToOveride paths
+            | [] -> 
+                Success(configToOveride)
+
+        loadAllConfigs defaultConfig subdirectories
+
     let loadConfigForProject projectFilePath =
         let configCheckers = 
             System.Reflection.Assembly.Load("FSharpLint.Rules")
@@ -174,7 +214,6 @@ module ProjectFile =
             else
                 Failure(FailedToLoadConfig(List.head configFailures))
 
-
         let config = 
             try
                 loadDefaultConfiguration() |> checkConfig
@@ -183,21 +222,7 @@ module ProjectFile =
                     Failure(FailedToLoadConfig ("Failed to load default config: " + message))
 
         match config with
-            | Success(config) ->
-                let projectConfigPath = System.IO.Path.GetDirectoryName(projectFilePath)
-
-                let filename = System.IO.Path.Combine(projectConfigPath, SettingsFileName)
-
-                if projectConfigPath <> null && System.IO.File.Exists(filename) then
-                    try
-                        overrideConfiguration config filename |> checkConfig
-                    with
-                        | ConfigurationException(message) ->
-                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
-                        | :? System.Xml.XmlException as e ->
-                            Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename e.Message))
-                else
-                    Success(config)
+            | Success(config) -> overideDefaultConfig projectFilePath config checkConfig
             | x -> x
 
     let loadProjectFile (projectFile:string) =

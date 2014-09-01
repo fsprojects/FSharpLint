@@ -95,7 +95,11 @@ Rules are grouped into sets of rules called analysers, the reason for this is th
 
 ####Configuration Files
 
-Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must have the extension: `.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](../src/FSharpLint.Framework/DefaultConfiguration.FSharpLint), these rules can then be overridden by creating new files in the directories of projects to be analysed (should be in the same directory as the .fsproj files). The rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
+Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must be named: `Settings.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](../src/FSharpLint.Framework/DefaultConfiguration.FSharpLint).
+
+The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was `C:\Files\SomeProjectBeingLinted`, then `C:\` would first be checked for a config file - if a config file is found then it would override the default config, then `C:\Files` would be checked - if a config file was found and a config file was also previously found in `C:\` then the config in `C:\Files` would override the one in `C:\` and so on.
+
+The configuration rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
 
     <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
       <Rules />
@@ -106,12 +110,15 @@ Configuration of the tool is done using xml with a purposely similar structure t
 
 To override to turn off you'd set enabled to false in your own configuration file as follows:
 
-    <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
-      <Rules />
-      <AnalyserSettings>
-        <Property name="Enabled">False</Property>
-      </AnalyserSettings>
-    </Analyser>
+    <?xml version="1.0" encoding="utf-8"?>
+	<FSharpLintSettings>
+		<Analyser AnalyserId="FSharpLint.FunctionReimplementation">
+			<Rules />
+			<AnalyserSettings>
+				<Property name="Enabled">False</Property>
+			</AnalyserSettings>
+		</Analyser>
+	</FSharpLintSettings>
 
 ####Running Lint From An Application
 
