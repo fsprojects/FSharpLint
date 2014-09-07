@@ -174,3 +174,4 @@ TestResults.xml
 nuget/*.nupkg
 
 tools/
+!docs/tools

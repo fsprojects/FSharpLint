@@ -13,7 +13,7 @@ The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to tr
 
 Each directory aims to contain a README.md file with a brief technical overview of the code. 
 
-The [docs](docs/Home.md) contains an overview of the tool and how to use it.
+The [docs](http://duckmatt.github.io/FSharpLint/) contains an overview of the tool and how to use it.
 
 ###Support
 
