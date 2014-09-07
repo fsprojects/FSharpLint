@@ -8,21 +8,6 @@ N/A
 
 ###Rules
 
-|Rules|
-|---|
-|[IdentifiersMustNotContainUnderscores](#identifiersmustnotcontainunderscores)|
-|[InterfaceNamesMustBeginWithI](#interfacenamesmustbeginwithi)|
-|[ExceptionNamesMustEndWithException](#exceptionnamesmustendwithexception)|
-|[TypeNamesMustBePascalCase](#typenamesmustbepascalcase)|
-|[RecordFieldNamesMustBePascalCase](#recordfieldnamesmustbepascalcase)|
-|[EnumCasesMustBePascalCase](#enumcasesmustbepascalcase)||
-|[ModuleNamesMustBePascalCase](#modulenamesmustbepascalcase)|
-|[LiteralNamesMustBePascalCase](#literalnamesmustbepascalcase)|
-|[NamespaceNamesMustBePascalCase](#namespacenamesmustbepascalcase)|
-|[MemberNamesMustBePascalCase](#membernamesmustbepascalcase)|
-|[ParameterMustBeCamelCase](#parametermustbecamelcase)|
-|[NonPublicValuesCamelCase](#nonpublicvaluescamelcase)|
-
 ####IdentifiersMustNotContainUnderscores
 
 #####Cause

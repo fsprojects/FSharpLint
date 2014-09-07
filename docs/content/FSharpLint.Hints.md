@@ -8,10 +8,6 @@
 
 ###Rules
 
-|Rules|
-|---|
-|[Hints](#hints)|
-
 ####Hints
 
 #####Cause

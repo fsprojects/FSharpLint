@@ -8,11 +8,6 @@ Set of rules that analyse possible mistakes when binding values.
 
 ###Rules
 
-|Rules|
-|---|
-|[FavourIgnoreOverLetWild](#favourignoreoverletwild)|
-|[UselessBinding](#uselessbinding)|
-
 ####FavourIgnoreOverLetWild
 
 #####Cause

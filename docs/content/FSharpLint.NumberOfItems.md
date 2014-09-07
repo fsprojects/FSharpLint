@@ -8,13 +8,6 @@ N/A
 
 ###Rules
 
-|Rules|
-|---|
-|[MaxNumberOfFunctionParameters](#maxnumberoffunctionparameters)|
-|[MaxNumberOfMembers](#maxnumberofmembers)|
-|[MaxNumberOfItemsInTuple](#maxnumberofitemsintuple)|
-|[MaxNumberOfBooleanOperatorsInCondition](#maxnumberofbooleanoperatorsincondition)|
-
 ####MaxNumberOfFunctionParameters
 
 #####Cause

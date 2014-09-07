@@ -104,16 +104,20 @@ Target "RunFunctionalTests" (fun _ ->
 )
 
 // --------------------------------------------------------------------------------------
+// Generate the documentation web pages
+
+Target "GenerateDocs" (fun _ ->
+    executeFSI "docs/tools" "generate.fsx" [] |> ignore
+)
+
+// --------------------------------------------------------------------------------------
 // Run all targets by default. Invoke 'build <Target>' to override
 
 Target "All" DoNothing
 
-"Clean"
-  ==> "RestorePackages"
-  ==> "AssemblyInfo"
-  ==> "Build"
-  ==> "RunTests"
-  ==> "RunFunctionalTests"
-  ==> "All"
+"Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
+"Build" ==> "All"
+"RunTests" ==> "RunFunctionalTests" ==> "All"
+"GenerateDocs" ==> "All"
 
 RunTargetOrDefault "All"

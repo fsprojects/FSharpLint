@@ -8,21 +8,6 @@ N/A
 
 ###Rules
 
-|Rules|
-|---|
-|[MaxLinesInFunction](#maxlinesinfunction)|
-|[MaxLinesInLambdaFunction](#maxlinesinlambdafunction)|
-|[MaxLinesInMatchLambdaFunction](#maxlinesinmatchlambdafunction)|
-|[MaxLinesInValue](#maxlinesinvalue)|
-|[MaxLinesInConstructor](#maxlinesinconstructor)|
-|[MaxLinesInMember](#maxlinesinmember)|
-|[MaxLinesInProperty](#maxlinesinproperty)|
-|[MaxLinesInClass](#maxlinesinclass)|
-|[MaxLinesInEnum](#maxlinesinenum)|
-|[MaxLinesInUnion](#maxlinesinunion)|
-|[MaxLinesInRecord](#maxlinesinrecord)|
-|[MaxLinesInModule](#maxlinesinmodule)|
-
 ####MaxLinesInFunction
 
 #####Cause

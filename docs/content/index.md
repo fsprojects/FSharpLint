@@ -21,6 +21,7 @@ The following program:
 
 Run against the lint tool generates the following errors:
 
+	[lang=error]
     Interface identifiers should begin with the letter I found interface ExampleInterface
     Error in file Program.fs on line 1 starting at column 5
     type ExampleInterface =
@@ -49,6 +50,7 @@ After refactoring to the fix the lint errors, we end up with the following progr
 
 If we run lint again it will find a new error, it's worth running the tool until it no longer finds any errors:
 
+	[lang=error]
     List.fold + 0 can be refactored into List.sum
     Error in file Program.fs on line 6 starting at column 12
     let x = List.fold (+) 0 [1;2;3]
@@ -73,23 +75,21 @@ On windows run `build.cmd` and on unix based systems run `build.sh`. These will 
 
 The tool can be run from the command line, or as an MSBuild task. 
 
-* [Using the command line tool](Console-Application.md).
-* [Using the MSBuild task](MSBuild-Task.md).
+* [Using the command line tool](Console-Application.html).
+* [Using the MSBuild task](MSBuild-Task.html).
 
-####Rules
+####Analysers
 
-| Analysers     |
-| ------------- |
-| FSharpLint.Hints |
-| [FSharpLint.NameConventions](FSharpLint.NameConventions.md) |
-| [FSharpLint.SourceLength](FSharpLint.SourceLength.md) |
-| [FSharpLint.Typography](FSharpLint.Typography.md) |
-| [FSharpLint.NestedStatements](FSharpLint.NestedStatements.md) |
-| [FSharpLint.NumberOfItems](FSharpLint.NumberOfItems.md) |
-| [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.md) |
-| [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.md) |
-| [FSharpLint.Binding](FSharpLint.Binding.md) |
-| [FSharpLint.CyclomaticComplexity](FSharpLint.CyclomaticComplexity.md) |
+* FSharpLint.Hints
+* [FSharpLint.NameConventions](FSharpLint.NameConventions.html)
+* [FSharpLint.SourceLength](FSharpLint.SourceLength.html)
+* [FSharpLint.Typography](FSharpLint.Typography.html)
+* [FSharpLint.NestedStatements](FSharpLint.NestedStatements.html)
+* [FSharpLint.NumberOfItems](FSharpLint.NumberOfItems.html)
+* [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.html)
+* [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.html)
+* [FSharpLint.Binding](FSharpLint.Binding.html)
+* [FSharpLint.CyclomaticComplexity](FSharpLint.CyclomaticComplexity.html)
 
 Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
 
@@ -101,6 +101,7 @@ The configuration files are loaded in a specific order, files loaded after anoth
 
 The configuration rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
 
+	[lang=xml]
     <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
       <Rules />
       <AnalyserSettings>
@@ -110,6 +111,7 @@ The configuration rules are overridden by redefining any properties of an analys
 
 To override to turn off you'd set enabled to false in your own configuration file as follows:
 
+	[lang=xml]
     <?xml version="1.0" encoding="utf-8"?>
 	<FSharpLintSettings>
 		<Analyser AnalyserId="FSharpLint.FunctionReimplementation">

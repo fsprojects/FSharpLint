@@ -4,14 +4,14 @@ The console application is a very simple wrapper around the lint tool, as of now
 
 ##### Example
 
-`C:\Users\matthewm\Documents\GitHub\FSharpLint\bin` is the directory containing `fsharplint.exe`
+`C:\FSharpLint\bin` is the directory containing `fsharplint.exe`
 
-`C:\Users\matthewm\Documents\GitHub\FSharpLint\tests\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj` is the path of the project file of the project that we want to lint.
+`C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj` is the path of the project file of the project that we want to lint.
 
 To run the tool we need to open the command line, `cd` into the directory containing `fsharplint.exe` and then run the tool using the `-f` argument to specify the project file:
 
-    >cd C:\Users\matthewm\Documents\GitHub\FSharpLint\bin
-    >fsharplint -f "C:\Users\matthewm\Documents\GitHub\FSharpLint\tests\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj"
+    >cd C:\FSharpLint\bin
+    >fsharplint -f "C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj"
 
 ###### Output
 
@@ -21,7 +21,7 @@ To run the tool we need to open the command line, `cd` into the directory contai
 
 | Arguments | Description | Example |
 | --- | :------------- | --- |
-| `-f` | Specifies the path to the project file of the project to be linted. **(Required)** | `fsharplint -f "C:\Users\Matt\FSharpProjectDirectory\ProjectFile.fsproj"` |
+| `-f` | Specifies the path to the project file of the project to be linted. **(Required)** | `fsharplint -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
 
 #### Future Improvements
 

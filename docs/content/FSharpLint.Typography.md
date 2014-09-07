@@ -8,14 +8,6 @@ Set of rules that analyse the text in a file.
 
 ###Rules
 
-|Rules|
-|---|
-|[MaxLinesInFile](#maxlinesinfile)|
-|[MaxCharactersOnLine](#maxcharactersonline)|
-|[NoTabCharacters](#notabcharacters)|
-|[TrailingNewLineInFile](#trailingnewlineinfile)|
-|[TrailingWhitespaceOnLine](#trailingwhitespaceonline)|
-
 ####MaxLinesInFile
 
 #####Cause

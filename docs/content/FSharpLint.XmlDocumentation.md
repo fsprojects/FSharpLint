@@ -8,10 +8,6 @@ N/A
 
 ###Rules
 
-|Rules|
-|---|
-|[ExceptionDefinitionHeader](#exceptiondefinitionheader)|
-
 ####ExceptionDefinitionHeader
 
 #####Cause
