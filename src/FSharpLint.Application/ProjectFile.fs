@@ -62,25 +62,10 @@ module ProjectFile =
                             |> Seq.map (fun (x:Microsoft.Build.Evaluation.ProjectItem) -> (x.EvaluatedInclude, ""))
                             |> Seq.toArray
 
-        let fsharpCoreDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
-                                      + @"\..\..\FSharp\{0}\Runtime\v4.0"
-
-        let altDirectory = Microsoft.FSharp.Compiler.MSBuildResolver.DotNetFrameworkReferenceAssembliesRootDirectory
-                                + @"\..\..\FSharp\.NETFramework\v4.0\4.3.0.0\"
-
-        let isRunningOnMono() = System.Type.GetType("Mono.Runtime") <> null
-
         let fsharpCoreDirectory =
-            if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.1")) then
-                Success(System.String.Format(fsharpCoreDirectory, "3.1"))
-            else if System.IO.Directory.Exists(System.String.Format(fsharpCoreDirectory, "3.0")) then
-                Success(System.String.Format(fsharpCoreDirectory, "3.0"))
-            else if System.IO.Directory.Exists(altDirectory) then
-                Success(altDirectory)
-            else if isRunningOnMono() then
-                Success(System.String.Format(fsharpCoreDirectory, "3.1"))
-            else
-                Failure(UnableToFindFSharpCoreDirectory)
+            match FSharpCoreLookup.lookup references with
+                | Some(directory) -> Success(directory)
+                | None -> Failure(UnableToFindFSharpCoreDirectory)
 
         match fsharpCoreDirectory with
             | Success(fsharpCoreDirectory) ->
