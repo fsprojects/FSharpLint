@@ -95,7 +95,7 @@ Rules are grouped into sets of rules called analysers, the reason for this is th
 
 ####Configuration Files
 
-Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must be named: `Settings.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](../src/FSharpLint.Framework/DefaultConfiguration.FSharpLint).
+Configuration of the tool is done using xml with a purposely similar structure to [StyleCop](http://stylecop.codeplex.com/). Configuration files must be named: `Settings.FSharpLint`. A single xml file containing the default configuration for all rules is [included inside of the software](https://github.com/duckmatt/FSharpLint/blob/master/src/FSharpLint.Framework/DefaultConfiguration.FSharpLint).
 
 The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was `C:\Files\SomeProjectBeingLinted`, then `C:\` would first be checked for a config file - if a config file is found then it would override the default config, then `C:\Files` would be checked - if a config file was found and a config file was also previously found in `C:\` then the config in `C:\Files` would override the one in `C:\` and so on.
 
