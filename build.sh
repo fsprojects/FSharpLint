@@ -16,4 +16,4 @@ chmod +x fsharpi
 mono packages/FAKE/tools/FAKE.exe build.fsx $@
 EXITCODE=$?
 rm fsharpi
-$EXITCODE
+exit $EXITCODE
