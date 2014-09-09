@@ -59,9 +59,10 @@ module FSharpCoreLookup =
 
     let private lookupDirectory referenceString =
         match versionFromReference referenceString with
-            | Some(version) ->
+            | Some(version) when versions |> Map.containsKey version ->
                 let directories = versions.[version]
                 getExistingDirectory directories
+            | Some(_) -> None /// Unrecognised version.
             | None -> None
 
     /// Get the FSharpCore reference from a list of references.
