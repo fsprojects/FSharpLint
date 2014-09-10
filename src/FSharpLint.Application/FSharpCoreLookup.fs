@@ -75,6 +75,13 @@ module FSharpCoreLookup =
     /// Attempts to get the directory containing FSharpCore with .sigdata and .opdata for the correct version.
     /// References should be a list of references containing the reference to FSharpCore that's going to need to be resolved.
     let lookup references =
-        match references |> tryGetFSharpCoreReference with 
-            | Some(fsharpCoreReference) -> lookupDirectory fsharpCoreReference
-            | None -> None
+        let isNotRunningOnMono = System.Type.GetType("Mono.Runtime") = null
+
+        if isNotRunningOnMono then
+            match references |> tryGetFSharpCoreReference with 
+                | Some(fsharpCoreReference) -> lookupDirectory fsharpCoreReference
+                | None -> None
+        else
+            /// Seems to magically work on mono even when the directory doesn't exist
+            /// FSharp.core lookup for mono needs further investigation
+            Some(fullDirectory @"3.1\Runtime\v4.0")
