@@ -86,7 +86,7 @@ The tool can be run from the command line, or as an MSBuild task.
 
 ####Analysers
 
-* FSharpLint.Hints
+* [FSharpLint.Hints](FSharpLint.Hints.html)
 * [FSharpLint.NameConventions](FSharpLint.NameConventions.html)
 * [FSharpLint.SourceLength](FSharpLint.SourceLength.html)
 * [FSharpLint.Typography](FSharpLint.Typography.html)

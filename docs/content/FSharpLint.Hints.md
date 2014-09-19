@@ -9,25 +9,89 @@ Every hint is formed of two parts: the match and the suggestion. Both the match 
 ###Matching
 
 #####Match Any Expression
-todo: variable
-todo: wildcard
 
-#####Match Identifier
-todo: identifier
+Any F# expression can be matched by a variable or wildcard.
+
+* A variable is represented by a single letter e.g. `x`
+* A wildcard is represented by the character `_`
+
+Variables and wildcards are seemingly the same, and in terms of matching they are. The key difference is that using a variable lets you refer to it in the suggestion, enabling you to show where the matched expression should be moved within the matched code.
+
+For example if we wanted to match the following:
+
+    not ((4 + 4) >= (x + 77 * (9 * y)))
+
+and suggest the following (which is equivalent):
+
+    (4 + 4) < (x + 77 * (9 * y))
+
+We can use variables here, the expression `(4 + 4)` can be matched by a variable and `(x + 77 * (9 * y))` by another, this is shown below using the variables `a` and `b`.
+
+    [lang=hint]
+    not (a >= b) ===> a <  b
+
+#####Match An Identifier
+
+Identifiers in F# code can be matched by using the same identifier in the hint. It's important to note that since single characters are used to represent variables in hints the identifier must be at least 2 characters long.
+
+For example the following rule uses identifiers:
+
+    [lang=hint]
+    List.fold (+) 0 ===> List.sum
+
+`List.fold` in the hint will match the same identifier in the code. So if `List.fold` is found anywhere in the F# code being analysed with `(+)` and `0` applied to it then the rule will be matched.
 
 #####Match Literal Constants
-todo: constants
+
+Literal constants can be used to match literal constants in the code, the constants in hints are the same format as constants in F#, so for example if you wanted to match `0x4b` you could use `0x4b` in the hint.
+
+Example:
+
+    [lang=hint]
+    not true ===> false
+	
+In the example above the boolean literal `true` is used to match any F# code where `true` is applied to the `not` identifier.
 
 #####Match Function Application and Operators
-todo: function application
-todo: prefix operator
-todo: infix operator
+
+Matching function application, prefix operators, and infix operators in hints are all done in the same way as how you'd write it in F# e.g.
+
+    [lang=hint]
+    not true ===> false
+    4 + 4 ===> 8
+    ~x ===> someFunc x
+	
+The first rule above matches `true` (boolean literal) applied to the function `not`, the second matches two literal integers (both `4`) applied to the `+` binary operator, and the third matches an expression applied to the `~` prefix operator.
+	
+Read the below section titled "Order Of Operations" for specifying the order of application in a hint.
 
 #####Match Lambda Functions
-todo: lambda
+
+Lambda functions can be matched using the syntax `fun args -> ()` e.g. `fun x y -> x + y`.
+
+The arguments may be either wildcards (`_`) or 'variables' (a single character). The 'variable' arguments have a particular use: they match a lambda that has that argument as an identifier, and then if that 'variable' is used in the body of the lambda in the hint then it will match the argument's identifier in the body of the code.
+
+For example:
+
+    [lang=hint]
+    fun x -> x ===> id
+	
+The above hint will match a lambda that has a single argument which is an identifier and returns that identifier. `fun val -> val` would be matched, whereas `fun val -> ()` would not be matched - to match this you could use the hint: `fun _ -> ()`.
 
 #####Order Of Operations
-todo: parentheses
+
+Generic order of operations can be specified using parentheses. They're described as 'generic' because using parentheses in a hint will also take into account the following operators: `|>`, `||>`, `|||>`, `<|`, `<||`, and `<|||` which are often used to specificy the order of function application.
+
+Below uses parentheses to match `x` applied to `not` and the result of that application applied to `someFunc`.
+
+    [lang=hint]
+    someFunc (not x) ===> someOtherFunc x
+
+In F# several operators are commonly used to show the order of function application, for example in F# `someFunc (not x)` could also be written as:
+
+    not x |> someFunc
+	
+The same code written as a rule `not x |> someFunc` will match the above, but it is matching against the operator so it will not match `someFunc (not x)`. However the rule `someFunc (not x)` will match both.
 
 ###EBNF of a Hint
 
@@ -162,8 +226,7 @@ For example to make the lint tool run with just the two hints: `not (a =  b) ===
 
 * Provide more informative parse errors.
 * Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.
-* Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements
-* Provide support for 
+* Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements.
 
 ###Analyser Settings
 
