@@ -44,4 +44,4 @@ module ProjectFile =
             Config: Map<string, FSharpLint.Framework.Configuration.Analyser>
         }
 
-    val internal loadProjectFile : string -> Result<ProjectFile>
+    val internal loadProjectFile : string -> userSuppliedFSharpCoreDirectory: string option -> Result<ProjectFile>

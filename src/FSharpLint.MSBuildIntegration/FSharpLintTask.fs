@@ -34,6 +34,8 @@ type FSharpLintTask() =
 
     member val TreatWarningsAsErrors = false with get, set
 
+    member val FSharpCoreDirectory: string = null with get, set
+
     override this.Execute() = 
         let finishEarly = System.Func<_>(fun _ -> false)
         let action = System.Action<_>(fun _ -> ())
@@ -57,7 +59,20 @@ type FSharpLintTask() =
         currentDomain.add_AssemblyResolve(handler)
 
         try
-            FSharpLint.Application.RunLint.parseProject(finishEarly, this.Project, action, error)
+            let parseInfo: FSharpLint.Application.RunLint.ProjectParseInfo =
+                {
+                    FinishEarly = finishEarly
+                    ProjectFile = this.Project
+                    Progress = action
+                    ErrorReceived = error
+                    FSharpCoreDirectory = 
+                        if this.FSharpCoreDirectory = null then 
+                            None 
+                        else
+                            Some(this.FSharpCoreDirectory) 
+                }
+
+            FSharpLint.Application.RunLint.parseProject parseInfo
                 |> ignore
         with
             | e -> 

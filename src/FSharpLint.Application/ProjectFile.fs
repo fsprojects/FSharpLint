@@ -57,15 +57,18 @@ module ProjectFile =
         }
 
     /// Resolves a a list of references from their short term form e.g. System.Core to absolute paths to the dlls.
-    let private resolveReferences (projectInstance:Microsoft.Build.Evaluation.Project) outputPath references =
+    let private resolveReferences (projectInstance:Microsoft.Build.Evaluation.Project) outputPath userSuppliedFSharpCoreDirectory references =
         let references = references 
                             |> Seq.map (fun (x:Microsoft.Build.Evaluation.ProjectItem) -> (x.EvaluatedInclude, ""))
                             |> Seq.toArray
 
         let fsharpCoreDirectory =
-            match FSharpCoreLookup.lookup references with
+            match userSuppliedFSharpCoreDirectory with
                 | Some(directory) -> Success(directory)
-                | None -> Failure(UnableToFindFSharpCoreDirectory)
+                | None ->
+                    match FSharpCoreLookup.lookup references with
+                        | Some(directory) -> Success(directory)
+                        | None -> Failure(UnableToFindFSharpCoreDirectory)
 
         match fsharpCoreDirectory with
             | Success(fsharpCoreDirectory) ->
@@ -210,7 +213,7 @@ module ProjectFile =
             | Success(config) -> overideDefaultConfig projectFilePath config checkConfig
             | x -> x
 
-    let loadProjectFile (projectFile:string) =
+    let loadProjectFile (projectFile:string) userSuppliedFSharpCoreDirectory =
         match openProjectFile projectFile with
             | Success(projectInstance) ->
                 let projectPath = System.IO.Path.GetDirectoryName(projectFile)
@@ -229,7 +232,7 @@ module ProjectFile =
 
                             match loadConfigForProject projectFile with
                                 | Success(config) ->
-                                    match projectInstance.GetItems("Reference") |> resolveReferences projectInstance outputAbsolutePath with
+                                    match projectInstance.GetItems("Reference") |> resolveReferences projectInstance outputAbsolutePath userSuppliedFSharpCoreDirectory with
                                         | Success(references) ->
                                             {
                                                 Path = projectFile

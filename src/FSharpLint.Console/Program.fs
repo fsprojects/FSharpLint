@@ -45,7 +45,7 @@ module Program =
         | FSharpLint.Application.RunLint.Failed(file, parseException) ->
             failedToParseFileError file parseException
 
-    let private runLint projectFile =
+    let private runLint projectFile fsharpCoreDir =
         let finishEarly = System.Func<_>(fun _ -> false)
 
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
@@ -54,7 +54,16 @@ module Program =
             let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input
             System.Console.WriteLine(output))
 
-        RunLint.parseProject(finishEarly, projectFile, parserProgress, error)
+        let parseInfo: RunLint.ProjectParseInfo =
+            {
+                FinishEarly = finishEarly
+                ProjectFile = projectFile
+                Progress = parserProgress
+                ErrorReceived = error
+                FSharpCoreDirectory = fsharpCoreDir
+            }
+
+        RunLint.parseProject parseInfo
 
     let private printFailedDescription = function
         | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
@@ -89,25 +98,68 @@ module Program =
 
         | ProjectFile.FailedToResolveReferences ->
             System.Console.WriteLine(Resources.GetString("ConsoleFailedToResolveReferences"))
+
+    type private Argument =
+        | ProjectFile of string
+        | FSharpCoreDirectory of string
+        | UnexpectedArgument of string
+
+    let private parseArguments arguments =
+        let rec parseArguments parsedArguments = function
+            | "-f" :: argument :: remainingArguments -> 
+                parseArguments (ProjectFile(argument) :: parsedArguments) remainingArguments
+            | "-core" :: argument :: remainingArguments -> 
+                parseArguments (FSharpCoreDirectory(argument) :: parsedArguments) remainingArguments
+            | [] -> 
+                parsedArguments
+            | argument :: _ -> 
+                [UnexpectedArgument(argument)]
+
+        parseArguments [] arguments
+
+    let private containsUnexpectedArgument arguments =
+        let isUnexpectedArgument = function 
+            | UnexpectedArgument(_) -> true 
+            | _ -> false
+
+        arguments |> List.exists isUnexpectedArgument
+
+    let private containsRequiredArguments arguments =
+        let isProjectFileArgument = function 
+            | ProjectFile(_) -> true 
+            | _ -> false
+
+        arguments |> List.exists isProjectFileArgument
+
+    let private start projectFile fsharpCoreDir =
+        if System.IO.File.Exists(projectFile) then
+            match runLint projectFile fsharpCoreDir with
+                | RunLint.Success ->
+                    System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
+                | RunLint.Failure(error) ->
+                    printFailedDescription error
+        else
+            let formatString = Resources.GetString("ConsoleCouldNotFindFile")
+            System.Console.WriteLine(System.String.Format(formatString, projectFile))
+
+    let private startWithArguments arguments =
+        let projectFile = arguments |> List.pick (function | ProjectFile(file) -> Some(file) | _ -> None)
+
+        let fsharpCoreDir = arguments |> List.tryPick (function | FSharpCoreDirectory(dir) -> Some(dir) | _ -> None)
+
+        start projectFile fsharpCoreDir
     
     [<EntryPoint>]
     let main argv = 
-        if argv.Length < 2 then
+        let parsedArguments = Array.toList argv |> parseArguments
+
+        let argumentAreInvalid = 
+            containsUnexpectedArgument parsedArguments || 
+            not <| containsRequiredArguments parsedArguments
+
+        if argumentAreInvalid then
             help()
         else
-            match argv.[0] with
-                | "-f" -> 
-                    let projectFile = argv.[1]
-
-                    if System.IO.File.Exists(projectFile) then
-                        match runLint projectFile with
-                            | RunLint.Success ->
-                                System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
-                            | RunLint.Failure(error) ->
-                                printFailedDescription error
-                    else
-                        let formatString = Resources.GetString("ConsoleCouldNotFindFile")
-                        System.Console.WriteLine(System.String.Format(formatString, projectFile))
-                | _ -> help()
+            startWithArguments parsedArguments
 
         0

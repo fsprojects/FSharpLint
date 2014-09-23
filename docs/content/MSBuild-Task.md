@@ -20,6 +20,13 @@ The task has an optional property `TreatWarningsAsErrors` which will fail the bu
         <FSharpLintTask Project="$(MSBuildProjectFullPath)" TreatWarningsAsErrors="true" />
     </Target>
 
+The task has another optional property `FSharpCoreDirectory` which allows you to specify the directory of where your `FSharp.Core.dll` is located. If it's you don't provide it the tool will attempt to find it from default locations - if it uses the wrong location you'll get a `ParseException` reported when running the tool:
+
+	[lang=xml]
+    <Target Name="AfterBuild">
+        <FSharpLintTask Project="$(MSBuildProjectFullPath)" FSharpCoreDirectory="C:\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0" />
+    </Target>
+
 The following should be in your `.fsproj` file, with the `AssemblyFile` path ammended:
 
 	[lang=xml]

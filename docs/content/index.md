@@ -132,17 +132,9 @@ To override to turn off you'd set enabled to false in your own configuration fil
 
 The project `src/FSharpLint.Application` contains `RunLint.fs` that contains the following function:
 
-    /// <summary>Parses and runs the linter on all the files in a project.</summary>
-    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
-    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
-    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    let parseProject (
-        finishEarly: System.Func<bool>, 
-        projectFile:string, 
-        progress: System.Action<ParserProgress>, 
-        errorReceived: System.Action<ErrorHandling.Error>)
+    /// Parses and runs the linter on all the files in a project.
+    val parseProject : projectInformation: ProjectParseInfo -> Result
 
-This function is how all the current tools (MSBuild task and console application) run the lint tool on a single project. You pass it three functions: `finishEarly` lets you stop the lint tool at any time by returning true, `progress` gets passed information on what file is currently being linted within the project, every time a rule is found to be broken `errorReceived` is passed details on the broken rule.
+This function is how all the current tools (MSBuild task and console application) run the lint tool on a single project. You pass it a record with information needed to locate the project along with three functions: `finishEarly` lets you stop the lint tool at any time by returning true, `progress` gets passed information on what file is currently being linted within the project, every time a rule is found to be broken `errorReceived` is passed details on the broken rule.
 
 If you've built the tool, the assembly to reference to access this function will be: `/bin/FSharpLint.Application.dll`

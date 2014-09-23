@@ -37,14 +37,25 @@ module RunLint =
     type Result = 
         | Success
         | Failure of ProjectFile.Error
+
+    /// Provides information for controlling the parse of a project.
+    type ProjectParseInfo =
+        {
+            /// Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.
+            FinishEarly: System.Func<bool>
+
+            /// Absolute path to the .fsproj file.
+            ProjectFile: string
+
+            /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
+            Progress: System.Action<ParserProgress>
+
+            /// Callback that's called when a lint error is detected.
+            ErrorReceived: System.Action<ErrorHandling.Error>
+
+            /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
+            FSharpCoreDirectory: string option
+        }
         
-    /// <summary>Parses and runs the linter on all the files in a project.</summary>
-    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
-    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
-    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    val parseProject :
-        finishEarly: System.Func<bool> * 
-        projectFile:string *
-        progress: System.Action<ParserProgress> *
-        errorReceived: System.Action<ErrorHandling.Error> -> Result
+    /// Parses and runs the linter on all the files in a project.
+    val parseProject : projectInformation: ProjectParseInfo -> Result

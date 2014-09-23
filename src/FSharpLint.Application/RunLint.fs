@@ -126,16 +126,31 @@ module RunLint =
                     for r in projectFile.References do yield "-r:" + r
                     for r in projectFile.ProjectReferences do yield "-r:" + r
                 |])
-        
-    /// <summary>Parses and runs the linter on all the files in a project.</summary>
-    /// <param name="finishEarly">Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.</param>
-    /// <param name="projectFile">Absolute path to the .fsproj file.</param>
-    /// <param name="progress">Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).</param>
-    /// <param name="errorReceived">Callback that's called when a lint error is detected.</param>
-    let parseProject (finishEarly: System.Func<bool>, projectFile:string, progress: System.Action<ParserProgress>, errorReceived: System.Action<ErrorHandling.Error>) = 
-        let finishEarly = fun _ -> finishEarly.Invoke()
 
-        match ProjectFile.loadProjectFile projectFile with
+    /// Provides information for controlling the parse of a project.
+    type ProjectParseInfo =
+        {
+            /// Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.
+            FinishEarly: System.Func<bool>
+
+            /// Absolute path to the .fsproj file.
+            ProjectFile: string
+
+            /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
+            Progress: System.Action<ParserProgress>
+
+            /// Callback that's called when a lint error is detected.
+            ErrorReceived: System.Action<ErrorHandling.Error>
+
+            /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
+            FSharpCoreDirectory: string option
+        }
+        
+    /// Parses and runs the linter on all the files in a project.
+    let parseProject projectInformation = 
+        let finishEarly = fun _ -> projectInformation.FinishEarly.Invoke()
+
+        match ProjectFile.loadProjectFile projectInformation.ProjectFile projectInformation.FSharpCoreDirectory with
             | ProjectFile.Success(projectFile) -> 
                 let checker = Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.Create()
         
@@ -145,7 +160,7 @@ module RunLint =
                     let plugins = loadPlugins()
 
                     projectFile.FSharpFiles 
-                        |> List.iter (parseFile finishEarly errorReceived progress projectFile checker plugins projectOptions)
+                        |> List.iter (parseFile finishEarly projectInformation.ErrorReceived projectInformation.Progress projectFile checker plugins projectOptions)
 
                     Success
                 with 
