@@ -118,7 +118,7 @@ Target "CreatePackage" (fun _ ->
                     (@"..\src\FSharpLint.MSBuildIntegration\bin\Release\*.dll", None, None)
                 ]
          }) 
-        "nugetpackage\FSharpLint.nuspec"
+        "nugetpackage/FSharpLint.nuspec"
 )
 
 // --------------------------------------------------------------------------------------
