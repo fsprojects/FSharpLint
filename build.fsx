@@ -23,15 +23,10 @@ let project = "FSharpLint"
 // (used as description in AssemblyInfo and as a short summary for NuGet package)
 let summary = "Lint tool for F#."
 
-// Longer description of the project
-// (used as a description for NuGet package; line breaks are automatically cleaned up)
-let description = """
-  FSharpLint is a style checking tool for F#. 
-  It points out locations where a set of rules on how F# is to be styled have been broken. 
-  The tool is configurable via XML and can be run from a console app, or inside Visual Studio using the Visual Studio extension. """
-
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
+
+let version = "0.1.1"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -104,6 +99,29 @@ Target "RunFunctionalTests" (fun _ ->
 )
 
 // --------------------------------------------------------------------------------------
+// Create nuget package
+
+Target "CreatePackage" (fun _ ->
+    NuGet (fun p -> 
+        {p with
+            Authors = authors
+            Project = project
+            Description = summary                               
+            OutputPath = "nugetpackage"
+            Summary = summary
+            WorkingDir = "nugetpackage"
+            Version = version
+            Publish = false
+            Files = 
+                [
+                    (@"build\*", Some "build", None)
+                    (@"..\src\FSharpLint.MSBuildIntegration\bin\Release\*.dll", None, None)
+                ]
+         }) 
+        "nugetpackage\FSharpLint.nuspec"
+)
+
+// --------------------------------------------------------------------------------------
 // Generate the documentation web pages
 
 Target "GenerateDocs" (fun _ ->
@@ -119,5 +137,6 @@ Target "All" DoNothing
 "Build" ==> "All"
 "RunTests" ==> "RunFunctionalTests" ==> "All"
 "GenerateDocs" ==> "All"
+"CreatePackage" ==> "All"
 
 RunTargetOrDefault "All"
