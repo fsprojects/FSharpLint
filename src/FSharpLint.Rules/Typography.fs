@@ -168,7 +168,9 @@ module Typography =
         if isAnalyserEnabled visitorInfo.Config then
             let mkRange = mkRange filename
 
-            let lines = file.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
+            let lines = 
+                file.Split([|"\n"|], System.StringSplitOptions.None)
+                    |> Array.map (fun line -> line.TrimEnd('\r'))
 
             lines |> Array.iteri (analyseLine visitorInfo mkRange)
 
