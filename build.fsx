@@ -114,8 +114,8 @@ Target "CreatePackage" (fun _ ->
             Publish = false
             Files = 
                 [
-                    (@"build\*", Some "build", None)
-                    (@"..\src\FSharpLint.MSBuildIntegration\bin\Release\*.dll", None, None)
+                    (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
+                    (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}*.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                 ]
          }) 
         "nugetpackage/FSharpLint.nuspec"
