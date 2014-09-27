@@ -107,22 +107,19 @@ type TestNestedStatements() =
 
     [<Test>]
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
-        this.Parse("fun x -> 
-                        ()", setupConfig 0 true false)
+        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 true false)
                         
         Assert.IsFalse(this.ErrorExistsAt(1, 8))
 
     [<Test>]
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() = 
-        this.Parse("fun x -> 
-                        ()", setupConfig 0 false false)
+        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 false false)
 
         Assert.IsTrue(this.ErrorExistsAt(1, 8))
 
     [<Test>]
     member this.MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
-        this.Parse("fun x ->  
-                        ()", setupConfig 0 true false)
+        this.Parse("fun x ->  " + System.Environment.NewLine + "    ()", setupConfig 0 true false)
                         
         Assert.IsTrue(this.ErrorExistsAt(1, 8))
 
