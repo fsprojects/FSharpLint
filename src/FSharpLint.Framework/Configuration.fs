@@ -40,6 +40,9 @@ module Configuration =
         | Hints of string list
         | MaxCyclomaticComplexity of int
         | IncludeMatchStatements of bool
+        | OneSpaceAllowedAfterOperator of bool
+        | NumberOfSpacesAllowed of int
+        | IgnoreBlankLines of bool
 
     type Rule = 
         {
@@ -71,6 +74,12 @@ module Configuration =
                 Some(IncludeMatchStatements(property.Boolean.Value)) 
             | "Hints" when property.String.IsSome ->
                 Some(Hints(property.String.Value.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList))
+            | "OneSpaceAllowedAfterOperator" when property.Boolean.IsSome -> 
+                Some(OneSpaceAllowedAfterOperator(property.Boolean.Value))
+            | "NumberOfSpacesAllowed" when property.Number.IsSome -> 
+                Some(NumberOfSpacesAllowed(property.Number.Value))
+            | "IgnoreBlankLines" when property.Boolean.IsSome -> 
+                Some(IgnoreBlankLines(property.Boolean.Value))
             | _ -> 
                 None
 
@@ -82,7 +91,7 @@ module Configuration =
                         yield (property.Name, propertyVal) 
                     | None -> ()
         ]
-        
+
     let private parseRule (rule:Config.Rule) : Rule =
         {
             Settings = 
@@ -146,7 +155,7 @@ module Configuration =
         let newAnalysers = System.IO.File.ReadAllText(file) |> configuration
 
         overwriteMap configToOverride newAnalysers overrideAnalysers
-        
+
     /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
     /// This function loads and returns this default configuration.
     let loadDefaultConfiguration () =

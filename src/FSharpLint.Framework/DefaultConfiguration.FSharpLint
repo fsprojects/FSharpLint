@@ -195,7 +195,7 @@
         <Rule Name="MaxCharactersOnLine">
           <RuleSettings>
             <Property name="Enabled">True</Property>
-            <Property name="Length">80</Property>>
+            <Property name="Length">120</Property>>
           </RuleSettings>
         </Rule>
         <Rule Name="NoTabCharacters">
@@ -211,11 +211,14 @@
         <Rule Name="TrailingWhitespaceOnLine">
           <RuleSettings>
             <Property name="Enabled">True</Property>
+            <Property name="NumberOfSpacesAllowed">1</Property>
+            <Property name="OneSpaceAllowedAfterOperator">True</Property>
+            <Property name="IgnoreBlankLines">True</Property>
           </RuleSettings>
         </Rule>
       </Rules>
       <AnalyserSettings>
-        <Property name="Enabled">False</Property>
+        <Property name="Enabled">True</Property>
       </AnalyserSettings>
     </Analyser>
     <Analyser AnalyserId="FSharpLint.NestedStatements">
@@ -292,7 +295,7 @@
       <AnalyserSettings>
         <Property name="Enabled">True</Property>
         <Property name="MaxCyclomaticComplexity">10</Property>
-        <Property name="IncludeMatchStatements">True</Property>
+        <Property name="IncludeMatchStatements">False</Property>
       </AnalyserSettings>
     </Analyser>
   </Analysers>

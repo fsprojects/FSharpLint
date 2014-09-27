@@ -23,6 +23,7 @@ module Typography =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
     open Microsoft.FSharp.Compiler.Range
+    open FSharpLint.Framework.Ast
 
     [<Literal>]
     let AnalyserName = "FSharpLint.Typography"
@@ -35,70 +36,144 @@ module Typography =
             | Some(_) -> true
             | None -> false
 
-    let maxCharactersOnLine config =
-        match isRuleEnabled config AnalyserName "MaxCharactersOnLine" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Length" -> 
-                match ruleSettings.["Length"] with
-                    | Length(length) -> Some(length)
-                    | _ -> None
-            | _ -> None
+    module MaxCharactersOnLine =
+        let private maxCharactersOnLine config =
+            match isRuleEnabled config AnalyserName "MaxCharactersOnLine" with
+                | Some(_, ruleSettings) when ruleSettings.ContainsKey "Length" -> 
+                    match ruleSettings.["Length"] with
+                        | Length(length) -> Some(length)
+                        | _ -> None
+                | _ -> None
 
-    let maxLinesInFile config =
-        match isRuleEnabled config AnalyserName "MaxLinesInFile" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
-                match ruleSettings.["Lines"] with
-                    | Lines(lines) -> Some(lines)
-                    | _ -> None
-            | _ -> None
-
-    let endsWithWhitespace (str:string) =
-        str.Length > 0 && System.Char.IsWhiteSpace(str.[str.Length - 1])
-
-    let lengthOfWhitespaceOnEnd (str:string) =
-        str.Length - str.TrimEnd().Length
-
-    let analyseLine (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) mkRange lineNumber (line:string) = 
-        let lineNumber = lineNumber + 1
-
-        maxCharactersOnLine visitorInfo.Config
-            |> Option.iter (fun maxCharacters ->
+        let checkMaxCharactersOnLine mkRange (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) (line:string) lineNumber =
+            let checkMaxCharactersOnLine maxCharacters =
                 if line.Length > maxCharacters then
                     let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber line.Length)
                     let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesTypographyLineLengthError")
                     let error = System.String.Format(errorFormatString, (maxCharacters + 1))
-                    visitorInfo.PostError range error)
-
-        if isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config && endsWithWhitespace line then
-            let whitespaceLength = lengthOfWhitespaceOnEnd line
-            let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
-            visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingWhitespaceError"))
-                
-        if isEnabled "NoTabCharacters" visitorInfo.Config then
-            let indexOfTab = line.IndexOf('\t')
+                    visitorInfo.PostError range error
             
-            if indexOfTab >= 0 then
-                let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTabCharacterError"))
-    
+            maxCharactersOnLine visitorInfo.Config |> Option.iter checkMaxCharactersOnLine
+
+    module TrailingWhitespaceOnLine =
+        let private numberOfSpacesAllowed config =
+            match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
+                | Some(_, ruleSettings) when ruleSettings.ContainsKey "NumberOfSpacesAllowed" -> 
+                    match ruleSettings.["NumberOfSpacesAllowed"] with
+                        | NumberOfSpacesAllowed(n) -> Some(n)
+                        | _ -> None
+                | _ -> None
+
+        let private isOneSpaceAllowedAfterOperator config =
+            match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
+                | Some(_, ruleSettings) when ruleSettings.ContainsKey "OneSpaceAllowedAfterOperator" -> 
+                    match ruleSettings.["OneSpaceAllowedAfterOperator"] with
+                        | OneSpaceAllowedAfterOperator(b) -> Some(b)
+                        | _ -> None
+                | _ -> None
+
+        let private isIgnoringBlankLines config =
+            match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
+                | Some(_, ruleSettings) when ruleSettings.ContainsKey "IgnoreBlankLines" -> 
+                    match ruleSettings.["IgnoreBlankLines"] with
+                        | IgnoreBlankLines(b) -> b
+                        | _ -> false
+                | _ -> false
+
+        let private isSymbol character = 
+            let symbols = [
+                '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
+                '#';'^';'!';'?';'/';'.';':';',';'(';')';'[';']';'{';'}'
+            ]
+
+            symbols |> List.exists ((=) character) 
+
+        let private doesStringNotEndWithWhitespace config (str:string) =
+            match numberOfSpacesAllowed config, isOneSpaceAllowedAfterOperator config with
+                | Some(numberOfSpacesAllowed), _ when numberOfSpacesAllowed > 0 ->
+                    str.Length - str.TrimEnd().Length <= numberOfSpacesAllowed
+                | _, Some(isOneSpaceAllowedAfterOperator) when isOneSpaceAllowedAfterOperator ->
+                    let trimmedStr = str.TrimEnd()
+
+                    trimmedStr.Length = str.Length ||
+                        (str.Length - trimmedStr.Length = 1 && 
+                         trimmedStr.Length > 0 &&
+                         isSymbol trimmedStr.[trimmedStr.Length - 1])
+                | _ -> 
+                    str.TrimEnd().Length = str.Length
+
+        let private lengthOfWhitespaceOnEnd (str:string) =
+            str.Length - str.TrimEnd().Length
+
+        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber =
+            let enabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
+
+            if enabled then
+                let ignoringBlankLinesAndIsBlankLine =
+                    isIgnoringBlankLines visitorInfo.Config && System.String.IsNullOrWhiteSpace(line)
+                
+                let stringEndsWithWhitespace =
+                    not ignoringBlankLinesAndIsBlankLine &&
+                    not <| doesStringNotEndWithWhitespace visitorInfo.Config line
+
+                if stringEndsWithWhitespace then
+                    let whitespaceLength = lengthOfWhitespaceOnEnd line
+                    let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
+                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingWhitespaceError"))
+                
+    module MaxLinesInFile =
+        let private maxLinesInFile config =
+            match isRuleEnabled config AnalyserName "MaxLinesInFile" with
+                | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
+                    match ruleSettings.["Lines"] with
+                        | Lines(lines) -> Some(lines)
+                        | _ -> None
+                | _ -> None
+
+        let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) (lines:string []) maxLines =
+            if lines.Length > maxLines then
+                let range = mkRange (mkPos (maxLines + 1) 0) (mkPos lines.Length lines.[lines.Length - 1].Length)
+                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesTypographyFileLengthError")
+                let error = System.String.Format(errorFormatString, (maxLines + 1))
+                visitorInfo.PostError range error
+
+        let checkMaxLinesInFile mkRange (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) lines =
+            let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange visitorInfo lines
+
+            maxLinesInFile visitorInfo.Config |> Option.iter checkNumberOfLinesInFile
+
+    module TrailingNewLineInFile =
+        let checkTrailingNewLineInFile mkRange (visitorInfo:VisitorInfo) (file:string) (lines:string []) =
+            if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
+                let range = mkRange (mkPos lines.Length 0) (mkPos lines.Length 0)
+                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingLineError"))
+
+    module NoTabCharacters =
+        let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber =
+            if isEnabled "NoTabCharacters" visitorInfo.Config then
+                let indexOfTab = line.IndexOf('\t')
+
+                if indexOfTab >= 0 then
+                    let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
+                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTabCharacterError"))
+
+    let analyseLine (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) mkRange lineNumber (line:string) = 
+        let lineNumber = lineNumber + 1
+
+        MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber 
+        TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber
+        NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber
+
     let visitor (visitorInfo:FSharpLint.Framework.Ast.VisitorInfo) (file:string) filename = 
         if isAnalyserEnabled visitorInfo.Config then
             let mkRange = mkRange filename
 
             let lines = file.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
 
-            if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
-                let range = mkRange (mkPos lines.Length 0) (mkPos lines.Length 0)
-                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesTypographyTrailingLineError"))
-
             lines |> Array.iteri (analyseLine visitorInfo mkRange)
 
-            maxLinesInFile visitorInfo.Config
-                |> Option.iter (fun maxLines ->
-                    if lines.Length > maxLines then
-                        let range = mkRange (mkPos (maxLines + 1) 0) (mkPos lines.Length lines.[lines.Length - 1].Length)
-                        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesTypographyFileLengthError")
-                        let error = System.String.Format(errorFormatString, (maxLines + 1))
-                        visitorInfo.PostError range error)
+            TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo file lines
+            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines
 
     type RegisterTypographyVisitor() = 
         let plugin =

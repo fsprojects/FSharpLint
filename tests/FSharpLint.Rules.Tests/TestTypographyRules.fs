@@ -23,7 +23,7 @@ open FSharpLint.Rules.Typography
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
-let config = 
+let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlankLines = 
     Map.ofList 
         [ 
             (AnalyserName, 
@@ -65,12 +65,23 @@ let config =
                                     Settings = Map.ofList 
                                         [ 
                                             ("Enabled", Enabled(true))
+
+                                            ("NumberOfSpacesAllowed", 
+                                             NumberOfSpacesAllowed(numberOfSpacesAllowed))
+
+                                            ("OneSpaceAllowedAfterOperator", 
+                                             OneSpaceAllowedAfterOperator(isOneSpaceAllowedAfterOperator))
+
+                                            ("IgnoreBlankLines",
+                                             IgnoreBlankLines(ignoreBlankLines))
                                         ] 
                                 }) 
                         ]
                     Settings = Map.ofList []
                 })
             ]
+
+let config = setupConfig 0 false false
 
 [<TestFixture>]
 type TestNestedStatements() =
@@ -95,10 +106,70 @@ type TestNestedStatements() =
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
 
     [<Test>]
+    member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
+        this.Parse("fun x -> 
+                        ()", setupConfig 0 true false)
+                        
+        Assert.IsFalse(this.ErrorExistsAt(1, 8))
+
+    [<Test>]
+    member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() = 
+        this.Parse("fun x -> 
+                        ()", setupConfig 0 false false)
+
+        Assert.IsTrue(this.ErrorExistsAt(1, 8))
+
+    [<Test>]
+    member this.MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
+        this.Parse("fun x ->  
+                        ()", setupConfig 0 true false)
+                        
+        Assert.IsTrue(this.ErrorExistsAt(1, 8))
+
+    [<Test>]
+    member this.NoSpacesOnEndOfLineWithNoSpacesAllowed() = 
+        this.Parse("let line = 55", setupConfig 0 false false)
+        
+        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
+    member this.OneSpaceOnEndOfLineWithNoSpacesAllowed() = 
+        this.Parse("let line = 55 ", setupConfig 0 false false)
+        
+        Assert.IsTrue(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
+    member this.OneSpaceOnEndOfLineWithOneSpaceAllowed() = 
+        this.Parse("let line = 55 ", setupConfig 1 false false)
+        
+        Assert.IsFalse(this.ErrorExistsAt(1, 14))
+        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
+    member this.TwoSpacesOnEndOfLineWithOneSpaceAllowed() = 
+        this.Parse("let line = 55  ", setupConfig 1 false false)
+        
+        Assert.IsTrue(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
+    member this.TwoSpacesOnEndOfLineWithTwoSpacesAllowed() = 
+        this.Parse("let line = 55  ", setupConfig 2 false false)
+        
+        Assert.IsFalse(this.ErrorExistsAt(1, 15))
+        Assert.IsFalse(this.ErrorExistsAt(1, 14))
+        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
     member this.WhitespaceEntireLine() = 
         this.Parse " "
 
         Assert.IsTrue(this.ErrorExistsAt(1, 0))
+
+    [<Test>]
+    member this.WhitespaceEntireLineIgnoreBlankLines() = 
+        this.Parse(" ", setupConfig 0 false true)
+
+        Assert.IsFalse(this.ErrorExistsAt(1, 0))
 
     [<Test>]
     member this.WhitespaceOnEndOfLineAfterNewLine() = 
