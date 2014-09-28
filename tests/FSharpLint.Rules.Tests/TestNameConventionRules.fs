@@ -367,6 +367,20 @@ namespace matt.dog.cat"""
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
+    member this.LiteralPatternMatchExpectNoErrors() = 
+        this.Parse """
+module program
+  [<Literal>]
+  let Dog = true
+
+  let main = 
+    match true with
+    | Dog -> ()
+    | _ -> ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(8, 6))
+
+    [<Test>]
     member this.VariablePatternMatchIsPascalCase() = 
         this.Parse """
 module program
@@ -375,7 +389,7 @@ module program
     | Dog -> ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 6))
-
+        
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 
         this.Parse """

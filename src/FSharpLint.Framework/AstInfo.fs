@@ -103,6 +103,7 @@ module AstInfo =
 
         isPublic true false path
 
+    /// Is an identifier being used to identify declaration of a value?
     let isValue (identifier:LongIdent) (checkFile:CheckFileResults) =
         if System.Char.IsUpper(identifier.Head.idText.[0]) && identifier.Length = 1 then
             let identifier = identifier.Head
@@ -115,7 +116,15 @@ module AstInfo =
             match symbol with
                 | Some(symbol) ->
                     match symbol.Symbol with
-                        | :? FSharpMemberFunctionOrValue -> true
+                        | :? FSharpMemberFunctionOrValue as symbol -> 
+                            match symbol.ImplementationLocation with
+                                | Some(implLocation) -> 
+                                    /// If it's implemented elsewhere then it's not what we're looking for,
+                                    /// it's probably a literal being matched against.
+                                    let isImplementedHere = implLocation.StartRange = identifier.idRange.StartRange
+
+                                    isImplementedHere
+                                | None -> true
                         | _ -> false
                 | None -> false
         else 
