@@ -36,7 +36,7 @@ let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted 
-let gitHome = "https://github.com/duckmatt/FSharpLint"
+let gitHome = "https://github.com/fsprojects/FSharpLint"
 // The name of the project on GitHub
 let gitName = "FSharpLint"
 

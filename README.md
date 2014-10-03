@@ -3,7 +3,7 @@
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via XML and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
-The project aims to let the user know of problems through [matching user defined hints](http://duckmatt.github.io/FSharpLint/FSharpLint.Hints.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
+The project aims to let the user know of problems through [matching user defined hints](http://fsprojects.github.io/FSharpLint/FSharpLint.Hints.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
 The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to true):
 
@@ -13,7 +13,7 @@ The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to tr
 
 Each directory aims to contain a README.md file with a brief technical overview of the code. 
 
-The [docs](http://duckmatt.github.io/FSharpLint/) contains an overview of the tool and how to use it.
+The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it.
 
 ###Nuget
 
@@ -21,8 +21,8 @@ A [package is availiable on nuget](https://www.nuget.org/packages/FSharpLint/) -
 
 ###Support
 
-* Mono 3.4.0 - [![Mono CI Build Status](https://travis-ci.org/duckmatt/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/duckmatt/FSharpLint)
-* .NET - [![Windows CI Build status](https://ci.appveyor.com/api/projects/status/y720rs0ek67vxumf "Build Status")](https://ci.appveyor.com/project/duckmatt/FSharpLint)
+* Mono 3.4.0 - [![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint)
+* .NET - [![Windows CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
 
 ###Licensing
 
@@ -30,5 +30,4 @@ The project is licensed under GPLv3. For more information on the license see the
 
 ###Contact
 
-Feel free to post an issue on [github](https://github.com/duckmatt/FSharpLint/issues) if you have any questions, have suggestions, or have found a defect.
-Aslo I can be contacted via email at [p4rk0ur@hotmail.co.uk](mailto:p4rk0ur@hotmail.co.uk)
+Feel free to post an issue on [github](../../issues) if you have any questions, have suggestions, or have found a defect.

@@ -6,7 +6,7 @@
 // Web site location for the generated documentation
 let website = "/FSharpLint"
 
-let githubLink = "http://github.com/duckmatt/FSharpLint"
+let githubLink = "http://github.com/fsprojects/FSharpLint"
 
 // Specify more information about your project
 let info =
