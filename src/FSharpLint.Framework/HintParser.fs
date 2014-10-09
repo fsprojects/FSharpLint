@@ -65,6 +65,8 @@ module HintParser =
         | Constant of Constant
         | Parentheses of Expression
         | Lambda of Lambda<Expression>
+        | Tuple of Expression list
+        | List of Expression list
 
     type Hint =
         {
@@ -473,7 +475,23 @@ module HintParser =
         let pexpression, private pexpressionImpl = createParserForwardedToRef()
 
         let pparentheses = skipChar '(' >>. pexpression .>> skipChar ')' |>> Expression.Parentheses
-    
+
+        let ptuple = 
+            skipChar '(' 
+                >>. pexpression
+                .>> skipChar ',' 
+                .>>. sepEndBy1 pexpression (skipChar ',')
+                .>> skipChar ')' 
+                |>> fun (func, rest) -> Expression.Tuple(func::rest)
+
+        let plist = 
+            skipChar '['
+                >>. spaces
+                >>. sepEndBy pexpression (skipChar ';')
+                .>> spaces
+                .>> skipChar ']'
+                |>> Expression.List
+
         let private plambdastart = 
             skipString "fun"
                 >>. spaces1
@@ -510,7 +528,9 @@ module HintParser =
                     attempt pvariable
                     attempt pwildcard
                     attempt Identifiers.plongidentorop |>> Expression.Identifier
-                    pparentheses
+                    attempt ptuple
+                    attempt plist
+                    attempt pparentheses
                 ]
 
         let pfunctionapplication =
@@ -522,6 +542,9 @@ module HintParser =
 
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
+        let prefixoperatorterm = 
+            followedBy (pischar ['+';'-';'%';'&';'!';'~']) >>. opp.ExpressionParser
+
         opp.TermParser <- 
             spaces >>.
             choice 
@@ -532,8 +555,10 @@ module HintParser =
                     attempt pwildcard
                     attempt pfunctionapplication
                     attempt Identifiers.plongidentorop |>> Expression.Identifier
+                    attempt ptuple
+                    attempt plist
                     attempt pparentheses
-                    opp.ExpressionParser
+                    prefixoperatorterm
                 ] .>> spaces
 
         // a helper function for adding infix operators to opp
@@ -551,18 +576,12 @@ module HintParser =
             opp.AddOperator(op)
 
         let addPrefixOperator op precedence =
-            opp.AddOperator(PrefixOperator(op, preturn "", precedence, true, 
+            opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
                                                 fun expr ->
                                                     Expression.PrefixOperator(op, expr)))
 
         do
-            addInfixOperator ";"  1 Associativity.Right
-
-            addInfixOperator "->"  2 Associativity.Right
-
             addInfixOperator ":="  3 Associativity.Right
-
-            addInfixOperator ","  4 Associativity.None
 
             addInfixOperator "or"  5 Associativity.Left
             addInfixOperator "||"  5 Associativity.Left
@@ -588,6 +607,7 @@ module HintParser =
             addInfixOperator "^"  9 Associativity.Right
 
             addInfixOperator "::"  10 Associativity.Right
+            addInfixOperator "@"  10 Associativity.Right
 
             addInfixOperator ":?>"  11 Associativity.None
             addInfixOperator ":?"  11 Associativity.None

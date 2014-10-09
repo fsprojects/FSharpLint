@@ -217,15 +217,22 @@ module HintMatcher =
                 matchHintExpr arguments (expr, hint)
             | Expression.Lambda(_) -> 
                 matchLambda arguments (expr, hint)
+            | Expression.Tuple(_) ->
+                matchTuple arguments (expr, hint)
+            | Expression.List(_) ->
+                matchList arguments (expr, hint)
+
+    and private doExpressionsMatch expressions hintExpressions arguments =  
+        List.length expressions = List.length hintExpressions &&
+            (expressions, hintExpressions)
+                ||> List.forall2 (fun x y -> matchHintExpr arguments (x, y))
 
     and matchFunctionApplication arguments (expr, hint) =
         match (expr, hint) with
             | SynExpr.App(_) as application, Expression.FunctionApplication(hintExpressions) -> 
                 let expressions = flattenFunctionApplication application
 
-                List.length expressions = List.length hintExpressions &&
-                    (expressions, hintExpressions)
-                        ||> List.forall2 (fun x y -> matchHintExpr arguments (x, y))
+                doExpressionsMatch expressions hintExpressions arguments
             | _ -> false
 
     and matchLambda arguments (expr, hint) =
@@ -240,8 +247,27 @@ module HintMatcher =
                     | LambdaMatch.NoMatch -> false
             | _ -> false
 
+    and matchTuple arguments (expr, hint) =
+        match (expr, hint) with
+            | SynExpr.Tuple(expressions, _, _), Expression.Tuple(hintExpressions) ->
+                doExpressionsMatch expressions hintExpressions arguments
+            | _ -> false
+
+    and matchList arguments (expr, hint) =
+        match (expr, hint) with
+            | SynExpr.ArrayOrList(false, expressions, _), Expression.List(hintExpressions) ->
+                doExpressionsMatch expressions hintExpressions arguments
+            | SynExpr.ArrayOrListOfSeqExpr(false, SynExpr.CompExpr(true, _, expression, _), _), Expression.List([hintExpression]) ->
+                matchHintExpr arguments (expression, hintExpression)
+            | _ -> false
+
     and matchInfixOperation arguments (expr, hint) =
         match (expr, hint) with
+            | SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple([leftExpr; rightExpr], _, _), _), 
+                    Expression.InfixOperator(op, left, right) ->
+                matchHintExpr arguments (opExpr, Expression.Identifier([op])) &&
+                matchHintExpr arguments (rightExpr, right) &&
+                matchHintExpr arguments (leftExpr, left)
             | SynExpr.App(_, _, infixExpr, leftExpr, _) as application, 
                     Expression.InfixOperator(op, left, right) -> 
 
@@ -326,6 +352,14 @@ module HintMatcher =
         | Constant.UserNum(x, char) -> x.ToString()
         | Constant.Unit -> "()"
 
+    let private surroundExpressionsString hintToString left right sep expressions =
+        let inside =
+            expressions 
+                |> List.map hintToString
+                |> String.concat sep
+
+        left + inside + right
+
     let rec hintToString = function
         | Expression.Variable(x) -> x.ToString()
         | Expression.Wildcard -> "_"
@@ -333,10 +367,8 @@ module HintMatcher =
             constantToString constant
         | Expression.Identifier(identifier) ->
             String.concat "." identifier
-        | Expression.FunctionApplication(hints) ->
-            hints 
-                |> List.map hintToString
-                |> String.concat " "
+        | Expression.FunctionApplication(expressions) ->
+            expressions |> surroundExpressionsString hintToString "" "" " "
         | Expression.InfixOperator(operator, leftHint, rightHint) ->
             hintToString leftHint + operator + hintToString rightHint
         | Expression.PrefixOperator(operator, hint) ->
@@ -345,6 +377,10 @@ module HintMatcher =
             "(" + hintToString hint + ")"
         | Expression.Lambda(lambda) -> 
             "fun " + lambdaArgumentsToString lambda.Arguments + " -> " + hintToString lambda.Body
+        | Expression.Tuple(expressions) ->
+            expressions |> surroundExpressionsString hintToString "(" ")" ","
+        | Expression.List(expressions) ->
+            expressions |> surroundExpressionsString hintToString "[" "]" ";"
 
     let visitor getHints visitorInfo (checkFile:CheckFileResults) astNode = 
         if isAnalyserEnabled visitorInfo.Config then

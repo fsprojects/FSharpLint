@@ -224,3 +224,35 @@ module Goat
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
+    [<Test>]
+    member this.MatchTupleApplication() = 
+        let config = generateHintConfig ["fst (x, y) ===> x"]
+
+        this.Parse("""
+module Goat
+
+fst (1, 0) |> ignore""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchListAppendItem() = 
+        let config = generateHintConfig ["x::[] ===> [x]"]
+
+        this.Parse("""
+module Goat
+
+x::[] |> ignore""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchAppendListToList() = 
+        let config = generateHintConfig ["[x]@[y] ===> [x;y]"]
+
+        this.Parse("""
+module Goat
+
+[1]@[2] |> ignore""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))

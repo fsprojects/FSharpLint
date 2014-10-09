@@ -522,6 +522,79 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
+    member this.Tuple() = 
+        let expected = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
+
+        match run Expressions.ptuple "(x, y)" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.List() = 
+        let expected = Expression.List([Expression.Variable('x');Expression.Variable('y')])
+
+        match run Expressions.plist "[x; y]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.EmptyList() = 
+        let expected = Expression.List([])
+
+        match run Expressions.plist "[]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+           
+    [<Test>]
+    member this.EmptyListWithWhitespace() = 
+        let expected = 
+            Expression.List([])
+
+        match run Expressions.plist "[  ]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+            
+    [<Test>]
+    member this.TupleHint() = 
+        let expected = 
+            {
+                Match = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
+                Suggestion = Expression.Identifier(["id"])
+            }
+            
+        match run phint "(x, y) ===> id" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+            
+    [<Test>]
+    member this.TupleInFunctionApplication() = 
+        let expected = 
+            {
+                Match = Expression.FunctionApplication(
+                            [
+                                Expression.Identifier(["fst"])
+                                Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
+                            ])
+                Suggestion = Expression.Variable('x')
+            }
+            
+        match run phint "fst (x, y) ===> x" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+            
+    [<Test>]
+    member this.ListHint() = 
+        let expected = 
+            {
+                Match = Expression.InfixOperator("::", Expression.Variable('x'), Expression.List([]))
+                Suggestion = Expression.List([Expression.Variable('x')])
+            }
+            
+        match run phint "x::[] ===> [x]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+            
+    [<Test>]
     member this.MultipleFunctionApplicationsHint() = 
         let expected = 
             {
