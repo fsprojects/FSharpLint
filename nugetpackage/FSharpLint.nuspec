@@ -8,7 +8,7 @@
     <summary>@summary@</summary>
     <licenseUrl>https://github.com/duckmatt/FSharpLint/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/duckmatt/FSharpLint/</projectUrl>
-    <!-- <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl> -->
+    <iconUrl>https://raw.githubusercontent.com/fsprojects/FSharpLint/master/docs/files/img/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>@description@</description>
     <releaseNotes>@releaseNotes@</releaseNotes>
