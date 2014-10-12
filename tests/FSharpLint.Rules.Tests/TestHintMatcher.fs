@@ -242,7 +242,7 @@ fst (1, 0) |> ignore""", config)
         this.Parse("""
 module Goat
 
-x::[] |> ignore""", config)
+1::[] |> ignore""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -256,3 +256,68 @@ module Goat
 [1]@[2] |> ignore""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchListAppendItemInPattern() = 
+        let config = generateHintConfig ["x::[] ===> [x]"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| x::[] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchTupleInPattern() = 
+        let config = generateHintConfig ["(_, []) ===> []"]
+
+        this.Parse("""
+module Goat
+
+match ([], []) with
+| (_, []) -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchIntegerConstantInPattern() = 
+        let config = generateHintConfig ["0 ===> 0"]
+
+        this.Parse("""
+module Goat
+
+match 0 with
+| 0 -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchListInPattern() = 
+        let config = generateHintConfig ["[0; 1; 2] ===> 0"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [0; 1; 2;] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchOrPattern() = 
+        let config = generateHintConfig ["[] | [0] ===> []"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [] | [0] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
