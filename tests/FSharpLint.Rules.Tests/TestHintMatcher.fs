@@ -321,3 +321,77 @@ match [] with
 | _ -> ()""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        
+    [<Test>]
+    member this.MatchAndPattern() = 
+        let config = generateHintConfig ["[] & [0] ===> []"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [] & [0] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchMultipleAndPatterns() = 
+        let config = generateHintConfig ["[] & [0] & [1] & [2] ===> []"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [] & [0] & [1] & [2] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        
+    [<Test>]
+    member this.MatchAndPatternsInsideMultipleAndPatterns() = 
+        let config = generateHintConfig ["[0] & [1] ===> []"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [] & [0] & [1] & [2] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchAndPatternsAndOrPatterns() = 
+        let config = generateHintConfig ["[0] & [1] | [1] & [2] ===> []"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [0] & [1] | [1] & [2] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchIfStatement() = 
+        let config = generateHintConfig ["if x then true else false ===> x"]
+
+        this.Parse("""
+module Goat
+
+if true then true else false""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchElseIfStatement() = 
+        let config = generateHintConfig ["if x then true else if y then true else false ===> x || y"]
+
+        this.Parse("""
+module Goat
+
+if true then true else if true then true else false""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))

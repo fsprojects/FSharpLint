@@ -223,11 +223,23 @@ module HintMatcher =
                     matchTuple arguments (expr, hint)
                 | Expression.List(_) ->
                     matchList arguments (expr, hint)
+                | Expression.If(_) ->
+                    matchIf arguments (expr, hint)
 
         and private doExpressionsMatch expressions hintExpressions arguments =  
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions)
                     ||> List.forall2 (fun x y -> matchHintExpr arguments (x, y))
+
+        and private matchIf arguments (expr, hint) =
+            match (expr, hint) with
+                | SynExpr.IfThenElse(cond, expr, None, _, _, _, _), Expression.If(hintCond, hintExpr, None) -> 
+                    matchHintExpr arguments (cond, hintCond) && matchHintExpr arguments (expr, hintExpr)
+                | SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _), Expression.If(hintCond, hintExpr, Some(hintElseExpr)) -> 
+                    matchHintExpr arguments (cond, hintCond) &&
+                    matchHintExpr arguments (expr, hintExpr) &&
+                    matchHintExpr arguments (elseExpr, hintElseExpr)
+                | _ -> false
 
         and private matchFunctionApplication arguments (expr, hint) =
             match (expr, hint) with
@@ -331,6 +343,7 @@ module HintMatcher =
                     matchList (pattern, hint)
                 | Expression.FunctionApplication(_)
                 | Expression.Lambda(_)
+                | Expression.If(_)
                 | Expression.InfixOperator(_)
                 | Expression.PrefixOperator(_) ->
                     false
@@ -372,8 +385,21 @@ module HintMatcher =
                 | _ -> false
 
         and private matchAndPattern (pattern, hint) =
+            let rec matchAndPatterns = function 
+                | rightPattern::patterns, Expression.InfixOperator(
+                                                                    "&", 
+                                                                    (Expression.InfixOperator("&", _, _) as left), 
+                                                                    right) -> 
+                    matchHintPattern (rightPattern, right) && matchAndPatterns (patterns, left)
+                | rightPattern::leftPattern::_ & _::patterns, Expression.InfixOperator("&", left, right) -> 
+                    let isMatch = matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
+
+                    isMatch || matchAndPatterns (patterns, hint)
+                | _ -> false
+
             match pattern with
-                | SynPat.Ands(patterns, _) -> false
+                | SynPat.Ands(patterns, _) -> 
+                    matchAndPatterns (List.rev patterns, hint)
                 | _ -> false
 
     /// Gets a list of hints from the config file.
@@ -467,6 +493,11 @@ module HintMatcher =
             expressions |> surroundExpressionsString hintToString "(" ")" ","
         | Expression.List(expressions) ->
             expressions |> surroundExpressionsString hintToString "[" "]" ";"
+        | Expression.If(cond, expr, None) ->
+            "if " + hintToString cond + " then " + hintToString expr
+        | Expression.If(cond, expr, Some(elseExpr)) ->
+            "if " + hintToString cond + " then " + hintToString expr +
+            " else " + hintToString elseExpr
 
     let hintError hint visitorInfo range =
         let matched = hintToString hint.Match

@@ -67,6 +67,7 @@ module HintParser =
         | Lambda of Lambda<Expression>
         | Tuple of Expression list
         | List of Expression list
+        | If of Expression * Expression * Expression option
 
     type Hint =
         {
@@ -476,6 +477,16 @@ module HintParser =
 
         let pparentheses = skipChar '(' >>. pexpression .>> skipChar ')' |>> Expression.Parentheses
 
+        let pif =
+            skipString "if"
+                >>. spaces
+                >>. pexpression
+                .>> spaces
+                .>> skipString "then"
+                .>>. pexpression
+                .>>. opt (skipString "else" >>. pexpression)
+                |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr)
+
         let ptuple = 
             skipChar '(' 
                 >>. pexpression
@@ -540,6 +551,18 @@ module HintParser =
                 .>>. sepEndBy1 papplication spaces
                 |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
 
+        let ppattern =
+            choice 
+                [
+                    attempt Constants.pconstant
+                    attempt pvariable
+                    attempt pwildcard
+                    attempt Identifiers.plongidentorop |>> Expression.Identifier
+                    attempt ptuple
+                    attempt plist
+                    pparentheses
+                ]
+
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
         let prefixoperatorterm = 
@@ -549,6 +572,7 @@ module HintParser =
             spaces >>.
             choice 
                 [
+                    attempt pif
                     attempt Constants.pconstant
                     attempt plambda
                     attempt pvariable
@@ -583,8 +607,10 @@ module HintParser =
         do
             addInfixOperator ":="  3 Associativity.Right
 
-            addInfixOperator "or"  5 Associativity.Left
-            addInfixOperator "||"  5 Associativity.Left
+            addInfixOperator "or"  4 Associativity.Left
+            addInfixOperator "||"  4 Associativity.Left
+
+            addInfixOperator "|"  5 Associativity.Left
 
             addInfixOperator "&"  6 Associativity.Left
             addInfixOperator "&&"  6 Associativity.Left
@@ -592,7 +618,6 @@ module HintParser =
             addInfixOperator "<"  7 Associativity.Left
             addInfixOperator ">"  7 Associativity.Left
             addInfixOperator "="  7 Associativity.Left
-            addInfixOperator "|"  7 Associativity.Left
             for i in Operators.opchars do
                 if i <> '&' then
                     addInfixOperator ("&" + i.ToString())  7 Associativity.Left

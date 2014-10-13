@@ -595,6 +595,22 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
+    member this.IfStatementHint() = 
+        let expected = 
+            {
+                Match = Expression.If(
+                                        Expression.Variable('x'), 
+                                        Expression.Constant(Constant.Bool(true)), 
+                                        Some(Expression.Constant(Constant.Bool(false)))
+                                     )
+                Suggestion = Expression.Variable('x')
+            }
+            
+        match run phint "if x then true else false ===> x" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
     member this.MultipleFunctionApplicationsHint() = 
         let expected = 
             {
