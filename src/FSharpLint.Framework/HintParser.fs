@@ -551,18 +551,6 @@ module HintParser =
                 .>>. sepEndBy1 papplication spaces
                 |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
 
-        let ppattern =
-            choice 
-                [
-                    attempt Constants.pconstant
-                    attempt pvariable
-                    attempt pwildcard
-                    attempt Identifiers.plongidentorop |>> Expression.Identifier
-                    attempt ptuple
-                    attempt plist
-                    pparentheses
-                ]
-
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
         let prefixoperatorterm = 
