@@ -553,6 +553,31 @@ type TestHintParser() =
         match run Expressions.plist "[  ]" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
             | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.Array() = 
+        let expected = Expression.Array([Expression.Variable('x');Expression.Variable('y')])
+
+        match run Expressions.parray "[|x; y|]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.EmptyArray() = 
+        let expected = Expression.Array([])
+
+        match run Expressions.parray "[||]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+           
+    [<Test>]
+    member this.EmptyArrayWithWhitespace() = 
+        let expected = 
+            Expression.Array([])
+
+        match run Expressions.parray "[|  |]" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
     member this.TupleHint() = 
@@ -584,7 +609,7 @@ type TestHintParser() =
             
     [<Test>]
     member this.ListHint() = 
-        let expected = 
+        let expected =
             {
                 Match = Expression.InfixOperator("::", Expression.Variable('x'), Expression.List([]))
                 Suggestion = Expression.List([Expression.Variable('x')])
@@ -595,12 +620,24 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
-    member this.IfStatementHint() = 
-        let expected = 
+    member this.ArrayHint() = 
+        let expected =
+            {
+                Match = Expression.Array([Expression.Variable('x')])
+                Suggestion = Expression.Variable('x')
+            }
+            
+        match run phint "[|x|] ===> x" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+            
+    [<Test>]
+    member this.IfStatementHint() =
+        let expected =
             {
                 Match = Expression.If(
-                                        Expression.Variable('x'), 
-                                        Expression.Constant(Constant.Bool(true)), 
+                                        Expression.Variable('x'),
+                                        Expression.Constant(Constant.Bool(true)),
                                         Some(Expression.Constant(Constant.Bool(false)))
                                      )
                 Suggestion = Expression.Variable('x')

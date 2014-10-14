@@ -67,6 +67,7 @@ module HintParser =
         | Lambda of Lambda<Expression>
         | Tuple of Expression list
         | List of Expression list
+        | Array of Expression list
         | If of Expression * Expression * Expression option
 
     type Hint =
@@ -503,6 +504,14 @@ module HintParser =
                 .>> skipChar ']'
                 |>> Expression.List
 
+        let parray = 
+            skipString "[|"
+                >>. spaces
+                >>. sepEndBy pexpression (skipChar ';')
+                .>> spaces
+                .>> skipString "|]"
+                |>> Expression.Array
+
         let private plambdastart = 
             skipString "fun"
                 >>. spaces1
@@ -541,6 +550,7 @@ module HintParser =
                     attempt Identifiers.plongidentorop |>> Expression.Identifier
                     attempt ptuple
                     attempt plist
+                    attempt parray
                     attempt pparentheses
                 ]
 
@@ -569,6 +579,7 @@ module HintParser =
                     attempt Identifiers.plongidentorop |>> Expression.Identifier
                     attempt ptuple
                     attempt plist
+                    attempt parray
                     attempt pparentheses
                     prefixoperatorterm
                 ] .>> spaces
@@ -578,6 +589,8 @@ module HintParser =
             let remainingOpChars_ws = 
                 if prefix = "=" then
                     notFollowedBy (pstring "==>") |>> fun _ -> ""
+                else if prefix = "|" then
+                    notFollowedBy (pstring "]") |>> fun _ -> ""
                 else
                     manySatisfy (isAnyOf Operators.opchars)
 

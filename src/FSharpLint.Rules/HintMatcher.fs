@@ -223,6 +223,8 @@ module HintMatcher =
                     matchTuple arguments (expr, hint)
                 | Expression.List(_) ->
                     matchList arguments (expr, hint)
+                | Expression.Array(_) ->
+                    matchArray arguments (expr, hint)
                 | Expression.If(_) ->
                     matchIf arguments (expr, hint)
 
@@ -272,6 +274,14 @@ module HintMatcher =
                 | SynExpr.ArrayOrList(false, expressions, _), Expression.List(hintExpressions) ->
                     doExpressionsMatch expressions hintExpressions arguments
                 | SynExpr.ArrayOrListOfSeqExpr(false, SynExpr.CompExpr(true, _, expression, _), _), Expression.List([hintExpression]) ->
+                    matchHintExpr arguments (expression, hintExpression)
+                | _ -> false
+
+        and private matchArray arguments (expr, hint) =
+            match (expr, hint) with
+                | SynExpr.ArrayOrList(true, expressions, _), Expression.Array(hintExpressions) ->
+                    doExpressionsMatch expressions hintExpressions arguments
+                | SynExpr.ArrayOrListOfSeqExpr(true, SynExpr.CompExpr(true, _, expression, _), _), Expression.Array([hintExpression]) ->
                     matchHintExpr arguments (expression, hintExpression)
                 | _ -> false
 
@@ -341,6 +351,8 @@ module HintMatcher =
                     matchTuple (pattern, hint)
                 | Expression.List(_) ->
                     matchList (pattern, hint)
+                | Expression.Array(_) ->
+                    matchArray (pattern, hint)
                 | Expression.FunctionApplication(_)
                 | Expression.Lambda(_)
                 | Expression.If(_)
@@ -356,6 +368,12 @@ module HintMatcher =
         and private matchList (pattern, hint) =
             match (pattern, hint) with
                 | SynPat.ArrayOrList(false, patterns, _), Expression.List(hintExpressions) ->
+                    doPatternsMatch patterns hintExpressions
+                | _ -> false
+
+        and private matchArray (pattern, hint) =
+            match (pattern, hint) with
+                | SynPat.ArrayOrList(true, patterns, _), Expression.Array(hintExpressions) ->
                     doPatternsMatch patterns hintExpressions
                 | _ -> false
 
@@ -493,6 +511,8 @@ module HintMatcher =
             expressions |> surroundExpressionsString hintToString "(" ")" ","
         | Expression.List(expressions) ->
             expressions |> surroundExpressionsString hintToString "[" "]" ";"
+        | Expression.Array(expressions) ->
+            expressions |> surroundExpressionsString hintToString "[|" "|]" ";"
         | Expression.If(cond, expr, None) ->
             "if " + hintToString cond + " then " + hintToString expr
         | Expression.If(cond, expr, Some(elseExpr)) ->

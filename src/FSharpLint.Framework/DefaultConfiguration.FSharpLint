@@ -13,6 +13,29 @@
                 not (a >= b) ===> a <  b
                 not (a <  b) ===> a >= b
                 not (a <= b) ===> a >  b
+                compare x y <> 1 ===> x <= y
+                compare x y = -1 ===> x < y
+                compare x y <> -1 ===> x >= y
+                compare x y = 1 ===> x > y
+                
+                List.head (List.sort x) ===> List.min x
+                List.head (List.sortBy f x) ===> List.minBy f x
+                
+                List.map f (List.map g x) ===> List.map (f >> g) x
+                List.nth x 0 ===> List.head x
+                List.map f (List.replicate n x) ===> List.replicate n (f x)
+                List.rev (List.rev x) ===> x
+                List.fold (@) [] ===> List.concat
+                List.map id ===> id
+                (List.length x) = 0 ===> List.isEmpty x
+                x = [] ===> List.isEmpty x
+                (List.length x) <> 0 ===> not (List.isEmpty x)
+                (List.length x) > 0 ===> not (List.isEmpty x)
+                
+                List.isEmpty (List.filter f x) ===> not (List.exists f x)
+                not (List.isEmpty (List.filter f x)) ===> List.exists f x
+                
+                List.length x >= 0 ===> true                
                 
                 x = true ===> x
                 x = false ===> not x
@@ -22,16 +45,46 @@
                 a <> false ===> a
                 true <> a ===> not a
                 false <> a ===> a
+                if a then true else false ===> a
+                if a then false else true ===> not a
+                not (not x) ===> x
                 
+                (fst x, snd x) ===> x
+                
+                true && x ===> x
+                false && x ===> false
+                true || x ===> true
+                false || x ===> x
                 not true ===> false
                 not false ===> true
+                fst (x, y) ===> x
+                snd (x, y) ===> y
+                List.isEmpty [] ===> true
+                List.fold f x [] ===> x
+                List.foldBack f x [] ===> x
+                x - 0 ===> x
+                x * 1 ===> x
+                x / 1 ===> x
                 
                 List.fold (+) 0 ===> List.sum
+                Array.fold (+) 0 ===> Array.sum
                 
-                List.head (List.sort x) ===> List.min x
+                List.empty ===> []
                 
+                x::[] ===> [x]
+                
+                x @ [] ===> x
+                
+                List.isEmpty [] ===> true
+                Array.isEmpty [||] ===> true
+                
+                (Array.length x) = 0 ===> Array.isEmpty x
+                
+                fun _ -> () ===> ignore
                 fun x -> x ===> id
                 id x ===> x
+                id >> f ===> f
+                f >> id ===> f
               ]]>
             </Property>
           </RuleSettings>
@@ -41,7 +94,7 @@
         <Property name="Enabled">True</Property>
       </AnalyserSettings>
     </Analyser>
-    
+
     <Analyser AnalyserId="FSharpLint.NameConventions">
       <Rules>
         <Rule Name="IdentifiersMustNotContainUnderscores">

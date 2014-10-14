@@ -310,6 +310,30 @@ match [] with
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
 
     [<Test>]
+    member this.MatchArrayInPattern() = 
+        let config = generateHintConfig ["[|0; 1; 2|] ===> 0"]
+
+        this.Parse("""
+module Goat
+
+match [] with
+| [|0; 1; 2;|] -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.MatchEmptyArray() = 
+        let config = generateHintConfig ["Array.isEmpty [||] ===> true"]
+
+        this.Parse("""
+module Goat
+
+Array.isEmpty [||]""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
     member this.MatchOrPattern() = 
         let config = generateHintConfig ["[] | [0] ===> []"]
 
@@ -393,5 +417,27 @@ if true then true else false""", config)
 module Goat
 
 if true then true else if true then true else false""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchSingleParamStaticMethod() = 
+        let config = generateHintConfig ["System.String.Copy x ===> x"]
+
+        this.Parse("""
+module Goat
+
+System.String.Copy("dog")""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.MatchMultiParamStaticMethod() = 
+        let config = generateHintConfig ["System.String.Compare(x, y) ===> x"]
+        
+        this.Parse("""
+module Goat
+
+System.String.Compare("dog", "cat")""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
