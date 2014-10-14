@@ -22,20 +22,38 @@
                 List.head (List.sortBy f x) ===> List.minBy f x
                 
                 List.map f (List.map g x) ===> List.map (f >> g) x
+                Array.map f (Array.map g x) ===> Array.map (f >> g) x
+                Seq.map f (Seq.map g x) ===> Seq.map (f >> g) x
                 List.nth x 0 ===> List.head x
                 List.map f (List.replicate n x) ===> List.replicate n (f x)
                 List.rev (List.rev x) ===> x
+                Array.rev (Array.rev x) ===> x
                 List.fold (@) [] ===> List.concat
                 List.map id ===> id
+                Array.map id ===> id
+                Seq.map id ===> id
                 (List.length x) = 0 ===> List.isEmpty x
+                (Array.length x) = 0 ===> Array.isEmpty x
+                (Seq.length x) = 0 ===> Seq.isEmpty x
                 x = [] ===> List.isEmpty x
+                x = [||] ===> Array.isEmpty x
                 (List.length x) <> 0 ===> not (List.isEmpty x)
+                (Array.length x) <> 0 ===> not (Array.isEmpty x)
+                (Seq.length x) <> 0 ===> not (Seq.isEmpty x)
                 (List.length x) > 0 ===> not (List.isEmpty x)
+                (Array.length x) <> 0 ===> not (Array.isEmpty x)
+                (Seq.length x) <> 0 ===> not (Seq.isEmpty x)
                 
                 List.isEmpty (List.filter f x) ===> not (List.exists f x)
+                Array.isEmpty (Array.filter f x) ===> not (Array.exists f x)
+                Seq.isEmpty (Seq.filter f x) ===> not (Seq.exists f x)
                 not (List.isEmpty (List.filter f x)) ===> List.exists f x
+                not (Array.isEmpty (Array.filter f x)) ===> Array.exists f x
+                not (Seq.isEmpty (Seq.filter f x)) ===> Seq.exists f x
                 
-                List.length x >= 0 ===> true                
+                List.length x >= 0 ===> true
+                Array.length x >= 0 ===> true
+                Seq.length x >= 0 ===> true
                 
                 x = true ===> x
                 x = false ===> not x
@@ -59,17 +77,20 @@
                 not false ===> true
                 fst (x, y) ===> x
                 snd (x, y) ===> y
-                List.isEmpty [] ===> true
                 List.fold f x [] ===> x
+                Array.fold f x [||] ===> x
                 List.foldBack f x [] ===> x
+                Array.foldBack f x [||] ===> x
                 x - 0 ===> x
                 x * 1 ===> x
                 x / 1 ===> x
                 
                 List.fold (+) 0 ===> List.sum
                 Array.fold (+) 0 ===> Array.sum
+                Seq.fold (+) 0 ===> Seq.sum
                 
                 List.empty ===> []
+                Array.empty ===> [||]
                 
                 x::[] ===> [x]
                 
@@ -77,8 +98,6 @@
                 
                 List.isEmpty [] ===> true
                 Array.isEmpty [||] ===> true
-                
-                (Array.length x) = 0 ===> Array.isEmpty x
                 
                 fun _ -> () ===> ignore
                 fun x -> x ===> id
