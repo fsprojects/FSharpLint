@@ -46,6 +46,14 @@ module Binding =
             if findWildAndIgnoreParens pattern then
                 visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
 
+
+    let checkForWildcardNamedWithAsPattern visitorInfo pattern =
+        if "WildcardNamedWithAsPattern" |> isRuleEnabled visitorInfo.Config then
+            match pattern with
+                | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
+                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
+                | _ -> ()
+
     let checkForUselessBinding visitorInfo pattern expr range =
         if "UselessBinding" |> isRuleEnabled visitorInfo.Config then
             let rec findBindingIdentifier = function
@@ -69,6 +77,8 @@ module Binding =
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expr, range, _)) -> 
                 checkForBindingToAWildcard visitorInfo pattern range
                 checkForUselessBinding visitorInfo pattern expr range
+            | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
+                checkForWildcardNamedWithAsPattern visitorInfo pattern
             | _ -> ()
 
         Continue

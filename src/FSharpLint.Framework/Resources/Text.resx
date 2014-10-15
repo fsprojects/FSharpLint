@@ -222,6 +222,9 @@
   <data name="RulesUselessBindingError" xml:space="preserve">
     <value>Useless binding.</value>
   </data>
+  <data name="RulesWildcardNamedWithAsPattern" xml:space="preserve">
+    <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` can simply be `x`</value>
+  </data>
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>

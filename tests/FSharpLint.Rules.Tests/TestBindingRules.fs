@@ -40,6 +40,11 @@ let config =
                                     Settings = Map.ofList 
                                         [ ("Enabled", Enabled(true)) ] 
                                 }) 
+                            ("WildcardNamedWithAsPattern", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
                         ]
                     Settings = Map.ofList 
                         [
@@ -109,3 +114,23 @@ let a = 10
 let ((a)) = ((a))"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        
+    [<Test>]
+    member this.WildcardNamedWithAsPattern() = 
+        this.Parse """
+module Program
+
+match [] with
+    | _ as x -> ()"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 6))
+
+    [<Test>]
+    member this.NamedPattern() = 
+        this.Parse """
+module Program
+
+match [] with
+    | x -> ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 6))

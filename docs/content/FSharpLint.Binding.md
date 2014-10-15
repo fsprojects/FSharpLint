@@ -43,3 +43,21 @@ Remove the binding.
 #####Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
+
+####WildcardNamedWithAsPattern
+
+#####Cause
+
+A wildcard is given a name using the as pattern e.g. `match something with | _ as x -> x + y`
+
+#####Rationale
+
+The wildcard and as pattern can be replaced with the identifier the value is to be bound to.
+
+#####How To Fix
+
+Replace the wildcard with the identifier the wildcard is currently being bound to, e.g. change `match something with | _ as x -> x + y` to `match something with | x -> x + y`
+
+#####Rule Settings
+
+`Enabled` - A boolean property that can enable and disable this rule. (Default true)
