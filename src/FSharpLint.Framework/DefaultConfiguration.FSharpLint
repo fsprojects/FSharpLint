@@ -329,6 +329,28 @@
       </Rules>
       <AnalyserSettings />
     </Analyser>
+    <Analyser AnalyserId="FSharpLint.RaiseWithTooManyArguments">
+      <Rules>
+        <Rule Name="FailwithWithSingleArgument">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="RaiseWithSingleArgument">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FailwithfWithArgumentsMatchingFormatString">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyserSettings>
+        <Property name="Enabled">True</Property>
+      </AnalyserSettings>
+    </Analyser>
     <Analyser AnalyserId="FSharpLint.Binding">
       <Rules>
         <Rule Name="FavourIgnoreOverLetWild">
