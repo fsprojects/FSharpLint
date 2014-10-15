@@ -57,6 +57,7 @@
     <EmbeddedResource Include="Resources\Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <Compile Include="ExpressionUtilities.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

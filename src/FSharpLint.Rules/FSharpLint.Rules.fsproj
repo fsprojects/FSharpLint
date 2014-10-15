@@ -56,6 +56,7 @@
     <Compile Include="HintMatcher.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
+    <Compile Include="RaiseWithTooManyArguments.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

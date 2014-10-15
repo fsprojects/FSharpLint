@@ -57,6 +57,7 @@
     <Compile Include="TestHintMatcher.fs" />
     <None Include="packages.config" />
     <None Include="App.config" />
+    <Compile Include="TestRaiseWithTooManyArgumentsRules.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
