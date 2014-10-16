@@ -44,6 +44,42 @@ Remove the extra arguments.
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
+####NullArgWithSingleArgument
+
+#####Cause
+
+`nullArg` is passed more than one argument e.g. `nullArg "Divisor cannot be zero." 5`
+
+#####Rationale
+
+`nullArg` being passed more than one argument (the error message) is probably a mistake.
+
+#####How To Fix
+
+Remove the extra arguments.
+
+#####Rule Settings
+
+`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+
+####InvalidOpWithSingleArgument
+
+#####Cause
+
+`invalidOp` is passed more than one argument e.g. `invalidOp "Divisor cannot be zero." 5`
+
+#####Rationale
+
+`invalidOp` being passed more than one argument (the error message) is probably a mistake.
+
+#####How To Fix
+
+Remove the extra arguments.
+
+#####Rule Settings
+
+`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+
 ####FailwithfWithArgumentsMatchingFormatString
 
 #####Cause
@@ -53,6 +89,24 @@ Remove the extra arguments.
 #####Rationale
 
 `failwithf` being passed more arguments than the format string (first argument) specifies is probably a mistake.
+
+#####How To Fix
+
+Remove the extra arguments.
+
+#####Rule Settings
+
+`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+
+####InvalidArgWithTwoArguments
+
+#####Cause
+
+`invalidArg` is passed more than two arguments e.g. `invalidArg "month" "Expected value between 1 and 12"`
+
+#####Rationale
+
+`invalidArg` being passed more than two arguments is probably a mistake.
 
 #####How To Fix
 

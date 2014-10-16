@@ -237,8 +237,8 @@
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>
-  <data name="RulesInvalidArgWithArgumentsMatchingFormatString" xml:space="preserve">
-    <value>Expected invalidArg's arguments to match the format string (there were too many arguments).</value>
+  <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
+    <value>Expected invalidArg to have two arguments.</value>
   </data>
   <data name="RulesInvalidOpWithSingleArgument" xml:space="preserve">
     <value>Expected invalidOp to have a single argument.</value>

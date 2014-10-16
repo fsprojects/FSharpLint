@@ -341,7 +341,22 @@
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
+        <Rule Name="NullArgWithSingleArgument">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="InvalidOpWithSingleArgument">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
         <Rule Name="FailwithfWithArgumentsMatchingFormatString">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="InvalidArgWithTwoArguments">
           <RuleSettings>
             <Property name="Enabled">True</Property>
           </RuleSettings>

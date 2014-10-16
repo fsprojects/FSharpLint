@@ -50,7 +50,7 @@ let config =
                                     Settings = Map.ofList 
                                         [ ("Enabled", Enabled(true)) ] 
                                 }) 
-                            ("InvalidArgWithArgumentsMatchingFormatString", 
+                            ("InvalidArgWithTwoArguments", 
                                 { 
                                     Settings = Map.ofList 
                                         [ ("Enabled", Enabled(true)) ] 
@@ -194,7 +194,7 @@ invalidOp "" "" """
         this.Parse """
 module Program
 
-invalidArg "%d %s" 4 "dog" """
+invalidArg "month" "Expected value to be between 1 and 12" """
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -203,6 +203,6 @@ invalidArg "%d %s" 4 "dog" """
         this.Parse """
 module Program
 
-invalidArg "%d %s" 4 "dog" 5 """
+invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))

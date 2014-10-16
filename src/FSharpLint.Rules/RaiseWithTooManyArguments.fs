@@ -35,16 +35,16 @@ module RaiseWithTooManyArguments =
             | Some(_) -> true
             | None -> false
 
-    let private raiseFunctionHasTooManyArgs identifier = function
-        | SynExpr.Ident(ident)::arguments when List.length arguments > 1 && ident.idText = identifier ->
-            true
-        | _ -> false
+    let (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
+        | SynExpr.Ident(ident)::arguments when List.length arguments > maxArgs && ident.idText = identifier ->
+            Some()
+        | _ -> None
 
-    let private raiseFunctionWithFormatStringHasTooManyArgs identifier = function
+    let (|RaiseWithFormatStringTooManyArgs|_|) identifier = function
         | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _), _)::arguments 
             when ident.idText = identifier && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
-                true
-        | _ -> false
+                Some()
+        | _ -> None
 
     type private DoesHaveFormatString =
         | HasFormatString
@@ -53,23 +53,12 @@ module RaiseWithTooManyArguments =
     type private CheckFunctionInfo =
         {
             RuleName: string
-            FunctionIdentifier: string
             ResourceStringName: string
-            FlattenedExpression: SynExpr list
             Range: range
-            DoesHaveFormatString: DoesHaveFormatString
         }
 
-    let private checkFunction visitorInfo checkFunctionInfo =
+    let private checkFunction visitorInfo checkFunctionInfo hasTooManyArguments =
         let ruleIsEnabled = checkFunctionInfo.RuleName |> isRuleEnabled visitorInfo.Config
-
-        let hasTooManyArguments () =
-            let checkArguments = 
-                match checkFunctionInfo.DoesHaveFormatString with
-                    | HasFormatString -> raiseFunctionWithFormatStringHasTooManyArgs
-                    | NoFormatString -> raiseFunctionHasTooManyArgs
-
-            checkArguments checkFunctionInfo.FunctionIdentifier checkFunctionInfo.FlattenedExpression
 
         if ruleIsEnabled && hasTooManyArguments() then
             let error = FSharpLint.Framework.Resources.GetString checkFunctionInfo.ResourceStringName
@@ -77,70 +66,82 @@ module RaiseWithTooManyArguments =
             visitorInfo.PostError checkFunctionInfo.Range error
 
     let checkFailwith visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithTooManyArgs "failwith" 1 -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
                 RuleName = "FailwithWithSingleArgument"
-                FunctionIdentifier = "failwith"
                 ResourceStringName = "RulesFailwithWithSingleArgument"
-                FlattenedExpression = flattenedExpression
                 Range = range
-                DoesHaveFormatString = NoFormatString
-            }
+            } hasTooManyArguments
 
     let checkRange visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithTooManyArgs "raise" 1 -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
                 RuleName = "RaiseWithSingleArgument"
-                FunctionIdentifier = "raise"
                 ResourceStringName = "RulesRaiseWithSingleArgument"
-                FlattenedExpression = flattenedExpression
                 Range = range
-                DoesHaveFormatString = NoFormatString
-            }
+            } hasTooManyArguments
 
     let checkNullArg visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithTooManyArgs "nullArg" 1 -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
                 RuleName = "NullArgWithSingleArgument"
-                FunctionIdentifier = "nullArg"
                 ResourceStringName = "RulesNullArgWithSingleArgument"
-                FlattenedExpression = flattenedExpression
                 Range = range
-                DoesHaveFormatString = NoFormatString
-            }
+            } hasTooManyArguments
 
     let checkInvalidOp visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithTooManyArgs "invalidOp" 1 -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
                 RuleName = "InvalidOpWithSingleArgument"
-                FunctionIdentifier = "invalidOp"
                 ResourceStringName = "RulesInvalidOpWithSingleArgument"
-                FlattenedExpression = flattenedExpression
                 Range = range
-                DoesHaveFormatString = NoFormatString
-            }
+            } hasTooManyArguments
 
     let checkInvalidArg visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithTooManyArgs "invalidArg" 2 -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
-                RuleName = "InvalidArgWithArgumentsMatchingFormatString"
-                FunctionIdentifier = "invalidArg"
-                ResourceStringName = "RulesInvalidArgWithArgumentsMatchingFormatString"
-                FlattenedExpression = flattenedExpression
+                RuleName = "InvalidArgWithTwoArguments"
+                ResourceStringName = "RulesInvalidArgWithTwoArguments"
                 Range = range
-                DoesHaveFormatString = HasFormatString
-            }
+            } hasTooManyArguments
 
     let checkFailwithf visitorInfo flattenedExpression range =
+        let hasTooManyArguments () =
+            match flattenedExpression with
+                | RaiseWithFormatStringTooManyArgs "failwithf" -> true
+                | _ -> false
+
         checkFunction visitorInfo 
             {
                 RuleName = "FailwithfWithArgumentsMatchingFormatString"
-                FunctionIdentifier = "failwithf"
                 ResourceStringName = "RulesFailwithfWithArgumentsMatchingFormatString"
-                FlattenedExpression = flattenedExpression
                 Range = range
-                DoesHaveFormatString = HasFormatString
-            }
+            } hasTooManyArguments
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
