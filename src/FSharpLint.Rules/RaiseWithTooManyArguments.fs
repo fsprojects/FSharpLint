@@ -35,36 +35,124 @@ module RaiseWithTooManyArguments =
             | Some(_) -> true
             | None -> false
 
+    let private raiseFunctionHasTooManyArgs identifier = function
+        | SynExpr.Ident(ident)::arguments when List.length arguments > 1 && ident.idText = identifier ->
+            true
+        | _ -> false
+
+    let private raiseFunctionWithFormatStringHasTooManyArgs identifier = function
+        | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _), _)::arguments 
+            when ident.idText = identifier && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
+                true
+        | _ -> false
+
+    type private DoesHaveFormatString =
+        | HasFormatString
+        | NoFormatString
+
+    type private CheckFunctionInfo =
+        {
+            RuleName: string
+            FunctionIdentifier: string
+            ResourceStringName: string
+            FlattenedExpression: SynExpr list
+            Range: range
+            DoesHaveFormatString: DoesHaveFormatString
+        }
+
+    let private checkFunction visitorInfo checkFunctionInfo =
+        let ruleIsEnabled = checkFunctionInfo.RuleName |> isRuleEnabled visitorInfo.Config
+
+        let hasTooManyArguments () =
+            let checkArguments = 
+                match checkFunctionInfo.DoesHaveFormatString with
+                    | HasFormatString -> raiseFunctionWithFormatStringHasTooManyArgs
+                    | NoFormatString -> raiseFunctionHasTooManyArgs
+
+            checkArguments checkFunctionInfo.FunctionIdentifier checkFunctionInfo.FlattenedExpression
+
+        if ruleIsEnabled && hasTooManyArguments() then
+            let error = FSharpLint.Framework.Resources.GetString checkFunctionInfo.ResourceStringName
+
+            visitorInfo.PostError checkFunctionInfo.Range error
+
     let checkFailwith visitorInfo flattenedExpression range =
-        if "FailwithWithSingleArgument" |> isRuleEnabled visitorInfo.Config then
-            match flattenedExpression with
-                | SynExpr.Ident(ident)::arguments when List.length arguments > 1 && ident.idText = "failwith" ->
-                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFailwithWithSingleArgument"))
-                | _ -> ()
+        checkFunction visitorInfo 
+            {
+                RuleName = "FailwithWithSingleArgument"
+                FunctionIdentifier = "failwith"
+                ResourceStringName = "RulesFailwithWithSingleArgument"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = NoFormatString
+            }
 
     let checkRange visitorInfo flattenedExpression range =
-        if "RaiseWithSingleArgument" |> isRuleEnabled visitorInfo.Config then
-            match flattenedExpression with
-                | SynExpr.Ident(ident)::arguments when List.length arguments > 1 && ident.idText = "raise" ->
-                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesRaiseWithSingleArgument"))
-                | _ -> ()
+        checkFunction visitorInfo 
+            {
+                RuleName = "RaiseWithSingleArgument"
+                FunctionIdentifier = "raise"
+                ResourceStringName = "RulesRaiseWithSingleArgument"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = NoFormatString
+            }
+
+    let checkNullArg visitorInfo flattenedExpression range =
+        checkFunction visitorInfo 
+            {
+                RuleName = "NullArgWithSingleArgument"
+                FunctionIdentifier = "nullArg"
+                ResourceStringName = "RulesNullArgWithSingleArgument"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = NoFormatString
+            }
+
+    let checkInvalidOp visitorInfo flattenedExpression range =
+        checkFunction visitorInfo 
+            {
+                RuleName = "InvalidOpWithSingleArgument"
+                FunctionIdentifier = "invalidOp"
+                ResourceStringName = "RulesInvalidOpWithSingleArgument"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = NoFormatString
+            }
+
+    let checkInvalidArg visitorInfo flattenedExpression range =
+        checkFunction visitorInfo 
+            {
+                RuleName = "InvalidArgWithArgumentsMatchingFormatString"
+                FunctionIdentifier = "invalidArg"
+                ResourceStringName = "RulesInvalidArgWithArgumentsMatchingFormatString"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = HasFormatString
+            }
 
     let checkFailwithf visitorInfo flattenedExpression range =
-        if "FailwithfWithArgumentsMatchingFormatString" |> isRuleEnabled visitorInfo.Config then
-            match flattenedExpression with
-                | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _), _)::arguments 
-                    when ident.idText = "failwithf" && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFailwithfWithArgumentsMatchingFormatString"))
-                | _ -> ()
+        checkFunction visitorInfo 
+            {
+                RuleName = "FailwithfWithArgumentsMatchingFormatString"
+                FunctionIdentifier = "failwithf"
+                ResourceStringName = "RulesFailwithfWithArgumentsMatchingFormatString"
+                FlattenedExpression = flattenedExpression
+                Range = range
+                DoesHaveFormatString = HasFormatString
+            }
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.Expression(SynExpr.App(_, _, _, _, range) as expr) -> 
                 let flattenedExpression = FSharpLint.Framework.ExpressionUtilities.flattenFunctionApplication expr
-
+                
                 checkFailwith visitorInfo flattenedExpression range
-                checkFailwithf visitorInfo flattenedExpression range
                 checkRange visitorInfo flattenedExpression range
+                checkNullArg visitorInfo flattenedExpression range
+                checkInvalidOp visitorInfo flattenedExpression range
+                checkInvalidArg visitorInfo flattenedExpression range
+                checkFailwithf visitorInfo flattenedExpression range
             | _ -> ()
 
         Continue

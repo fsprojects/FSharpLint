@@ -6,8 +6,8 @@
     <authors>@authors@</authors>
     <owners>@authors@</owners>
     <summary>@summary@</summary>
-    <licenseUrl>https://github.com/duckmatt/FSharpLint/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/duckmatt/FSharpLint/</projectUrl>
+    <licenseUrl>https://github.com/fsprojects/FSharpLint/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/fsprojects/FSharpLint/</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/fsprojects/FSharpLint/master/docs/files/img/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>@description@</description>

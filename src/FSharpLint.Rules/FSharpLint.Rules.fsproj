@@ -54,9 +54,9 @@
     <Compile Include="FunctionReimplementation.fs" />
     <Compile Include="CyclomaticComplexity.fs" />
     <Compile Include="HintMatcher.fs" />
+    <Compile Include="RaiseWithTooManyArguments.fs" />
     <None Include="README.md" />
     <None Include="packages.config" />
-    <Compile Include="RaiseWithTooManyArguments.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

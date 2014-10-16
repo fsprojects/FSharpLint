@@ -40,6 +40,21 @@ let config =
                                     Settings = Map.ofList 
                                         [ ("Enabled", Enabled(true)) ] 
                                 }) 
+                            ("NullArgWithSingleArgument", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
+                            ("InvalidOpWithSingleArgument", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
+                            ("InvalidArgWithArgumentsMatchingFormatString", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
                             ("FailwithfWithArgumentsMatchingFormatString", 
                                 { 
                                     Settings = Map.ofList 
@@ -135,5 +150,59 @@ failwithf "%d %s" 4 "dog" 5 """
 module Program
 
 failwithf "%d %% %s" 4 "dog" 5 """
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.NullArgWithCorrectNumberOfArguments() = 
+        this.Parse """
+module Program
+
+nullArg "" """
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.NullArgWithExtraArgument() = 
+        this.Parse """
+module Program
+
+nullArg "" "" """
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.InvalidOpWithCorrectNumberOfArguments() = 
+        this.Parse """
+module Program
+
+invalidOp "" """
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.InvalidOpWithExtraArgument() = 
+        this.Parse """
+module Program
+
+invalidOp "" "" """
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.InvalidArgWithCorrectNumberOfArguments() = 
+        this.Parse """
+module Program
+
+invalidArg "%d %s" 4 "dog" """
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.InvalidArgWithExtraArgument() = 
+        this.Parse """
+module Program
+
+invalidArg "%d %s" 4 "dog" 5 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))

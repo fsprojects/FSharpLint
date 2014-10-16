@@ -55,9 +55,9 @@
     <Compile Include="TestFunctionReimplementationRules.fs" />
     <Compile Include="TestCyclomaticComplexity.fs" />
     <Compile Include="TestHintMatcher.fs" />
+    <Compile Include="TestRaiseWithTooManyArgumentsRules.fs" />
     <None Include="packages.config" />
     <None Include="App.config" />
-    <Compile Include="TestRaiseWithTooManyArgumentsRules.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

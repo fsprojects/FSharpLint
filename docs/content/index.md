@@ -96,6 +96,7 @@ The tool can be run from the command line, or as an MSBuild task.
 * [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.html)
 * [FSharpLint.Binding](FSharpLint.Binding.html)
 * [FSharpLint.CyclomaticComplexity](FSharpLint.CyclomaticComplexity.html)
+* [FSharpLint.RaiseWithTooManyArguments](FSharpLint.RaiseWithTooManyArguments.html)
 
 Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
 
