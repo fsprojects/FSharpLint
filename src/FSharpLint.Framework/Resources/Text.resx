@@ -162,6 +162,12 @@
   <data name="RulesCyclomaticComplexityError" xml:space="preserve">
     <value>Binding with cyclomatic complexity of {0} found, expecting bindings to have a cyclomatic complexity of less than {1}.</value>
   </data>
+  <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
+    <value>Expected failwithf's arguments to match the format string (there were too many arguments).</value>
+  </data>
+  <data name="RulesFailwithWithSingleArgument" xml:space="preserve">
+    <value>Expected failwith to have a single argument.</value>
+  </data>
   <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
     <value>Favour using the ignore function rather than let _ = ...</value>
   </data>
@@ -201,6 +207,9 @@
   <data name="RulesNumberOfItemsTupleError" xml:space="preserve">
     <value>Tuple should have a maximum of {0} items</value>
   </data>
+  <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
+    <value>Expected raise to have a single argument.</value>
+  </data>
   <data name="RulesSourceLengthError" xml:space="preserve">
     <value>{0}s should be less than {1} lines long, was {2} lines long.</value>
   </data>
@@ -227,5 +236,14 @@
   </data>
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
+  </data>
+  <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
+    <value>Expected invalidArg to have two arguments.</value>
+  </data>
+  <data name="RulesInvalidOpWithSingleArgument" xml:space="preserve">
+    <value>Expected invalidOp to have a single argument.</value>
+  </data>
+  <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
+    <value>Expected nullArg to have a single argument.</value>
   </data>
 </root>

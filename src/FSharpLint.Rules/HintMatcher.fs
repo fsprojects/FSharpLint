@@ -27,6 +27,7 @@ module HintMatcher =
     open FSharpLint.Framework.HintParser
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
+    open FSharpLint.Framework.ExpressionUtilities
 
     [<Literal>]
     let AnalyserName = "FSharpLint.Hints"
@@ -128,13 +129,6 @@ module HintMatcher =
         | SynConst.UInt16s(_)
         | SynConst.Measure(_) -> None
 
-    /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
-    let private identAsDecompiledOpName (ident:Ident) =
-        if ident.idText.StartsWith("op_") then
-            Microsoft.FSharp.Compiler.PrettyNaming.DecompileOpName ident.idText
-        else 
-            ident.idText
-
     module MatchExpression =
 
         let private matchExpr = function
@@ -160,38 +154,6 @@ module HintMatcher =
                 | _ -> None
 
             removeMatchClauses 0
-
-        /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
-        let rec private removeParens = function
-            | SynExpr.Paren(x, _, _, _) -> removeParens x
-            | x -> x
-        
-        let private flattenFunctionApplication expr =
-            let listContains value list = List.exists ((=) value) list
-
-            let isForwardPipeOperator op = ["|>";"||>";"|||>"] |> listContains op
-            let isBackwardPipeOperator op = ["<|";"<||";"<|||"] |> listContains op
-
-            let rec flattenFunctionApplication exprs = function
-                | SynExpr.App(_, _, x, y, _) -> 
-                    match removeParens x with
-                        | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) ->
-                            let opIdent = identAsDecompiledOpName op
-
-                            if isForwardPipeOperator opIdent then
-                                let flattened = flattenFunctionApplication [] y
-                                flattened@[rightExpr]
-                            else if isBackwardPipeOperator opIdent then
-                                let flattened = flattenFunctionApplication [] rightExpr
-                                flattened@[y]
-                            else
-                                flattenFunctionApplication (y::exprs) x
-                        | _ -> 
-                            flattenFunctionApplication (y::exprs) x
-                | x -> 
-                    x::exprs
-
-            flattenFunctionApplication [] expr
 
         let rec matchHintExpr arguments (expr, hint) =
             let expr = removeParens expr
