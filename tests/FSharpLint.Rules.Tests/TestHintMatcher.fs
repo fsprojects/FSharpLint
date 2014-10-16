@@ -441,3 +441,17 @@ module Goat
 System.String.Compare("dog", "cat")""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.NamedParameterShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    static member SomeMethod(foo: bool) = ()
+
+Bar.SomeMethod(foo = true)""", config)
+
+        Assert.IsFalse(this.ErrorExistsAt(7, 15))
