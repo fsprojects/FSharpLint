@@ -454,4 +454,18 @@ type Bar() =
 
 Bar.SomeMethod(foo = true)""", config)
 
-        Assert.IsFalse(this.ErrorExistsAt(7, 15))
+        Assert.IsFalse(this.ErrorExistsOnLine(7))
+
+    [<Test>]
+    member this.PropertyInitShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member val Foo = true with get, set
+
+Bar(Foo = true) |> ignore""", config)
+
+        Assert.IsFalse(this.ErrorExistsOnLine(7))
