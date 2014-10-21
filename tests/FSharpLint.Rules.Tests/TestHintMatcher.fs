@@ -469,3 +469,18 @@ type Bar() =
 Bar(Foo = true) |> ignore""", config)
 
         Assert.IsFalse(this.ErrorExistsOnLine(7))
+
+    [<Test>]
+    member this.PropertyEqualityOperationShouldBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member val Foo = true with get, set
+
+    member this.X() = this.Foo = true""", config)
+
+        Assert.IsTrue(this.ErrorExistsOnLine(7))
+
