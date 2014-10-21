@@ -131,6 +131,18 @@ module HintMatcher =
 
     module MatchExpression =
 
+        type Arguments =
+            {
+                LambdaArguments: Map<char, string>
+                Expression: SynExpr
+                Hint: Expression
+                CheckFileResults: CheckFileResults
+            }
+
+            with 
+                member this.SubHint(expr, hint) =
+                    { this with Expression = expr; Hint = hint }
+
         let private matchExpr = function
             | SynExpr.Ident(ident) -> 
                 let ident = identAsDecompiledOpName ident
@@ -155,14 +167,33 @@ module HintMatcher =
 
             removeMatchClauses 0
 
-        let rec matchHintExpr arguments (expr, hint) =
-            let expr = removeParens expr
+        /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
+        /// or a named parameter in a method call.
+        let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
+            match (leftExpr, opExpr) with 
+                | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
+                    let symbolUse = 
+                        arguments.CheckFileResults.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                            |> Async.RunSynchronously
+                                    
+                    match symbolUse with
+                        | Some(symbolUse) ->
+                            match symbolUse.Symbol with
+                                | :? FSharpParameter -> false
+                                | :? FSharpMemberFunctionOrValue as x -> not x.IsProperty
+                                | _ -> true
+                        | None -> true
+                | _ -> true
 
-            match hint with
-                | Expression.Variable(variable) when arguments |> Map.containsKey variable ->
+        let rec matchHintExpr arguments =
+            let expr = removeParens arguments.Expression
+            let arguments = { arguments with Expression = expr }
+
+            match arguments.Hint with
+                | Expression.Variable(variable) when arguments.LambdaArguments |> Map.containsKey variable ->
                     match expr with
                         | SynExpr.Ident(identifier) 
-                            when identifier.idText = arguments.[variable] -> 
+                            when identifier.idText = arguments.LambdaArguments.[variable] -> 
                                 true
                         | _ -> false
                 | Expression.Variable(_)
@@ -170,110 +201,112 @@ module HintMatcher =
                     true
                 | Expression.Constant(_)
                 | Expression.Identifier(_) ->
-                    matchExpr expr = Some(hint)
+                    matchExpr expr = Some(arguments.Hint)
                 | Expression.FunctionApplication(_) ->
-                    matchFunctionApplication arguments (expr, hint)
+                    matchFunctionApplication arguments
                 | Expression.InfixOperator(_) ->
-                    matchInfixOperation arguments (expr, hint)
+                    matchInfixOperation arguments
                 | Expression.PrefixOperator(_) ->
-                    matchPrefixOperation arguments (expr, hint)
+                    matchPrefixOperation arguments
                 | Expression.Parentheses(hint) -> 
-                    matchHintExpr arguments (expr, hint)
+                    arguments.SubHint(expr, hint) |> matchHintExpr
                 | Expression.Lambda(_) -> 
-                    matchLambda arguments (expr, hint)
+                    matchLambda arguments
                 | Expression.Tuple(_) ->
-                    matchTuple arguments (expr, hint)
+                    matchTuple arguments
                 | Expression.List(_) ->
-                    matchList arguments (expr, hint)
+                    matchList arguments
                 | Expression.Array(_) ->
-                    matchArray arguments (expr, hint)
+                    matchArray arguments
                 | Expression.If(_) ->
-                    matchIf arguments (expr, hint)
+                    matchIf arguments
 
-        and private doExpressionsMatch expressions hintExpressions arguments =  
+        and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =  
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions)
-                    ||> List.forall2 (fun x y -> matchHintExpr arguments (x, y))
+                    ||> List.forall2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
 
-        and private matchIf arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchIf arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.IfThenElse(cond, expr, None, _, _, _, _), Expression.If(hintCond, hintExpr, None) -> 
-                    matchHintExpr arguments (cond, hintCond) && matchHintExpr arguments (expr, hintExpr)
+                    arguments.SubHint(cond, hintCond) |> matchHintExpr &&
+                    arguments.SubHint(expr, hintExpr) |> matchHintExpr
                 | SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _), Expression.If(hintCond, hintExpr, Some(hintElseExpr)) -> 
-                    matchHintExpr arguments (cond, hintCond) &&
-                    matchHintExpr arguments (expr, hintExpr) &&
-                    matchHintExpr arguments (elseExpr, hintElseExpr)
+                    arguments.SubHint(cond, hintCond) |> matchHintExpr &&
+                    arguments.SubHint(expr, hintExpr) |> matchHintExpr &&
+                    arguments.SubHint(elseExpr, hintElseExpr) |> matchHintExpr
                 | _ -> false
 
-        and private matchFunctionApplication arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchFunctionApplication arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.App(_) as application, Expression.FunctionApplication(hintExpressions) -> 
                     let expressions = flattenFunctionApplication application
 
                     doExpressionsMatch expressions hintExpressions arguments
                 | _ -> false
 
-        and private matchLambda arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchLambda arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.Lambda(_) as lambda, Expression.Lambda(lambdaHint) -> 
                     match matchLambdaArguments lambdaHint.Arguments lambda with
-                        | LambdaMatch.Match(bodyExpr, arguments, numberOfWildcards) -> 
+                        | LambdaMatch.Match(bodyExpr, lambdaArguments, numberOfWildcards) -> 
                             match removeAutoGeneratedMatchesFromLambda numberOfWildcards bodyExpr with
                                 | Some(bodyExpr) -> 
-                                    matchHintExpr arguments (bodyExpr, lambdaHint.Body)
+                                    { arguments.SubHint(bodyExpr, lambdaHint.Body) with LambdaArguments = lambdaArguments } |> matchHintExpr
                                 | None -> false
                         | LambdaMatch.NoMatch -> false
                 | _ -> false
 
-        and private matchTuple arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchTuple arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.Tuple(expressions, _, _), Expression.Tuple(hintExpressions) ->
                     doExpressionsMatch expressions hintExpressions arguments
                 | _ -> false
 
-        and private matchList arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchList arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.ArrayOrList(false, expressions, _), Expression.List(hintExpressions) ->
                     doExpressionsMatch expressions hintExpressions arguments
                 | SynExpr.ArrayOrListOfSeqExpr(false, SynExpr.CompExpr(true, _, expression, _), _), Expression.List([hintExpression]) ->
-                    matchHintExpr arguments (expression, hintExpression)
+                    arguments.SubHint(expression, hintExpression) |> matchHintExpr
                 | _ -> false
 
-        and private matchArray arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchArray arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.ArrayOrList(true, expressions, _), Expression.Array(hintExpressions) ->
                     doExpressionsMatch expressions hintExpressions arguments
                 | SynExpr.ArrayOrListOfSeqExpr(true, SynExpr.CompExpr(true, _, expression, _), _), Expression.Array([hintExpression]) ->
-                    matchHintExpr arguments (expression, hintExpression)
+                    arguments.SubHint(expression, hintExpression) |> matchHintExpr
                 | _ -> false
 
-        and private matchInfixOperation arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchInfixOperation arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple([leftExpr; rightExpr], _, _), _), 
                         Expression.InfixOperator(op, left, right) ->
-                    matchHintExpr arguments (opExpr, Expression.Identifier([op])) &&
-                    matchHintExpr arguments (rightExpr, right) &&
-                    matchHintExpr arguments (leftExpr, left)
-                | SynExpr.App(_, _, infixExpr, leftExpr, _) as application, 
+                    arguments.SubHint(opExpr, Expression.Identifier([op])) |> matchHintExpr &&
+                    arguments.SubHint(rightExpr, right) |> matchHintExpr &&
+                    arguments.SubHint(leftExpr, left) |> matchHintExpr
+                | SynExpr.App(_, _, infixExpr, rightExpr, _) as application, 
                         Expression.InfixOperator(op, left, right) -> 
 
                     match removeParens infixExpr with
-                        | SynExpr.App(_, true, opExpr, rightExpr, _) ->
-                            matchHintExpr arguments (opExpr, Expression.Identifier([op])) &&
-                            matchHintExpr arguments (rightExpr, left) &&
-                            matchHintExpr arguments (leftExpr, right)
+                        | SynExpr.App(_, true, opExpr, leftExpr, _) ->
+                            arguments.SubHint(opExpr, Expression.Identifier([op])) |> matchHintExpr &&
+                            arguments.SubHint(leftExpr, left) |> matchHintExpr &&
+                            arguments.SubHint(rightExpr, right) |> matchHintExpr &&
+                            notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr
                         | _ -> false
                 | _ -> false
 
-        and private matchPrefixOperation arguments (expr, hint) =
-            match (expr, hint) with
+        and private matchPrefixOperation arguments =
+            match (arguments.Expression, arguments.Hint) with
                 | SynExpr.App(_, _, opExpr, rightExpr, _) as application, 
                         Expression.PrefixOperator(op, expr) -> 
-                    matchHintExpr arguments (opExpr, Expression.Identifier(["~" + op])) &&
-                    matchHintExpr arguments (rightExpr, expr)
+                    arguments.SubHint(opExpr, Expression.Identifier(["~" + op])) |> matchHintExpr &&
+                    arguments.SubHint(rightExpr, expr) |> matchHintExpr
                 | SynExpr.AddressOf(_, addrExpr, _, _), Expression.PrefixOperator(op, expr) 
                         when op = "&" || op = "&&" ->
-                    matchHintExpr arguments (addrExpr, expr)
+                    arguments.SubHint(addrExpr, expr) |> matchHintExpr
                 | _ -> false
 
     module MatchPattern =
@@ -495,7 +528,15 @@ module HintMatcher =
             match astNode.Node with
                 | AstNode.Expression(expr) -> 
                     for hint in getHints visitorInfo.Config do
-                        if MatchExpression.matchHintExpr (Map.ofList []) (expr, hint.Match) then
+                        let arguments =
+                            {
+                                MatchExpression.LambdaArguments = Map.ofList []
+                                MatchExpression.Expression = expr
+                                MatchExpression.Hint = hint.Match
+                                MatchExpression.CheckFileResults = checkFile
+                            }
+
+                        if MatchExpression.matchHintExpr arguments then
                             hintError hint visitorInfo expr.Range
 
                     Continue
