@@ -228,8 +228,6 @@ module ProjectFile =
                         else
                             let outputAbsolutePath = System.IO.Path.Combine(projectPath, outputProperty.EvaluatedValue)
 
-                            let config = loadConfigForProject projectFile
-
                             match loadConfigForProject projectFile with
                                 | Success(config) ->
                                     match projectInstance.GetItems("Reference") |> resolveReferences projectInstance outputAbsolutePath userSuppliedFSharpCoreDirectory with
