@@ -121,12 +121,14 @@ To override to turn off you'd set enabled to false in your own configuration fil
 	[lang=xml]
     <?xml version="1.0" encoding="utf-8"?>
 	<FSharpLintSettings>
-		<Analyser AnalyserId="FSharpLint.FunctionReimplementation">
-			<Rules />
-			<AnalyserSettings>
-				<Property name="Enabled">False</Property>
-			</AnalyserSettings>
-		</Analyser>
+	    <Analysers>
+			<Analyser AnalyserId="FSharpLint.FunctionReimplementation">
+				<Rules />
+				<AnalyserSettings>
+					<Property name="Enabled">False</Property>
+				</AnalyserSettings>
+			</Analyser>
+		</Analysers>
 	</FSharpLintSettings>
 
 ####Running Lint From An Application
