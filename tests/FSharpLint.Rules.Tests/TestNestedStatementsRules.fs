@@ -59,6 +59,24 @@ let dog =
         Assert.IsTrue(this.ErrorExistsAt(9, 20)) 
 
     [<Test>]
+    member this.NestedTooDeepSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NestedStatements", "*")>]
+let dog =
+    if true then
+        if true then
+            if true then
+                if true then
+                    if true then
+                        if true then
+                            ()
+    ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(10)) 
+
+    [<Test>]
     member this.ElseIfsShouldNotCountAsNested() = 
         this.Parse """
 module Program
