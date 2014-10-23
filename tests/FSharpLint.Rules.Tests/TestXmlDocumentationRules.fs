@@ -57,6 +57,17 @@ exception SomeException of string"""
         Assert.IsTrue(this.ErrorExistsAt(5, 0))
 
     [<Test>]
+    member this.ExceptionWithDoubleDashCommentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.XmlDocumentation", "ExceptionDefinitionHeader")>]
+module Program
+
+// Some exception.
+exception SomeException of string"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(6))
+
+    [<Test>]
     member this.ExceptionWithMultilineComment() = 
         this.Parse """
 module Program

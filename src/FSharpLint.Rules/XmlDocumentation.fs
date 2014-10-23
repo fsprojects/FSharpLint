@@ -48,7 +48,7 @@ module XmlDocumentation =
     let visitor visitorInfo (checkFile:CheckFileResults) astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
-                if configExceptionHeader visitorInfo.Config then
+                if configExceptionHeader visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "ExceptionDefinitionHeader") |> not then
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationExceptionError"))
             | _ -> ()
