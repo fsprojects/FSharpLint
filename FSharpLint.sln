@@ -37,6 +37,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.T
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.MSBuildIntegration", "src\FSharpLint.MSBuildIntegration\FSharpLint.MSBuildIntegration.fsproj", "{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FAKE", "src\FSharpLint.FAKE\FSharpLint.FAKE.fsproj", "{F66EF621-E053-4E68-A35A-56F16FA8697B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F66EF621-E053-4E68-A35A-56F16FA8697B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F66EF621-E053-4E68-A35A-56F16FA8697B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F66EF621-E053-4E68-A35A-56F16FA8697B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F66EF621-E053-4E68-A35A-56F16FA8697B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
