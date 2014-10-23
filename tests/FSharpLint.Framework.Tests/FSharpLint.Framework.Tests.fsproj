@@ -53,6 +53,7 @@
     <Compile Include="TestHintParser.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Compile Include="TestAst.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
