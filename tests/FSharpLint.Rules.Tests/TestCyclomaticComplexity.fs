@@ -69,6 +69,25 @@ let x () =
         this.AssertComplexityOf(3, 5, 4)
 
     [<Test>]
+    member this.CyclomaticComplexityOfFunctionSuppressed() = 
+        this.Parse("""
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.CyclomaticComplexity", "*")>]
+let x () =
+    if true then
+        if true then
+            ()
+        else
+            ()
+    else
+        for i in [] do
+            ()
+""", config true)
+
+        Assert.IsFalse(this.ErrorExistsOnLine(6))
+
+    [<Test>]
     member this.CyclomaticComplexityWithMatchStatement() = 
         this.Parse("""
 module Program

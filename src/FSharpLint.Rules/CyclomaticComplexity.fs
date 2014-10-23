@@ -88,9 +88,9 @@ module CyclomaticComplexity =
                     visitorInfo.PostError range error
                 | _ -> ()
     and 
-        findBindingVisitor visitorInfo checkFile astNode : VisitorResult =
+        findBindingVisitor visitorInfo checkFile (astNode:CurrentNode) : VisitorResult =
             match astNode.Node with
-                | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) ->
+                | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) when astNode.IsSuppressed(AnalyserName) |> not ->
                     let getVisitorForChild _ child =
                         match child with
                             | AstNode.Pattern(_) ->
