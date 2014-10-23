@@ -67,6 +67,16 @@ let _ = ()"""
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
+    member this.LetWildcardUnitValueSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "FavourIgnoreOverLetWild")>]
+let _ = ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.LetWildcardMultilaneStatementOfUnit() = 
         this.Parse """
 module Program
@@ -106,6 +116,17 @@ let a = a"""
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
+    member this.UslessBindingSuppressed() = 
+        this.Parse """
+module Program
+
+let a = 10
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "UselessBinding")>]
+let a = a"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(6))
+
+    [<Test>]
     member this.UslessBindingWithParens() = 
         this.Parse """
 module Program
@@ -124,6 +145,18 @@ match [] with
     | _ as x -> ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 6))
+        
+    [<Test>]
+    member this.WildcardNamedWithAsPatternSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "WildcardNamedWithAsPattern")>]
+let f =
+    match [] with
+        | _ as x -> ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(7))
 
     [<Test>]
     member this.NamedPattern() = 
