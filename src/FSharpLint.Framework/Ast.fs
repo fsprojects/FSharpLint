@@ -121,6 +121,7 @@ module Ast =
         match node with
             | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, _))
             | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, _, _))
+            | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, _))
             | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _)) -> 
                 attributes 
                     |> List.choose tryGetSuppressMessageAttribute

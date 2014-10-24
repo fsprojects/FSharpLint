@@ -81,75 +81,76 @@ module NameConventions =
         [<Literal>]
         let private TypeNamesMustBePascalCase = "TypeNamesMustBePascalCase"
 
-        let private expectNoUnderscore visitorInfo identifier = 
-            if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config then
+        let private expectNoUnderscore visitorInfo (astNode:CurrentNode) identifier = 
+            if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config && 
+               astNode.IsSuppressed(AnalyserName, IdentifiersMustNotContainUnderscores) |> not then
                 expectNoUnderscore visitorInfo.PostError identifier
 
-        let checkNonPublicValue visitorInfo (identifier:Ident) =
+        let checkNonPublicValue visitorInfo (astNode:CurrentNode) (identifier:Ident) =
             if not <| isOperator identifier.idText then
-                if "NonPublicValuesCamelCase" |> isRuleEnabled visitorInfo.Config then
+                if "NonPublicValuesCamelCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "NonPublicValuesCamelCase") |> not then
                     expectCamelCase visitorInfo.PostError identifier
 
-                expectNoUnderscore visitorInfo identifier
+                expectNoUnderscore visitorInfo astNode identifier
 
-        let checkPublicValue visitorInfo (identifier:Ident) =
+        let checkPublicValue visitorInfo (astNode:CurrentNode) (identifier:Ident) =
             if not <| isOperator identifier.idText then
-                expectNoUnderscore visitorInfo identifier
+                expectNoUnderscore visitorInfo astNode identifier
 
-        let checkMember visitorInfo (identifier:Ident) =
+        let checkMember visitorInfo (astNode:CurrentNode) (identifier:Ident) =
             if not <| isOperator identifier.idText then
-                if "MemberNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+                if "MemberNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "MemberNamesMustBePascalCase") |> not then
                     expectPascalCase visitorInfo.PostError identifier
                 
-                expectNoUnderscore visitorInfo identifier
+                expectNoUnderscore visitorInfo astNode identifier
 
-        let checkNamespace visitorInfo identifier =
+        let checkNamespace visitorInfo (astNode:CurrentNode) identifier =
             if "NamespaceNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkLiteral visitorInfo identifier =
-            if "LiteralNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+        let checkLiteral visitorInfo (astNode:CurrentNode) identifier =
+            if "LiteralNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "LiteralNamesMustBePascalCase") |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkModule visitorInfo identifier =
-            if "ModuleNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+        let checkModule visitorInfo (astNode:CurrentNode) identifier =
+            if "ModuleNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "ModuleNamesMustBePascalCase") |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkEnumCase visitorInfo identifier =
-            if "EnumCasesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+        let checkEnumCase visitorInfo (astNode:CurrentNode) identifier =
+            if "EnumCasesMustBePascalCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "EnumCasesMustBePascalCase") |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkUnionCase visitorInfo identifier =
-            expectNoUnderscore visitorInfo identifier
+        let checkUnionCase visitorInfo (astNode:CurrentNode) identifier =
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkRecordField visitorInfo identifier =
-            if "RecordFieldNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config then
+        let checkRecordField visitorInfo (astNode:CurrentNode) identifier =
+            if "RecordFieldNamesMustBePascalCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "RecordFieldNamesMustBePascalCase") |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkTypeName visitorInfo identifier =
-            if TypeNamesMustBePascalCase |> isRuleEnabled visitorInfo.Config then
+        let checkTypeName visitorInfo (astNode:CurrentNode) identifier =
+            if TypeNamesMustBePascalCase |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, TypeNamesMustBePascalCase) |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkParameter visitorInfo identifier =
-            if "ParameterMustBeCamelCase" |> isRuleEnabled visitorInfo.Config then
+        let checkParameter visitorInfo (astNode:CurrentNode) identifier =
+            if "ParameterMustBeCamelCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "ParameterMustBeCamelCase") |> not then
                 expectCamelCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-        let checkActivePattern visitorInfo (identifier:Ident) =
-            if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config then
+        let checkActivePattern visitorInfo (astNode:CurrentNode) (identifier:Ident) =
+            if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, IdentifiersMustNotContainUnderscores) |> not then
                 let error ident =
                     if containsUnderscore ident then
                         let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
@@ -159,24 +160,24 @@ module NameConventions =
                 identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
                     |> Seq.iter error
 
-        let checkException visitorInfo identifier =
-            if TypeNamesMustBePascalCase |> isRuleEnabled visitorInfo.Config then
+        let checkException visitorInfo (astNode:CurrentNode) identifier =
+            if TypeNamesMustBePascalCase |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, TypeNamesMustBePascalCase) |> not then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-            if "ExceptionNamesMustEndWithException" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.EndsWith("Exception") then
+            if "ExceptionNamesMustEndWithException" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.EndsWith("Exception") && astNode.IsSuppressed(AnalyserName, "ExceptionNamesMustEndWithException") |> not then
                 let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsExceptionError")
                 let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError identifier.idRange error
 
-        let checkInterface visitorInfo identifier =
+        let checkInterface visitorInfo (astNode:CurrentNode) identifier =
             if TypeNamesMustBePascalCase |> isRuleEnabled visitorInfo.Config then
                 expectPascalCase visitorInfo.PostError identifier
                 
-            expectNoUnderscore visitorInfo identifier
+            expectNoUnderscore visitorInfo astNode identifier
 
-            if "InterfaceNamesMustBeginWithI" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.StartsWith("I") then
+            if "InterfaceNamesMustBeginWithI" |> isRuleEnabled visitorInfo.Config && not <| identifier.idText.StartsWith("I") && astNode.IsSuppressed(AnalyserName, "InterfaceNamesMustBeginWithI") |> not then
                 let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsInterfaceError")
                 let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError identifier.idRange error
@@ -188,7 +189,7 @@ module NameConventions =
             | _ -> false
         | None -> false
 
-    let checkComponentInfo visitorInfo (checkFile:CheckFileResults) (identifier:LongIdent) =
+    let checkComponentInfo visitorInfo astNode (checkFile:CheckFileResults) (identifier:LongIdent) =
         let interfaceIdentifier = identifier.[List.length identifier - 1]
         let interfaceRange = interfaceIdentifier.idRange
 
@@ -208,9 +209,9 @@ module NameConventions =
             | None -> false
                 
         if isSymbolAnInterface symbol then 
-            CheckIdentifiers.checkInterface visitorInfo interfaceIdentifier
+            CheckIdentifiers.checkInterface visitorInfo astNode interfaceIdentifier
         else if not <| isSymbolAnExtensionType symbol then
-            identifier |> List.iter (CheckIdentifiers.checkTypeName visitorInfo)
+            identifier |> List.iter (CheckIdentifiers.checkTypeName visitorInfo astNode)
             
     let isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
@@ -246,53 +247,53 @@ module NameConventions =
         match astNode.Node with
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, _)) -> 
                 let checkIdent = 
-                    if isModule then CheckIdentifiers.checkModule visitorInfo
-                    else CheckIdentifiers.checkNamespace visitorInfo
+                    if isModule then CheckIdentifiers.checkModule visitorInfo astNode
+                    else CheckIdentifiers.checkNamespace visitorInfo astNode
                         
                 identifier |> List.iter checkIdent
                 Continue
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
-                CheckIdentifiers.checkUnionCase visitorInfo identifier
+                CheckIdentifiers.checkUnionCase visitorInfo astNode identifier
                 Continue
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
-                identifier |> Option.iter (CheckIdentifiers.checkRecordField visitorInfo)
+                identifier |> Option.iter (CheckIdentifiers.checkRecordField visitorInfo astNode)
                 Continue
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
-                CheckIdentifiers.checkEnumCase visitorInfo identifier
+                CheckIdentifiers.checkEnumCase visitorInfo astNode identifier
                 Continue
             | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
-                checkComponentInfo visitorInfo checkFile identifier
+                checkComponentInfo visitorInfo astNode checkFile identifier
                 Continue
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
                 match unionCase with
                     | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
-                        CheckIdentifiers.checkException visitorInfo identifier
+                        CheckIdentifiers.checkException visitorInfo astNode identifier
                 Continue
             | AstNode.Expression(expr) ->
                 match expr with
                     | SynExpr.For(_, identifier, _, _, _, _, _) ->
-                        CheckIdentifiers.checkNonPublicValue visitorInfo identifier
+                        CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
                     | _ -> ()
                 Continue
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                     | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
-                        CheckIdentifiers.checkMember visitorInfo identifier
+                        CheckIdentifiers.checkMember visitorInfo astNode identifier
                     | _ -> ()
                 Continue
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
                         if isValue longIdentifier.Lid checkFile then
-                            CheckIdentifiers.checkNonPublicValue visitorInfo longIdentifier.Lid.Head
+                            CheckIdentifiers.checkNonPublicValue visitorInfo astNode longIdentifier.Lid.Head
                     | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
-                        CheckIdentifiers.checkParameter visitorInfo identifier
+                        CheckIdentifiers.checkParameter visitorInfo astNode identifier
                     | _ -> ()
                 Continue
             | AstNode.SimplePattern(pattern) ->
                 match pattern with
                     | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) when not isCompilerGenerated ->
-                        CheckIdentifiers.checkParameter visitorInfo identifier
+                        CheckIdentifiers.checkParameter visitorInfo astNode identifier
                     | _ -> ()
                 Continue
             | AstNode.Binding(binding) ->
@@ -301,7 +302,7 @@ module NameConventions =
                         if isLiteral attributes checkFile then
                             match pattern with
                                 | SynPat.Named(_, identifier, _, _, _) -> 
-                                    CheckIdentifiers.checkLiteral visitorInfo identifier
+                                    CheckIdentifiers.checkLiteral visitorInfo astNode identifier
                                 | _ -> ()
 
                             Stop
@@ -325,21 +326,21 @@ module NameConventions =
 
                             match identifierType longIdentifier.Lid checkFile valData with
                                 | Value | Function when isActivePattern lastIdent ->
-                                    CheckIdentifiers.checkActivePattern visitorInfo lastIdent
+                                    CheckIdentifiers.checkActivePattern visitorInfo astNode lastIdent
                                     Continue
                                 | Value | Function when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
-                                    CheckIdentifiers.checkPublicValue visitorInfo lastIdent
+                                    CheckIdentifiers.checkPublicValue visitorInfo astNode lastIdent
                                     ContinueWithVisitor(visitor visitorInfo checkFile)
                                 | Value | Function ->
-                                    CheckIdentifiers.checkNonPublicValue visitorInfo lastIdent
+                                    CheckIdentifiers.checkNonPublicValue visitorInfo astNode lastIdent
                                     Continue
                                 | Member | Property -> 
-                                    CheckIdentifiers.checkMember visitorInfo lastIdent
+                                    CheckIdentifiers.checkMember visitorInfo astNode lastIdent
                                     Continue
                                 | _ -> Continue
                         | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                             if isActivePattern identifier then
-                                CheckIdentifiers.checkActivePattern visitorInfo identifier
+                                CheckIdentifiers.checkActivePattern visitorInfo astNode identifier
                             Continue
                         | _ -> Continue
                 | _ -> Continue

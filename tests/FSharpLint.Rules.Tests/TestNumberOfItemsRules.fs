@@ -81,6 +81,16 @@ let foo one two three four five six = ()"""
         Assert.IsTrue(this.ErrorExistsAt(4, 32))
 
     [<Test>]
+    member this.SixParametersSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfFunctionParameters")>]
+let foo one two three four five six = ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.FiveParameters() = 
         this.Parse """
 module Program
@@ -103,6 +113,22 @@ type Test() =
     member val Six = 0 with get, set"""
 
         Assert.IsTrue(this.ErrorExistsAt(10, 11))
+
+    [<Test>]
+    member this.SixClassPropertiesSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfMembers")>]
+type Test() =
+    member val One = 0 with get, set
+    member val Two = 0 with get, set
+    member val Three = 0 with get, set
+    member val Four = 0 with get, set
+    member val Five = 0 with get, set
+    member val Six = 0 with get, set"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(11))
             
     [<Test>]
     member this.FiveClassProperties() = 
@@ -240,6 +266,16 @@ let foo = (1, 2, 3, 4, 5, 6)"""
         Assert.IsTrue(this.ErrorExistsAt(4, 26))
 
     [<Test>]
+    member this.SixTupleItemsExpressionSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfItemsInTuple")>]
+let foo = (1, 2, 3, 4, 5, 6)"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.FiveTupleItemsExpression() = 
         this.Parse """
 module Program
@@ -267,3 +303,14 @@ if not true && (false && false) || true (&&) (false) then
     ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 3))
+
+    [<Test>]
+    member this.FiveBooleanOperatorsSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfBooleanOperatorsInCondition")>]
+module Program
+
+if not true && (false && false) || true (&&) (false) then
+    ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
