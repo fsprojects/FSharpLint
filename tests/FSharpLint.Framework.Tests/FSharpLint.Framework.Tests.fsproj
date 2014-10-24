@@ -51,6 +51,7 @@
     <Compile Include="TestConfiguration.fs" />
     <Compile Include="TestAstInfo.fs" />
     <Compile Include="TestHintParser.fs" />
+    <Compile Include="TestAst.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

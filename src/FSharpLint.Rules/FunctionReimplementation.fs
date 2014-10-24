@@ -85,7 +85,7 @@ module FunctionReimplementation =
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Expression(expression) when isAnalyserEnabled visitorInfo.Config ->
+            | AstNode.Expression(expression) when isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not ->
                 match expression with
                     | SynExpr.Lambda(_) as lambda -> 
                         let (parameters, expression) = getLambdaParametersAndExpression lambda

@@ -91,6 +91,16 @@ failwith "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
+    member this.FailwithWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "FailwithWithSingleArgument")>]
+module Program
+
+failwith "" "" """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.FailwithWithMultipleExtraArguments() = 
         this.Parse """
 module Program
@@ -127,6 +137,16 @@ raise (System.ArgumentException("Divisor cannot be zero!")) "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
+    member this.RaiseWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "RaiseWithSingleArgument")>]
+module Program
+
+raise (System.ArgumentException("Divisor cannot be zero!")) "" """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.FailwithfWithCorrectNumberOfArguments() = 
         this.Parse """
 module Program
@@ -143,6 +163,16 @@ module Program
 failwithf "%d %s" 4 "dog" 5 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.FailwithfWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "FailwithfWithArgumentsMatchingFormatString")>]
+module Program
+
+failwithf "%d %s" 4 "dog" 5 """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
     member this.FailwithfWithEscapedFormatAndWithExtraArgument() = 
@@ -172,6 +202,16 @@ nullArg "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
+    member this.NullArgWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "NullArgWithSingleArgument")>]
+module Program
+
+nullArg "" "" """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.InvalidOpWithCorrectNumberOfArguments() = 
         this.Parse """
 module Program
@@ -190,6 +230,16 @@ invalidOp "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
+    member this.InvalidOpWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "InvalidOpWithSingleArgument")>]
+module Program
+
+invalidOp "" "" """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.InvalidArgWithCorrectNumberOfArguments() = 
         this.Parse """
 module Program
@@ -206,3 +256,13 @@ module Program
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.InvalidArgWithExtraArgumentSuppressed() = 
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "InvalidArgWithTwoArguments")>]
+module Program
+
+invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))

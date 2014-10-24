@@ -185,6 +185,17 @@ exception SomeException of string""" (generateNewLines ModuleLength))
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
 
     [<Test>]
+    member this.ModuleTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInModule")>]
+module Program
+%s
+// Some exception.
+exception SomeException of string""" (generateNewLines ModuleLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(3))
+
+    [<Test>]
     member this.ModuleNotTooManyLines() = 
         this.Parse (sprintf """
 module Program
@@ -204,6 +215,18 @@ let dog x =
     ()""" (generateNewLines FunctionLength))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
+
+    [<Test>]
+    member this.FunctionTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInFunction")>]
+let dog x =
+    %s
+    ()""" (generateNewLines FunctionLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
     member this.FunctionNotTooManyLines() = 
@@ -228,6 +251,18 @@ let dog =
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
+    member this.ValueTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInValue")>]
+let dog =
+    %s
+    ()""" (generateNewLines ValueLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.ValueNotTooManyLines() = 
         this.Parse (sprintf """
 module Program
@@ -249,7 +284,21 @@ let dog = function
     ()
 | None -> ()""" (generateNewLines MatchLambdaFunctionLength))
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ErrorExistsAt(4, 10))
+
+    [<Test>]
+    member this.MatchFunctionTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInMatchLambdaFunction")>]
+let dog = function
+| Some(x) ->
+    %s
+    ()
+| None -> ()""" (generateNewLines MatchLambdaFunctionLength))
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 10))
 
     [<Test>]
     member this.MatchFunctionNotTooManyLines() = 
@@ -280,6 +329,22 @@ let dog = fun x ->
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
+    member this.LambdaFunctionTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInLambdaFunction")>]
+let dog = fun x ->
+    match x with
+        | Some(x) ->
+            %s
+            ()
+        | None -> ()
+        """ (generateNewLines LambdaFunctionLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.LambdaFunctionNotTooManyLines() = 
         this.Parse """
 module Program
@@ -304,6 +369,17 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
+    member this.ClassTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInClass")>]
+  type MyClass2() as this =
+    %s
+    member this.PrintMessage() = ()""" (generateNewLines 500))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(4))
+
+    [<Test>]
     member this.ClassNotTooManyLines() = 
         this.Parse """
 module Program
@@ -321,6 +397,17 @@ module Program
     abstract member Print : unit -> unit""" (generateNewLines ClassLength))
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
+
+    [<Test>]
+    member this.InterfaceTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInClass")>]
+  type IPrintable =
+    %s
+    abstract member Print : unit -> unit""" (generateNewLines ClassLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
     member this.InterfaceNotTooManyLines() = 
@@ -342,6 +429,19 @@ type MyClass(x) =
       """ (generateNewLines ConstructorLength))
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
+
+    [<Test>]
+    member this.ConstructorTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInConstructor")>]
+type MyClass(x) =
+    new() = 
+      %s
+      MyClass(0)
+      """ (generateNewLines ConstructorLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
     member this.ConstructorNotTooManyLines() = 
@@ -366,6 +466,20 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
+    member this.RecordTooManyLinesSuppressed() = 
+        this.Parse (sprintf """
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInRecord")>]
+  type Record = 
+    {
+      %s 
+      dog: int 
+    }""" (generateNewLines RecordLength))
+
+
+        Assert.IsFalse(this.ErrorExistsOnLine(4))
+
+    [<Test>]
     member this.RecordNotTooManyLines() = 
         this.Parse """
 module Program
@@ -375,6 +489,19 @@ module Program
 
     [<Test>]
     member this.PropertyTooManyLines() = 
+        this.Parse (sprintf """
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInProperty")>]
+  type Class() =
+    let mutable value = 10
+    member this.Property1 with get() = 
+        %s
+        value""" (generateNewLines PropertyLength))
+
+        Assert.IsFalse(this.ErrorExistsOnLine(6))
+
+    [<Test>]
+    member this.PropertyTooManyLinesSuppressed() = 
         this.Parse (sprintf """
 module Program
   type Class() =

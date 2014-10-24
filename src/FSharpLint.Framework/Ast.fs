@@ -27,6 +27,16 @@ module Ast =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
+
+    /// Represents a SuppressedMessageAttribute found in the AST.
+    type SuppressedMessage =
+        {
+            /// Category property of the SuppressedMessageAttribute. (The name of the analyser to be suppressed).
+            Category: string
+
+            /// CheckId property of the SuppressedMessageAttribute. (The name of the rule to be suppressed).
+            Rule: string
+        }
     
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
     type VisitorInfo =
@@ -62,6 +72,60 @@ module Ast =
         | ConstructorArguments of SynConstructorArgs
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
+
+    /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
+    let getSuppressMessageAttributes node =
+        let tryGetArguments (attribute:SynAttribute) = 
+            let tryGetArgumentsFromPropertyInitialisers arguments = 
+                let rec getPropertyIntiailiserValues category checkid = function
+                    | SynExpr.App(_, 
+                                  _, 
+                                  SynExpr.App(_, _, SynExpr.Ident(op), SynExpr.Ident(propName), _), 
+                                  SynExpr.Const(SynConst.String(argValue, _), _), _)::tail when op.idText = "op_Equality" -> 
+                        if propName.idText = "Category" then
+                            getPropertyIntiailiserValues (Some(argValue)) checkid tail
+                        else if propName.idText = "CheckId" then
+                            getPropertyIntiailiserValues category (Some(argValue)) tail
+                        else
+                            getPropertyIntiailiserValues category checkid tail
+                    | _::tail ->
+                        getPropertyIntiailiserValues category checkid tail
+                    | [] -> 
+                        match category, checkid with
+                            | Some(category), Some(checkid) ->
+                                Some({ Category = category; Rule = checkid })
+                            | _ -> None
+
+                getPropertyIntiailiserValues None None arguments
+
+            match attribute.ArgExpr with
+                | SynExpr.Paren(SynExpr.Tuple(arguments, _, _), _, _, _) ->
+                    match arguments with
+                        | SynExpr.Const(SynConst.String(category, _), _)::SynExpr.Const(SynConst.String(checkid, _), _)::_ ->
+                            Some({ Category = category; Rule = checkid })
+                        | _ -> 
+                            tryGetArgumentsFromPropertyInitialisers arguments
+                | _ -> None
+
+        let tryGetSuppressMessageAttribute (attribute:SynAttribute) =
+            let attributeName =
+                attribute.TypeName.Lid
+                    |> List.rev
+                    |> List.head
+
+            if attributeName.idText = "SuppressMessage" || attributeName.idText = "SuppressMessageAttribute" then
+                tryGetArguments attribute
+            else 
+                None
+
+        match node with
+            | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, _))
+            | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, _, _))
+            | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, _))
+            | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _)) -> 
+                attributes 
+                    |> List.choose tryGetSuppressMessageAttribute
+            | _ -> []
 
     /// Extracts the child nodes to be visited from a given node.
     let private traverseNode node =
@@ -385,7 +449,18 @@ module Ast =
 
             /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
             Breadcrumbs: AstNode list
+
+            SuppressedMessages: SuppressedMessage list
         }
+
+        with
+            /// Has a given rule been suppressed by SuppressMessageAttribute?
+            member this.IsSuppressed(analyserName, ?rulename) =
+                let isAnalyserSuppressed analyser =
+                    analyser.Category = analyserName && 
+                    (Option.exists ((=) analyser.Rule) rulename || analyser.Rule = "*")
+
+                this.SuppressedMessages |> List.exists isAnalyserSuppressed
 
     /// Defines a function that visits a node on the AST.
     type Visitor = CurrentNode -> VisitorResult
@@ -441,12 +516,20 @@ module Ast =
     /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
     let walk finishEarly rootNode visitor =
         /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
-        let rec walk finishEarly breadcrumbs node visitor currentVisitMethod = 
-            let walk = walk finishEarly (node :: breadcrumbs)
+        let rec walk finishEarly breadcrumbs suppressedMessages node visitor currentVisitMethod = 
+            let suppressedMessages = getSuppressMessageAttributes node @ suppressedMessages
+
+            let walk = walk finishEarly (node :: breadcrumbs) suppressedMessages
 
             let children = traverseNode node
 
-            let currentNode = { Node = node; ChildNodes = children; Breadcrumbs = breadcrumbs }
+            let currentNode = 
+                { 
+                    Node = node
+                    ChildNodes = children
+                    Breadcrumbs = breadcrumbs
+                    SuppressedMessages = suppressedMessages
+                }
 
             let visitChildrenMethod = visitor currentNode
 
@@ -486,7 +569,7 @@ module Ast =
                 | children ->
                     walkChildren None 0 children
 
-        walk finishEarly [] rootNode visitor Continue
+        walk finishEarly [] [] rootNode visitor Continue
 
     let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 

@@ -51,6 +51,17 @@ let f = fun a b -> a * b
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.LambdaReimplementingMultiplcationIssuesErrorSuppressed() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "*")>]
+let f = fun a b -> a * b
+"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() = 
         this.Parse """
 module Program

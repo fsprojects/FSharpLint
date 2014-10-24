@@ -36,8 +36,8 @@ module Binding =
             | None -> false
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
-    let checkForBindingToAWildcard visitorInfo pattern range =
-        if "FavourIgnoreOverLetWild" |> isRuleEnabled visitorInfo.Config then
+    let checkForBindingToAWildcard visitorInfo (astNode:CurrentNode) pattern range =
+        if "FavourIgnoreOverLetWild" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "FavourIgnoreOverLetWild") |> not then
             let rec findWildAndIgnoreParens = function
                 | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
                 | SynPat.Wild(_) -> true
@@ -47,15 +47,15 @@ module Binding =
                 visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
 
 
-    let checkForWildcardNamedWithAsPattern visitorInfo pattern =
-        if "WildcardNamedWithAsPattern" |> isRuleEnabled visitorInfo.Config then
+    let checkForWildcardNamedWithAsPattern visitorInfo (astNode:CurrentNode) pattern =
+        if "WildcardNamedWithAsPattern" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "WildcardNamedWithAsPattern") |> not then
             match pattern with
                 | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
                     visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
                 | _ -> ()
 
-    let checkForUselessBinding visitorInfo pattern expr range =
-        if "UselessBinding" |> isRuleEnabled visitorInfo.Config then
+    let checkForUselessBinding visitorInfo (astNode:CurrentNode) pattern expr range =
+        if "UselessBinding" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "UselessBinding") |> not then
             let rec findBindingIdentifier = function
                 | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
                 | SynPat.Named(_, ident, _, _, _) -> Some(ident)
@@ -72,13 +72,13 @@ module Binding =
                 if exprIdentMatchesBindingIdent bindingIdent expr then
                     visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
     
-    let visitor visitorInfo checkFile astNode = 
+    let visitor visitorInfo checkFile (astNode:CurrentNode) = 
         match astNode.Node with
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expr, range, _)) -> 
-                checkForBindingToAWildcard visitorInfo pattern range
-                checkForUselessBinding visitorInfo pattern expr range
+                checkForBindingToAWildcard visitorInfo astNode pattern range
+                checkForUselessBinding visitorInfo astNode pattern expr range
             | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
-                checkForWildcardNamedWithAsPattern visitorInfo pattern
+                checkForWildcardNamedWithAsPattern visitorInfo astNode pattern
             | _ -> ()
 
         Continue

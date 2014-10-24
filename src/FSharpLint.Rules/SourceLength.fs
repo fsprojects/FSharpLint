@@ -46,22 +46,22 @@ module SourceLength =
 
     let inline length (range:range) = range.EndLine - range.StartLine
 
-    let expectMaxLines visitorInfo range configRuleName errorName =
+    let expectMaxLines visitorInfo (astNode:CurrentNode) range configRuleName errorName =
         let actualLines = length range
 
         match configLines visitorInfo.Config configRuleName with
-            | Some(expectedMaxLines) when actualLines > expectedMaxLines ->
+            | Some(expectedMaxLines) when actualLines > expectedMaxLines && astNode.IsSuppressed(AnalyserName, configRuleName) |> not ->
                 visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
             | _ -> ()
     
     let rec visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
-                expectMaxLines visitorInfo range "MaxLinesInLambdaFunction" "Lambda Function"
+                expectMaxLines visitorInfo astNode range "MaxLinesInLambdaFunction" "Lambda Function"
 
                 Continue
             | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
-                expectMaxLines visitorInfo range "MaxLinesInMatchLambdaFunction" "Match Lambda Function"
+                expectMaxLines visitorInfo astNode range "MaxLinesInMatchLambdaFunction" "Match Lambda Function"
 
                 Continue
             | AstNode.Binding(binding) ->
@@ -69,7 +69,7 @@ module SourceLength =
                     | SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _) -> 
                         let length = length binding.RangeOfBindingAndRhs
 
-                        let expectMaxLines = expectMaxLines visitorInfo binding.RangeOfBindingAndRhs
+                        let expectMaxLines = expectMaxLines visitorInfo astNode binding.RangeOfBindingAndRhs
 
                         match identifierTypeFromValData valData with
                             | Value -> 
@@ -86,7 +86,7 @@ module SourceLength =
 
                         Continue
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, range)) when isModule -> 
-                expectMaxLines visitorInfo range "MaxLinesInModule" "Module"
+                expectMaxLines visitorInfo astNode range "MaxLinesInModule" "Module"
 
                 Continue
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
@@ -94,14 +94,14 @@ module SourceLength =
                     | SynTypeDefnRepr.Simple(simpleRepr, _) ->
                         match simpleRepr with
                             | SynTypeDefnSimpleRepr.Record(_) -> 
-                                expectMaxLines visitorInfo range "MaxLinesInRecord" "Record"
+                                expectMaxLines visitorInfo astNode range "MaxLinesInRecord" "Record"
                             | SynTypeDefnSimpleRepr.Enum(_) -> 
-                                expectMaxLines visitorInfo range "MaxLinesInEnum" "Enum"
+                                expectMaxLines visitorInfo astNode range "MaxLinesInEnum" "Enum"
                             | SynTypeDefnSimpleRepr.Union(_) -> 
-                                expectMaxLines visitorInfo range "MaxLinesInUnion" "Union"
+                                expectMaxLines visitorInfo astNode range "MaxLinesInUnion" "Union"
                             | _ -> ()
                     | SynTypeDefnRepr.ObjectModel(_) -> 
-                        expectMaxLines visitorInfo range "MaxLinesInClass" "Classes and interface"
+                        expectMaxLines visitorInfo astNode range "MaxLinesInClass" "Classes and interface"
 
                 Continue
             | _ -> Continue

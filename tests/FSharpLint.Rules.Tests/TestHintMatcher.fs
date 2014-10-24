@@ -181,6 +181,18 @@ let f = fun x -> x""", config)
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.MatchIdLambdaSuppressed() = 
+        let config = generateHintConfig ["fun x -> x ===> id"]
+
+        this.Parse("""
+module Goat
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Hints", "*")>]
+let f = fun x -> x""", config)
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.DontMatchIdLambda() = 
         let config = generateHintConfig ["fun x -> x ===> id"]
 

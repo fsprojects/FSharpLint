@@ -88,7 +88,8 @@ module NestedStatements =
             | AstNode.Expression(SynExpr.While(_))
             | AstNode.Expression(SynExpr.For(_))
             | AstNode.Expression(SynExpr.ForEach(_)) as node 
-                    when not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
+                    when astNode.IsSuppressed(AnalyserName) |> not && 
+                         not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
 
                 let range () =
                     match node with 

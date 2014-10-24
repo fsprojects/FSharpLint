@@ -523,8 +523,8 @@ module HintMatcher =
 
         visitorInfo.PostError range error
 
-    let visitor getHints visitorInfo (checkFile:CheckFileResults) astNode = 
-        if isAnalyserEnabled visitorInfo.Config then
+    let visitor getHints visitorInfo (checkFile:CheckFileResults) (astNode:CurrentNode) = 
+        if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
                 | AstNode.Expression(expr) -> 
                     for hint in getHints visitorInfo.Config do

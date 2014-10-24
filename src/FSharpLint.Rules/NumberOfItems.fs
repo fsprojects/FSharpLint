@@ -31,25 +31,26 @@ module NumberOfItems =
     [<Literal>]
     let AnalyserName = "FSharpLint.NumberOfItems"
 
-    let maxItemsForRule (config:Map<string,Analyser>) ruleName =
+    let maxItemsForRule (config:Map<string,Analyser>) (astNode:CurrentNode) ruleName =
         match isRuleEnabled config AnalyserName ruleName with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "MaxItems" ->
+            | Some(_, ruleSettings) 
+                    when ruleSettings.ContainsKey "MaxItems" && astNode.IsSuppressed(AnalyserName, ruleName) |> not ->
                 match ruleSettings.["MaxItems"] with
                     | MaxItems(i) -> Some(i)
                     | _ -> None
             | Some(_)
             | None -> None
 
-    let validateTuple (items:SynExpr list) visitorInfo =
-        maxItemsForRule visitorInfo.Config "MaxNumberOfItemsInTuple"
+    let validateTuple (items:SynExpr list) visitorInfo astNode =
+        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfItemsInTuple"
             |> Option.iter (fun maxItems ->
                 if List.length items > maxItems then
                     let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsTupleError")
                     let error = System.String.Format(errorFormatString, maxItems)
                     visitorInfo.PostError (items.[maxItems].Range) error)
 
-    let validateFunction (constructorArguments:SynConstructorArgs) visitorInfo = 
-        maxItemsForRule visitorInfo.Config "MaxNumberOfFunctionParameters"
+    let validateFunction (constructorArguments:SynConstructorArgs) visitorInfo astNode = 
+        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfFunctionParameters"
             |> Option.iter (fun maxParameters ->
                 match constructorArguments with
                     | SynConstructorArgs.Pats(parameters) when List.length parameters > maxParameters -> 
@@ -75,14 +76,14 @@ module NumberOfItems =
         members 
             |> List.filter isPublicMember
 
-    let validateType members typeRepresentation visitorInfo =
+    let validateType members typeRepresentation visitorInfo astNode =
         let members = 
             getMembers <|
                 match typeRepresentation with
                     | SynTypeDefnRepr.Simple(_) -> members
                     | SynTypeDefnRepr.ObjectModel(_, members, _) -> members
                                                         
-        maxItemsForRule visitorInfo.Config "MaxNumberOfMembers"
+        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfMembers"
             |> Option.iter (fun maxMembers ->
                 if List.length members > maxMembers then
                     let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsClassMembersError")
@@ -109,7 +110,7 @@ module NumberOfItems =
             | Some(_)
             | None -> false
 
-    let validateCondition condition visitorInfo =
+    let validateCondition condition visitorInfo astNode =
         let rec countBooleanOperators total = function
             | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
             | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) -> 
@@ -123,7 +124,7 @@ module NumberOfItems =
                 countBooleanOperators total expr
             | _ -> total
 
-        maxItemsForRule visitorInfo.Config "MaxNumberOfBooleanOperatorsInCondition"
+        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfBooleanOperatorsInCondition"
             |> Option.iter (fun maxBooleanOperators ->
                 let numberOfBooleanOperators = countBooleanOperators 0 condition
 
@@ -137,27 +138,27 @@ module NumberOfItems =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(_, _, _, constructorArguments, _, _) ->
-                        validateFunction constructorArguments visitorInfo
+                        validateFunction constructorArguments visitorInfo astNode
                     | _ -> ()
             | AstNode.Expression(expression) ->
                 match expression with
                     | SynExpr.Tuple(expressions, _, _) ->
                         if not <| isTupleAppliedToMember astNode then
-                            validateTuple expressions visitorInfo
+                            validateTuple expressions visitorInfo astNode
                     | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
                     | SynExpr.While(_, condition, _, _)
                     | SynExpr.Assert(condition, _) ->
-                        validateCondition condition visitorInfo
+                        validateCondition condition visitorInfo astNode
                     | _ -> ()
             | AstNode.Match(matchClause) ->
                 match matchClause with
                     | SynMatchClause.Clause(_, whenExpr, _, _, _) when whenExpr.IsSome ->
-                        validateCondition whenExpr.Value visitorInfo
+                        validateCondition whenExpr.Value visitorInfo astNode
                     | _ -> ()
             | AstNode.TypeDefinition(typeDefinition) ->
                 match typeDefinition with
                     | SynTypeDefn.TypeDefn(_, typeRepresentation, members, _) ->
-                        validateType members typeRepresentation visitorInfo
+                        validateType members typeRepresentation visitorInfo astNode
             | _ -> ()
 
         Continue

@@ -131,6 +131,46 @@ To override to turn off you'd set enabled to false in your own configuration fil
 		</Analysers>
 	</FSharpLintSettings>
 
+####Disabling rules and analysers within code
+
+To disable a rule for a single section of code the [SuppressMessageAttribute](http://msdn.microsoft.com/en-us/library/system.diagnostics.codeanalysis.suppressmessageattribute(v=vs.110).aspx) can be used. The attribute will not be included into the IL (as long as you don't have the `CODE_ANALYSIS` preprocessing symbol set).
+
+The attribute can be applied to let bindings, modules, types, and exceptions. Any lint warnings generated on or inside of what the attribute is applied to will be suppressed.
+
+*Note: The attributes are currently unable to suppress the rules in the `FSharpLint.Typography` analyser.*
+
+#####Category and CheckId
+
+Only two properties in the attribute need to be set to suppress a rule, these are: `Category` and `CheckId`. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.
+
+Category is the name of the analyser containing the rule to be suppressed e.g. `FSharpLint.NameConventions`.
+
+CheckId is the name of the rule to be suppressed, or `*` to suppress all rules in the analyser e.g. `InterfaceNamesMustBeginWithI`.
+
+#####Example
+
+The following code breaks the rule `FSharpLint.NameConventions.InterfaceNamesMustBeginWithI`:
+
+    type Printable =
+        abstract member Print : unit -> unit
+        
+It will result in the warning: `Interface identifiers should begin with the letter I found interface Printable`.
+
+We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "InterfaceNamesMustBeginWithI")>]`
+
+The following code has the `SuppressMessage` attribute applied to it, this code will generate no warning:
+
+    [<SuppressMessage("FSharpLint.NameConventions", "InterfaceNamesMustBeginWithI")>]
+    type Printable =
+        abstract member Print : unit -> unit
+        
+        
+This could also be written using property initialisers as:
+
+    [<SuppressMessage(Category = "FSharpLint.NameConventions", CheckId = "InterfaceNamesMustBeginWithI")>]
+    type Printable =
+        abstract member Print : unit -> unit
+
 ####Running Lint From An Application
 
 The project `src/FSharpLint.Application` contains `RunLint.fs` that contains the following function:
