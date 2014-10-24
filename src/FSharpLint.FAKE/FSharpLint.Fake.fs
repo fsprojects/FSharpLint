@@ -38,7 +38,6 @@ let private defaultProgress = function
     | FSharpLint.Application.RunLint.Failed(file, parseException) ->
         failedToParseFileError file parseException
 
-
 let private defaultErrorReceived (error:ErrorHandling.Error) =
     let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input 
     System.Console.WriteLine(output)
