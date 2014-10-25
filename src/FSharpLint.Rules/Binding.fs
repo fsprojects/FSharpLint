@@ -86,7 +86,6 @@ module Binding =
             let rec isWildcard = function
                 | SynPat.Paren(pattern, _) -> isWildcard pattern
                 | SynPat.Wild(_) -> true
-                | SynPat.ArrayOrList(_, _, _) -> false
                 | _ -> false
 
             let constructorString numberOfWildcards =

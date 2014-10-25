@@ -61,3 +61,21 @@ Replace the wildcard with the identifier the wildcard is currently being bound t
 #####Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
+
+####TupleOfWildcards
+
+#####Cause
+
+A constructor in a pattern has arguments that consist entirely of wildcards e.g. `SynPat.Paren(_, _)`
+
+#####Rationale
+
+The tuple of wildcards can be replaced with a single wildcard.
+
+#####How To Fix
+
+Replace the tuple with a single wildcard e.g. the example in the cause could be turned into `SynPat.Paren(_)`
+
+#####Rule Settings
+
+`Enabled` - A boolean property that can enable and disable this rule. (Default true)
