@@ -116,6 +116,27 @@ let a = a"""
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
+    member this.NotUslessBindingAsShadowingMutableWithImmutable() = 
+        this.Parse """
+module Program
+
+let mutable a = 10
+let a = a"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        ()
+
+    [<Test>]
+    member this.NotUslessBindingAsShadowingImmutableWithMutable() = 
+        this.Parse """
+module Program
+
+let a = 10
+let mutable a = a"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.UslessBindingSuppressed() = 
         this.Parse """
 module Program

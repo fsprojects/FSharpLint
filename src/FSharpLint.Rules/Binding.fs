@@ -54,7 +54,7 @@ module Binding =
                     visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
                 | _ -> ()
 
-    let checkForUselessBinding visitorInfo (astNode:CurrentNode) pattern expr range =
+    let checkForUselessBinding visitorInfo (checkFile:CheckFileResults) (astNode:CurrentNode) pattern expr range =
         if "UselessBinding" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "UselessBinding") |> not then
             let rec findBindingIdentifier = function
                 | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
@@ -65,7 +65,16 @@ module Binding =
                 | SynExpr.Paren(expr, _, _, _) -> 
                     exprIdentMatchesBindingIdent bindingIdent expr
                 | SynExpr.Ident(ident) ->
-                    ident.idText = bindingIdent.idText
+                    let isSymbolMutable (ident:Ident) =
+                        let symbol =
+                            checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                                |> Async.RunSynchronously
+
+                        let isMutable (symbol:FSharpSymbolUse) = (symbol.Symbol :?> FSharpMemberFunctionOrValue).IsMutable
+
+                        symbol |> Option.exists isMutable
+
+                    ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
                 | _ -> false
                 
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
@@ -74,9 +83,10 @@ module Binding =
     
     let visitor visitorInfo checkFile (astNode:CurrentNode) = 
         match astNode.Node with
-            | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expr, range, _)) -> 
+            | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) -> 
                 checkForBindingToAWildcard visitorInfo astNode pattern range
-                checkForUselessBinding visitorInfo astNode pattern expr range
+                if not isMutable then
+                    checkForUselessBinding visitorInfo checkFile astNode pattern expr range
             | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
                 checkForWildcardNamedWithAsPattern visitorInfo astNode pattern
             | _ -> ()
