@@ -378,6 +378,11 @@
             <Property name="Enabled">True</Property>
           </RuleSettings>
         </Rule>
+        <Rule Name="TupleOfWildcards">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
         <Rule Name="WildcardNamedWithAsPattern">
           <RuleSettings>
             <Property name="Enabled">True</Property>

@@ -246,4 +246,7 @@
   <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
     <value>Expected nullArg to have a single argument.</value>
   </data>
+  <data name="RulesTupleOfWildcardsError" xml:space="preserve">
+    <value>A constructor argument in a pattern that is a tuple consisting of entirely wildcards can be replaced with a single wildcard. {0} can be replaced with {1}</value>
+  </data>
 </root>

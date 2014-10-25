@@ -80,6 +80,27 @@ module Binding =
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
                 if exprIdentMatchesBindingIdent bindingIdent expr then
                     visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
+
+    let checkTupleOfWildcards visitorInfo (astNode:CurrentNode) pattern identifier =
+        if "TupleOfWildcards" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "TupleOfWildcards") |> not then
+            let rec isWildcard = function
+                | SynPat.Paren(pattern, _) -> isWildcard pattern
+                | SynPat.Wild(_) -> true
+                | SynPat.ArrayOrList(_, _, _) -> false
+                | _ -> false
+
+            let constructorString numberOfWildcards =
+                let constructorName = identifier |> String.concat "."
+                let arguments = [ for i in 1..numberOfWildcards -> "_" ] |> String.concat ", "
+                constructorName + "(" + arguments + ")"
+
+            match pattern with
+                | SynPat.Tuple(patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
+                    let errorFormat = FSharpLint.Framework.Resources.GetString("RulesTupleOfWildcardsError")
+                    let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
+                    let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
+                    visitorInfo.PostError range error
+                | _ -> ()
     
     let visitor visitorInfo checkFile (astNode:CurrentNode) = 
         match astNode.Node with
@@ -89,6 +110,9 @@ module Binding =
                     checkForUselessBinding visitorInfo checkFile astNode pattern expr range
             | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
                 checkForWildcardNamedWithAsPattern visitorInfo astNode pattern
+            | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as pattern, _)]), _, _)) ->
+                let identifier = identifier.Lid |> List.map (fun x -> x.idText)
+                checkTupleOfWildcards visitorInfo astNode pattern identifier
             | _ -> ()
 
         Continue

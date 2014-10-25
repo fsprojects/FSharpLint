@@ -45,6 +45,11 @@ let config =
                                     Settings = Map.ofList 
                                         [ ("Enabled", Enabled(true)) ] 
                                 }) 
+                            ("TupleOfWildcards", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ ("Enabled", Enabled(true)) ] 
+                                }) 
                         ]
                     Settings = Map.ofList 
                         [
@@ -188,3 +193,15 @@ match [] with
     | x -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(5, 6))
+
+    [<Test>]
+    member this.TupleOfWildcards() = 
+        this.Parse """
+module Program
+
+type Cat = | Persian of int * int
+
+match Persian(1, 3) with
+    | Persian(_, _) -> ()"""
+
+        Assert.IsTrue(this.ErrorExistsAt(7, 14))
