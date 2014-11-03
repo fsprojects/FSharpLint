@@ -119,326 +119,268 @@ module Ast =
                 None
 
         match node with
-            | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, _))
-            | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, _, _))
-            | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, _))
-            | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _)) -> 
-                attributes 
+            | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, range))
+            | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, range, _))
+            | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, range))
+            | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) -> 
+                attributes
                     |> List.choose tryGetSuppressMessageAttribute
+                    |> List.map (fun x -> (x, range))
             | _ -> []
 
     /// Extracts the child nodes to be visited from a given node.
     let private traverseNode node =
         [
             match node with
-                | ModuleDeclaration(moduleDeclaration) ->
-                    match moduleDeclaration with
-                        | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) ->
-                            yield ComponentInfo(componentInfo)
-                            for x in moduleDeclarations do yield ModuleDeclaration(x)
-                        | SynModuleDecl.Let(_, bindings, _) -> 
-                            for x in bindings do yield Binding(x)
-                        | SynModuleDecl.DoExpr(_, expression, _) -> 
-                            yield Expression(expression)
-                        | SynModuleDecl.Types(typeDefinitions, _) -> 
-                            for x in typeDefinitions do yield TypeDefinition(x)
-                        | SynModuleDecl.Exception(exceptionDefinition, _) -> 
-                            yield ExceptionDefinition(exceptionDefinition)
-                        | SynModuleDecl.NamespaceFragment(moduleOrNamespace) -> 
-                            yield ModuleOrNamespace(moduleOrNamespace)
-                        | SynModuleDecl.Open(_, _)
-                        | SynModuleDecl.Attributes(_, _)
-                        | SynModuleDecl.HashDirective(_, _)
-                        | SynModuleDecl.ModuleAbbrev(_, _, _) -> ()
-                | ModuleOrNamespace(moduleOrNamespace) ->
-                    match moduleOrNamespace with
-                        | SynModuleOrNamespace(_, _, moduleDeclarations, _, _, _, _) ->
-                            for x in moduleDeclarations do yield ModuleDeclaration(x)
-                | Binding(binding) ->
-                    match binding with
-                        | SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _) ->
-                            yield Pattern(pattern)
-                            yield Expression(expression)
-                | ExceptionDefinition(exceptionDefinition) ->
-                    match exceptionDefinition with
-                        | SynExceptionDefn.ExceptionDefn(exceptionRepresentation, members, _) -> 
-                            yield ExceptionRepresentation(exceptionRepresentation)
-                            for x in members do yield MemberDefinition(x)
-                | ExceptionRepresentation(exceptionRepresentation) ->
-                    match exceptionRepresentation with
-                        | SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _) -> 
-                            yield UnionCase(unionCase)
-                | TypeDefinition(typeDefinition) ->
-                    match typeDefinition with
-                        | SynTypeDefn.TypeDefn(componentInfo, typeRepresentation, members, _) -> 
-                            yield ComponentInfo(componentInfo)
-                            yield TypeRepresentation(typeRepresentation)
-                            for x in members do yield MemberDefinition(x)
-                | ComponentInfo(componentInfo) ->
-                    match componentInfo with
-                        | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, _, _) -> ()
-                | TypeRepresentation(typeRepresentation) ->
-                    match typeRepresentation with
-                        | ObjectModel(typeKind, members, _) -> 
-                            for x in members do yield MemberDefinition(x)
-                        | Simple(typeSimpleRepresentation, _) -> 
-                            yield TypeSimpleRepresentation(typeSimpleRepresentation)
-                | TypeSimpleRepresentation(typeSimpleRepresentation) ->
-                    match typeSimpleRepresentation with
-                        | SynTypeDefnSimpleRepr.Union(access, unionCases, range) -> 
-                            for x in unionCases do yield UnionCase(x)
-                        | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> 
-                            for x in enumCases do yield EnumCase(x)
-                        | SynTypeDefnSimpleRepr.Record(_, fields, _) -> 
-                            for x in fields do yield Field(x)
-                        | SynTypeDefnSimpleRepr.TypeAbbrev(_, synType, _) -> 
-                            yield Type(synType)
-                        | SynTypeDefnSimpleRepr.General(_, _, _, _, _, _, _, _)
-                        | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(_, _)
-                        | SynTypeDefnSimpleRepr.None(_) -> ()
-                | UnionCase(unionCase) ->
-                    match unionCase with
-                        | SynUnionCase.UnionCase(_, _, _, _, _, _) -> ()
-                | EnumCase(enumCase) ->
-                    match enumCase with
-                        | SynEnumCase.EnumCase(_, _, _, _, _) -> ()
-                | Field(field) ->
-                    match field with
-                        | SynField.Field(_, _, _, synType, _, _, _, _) -> 
-                            yield Type(synType)
-                | Type(synType) ->
+                | ModuleDeclaration(SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _)) ->
+                    yield ComponentInfo(componentInfo)
+                    for x in moduleDeclarations do yield ModuleDeclaration(x)
+                | ModuleDeclaration(SynModuleDecl.Let(_, bindings, _)) ->
+                    for x in bindings do yield Binding(x)
+                | ModuleDeclaration(SynModuleDecl.DoExpr(_, expression, _)) ->
+                    yield Expression(expression)
+                | ModuleDeclaration(SynModuleDecl.Types(typeDefinitions, _)) ->
+                    for x in typeDefinitions do yield TypeDefinition(x)
+                | ModuleDeclaration(SynModuleDecl.Exception(exceptionDefinition, _)) ->
+                    yield ExceptionDefinition(exceptionDefinition)
+                | ModuleDeclaration(SynModuleDecl.NamespaceFragment(moduleOrNamespace)) ->
+                    yield ModuleOrNamespace(moduleOrNamespace)
+                | ModuleDeclaration(SynModuleDecl.Open(_))
+                | ModuleDeclaration(SynModuleDecl.Attributes(_))
+                | ModuleDeclaration(SynModuleDecl.HashDirective(_))
+                | ModuleDeclaration(SynModuleDecl.ModuleAbbrev(_)) -> ()
+                | ModuleOrNamespace(SynModuleOrNamespace(_, _, moduleDeclarations, _, _, _, _)) ->
+                    for x in moduleDeclarations do yield ModuleDeclaration(x)
+                | Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)) ->
+                    yield Pattern(pattern)
+                    yield Expression(expression)
+                | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(exceptionRepresentation, members, _)) ->
+                    yield ExceptionRepresentation(exceptionRepresentation)
+                    for x in members do yield MemberDefinition(x)
+                | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
+                    yield UnionCase(unionCase)
+                | TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeRepresentation, members, _)) ->
+                    yield ComponentInfo(componentInfo)
+                    yield TypeRepresentation(typeRepresentation)
+                    for x in members do yield MemberDefinition(x)
+                | TypeRepresentation(ObjectModel(typeKind, members, _)) ->
+                    for x in members do yield MemberDefinition(x)
+                | TypeRepresentation(Simple(typeSimpleRepresentation, _)) ->
+                    yield TypeSimpleRepresentation(typeSimpleRepresentation)
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(_, unionCases, _)) ->
+                    for x in unionCases do yield UnionCase(x)
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Enum(enumCases, _)) ->
+                    for x in enumCases do yield EnumCase(x)
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(_, fields, _)) ->
+                    for x in fields do yield Field(x)
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.TypeAbbrev(_, synType, _)) ->
+                    yield Type(synType)
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.General(_))
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(_))
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.None(_)) -> ()
+                | Field(SynField.Field(_, _, _, synType, _, _, _, _)) ->
+                    yield Type(synType)
+                | Type(SynType.App(synType, _, types, _, _, _, _)) 
+                | Type(SynType.LongIdentApp(synType, _, _, types, _, _, _)) ->
+                    yield Type(synType)
+                    for x in types do yield Type(x)
+                | Type(SynType.Tuple(types, _)) ->
+                    for (_, x) in types do yield Type(x)
+                | Type(SynType.Fun(synType, synType1, _))
+                | Type(SynType.StaticConstantNamed(synType, synType1, _))
+                | Type(SynType.MeasureDivide(synType, synType1, _)) ->
+                    yield Type(synType)
+                    yield Type(synType1)
+                | Type(SynType.WithGlobalConstraints(synType, _, _))
+                | Type(SynType.HashConstraint(synType, _))
+                | Type(SynType.MeasurePower(synType, _, _))
+                | Type(SynType.Array(_, synType, _)) ->
+                    yield Type(synType)
+                | Type(SynType.StaticConstantExpr(expression, _)) ->
+                    yield Expression(expression)
+                | Type(SynType.Var(_))
+                | Type(SynType.Anon(_))
+                | Type(SynType.StaticConstant(_))
+                | Type(SynType.LongIdent(_)) -> ()
+                | Match(SynMatchClause.Clause(pattern, expression, expression1, _, _)) ->
+                    yield Pattern(pattern)
+                    match expression with 
+                        | Some(x) -> yield Expression(x)
+                        | None -> ()
+                    yield Expression(expression1)
+                | MemberDefinition(SynMemberDefn.Member(binding, _)) ->
+                    yield Binding(binding)
+                | MemberDefinition(SynMemberDefn.ImplicitCtor(_, attributes, patterns, identifier, _)) ->
+                    for x in patterns do yield SimplePattern(x)
+                | MemberDefinition(SynMemberDefn.ImplicitInherit(synType, expression, _, _)) ->
+                    yield Type(synType)
+                    yield Expression(expression)
+                | MemberDefinition(SynMemberDefn.LetBindings(bindings, _, _, _)) ->
+                    for x in bindings do yield Binding(x)
+                | MemberDefinition(SynMemberDefn.Interface(synType, members, _)) ->
+                    yield Type(synType)
+                    match members with
+                        | Some(members) -> for x in members do yield MemberDefinition(x)
+                        | None -> ()
+                | MemberDefinition(SynMemberDefn.Inherit(synType, _, _)) ->
+                    yield Type(synType)
+                | MemberDefinition(SynMemberDefn.ValField(field, _)) ->
+                    yield Field(field)
+                | MemberDefinition(SynMemberDefn.NestedType(typeDefinition, _, _)) ->
+                    yield TypeDefinition(typeDefinition)
+                | MemberDefinition(SynMemberDefn.AutoProperty(_, _, _, synType, _, _, _, _, expression, _, _)) ->
                     match synType with
-                        | SynType.App(synType, _, types, _, _, _, _) 
-                        | SynType.LongIdentApp(synType, _, _, types, _, _, _) -> 
-                            yield Type(synType)
-                            for x in types do yield Type(x)
-                        | SynType.Tuple(types, _) ->    
-                            for (_, x) in types do yield Type(x)
-                        | SynType.Fun(synType, synType1, _)
-                        | SynType.StaticConstantNamed(synType, synType1, _)
-                        | SynType.MeasureDivide(synType, synType1, _) -> 
-                            yield Type(synType)
-                            yield Type(synType1)
-                        | SynType.WithGlobalConstraints(synType, _, _)
-                        | SynType.HashConstraint(synType, _)
-                        | SynType.MeasurePower(synType, _, _)
-                        | SynType.Array(_, synType, _) -> 
-                            yield Type(synType)
-                        | SynType.StaticConstantExpr(expression, _) -> 
-                            yield Expression(expression)
-                        | SynType.Var(_, _)
-                        | SynType.Anon(_)
-                        | SynType.StaticConstant(_, _) 
-                        | SynType.LongIdent(_) -> ()
-                | Match(matchClause) ->
-                    match matchClause with
-                        | SynMatchClause.Clause(pattern, expression, expression1, _, _) -> 
-                            yield Pattern(pattern)
-                            match expression with 
-                                | Some(x) -> yield Expression(x)
-                                | None -> ()
-                            yield Expression(expression1)
-                | MemberDefinition(synMember) ->
-                    match synMember with
-                        | SynMemberDefn.Member(binding, _) -> 
-                            yield Binding(binding)
-                        | SynMemberDefn.ImplicitCtor(_, attributes, patterns, identifier, _) -> 
-                            for x in patterns do yield SimplePattern(x)
-                        | SynMemberDefn.ImplicitInherit(synType, expression, _, _) -> 
-                            yield Type(synType)
-                            yield Expression(expression)
-                        | SynMemberDefn.LetBindings(bindings, _, _, _) -> 
-                            for x in bindings do yield Binding(x)
-                        | SynMemberDefn.Interface(synType, members, _) -> 
-                            yield Type(synType)
-                            match members with
-                                | Some(members) -> for x in members do yield MemberDefinition(x)
-                                | None -> ()
-                        | SynMemberDefn.Inherit(synType, _, _) -> 
-                            yield Type(synType)
-                        | SynMemberDefn.ValField(field, _) -> 
-                            yield Field(field)
-                        | SynMemberDefn.NestedType(typeDefinition, _, _) -> 
-                            yield TypeDefinition(typeDefinition)
-                        | SynMemberDefn.AutoProperty(attributes, _, identifier, synType, _, _, _, _, expression, _, _) -> 
-                            match synType with
-                                | Some(synType) -> yield Type(synType)
-                                | None -> ()
-                            yield Expression(expression)
-                        | SynMemberDefn.Open(_, _)
-                        | SynMemberDefn.AbstractSlot(_, _, _) -> ()
-                | Expression(expression) ->
+                        | Some(synType) -> yield Type(synType)
+                        | None -> ()
+                    yield Expression(expression)
+                | MemberDefinition(SynMemberDefn.Open(_))
+                | MemberDefinition(SynMemberDefn.AbstractSlot(_)) -> ()
+                | Expression(SynExpr.Paren(expression, _, _, _))
+                | Expression(SynExpr.DotGet(expression, _, _, _))
+                | Expression(SynExpr.DotIndexedGet(expression, _, _, _))
+                | Expression(SynExpr.LongIdentSet(_, expression, _))
+                | Expression(SynExpr.Do(expression, _))
+                | Expression(SynExpr.Assert(expression, _))
+                | Expression(SynExpr.CompExpr(_, _, expression, _))
+                | Expression(SynExpr.ArrayOrListOfSeqExpr(_, expression, _))
+                | Expression(SynExpr.AddressOf(_, expression, _, _))
+                | Expression(SynExpr.InferredDowncast(expression, _))
+                | Expression(SynExpr.InferredUpcast(expression, _))
+                | Expression(SynExpr.DoBang(expression, _))
+                | Expression(SynExpr.Lazy(expression, _))
+                | Expression(SynExpr.TraitCall(_, _, expression, _))
+                | Expression(SynExpr.YieldOrReturn(_, expression, _))
+                | Expression(SynExpr.YieldOrReturnFrom(_, expression, _)) ->
+                    yield Expression(expression)
+                | Expression(SynExpr.Quote(expression, _, expression1, _, _))
+                | Expression(SynExpr.App(_, _, expression, expression1, _))
+                | Expression(SynExpr.Sequential(_, _, expression, expression1, _))
+                | Expression(SynExpr.NamedIndexedPropertySet(_, expression, expression1, _))
+                | Expression(SynExpr.DotIndexedSet(expression, _, expression1, _, _, _))
+                | Expression(SynExpr.JoinIn(expression, _, expression1, _))
+                | Expression(SynExpr.While(_, expression, expression1, _))
+                | Expression(SynExpr.TryFinally(expression, expression1, _, _, _))
+                | Expression(SynExpr.DotSet(expression, _, expression1, _)) ->
+                    yield Expression(expression)
+                    yield Expression(expression1)
+                | Expression(SynExpr.Typed(expression, synType, _)) ->
+                    yield Expression(expression)
+                    yield Type(synType)
+                | Expression(SynExpr.Tuple(expressions, _, _))
+                | Expression(SynExpr.ArrayOrList(_, expressions, _)) ->
+                    for x in expressions do yield Expression(x)
+                | Expression(SynExpr.Record(synType, expression, _, _)) ->
                     match expression with
-                        | SynExpr.Paren(expression, _, _, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.Quote(expression, _, expression1, _, _)
-                        | SynExpr.App(_, _, expression, expression1, _)
-                        | SynExpr.Sequential(_, _, expression, expression1, _)
-                        | SynExpr.NamedIndexedPropertySet(_, expression, expression1, _)
-                        | SynExpr.DotIndexedSet(expression, _, expression1, _, _, _)
-                        | SynExpr.JoinIn(expression, _, expression1, _)
-                        | SynExpr.While(_, expression, expression1, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                        | SynExpr.Typed(expression, synType, _) -> 
-                            yield Expression(expression)
-                            yield Type(synType)
-                        | SynExpr.Tuple(expressions, _, _)
-                        | SynExpr.ArrayOrList(_, expressions, _) ->
-                            for x in expressions do yield Expression(x)
-                        | SynExpr.Record(synType, expression, _, _) -> 
-                            match expression with
-                                | Some(e, _) -> yield Expression(e)
-                                | None -> ()
-                        | SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _) -> 
-                            yield Type(synType)
-                            for x in bindings do yield Binding(x)
-                        | SynExpr.For(_, _, expression, _, expression1, expression2, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                            yield Expression(expression2)
-                        | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) -> 
-                            yield Pattern(pattern)
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                        | SynExpr.Do(expression, _)
-                        | SynExpr.Assert(expression, _)
-                        | SynExpr.CompExpr(_, _, expression, _)
-                        | SynExpr.ArrayOrListOfSeqExpr(_, expression, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.Lambda(_, _, simplePatterns, expression, _) -> 
-                            yield SimplePatterns(simplePatterns)
-                            yield Expression(expression)
-                        | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
-                            for x in matchClauses do yield Match(x)
-                        | SynExpr.Match(_, expression, matchClauses, _, _) -> 
-                            yield Expression(expression)
-                            for x in matchClauses do yield Match(x)
-                        | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> 
-                            yield Expression(expression)
-                            for x in types do yield Type(x)
-                        | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
-                            for x in bindings do yield Binding(x)
-                            yield Expression(expression)
-                        | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _) -> 
-                            yield Expression(expression)
-                            for x in matchClauses do yield Match(x)
-                        | SynExpr.TryFinally(expression, expression1, _, _, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                        | SynExpr.IfThenElse(expression, expression1, expression2, _, _, _, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                            match expression2 with
-                                | Some(e) -> yield Expression(e)
-                                | None -> ()
-                        | SynExpr.DotGet(expression, _, _, _)
-                        | SynExpr.LongIdentSet(_, expression, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.DotSet(expression, _, expression1, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                        | SynExpr.DotIndexedGet(expression, _, _, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _) -> 
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                            yield Expression(expression2)
-                        | SynExpr.New(_, synType, expression, _) 
-                        | SynExpr.TypeTest(expression, synType, _)
-                        | SynExpr.Upcast(expression, synType, _)
-                        | SynExpr.Downcast(expression, synType, _) -> 
-                            yield Expression(expression)
-                            yield Type(synType)
-                        | SynExpr.AddressOf(_, expression, _, _) 
-                        | SynExpr.InferredDowncast(expression, _)
-                        | SynExpr.InferredUpcast(expression, _)
-                        | SynExpr.DoBang(expression, _)
-                        | SynExpr.Lazy(expression, _)
-                        | SynExpr.TraitCall(_, _, expression, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.ImplicitZero(_) -> ()
-                        | SynExpr.YieldOrReturn(_, expression, _)
-                        | SynExpr.YieldOrReturnFrom(_, expression, _) -> 
-                            yield Expression(expression)
-                        | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _) -> 
-                            yield Pattern(pattern)
-                            yield Expression(expression)
-                            yield Expression(expression1)
-                        | SynExpr.Ident(_) 
-                        | SynExpr.LongIdent(_, _, _, _) 
-                        | SynExpr.Null(_)
-                        | SynExpr.Const(_, _)
-                        | SynExpr.DiscardAfterMissingQualificationAfterDot(_, _)
-                        | SynExpr.FromParseError(_, _)
-                        | SynExpr.LibraryOnlyILAssembly(_, _, _, _, _)
-                        | SynExpr.LibraryOnlyStaticOptimization(_, _, _, _)
-                        | SynExpr.LibraryOnlyUnionCaseFieldGet(_, _, _, _)
-                        | SynExpr.LibraryOnlyUnionCaseFieldSet(_, _, _, _, _)
-                        | SynExpr.ArbitraryAfterError(_, _) -> ()
-                | SimplePattern(simplePattern) ->
-                    match simplePattern with
-                        | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, range) -> ()
-                        | SynSimplePat.Typed(simplePattern, synType, _) -> 
-                            yield SimplePattern(simplePattern)
-                            yield Type(synType)
-                        | SynSimplePat.Attrib(simplePattern, attributes, _) -> 
-                            yield SimplePattern(simplePattern)
-                | SimplePatterns(simplePatterns) ->
-                    match simplePatterns with
-                        | SynSimplePats.SimplePats(simplePatterns, _) -> 
-                            for x in simplePatterns do yield SimplePattern(x)
-                        | SynSimplePats.Typed(simplePatterns, synType, _) -> 
-                            yield SimplePatterns(simplePatterns)
-                            yield Type(synType)
-                | Pattern(pattern) ->
-                    match pattern with
-                        | SynPat.Named(pattern, _, _, _, _) -> 
-                            yield Pattern(pattern)
-                        | SynPat.Typed(pattern, synType, _) -> 
-                            yield Pattern(pattern)
-                            yield Type(synType)
-                        | SynPat.Or(pattern, pattern1, _) -> 
-                            yield Pattern(pattern)
-                            yield Pattern(pattern1)
-                        | SynPat.ArrayOrList(_, patterns, _)
-                        | SynPat.Ands(patterns, _) -> 
-                            for x in patterns do yield Pattern(x)
-                        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> 
-                            yield ConstructorArguments(constructorArguments)
-                        | SynPat.Tuple(patterns, _) -> 
-                            for x in patterns do yield Pattern(x)
-                        | SynPat.Attrib(pattern, _, _)
-                        | SynPat.Paren(pattern, _) -> 
-                            yield Pattern(pattern)
-                        | SynPat.Record(patternsAndIdentifier, _) -> 
-                            for (_, x) in patternsAndIdentifier do 
-                                yield Pattern(x)
-                        | SynPat.Null(_) -> ()
-                        | SynPat.OptionalVal(identifier, _) -> ()
-                        | SynPat.IsInst(synType, _) -> 
-                            yield Type(synType)
-                        | SynPat.QuoteExpr(expression, _) -> 
-                            yield Expression(expression)
-                        | SynPat.Const(_, _)
-                        | SynPat.Wild(_)
-                        | SynPat.FromParseError(_)
-                        | SynPat.InstanceMember(_, _, _, _, _)
-                        | SynPat.DeprecatedCharRange(_, _, _) -> ()
-                | ConstructorArguments(arguments) ->
-                    match arguments with
-                        | SynConstructorArgs.Pats(patterns) -> 
-                            for x in patterns do yield Pattern(x)
-                        | SynConstructorArgs.NamePatPairs(namePatterns, _) -> 
-                            for (_, x) in namePatterns do yield Pattern(x)
-                | InterfaceImplementation(implementation) ->
-                    match implementation with
-                        | SynInterfaceImpl.InterfaceImpl(synType, bindings, _) -> 
-                            yield Type(synType)
-                            for x in bindings do yield Binding(x)
-                | TypeParameter(typeParameter) ->
-                    match typeParameter with 
-                        | SynTypar.Typar(_, _, _) -> ()
+                        | Some(e, _) -> yield Expression(e)
+                        | None -> ()
+                | Expression(SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _)) ->
+                    yield Type(synType)
+                    for x in bindings do yield Binding(x)
+                | Expression(SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _))
+                | Expression(SynExpr.For(_, _, expression, _, expression1, expression2, _)) ->
+                    yield Expression(expression)
+                    yield Expression(expression1)
+                    yield Expression(expression2)
+                | Expression(SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _))
+                | Expression(SynExpr.ForEach(_, _, _, pattern, expression, expression1, _)) ->
+                    yield Pattern(pattern)
+                    yield Expression(expression)
+                    yield Expression(expression1)
+                | Expression(SynExpr.Lambda(_, _, simplePatterns, expression, _)) ->
+                    yield SimplePatterns(simplePatterns)
+                    yield Expression(expression)
+                | Expression(SynExpr.MatchLambda(_, _, matchClauses, _, _)) ->
+                    for x in matchClauses do yield Match(x)
+                | Expression(SynExpr.Match(_, expression, matchClauses, _, _)) ->
+                    yield Expression(expression)
+                    for x in matchClauses do yield Match(x)
+                | Expression(SynExpr.TypeApp(expression, _, types, _, _, _, _)) ->
+                    yield Expression(expression)
+                    for x in types do yield Type(x)
+                | Expression(SynExpr.LetOrUse(_, _, bindings, expression, _)) ->
+                    for x in bindings do yield Binding(x)
+                    yield Expression(expression)
+                | Expression(SynExpr.TryWith(expression, _, matchClauses, _, _, _, _)) ->
+                    yield Expression(expression)
+                    for x in matchClauses do yield Match(x)
+                | Expression(SynExpr.IfThenElse(expression, expression1, expression2, _, _, _, _)) ->
+                    yield Expression(expression)
+                    yield Expression(expression1)
+                    match expression2 with
+                        | Some(e) -> yield Expression(e)
+                        | None -> ()
+                | Expression(SynExpr.New(_, synType, expression, _) )
+                | Expression(SynExpr.TypeTest(expression, synType, _))
+                | Expression(SynExpr.Upcast(expression, synType, _))
+                | Expression(SynExpr.Downcast(expression, synType, _)) ->
+                    yield Expression(expression)
+                    yield Type(synType)
+                | Expression(SynExpr.ImplicitZero(_))
+                | Expression(SynExpr.Ident(_))
+                | Expression(SynExpr.LongIdent(_))
+                | Expression(SynExpr.Null(_))
+                | Expression(SynExpr.Const(_))
+                | Expression(SynExpr.DiscardAfterMissingQualificationAfterDot(_))
+                | Expression(SynExpr.FromParseError(_))
+                | Expression(SynExpr.LibraryOnlyILAssembly(_))
+                | Expression(SynExpr.LibraryOnlyStaticOptimization(_))
+                | Expression(SynExpr.LibraryOnlyUnionCaseFieldGet(_))
+                | Expression(SynExpr.LibraryOnlyUnionCaseFieldSet(_))
+                | Expression(SynExpr.ArbitraryAfterError(_)) -> ()
+                | SimplePattern(SynSimplePat.Id(_)) -> ()
+                | SimplePattern(SynSimplePat.Typed(simplePattern, synType, _)) ->
+                    yield SimplePattern(simplePattern)
+                    yield Type(synType)
+                | SimplePattern(SynSimplePat.Attrib(simplePattern, attributes, _)) ->
+                    yield SimplePattern(simplePattern)
+                | SimplePatterns(SynSimplePats.SimplePats(simplePatterns, _)) ->
+                    for x in simplePatterns do yield SimplePattern(x)
+                | SimplePatterns(SynSimplePats.Typed(simplePatterns, synType, _)) ->
+                    yield SimplePatterns(simplePatterns)
+                    yield Type(synType)
+                | Pattern(SynPat.Named(pattern, _, _, _, _)) ->
+                    yield Pattern(pattern)
+                | Pattern(SynPat.Typed(pattern, synType, _)) ->
+                    yield Pattern(pattern)
+                    yield Type(synType)
+                | Pattern(SynPat.Or(pattern, pattern1, _)) ->
+                    yield Pattern(pattern)
+                    yield Pattern(pattern1)
+                | Pattern(SynPat.ArrayOrList(_, patterns, _))
+                | Pattern(SynPat.Ands(patterns, _)) ->
+                    for x in patterns do yield Pattern(x)
+                | Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
+                    yield ConstructorArguments(constructorArguments)
+                | Pattern(SynPat.Tuple(patterns, _)) ->
+                    for x in patterns do yield Pattern(x)
+                | Pattern(SynPat.Attrib(pattern, _, _))
+                | Pattern(SynPat.Paren(pattern, _)) ->
+                    yield Pattern(pattern)
+                | Pattern(SynPat.Record(patternsAndIdentifier, _)) ->
+                    for (_, x) in patternsAndIdentifier do 
+                        yield Pattern(x)
+                | Pattern(SynPat.IsInst(synType, _)) ->
+                    yield Type(synType)
+                | Pattern(SynPat.QuoteExpr(expression, _)) ->
+                    yield Expression(expression)
+                | Pattern(SynPat.Const(_))
+                | Pattern(SynPat.Wild(_))
+                | Pattern(SynPat.FromParseError(_))
+                | Pattern(SynPat.InstanceMember(_))
+                | Pattern(SynPat.DeprecatedCharRange(_))
+                | Pattern(SynPat.Null(_))
+                | Pattern(SynPat.OptionalVal(_)) -> ()
+                | ConstructorArguments(SynConstructorArgs.Pats(patterns)) ->
+                    for x in patterns do yield Pattern(x)
+                | ConstructorArguments(SynConstructorArgs.NamePatPairs(namePatterns, _)) ->
+                    for (_, x) in namePatterns do yield Pattern(x)
+                | InterfaceImplementation(SynInterfaceImpl.InterfaceImpl(synType, bindings, _)) ->
+                    yield Type(synType)
+                    for x in bindings do yield Binding(x)
+                | TypeParameter(_)
+                | UnionCase(_)
+                | ComponentInfo(_)
+                | EnumCase(_) -> ()
         ]
 
     /// Contains information on the current node being visited.
@@ -450,13 +392,13 @@ module Ast =
             /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
             Breadcrumbs: AstNode list
 
-            SuppressedMessages: SuppressedMessage list
+            SuppressedMessages: (SuppressedMessage * range) list
         }
 
         with
             /// Has a given rule been suppressed by SuppressMessageAttribute?
             member this.IsSuppressed(analyserName, ?rulename) =
-                let isAnalyserSuppressed analyser =
+                let isAnalyserSuppressed (analyser, _) =
                     analyser.Category = analyserName && 
                     (Option.exists ((=) analyser.Rule) rulename || analyser.Rule = "*")
 
@@ -508,6 +450,16 @@ module Ast =
                     | Some(visitor) -> Visitor(visitor)
                     | None -> End
             | WalkWithVisitor(visitor, _), _ -> Visitor(visitor)
+
+    let walkTreeToGetSuppressMessageAttributes rootNode =
+        let rec walk node suppressedMessageAttributes =
+            let getAttributesForChild attrs child = 
+                getSuppressMessageAttributes child @ walk child attrs
+
+            traverseNode node
+                |> List.fold getAttributesForChild suppressedMessageAttributes
+
+        walk rootNode (getSuppressMessageAttributes rootNode)
         
     /// <summary>
     /// Walks an abstract syntax tree from a given root node and applies a visitor to each node in the tree.
@@ -586,19 +538,21 @@ module Ast =
     exception ParseException of string
 
     /// Parse a file.
-    let parse finishEarly (checker:InteractiveChecker) projectOptions file input visitors =
+    let parse finishEarly (checker:InteractiveChecker) projectOptions file input tree parseFileResults visitors =
+        let checkFileResults = 
+            checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
+                |> Async.RunSynchronously
+
+        match checkFileResults with
+            | CheckFileAnswer.Succeeded(res) -> 
+                let visitors = visitors |> List.map (fun visitor -> visitor res)
+                walkFile finishEarly visitors tree
+            | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
+
+    let parseFile (checker:InteractiveChecker) projectOptions file input =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match parseFileResults.ParseTree with
-            | Some tree -> 
-                let checkFileResults = 
-                    checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
-                        |> Async.RunSynchronously
-
-                match checkFileResults with
-                    | CheckFileAnswer.Succeeded(res) -> 
-                        let visitors = visitors |> List.map (fun visitor -> visitor res)
-                        walkFile finishEarly visitors tree
-                    | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
+            | Some tree -> tree, parseFileResults
             | None -> 
                 let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
                 raise <| ParseException(error) 
@@ -611,4 +565,6 @@ module Ast =
         
         let projectOptions = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
 
-        parse (fun _ -> false) checker projectOptions file input visitors |> ignore
+        let ast, results = parseFile checker projectOptions file input
+
+        parse (fun _ -> false) checker projectOptions file input ast results visitors |> ignore

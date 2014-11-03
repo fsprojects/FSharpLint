@@ -26,57 +26,31 @@ module AstInfo =
     
     let isPublic path =
         let isSynAccessPublic = function
-            | Some(SynAccess.Public) -> true
-            | None -> true
+            | Some(SynAccess.Public) | None -> true
             | _ -> false
 
         let rec isPublic publicSoFar isBinding = function
             | node :: path when publicSoFar ->
                 match node with
-                    | Pattern(pattern) ->
-                        match pattern with
-                            | SynPat.Named(_, _, _, access, _)
-                            | SynPat.LongIdent(_, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                            | _ -> true
-                    | Binding(binding) ->
-                        match binding with
-                            | SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _) ->
-                                isPublic (isSynAccessPublic access) true path
-                    | TypeSimpleRepresentation(typeSimpleRepresentation) ->
-                        match typeSimpleRepresentation with
-                            | SynTypeDefnSimpleRepr.Record(access, _, _)
-                            | SynTypeDefnSimpleRepr.Union(access, _, _) -> 
-                                isPublic (isSynAccessPublic access) isBinding path
-                            | _ -> true
-                    | UnionCase(unionCase) ->
-                        match unionCase with
-                            | SynUnionCase.UnionCase(_, _, _, _, access, _) -> 
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | Field(field) ->
-                        match field with
-                            | SynField.Field(_, _, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | ComponentInfo(componentInfo) ->
-                        match componentInfo with
-                            | SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | MemberDefinition(memberDefinition) ->
-                        match memberDefinition with
-                        | SynMemberDefn.NestedType(_, access, _)
-                        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _)
-                        | SynMemberDefn.ImplicitCtor(access, _, _, _, _)
-                        | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                        | _ -> isPublic publicSoFar isBinding path
-                    | ExceptionRepresentation(exceptionRepresentation) ->
-                        match exceptionRepresentation with
-                            | SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
-                    | ModuleOrNamespace (moduleOrNamespace) ->
-                        match moduleOrNamespace with
-                            | SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _) ->
-                                isPublic (isSynAccessPublic access) isBinding path
+                    | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
+                    | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
+                    | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
+                    | Field(SynField.Field(_, _, _, _, _, _, access, _))
+                    | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
+                    | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _))
+                    | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _))
+                    | MemberDefinition(SynMemberDefn.NestedType(_, access, _))
+                    | MemberDefinition(SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _))
+                    | MemberDefinition(SynMemberDefn.ImplicitCtor(access, _, _, _, _))
+                    | MemberDefinition(SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _))
+                    | Pattern(SynPat.Named(_, _, _, access, _))
+                    | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
+                        isPublic (isSynAccessPublic access) isBinding path
+                    | TypeSimpleRepresentation(_)
+                    | Pattern(_) -> true
+                    | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
+                        isPublic (isSynAccessPublic access) true path
+                    | MemberDefinition(_) -> isPublic publicSoFar isBinding path
                     | ExceptionDefinition(_)
                     | EnumCase(_)
                     | TypeRepresentation(_)
@@ -88,16 +62,8 @@ module AstInfo =
                     | ModuleDeclaration(_)
                     | SimplePattern(_)
                     | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
-                    | TypeDefinition(_) -> 
-                        if isBinding then
-                            false
-                        else
-                            isPublic publicSoFar isBinding path
-                    | Expression(_) ->
-                        if isBinding then
-                            false
-                        else
-                            isPublic publicSoFar isBinding path
+                    | TypeDefinition(_)
+                    | Expression(_) -> not isBinding && isPublic publicSoFar isBinding path
             | [] -> publicSoFar
             | _ -> false
 
@@ -255,8 +221,8 @@ module AstInfo =
             let operator = operators |> List.tryFind (fun op -> str.StartsWith(op))
 
             match operator with
-            | Some(operator) -> str.Substring(operator.Length) |> isSequenceOfOperators
-            | None -> false
+                | Some(operator) -> str.Substring(operator.Length) |> isSequenceOfOperators
+                | None -> false
 
     /// Is an identifier an operator overload?
     let isOperator (identifier:string) =

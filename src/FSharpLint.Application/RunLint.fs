@@ -83,7 +83,21 @@ module RunLint =
                     FSharpLint.Framework.Ast.PostError = postError
                 }
 
+            let ast, parseResults = FSharpLint.Framework.Ast.parseFile checker projectOptions file input
+
             let visitPlainText = async {
+                    let suppressMessageAttributes =
+                        if input.Contains("SuppressMessage") then
+                            match ast with
+                                | Microsoft.FSharp.Compiler.Ast.ParsedInput.ImplFile(Microsoft.FSharp.Compiler.Ast.ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
+                                    let walkRoot root =
+                                        FSharpLint.Framework.Ast.AstNode.ModuleOrNamespace(root)
+                                            |> FSharpLint.Framework.Ast.walkTreeToGetSuppressMessageAttributes 
+                                    
+                                    roots |> List.collect walkRoot
+                                | Microsoft.FSharp.Compiler.Ast.ParsedInput.SigFile(_) -> []
+                        else []
+
                     for visitor in plainTextVisitors plugins visitorInfo do
                         visitor input file
                 }
@@ -91,7 +105,7 @@ module RunLint =
             let visitAst = async {
                     try
                         astVisitors plugins visitorInfo
-                            |> FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input
+                            |> FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input ast parseResults
                     with 
                         | :? FSharpLint.Framework.Ast.ParseException as e -> 
                             progress.Invoke(Failed(file, e))

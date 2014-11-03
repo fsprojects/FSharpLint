@@ -65,7 +65,7 @@ let stubCurrentNodeInfo suppressedMessages =
         Node = Type(SynType.Anon(range()))
         ChildNodes = []
         Breadcrumbs = []
-        SuppressedMessages = suppressedMessages
+        SuppressedMessages = List.map (fun x -> (x, range())) suppressedMessages
     }
 
 [<TestFixture>]
@@ -85,7 +85,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "Rule" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "Rule" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisers() = 
@@ -101,7 +101,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() = 
@@ -149,7 +149,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.IsAnalyserSuppressedWithAllAnalyserRulesSuppressed() = 
