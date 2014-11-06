@@ -94,6 +94,14 @@ type TestNestedStatements() =
         Assert.IsTrue(this.ErrorExistsAt(1, 11))
 
     [<Test>]
+    member this.TooManyCharactersOnLineSuppressed() = 
+        this.Parse """
+        [<SuppressMessage("FSharpLint.Typography", "MaxCharactersOnLine")>]
+        let line = 55 + 77 + 77"""
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 11))
+
+    [<Test>]
     member this.TooManyLinesInFile() = 
         this.Parse (String.replicate 50 System.Environment.NewLine)
         
@@ -104,6 +112,15 @@ type TestNestedStatements() =
         this.Parse "let line = 55 "
 
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
+
+    [<Test>]
+    member this.WhitespaceOnEndOfLineSuppressed() = 
+        this.Parse """
+        [<SuppressMessage("FSharpLint.Typography", "TrailingWhitespaceOnLine")>]
+        module Dog =
+            let line = 55 """
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 25))
 
     [<Test>]
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
@@ -179,6 +196,14 @@ type TestNestedStatements() =
         this.Parse "\t"
 
         Assert.IsTrue(this.ErrorExistsAt(1, 0))
+
+    [<Test>]
+    member this.TabCharacterInFileSuppressed() = 
+        this.Parse (sprintf """
+        [<SuppressMessage("FSharpLint.Typography", "NoTabCharacters")>]
+        %slet foo = true""" "\t")
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 8))
 
     [<Test>]
     member this.NewLineOnEndOfFile() = 

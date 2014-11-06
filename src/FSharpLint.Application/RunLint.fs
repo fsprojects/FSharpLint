@@ -88,18 +88,11 @@ module RunLint =
             let visitPlainText = async {
                     let suppressMessageAttributes =
                         if input.Contains("SuppressMessage") then
-                            match ast with
-                                | Microsoft.FSharp.Compiler.Ast.ParsedInput.ImplFile(Microsoft.FSharp.Compiler.Ast.ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
-                                    let walkRoot root =
-                                        FSharpLint.Framework.Ast.AstNode.ModuleOrNamespace(root)
-                                            |> FSharpLint.Framework.Ast.walkTreeToGetSuppressMessageAttributes 
-                                    
-                                    roots |> List.collect walkRoot
-                                | Microsoft.FSharp.Compiler.Ast.ParsedInput.SigFile(_) -> []
+                            FSharpLint.Framework.Ast.getSuppressMessageAttributesFromAst ast
                         else []
 
                     for visitor in plainTextVisitors plugins visitorInfo do
-                        visitor input file
+                        visitor { Input = input; File = file; SuppressedMessages = suppressMessageAttributes }
                 }
 
             let visitAst = async {

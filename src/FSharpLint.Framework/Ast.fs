@@ -122,6 +122,7 @@ module Ast =
             | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, range))
             | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, range, _))
             | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, range))
+            | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range))
             | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) -> 
                 attributes
                     |> List.choose tryGetSuppressMessageAttribute
@@ -451,7 +452,7 @@ module Ast =
                     | None -> End
             | WalkWithVisitor(visitor, _), _ -> Visitor(visitor)
 
-    let walkTreeToGetSuppressMessageAttributes rootNode =
+    let private walkTreeToGetSuppressMessageAttributes rootNode =
         let rec walk node suppressedMessageAttributes =
             let getAttributesForChild attrs child = 
                 getSuppressMessageAttributes child @ walk child attrs
@@ -460,6 +461,15 @@ module Ast =
                 |> List.fold getAttributesForChild suppressedMessageAttributes
 
         walk rootNode (getSuppressMessageAttributes rootNode)
+
+    let getSuppressMessageAttributesFromAst = function
+        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
+            let walkRoot root =
+                ModuleOrNamespace(root)
+                    |> walkTreeToGetSuppressMessageAttributes
+
+            roots |> List.collect walkRoot
+        | ParsedInput.SigFile(_) -> []
         
     /// <summary>
     /// Walks an abstract syntax tree from a given root node and applies a visitor to each node in the tree.
@@ -558,7 +568,7 @@ module Ast =
                 raise <| ParseException(error) 
 
     /// Parse a single string.
-    let parseInput input visitors =
+    let parseInput input =
         let checker = InteractiveChecker.Create()
 
         let file = "/home/user/Dog.test.fsx"
@@ -567,4 +577,6 @@ module Ast =
 
         let ast, results = parseFile checker projectOptions file input
 
-        parse (fun _ -> false) checker projectOptions file input ast results visitors |> ignore
+        ast, results, projectOptions, file, checker
+
+        //parse (fun _ -> false) checker projectOptions file input ast results visitors |> ignore

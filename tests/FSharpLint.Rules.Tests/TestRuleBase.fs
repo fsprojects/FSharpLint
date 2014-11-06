@@ -56,9 +56,11 @@ type TestRuleBase(analyser:VisitorType, ?config:Map<string, Analyser>) =
 
         match analyser with
             | Ast(visitor) ->
-                parseInput input [visitor visitorInfo]
+                let ast, results, projectOptions, file, checker = parseInput input
+                parse (fun _ -> false) checker projectOptions file input ast results [visitor visitorInfo] |> ignore
             | PlainText(visitor) -> 
-                visitor visitorInfo input ""
+                let ast, _, _, _, _ = parseInput input
+                visitor visitorInfo { File = ""; Input = input; SuppressedMessages = getSuppressMessageAttributesFromAst ast }
 
     member this.ErrorExistsAt(startLine, startColumn) =
         errorRanges.Any(fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)

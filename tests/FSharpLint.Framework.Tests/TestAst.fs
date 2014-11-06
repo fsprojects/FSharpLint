@@ -180,3 +180,24 @@ type TestAst() =
         let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "*" }]
 
         Assert.IsTrue(currentNodeInfo.IsSuppressed("FSharpLint.Analyser", "Rule"))
+
+    [<Test>]
+    member this.GetSuppressMessageAttributesFromAst() =
+        let input =
+            """
+[<SuppressMessage("Analyser", "Rule")>]
+module Foo =
+    [<SuppressMessage("Analyser", "Rule")>]
+    let dog =
+        let Cat = ()
+        Cat
+        
+    [<SuppressMessage("Analyser", "Rule")>]
+    type Dog = { Woof: int }
+
+[<SuppressMessage("Analyser", "Rule")>]
+let dog = ()"""
+
+        let (ast, _, _, _, _) = parseInput input
+
+        Assert.AreEqual(4, getSuppressMessageAttributesFromAst ast |> List.length)
