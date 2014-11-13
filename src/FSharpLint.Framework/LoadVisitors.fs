@@ -32,8 +32,28 @@ module LoadVisitors =
     /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
     type AstVisitor = Ast.VisitorInfo -> CheckFileResults -> Ast.Visitor
 
+    type PlainTextVisitorInfo =
+        {
+            File: string
+            Input: string
+            SuppressedMessages: (Ast.SuppressedMessage * range) list
+        }
+
+        with
+            /// Has a given rule been suppressed by SuppressMessageAttribute?
+            member this.IsSuppressed(range:range, analyserName, ?rulename) =
+                let rangeContainsOtherRange (containingRange:range) (range:range) =
+                    range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
+
+                let isAnalyserSuppressed (suppressedMessage:Ast.SuppressedMessage, suppressedMessageRange:range) =
+                    suppressedMessage.Category = analyserName && 
+                    (Option.exists ((=) suppressedMessage.Rule) rulename || suppressedMessage.Rule = "*") &&
+                    rangeContainsOtherRange suppressedMessageRange range
+
+                this.SuppressedMessages |> List.exists isAnalyserSuppressed
+
     /// Visitor that visists the plain text of the F# files in a project.
-    type PlainTextVisitor = Ast.VisitorInfo -> string -> string -> unit
+    type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit
 
     type VisitorType =
         | Ast of AstVisitor

@@ -65,7 +65,7 @@ let stubCurrentNodeInfo suppressedMessages =
         Node = Type(SynType.Anon(range()))
         ChildNodes = []
         Breadcrumbs = []
-        SuppressedMessages = suppressedMessages
+        SuppressedMessages = List.map (fun x -> (x, range())) suppressedMessages
     }
 
 [<TestFixture>]
@@ -85,7 +85,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "Rule" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "Rule" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisers() = 
@@ -101,7 +101,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() = 
@@ -149,7 +149,7 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, List.head attrs)
+        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.IsAnalyserSuppressedWithAllAnalyserRulesSuppressed() = 
@@ -180,3 +180,24 @@ type TestAst() =
         let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "*" }]
 
         Assert.IsTrue(currentNodeInfo.IsSuppressed("FSharpLint.Analyser", "Rule"))
+
+    [<Test>]
+    member this.GetSuppressMessageAttributesFromAst() =
+        let input =
+            """
+[<SuppressMessage("Analyser", "Rule")>]
+module Foo =
+    [<SuppressMessage("Analyser", "Rule")>]
+    let dog =
+        let Cat = ()
+        Cat
+        
+    [<SuppressMessage("Analyser", "Rule")>]
+    type Dog = { Woof: int }
+
+[<SuppressMessage("Analyser", "Rule")>]
+let dog = ()"""
+
+        let (ast, _, _, _, _) = parseInput input
+
+        Assert.AreEqual(4, getSuppressMessageAttributesFromAst ast |> List.length)
