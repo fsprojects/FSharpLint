@@ -137,8 +137,6 @@ To disable a rule for a single section of code the [SuppressMessageAttribute](ht
 
 The attribute can be applied to let bindings, modules, types, and exceptions. Any lint warnings generated on or inside of what the attribute is applied to will be suppressed.
 
-*Note: The attributes are currently unable to suppress the rules in the `FSharpLint.Typography` analyser.*
-
 #####Category and CheckId
 
 Only two properties in the attribute need to be set to suppress a rule, these are: `Category` and `CheckId`. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.
