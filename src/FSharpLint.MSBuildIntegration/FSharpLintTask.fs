@@ -23,7 +23,7 @@ open FSharpLint.Application
 type FSharpLintTask() as this = 
     inherit Microsoft.Build.Utilities.Task()
 
-    let getError resouce ([<System.ParamArray>] args) = 
+    let logError resouce ([<System.ParamArray>] args) = 
         let formatString = FSharpLint.Framework.Resources.GetString resouce
         System.String.Format(formatString, args) |> this.Log.LogWarning
 
@@ -72,23 +72,23 @@ type FSharpLintTask() as this =
 
             match result with
                 | RunLint.Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
-                    getError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                    logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
                 | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
-                    getError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                    logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
                 | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e)) -> 
-                    getError "ConsoleMSBuildFailedToLoadReferencedProjectFile" [|referencedProjectPath; e.Message|]
+                    logError "ConsoleMSBuildFailedToLoadReferencedProjectFile" [|referencedProjectPath; e.Message|]
                 | RunLint.Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
-                    getError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
+                    logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
                 | RunLint.Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
-                    getError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
+                    logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
                 | RunLint.Result.Failure(ProjectFile.UnableToFindFSharpCoreDirectory) -> 
-                    getError "ConsoleUnableToFindFSharpCoreDirectory" [||]
+                    logError "ConsoleUnableToFindFSharpCoreDirectory" [||]
                 | RunLint.Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
-                    getError "ConsoleFailedToLoadConfig" [|message|]
+                    logError "ConsoleFailedToLoadConfig" [|message|]
                 | RunLint.Result.Failure(ProjectFile.RunTimeConfigError) -> 
-                    getError "ConsoleRunTimeConfigError" [||]
+                    logError "ConsoleRunTimeConfigError" [||]
                 | RunLint.Result.Failure(ProjectFile.FailedToResolveReferences) -> 
-                    getError "ConsoleFailedToResolveReferences" [||]
+                    logError "ConsoleFailedToResolveReferences" [||]
                 | RunLint.Result.Success -> ()
         with
             | e -> 
