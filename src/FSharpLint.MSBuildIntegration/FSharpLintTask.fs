@@ -62,7 +62,7 @@ type FSharpLintTask() as this =
                     Progress = action
                     ErrorReceived = error
                     FSharpCoreDirectory = 
-                        if this.FSharpCoreDirectory = null then 
+                        if System.String.IsNullOrEmpty(this.FSharpCoreDirectory) then 
                             None 
                         else
                             Some(this.FSharpCoreDirectory) 
