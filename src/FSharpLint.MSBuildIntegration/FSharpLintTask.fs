@@ -18,16 +18,14 @@
 
 namespace FSharpLint.MSBuildIntegration
 
-type FSharpLintTask() = 
+open FSharpLint.Application
+
+type FSharpLintTask() as this = 
     inherit Microsoft.Build.Utilities.Task()
 
-    let currentDomain = System.AppDomain.CurrentDomain
-
-    let handler = System.ResolveEventHandler(fun _ args ->
-        if System.Reflection.AssemblyName(args.Name).Name = "FSharp.Core" then
-            typeof<Microsoft.FSharp.Core.FSharpFunc<_,_>>.Assembly
-        else 
-            null)
+    let getError resouce ([<System.ParamArray>] args) = 
+        let formatString = FSharpLint.Framework.Resources.GetString resouce
+        System.String.Format(formatString, args) |> this.Log.LogWarning
 
     [<Microsoft.Build.Framework.Required>]
     member val Project = "" with get, set
@@ -38,8 +36,8 @@ type FSharpLintTask() =
 
     override this.Execute() = 
         let finishEarly = System.Func<_>(fun _ -> false)
-        let action = System.Action<_>(fun _ -> ())
-        let error = System.Action<FSharpLint.Application.ErrorHandling.Error>(fun error -> 
+        let action = System.Action<_>(ignore)
+        let error = System.Action<ErrorHandling.Error>(fun error -> 
             let (log:string*string*string*string*int*int*int*int*string*obj[]->unit) =
                 if this.TreatWarningsAsErrors then
                     this.Log.LogError
@@ -56,10 +54,8 @@ type FSharpLintTask() =
                 error.Info,
                 null))
 
-        currentDomain.add_AssemblyResolve(handler)
-
         try
-            let parseInfo: FSharpLint.Application.RunLint.ProjectParseInfo =
+            let parseInfo: RunLint.ProjectParseInfo =
                 {
                     FinishEarly = finishEarly
                     ProjectFile = this.Project
@@ -72,12 +68,30 @@ type FSharpLintTask() =
                             Some(this.FSharpCoreDirectory) 
                 }
 
-            FSharpLint.Application.RunLint.parseProject parseInfo
-                |> ignore
+            let result = RunLint.parseProject parseInfo
+
+            match result with
+                | RunLint.Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
+                    getError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                    getError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e)) -> 
+                    getError "ConsoleMSBuildFailedToLoadReferencedProjectFile" [|referencedProjectPath; e.Message|]
+                | RunLint.Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
+                    getError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
+                | RunLint.Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
+                    getError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
+                | RunLint.Result.Failure(ProjectFile.UnableToFindFSharpCoreDirectory) -> 
+                    getError "ConsoleUnableToFindFSharpCoreDirectory" [||]
+                | RunLint.Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
+                    getError "ConsoleFailedToLoadConfig" [|message|]
+                | RunLint.Result.Failure(ProjectFile.RunTimeConfigError) -> 
+                    getError "ConsoleRunTimeConfigError" [||]
+                | RunLint.Result.Failure(ProjectFile.FailedToResolveReferences) -> 
+                    getError "ConsoleFailedToResolveReferences" [||]
+                | RunLint.Result.Success -> ()
         with
             | e -> 
                 this.Log.LogWarning("Lint failed while analysing " + this.Project + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
-                
-        currentDomain.remove_AssemblyResolve(handler)
 
         true
