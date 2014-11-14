@@ -39,12 +39,21 @@ module FSharpCoreLookup =
     /// Standard locations of FSharp.Core for different versions.
     let private versions =
         [ 
-            "2.3.0.0", [@".NETFramework\v2.0\2.3.0.0";@"3.0\Runtime\v2.0"]
+            "2.3.0.0", [@".NETFramework\v2.0\2.3.0.0";@"3.0\Runtime\v2.0";@"2.0\Runtime\v2.0"]
             "2.3.5.1", [@".NETPortable\2.3.5.1"]
             "2.3.5.0", [@".NETPortable\2.3.5.0";@"3.0\Runtime\.NETPortable"]
-            "4.3.0.0", [@".NETFramework\v4.0\4.3.0.0";@"3.0\Runtime\v4.0"]
+            "3.3.1.0", [@".NETCore\3.3.1.0"]
+            "4.3.0.0", [@".NETFramework\v4.0\4.3.0.0";@"3.0\Runtime\v4.0";@"2.0\Runtime\v4.0"]
             "4.3.1.0", [@".NETFramework\v4.0\4.3.1.0"]
         ] |> Map.ofList
+
+    /// Tries to find the latest FSharp.Core avaliable on the machine.
+    let tryFindLatestVersion () = 
+        [
+            "4.3.1.0"
+            "4.3.0.0"
+            "2.3.0.0"
+        ] |> List.tryPick (fun x -> getExistingDirectory versions.[x])
 
     /// Gets the version number from the FSharpCore reference string.
     let versionFromReference referenceString = 
@@ -63,7 +72,7 @@ module FSharpCoreLookup =
                 let directories = versions.[version]
                 getExistingDirectory directories
             | Some(_) -> None /// Unrecognised version.
-            | None -> None
+            | None -> tryFindLatestVersion()
 
     /// Get the FSharpCore reference from a list of references.
     let private tryGetFSharpCoreReference references =
