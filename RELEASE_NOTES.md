@@ -1,3 +1,11 @@
+##### 0.1.7 - November 14 2014
+
+* Added support for SuppressMessageAttribute for the Typography analyser
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/48
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/47
+* Attempted to fix assembly resolution issues by including FParsec built against FSharp.Core 4.3.0.0
+* Added FAKE task to the nuget package
+
 ##### 0.1.6 - October 25 2014
 
 * Added `FSharpLint.Binding.TupleOfWildcards` rule
