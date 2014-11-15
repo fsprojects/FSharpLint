@@ -40,16 +40,24 @@ module FSharpCoreLookup =
     let private versions =
         [ 
             "2.3.0.0", [@".NETFramework\v2.0\2.3.0.0";@"3.0\Runtime\v2.0";@"2.0\Runtime\v2.0"]
+            "3.47.4.0", [@".NETPortable\3.47.4.0"]
             "2.3.5.1", [@".NETPortable\2.3.5.1"]
             "2.3.5.0", [@".NETPortable\2.3.5.0";@"3.0\Runtime\.NETPortable"]
             "3.3.1.0", [@".NETCore\3.3.1.0"]
+            "3.7.4.0", [@".NETCore\3.7.4.0"]
+            "3.78.3.1", [@".NETCore\3.78.3.1"]
+            "3.78.4.0", [@".NETCore\3.78.4.0"]
+            "3.259.3.1", [@".NETCore\3.259.3.1"]
+            "3.259.4.0", [@".NETCore\3.259.4.0"]
             "4.3.0.0", [@".NETFramework\v4.0\4.3.0.0";@"3.0\Runtime\v4.0";@"2.0\Runtime\v4.0"]
             "4.3.1.0", [@".NETFramework\v4.0\4.3.1.0"]
+            "4.4.0.0", [@".NETFramework\v4.0\4.4.0.0"]
         ] |> Map.ofList
 
     /// Tries to find the latest FSharp.Core avaliable on the machine.
     let tryFindLatestVersion () = 
         [
+            "4.4.0.0"
             "4.3.1.0"
             "4.3.0.0"
             "2.3.0.0"
@@ -57,7 +65,7 @@ module FSharpCoreLookup =
 
     /// Gets the version number from the FSharpCore reference string.
     let versionFromReference referenceString = 
-        let versionMatch = Regex.Match(referenceString, @"version\s*=\s*(\d\.\d\.\d\.\d)", RegexOptions.IgnoreCase)
+        let versionMatch = Regex.Match(referenceString, @"version\s*=\s*(\d+\.\d+\.\d+\.\d+)", RegexOptions.IgnoreCase)
 
         let versionFoundInString = versionMatch.Success && versionMatch.Groups.Count = 2
 
