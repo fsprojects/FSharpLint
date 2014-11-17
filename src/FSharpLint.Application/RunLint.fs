@@ -114,7 +114,7 @@ module RunLint =
             progress.Invoke(ReachedEnd(file))
 
     /// Creates a project options object that is required by the compiler.
-    let loadProjectOptions (projectFile:ProjectFile.ProjectFile) (checker:Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker) = 
+    let loadProjectOptions (projectFile:ProjectFile.ProjectFile) (checker:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker) = 
         checker.GetProjectOptionsFromCommandLineArgs
             (projectFile.Path,
                 [| 
@@ -159,7 +159,7 @@ module RunLint =
 
         match ProjectFile.loadProjectFile projectInformation.ProjectFile projectInformation.FSharpCoreDirectory with
             | ProjectFile.Success(projectFile) -> 
-                let checker = Microsoft.FSharp.Compiler.SourceCodeServices.InteractiveChecker.Create()
+                let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
         
                 let projectOptions = loadProjectOptions projectFile checker
 

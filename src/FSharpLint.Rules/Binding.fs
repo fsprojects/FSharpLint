@@ -54,7 +54,7 @@ module Binding =
                     visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
                 | _ -> ()
 
-    let checkForUselessBinding visitorInfo (checkFile:CheckFileResults) (astNode:CurrentNode) pattern expr range =
+    let checkForUselessBinding visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) pattern expr range =
         if "UselessBinding" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "UselessBinding") |> not then
             let rec findBindingIdentifier = function
                 | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
@@ -70,7 +70,7 @@ module Binding =
                             checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
                                 |> Async.RunSynchronously
 
-                        let isMutable (symbol:FSharpSymbolUse) = (symbol.Symbol :?> FSharpMemberFunctionOrValue).IsMutable
+                        let isMutable (symbol:FSharpSymbolUse) = (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
 
                         symbol |> Option.exists isMutable
 

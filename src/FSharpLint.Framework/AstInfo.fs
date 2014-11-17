@@ -70,7 +70,7 @@ module AstInfo =
         isPublic true false path
 
     /// Is an identifier being used to identify declaration of a value?
-    let isValue (identifier:LongIdent) (checkFile:CheckFileResults) =
+    let isValue (identifier:LongIdent) (checkFile:FSharpCheckFileResults) =
         if System.Char.IsUpper(identifier.Head.idText.[0]) && identifier.Length = 1 then
             let identifier = identifier.Head
 
@@ -82,7 +82,7 @@ module AstInfo =
             match symbol with
                 | Some(symbol) ->
                     match symbol.Symbol with
-                        | :? FSharpMemberFunctionOrValue as symbol -> 
+                        | :? FSharpMemberOrFunctionOrValue as symbol -> 
                             match symbol.ImplementationLocation with
                                 | Some(implLocation) -> 
                                     /// If it's implemented elsewhere then it's not what we're looking for,
@@ -118,7 +118,7 @@ module AstInfo =
                 | None when valInfo.ArgInfos.Length = 0 -> Value
                 | None -> Function
     
-    let identifierType (identifier:LongIdent) (checkFile:CheckFileResults) valData =
+    let identifierType (identifier:LongIdent) (checkFile:FSharpCheckFileResults) valData =
         match identifierTypeFromValData valData with
             | Value -> 
                 if isValue identifier checkFile then

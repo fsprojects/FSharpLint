@@ -136,7 +136,7 @@ module HintMatcher =
                 LambdaArguments: Map<char, string>
                 Expression: SynExpr
                 Hint: Expression
-                CheckFileResults: CheckFileResults
+                FSharpCheckFileResults: FSharpCheckFileResults
             }
 
             with 
@@ -173,14 +173,14 @@ module HintMatcher =
             match (leftExpr, opExpr) with 
                 | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
                     let symbolUse = 
-                        arguments.CheckFileResults.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                        arguments.FSharpCheckFileResults.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
                             |> Async.RunSynchronously
                                     
                     match symbolUse with
                         | Some(symbolUse) ->
                             match symbolUse.Symbol with
                                 | :? FSharpParameter -> false
-                                | :? FSharpMemberFunctionOrValue as x -> not x.IsProperty
+                                | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                                 | _ -> true
                         | None -> true
                 | _ -> true
@@ -523,7 +523,7 @@ module HintMatcher =
 
         visitorInfo.PostError range error
 
-    let visitor getHints visitorInfo (checkFile:CheckFileResults) (astNode:CurrentNode) = 
+    let visitor getHints visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) = 
         if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
                 | AstNode.Expression(expr) -> 
@@ -533,7 +533,7 @@ module HintMatcher =
                                 MatchExpression.LambdaArguments = Map.ofList []
                                 MatchExpression.Expression = expr
                                 MatchExpression.Hint = hint.Match
-                                MatchExpression.CheckFileResults = checkFile
+                                MatchExpression.FSharpCheckFileResults = checkFile
                             }
 
                         if MatchExpression.matchHintExpr arguments then

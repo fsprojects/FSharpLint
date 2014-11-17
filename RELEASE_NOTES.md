@@ -1,3 +1,11 @@
+##### 0.1.9 - November 17 2014
+
+* Updated `FSharp.Compiler.Service` for compatibility with VisualFSharpPowerTools: https://github.com/fsprojects/FSharpLint/issues/51
+
+##### 0.1.8 - November 15 2014
+
+* FSharp.Core lookup now supports F# 4, the package is now a single click install in VS 2015 preview
+
 ##### 0.1.7 - November 14 2014
 
 * Added support for SuppressMessageAttribute for the Typography analyser

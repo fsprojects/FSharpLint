@@ -56,8 +56,8 @@
     <Compile Include="HintMatcher.fs" />
     <Compile Include="RaiseWithTooManyArguments.fs" />
     <None Include="README.md" />
-    <None Include="packages.config" />
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
@@ -67,7 +67,7 @@
       <HintPath>..\..\lib\FParsec\FParsecCS.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.59\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+      <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.79\lib\net45\FSharp.Compiler.Service.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Data">

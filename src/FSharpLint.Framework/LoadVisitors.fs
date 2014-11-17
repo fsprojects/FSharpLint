@@ -30,7 +30,7 @@ module LoadVisitors =
     open System.Linq
 
     /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
-    type AstVisitor = Ast.VisitorInfo -> CheckFileResults -> Ast.Visitor
+    type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults -> Ast.Visitor
 
     type PlainTextVisitorInfo =
         {

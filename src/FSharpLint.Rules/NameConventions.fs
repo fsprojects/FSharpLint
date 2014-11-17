@@ -189,7 +189,7 @@ module NameConventions =
             | _ -> false
         | None -> false
 
-    let checkComponentInfo visitorInfo astNode (checkFile:CheckFileResults) (identifier:LongIdent) =
+    let checkComponentInfo visitorInfo astNode (checkFile:FSharpCheckFileResults) (identifier:LongIdent) =
         let interfaceIdentifier = identifier.[List.length identifier - 1]
         let interfaceRange = interfaceIdentifier.idRange
 
@@ -216,7 +216,7 @@ module NameConventions =
     let isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
-    let isLiteral (attributes:SynAttributes) (checkFile:CheckFileResults) = 
+    let isLiteral (attributes:SynAttributes) (checkFile:FSharpCheckFileResults) = 
         let isLiteralAttribute (attribute:SynAttribute) =
             let range = attribute.TypeName.Range
             let names = attribute.TypeName.Lid |> List.map (fun x -> x.idText)

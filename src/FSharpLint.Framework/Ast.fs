@@ -548,18 +548,18 @@ module Ast =
     exception ParseException of string
 
     /// Parse a file.
-    let parse finishEarly (checker:InteractiveChecker) projectOptions file input tree parseFileResults visitors =
+    let parse finishEarly (checker:FSharpChecker) projectOptions file input tree parseFileResults visitors =
         let checkFileResults = 
             checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
                 |> Async.RunSynchronously
 
         match checkFileResults with
-            | CheckFileAnswer.Succeeded(res) -> 
+            | FSharpCheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
                 walkFile finishEarly visitors tree
             | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
 
-    let parseFile (checker:InteractiveChecker) projectOptions file input =
+    let parseFile (checker:FSharpChecker) projectOptions file input =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match parseFileResults.ParseTree with
             | Some tree -> tree, parseFileResults
@@ -569,7 +569,7 @@ module Ast =
 
     /// Parse a single string.
     let parseInput input =
-        let checker = InteractiveChecker.Create()
+        let checker = FSharpChecker.Create()
 
         let file = "/home/user/Dog.test.fsx"
         
@@ -578,5 +578,3 @@ module Ast =
         let ast, results = parseFile checker projectOptions file input
 
         ast, results, projectOptions, file, checker
-
-        //parse (fun _ -> false) checker projectOptions file input ast results visitors |> ignore
