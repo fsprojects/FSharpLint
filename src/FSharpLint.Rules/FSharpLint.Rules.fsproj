@@ -58,6 +58,7 @@
     <None Include="README.md" />
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

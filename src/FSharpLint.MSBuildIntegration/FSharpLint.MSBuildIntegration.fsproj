@@ -48,6 +48,7 @@
     <Compile Include="FSharpLintTask.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">

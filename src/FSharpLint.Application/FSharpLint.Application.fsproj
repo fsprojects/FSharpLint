@@ -55,6 +55,7 @@
     <Compile Include="RunLint.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
+    <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">

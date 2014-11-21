@@ -26,7 +26,7 @@ let summary = "Lint tool for F#."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.1.9"
+let version = "0.1.10"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -49,15 +49,20 @@ Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
 let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md")
 
 // Generate assembly info files with the right version & up-to-date information
-Target "AssemblyInfo" (fun _ ->
-  let fileName = "src/FSharpLint.Console/AssemblyInfo.fs"
-  CreateFSharpAssemblyInfo fileName
+let genAssemblyInfo (projectPath) =
+    let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+    let basePath = "src/" + projectName
+    let fileName = basePath + "/AssemblyInfo.fs"
+    CreateFSharpAssemblyInfo fileName
       [ Attribute.Title project
         Attribute.Product project
         Attribute.Description summary
-        Attribute.Version release.AssemblyVersion
-        Attribute.FileVersion release.AssemblyVersion ] 
-)
+        Attribute.Version version
+        Attribute.FileVersion version ]
+
+Target "AssemblyInfo" (fun _ ->
+    !! "src/**/*.fsproj"
+        |> Seq.iter genAssemblyInfo)
 
 // --------------------------------------------------------------------------------------
 // Clean build results & restore NuGet packages
