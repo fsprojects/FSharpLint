@@ -73,11 +73,16 @@ module ProjectFile =
         match fsharpCoreDirectory with
             | Success(fsharpCoreDirectory) ->
                 let resolvedReferences = 
+                    let targetFrameworkVersion =
+                        let property = projectInstance.GetProperty("TargetFrameworkVersion")
+                        if property <> null then property.EvaluatedValue
+                        else ""
+
                     try
                         Microsoft.FSharp.Compiler.MSBuildResolver.Resolve(
                                 Microsoft.FSharp.Compiler.MSBuildResolver.CompileTimeLike, 
                                 references,
-                                "v" + projectInstance.ToolsVersion,
+                                targetFrameworkVersion,
                                 [],
                                 "",
                                 outputPath,
