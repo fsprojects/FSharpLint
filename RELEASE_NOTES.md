@@ -1,3 +1,7 @@
+##### 0.1.10 - November 19 2014
+
+* Dropped MSBuild tools back down from 12 to 4 to support VS2010
+
 ##### 0.1.9 - November 17 2014
 
 * Updated `FSharp.Compiler.Service` for compatibility with VisualFSharpPowerTools: https://github.com/fsprojects/FSharpLint/issues/51
