@@ -30,7 +30,7 @@ module RunLint =
         | ReachedEnd of string
 
         /// Failed to parse a file.
-        | Failed of string * FSharpLint.Framework.Ast.ParseException
+        | Failed of string * System.Exception
 
         member Filename : unit -> string
 

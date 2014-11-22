@@ -34,7 +34,7 @@ module RunLint =
         | ReachedEnd of string
 
         /// Failed to parse a file.
-        | Failed of string * FSharpLint.Framework.Ast.ParseException
+        | Failed of string * System.Exception
 
         member this.Filename() =
             match this with 
@@ -100,7 +100,7 @@ module RunLint =
                         astVisitors plugins visitorInfo
                             |> FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input ast parseResults
                     with 
-                        | :? FSharpLint.Framework.Ast.ParseException as e -> 
+                        | e -> 
                             progress.Invoke(Failed(file, e))
                 }
 
@@ -171,7 +171,7 @@ module RunLint =
 
                     Success
                 with 
-                    | :? FSharpLint.Framework.Configuration.ConfigurationException -> 
+                    | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
                         Failure(ProjectFile.RunTimeConfigError)
             | ProjectFile.Failure(error) -> 
                 Failure(error)

@@ -545,7 +545,7 @@ module Ast =
                     |> ignore
         | ParsedInput.SigFile _ -> ()
 
-    exception ParseException of string
+    exception CheckFileException of string
 
     /// Parse a file.
     let parse finishEarly (checker:FSharpChecker) projectOptions file input tree parseFileResults visitors =
@@ -557,15 +557,27 @@ module Ast =
             | FSharpCheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
                 walkFile finishEarly visitors tree
-            | res -> raise <| ParseException(sprintf "Parsing did not finish... (%A)" res)
+            | res -> raise <| CheckFileException("Checking files was aborted")
+
+    type FailedToParseFile =
+        {
+            File: string
+            Errors: string list
+        }
+
+    exception ParseException of FailedToParseFile
 
     let parseFile (checker:FSharpChecker) projectOptions file input =
         let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match parseFileResults.ParseTree with
             | Some tree -> tree, parseFileResults
             | None -> 
-                let error = sprintf "Failed to parse file %s, probably missing FSharp.Core .sigdata and .opdata files." file
-                raise <| ParseException(error) 
+                let errorMessages = 
+                    parseFileResults.Errors 
+                        |> Array.map (fun x -> x.Message)
+                        |> Array.toList
+
+                raise <| ParseException({ File = file; Errors = errorMessages }) 
 
     /// Parse a single string.
     let parseInput input =

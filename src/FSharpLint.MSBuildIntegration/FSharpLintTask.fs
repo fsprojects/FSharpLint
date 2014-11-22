@@ -91,6 +91,12 @@ type FSharpLintTask() as this =
                     logError "ConsoleFailedToResolveReferences" [||]
                 | RunLint.Result.Success -> ()
         with
+            | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
+                this.Log.LogWarning(
+                    "Lint failed while analysing " + 
+                    this.Project + 
+                    ".\nFailed with: " + 
+                    System.String.Join("\n", errors))
             | e -> 
                 this.Log.LogWarning("Lint failed while analysing " + this.Project + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
 
