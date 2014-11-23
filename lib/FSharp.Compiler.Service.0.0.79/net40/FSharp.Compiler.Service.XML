@@ -8446,18 +8446,6 @@ Apply the given function to each binding in the hash table
 <member name="">
 
 </member>
-<member name="">
-
-</member>
-<member name="">
-
-</member>
-<member name="">
-
-</member>
-<member name="">
-
-</member>
 <member name="M:Internal.Utilities.FSharpEnvironment.tryFsharpiScript(System.String)">
 <summary>
  Try to find the F# compiler location by looking at the &quot;fsharpi&quot; script installed by F# packages
@@ -9714,12 +9702,6 @@ Build a new array that contains the elements of the first array followed by the 
 <summary>
  Helpers used by generated parsers.
 </summary>
-</member>
-<member name="">
-
-</member>
-<member name="T:Internal.Utilities.Text.Parsing.Flags">
-
 </member>
 <member name="T:Microsoft.FSharp.Compiler.ErrorInfo">
 <summary>
@@ -14488,9 +14470,6 @@ Build a new array that contains the elements of the first array followed by the 
   to Abstract IL library
 </summary>
 </member>
-<member name="">
-
-</member>
 <member name="T:Microsoft.FSharp.Compiler.AbstractIL.ILAsciiWriter">
 <summary>
  Printer for the abstract syntax.
@@ -15281,12 +15260,6 @@ Emit comparison instructions
 <summary>
  Sets with a specific comparison function
 </summary>
-</member>
-<member name="">
-
-</member>
-<member name="">
-
 </member>
 <member name="">
 
@@ -21852,12 +21825,6 @@ Emit comparison instructions
 <member name="">
 
 </member>
-<member name="">
-
-</member>
-<member name="">
-
-</member>
 <member name="P:Microsoft.FSharp.Compiler.Build.TcConfig.light">
 <summary>
  Set if the user has explicitly turned indentation-aware syntax on/off
@@ -22052,12 +22019,6 @@ Emit comparison instructions
 <summary>
  If true, indicates all type checking and code generation is in the context of fsi.exe
 </summary>
-</member>
-<member name="">
-
-</member>
-<member name="">
-
 </member>
 <member name="">
 
@@ -22976,12 +22937,6 @@ Emit comparison instructions
 <member name="">
 
 </member>
-<member name="">
-
-</member>
-<member name="T:Microsoft.FSharp.Compiler.Build.FullCompiler">
-
-</member>
 <member name="T:Microsoft.FSharp.Compiler.Build">
 <summary>
  Loading initial context, reporting errors etc.
@@ -23525,9 +23480,6 @@ Emit comparison instructions
 <summary>
  Memoization table to help minimize the number of ILSourceDocument objects we create
 </summary>
-</member>
-<member name="">
-
 </member>
 <member name="">
 
@@ -27781,11 +27733,6 @@ Emit comparison instructions
  Get the declaring type or module holding the method. If this is an C#-style extension method then this is the type
  holding the static member that is the extension method. If this is an F#-style extension method it is the logical module
  holding the value for the extension method.
-</summary>
-</member>
-<member name="P:Microsoft.FSharp.Compiler.Infos.MethInfo.DebuggerDisplayName">
-<summary>
- Get the method name in DebuggerDisplayForm
 </summary>
 </member>
 <member name="P:Microsoft.FSharp.Compiler.Infos.MethInfo.ArbitraryValRef">
@@ -43758,7 +43705,7 @@ Get the signature for the value&apos;s XML documentation
  Create a new entity with empty, unlinked data. Only used during unpickling of F# metadata.
 </summary>
 </member>
-<member name="M:Microsoft.FSharp.Compiler.Tast.Entity.New(System.String,Microsoft.FSharp.Compiler.Tast.EntityData)">
+<member name="M:Microsoft.FSharp.Compiler.Tast.Entity.New``1(``0,Microsoft.FSharp.Compiler.Tast.EntityData)">
 <summary>
  Create a new entity with the given backing data. Only used during unpickling of F# metadata.
 </summary>
@@ -44596,11 +44543,6 @@ Get the signature for the value&apos;s XML documentation
 </member>
 <member name="">
 
-</member>
-<member name="P:Microsoft.FSharp.Compiler.Tast.verboseStamps">
-<summary>
-verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. Turn on using &apos;--stamps&apos;
-</summary>
 </member>
 <member name="">
 
@@ -45893,9 +45835,6 @@ verboseStamps: print #stamp on each id -- very verbose - but sometimes useful. T
 <summary>
  Get the element type of an array type
 </summary>
-</member>
-<member name="">
-
 </member>
 <member name="">
 
