@@ -1,3 +1,8 @@
+##### 0.1.11 - November 23 2014
+
+* FSharp.Compiler.Service now included as a strongly named assembly.
+* TargetFrameworkVersion now taken from the project file: https://github.com/fsprojects/FSharpLint/issues/52
+
 ##### 0.1.10 - November 19 2014
 
 * Dropped MSBuild tools back down from 12 to 4 to support VS2010
