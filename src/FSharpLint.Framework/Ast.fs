@@ -130,6 +130,8 @@ module Ast =
             | _ -> []
 
     /// Extracts the child nodes to be visited from a given node.
+    [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInFunction")>]
+    [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.CyclomaticComplexity", "*")>]
     let private traverseNode node =
         [
             match node with
@@ -475,7 +477,9 @@ module Ast =
     /// Walks an abstract syntax tree from a given root node and applies a visitor to each node in the tree.
     /// Maintains state of visitors using the visitor's return value.
     /// </summary>
-    /// <param name="finishEarly">States whether to stop walking the tree, used for asynchronous environments to cancel the task.</param>
+    /// <param name="finishEarly">
+    /// States whether to stop walking the tree, used for asynchronous environments to cancel the task.
+    /// </param>
     let walk finishEarly rootNode visitor =
         /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
         let rec walk finishEarly breadcrumbs suppressedMessages node visitor currentVisitMethod = 

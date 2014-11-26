@@ -183,7 +183,7 @@ module AstInfo =
         "op_DynamicAssignment"
         "op_ArrayLookup"
         "op_ArrayAssign"
-    ]    
+    ]
 
     /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
     let operators = [ 

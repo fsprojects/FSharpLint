@@ -82,30 +82,38 @@ module LoadVisitors =
 
     /// Loads all implementations of IRegisterPluginWithConfigChecker from a given assembly.
     let loadConfigCheckers (assembly:System.Reflection.Assembly) =
+        let isConfigCheckerType (t:System.Type) =
+            t.GetInterfaces().Contains(typeof<IRegisterPluginWithConfigChecker>)
+                && t.GetConstructor(System.Type.EmptyTypes) <> null
+
         assembly.GetTypes()
-                |> Array.filter (fun (t:System.Type) -> 
-                                    t.GetInterfaces().Contains(typeof<IRegisterPluginWithConfigChecker>)
-                                    && t.GetConstructor(System.Type.EmptyTypes) <> null)
+                |> Array.filter isConfigCheckerType
                 |> Array.toList
 
     /// <summary>
     /// Gets a list of failures that occurred when checking a given config file using a given list of checkConfigs.
     /// </summary>
-    /// <param name="checkConfigs">List of config checkers, these can be loaded from an assembly using loadConfigCheckers</param>
+    /// <param name="checkConfigs">
+    /// List of config checkers, these can be loaded from an assembly using loadConfigCheckers
+    /// </param>
     let checkConfigsForFailures config checkConfigs =
+        let instanceFromType (t:System.Type) = System.Activator.CreateInstance(t) :?> IRegisterPluginWithConfigChecker
+        let checkConfiguration (configChecker:IRegisterPluginWithConfigChecker) = configChecker.CheckConfig(config)
+        let getConfigurationFailures = function 
+            | CheckConfigResult.Failed(failMessage) -> Some(failMessage) 
+            | CheckConfigResult.Success -> None
+
         checkConfigs
-            |> List.map (fun (t:System.Type) -> System.Activator.CreateInstance(t) :?> IRegisterPluginWithConfigChecker)
-            |> List.map (fun (x:IRegisterPluginWithConfigChecker) -> x.CheckConfig(config))
-            |> List.choose (function 
-                | CheckConfigResult.Failed(failMessage) -> Some(failMessage) 
-                | CheckConfigResult.Success -> None)
+            |> List.choose (instanceFromType >> checkConfiguration >> getConfigurationFailures)
 
     /// Loads all registered visitors (files containing a class implementing IRegisterPlugin) from a given assembly.
     let loadPlugins (assembly:System.Reflection.Assembly) =
+        let isPluginType (t:System.Type) = 
+            t.GetInterfaces().Contains(typeof<IRegisterPlugin>) && t.GetConstructor(System.Type.EmptyTypes) <> null
+        let instanceFromType (t:System.Type) = System.Activator.CreateInstance(t) :?> IRegisterPlugin
+        let getPluginFromInstance (x:IRegisterPlugin) = x.RegisterPlugin
+
         assembly.GetTypes()
-                |> Array.filter (fun (t:System.Type) -> 
-                                    t.GetInterfaces().Contains(typeof<IRegisterPlugin>)
-                                    && t.GetConstructor(System.Type.EmptyTypes) <> null)
-                |> Array.map (fun (t:System.Type) -> System.Activator.CreateInstance(t) :?> IRegisterPlugin)
-                |> Array.map (fun (x:IRegisterPlugin) -> x.RegisterPlugin)
+                |> Array.filter isPluginType
+                |> Array.map (instanceFromType >> getPluginFromInstance)
                 |> Array.toList
