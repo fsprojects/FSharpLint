@@ -31,9 +31,7 @@ module Binding =
     let AnalyserName = "FSharpLint.Binding"
 
     let isRuleEnabled config ruleName =
-        match isRuleEnabled config AnalyserName ruleName with
-            | Some(_) -> true
-            | None -> false
+        isRuleEnabled config AnalyserName ruleName |> Option.isSome
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
     let checkForBindingToAWildcard visitorInfo (astNode:CurrentNode) pattern range =

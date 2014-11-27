@@ -49,7 +49,7 @@ module CyclomaticComplexity =
             | None -> true
 
     let isAnalyserEnabled config =
-        (isAnalyserEnabled config AnalyserName).IsSome
+        isAnalyserEnabled config AnalyserName |> Option.isSome
     
     let rec countDecisionPathsVisitor visitorInfo checkFile range count astNode : VisitorResult = 
         let visitor = countDecisionPathsVisitor visitorInfo checkFile range

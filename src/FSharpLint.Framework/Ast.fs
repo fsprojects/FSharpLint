@@ -549,18 +549,28 @@ module Ast =
                     |> ignore
         | ParsedInput.SigFile _ -> ()
 
+    type ParseInfo =
+        {
+            File: string
+            Checker: FSharpChecker
+            ProjectOptions: FSharpProjectOptions
+            Input: string
+            Ast: ParsedInput
+            FileParseResults: FSharpParseFileResults
+        }
+
     exception CheckFileException of string
 
     /// Parse a file.
-    let parse finishEarly (checker:FSharpChecker) projectOptions file input tree parseFileResults visitors =
+    let parse finishEarly parseInfo visitors =
         let checkFileResults = 
-            checker.CheckFileInProject(parseFileResults, file, 0, input, projectOptions) 
+            parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
                 |> Async.RunSynchronously
 
         match checkFileResults with
             | FSharpCheckFileAnswer.Succeeded(res) -> 
                 let visitors = visitors |> List.map (fun visitor -> visitor res)
-                walkFile finishEarly visitors tree
+                walkFile finishEarly visitors parseInfo.Ast
             | res -> raise <| CheckFileException("Checking files was aborted")
 
     type FailedToParseFile =
@@ -572,16 +582,24 @@ module Ast =
     exception ParseException of FailedToParseFile
 
     let parseFile (checker:FSharpChecker) projectOptions file input =
-        let parseFileResults = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
-        match parseFileResults.ParseTree with
-            | Some tree -> tree, parseFileResults
+        let results = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
+        match results.ParseTree with
+            | Some(ast) ->
+                {
+                    File = file
+                    Checker = checker
+                    ProjectOptions = projectOptions
+                    Input = input
+                    Ast = ast
+                    FileParseResults = results
+                }
             | None -> 
                 let errorMessages = 
-                    parseFileResults.Errors 
+                    results.Errors
                         |> Array.map (fun x -> x.Message)
                         |> Array.toList
 
-                raise <| ParseException({ File = file; Errors = errorMessages }) 
+                raise <| ParseException({ File = file; Errors = errorMessages })
 
     /// Parse a single string.
     let parseInput input =
@@ -591,6 +609,4 @@ module Ast =
         
         let projectOptions = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
 
-        let ast, results = parseFile checker projectOptions file input
-
-        ast, results, projectOptions, file, checker
+        parseFile checker projectOptions file input

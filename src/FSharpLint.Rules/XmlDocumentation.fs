@@ -35,14 +35,14 @@ module XmlDocumentation =
         match isRuleEnabled config AnalyserName "ExceptionDefinitionHeader" with
             | Some(_, ruleSettings) when ruleSettings.ContainsKey "Enabled" ->
                 match ruleSettings.["Enabled"] with
-                    | Enabled(b) when b = true -> true
+                    | Enabled(true) -> true
                     | _ -> false
             | Some(_)
             | None -> false
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
-            | XmlDoc(lines) when Array.length lines = 0 -> true
+            | XmlDoc([||]) -> true
             | _ -> false
 
     let visitor visitorInfo (checkFile:FSharpCheckFileResults) astNode = 

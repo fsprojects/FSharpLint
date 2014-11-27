@@ -269,11 +269,8 @@ module NameConventions =
                     | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
                         CheckIdentifiers.checkException visitorInfo astNode identifier
                 Continue
-            | AstNode.Expression(expr) ->
-                match expr with
-                    | SynExpr.For(_, identifier, _, _, _, _, _) ->
-                        CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
-                    | _ -> ()
+            | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
+                CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
                 Continue
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
@@ -296,25 +293,23 @@ module NameConventions =
                         CheckIdentifiers.checkParameter visitorInfo astNode identifier
                     | _ -> ()
                 Continue
-            | AstNode.Binding(binding) ->
-                match binding with
-                    | SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _) -> 
-                        if isLiteral attributes checkFile then
-                            match pattern with
-                                | SynPat.Named(_, identifier, _, _, _) -> 
-                                    CheckIdentifiers.checkLiteral visitorInfo astNode identifier
-                                | _ -> ()
+            | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+                if isLiteral attributes checkFile then
+                    match pattern with
+                        | SynPat.Named(_, identifier, _, _, _) -> 
+                            CheckIdentifiers.checkLiteral visitorInfo astNode identifier
+                        | _ -> ()
 
-                            Stop
-                        else
-                            let getVisitorForChild i child =
-                                match child with
-                                    | Pattern(_) ->
-                                        Some(bindingPatternVisitor visitorInfo checkFile valData)
-                                    | _ -> 
-                                        Some(visitor visitorInfo checkFile)
+                    Stop
+                else
+                    let getVisitorForChild i child =
+                        match child with
+                            | Pattern(_) ->
+                                Some(bindingPatternVisitor visitorInfo checkFile valData)
+                            | _ -> 
+                                Some(visitor visitorInfo checkFile)
 
-                            ContinueWithVisitorsForChildren(getVisitorForChild)
+                    ContinueWithVisitorsForChildren(getVisitorForChild)
             | _ -> Continue
     and 
         bindingPatternVisitor visitorInfo checkFile valData astNode = 

@@ -33,7 +33,7 @@ module FunctionReimplementation =
     let AnalyserName = "FSharpLint.FunctionReimplementation"
 
     let isAnalyserEnabled config =
-        (isAnalyserEnabled config AnalyserName).IsSome
+        isAnalyserEnabled config AnalyserName |> Option.isSome
 
     let validateFunctionIsNotPointless parameters expression range visitorInfo =
         let rec isFunctionPointless expression = function
@@ -85,14 +85,11 @@ module FunctionReimplementation =
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Expression(expression) when isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not ->
-                match expression with
-                    | SynExpr.Lambda(_) as lambda -> 
-                        let (parameters, expression) = getLambdaParametersAndExpression lambda
+            | AstNode.Expression(SynExpr.Lambda(_) as lambda) when isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not ->
+                let (parameters, expression) = getLambdaParametersAndExpression lambda
 
-                        if List.length parameters > 0 then
-                            validateFunctionIsNotPointless parameters expression lambda.Range visitorInfo
-                    | _ -> ()
+                if List.length parameters > 0 then
+                    validateFunctionIsNotPointless parameters expression lambda.Range visitorInfo
             | _ -> ()
 
         Continue

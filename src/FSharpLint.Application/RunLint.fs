@@ -83,12 +83,12 @@ module RunLint =
                     FSharpLint.Framework.Ast.PostError = postError
                 }
 
-            let ast, parseResults = FSharpLint.Framework.Ast.parseFile checker projectOptions file input
+            let parseInfo = FSharpLint.Framework.Ast.parseFile checker projectOptions file input
 
             let visitPlainText = async {
                     let suppressMessageAttributes =
                         if input.Contains("SuppressMessage") then
-                            FSharpLint.Framework.Ast.getSuppressMessageAttributesFromAst ast
+                            FSharpLint.Framework.Ast.getSuppressMessageAttributesFromAst parseInfo.Ast
                         else []
 
                     for visitor in plainTextVisitors plugins visitorInfo do
@@ -98,7 +98,7 @@ module RunLint =
             let visitAst = async {
                     try
                         astVisitors plugins visitorInfo
-                            |> FSharpLint.Framework.Ast.parse finishEarly checker projectOptions file input ast parseResults
+                            |> FSharpLint.Framework.Ast.parse finishEarly parseInfo
                     with 
                         | e -> 
                             progress.Invoke(Failed(file, e))

@@ -29,12 +29,10 @@ module Typography =
     let AnalyserName = "FSharpLint.Typography"
 
     let isAnalyserEnabled config =
-        (isAnalyserEnabled config AnalyserName).IsSome
+        isAnalyserEnabled config AnalyserName |> Option.isSome
 
     let isEnabled ruleName config =
-        match isRuleEnabled config AnalyserName ruleName with
-            | Some(_) -> true
-            | None -> false
+        isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
     module MaxCharactersOnLine =
         let private maxCharactersOnLine config =

@@ -19,7 +19,6 @@
 module TestRuleBase
 
 open NUnit.Framework
-open System.Linq
 open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
@@ -56,23 +55,28 @@ type TestRuleBase(analyser:VisitorType, ?config:Map<string, Analyser>) =
 
         match analyser with
             | Ast(visitor) ->
-                let ast, results, projectOptions, file, checker = parseInput input
-                parse (fun _ -> false) checker projectOptions file input ast results [visitor visitorInfo] |> ignore
+                let parseInfo = parseInput input
+                parse (fun _ -> false) parseInfo [visitor visitorInfo] |> ignore
             | PlainText(visitor) -> 
-                let ast, _, _, _, _ = parseInput input
-                visitor visitorInfo { File = ""; Input = input; SuppressedMessages = getSuppressMessageAttributesFromAst ast }
+                let parseInfo = parseInput input
+                let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
+                visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
 
     member this.ErrorExistsAt(startLine, startColumn) =
-        errorRanges.Any(fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
+        errorRanges
+            |> Seq.exists (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
 
     member this.ErrorsAt(startLine, startColumn) =
-        errorRanges.Where(fun (r:range, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
+        errorRanges
+            |> Seq.filter (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
 
     member this.ErrorExistsOnLine(startLine) =
-        errorRanges.Any(fun (r:range, _) -> r.StartLine = startLine)
+        errorRanges
+            |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
-        (this.ErrorsAt(startLine, startColumn)).Any(fun (_, e) -> e = message)
+        this.ErrorsAt(startLine, startColumn)
+            |> Seq.exists (fun (_, e) -> e = message)
 
     [<SetUp>]
     member this.SetUp() = 

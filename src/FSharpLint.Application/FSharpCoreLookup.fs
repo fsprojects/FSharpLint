@@ -32,9 +32,11 @@ module FSharpCoreLookup =
 
     /// Get the first directory that exists.
     let private getExistingDirectory directories =
+        let getIfDirectoryExists x = if System.IO.Directory.Exists(x) then Some(x) else None
+
         directories
             |> List.map fullDirectory
-            |> List.tryPick (fun x -> if System.IO.Directory.Exists(x) then Some(x) else None)
+            |> List.tryPick getIfDirectoryExists
 
     /// Standard locations of FSharp.Core for different versions.
     let private versions =

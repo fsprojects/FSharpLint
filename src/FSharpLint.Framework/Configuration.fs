@@ -95,11 +95,8 @@ module Configuration =
     let private parseRule (rule:Config.Rule) : Rule =
         {
             Settings = 
-                [ 
-                    let ruleSettings = rule.RuleSettings
-
-                    yield! ruleSettings.Properties |> parseSettings
-                ]
+                rule.RuleSettings.Properties 
+                    |> parseSettings
                     |> Map.ofList
         }
 
@@ -171,13 +168,15 @@ module Configuration =
     /// Returns the analyser settings if the analyser was enabled; None otherwise.
     let isAnalyserEnabled (config:Map<string,Analyser>) analyserName =
         if not <| config.ContainsKey analyserName then
-            raise <| ConfigurationException(sprintf "Expected %s analyser in config." analyserName)
+            sprintf "Expected %s analyser in config." analyserName
+                |> ConfigurationException
+                |> raise
 
         let analyserSettings = config.[analyserName].Settings
 
         if analyserSettings.ContainsKey "Enabled" then
             match analyserSettings.["Enabled"] with 
-                | Enabled(enabled) when enabled -> Some(analyserSettings)
+                | Enabled(true) -> Some(analyserSettings)
                 | _ -> None
         else
             Some(analyserSettings)
@@ -190,14 +189,15 @@ module Configuration =
                 let rules = config.[analyserName].Rules
 
                 if not <| rules.ContainsKey ruleName then 
-                    let error = sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
-                    raise <| ConfigurationException(error)
+                    sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
+                        |> ConfigurationException
+                        |> raise
 
                 let ruleSettings = rules.[ruleName].Settings
 
                 if ruleSettings.ContainsKey "Enabled" then
                     match ruleSettings.["Enabled"] with 
-                        | Enabled(enabled) when enabled -> Some(analyserSettings, ruleSettings)
+                        | Enabled(true) -> Some(analyserSettings, ruleSettings)
                         | _ -> None
                 else
                     None

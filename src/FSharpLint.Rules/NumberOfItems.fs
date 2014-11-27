@@ -61,9 +61,8 @@ module NumberOfItems =
 
     let private getMembers (members:SynMemberDefn list) =
         let isPublic = function
-            | Some(access) when access = SynAccess.Public -> true
+            | Some(SynAccess.Public) | None -> true
             | Some(_) -> false
-            | None -> true
 
         let isPublicMember = function
             | SynMemberDefn.AbstractSlot(_) ->
@@ -105,7 +104,7 @@ module NumberOfItems =
                 None
 
         match astNode.Breadcrumbs |> getApplicationNode with
-            | Some(SynExpr.App(flag, _, _, _, _)) when flag = ExprAtomicFlag.Atomic -> true
+            | Some(SynExpr.App(ExprAtomicFlag.Atomic, _, _, _, _)) -> true
             | Some(SynExpr.New(_)) -> true
             | Some(_)
             | None -> false
@@ -135,11 +134,8 @@ module NumberOfItems =
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Pattern(pattern) ->
-                match pattern with
-                    | SynPat.LongIdent(_, _, _, constructorArguments, _, _) ->
-                        validateFunction constructorArguments visitorInfo astNode
-                    | _ -> ()
+            | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
+                validateFunction constructorArguments visitorInfo astNode
             | AstNode.Expression(expression) ->
                 match expression with
                     | SynExpr.Tuple(expressions, _, _) ->
@@ -150,15 +146,10 @@ module NumberOfItems =
                     | SynExpr.Assert(condition, _) ->
                         validateCondition condition visitorInfo astNode
                     | _ -> ()
-            | AstNode.Match(matchClause) ->
-                match matchClause with
-                    | SynMatchClause.Clause(_, whenExpr, _, _, _) when whenExpr.IsSome ->
-                        validateCondition whenExpr.Value visitorInfo astNode
-                    | _ -> ()
-            | AstNode.TypeDefinition(typeDefinition) ->
-                match typeDefinition with
-                    | SynTypeDefn.TypeDefn(_, typeRepresentation, members, _) ->
-                        validateType members typeRepresentation visitorInfo astNode
+            | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
+                validateCondition whenExpr visitorInfo astNode
+            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
+                validateType members typeRepresentation visitorInfo astNode
             | _ -> ()
 
         Continue
