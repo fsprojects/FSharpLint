@@ -31,3 +31,9 @@ The project is licensed under GPLv3. For more information on the license see the
 ###Contact
 
 Feel free to post an issue on [github](../../issues) if you have any questions, have suggestions, or have found a defect.
+
+### Maintainer(s)
+
+- [@duckmatt](https://github.com/duckmatt)
+
+The default maintainer account for projects under "fsprojects" is [@fsgit](https://github.com/fsgit) - F# Community Project Incubation Space (repo management)
