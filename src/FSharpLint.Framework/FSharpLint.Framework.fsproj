@@ -55,9 +55,8 @@
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\Text.resx">
+    <EmbeddedResource Include="Text.resx">
       <SubType>Designer</SubType>
-	  <LogicalName>Resources.Text.resources</LogicalName>
     </EmbeddedResource>
     <Compile Include="AssemblyInfo.fs" />
   </ItemGroup>
