@@ -21,14 +21,7 @@ namespace FSharpLint.Framework
 /// Provides a way of getting string values from the framework's resource files (files in src/FSharpLint.Framework/Resources/).
 /// Used to retrieve multi-lingual strings inside of the app.
 type Resources() =
-    static let resourceName =
-        let isRunningOnMono = System.Type.GetType("Mono.Runtime") <> null
-        if isRunningOnMono then
-            "Text"
-        else
-            "Resources.Text"
-
-    static let resourceManager = System.Resources.ResourceManager(resourceName, typeof<Resources>.Assembly)
+    static let resourceManager = System.Resources.ResourceManager("Resources.Text", typeof<Resources>.Assembly)
 
     /// Returns the value of the specified string resource for the current culture.
     static member GetString(name) = resourceManager.GetString(name)
