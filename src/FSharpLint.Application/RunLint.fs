@@ -129,7 +129,7 @@ module RunLint =
                     yield "--fullpaths" 
                     yield "--flaterrors" 
                     yield "--target:exe" 
-                    yield! projectFile.FSharpFiles
+                    yield! projectFile.FSharpFiles |> List.map (fun x -> x.FileLocation)
                     for r in projectFile.References do yield "-r:" + r
                     for r in projectFile.ProjectReferences do yield "-r:" + r
                 |])
@@ -167,6 +167,7 @@ module RunLint =
                     let plugins = loadPlugins()
 
                     projectFile.FSharpFiles 
+                        |> List.choose (fun x -> if x.ExcludeFromAnalysis then None else Some(x.FileLocation))
                         |> List.iter (parseFile finishEarly projectInformation.ErrorReceived projectInformation.Progress projectFile checker plugins projectOptions)
 
                     Success

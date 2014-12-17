@@ -46,13 +46,19 @@ module ProjectFile =
         | Success of 'TSuccess
         | Failure of Error
 
+    type FSharpFile =
+        {
+            FileLocation: string
+            ExcludeFromAnalysis: bool
+        }
+
     /// Paths of all required files used to construct project options (must be absolute paths).
     type ProjectFile = 
         {
             Path: string
             References: string list
             ProjectReferences: string list
-            FSharpFiles: string list
+            FSharpFiles: FSharpFile list
             Config: Map<string,Analyser>
         }
 
@@ -150,8 +156,16 @@ module ProjectFile =
 
     /// Gets a list of the .fs and .fsi files in the project.
     let getFSharpFiles (projectInstance:Microsoft.Build.Evaluation.Project) projectPath =
+        let getFileInformation (item:Microsoft.Build.Evaluation.ProjectItem) =
+            {
+                FileLocation = System.IO.Path.Combine(projectPath, item.EvaluatedInclude)
+                ExcludeFromAnalysis = 
+                    item.HasMetadata("ExcludeFromSourceAnalysis") && 
+                    item.GetMetadataValue("ExcludeFromSourceAnalysis").Trim().ToLowerInvariant() = "true"
+            }
+
         projectInstance.GetItems("Compile")
-            |> Seq.map (fun item -> System.IO.Path.Combine(projectPath, item.EvaluatedInclude))
+            |> Seq.map getFileInformation
             |> Seq.toList
 
     /// Gets all the parent directories of a given path - includes the original path directory too.

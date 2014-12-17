@@ -35,12 +35,18 @@ module ProjectFile =
         | Success of 'TSuccess
         | Failure of Error
 
+    type FSharpFile =
+        {
+            FileLocation: string
+            ExcludeFromAnalysis: bool
+        }
+
     type internal ProjectFile = 
         {
             Path: string
             References: string list
             ProjectReferences: string list
-            FSharpFiles: string list
+            FSharpFiles: FSharpFile list
             Config: Map<string, FSharpLint.Framework.Configuration.Analyser>
         }
 
