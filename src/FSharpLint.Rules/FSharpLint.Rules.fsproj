@@ -58,7 +58,9 @@
     <None Include="README.md" />
     <None Include="app.config" />
     <None Include="packages.config" />
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AssemblyInfo.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

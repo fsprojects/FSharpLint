@@ -1,3 +1,7 @@
+##### 0.1.12 - December 16 2014
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
+
 ##### 0.1.11 - November 23 2014
 
 * FSharp.Compiler.Service now included as a strongly named assembly.

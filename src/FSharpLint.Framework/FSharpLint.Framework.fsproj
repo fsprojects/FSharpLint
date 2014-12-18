@@ -58,7 +58,9 @@
     <EmbeddedResource Include="Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AssemblyInfo.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">

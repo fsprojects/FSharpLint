@@ -47,7 +47,9 @@
   <ItemGroup>
     <Compile Include="ErrorHandling.fs" />
     <Compile Include="ReferenceResolution.fsi" />
-    <Compile Include="ReferenceResolution.fs" />
+    <Compile Include="ReferenceResolution.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    </Compile>
     <Compile Include="FSharpCoreLookup.fs" />
     <Compile Include="ProjectFile.fsi" />
     <Compile Include="ProjectFile.fs" />
@@ -55,7 +57,9 @@
     <Compile Include="RunLint.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AssemblyInfo.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service, Version=0.0.79.0, Culture=neutral, PublicKeyToken=178e2f793012a759">

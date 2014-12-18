@@ -48,7 +48,9 @@
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="AssemblyInfo.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    </Compile>
     <Compile Include="Program.fs" />
     <None Include="App.config" />
     <None Include="packages.config" />
