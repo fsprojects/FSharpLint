@@ -581,7 +581,7 @@ module Ast =
 
     exception ParseException of FailedToParseFile
 
-    let parseFile (checker:FSharpChecker) projectOptions file input =
+    let parseFileInProject (checker:FSharpChecker) projectOptions file input =
         let results = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
         match results.ParseTree with
             | Some(ast) ->
@@ -601,12 +601,12 @@ module Ast =
 
                 raise <| ParseException({ File = file; Errors = errorMessages })
 
-    /// Parse a single string.
-    let parseInput input =
+    let parseFile pathToFile input =
         let checker = FSharpChecker.Create()
-
-        let file = "/home/user/Dog.test.fsx"
         
-        let projectOptions = checker.GetProjectOptionsFromScript(file, input) |> Async.RunSynchronously
+        let projectOptions = checker.GetProjectOptionsFromScript(pathToFile, input) |> Async.RunSynchronously
 
-        parseFile checker projectOptions file input
+        parseFileInProject checker projectOptions pathToFile input
+        
+    /// Parse a single string.
+    let parseInput = parseFile "/home/user/Dog.test.fsx"

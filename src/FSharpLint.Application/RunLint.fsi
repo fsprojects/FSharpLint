@@ -59,3 +59,6 @@ module RunLint =
         
     /// Parses and runs the linter on all the files in a project.
     val parseProject : projectInformation: ProjectParseInfo -> Result
+        
+    /// Parses and runs the linter on a single file.
+    val parseFile : pathToFile: string -> errorReceived: System.Action<ErrorHandling.Error> -> unit
