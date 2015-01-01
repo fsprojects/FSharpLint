@@ -1,6 +1,6 @@
 #### Using the Console Application
 
-The console application is a very simple wrapper around the lint tool, with a single required argument `-f` which is specifies the path to the project file of the project to run the tool against.
+The console application is a very simple wrapper around the lint tool, with a required argument of `-f` or `-sf`. `-f` lints against an entire project, whereas `-sf` can be used to lint a single file.
 
 If you get a `ParseException` reported when running the tool it's likely that your `FSharp.Core.dll` is in a non-standard directory - if this is not the case please report it as an issue. When it *is* in a non-standard directory you can use the `-core` argument to specify the directory where your `FSharp.Core.dll` is located.
 
@@ -23,7 +23,8 @@ To run the tool we need to open the command line, `cd` into the directory contai
 
 | Arguments | Description | Example |
 | --- | :------------- | --- |
-| `-f` | Specifies the path to the project file of the project to be linted. **(Required)** | `-f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
+| `-f` | Specifies the path to the project file of the project to be linted. **(Required if -sf not specified)** | `-f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
+| `-sf` | Specifies the path to a single source file to be linted. **(Required if -f not specified)** | `-f "C:\FSharpProjectDirectory\Uploader.fsx"` |
 | `-core` | Specifies the path to the directory containing `FSharp.Core.dll` to be used to parse the project, this directory must contain `FSharp.Core.sigdata` and `FSharp.Core.optdata` alongside `FSharp.Core.dll` **(Optional)** | `-core "C:\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0"` |
 
 #### Future Improvements
