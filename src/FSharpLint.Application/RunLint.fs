@@ -180,16 +180,25 @@ module RunLint =
                         Failure(ProjectFile.RunTimeConfigError)
             | ProjectFile.Failure(error) -> 
                 Failure(error)
+
+    let private neverFinishEarly _ = false
+    let private ignoreProgress = System.Action<_>(ignore) 
         
     /// Parses and runs the linter on a single file.
     let parseFile pathToFile errorReceived =
-        let neverFinishEarly _ = false
-        let ignoreProgress = System.Action<_>(ignore) 
-
         let input = System.IO.File.ReadAllText(pathToFile)
         let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
         let plugins = loadPlugins()
         let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 
         Ast.parseFile pathToFile input 
+            |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
+        
+    /// Parses and runs the linter on a string.
+    let parseInput input errorReceived =
+        let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let plugins = loadPlugins()
+        let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+
+        Ast.parseInput input 
             |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
