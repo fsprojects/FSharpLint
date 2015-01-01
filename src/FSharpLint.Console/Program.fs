@@ -88,6 +88,9 @@ module Program =
     let private runLintOnFile pathToFile =
         RunLint.parseFile pathToFile reportError
 
+    let private runLintOnSource source =
+        RunLint.parseInput source reportError
+
     let private printFailedDescription = function
         | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
             let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
@@ -125,6 +128,7 @@ module Program =
     type private Argument =
         | ProjectFile of string
         | SingleFile of string
+        | Source of string
         | FSharpCoreDirectory of string
         | UnexpectedArgument of string
 
@@ -134,6 +138,8 @@ module Program =
                 parseArguments (ProjectFile(argument) :: parsedArguments) remainingArguments
             | "-sf" :: argument :: remainingArguments ->
                 parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
+            | "-source" :: argument :: remainingArguments ->
+                parseArguments (Source(argument) :: parsedArguments) remainingArguments
             | "-core" :: argument :: remainingArguments -> 
                 parseArguments (FSharpCoreDirectory(argument) :: parsedArguments) remainingArguments
             | [] -> 
@@ -152,7 +158,7 @@ module Program =
 
     let private containsRequiredArguments arguments =
         let isArgumentSpecifyingWhatToLint = function 
-            | ProjectFile(_) | SingleFile(_) -> true 
+            | ProjectFile(_) | SingleFile(_) | Source(_) -> true 
             | _ -> false
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
@@ -190,6 +196,7 @@ module Program =
         arguments
             |> List.iter (function 
                 | SingleFile(file) -> runLintOnFile file
+                | Source(source) -> runLintOnSource source
                 | _ -> ())
             
     [<EntryPoint>]
