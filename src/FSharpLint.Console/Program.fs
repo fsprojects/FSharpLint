@@ -65,6 +65,29 @@ module Program =
 
         RunLint.parseProject parseInfo
 
+    let private reportError = System.Action<ErrorHandling.Error>(fun error -> 
+        let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input
+        System.Console.WriteLine(output))
+
+    let private runLintOnProject projectFile fsharpCoreDir =
+        let finishEarly = System.Func<_>(fun _ -> false)
+
+        let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
+
+        let parseInfo: RunLint.ProjectParseInfo =
+            {
+                FinishEarly = finishEarly
+                ProjectFile = projectFile
+                Progress = parserProgress
+                ErrorReceived = reportError
+                FSharpCoreDirectory = fsharpCoreDir
+            }
+
+        RunLint.parseProject parseInfo
+
+    let private runLintOnFile pathToFile =
+        RunLint.parseFile pathToFile reportError
+
     let private printFailedDescription = function
         | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
             let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
@@ -101,6 +124,7 @@ module Program =
 
     type private Argument =
         | ProjectFile of string
+        | SingleFile of string
         | FSharpCoreDirectory of string
         | UnexpectedArgument of string
 
@@ -108,6 +132,8 @@ module Program =
         let rec parseArguments parsedArguments = function
             | "-f" :: argument :: remainingArguments -> 
                 parseArguments (ProjectFile(argument) :: parsedArguments) remainingArguments
+            | "-sf" :: argument :: remainingArguments ->
+                parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
             | "-core" :: argument :: remainingArguments -> 
                 parseArguments (FSharpCoreDirectory(argument) :: parsedArguments) remainingArguments
             | [] -> 
@@ -125,13 +151,13 @@ module Program =
         arguments |> List.exists isUnexpectedArgument
 
     let private containsRequiredArguments arguments =
-        let isProjectFileArgument = function 
-            | ProjectFile(_) -> true 
+        let isArgumentSpecifyingWhatToLint = function 
+            | ProjectFile(_) | SingleFile(_) -> true 
             | _ -> false
 
-        arguments |> List.exists isProjectFileArgument
+        arguments |> List.exists isArgumentSpecifyingWhatToLint
 
-    let private start projectFile fsharpCoreDir =
+    let private start fsharpCoreDir projectFile =
         if System.IO.File.Exists(projectFile) then
             try
                 match runLint projectFile fsharpCoreDir with
@@ -155,12 +181,17 @@ module Program =
             System.Console.WriteLine(System.String.Format(formatString, projectFile))
 
     let private startWithArguments arguments =
-        let projectFile = arguments |> List.pick (function | ProjectFile(file) -> Some(file) | _ -> None)
+        let projectFile = arguments |> List.tryPick (function | ProjectFile(file) -> Some(file) | _ -> None)
 
         let fsharpCoreDir = arguments |> List.tryPick (function | FSharpCoreDirectory(dir) -> Some(dir) | _ -> None)
 
-        start projectFile fsharpCoreDir
-    
+        projectFile |> Option.iter (start fsharpCoreDir)
+
+        arguments
+            |> List.iter (function 
+                | SingleFile(file) -> runLintOnFile file
+                | _ -> ())
+            
     [<EntryPoint>]
     let main argv = 
         let parsedArguments = Array.toList argv |> parseArguments
