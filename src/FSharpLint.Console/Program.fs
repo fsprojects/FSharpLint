@@ -51,7 +51,7 @@ module Program =
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
 
         let error = System.Action<ErrorHandling.Error>(fun error -> 
-            let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input
+            let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
             System.Console.WriteLine(output))
 
         let parseInfo: RunLint.ProjectParseInfo =
@@ -66,7 +66,7 @@ module Program =
         RunLint.parseProject parseInfo
 
     let private reportError = System.Action<ErrorHandling.Error>(fun error -> 
-        let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input
+        let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
         System.Console.WriteLine(output))
 
     let private runLintOnProject projectFile fsharpCoreDir =
@@ -89,6 +89,14 @@ module Program =
         RunLint.parseFile pathToFile reportError
 
     let private runLintOnSource source =
+        let getErrorMessage (range:Microsoft.FSharp.Compiler.Range.range) =
+            let error = FSharpLint.Framework.Resources.GetString("LintSourceError")
+            System.String.Format(error, range.StartLine, range.StartColumn)
+
+        let reportError = System.Action<ErrorHandling.Error>(fun error -> 
+            let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine getErrorMessage error.Range error.Input
+            System.Console.WriteLine(output))
+
         RunLint.parseInput source reportError
 
     let private printFailedDescription = function

@@ -39,7 +39,7 @@ let private defaultProgress = function
         failedToParseFileError file parseException
 
 let private defaultErrorReceived (error:ErrorHandling.Error) =
-    let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine error.Range error.Input 
+    let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input 
     System.Console.WriteLine(output)
 
 let defaultLintOptions =
