@@ -180,29 +180,6 @@ module Program =
             let formatString = Resources.GetString("ConsoleCouldNotFindFile")
             System.Console.WriteLine(System.String.Format(formatString, projectFile))
 
-    let private start2 fsharpCoreDir projectFile =
-        if System.IO.File.Exists(projectFile) then
-            try
-                match runLint projectFile fsharpCoreDir with
-                    | RunLint.Success ->
-                        System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
-                    | RunLint.Failure(error) ->
-                        printFailedDescription error
-            with
-                | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                    System.Console.WriteLine(
-                        "Lint failed while analysing " + 
-                        projectFile + 
-                        "\nFailed to parse file: " + file + 
-                        ".\nFailed with: " + 
-                        System.String.Join("\n", errors))
-                | e -> 
-                    System.Console.WriteLine("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
-
-        else
-            let formatString = Resources.GetString("ConsoleCouldNotFindFile")
-            System.Console.WriteLine(System.String.Format(formatString, projectFile))
-
     let private startWithArguments arguments =
         let projectFile = arguments |> List.tryPick (function | ProjectFile(file) -> Some(file) | _ -> None)
 
