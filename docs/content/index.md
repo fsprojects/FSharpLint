@@ -83,6 +83,7 @@ The tool can be run from the command line, or as an MSBuild task.
 
 * [Using the command line tool](Console-Application.html).
 * [Using the MSBuild task](MSBuild-Task.html).
+* [Using the FAKE task](FAKE-Task.html).
 
 ####Analysers
 
