@@ -526,6 +526,7 @@ module HintMatcher =
     let visitor getHints visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) = 
         if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
+                | AstNode.Expression(SynExpr.Paren(_)) -> Continue
                 | AstNode.Expression(expr) -> 
                     for hint in getHints visitorInfo.Config do
                         let arguments =
@@ -540,6 +541,7 @@ module HintMatcher =
                             hintError hint visitorInfo expr.Range
 
                     Continue
+                | AstNode.Pattern(SynPat.Paren(_)) -> Continue
                 | AstNode.Pattern(pattern) ->
                     for hint in getHints visitorInfo.Config do
                         if MatchPattern.matchHintPattern (pattern, hint.Match) then

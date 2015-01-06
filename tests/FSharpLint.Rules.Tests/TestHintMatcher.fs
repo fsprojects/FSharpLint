@@ -293,7 +293,7 @@ match ([], []) with
 | (_, []) -> ()
 | _ -> ()""", config)
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.IsTrue(this.ErrorExistsAt(5, 3))
 
     [<Test>]
     member this.MatchIntegerConstantInPattern() = 
@@ -496,3 +496,28 @@ type Bar() =
 
         Assert.IsTrue(this.ErrorExistsOnLine(7))
 
+    /// Parentheses around expressions matched by hints were causing duplicate warnings
+    [<Test>]
+    member this.ParenthesesAroundAMatchedExpressionShouldNotCauseAnExtraMatch() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+let foo x = if (x = true) then 0 else 1""", config)
+
+        Assert.IsTrue((this.ErrorExistsAt >> not)(4, 15) && this.ErrorExistsAt(4, 16))
+
+    /// Parentheses around patterns matched by hints were causing duplicate warnings
+    [<Test>]
+    member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() = 
+        let config = generateHintConfig ["[0] & [1] ===> []"]
+        
+        this.Parse("""
+module Goat
+
+match [] with
+| ([0] & [1]) -> ()
+| _ -> ()""", config)
+
+        Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
