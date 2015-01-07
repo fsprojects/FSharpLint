@@ -35,32 +35,35 @@ type FSharpLintTask() as this =
     member val FSharpCoreDirectory: string = null with get, set
 
     override this.Execute() = 
-        let finishEarly = System.Func<_>(fun _ -> false)
-        let action = System.Action<_>(ignore)
-        let error = System.Action<ErrorHandling.Error>(fun error -> 
-            let (log:string*string*string*string*int*int*int*int*string*obj[]->unit) =
-                if this.TreatWarningsAsErrors then
-                    this.Log.LogError
-                else
-                    this.Log.LogWarning
-
+        let handleLintWarning (error: ErrorHandling.Error) = 
             let range = error.Range
-            log("", "", "", 
-                range.FileName, 
-                range.StartLine, 
-                range.StartColumn + 1,
-                range.EndLine,
-                range.EndColumn + 1, 
-                error.Info,
-                null))
 
+            if this.TreatWarningsAsErrors then
+                this.Log.LogError("", "", "", 
+                    range.FileName, 
+                    range.StartLine, 
+                    range.StartColumn + 1,
+                    range.EndLine,
+                    range.EndColumn + 1, 
+                    error.Info,
+                    null)
+            else
+                this.Log.LogWarning("", "", "", 
+                    range.FileName, 
+                    range.StartLine, 
+                    range.StartColumn + 1,
+                    range.EndLine,
+                    range.EndColumn + 1, 
+                    error.Info,
+                    null)
+            
         try
             let parseInfo: RunLint.ProjectParseInfo =
                 {
-                    FinishEarly = finishEarly
+                    FinishEarly = System.Func<_>(fun _ -> false)
                     ProjectFile = this.Project
-                    Progress = action
-                    ErrorReceived = error
+                    Progress = System.Action<_>(ignore)
+                    ErrorReceived = System.Action<_>(handleLintWarning)
                     FSharpCoreDirectory = 
                         if System.String.IsNullOrEmpty(this.FSharpCoreDirectory) then 
                             None 
