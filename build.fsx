@@ -127,8 +127,7 @@ Target "CreatePackage" (fun _ ->
         "nugetpackage/FSharpLint.nuspec"
 )
 
-#r @"tools/FSharpLint.0.1.12/FSharpLint.Application.dll"
-#r @"tools/FSharpLint.0.1.12/FSharpLint.Framework.dll"
+#I @"tools/FSharpLint.0.1.12/"
 #r @"tools/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
