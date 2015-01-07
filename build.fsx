@@ -127,6 +127,13 @@ Target "CreatePackage" (fun _ ->
         "nugetpackage/FSharpLint.nuspec"
 )
 
+#r @"tools/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
+open FSharpLint.FAKE
+
+Target "Lint" (fun _ ->
+    !! "src/**/*.fsproj"
+        |> Seq.iter (FSharpLint id))
+
 // --------------------------------------------------------------------------------------
 // Generate the documentation web pages
 
@@ -142,6 +149,7 @@ Target "All" DoNothing
 "Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
 "Build" ==> "All"
 "RunTests" ==> "RunFunctionalTests" ==> "All"
+"Lint" ==> "All"
 "GenerateDocs" ==> "All"
 "CreatePackage" ==> "All"
 
