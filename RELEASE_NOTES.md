@@ -1,3 +1,9 @@
+##### 0.1.13 - January 07 2015
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
+* Files can now be ignored via the .fsproj file: https://github.com/fsprojects/FSharpLint/issues/55
+
 ##### 0.1.12 - December 16 2014
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57

@@ -26,7 +26,7 @@ let summary = "Lint tool for F#."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.1.12"
+let version = "0.1.13"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -127,6 +127,7 @@ Target "CreatePackage" (fun _ ->
         "nugetpackage/FSharpLint.nuspec"
 )
 
+#I @"lib/FSharp.Data/"
 #I @"tools/FSharpLint.0.1.12/"
 #r @"tools/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
