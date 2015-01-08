@@ -30,7 +30,7 @@ module ErrorHandling =
 
     /// Generates error reporting information on where in a file an error has occured.
     let errorInfoLine getErrorMessage (range:range) (input:string) =
-        let errorenousLine = input.Split([|'\n'|]).[range.StartLine - 1].TrimEnd()
+        let errorenousLine = input.Split('\n').[range.StartLine - 1].TrimEnd('\r')
         let highlightColumnLine = 
             if String.length errorenousLine = 0 then
                 "^"

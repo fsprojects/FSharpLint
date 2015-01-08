@@ -178,3 +178,4 @@ nuget/*.nupkg
 
 tools/
 !docs/tools
+*.nupkg
