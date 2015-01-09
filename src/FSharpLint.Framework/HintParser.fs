@@ -79,14 +79,14 @@ module HintParser =
     let charListToString charList =
         Seq.fold (fun x y -> x + y.ToString()) "" charList
 
-    let pischar chars =
+    let pischar chars : Parser<char, 'a> =
         satisfy (fun x -> List.exists ((=) x) chars)
 
-    let pnotchar chars =
+    let pnotchar chars : Parser<char, 'a> =
         satisfy (fun x -> not <| List.exists ((=) x) chars)
 
     module Operators =
-        let pfirstopchar =
+        let pfirstopchar: Parser<char, unit> =
             pischar ['!';'%';'&';'*';'+';'-';'.';'/';'<';'=';'>';'@';'^';'|';'~']
 
         let opchars =
@@ -95,13 +95,13 @@ module HintParser =
                     '#';'^';'!';'?';'/';'.';':';',';//'(';')';'[';']'
                 ]
 
-        let poperator =
+        let poperator: Parser<char list, unit> =
             pfirstopchar .>>. many (pischar opchars)
                 |>> fun (x, rest) -> x::rest
 
     /// Need to change isLetter so that it's using unicode character classes.
     module Identifiers =
-        let private pidentstartchar =
+        let private pidentstartchar: Parser<char, unit> =
             pchar '_' <|> satisfy isLetter
 
         let private pidentchar: Parser<char, unit> = 
@@ -113,11 +113,11 @@ module HintParser =
                     pchar '_'
                 ]
 
-        let private pidenttext = 
+        let private pidenttext: Parser<char list, unit> = 
             pidentstartchar .>>. many pidentchar
                 |>> fun (start, rest) -> start::rest
 
-        let private pident = 
+        let private pident: (CharStream<unit> -> Reply<char list>) = 
             let chars = ['`'; '\n'; '\r'; '\t']
 
             choice
@@ -133,14 +133,14 @@ module HintParser =
                         .>> skipString "``"
                 ]
 
-        let private plongident = 
+        let private plongident: (CharStream<unit> -> Reply<char list list>) = 
             choice
                 [
                     attempt (sepBy1 pident (skipChar '.'))
                     pident |>> fun x -> [x]
                 ]
 
-        let private pidentorop =
+        let private pidentorop: (CharStream<unit> -> Reply<char list>) =
             choice
                 [
                     attempt pident
@@ -151,7 +151,7 @@ module HintParser =
                         .>> skipChar ')'
                 ]
 
-        let plongidentorop = 
+        let plongidentorop: Parser<string list, unit> = 
             choice
                 [
                     attempt pident 
@@ -194,17 +194,17 @@ module HintParser =
                 >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
                 |>> fun x -> Map.find x escapeMap
 
-        let private pnonescapechars =
+        let private pnonescapechars: Parser<char, unit> =
             skipChar '\\'
                 >>. pnotchar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
 
-        let private psimplecharchar =
+        let private psimplecharchar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
 
-        let private psimplestringchar =
+        let private psimplestringchar: Parser<char, unit> =
             pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
 
-        let private punicodegraphshort = 
+        let private punicodegraphshort: Parser<char, unit> = 
             skipString "\\u"
                 >>. many1 hex
                 >>= fun x ->
@@ -213,7 +213,7 @@ module HintParser =
                     else
                         preturn (x |> charListToString |> hexToCharacter)
 
-        let private punicodegraphlong =
+        let private punicodegraphlong: Parser<char, unit> =
             skipString "\\U"
                 >>. many1 hex
                 >>= fun x ->
@@ -222,7 +222,7 @@ module HintParser =
                     else
                         preturn (x |> charListToString |> hexToCharacter)
 
-        let private ptrigraph =
+        let private ptrigraph: Parser<char, unit> =
             skipChar '\\'
                 >>. many1 digit
                 >>= fun x ->
@@ -231,10 +231,10 @@ module HintParser =
                     else
                         preturn (x |> charListToString |> decimalToCharacter)
 
-        let private pnewline = 
+        let private pnewline: Parser<char, unit> = 
             pchar '\n' <|> (skipChar '\r' >>. skipChar '\n' >>% '\n')
 
-        let private pcharchar =
+        let private pcharchar: (CharStream<unit> -> Reply<char>) =
             choice 
                 [
                     attempt psimplecharchar
@@ -243,7 +243,7 @@ module HintParser =
                     punicodegraphshort
                 ]
 
-        let private pstringchar =
+        let private pstringchar: (CharStream<unit> -> Reply<char>) =
             choice
                 [
                     attempt psimplestringchar
@@ -263,15 +263,15 @@ module HintParser =
                     skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem
                 ]
 
-        let pcharacter =
+        let pcharacter: Parser<Constant, unit> =
             skipChar '\'' >>. pcharchar .>> pchar '\''
                 |>> Char
 
-        let pliteralstring =
+        let pliteralstring: Parser<Constant, unit> =
             skipChar '"' >>. many pstringchar .>> skipChar '"'
                 |>> fun x -> String(charListToString x)
 
-        let private pverbatimstringchar =
+        let private pverbatimstringchar: (CharStream<unit> -> Reply<char>) =
             choice
                 [
                     pstringelem
@@ -281,60 +281,60 @@ module HintParser =
                     pstring "\"\"" >>% '"'
                 ]
 
-        let pverbatimstring =
+        let pverbatimstring: Parser<Constant, unit> =
             pstring "@\"" >>. many pverbatimstringchar .>> pchar '"'
                 |>> fun x -> String(charListToString x)
 
-        let private psimplechar =
+        let private psimplechar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\'';'\\';'"']
 
-        let private psimpleorescapechar =
+        let private psimpleorescapechar: Parser<char, unit> =
             pescapechar <|> psimplechar
 
-        let pbytechar =
+        let pbytechar: Parser<Constant, unit> =
             skipChar '\'' >>. psimpleorescapechar .>> skipString "'B"
                 |>> fun x -> Byte(byte x)
 
-        let pbytearray = 
+        let pbytearray: Parser<Constant, unit> = 
             skipChar '"' >>. many pstringchar .>> skipString "\"B"
                 |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
 
-        let pverbatimbytearray = 
+        let pverbatimbytearray: Parser<Constant, unit> = 
             skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
                 |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
 
-        let ptriplequotedstring =
+        let ptriplequotedstring: Parser<Constant, unit> =
             skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
                 |>> fun x -> String(charListToString x)
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.
     module NumericLiterals =
-        let private pminus = pchar '-'
+        let private pminus: Parser<char, unit> = pchar '-'
 
         let private minusString (minus:char option, charList) =
             if minus.IsSome then '-' :: charList else charList
                 |> charListToString
 
-        let private phexint =
+        let private phexint: Parser<char list, unit> =
             skipChar '0' 
                 >>. (skipChar 'x' <|> skipChar 'X')
                 >>. many1 hex
                 |>> fun x -> '0'::'x'::x
 
-        let private poctalint =
+        let private poctalint: Parser<char list, unit> =
             skipChar '0'
                 >>. (skipChar 'o' <|> skipChar 'O')
                 >>. many1 octal
                 |>> fun x -> '0'::'o'::x
 
-        let private pbinaryint =
+        let private pbinaryint: Parser<char list, unit> =
             skipChar '0'
                 >>. (skipChar 'b' <|> skipChar 'B')
                 >>. many1 (pchar '0' <|> pchar '1')
                 |>> fun x -> '0'::'b'::x
 
-        let private pint =
+        let private pint: (CharStream<unit> -> Reply<char list>) =
             choice
                 [
                     attempt phexint
@@ -343,43 +343,43 @@ module HintParser =
                     many1 digit
                 ]
 
-        let psbyte = 
+        let psbyte: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'y'
                 |>> fun x -> SByte(sbyte(minusString x))
 
-        let pbyte = 
+        let pbyte: Parser<Constant, unit> = 
             pint .>> skipString "uy"
                 |>> fun x -> Byte(byte(charListToString x))
 
-        let pint16 = 
+        let pint16: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 's'
                 |>> fun x -> Int16(int16(minusString x))
 
-        let puint16 = 
+        let puint16: Parser<Constant, unit> = 
             pint .>> skipString "us"
                 |>> fun x -> UInt16(uint16(charListToString x))
 
-        let puint32 = 
+        let puint32: Parser<Constant, unit> = 
             pint .>> (skipString "u" <|> skipString "ul")
                 |>> fun x -> UInt32(uint32(charListToString x))
 
-        let pnativeint = 
+        let pnativeint: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'n'
                 |>> fun x -> IntPtr(nativeint(int64(minusString x)))
 
-        let punativeint = 
+        let punativeint: Parser<Constant, unit> = 
             pint .>> pstring "un"
                 |>> fun x -> UIntPtr(unativeint(uint64(charListToString x)))
 
-        let pint64 = 
+        let pint64: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'L'
                 |>> fun x -> Int64(int64(minusString x))
 
-        let puint64 = 
+        let puint64: Parser<Constant, unit> = 
             pint .>> (skipString "UL" <|> skipString "uL")
                 >>= fun x -> preturn (UInt64(uint64(charListToString x)))
 
-        let psingle =
+        let psingle: Parser<Constant, unit> =
             (opt pminus) .>>. 
                 pfloat .>> (skipChar 'F' <|> skipChar 'f')
                     |>> fun (minus, x) -> Single(if minus.IsSome then -float32(x) else float32(x))
@@ -389,26 +389,26 @@ module HintParser =
             ||| NumberLiteralOptions.AllowFraction
             ||| NumberLiteralOptions.AllowExponent
 
-        let private pnumber =
+        let private pnumber: Parser<Constant, unit> =
             numberLiteral numberFormat "number"
             |>> fun nl ->
                     if nl.IsInteger then Int32(int32 nl.String)
                     else Double(double nl.String)
 
-        let pint32 = pnumber .>> optional (skipChar 'l')
+        let pint32: Parser<Constant, unit> = pnumber .>> optional (skipChar 'l')
 
-        let pdouble = pnumber
+        let pdouble: Parser<Constant, unit> = pnumber
 
-        let pbignum =
+        let pbignum: Parser<Constant, unit> =
             (opt pminus) .>>. pint .>>. anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
                 |>> fun (x, t) -> UserNum(bigint.Parse(minusString x), t)
 
-        let pdecimal =
-            let pdecimalint =
+        let pdecimal: Parser<Constant, unit> =
+            let pdecimalint: Parser<Constant, unit> =
                 (opt pminus) .>>. pint .>> (skipChar 'M' <|> skipChar 'm')
                     |>> fun x -> Decimal(decimal (minusString x))
 
-            let pdecimalfloat =
+            let pdecimalfloat: Parser<Constant, unit> =
                 (opt pminus) .>>. pfloat .>> (skipChar 'M' <|> skipChar 'm')
                     |>> fun (minus, x) -> Decimal(decimal (if minus.IsSome then -x else x))
 
@@ -419,19 +419,19 @@ module HintParser =
                 ]
 
     module Constants =
-        let private pbool = 
+        let private pbool: (CharStream<unit> -> Reply<Constant>) = 
             choice
                 [
                     skipString "true" >>% Bool(true)
                     skipString "false" >>% Bool(false)
                 ]
 
-        let private punit = 
+        let private punit: Parser<Constant, unit> = 
             skipString "(" 
                 >>. ((spaces >>. skipString ")") <|> skipString ")")
                 >>% Unit
 
-        let pconstant = 
+        let pconstant: Parser<Expression, unit> = 
             choice
                 [
                     attempt pbool
@@ -461,24 +461,24 @@ module HintParser =
 
     module Expressions =
 
-        let pwildcard = skipString "_" >>% Expression.Wildcard
+        let pwildcard: Parser<Expression, unit> = skipString "_" >>% Expression.Wildcard
 
-        let pargumentwildcard = skipString "_" >>% Argument.Wildcard
+        let pargumentwildcard: Parser<Argument, unit> = skipString "_" >>% Argument.Wildcard
 
-        let pvariable = 
+        let pvariable: Parser<Expression, unit> = 
             satisfy isLetter 
                 .>> notFollowedBy (satisfy isLetter)
                 |>> Expression.Variable
 
-        let pargumentvariable = satisfy isLetter |>> Argument.Variable
+        let pargumentvariable: Parser<Argument, unit> = satisfy isLetter |>> Argument.Variable
 
-        let plambdaarguments = sepEndBy1 (pargumentvariable <|> pargumentwildcard) spaces1
+        let plambdaarguments: Parser<Argument list, unit> = sepEndBy1 (pargumentvariable <|> pargumentwildcard) spaces1
 
         let pexpression, private pexpressionImpl = createParserForwardedToRef()
 
-        let pparentheses = skipChar '(' >>. pexpression .>> skipChar ')' |>> Expression.Parentheses
+        let pparentheses: Parser<Expression, unit> = skipChar '(' >>. pexpression .>> skipChar ')' |>> Expression.Parentheses
 
-        let pif =
+        let pif: Parser<Expression, unit> =
             skipString "if"
                 >>. spaces
                 >>. pexpression
@@ -488,7 +488,7 @@ module HintParser =
                 .>>. opt (skipString "else" >>. pexpression)
                 |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr)
 
-        let ptuple = 
+        let ptuple: Parser<Expression, unit> = 
             skipChar '(' 
                 >>. pexpression
                 .>> skipChar ',' 
@@ -496,7 +496,7 @@ module HintParser =
                 .>> skipChar ')' 
                 |>> fun (func, rest) -> Expression.Tuple(func::rest)
 
-        let plist = 
+        let plist: Parser<Expression, unit> = 
             skipChar '['
                 >>. spaces
                 >>. sepEndBy pexpression (skipChar ';')
@@ -504,7 +504,7 @@ module HintParser =
                 .>> skipChar ']'
                 |>> Expression.List
 
-        let parray = 
+        let parray: Parser<Expression, unit> = 
             skipString "[|"
                 >>. spaces
                 >>. sepEndBy pexpression (skipChar ';')
@@ -512,23 +512,23 @@ module HintParser =
                 .>> skipString "|]"
                 |>> Expression.Array
 
-        let private plambdastart = 
+        let private plambdastart: Parser<Argument list, unit> = 
             skipString "fun"
                 >>. spaces1
                 >>. plambdaarguments
 
-        let private plambdaend =
+        let private plambdaend: Parser<Expression, unit> =
             skipString "->" 
                 >>. spaces
                 >>. pexpression
 
-        let plambda = 
-            let plambdastart = 
+        let plambda: Parser<Expression, unit> = 
+            let plambdastart: Parser<Argument list, unit> = 
                 skipString "fun"
                     >>. spaces1
                     >>. plambdaarguments
 
-            let plambdaend =
+            let plambdaend: Parser<Expression, unit> =
                 skipString "->" 
                     >>. spaces
                     >>. pexpression
@@ -554,7 +554,7 @@ module HintParser =
                     attempt pparentheses
                 ]
 
-        let pfunctionapplication =
+        let pfunctionapplication: Parser<Expression, unit> =
             Identifiers.plongidentorop 
                 |>> Expression.Identifier
                 .>> spaces
@@ -563,7 +563,7 @@ module HintParser =
 
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
-        let prefixoperatorterm = 
+        let prefixoperatorterm: Parser<Expression, unit> = 
             followedBy (pischar ['+';'-';'%';'&';'!';'~']) >>. opp.ExpressionParser
 
         opp.TermParser <- 
@@ -659,7 +659,7 @@ module HintParser =
             pexpressionImpl := opp.ExpressionParser
 
     let phint: Parser<Hint, unit> = 
-        let phintcenter = 
+        let phintcenter: Parser<unit, unit> = 
             spaces 
                 .>> skipString "===>"
                 .>> spaces
