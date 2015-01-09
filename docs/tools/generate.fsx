@@ -21,7 +21,7 @@ let info =
 // --------------------------------------------------------------------------------------
 
 #I "../../packages/FSharp.Formatting.2.6.0/lib/net40"
-#I "../../packages/FSharp.Compiler.Service.0.0.79/lib/net45"
+#I "../../packages/FSharp.Compiler.Service.0.0.80/lib/net45"
 #r "../../packages/FAKE/tools/NuGet.Core.dll"
 #r "../../packages/FAKE/tools/FakeLib.dll"
 #r "RazorEngine.dll"

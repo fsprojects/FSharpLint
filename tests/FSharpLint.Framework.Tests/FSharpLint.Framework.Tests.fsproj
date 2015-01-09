@@ -62,8 +62,8 @@
     <Reference Include="FParsecCS">
       <HintPath>..\..\lib\FParsec\FParsecCS.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Compiler.Service, Version=0.0.79.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
-      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.79\net40\FSharp.Compiler.Service.dll</HintPath>
+    <Reference Include="FSharp.Compiler.Service, Version=0.0.80.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
+      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.80\net40\FSharp.Compiler.Service.dll</HintPath>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="mscorlib" />

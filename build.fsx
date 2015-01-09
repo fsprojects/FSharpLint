@@ -132,15 +132,9 @@ Target "CreatePackage" (fun _ ->
 #r @"tools/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
-let isRunningOnMono = System.Type.GetType("Mono.Runtime") <> null
-
 Target "Lint" (fun _ ->
-    if isRunningOnMono then 
-        trace "Not linting on mono right now to keep build passing; see https://github.com/fsprojects/FSharpLint/issues/65"
-        
-    else
-        !! "src/**/*.fsproj"
-            |> Seq.iter (FSharpLint id))
+    !! "src/**/*.fsproj"
+        |> Seq.iter (FSharpLint id))
 
 // --------------------------------------------------------------------------------------
 // Generate the documentation web pages
