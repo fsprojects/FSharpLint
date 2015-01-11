@@ -2,6 +2,7 @@
 
 open FSharpLint.Application
 open FSharpLint.Framework
+open Fake
 
 type LintOptions =
     {
@@ -16,16 +17,17 @@ type LintOptions =
 
         /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
         FSharpCoreDirectory: string option
+
+        /// Fail the FAKE build script if one or more lint warnings are found in a project.
+        FailBuildIfAnyWarrnings: bool
     }
 
 /// the default never finishes early
 let private defaultFinishEarly _ = false 
 
 let private printException (e:System.Exception) =
-    System.Console.WriteLine("Exception Message:")
-    System.Console.WriteLine(e.Message)
-    System.Console.WriteLine("Exception Stack Trace:")
-    System.Console.WriteLine(e.StackTrace)
+    "Exception Message:" + e.Message + "Exception Stack Trace:" + e.StackTrace
+        |> traceError
 
 let private failedToParseFileError (file:string) parseException =
     printfn "%A" file
@@ -39,8 +41,8 @@ let private defaultProgress = function
         failedToParseFileError file parseException
 
 let private defaultErrorReceived (error:ErrorHandling.Error) =
-    let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input 
-    System.Console.WriteLine(output)
+    error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input 
+        |> traceFAKE "%s"
 
 let defaultLintOptions =
     {
@@ -48,7 +50,39 @@ let defaultLintOptions =
         Progress = System.Action<RunLint.ParserProgress>(defaultProgress)
         ErrorReceived = System.Action<ErrorHandling.Error>(defaultErrorReceived)
         FSharpCoreDirectory = None
+        FailBuildIfAnyWarrnings = false
     }
+
+let private getErrorDescription = function
+    | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
+        let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
+        System.String.Format(formatString, projectPath)
+
+    | ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e) ->
+        let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
+        System.String.Format(formatString, projectPath, e.Message)
+
+    | ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e) ->
+        let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadReferencedProjectFile")
+        System.String.Format(formatString, referencedProjectPath, e.Message)
+
+    | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
+        let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
+        System.String.Format(formatString, projectPath)
+
+    | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
+        let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
+        System.String.Format(formatString, referencedProjectPath)
+
+    | ProjectFile.UnableToFindFSharpCoreDirectory -> Resources.GetString("ConsoleUnableToFindFSharpCoreDirectory")
+
+    | ProjectFile.FailedToLoadConfig(message) ->
+        let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
+        System.String.Format(formatString, message)
+
+    | ProjectFile.RunTimeConfigError -> Resources.GetString("ConsoleRunTimeConfigError")
+
+    | ProjectFile.FailedToResolveReferences -> Resources.GetString("ConsoleFailedToResolveReferences")
 
 /// Runs FSharpLint on a project.
 /// ## Parameters
@@ -63,12 +97,37 @@ let defaultLintOptions =
 ///     )
 let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     let parameters = defaultLintOptions |> setParams
+
+    traceStartTask "FSharpLint" projectFile
+
+    let numberOfWarnings, numberOfFiles = ref 0, ref 0
+
+    let errorReceived error = 
+        incr numberOfWarnings
+        parameters.ErrorReceived.Invoke(error)
+
+    let parserProgress progress =
+        match progress with
+            | RunLint.ParserProgress.ReachedEnd(_) -> incr numberOfFiles
+            | _ -> ()
+        parameters.Progress.Invoke(progress)
+
     let lintOptions: RunLint.ProjectParseInfo =
         {
             FinishEarly = parameters.FinishEarly
             ProjectFile = projectFile
-            Progress = parameters.Progress
-            ErrorReceived = parameters.ErrorReceived
+            Progress = System.Action<_>(parserProgress)
+            ErrorReceived = System.Action<_>(errorReceived)
             FSharpCoreDirectory = parameters.FSharpCoreDirectory
         }
-    RunLint.parseProject lintOptions |> printfn "%A"
+
+    match RunLint.parseProject lintOptions with
+        | RunLint.Result.Success when parameters.FailBuildIfAnyWarrnings -> 
+            failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
+        | RunLint.Result.Success -> 
+            tracefn "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
+        | RunLint.Result.Failure(error) -> 
+            sprintf "Failed to lint %s. Reason: \n%s" projectFile (getErrorDescription error)
+                |> traceError
+
+    traceEndTask "FSharpLint" projectFile
