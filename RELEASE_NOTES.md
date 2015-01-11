@@ -1,4 +1,4 @@
-##### 0.1.13 - January 07 2015
+##### 0.1.13 - January 11 2015
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
