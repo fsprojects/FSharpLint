@@ -100,9 +100,9 @@ module Configuration =
                     |> Map.ofList
         }
 
-    let private getRules (analyser:Config.Analysers) =
+    let private getRules (analyser:Config.Analyser) =
         [ 
-            for rule in analyser.Rules.Rules do
+            for rule in analyser.Rules do
                 yield (rule.Name, parseRule rule) 
         ]
             |> Map.ofList

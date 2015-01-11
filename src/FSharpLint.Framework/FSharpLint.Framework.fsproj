@@ -59,7 +59,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <Compile Include="AssemblyInfo.fs">
-	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+      <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -74,7 +74,8 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="FSharp.Data">
-      <HintPath>..\..\lib\FSharp.Data\FSharp.Data.dll</HintPath>
+      <HintPath>..\..\packages\FSharp.Data.2.1.1\lib\net40\FSharp.Data.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

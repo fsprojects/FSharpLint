@@ -3,6 +3,9 @@
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
 * Files can now be ignored via the .fsproj file: https://github.com/fsprojects/FSharpLint/issues/55
+* FAKE task now reports on how many files were linted and how many warnings were found.
+* FAKE task now includes more detailed information on failure.
+* FAKE task now includes an option to fail the build if any warnings are found.
 
 ##### 0.1.12 - December 16 2014
 
