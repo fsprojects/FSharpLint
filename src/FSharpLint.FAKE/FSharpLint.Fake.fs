@@ -122,7 +122,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
         }
 
     match RunLint.parseProject lintOptions with
-        | RunLint.Result.Success when parameters.FailBuildIfAnyWarrnings -> 
+        | RunLint.Result.Success when parameters.FailBuildIfAnyWarrnings && !numberOfWarnings > 0 -> 
             failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
         | RunLint.Result.Success -> 
             tracefn "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
