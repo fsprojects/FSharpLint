@@ -53,12 +53,10 @@ module FunctionReimplementation =
             match ExpressionUtilities.flattenFunctionApplication expression with
                 | [SynExpr.Ident(_) | SynExpr.LongIdent(_); SynExpr.App(_) as nextFunction] -> 
                     canBeReplacedWithFunctionComposition nextFunction
-                | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::arguments -> 
-                    List.length arguments = List.length parameters &&
-                        List.zip arguments parameters
-                            |> List.forall (function 
-                                | SynExpr.Ident(argument), (parameter:Ident) -> argument.idText = parameter.idText
-                                | _ -> false)
+                | [SynExpr.Ident(_) | SynExpr.LongIdent(_); SynExpr.Ident(argument)] -> 
+                    match parameters with
+                        | [singleParameter:Ident] -> argument.idText = singleParameter.idText
+                        | _ -> false
                 | _ -> false
             
         if canBeReplacedWithFunctionComposition expression then
