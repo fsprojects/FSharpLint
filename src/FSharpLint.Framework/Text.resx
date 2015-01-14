@@ -252,4 +252,7 @@
   <data name="LintSourceError" xml:space="preserve">
     <value>Error on line {0} starting at column {1}</value>
   </data>
+  <data name="RulesFunctionCompositionError" xml:space="preserve">
+    <value>Pointless function can be replaced with function composition.</value>
+  </data>
 </root>
