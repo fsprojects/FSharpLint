@@ -25,6 +25,7 @@ module FunctionReimplementation =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -48,9 +49,24 @@ module FunctionReimplementation =
                     | SynExpr.Ident(identifier) -> Some(identifier)
                     | _ -> None
 
+        let rec canBeReplacedWithFunctionComposition expression = 
+            match ExpressionUtilities.flattenFunctionApplication expression with
+                | [SynExpr.Ident(_) | SynExpr.LongIdent(_); SynExpr.App(_) as nextFunction] -> 
+                    canBeReplacedWithFunctionComposition nextFunction
+                | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::arguments -> 
+                    List.length arguments = List.length parameters &&
+                        List.zip arguments parameters
+                            |> List.forall (function 
+                                | SynExpr.Ident(argument), (parameter:Ident) -> argument.idText = parameter.idText
+                                | _ -> false)
+                | _ -> false
+            
+        if canBeReplacedWithFunctionComposition expression then
+            Resources.GetString("RulesFunctionCompositionError") |> visitorInfo.PostError range 
+
         isFunctionPointless expression parameters 
             |> Option.iter (fun identifier ->
-                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesFunctionReimplementationError")
+                let errorFormatString = Resources.GetString("RulesFunctionReimplementationError")
                 let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError range error)
 

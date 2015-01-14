@@ -82,6 +82,36 @@ let f = fun x -> ceil x
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+        this.Parse """
+module Program
+
+let f = fun x -> tan(cos(tan x))
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+        this.Parse """
+module Program
+
+let f = fun x -> x |> tan |> cos |> tan
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError2() = 
+        this.Parse """
+module Program
+
+let f = fun x -> tan x |> cos |> tan
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
     member this.LambdaWithUnitParameterDoesNotIssueError() = 
         this.Parse """
 module Program
