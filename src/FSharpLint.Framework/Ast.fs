@@ -132,7 +132,7 @@ module Ast =
     /// Extracts the child nodes to be visited from a given node.
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInFunction")>]
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.CyclomaticComplexity", "*")>]
-    let private traverseNode node =
+    let traverseNode node =
         [
             match node with
                 | ModuleDeclaration(SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _)) ->
