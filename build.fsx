@@ -26,7 +26,7 @@ let summary = "Lint tool for F#."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.1.13"
+let version = "0.1.14"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)

@@ -394,7 +394,18 @@
       </AnalyserSettings>
     </Analyser>
     <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
-      <Rules />
+      <Rules>
+        <Rule Name="ReimplementsFunction">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="CanBeReplacedWithComposition">
+          <RuleSettings>
+            <Property name="Enabled">True</Property>
+          </RuleSettings>
+        </Rule>
+      </Rules>
       <AnalyserSettings>
         <Property name="Enabled">True</Property>
       </AnalyserSettings>

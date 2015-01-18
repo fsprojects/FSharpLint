@@ -28,7 +28,23 @@ let config =
         [ 
             (AnalyserName, 
                 { 
-                    Rules = Map.ofList []
+                    Rules = Map.ofList 
+                        [
+                            ("CanBeReplacedWithComposition", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("ReimplementsFunction", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                        ]
                     Settings = Map.ofList 
                         [ 
                             ("Enabled", Enabled(true))
@@ -62,6 +78,17 @@ let f = fun a b -> a * b
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
+    member this.LambdaReimplementingMultiplcationIssuesErrorSuppressedWithRuleName() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "ReimplementsFunction")>]
+let f = fun a b -> a * b
+"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
     member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() = 
         this.Parse """
 module Program
@@ -80,6 +107,253 @@ let f = fun x -> ceil x
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+        this.Parse """
+module Program
+
+let f = fun x -> tan(cos(tan x))
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaReplacableWithCompositionErrorSuppressedWithRuleName() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "CanBeReplacedWithComposition")>]
+let f = fun x -> tan(cos(tan x))
+"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+        this.Parse """
+module Program
+
+let f = fun x -> x |> tan |> cos |> tan
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError2() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan y x |> cos y |> tan (tan y)
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError3() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan y x |> cos x |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError4() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan x x |> cos y |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError5() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan y x |> cos (fun _ -> x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError6() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan y x |> cos (fun x -> x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError7() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> tan y x |> cos (fun _ -> y) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError8() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> 
+                        let x = 7
+                        x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError9() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> 
+                        let y = x
+                        let x = 7
+                        y) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError10() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> 
+                        let y = 7
+                        x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError11() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (function | y -> x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError12() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (function | x -> x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError13() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> match x with | _ -> 0) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError14() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> match y with | _ -> x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError15() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> match y with | x -> x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError16() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for y = 0 to 10 do ignore x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError17() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for x = 0 to 10 do ignore x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError18() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for y = 0 to x do ()) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.LambdaWithUnitParameterDoesNotIssueError() = 

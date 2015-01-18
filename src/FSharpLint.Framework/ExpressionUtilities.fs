@@ -53,9 +53,9 @@ module ExpressionUtilities =
                             let flattened = flattenFunctionApplication [] rightExpr
                             flattened@[y]
                         else
-                            flattenFunctionApplication (y::exprs) x
+                            flattenFunctionApplication (removeParens y::exprs) (removeParens x)
                     | _ -> 
-                        flattenFunctionApplication (y::exprs) x
+                        flattenFunctionApplication (removeParens y::exprs) (removeParens x)
             | x -> 
                 x::exprs
 
