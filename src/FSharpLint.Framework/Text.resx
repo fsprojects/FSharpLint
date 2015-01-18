@@ -171,7 +171,7 @@
   <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
     <value>Favour using the ignore function rather than let _ = ...</value>
   </data>
-  <data name="RulesFunctionReimplementationError" xml:space="preserve">
+  <data name="RulesReimplementsFunction" xml:space="preserve">
     <value>Pointless function redefines {0}</value>
   </data>
   <data name="RulesHintRefactor" xml:space="preserve">
@@ -252,7 +252,7 @@
   <data name="LintSourceError" xml:space="preserve">
     <value>Error on line {0} starting at column {1}</value>
   </data>
-  <data name="RulesFunctionCompositionError" xml:space="preserve">
+  <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Pointless function can be replaced with function composition.</value>
   </data>
 </root>

@@ -33,8 +33,8 @@ module FunctionReimplementation =
     [<Literal>]
     let AnalyserName = "FSharpLint.FunctionReimplementation"
 
-    let isAnalyserEnabled config =
-        isAnalyserEnabled config AnalyserName |> Option.isSome 
+    let isRuleEnabled config ruleName =
+        isRuleEnabled config AnalyserName ruleName |> Option.isSome 
 
     let rec simplePatternsLength = function
         | SynSimplePats.SimplePats(patterns, _) -> 
@@ -129,7 +129,42 @@ module FunctionReimplementation =
             | Found -> true
             | NotFound | Shadowed -> false
 
-    let validateFunctionIsNotPointless parameters expression range visitorInfo =
+    let validateLambdaCannotBeReplacedWithComposition parameters expression range visitorInfo =
+        let canBeReplacedWithFunctionComposition expression = 
+            let removeLastElement = List.rev >> List.tail >> List.rev
+
+            let getLastElement = List.rev >> List.head
+
+            let rec lambdaArgumentIsLastApplicationInFunctionCalls expression lambdaArgument numFunctionCalls =
+                let appliedValuesDoNotReferenceLambdaArgument appliedValues =
+                    let lambdaArgumentNotReferenced = expressionReferencesIdentifier lambdaArgument >> not
+
+                    List.length appliedValues > 0 &&
+                    removeLastElement appliedValues
+                         |> List.forall lambdaArgumentNotReferenced
+
+                match ExpressionUtilities.flattenFunctionApplication expression with
+                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
+                            when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
+
+                        match getLastElement appliedValues with
+                            | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                                lastArgument.idText = lambdaArgument.idText
+                            | SynExpr.App(_) as nextFunction ->
+                                lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                            | _ -> 
+                                false
+                    | _ -> false
+
+            match parameters with
+                | [singleParameter] -> 
+                    lambdaArgumentIsLastApplicationInFunctionCalls expression singleParameter 1
+                | _ -> false
+            
+        if canBeReplacedWithFunctionComposition expression then
+            Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
+
+    let validateLambdaIsNotPointless parameters expression range visitorInfo =
         let rec isFunctionPointless expression = function
             | (parameter:Ident) :: parameters ->
                 match expression with
@@ -142,51 +177,25 @@ module FunctionReimplementation =
                     | SynExpr.Ident(identifier) -> Some(identifier)
                     | _ -> None
 
-        let canBeReplacedWithFunctionComposition expression = 
-            let removeLastElement = List.rev >> List.tail >> List.rev
-
-            let getLastElement = List.rev >> List.head
-
-            let rec lambdaArgumentIsLastApplicationInFunctionCalls expression lambdaArgument =
-                let appliedValuesDoNotReferenceLambdaArgument appliedValues =
-                    List.length appliedValues > 0 &&
-                    removeLastElement appliedValues
-                         |> (List.forall ((expressionReferencesIdentifier lambdaArgument) >> not))
-
-                match ExpressionUtilities.flattenFunctionApplication expression with
-                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
-                            when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
-
-                        match getLastElement appliedValues with
-                            | SynExpr.Ident(lastArgument) -> 
-                                lastArgument.idText = lambdaArgument.idText
-                            | SynExpr.App(_) as nextFunction ->
-                                lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument
-                            | _ -> 
-                                false
-                    | _ -> false
-
-            match parameters with
-                | [singleParameter] -> 
-                    lambdaArgumentIsLastApplicationInFunctionCalls expression singleParameter
-                | _ -> false
-            
-        if canBeReplacedWithFunctionComposition expression then
-            Resources.GetString("RulesFunctionCompositionError") |> visitorInfo.PostError range 
-
         isFunctionPointless expression parameters 
             |> Option.iter (fun identifier ->
-                let errorFormatString = Resources.GetString("RulesFunctionReimplementationError")
+                let errorFormatString = Resources.GetString("RulesReimplementsFunction")
                 let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError range error)
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Expression(SynExpr.Lambda(_) as lambda) when isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not ->
+            | AstNode.Expression(SynExpr.Lambda(_) as lambda) ->
                 let (parameters, expression) = getLambdaParametersAndExpression lambda
 
-                if List.length parameters > 0 then
-                    validateFunctionIsNotPointless parameters expression lambda.Range visitorInfo
+                if (not << List.isEmpty) parameters then
+                    if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
+                        && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
+                        validateLambdaIsNotPointless parameters expression lambda.Range visitorInfo
+                    
+                    if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
+                            && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
+                        validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
             | _ -> ()
 
         Continue

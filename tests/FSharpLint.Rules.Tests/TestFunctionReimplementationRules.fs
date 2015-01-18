@@ -28,7 +28,23 @@ let config =
         [ 
             (AnalyserName, 
                 { 
-                    Rules = Map.ofList []
+                    Rules = Map.ofList 
+                        [
+                            ("CanBeReplacedWithComposition", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                            ("ReimplementsFunction", 
+                                { 
+                                    Settings = Map.ofList 
+                                        [ 
+                                            ("Enabled", Enabled(true)) 
+                                        ] 
+                                }) 
+                        ]
                     Settings = Map.ofList 
                         [ 
                             ("Enabled", Enabled(true))
@@ -56,6 +72,17 @@ let f = fun a b -> a * b
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "*")>]
+let f = fun a b -> a * b
+"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
+    member this.LambdaReimplementingMultiplcationIssuesErrorSuppressedWithRuleName() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "ReimplementsFunction")>]
 let f = fun a b -> a * b
 """
 
@@ -90,6 +117,17 @@ let f = fun x -> tan(cos(tan x))
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.LambdaReplacableWithCompositionErrorSuppressedWithRuleName() = 
+        this.Parse """
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "CanBeReplacedWithComposition")>]
+let f = fun x -> tan(cos(tan x))
+"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
