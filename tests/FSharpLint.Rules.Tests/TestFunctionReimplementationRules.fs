@@ -279,6 +279,45 @@ let f = fun x ->
         Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError16() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for y = 0 to 10 do ignore x) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError17() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for x = 0 to 10 do ignore x) |> tan y
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError18() = 
+        this.Parse """
+module Program
+
+let y = 0
+let f = fun x -> 
+    tan y x 
+        |> cos (fun _ -> for y = 0 to x do ()) |> tan y
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+
+    [<Test>]
     member this.LambdaWithUnitParameterDoesNotIssueError() = 
         this.Parse """
 module Program

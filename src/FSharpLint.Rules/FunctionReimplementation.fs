@@ -105,7 +105,19 @@ module FunctionReimplementation =
                             match expressionReferencesIdentifier NotFound (Expression(bodyExpr)) with
                                 | Shadowed -> NotFound
                                 | isFound -> isFound
-                | NotFound, Match(SynMatchClause.Clause(pattern, whenClause, expr, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
+                | NotFound, Expression(SynExpr.For(_, iteratorIdent, startExpr, _, finishExpr, _, _)) when iteratorIdent.idText = ident.idText -> 
+                    match expressionReferencesIdentifier NotFound (Expression(startExpr)) with
+                        | Found -> 
+                            Found
+                        | _ -> 
+                            match expressionReferencesIdentifier NotFound (Expression(finishExpr)) with
+                                | Found -> Found
+                                | _ -> NotFound
+                | NotFound, Expression(SynExpr.ForEach(_, _, _, pattern, expr, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
+                    match expressionReferencesIdentifier NotFound (Expression(expr)) with
+                        | Found -> Found
+                        | _ -> NotFound
+                | NotFound, Match(SynMatchClause.Clause(pattern, _, _, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
                     NotFound
                 | NotFound, expr ->
                     match expr |> traverseNode |> List.fold expressionReferencesIdentifier NotFound with
