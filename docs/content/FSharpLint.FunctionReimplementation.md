@@ -39,7 +39,7 @@ Replace the lambda with the function that is being called.
 A lambda function applies a single argument to a chain of function calls, two examples below:
 
 `fun x -> not(isValid(x))`
-`fun x -> x |> isValid |> not` can be refactored to 
+`fun x -> x |> isValid |> not`
 
 #####Rationale
 
