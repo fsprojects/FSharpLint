@@ -1,3 +1,7 @@
+##### 0.1.14 - January 18 2015
+
+* Added a new rule `CanBeReplacedWithComposition` to the `FSharpLint.FunctionReimplementation` analyser: http://fsprojects.github.io/FSharpLint/FSharpLint.FunctionReimplementation.html
+
 ##### 0.1.13 - January 11 2015
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
