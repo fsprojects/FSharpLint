@@ -609,4 +609,4 @@ module Ast =
         parseFileInProject checker projectOptions pathToFile input
         
     /// Parse a single string.
-    let parseInput = parseFile "/home/user/Dog.test.fsx"
+    let parseInput = parseFile "/home/user/Dog.Test.fsx"
