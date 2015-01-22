@@ -1,4 +1,8 @@
-#FSharpLint
+[![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/issue)](http://issuestats.com/github/fsprojects/FSharpLint)
+[![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/pr)](http://issuestats.com/github/fsprojects/FSharpLint)
+
+#FSharpLint [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.svg?style=flat)](https://www.nuget.org/packages/FSharpLint/)
+
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via XML and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
