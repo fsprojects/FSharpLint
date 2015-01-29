@@ -44,7 +44,7 @@ module RunLint =
 
     /// Loads visitors implementing lint rules.
     let loadPlugins () =
-        System.Reflection.Assembly.Load("FSharpLint.Rules")
+        ProjectFile.loadRulesAssembly()
             |> FSharpLint.Framework.LoadVisitors.loadPlugins
 
     /// Extracts a list of ast visitors from a general list of visitors.

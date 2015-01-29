@@ -207,9 +207,18 @@ module ProjectFile =
 
         loadAllConfigs defaultConfig subdirectories
 
+    let loadRulesAssembly () =
+        let directory =
+            System.Reflection.Assembly.GetExecutingAssembly().Location
+                |> System.IO.Path.GetDirectoryName
+
+        let rulesAssembly = sprintf "%s%c%s" directory System.IO.Path.DirectorySeparatorChar "FSharpLint.Rules.dll"
+
+        System.Reflection.Assembly.LoadFrom rulesAssembly
+
     let loadConfigForProject projectFilePath =
         let configCheckers = 
-            System.Reflection.Assembly.Load("FSharpLint.Rules")
+            loadRulesAssembly()
                 |> FSharpLint.Framework.LoadVisitors.loadConfigCheckers
 
         let checkConfig config =

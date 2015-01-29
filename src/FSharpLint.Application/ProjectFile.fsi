@@ -41,6 +41,8 @@ module ProjectFile =
             ExcludeFromAnalysis: bool
         }
 
+    val internal loadRulesAssembly : unit -> System.Reflection.Assembly
+
     type internal ProjectFile = 
         {
             Path: string
