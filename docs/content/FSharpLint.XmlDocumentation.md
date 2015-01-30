@@ -4,7 +4,7 @@ Set of rules that analyse whether or not certain areas of code contain XML docum
 
 ###Analyser Settings
 
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
+`Enabled` - A boolean property that can enable and disable this analyser. (Default false)
 
 ###Rules
 
