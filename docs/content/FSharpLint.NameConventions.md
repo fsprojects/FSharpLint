@@ -4,7 +4,7 @@ Set of rules that analyse the naming of user defined elements within a program. 
 
 ###Analyser Settings
 
-N/A
+`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
 
 ###Rules
 
