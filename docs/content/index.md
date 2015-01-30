@@ -170,6 +170,14 @@ This could also be written using property initialisers as:
     type Printable =
         abstract member Print : unit -> unit
 
+####Ignoring Files
+
+Specific F# source files can be excluded from being linted via the `.fsproj` file using the `ExcludeFromSourceAnalysis` element:
+
+	<Compile Include="AssemblyInfo.fs">
+	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+	</Compile>
+
 ####Running Lint From An Application
 
 The project `src/FSharpLint.Application` contains `RunLint.fs` that contains the following function:
