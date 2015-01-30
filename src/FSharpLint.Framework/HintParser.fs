@@ -269,7 +269,7 @@ module HintParser =
 
         let pliteralstring: Parser<Constant, unit> =
             skipChar '"' >>. many pstringchar .>> skipChar '"'
-                |>> fun x -> String(charListToString x)
+                |>> (charListToString >> String)
 
         let private pverbatimstringchar: (CharStream<unit> -> Reply<char>) =
             choice
@@ -283,7 +283,7 @@ module HintParser =
 
         let pverbatimstring: Parser<Constant, unit> =
             pstring "@\"" >>. many pverbatimstringchar .>> pchar '"'
-                |>> fun x -> String(charListToString x)
+                |>> (charListToString >> String)
 
         let private psimplechar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\'';'\\';'"']
@@ -293,19 +293,19 @@ module HintParser =
 
         let pbytechar: Parser<Constant, unit> =
             skipChar '\'' >>. psimpleorescapechar .>> skipString "'B"
-                |>> fun x -> Byte(byte x)
+                |>> (byte >> Byte)
 
         let pbytearray: Parser<Constant, unit> = 
             skipChar '"' >>. many pstringchar .>> skipString "\"B"
-                |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
+                |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
 
         let pverbatimbytearray: Parser<Constant, unit> = 
             skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
-                |>> fun x -> Bytes(System.Text.Encoding.Default.GetBytes(charListToString x))
+                |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
 
         let ptriplequotedstring: Parser<Constant, unit> =
             skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
-                |>> fun x -> String(charListToString x)
+                |>> (charListToString >> String)
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.
@@ -345,39 +345,39 @@ module HintParser =
 
         let psbyte: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'y'
-                |>> fun x -> SByte(sbyte(minusString x))
+                |>> (minusString >> sbyte >> SByte)
 
         let pbyte: Parser<Constant, unit> = 
             pint .>> skipString "uy"
-                |>> fun x -> Byte(byte(charListToString x))
+                |>> (charListToString >> byte >> Byte)
 
         let pint16: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 's'
-                |>> fun x -> Int16(int16(minusString x))
+                |>> (minusString >> int16 >> Int16)
 
         let puint16: Parser<Constant, unit> = 
             pint .>> skipString "us"
-                |>> fun x -> UInt16(uint16(charListToString x))
+                |>> (charListToString >> uint16 >> UInt16)
 
         let puint32: Parser<Constant, unit> = 
             pint .>> (skipString "u" <|> skipString "ul")
-                |>> fun x -> UInt32(uint32(charListToString x))
+                |>> (charListToString >> uint32 >> UInt32)
 
         let pnativeint: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'n'
-                |>> fun x -> IntPtr(nativeint(int64(minusString x)))
+                |>> (minusString >> int64 >> nativeint >> IntPtr)
 
         let punativeint: Parser<Constant, unit> = 
             pint .>> pstring "un"
-                |>> fun x -> UIntPtr(unativeint(uint64(charListToString x)))
+                |>> (charListToString >> uint64 >> unativeint >> UIntPtr)
 
         let pint64: Parser<Constant, unit> = 
             (opt pminus) .>>. pint .>> skipChar 'L'
-                |>> fun x -> Int64(int64(minusString x))
+                |>> (minusString >> int64 >> Int64)
 
         let puint64: Parser<Constant, unit> = 
             pint .>> (skipString "UL" <|> skipString "uL")
-                >>= fun x -> preturn (UInt64(uint64(charListToString x)))
+                >>= (charListToString >> uint64 >> UInt64 >> preturn)
 
         let psingle: Parser<Constant, unit> =
             (opt pminus) .>>. 
@@ -406,7 +406,7 @@ module HintParser =
         let pdecimal: Parser<Constant, unit> =
             let pdecimalint: Parser<Constant, unit> =
                 (opt pminus) .>>. pint .>> (skipChar 'M' <|> skipChar 'm')
-                    |>> fun x -> Decimal(decimal (minusString x))
+                    |>> (minusString >> decimal >> Decimal)
 
             let pdecimalfloat: Parser<Constant, unit> =
                 (opt pminus) .>>. pfloat .>> (skipChar 'M' <|> skipChar 'm')
