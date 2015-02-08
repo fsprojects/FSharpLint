@@ -117,8 +117,10 @@ module ProjectFile =
 
     let openProjectFile (projectFile:string) =
         try
-            use projectCollection = new Microsoft.Build.Evaluation.ProjectCollection()
-            Microsoft.Build.Evaluation.Project(projectFile, null, null, projectCollection) |> Success
+            let globalProperties = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.GlobalProperties
+            let toolsetVersion = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
+            use projectCollection = new Microsoft.Build.Evaluation.ProjectCollection(SkipEvaluation = true)
+            Microsoft.Build.Evaluation.Project(projectFile, globalProperties, toolsetVersion, projectCollection) |> Success
         with
             | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
                 Failure(MSBuildFailedToLoadProjectFile(projectFile, e))
