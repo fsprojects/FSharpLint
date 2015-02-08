@@ -117,9 +117,8 @@ module ProjectFile =
 
     let openProjectFile (projectFile:string) =
         try
-            let xmlReader = System.Xml.XmlReader.Create(projectFile)
-
-            Microsoft.Build.Evaluation.Project(xmlReader) |> Success
+            use projectCollection = new Microsoft.Build.Evaluation.ProjectCollection()
+            Microsoft.Build.Evaluation.Project(projectFile, null, null, projectCollection) |> Success
         with
             | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
                 Failure(MSBuildFailedToLoadProjectFile(projectFile, e))

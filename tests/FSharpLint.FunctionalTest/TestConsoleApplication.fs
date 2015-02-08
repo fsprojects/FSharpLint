@@ -130,9 +130,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(
-                output.Contains("Referenced project") && 
-                output.Contains("doesntexist.fsproj could not be found on disk"))
+            Assert.IsTrue(output.Contains("Could not find file"))
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
