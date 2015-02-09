@@ -119,7 +119,7 @@ module ProjectFile =
         try
             let globalProperties = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.GlobalProperties
             let toolsetVersion = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
-            use projectCollection = new Microsoft.Build.Evaluation.ProjectCollection(SkipEvaluation = true)
+            use projectCollection = new Microsoft.Build.Evaluation.ProjectCollection()
             Microsoft.Build.Evaluation.Project(projectFile, globalProperties, toolsetVersion, projectCollection) |> Success
         with
             | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
