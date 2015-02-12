@@ -138,17 +138,11 @@
   <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
     <value>MSBuild could not load the project file {0} because: {1}</value>
   </data>
-  <data name="ConsoleMSBuildFailedToLoadReferencedProjectFile" xml:space="preserve">
-    <value>MSBuild could not load a referenced project file {0} because: {1}</value>
-  </data>
   <data name="ConsoleProjectFileCouldNotBeFound" xml:space="preserve">
     <value>{0} could not be found on disk.</value>
   </data>
   <data name="ConsoleRunTimeConfigError" xml:space="preserve">
     <value>Failed while reading from config at run time.</value>
-  </data>
-  <data name="ConsoleUnableToFindFSharpCoreDirectory" xml:space="preserve">
-    <value>Could not locate your FSharp core directory.</value>
   </data>
   <data name="ConsoleUnableToFindProjectOutputPath" xml:space="preserve">
     <value>MSBuild failed to get the output path for project file {0}</value>

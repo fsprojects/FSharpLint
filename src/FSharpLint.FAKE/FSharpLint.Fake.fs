@@ -62,10 +62,6 @@ let private getErrorDescription = function
         let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
         System.String.Format(formatString, projectPath, e.Message)
 
-    | ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e) ->
-        let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadReferencedProjectFile")
-        System.String.Format(formatString, referencedProjectPath, e.Message)
-
     | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
         let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
         System.String.Format(formatString, projectPath)
@@ -73,8 +69,6 @@ let private getErrorDescription = function
     | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
         let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
         System.String.Format(formatString, referencedProjectPath)
-
-    | ProjectFile.UnableToFindFSharpCoreDirectory -> Resources.GetString("ConsoleUnableToFindFSharpCoreDirectory")
 
     | ProjectFile.FailedToLoadConfig(message) ->
         let formatString = Resources.GetString("ConsoleFailedToLoadConfig")

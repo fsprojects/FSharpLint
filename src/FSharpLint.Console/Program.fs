@@ -108,10 +108,6 @@ module Program =
             let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
             System.Console.WriteLine(System.String.Format(formatString, projectPath, e.Message))
 
-        | ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e) ->
-            let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadReferencedProjectFile")
-            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath, e.Message))
-
         | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
             let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
             System.Console.WriteLine(System.String.Format(formatString, projectPath))
@@ -119,9 +115,6 @@ module Program =
         | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
             let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
             System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath))
-
-        | ProjectFile.UnableToFindFSharpCoreDirectory ->
-            System.Console.WriteLine(Resources.GetString("ConsoleUnableToFindFSharpCoreDirectory"))
 
         | ProjectFile.FailedToLoadConfig(message) ->
             let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
@@ -208,9 +201,7 @@ module Program =
                 | _ -> ())
             
     [<EntryPoint>]
-    let main argv = 
-        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Framework\FSharpLint.Framework.fsproj" |]
-
+    let main argv =
         let parsedArguments = Array.toList argv |> parseArguments
 
         let argumentAreInvalid = 

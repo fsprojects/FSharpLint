@@ -143,24 +143,28 @@ module RunLint =
 
         let checker = FSharpChecker.Create()
         
-        let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
-
-        let projectFileInfo = FSharpProjectFileInfo.Parse(projectInformation.ProjectFile)
-            
         try
-            let plugins = loadPlugins()
+            let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
 
-            match ProjectFile.loadConfigForProject projectInformation.ProjectFile with
-                | ProjectFile.Result.Success(config) ->
-                    projectFileInfo.CompileFiles
-                        |> Seq.map (getParseInfoForFileInProject checker projectOptions)
-                        |> Seq.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins config)
+            let projectFileInfo = FSharpProjectFileInfo.Parse(projectInformation.ProjectFile)
+            
+            try
+                let plugins = loadPlugins()
+
+                match ProjectFile.loadConfigForProject projectInformation.ProjectFile with
+                    | ProjectFile.Result.Success(config) ->
+                        projectFileInfo.CompileFiles
+                            |> Seq.map (getParseInfoForFileInProject checker projectOptions)
+                            |> Seq.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins config)
                 
-                    Success
-                | ProjectFile.Result.Failure(x) -> Failure(x)
-        with 
-            | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
-                Failure(ProjectFile.RunTimeConfigError)
+                        Success
+                    | ProjectFile.Result.Failure(x) -> Failure(x)
+            with 
+                | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
+                    Failure(ProjectFile.RunTimeConfigError)
+        with
+            | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
+                Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectInformation.ProjectFile, e))
 
     let private neverFinishEarly _ = false
     let private ignoreProgress = System.Action<_>(ignore) 

@@ -34,10 +34,8 @@ module ProjectFile =
     type Error =
         | ProjectFileCouldNotBeFound of string
         | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
-        | MSBuildFailedToLoadReferencedProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
         | UnableToFindProjectOutputPath of string
         | UnableToFindReferencedProject of string
-        | UnableToFindFSharpCoreDirectory
         | FailedToLoadConfig of string
         | RunTimeConfigError
         | FailedToResolveReferences

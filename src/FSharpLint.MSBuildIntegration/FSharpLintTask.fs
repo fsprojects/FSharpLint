@@ -78,14 +78,10 @@ type FSharpLintTask() as this =
                     logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
                 | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
                     logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
-                | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e)) -> 
-                    logError "ConsoleMSBuildFailedToLoadReferencedProjectFile" [|referencedProjectPath; e.Message|]
                 | RunLint.Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
                     logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
                 | RunLint.Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
                     logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
-                | RunLint.Result.Failure(ProjectFile.UnableToFindFSharpCoreDirectory) -> 
-                    logError "ConsoleUnableToFindFSharpCoreDirectory" [||]
                 | RunLint.Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
                     logError "ConsoleFailedToLoadConfig" [|message|]
                 | RunLint.Result.Failure(ProjectFile.RunTimeConfigError) -> 
