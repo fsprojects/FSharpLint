@@ -35,21 +35,6 @@ module ProjectFile =
         | Success of 'TSuccess
         | Failure of Error
 
-    type FSharpFile =
-        {
-            FileLocation: string
-            ExcludeFromAnalysis: bool
-        }
-
     val internal loadRulesAssembly : unit -> System.Reflection.Assembly
 
-    type internal ProjectFile = 
-        {
-            Path: string
-            References: string list
-            ProjectReferences: string list
-            FSharpFiles: FSharpFile list
-            Config: Map<string, FSharpLint.Framework.Configuration.Analyser>
-        }
-
-    val internal loadProjectFile : string -> userSuppliedFSharpCoreDirectory: string option -> Result<ProjectFile>
+    val internal loadConfigForProject : projectFilePath:string -> Result<Map<string, FSharpLint.Framework.Configuration.Analyser>>

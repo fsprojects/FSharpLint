@@ -114,28 +114,7 @@ module RunLint =
     let getParseInfoForFileInProject checker projectOptions file =
         let input = System.IO.File.ReadAllText(file)
 
-        Ast.parseFileInProject checker projectOptions file input        
-
-    /// Creates a project options object that is required by the compiler.
-    let loadProjectOptions (projectFile:ProjectFile.ProjectFile) (checker:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker) = 
-        checker.GetProjectOptionsFromCommandLineArgs
-            (projectFile.Path,
-                [| 
-                    yield "--simpleresolution" 
-                    yield "--noframework" 
-                    yield "--debug:full" 
-                    yield "--define:DEBUG" 
-                    yield "--optimize-" 
-                    yield "--out:" + "dog.exe"
-                    yield "--doc:test.xml" 
-                    yield "--warn:3" 
-                    yield "--fullpaths" 
-                    yield "--flaterrors" 
-                    yield "--target:exe" 
-                    yield! projectFile.FSharpFiles |> List.map (fun x -> x.FileLocation)
-                    for r in projectFile.References do yield "-r:" + r
-                    for r in projectFile.ProjectReferences do yield "-r:" + r
-                |])
+        Ast.parseFileInProject checker projectOptions file input
 
     /// Provides information for controlling the parse of a project.
     type ProjectParseInfo =
@@ -155,31 +134,33 @@ module RunLint =
             /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
             FSharpCoreDirectory: string option
         }
+
+    open Microsoft.FSharp.Compiler.SourceCodeServices
         
     /// Parses and runs the linter on all the files in a project.
     let parseProject projectInformation = 
         let finishEarly = fun _ -> projectInformation.FinishEarly.Invoke()
 
-        match ProjectFile.loadProjectFile projectInformation.ProjectFile projectInformation.FSharpCoreDirectory with
-            | ProjectFile.Success(projectFile) -> 
-                let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         
-                let projectOptions = loadProjectOptions projectFile checker
+        let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
+
+        let projectFileInfo = FSharpProjectFileInfo.Parse(projectInformation.ProjectFile)
+            
+        try
+            let plugins = loadPlugins()
+
+            match ProjectFile.loadConfigForProject projectInformation.ProjectFile with
+                | ProjectFile.Result.Success(config) ->
+                    projectFileInfo.CompileFiles
+                        |> Seq.map (getParseInfoForFileInProject checker projectOptions)
+                        |> Seq.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins config)
                 
-                try
-                    let plugins = loadPlugins()
-
-                    projectFile.FSharpFiles 
-                        |> List.choose (fun x -> if x.ExcludeFromAnalysis then None else Some(x.FileLocation))
-                        |> List.map (getParseInfoForFileInProject checker projectOptions)
-                        |> List.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins projectFile.Config)
-
                     Success
-                with 
-                    | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
-                        Failure(ProjectFile.RunTimeConfigError)
-            | ProjectFile.Failure(error) -> 
-                Failure(error)
+                | ProjectFile.Result.Failure(x) -> Failure(x)
+        with 
+            | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
+                Failure(ProjectFile.RunTimeConfigError)
 
     let private neverFinishEarly _ = false
     let private ignoreProgress = System.Action<_>(ignore) 
@@ -187,7 +168,7 @@ module RunLint =
     /// Parses and runs the linter on a single file.
     let parseFile pathToFile errorReceived =
         let input = System.IO.File.ReadAllText(pathToFile)
-        let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         let plugins = loadPlugins()
         let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 
@@ -196,7 +177,7 @@ module RunLint =
         
     /// Parses and runs the linter on a string.
     let parseInput input errorReceived =
-        let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         let plugins = loadPlugins()
         let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 

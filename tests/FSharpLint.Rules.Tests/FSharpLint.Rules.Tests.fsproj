@@ -66,8 +66,20 @@
     <Reference Include="FParsecCS">
       <HintPath>..\..\lib\FParsec\FParsecCS.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Compiler.Service, Version=0.0.80.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
-      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.80\net40\FSharp.Compiler.Service.dll</HintPath>
+    <Reference Include="FSharp.Compiler.Service">
+      <HintPath>..\..\packages\FSharp.Compiler.Service.0.0.82\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.dll</HintPath>
+      <SpecificVersion>True</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Build.Engine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.Engine.dll</HintPath>
+      <SpecificVersion>True</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Build.Framework, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.Framework.dll</HintPath>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="mscorlib" />

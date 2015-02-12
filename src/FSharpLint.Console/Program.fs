@@ -209,6 +209,8 @@ module Program =
             
     [<EntryPoint>]
     let main argv = 
+        let argv = [| "-f"; @"C:\Users\matthewm\Documents\GitHub\FSharpLint\src\FSharpLint.Framework\FSharpLint.Framework.fsproj" |]
+
         let parsedArguments = Array.toList argv |> parseArguments
 
         let argumentAreInvalid = 
