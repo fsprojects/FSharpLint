@@ -118,7 +118,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains("Could not find file"), sprintf "Output:\n%s" output)
+            Assert.IsTrue(output.Contains("Could not find file") || output.Contains("not found"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
