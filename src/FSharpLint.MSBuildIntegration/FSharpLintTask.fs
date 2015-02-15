@@ -28,8 +28,6 @@ type FSharpLintTask() =
 
     member val TreatWarningsAsErrors = false with get, set
 
-    member val FSharpCoreDirectory: string = null with get, set
-
     override this.Execute() = 
         let fullPath = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
 

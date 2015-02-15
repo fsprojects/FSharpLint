@@ -130,9 +130,6 @@ module RunLint =
 
             /// Callback that's called when a lint error is detected.
             ErrorReceived: System.Action<ErrorHandling.Error>
-
-            /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
-            FSharpCoreDirectory: string option
         }
 
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -215,7 +212,6 @@ module RunLint =
                             ProjectFile = projectFile
                             Progress = System.Action<_>(ignore)
                             ErrorReceived = System.Action<_>(handleLintWarning)
-                            FSharpCoreDirectory = None
                         }
 
                     let result = parseProject parseInfo

@@ -15,9 +15,6 @@ type LintOptions =
         /// Callback that's called when a lint error is detected.
         ErrorReceived: System.Action<ErrorHandling.Error>
 
-        /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
-        FSharpCoreDirectory: string option
-
         /// Fail the FAKE build script if one or more lint warnings are found in a project.
         FailBuildIfAnyWarnings: bool
     }
@@ -49,7 +46,6 @@ let defaultLintOptions =
         FinishEarly = System.Func<_>(defaultFinishEarly)
         Progress = System.Action<RunLint.ParserProgress>(defaultProgress)
         ErrorReceived = System.Action<ErrorHandling.Error>(defaultErrorReceived)
-        FSharpCoreDirectory = None
         FailBuildIfAnyWarnings = false
     }
 
@@ -112,7 +108,6 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
             ProjectFile = projectFile
             Progress = System.Action<_>(parserProgress)
             ErrorReceived = System.Action<_>(errorReceived)
-            FSharpCoreDirectory = parameters.FSharpCoreDirectory
         }
 
     match RunLint.parseProject lintOptions with
