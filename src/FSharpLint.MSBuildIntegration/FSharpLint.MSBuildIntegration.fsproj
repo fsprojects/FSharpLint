@@ -47,17 +47,14 @@
   <ItemGroup>
     <Compile Include="FSharpLintTask.fs" />
     <None Include="app.config" />
-    <None Include="packages.config" />
     <Compile Include="AssemblyInfo.fs">
-	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+      <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Compiler.Service, Version=0.0.80.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
-      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.80\net40\FSharp.Compiler.Service.dll</HintPath>
-      <SpecificVersion>True</SpecificVersion>
-    </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
@@ -67,19 +64,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\FSharpLint.Application\FSharpLint.Application.fsproj">
-      <Name>FSharpLint.Application</Name>
-      <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.Framework\FSharpLint.Framework.fsproj">
-      <Name>FSharpLint.Framework</Name>
-      <Project>{94220ba0-e632-4f4f-8f6d-a11a5aa52636}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.Rules\FSharpLint.Rules.fsproj">
-      <Name>FSharpLint.Rules</Name>
-      <Project>{faa41613-e697-4012-94cd-6e6890a6e7c7}</Project>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.fsproj">
+      <Name>FSharpLint.Worker</Name>
+      <Project>{9a7cc4be-7adb-43ac-b972-e458671f8d04}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

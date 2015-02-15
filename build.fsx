@@ -122,14 +122,21 @@ Target "CreatePackage" (fun _ ->
                     (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
                     (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}*.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}packages{0}FSharp.Data.2.1.1{0}lib{0}net40{0}FSharp.Data.DesignTime.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+
+                    (System.String.Format("..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FSharp.Data.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                 ]
          })
         "nugetpackage/FSharpLint.nuspec"
 )
 
-#I @"tools/FSharpLint.0.1.15/"
-#r @"tools/FSharpLint.0.1.15/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.1.14/"
+#r @"tools/FSharpLint.0.1.14/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->

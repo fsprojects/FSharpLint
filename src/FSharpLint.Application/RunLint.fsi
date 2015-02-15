@@ -52,9 +52,6 @@ module RunLint =
 
             /// Callback that's called when a lint error is detected.
             ErrorReceived: System.Action<ErrorHandling.Error>
-
-            /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
-            FSharpCoreDirectory: string option
         }
         
     /// Parses and runs the linter on all the files in a project.
@@ -65,3 +62,10 @@ module RunLint =
         
     /// Parses and runs the linter on a string.
     val parseInput : input: string -> errorReceived: System.Action<ErrorHandling.Error> -> unit
+        
+    type FSharpLintWorker = 
+        inherit System.MarshalByRefObject
+
+        new : unit -> FSharpLintWorker
+
+        interface FSharpLint.Worker.IFSharpLintWorker

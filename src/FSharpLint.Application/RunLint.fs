@@ -114,28 +114,7 @@ module RunLint =
     let getParseInfoForFileInProject checker projectOptions file =
         let input = System.IO.File.ReadAllText(file)
 
-        Ast.parseFileInProject checker projectOptions file input        
-
-    /// Creates a project options object that is required by the compiler.
-    let loadProjectOptions (projectFile:ProjectFile.ProjectFile) (checker:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker) = 
-        checker.GetProjectOptionsFromCommandLineArgs
-            (projectFile.Path,
-                [| 
-                    yield "--simpleresolution" 
-                    yield "--noframework" 
-                    yield "--debug:full" 
-                    yield "--define:DEBUG" 
-                    yield "--optimize-" 
-                    yield "--out:" + "dog.exe"
-                    yield "--doc:test.xml" 
-                    yield "--warn:3" 
-                    yield "--fullpaths" 
-                    yield "--flaterrors" 
-                    yield "--target:exe" 
-                    yield! projectFile.FSharpFiles |> List.map (fun x -> x.FileLocation)
-                    for r in projectFile.References do yield "-r:" + r
-                    for r in projectFile.ProjectReferences do yield "-r:" + r
-                |])
+        Ast.parseFileInProject checker projectOptions file input
 
     /// Provides information for controlling the parse of a project.
     type ProjectParseInfo =
@@ -151,35 +130,38 @@ module RunLint =
 
             /// Callback that's called when a lint error is detected.
             ErrorReceived: System.Action<ErrorHandling.Error>
-
-            /// Optionally force the lint to lookup FSharp.Core.dll from this directory.
-            FSharpCoreDirectory: string option
         }
+
+    open Microsoft.FSharp.Compiler.SourceCodeServices
         
     /// Parses and runs the linter on all the files in a project.
     let parseProject projectInformation = 
         let finishEarly = fun _ -> projectInformation.FinishEarly.Invoke()
 
-        match ProjectFile.loadProjectFile projectInformation.ProjectFile projectInformation.FSharpCoreDirectory with
-            | ProjectFile.Success(projectFile) -> 
-                let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         
-                let projectOptions = loadProjectOptions projectFile checker
+        try
+            let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
+
+            let projectFileInfo = FSharpProjectFileInfo.Parse(projectInformation.ProjectFile)
+            
+            try
+                let plugins = loadPlugins()
+
+                match ProjectFile.loadConfigForProject projectInformation.ProjectFile with
+                    | ProjectFile.Result.Success(config) ->
+                        projectFileInfo.CompileFiles
+                            |> Seq.map (getParseInfoForFileInProject checker projectOptions)
+                            |> Seq.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins config)
                 
-                try
-                    let plugins = loadPlugins()
-
-                    projectFile.FSharpFiles 
-                        |> List.choose (fun x -> if x.ExcludeFromAnalysis then None else Some(x.FileLocation))
-                        |> List.map (getParseInfoForFileInProject checker projectOptions)
-                        |> List.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins projectFile.Config)
-
-                    Success
-                with 
-                    | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
-                        Failure(ProjectFile.RunTimeConfigError)
-            | ProjectFile.Failure(error) -> 
-                Failure(error)
+                        Success
+                    | ProjectFile.Result.Failure(x) -> Failure(x)
+            with 
+                | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
+                    Failure(ProjectFile.RunTimeConfigError)
+        with
+            | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
+                Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectInformation.ProjectFile, e))
 
     let private neverFinishEarly _ = false
     let private ignoreProgress = System.Action<_>(ignore) 
@@ -187,7 +169,7 @@ module RunLint =
     /// Parses and runs the linter on a single file.
     let parseFile pathToFile errorReceived =
         let input = System.IO.File.ReadAllText(pathToFile)
-        let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         let plugins = loadPlugins()
         let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 
@@ -196,9 +178,66 @@ module RunLint =
         
     /// Parses and runs the linter on a string.
     let parseInput input errorReceived =
-        let checker = Microsoft.FSharp.Compiler.SourceCodeServices.FSharpChecker.Create()
+        let checker = FSharpChecker.Create()
         let plugins = loadPlugins()
         let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 
         Ast.parseInput input 
             |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
+
+    type FSharpLintWorker() = 
+        inherit System.MarshalByRefObject()
+
+        interface FSharpLint.Worker.IFSharpLintWorker with
+            member this.RunLint projectFile reportError logWarning = 
+                let logError resouce args = 
+                    let formatString = FSharpLint.Framework.Resources.GetString resouce
+                    System.String.Format(formatString, args) |> logWarning
+
+                let handleLintWarning (error: ErrorHandling.Error) = 
+                    let range = error.Range
+
+                    reportError(
+                        range.FileName, 
+                        range.StartLine, 
+                        range.StartColumn + 1, 
+                        range.EndLine,
+                        range.EndColumn + 1, 
+                        error.Info)
+            
+                try
+                    let parseInfo =
+                        {
+                            FinishEarly = System.Func<_>(fun _ -> false)
+                            ProjectFile = projectFile
+                            Progress = System.Action<_>(ignore)
+                            ErrorReceived = System.Action<_>(handleLintWarning)
+                        }
+
+                    let result = parseProject parseInfo
+
+                    match result with
+                        | Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
+                            logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                        | Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                            logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                        | Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
+                            logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
+                        | Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
+                            logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
+                        | Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
+                            logError "ConsoleFailedToLoadConfig" [|message|]
+                        | Result.Failure(ProjectFile.RunTimeConfigError) -> 
+                            logError "ConsoleRunTimeConfigError" [||]
+                        | Result.Failure(ProjectFile.FailedToResolveReferences) -> 
+                            logError "ConsoleFailedToResolveReferences" [||]
+                        | Result.Success -> ()
+                with
+                    | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
+                        logWarning(
+                            "Lint failed while analysing " + 
+                            projectFile + 
+                            ".\nFailed with: " + 
+                            System.String.Join("\n", errors))
+                    | e -> 
+                        logWarning("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)

@@ -23,10 +23,8 @@ module ProjectFile =
     type Error =
         | ProjectFileCouldNotBeFound of string
         | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
-        | MSBuildFailedToLoadReferencedProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
         | UnableToFindProjectOutputPath of string
         | UnableToFindReferencedProject of string
-        | UnableToFindFSharpCoreDirectory
         | FailedToLoadConfig of string
         | RunTimeConfigError
         | FailedToResolveReferences
@@ -35,21 +33,6 @@ module ProjectFile =
         | Success of 'TSuccess
         | Failure of Error
 
-    type FSharpFile =
-        {
-            FileLocation: string
-            ExcludeFromAnalysis: bool
-        }
-
     val internal loadRulesAssembly : unit -> System.Reflection.Assembly
 
-    type internal ProjectFile = 
-        {
-            Path: string
-            References: string list
-            ProjectReferences: string list
-            FSharpFiles: FSharpFile list
-            Config: Map<string, FSharpLint.Framework.Configuration.Analyser>
-        }
-
-    val internal loadProjectFile : string -> userSuppliedFSharpCoreDirectory: string option -> Result<ProjectFile>
+    val internal loadConfigForProject : projectFilePath:string -> Result<Map<string, FSharpLint.Framework.Configuration.Analyser>>

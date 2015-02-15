@@ -66,16 +66,6 @@ module Tests =
             }
         ]
 
-    let isRunningOnUnixBasedSystem =
-        System.Environment.OSVersion.Platform = System.PlatformID.MacOSX ||
-        System.Environment.OSVersion.Platform = System.PlatformID.Unix
-
-    let toPlatformSpecificPath error = 
-        if isRunningOnUnixBasedSystem then
-            { error with Location = error.Location.Replace('\\', '/') }
-        else
-            error
-
     [<TestFixture>]
     type TestConsoleApplication() =
         [<Test>]
@@ -88,7 +78,7 @@ module Tests =
 
             System.IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
 
-            Assert.IsTrue(output.Contains("Failed to load config file"))
+            Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.InvalidReferencedProjectFile() = 
@@ -97,10 +87,8 @@ module Tests =
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
-
-            Assert.IsTrue(
-                output.Contains("MSBuild could not load a referenced project file") && 
-                output.Contains("invalidProjectFile.fsproj"))
+            
+            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("referencesInvalidProject.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.InvalidProjectFile() = 
@@ -110,7 +98,7 @@ module Tests =
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.Contains(sprintf "MSBuild could not load the project file %s" projectFile))
+            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.UnableToFindProjectFile() = 
@@ -120,7 +108,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile))
+            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.UnableToFindReferencedProjectFile() = 
@@ -130,7 +118,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains("Could not find file"))
+            Assert.IsTrue(output.Contains("Could not find file") || output.Contains("not found"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
@@ -142,52 +130,19 @@ module Tests =
 
             let expectedErrors =
                 [
-                    { 
-                        Description = "not (a=b) can be refactored into a<>b" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 6 starting at column 4"
-                        Code = "    not ((x * y) = z) |> ignore"
-                    }
-                    { 
-                        Description = "not (a<>b) can be refactored into a=b" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 8 starting at column 15"
-                        Code = "    let meow = not (1 <> 1)"
-                    }
-                    { 
-                        Description = "fun x -> x can be refactored into id" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 10 starting at column 13"
-                        Code = "    let id = fun x -> x"
-                    }
-                    { 
-                        Description = "not true can be refactored into false" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 12 starting at column 14"
-                        Code = "    let dog = not true"
-                    }
-                    { 
-                        Description = "not false can be refactored into true" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 14 starting at column 14"
-                        Code = "    let dog = not false"
-                    }
-                    { 
-                        Description = "List.fold + 0 can be refactored into List.sum" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 16 starting at column 25"
-                        Code = "    let sum = [1;2;3] |> List.fold (+) 0"
-                    }
-                    { 
-                        Description = "a<>true can be refactored into not a" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 20 starting at column 7"
-                        Code = "    if x <> true then"
-                    }
-                    { 
-                        Description = "List.head (List.sort x) can be refactored into List.min x" 
-                        Location = "Error in file ..\\..\\..\\FSharpLint.FunctionalTest.TestedProject\\TestHints.fs on line 23 starting at column 15"
-                        Code = "    let woof = [1;2;3] |> List.sort |> List.head"
-                    }
+                    "not (a=b) can be refactored into a<>b"
+                    "not (a<>b) can be refactored into a=b"
+                    "fun x -> x can be refactored into id"
+                    "not true can be refactored into false"
+                    "not false can be refactored into true"
+                    "List.fold + 0 can be refactored into List.sum"
+                    "a<>true can be refactored into not a"
+                    "List.head (List.sort x) can be refactored into List.min x"
                 ]
 
             expectedErrors 
-                |> List.map toPlatformSpecificPath
-                |> List.iter (fun x -> Assert.True(List.exists ((=) x) errors, 
-                                                   "Errors did not contain expected error:\n" + x.ToString() +
+                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
+                                                   "Errors did not contain expected error:\n" + x +
                                                    ". Program output:\n" + output))
 
             Assert.AreEqual(expectedErrors.Length, errors.Length)

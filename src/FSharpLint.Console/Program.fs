@@ -45,7 +45,7 @@ module Program =
         | FSharpLint.Application.RunLint.Failed(file, parseException) ->
             failedToParseFileError file parseException
 
-    let private runLint projectFile fsharpCoreDir =
+    let private runLint projectFile =
         let finishEarly = System.Func<_>(fun _ -> false)
 
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
@@ -60,7 +60,6 @@ module Program =
                 ProjectFile = projectFile
                 Progress = parserProgress
                 ErrorReceived = error
-                FSharpCoreDirectory = fsharpCoreDir
             }
 
         RunLint.parseProject parseInfo
@@ -69,7 +68,7 @@ module Program =
         let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
         System.Console.WriteLine(output))
 
-    let private runLintOnProject projectFile fsharpCoreDir =
+    let private runLintOnProject projectFile =
         let finishEarly = System.Func<_>(fun _ -> false)
 
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
@@ -80,7 +79,6 @@ module Program =
                 ProjectFile = projectFile
                 Progress = parserProgress
                 ErrorReceived = reportError
-                FSharpCoreDirectory = fsharpCoreDir
             }
 
         RunLint.parseProject parseInfo
@@ -108,10 +106,6 @@ module Program =
             let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
             System.Console.WriteLine(System.String.Format(formatString, projectPath, e.Message))
 
-        | ProjectFile.MSBuildFailedToLoadReferencedProjectFile(referencedProjectPath, e) ->
-            let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadReferencedProjectFile")
-            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath, e.Message))
-
         | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
             let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
             System.Console.WriteLine(System.String.Format(formatString, projectPath))
@@ -119,9 +113,6 @@ module Program =
         | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
             let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
             System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath))
-
-        | ProjectFile.UnableToFindFSharpCoreDirectory ->
-            System.Console.WriteLine(Resources.GetString("ConsoleUnableToFindFSharpCoreDirectory"))
 
         | ProjectFile.FailedToLoadConfig(message) ->
             let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
@@ -137,7 +128,6 @@ module Program =
         | ProjectFile of string
         | SingleFile of string
         | Source of string
-        | FSharpCoreDirectory of string
         | UnexpectedArgument of string
 
     let private parseArguments arguments =
@@ -148,8 +138,6 @@ module Program =
                 parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
             | "-source" :: argument :: remainingArguments ->
                 parseArguments (Source(argument) :: parsedArguments) remainingArguments
-            | "-core" :: argument :: remainingArguments -> 
-                parseArguments (FSharpCoreDirectory(argument) :: parsedArguments) remainingArguments
             | [] -> 
                 parsedArguments
             | argument :: _ -> 
@@ -171,10 +159,10 @@ module Program =
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
 
-    let private start fsharpCoreDir projectFile =
+    let private start projectFile =
         if System.IO.File.Exists(projectFile) then
             try
-                match runLint projectFile fsharpCoreDir with
+                match runLint projectFile with
                     | RunLint.Success ->
                         System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
                     | RunLint.Failure(error) ->
@@ -197,9 +185,7 @@ module Program =
     let private startWithArguments arguments =
         let projectFile = arguments |> List.tryPick (function | ProjectFile(file) -> Some(file) | _ -> None)
 
-        let fsharpCoreDir = arguments |> List.tryPick (function | FSharpCoreDirectory(dir) -> Some(dir) | _ -> None)
-
-        projectFile |> Option.iter (start fsharpCoreDir)
+        projectFile |> Option.iter start
 
         arguments
             |> List.iter (function 
@@ -208,7 +194,7 @@ module Program =
                 | _ -> ())
             
     [<EntryPoint>]
-    let main argv = 
+    let main argv =
         let parsedArguments = Array.toList argv |> parseArguments
 
         let argumentAreInvalid = 
