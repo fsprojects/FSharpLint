@@ -18,14 +18,10 @@
 
 namespace FSharpLint.MSBuildIntegration
 
-open FSharpLint.Application
+open System
 
-type FSharpLintTask() as this = 
+type FSharpLintTask() = 
     inherit Microsoft.Build.Utilities.Task()
-
-    let logError resouce ([<System.ParamArray>] args) = 
-        let formatString = FSharpLint.Framework.Resources.GetString resouce
-        System.String.Format(formatString, args) |> this.Log.LogWarning
 
     [<Microsoft.Build.Framework.Required>]
     member val Project = "" with get, set
@@ -35,68 +31,41 @@ type FSharpLintTask() as this =
     member val FSharpCoreDirectory: string = null with get, set
 
     override this.Execute() = 
-        let handleLintWarning (error: ErrorHandling.Error) = 
-            let range = error.Range
+        let fullPath = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
 
-            if this.TreatWarningsAsErrors then
-                this.Log.LogError("", "", "", 
-                    range.FileName, 
-                    range.StartLine, 
-                    range.StartColumn + 1,
-                    range.EndLine,
-                    range.EndColumn + 1, 
-                    error.Info,
-                    null)
+        let directory = System.IO.Path.GetDirectoryName(fullPath)
+
+        let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
+
+        let evidence = System.AppDomain.CurrentDomain.Evidence
+
+        let appDomain = System.AppDomain.CreateDomain("Lint Domain", evidence, setup)
+
+        System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(fun x args ->
+            let assembly = System.Reflection.Assembly.Load(args.Name)
+            if assembly <> null then
+                assembly
             else
-                this.Log.LogWarning("", "", "", 
-                    range.FileName, 
-                    range.StartLine, 
-                    range.StartColumn + 1,
-                    range.EndLine,
-                    range.EndColumn + 1, 
-                    error.Info,
-                    null)
+                let Parts = args.Name.Split(',')
+                let File = directory + "\\" + Parts.[0].Trim() + ".dll"
+
+                System.Reflection.Assembly.LoadFrom(File)))
+        
+        let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
+
+        // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
+        let treatWarningsAsErrors = this.TreatWarningsAsErrors
+        let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
+        let logFailure = this.Log.LogWarning
+        let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
+
+        worker.RunLint 
+            this.Project
+            (fun (filename, startLine, startColumn, endLine, endColumn, info) -> 
+                if treatWarningsAsErrors then
+                    logError("", "", "", filename, startLine, startColumn, endLine, endColumn, info, null)
+                else
+                    logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, info, null))
+            logFailure
             
-        try
-            let parseInfo: RunLint.ProjectParseInfo =
-                {
-                    FinishEarly = System.Func<_>(fun _ -> false)
-                    ProjectFile = this.Project
-                    Progress = System.Action<_>(ignore)
-                    ErrorReceived = System.Action<_>(handleLintWarning)
-                    FSharpCoreDirectory = 
-                        if System.String.IsNullOrEmpty(this.FSharpCoreDirectory) then 
-                            None 
-                        else
-                            Some(this.FSharpCoreDirectory) 
-                }
-
-            let result = RunLint.parseProject parseInfo
-
-            match result with
-                | RunLint.Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
-                    logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
-                | RunLint.Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
-                    logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
-                | RunLint.Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
-                    logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
-                | RunLint.Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
-                    logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
-                | RunLint.Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
-                    logError "ConsoleFailedToLoadConfig" [|message|]
-                | RunLint.Result.Failure(ProjectFile.RunTimeConfigError) -> 
-                    logError "ConsoleRunTimeConfigError" [||]
-                | RunLint.Result.Failure(ProjectFile.FailedToResolveReferences) -> 
-                    logError "ConsoleFailedToResolveReferences" [||]
-                | RunLint.Result.Success -> ()
-        with
-            | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                this.Log.LogWarning(
-                    "Lint failed while analysing " + 
-                    this.Project + 
-                    ".\nFailed with: " + 
-                    System.String.Join("\n", errors))
-            | e -> 
-                this.Log.LogWarning("Lint failed while analysing " + this.Project + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
-
         true

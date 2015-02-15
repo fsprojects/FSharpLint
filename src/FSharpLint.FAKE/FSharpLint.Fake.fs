@@ -19,7 +19,7 @@ type LintOptions =
         FSharpCoreDirectory: string option
 
         /// Fail the FAKE build script if one or more lint warnings are found in a project.
-        FailBuildIfAnyWarrnings: bool
+        FailBuildIfAnyWarnings: bool
     }
 
 /// the default never finishes early
@@ -50,7 +50,7 @@ let defaultLintOptions =
         Progress = System.Action<RunLint.ParserProgress>(defaultProgress)
         ErrorReceived = System.Action<ErrorHandling.Error>(defaultErrorReceived)
         FSharpCoreDirectory = None
-        FailBuildIfAnyWarrnings = false
+        FailBuildIfAnyWarnings = false
     }
 
 let private getErrorDescription = function
@@ -116,7 +116,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
         }
 
     match RunLint.parseProject lintOptions with
-        | RunLint.Result.Success when parameters.FailBuildIfAnyWarrnings && !numberOfWarnings > 0 -> 
+        | RunLint.Result.Success when parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 -> 
             failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
         | RunLint.Result.Success -> 
             tracefn "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings

@@ -187,3 +187,61 @@ module RunLint =
 
         Ast.parseInput input 
             |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
+
+    type FSharpLintWorker() = 
+        inherit System.MarshalByRefObject()
+
+        interface FSharpLint.Worker.IFSharpLintWorker with
+            member this.RunLint projectFile reportError logWarning = 
+                let logError resouce args = 
+                    let formatString = FSharpLint.Framework.Resources.GetString resouce
+                    System.String.Format(formatString, args) |> logWarning
+
+                let handleLintWarning (error: ErrorHandling.Error) = 
+                    let range = error.Range
+
+                    reportError(
+                        range.FileName, 
+                        range.StartLine, 
+                        range.StartColumn + 1, 
+                        range.EndLine,
+                        range.EndColumn + 1, 
+                        error.Info)
+            
+                try
+                    let parseInfo =
+                        {
+                            FinishEarly = System.Func<_>(fun _ -> false)
+                            ProjectFile = projectFile
+                            Progress = System.Action<_>(ignore)
+                            ErrorReceived = System.Action<_>(handleLintWarning)
+                            FSharpCoreDirectory = None
+                        }
+
+                    let result = parseProject parseInfo
+
+                    match result with
+                        | Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
+                            logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                        | Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                            logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                        | Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
+                            logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
+                        | Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
+                            logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
+                        | Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
+                            logError "ConsoleFailedToLoadConfig" [|message|]
+                        | Result.Failure(ProjectFile.RunTimeConfigError) -> 
+                            logError "ConsoleRunTimeConfigError" [||]
+                        | Result.Failure(ProjectFile.FailedToResolveReferences) -> 
+                            logError "ConsoleFailedToResolveReferences" [||]
+                        | Result.Success -> ()
+                with
+                    | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
+                        logWarning(
+                            "Lint failed while analysing " + 
+                            projectFile + 
+                            ".\nFailed with: " + 
+                            System.String.Join("\n", errors))
+                    | e -> 
+                        logWarning("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
