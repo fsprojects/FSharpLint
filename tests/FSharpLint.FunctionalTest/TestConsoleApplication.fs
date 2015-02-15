@@ -78,7 +78,7 @@ module Tests =
 
             System.IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
 
-            Assert.IsTrue(output.Contains("Failed to load config file"))
+            Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.InvalidReferencedProjectFile() = 
@@ -88,7 +88,7 @@ module Tests =
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("referencesInvalidProject.fsproj"))
+            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("referencesInvalidProject.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.InvalidProjectFile() = 
@@ -98,7 +98,7 @@ module Tests =
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"))
+            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.UnableToFindProjectFile() = 
@@ -108,7 +108,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile))
+            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.UnableToFindReferencedProjectFile() = 
@@ -118,7 +118,7 @@ module Tests =
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains("Could not find file"))
+            Assert.IsTrue(output.Contains("Could not find file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
