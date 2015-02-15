@@ -46,10 +46,10 @@ type FSharpLintTask() =
             if assembly <> null then
                 assembly
             else
-                let Parts = args.Name.Split(',')
-                let File = directory + "\\" + Parts.[0].Trim() + ".dll"
+                let parts = args.Name.Split(',')
+                let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
 
-                System.Reflection.Assembly.LoadFrom(File)))
+                System.Reflection.Assembly.LoadFrom(file)))
         
         let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
