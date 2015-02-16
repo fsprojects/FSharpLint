@@ -54,16 +54,39 @@ type FSharpLintTask() =
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
-        let logFailure = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
+        let logFailure:(string -> unit) = this.Log.LogWarning
 
-        worker.RunLint 
-            this.Project
-            (fun (filename, startLine, startColumn, endLine, endColumn, info) -> 
-                if treatWarningsAsErrors then
-                    logError("", "", "", filename, startLine, startColumn, endLine, endColumn, info, null)
-                else
-                    logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, info, null))
-            logFailure
+        let progress = function
+            | FSharpLint.Worker.Starting(_)
+            | FSharpLint.Worker.ReachedEnd(_) -> ()
+            | FSharpLint.Worker.Failed(filename, e) ->
+                logFailure(sprintf "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s" filename e.Message e.StackTrace)
+
+        let neverFinishEarly = fun _ -> false
+
+        let errorReceived (error:FSharpLint.Worker.Error) = 
+            let filename = error.Range.FileName
+            let startLine = error.Range.StartLine
+            let startColumn = error.Range.StartColumn + 1
+            let endLine = error.Range.EndLine
+            let endColumn = error.Range.EndColumn + 1
+
+            if treatWarningsAsErrors then
+                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+            else
+                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+
+        let options = 
+            {
+                FSharpLint.Worker.LintOptions.FinishEarly = Func<_>(neverFinishEarly)
+                FSharpLint.Worker.LintOptions.Progress = System.Action<_>(progress)
+                FSharpLint.Worker.LintOptions.ErrorReceived = System.Action<_>(errorReceived)
+            }
+
+        match worker.RunLint this.Project options with
+            | FSharpLint.Worker.Success -> ()
+            | FSharpLint.Worker.Failure(error) ->
+                logFailure(error)
             
         true

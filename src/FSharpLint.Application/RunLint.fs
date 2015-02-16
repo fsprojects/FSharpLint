@@ -185,59 +185,69 @@ module RunLint =
         Ast.parseInput input 
             |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
 
+    let private toWorkerProgress = function
+        | Starting(f) -> FSharpLint.Worker.Starting(f)
+        | ReachedEnd(f) -> FSharpLint.Worker.ReachedEnd(f)
+        | Failed(f, e) -> FSharpLint.Worker.Failed(f, e)
+
+    let private toWorkerRange (range:Microsoft.FSharp.Compiler.Range.range) =
+        {
+            FSharpLint.Worker.StartLine = range.StartLine
+            FSharpLint.Worker.StartColumn = range.StartColumn
+            FSharpLint.Worker.EndLine = range.EndLine
+            FSharpLint.Worker.EndColumn = range.EndColumn
+            FSharpLint.Worker.FileName = range.FileName
+        }
+                        
+    let private toWorkerError (error:ErrorHandling.Error) = 
+        {
+            FSharpLint.Worker.Error.Info = error.Info
+            FSharpLint.Worker.Error.Range = toWorkerRange error.Range
+            FSharpLint.Worker.Error.Input = error.Input
+            FSharpLint.Worker.Error.FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Info
+        }
+
     type FSharpLintWorker() = 
         inherit System.MarshalByRefObject()
 
         interface FSharpLint.Worker.IFSharpLintWorker with
-            member this.RunLint projectFile reportError logWarning = 
-                let logError resouce args = 
+            member this.RunLint projectFile (options:FSharpLint.Worker.LintOptions) =
+                let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
-                    System.String.Format(formatString, args) |> logWarning
+                    System.String.Format(formatString, args) |> FSharpLint.Worker.Failure
 
-                let handleLintWarning (error: ErrorHandling.Error) = 
-                    let range = error.Range
-
-                    reportError(
-                        range.FileName, 
-                        range.StartLine, 
-                        range.StartColumn + 1, 
-                        range.EndLine,
-                        range.EndColumn + 1, 
-                        error.Info)
-            
                 try
                     let parseInfo =
                         {
-                            FinishEarly = System.Func<_>(fun _ -> false)
+                            FinishEarly = options.FinishEarly
                             ProjectFile = projectFile
-                            Progress = System.Action<_>(ignore)
-                            ErrorReceived = System.Action<_>(handleLintWarning)
+                            Progress = System.Action<_>(toWorkerProgress >> options.Progress.Invoke)
+                            ErrorReceived = System.Action<_>(toWorkerError >> options.ErrorReceived.Invoke)
                         }
 
-                    let result = parseProject parseInfo
-
-                    match result with
+                    match parseProject parseInfo with
                         | Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
-                            logError "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                            failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
                         | Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
-                            logError "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                            failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
                         | Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
-                            logError "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
+                            failed "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
                         | Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
-                            logError "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
+                            failed "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
                         | Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
-                            logError "ConsoleFailedToLoadConfig" [|message|]
+                            failed "ConsoleFailedToLoadConfig" [|message|]
                         | Result.Failure(ProjectFile.RunTimeConfigError) -> 
-                            logError "ConsoleRunTimeConfigError" [||]
+                            failed "ConsoleRunTimeConfigError" [||]
                         | Result.Failure(ProjectFile.FailedToResolveReferences) -> 
-                            logError "ConsoleFailedToResolveReferences" [||]
-                        | Result.Success -> ()
+                            failed "ConsoleFailedToResolveReferences" [||]
+                        | Result.Success -> 
+                            FSharpLint.Worker.Success
                 with
                     | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                        logWarning(
+                        FSharpLint.Worker.Failure(
                             "Lint failed while analysing " + 
                             projectFile + 
                             ".\nFailed with: " + 
                             System.String.Join("\n", errors))
                     | e -> 
-                        logWarning("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
+                        FSharpLint.Worker.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)

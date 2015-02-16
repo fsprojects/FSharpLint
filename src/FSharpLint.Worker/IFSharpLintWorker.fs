@@ -18,5 +18,48 @@
 
 namespace FSharpLint.Worker
 
+type Range =
+    {
+        StartLine: int
+        StartColumn: int
+        EndLine: int
+        EndColumn: int
+        FileName: string
+    }
+
+type Error =
+    {
+        /// Description of the error.
+        Info: string
+
+        Range: Range
+
+        /// Entire input file, needed to display where in the file the error occurred.
+        Input: string
+
+        FormattedError: string
+    }
+
+type Progress =
+    | Starting of string
+    | ReachedEnd of string
+    | Failed of string * System.Exception
+
+type LintOptions =
+    {
+        /// Function that when returns true cancels the parsing of the project, useful for cancellation tokens etc.
+        FinishEarly: System.Func<bool>
+
+        /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
+        Progress: System.Action<Progress>
+
+        /// Callback that's called when a lint error is detected.
+        ErrorReceived: System.Action<Error>
+    }
+
+type Result =
+    | Success
+    | Failure of string
+
 type IFSharpLintWorker =
-    abstract member RunLint : projectFile:string -> reportError:(string * int * int * int * int * string -> unit) -> logWarning:(string -> unit) -> unit
+    abstract member RunLint : projectFile:string -> options:LintOptions -> Result
