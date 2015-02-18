@@ -204,7 +204,7 @@ module RunLint =
             FSharpLint.Worker.Error.Info = error.Info
             FSharpLint.Worker.Error.Range = toWorkerRange error.Range
             FSharpLint.Worker.Error.Input = error.Input
-            FSharpLint.Worker.Error.FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Info
+            FSharpLint.Worker.Error.FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Input
         }
 
     type FSharpLintWorker() = 
