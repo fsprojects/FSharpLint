@@ -70,7 +70,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
     let directory = System.IO.Path.GetDirectoryName(fullPath)
 
-    let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
+    let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
 
     let evidence = System.AppDomain.CurrentDomain.Evidence
 
