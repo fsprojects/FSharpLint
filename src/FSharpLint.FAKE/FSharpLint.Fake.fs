@@ -66,6 +66,11 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
     let numberOfWarnings, numberOfFiles = ref 0, ref 0
 
+    System.AppDomain.CurrentDomain.GetAssemblies()
+        |> Array.iter (fun x -> printf "%s %s %s\n" x.FullName x.CodeBase x.Location)
+
+    printf "\n\n"
+
     let fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
     let directory = System.IO.Path.GetDirectoryName(fullPath)
@@ -105,7 +110,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
             ErrorReceived = parameters.ErrorReceived
         }
 
-    match worker.RunLint projectFile options with
+    match worker.RunLint projectFile (*options*) with
         | Success when parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 ->
             failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
         | Success ->

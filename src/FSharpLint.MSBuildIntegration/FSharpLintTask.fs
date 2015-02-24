@@ -84,7 +84,7 @@ type FSharpLintTask() =
                 FSharpLint.Worker.LintOptions.ErrorReceived = System.Action<_>(errorReceived)
             }
 
-        match worker.RunLint this.Project options with
+        match worker.RunLint this.Project (*options*) with
             | FSharpLint.Worker.Success -> ()
             | FSharpLint.Worker.Failure(error) ->
                 logFailure(error)

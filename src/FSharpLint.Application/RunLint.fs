@@ -211,18 +211,25 @@ module RunLint =
         inherit System.MarshalByRefObject()
 
         interface FSharpLint.Worker.IFSharpLintWorker with
-            member this.RunLint projectFile (options:FSharpLint.Worker.LintOptions) =
+            member this.RunLint projectFile (*(options:FSharpLint.Worker.LintOptions)*) =
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
                     System.String.Format(formatString, args) |> FSharpLint.Worker.Failure
 
+                System.AppDomain.CurrentDomain.GetAssemblies()
+                    |> Array.iter (fun x -> printf "%s %s %s\n" x.FullName x.CodeBase x.Location)
+
+                printf "\n\n"
+
+                FSharpLint.Worker.Failure "woof"
+                (*
                 try
                     let parseInfo =
                         {
-                            FinishEarly = options.FinishEarly
+                            FinishEarly = System.Func<_>(fun _ -> false)
                             ProjectFile = projectFile
-                            Progress = System.Action<_>(toWorkerProgress >> options.Progress.Invoke)
-                            ErrorReceived = System.Action<_>(toWorkerError >> options.ErrorReceived.Invoke)
+                            Progress = System.Action<_>(ignore)
+                            ErrorReceived = System.Action<_>(ignore)
                         }
 
                     match parseProject parseInfo with
@@ -251,3 +258,4 @@ module RunLint =
                             System.String.Join("\n", errors))
                     | e -> 
                         FSharpLint.Worker.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
+                        *)

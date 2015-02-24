@@ -62,4 +62,4 @@ type Result =
     | Failure of string
 
 type IFSharpLintWorker =
-    abstract member RunLint : projectFile:string -> options:LintOptions -> Result
+    abstract member RunLint : projectFile:string -> (*options:LintOptions ->*) Result
