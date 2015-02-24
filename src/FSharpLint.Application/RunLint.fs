@@ -215,9 +215,14 @@ module RunLint =
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
                     System.String.Format(formatString, args) |> FSharpLint.Worker.Failure
-
+                    
                 System.AppDomain.CurrentDomain.GetAssemblies()
-                    |> Array.iter (fun x -> printf "%s %s %s\n" x.FullName x.CodeBase x.Location)
+                    |> Array.iter (fun x -> 
+                        printf 
+                            "%s %s %s\n" 
+                            x.FullName 
+                            (if x.IsDynamic then "dynamic" else x.CodeBase) 
+                            (if x.IsDynamic then "dynamic" else x.Location))
 
                 printf "\n\n"
 

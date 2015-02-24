@@ -65,9 +65,14 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     traceStartTask "FSharpLint" projectFile
 
     let numberOfWarnings, numberOfFiles = ref 0, ref 0
-
+    
     System.AppDomain.CurrentDomain.GetAssemblies()
-        |> Array.iter (fun x -> printf "%s %s %s\n" x.FullName x.CodeBase x.Location)
+        |> Array.iter (fun x -> 
+            printf 
+                "%s %s %s\n" 
+                x.FullName 
+                (if x.IsDynamic then "dynamic" else x.CodeBase) 
+                (if x.IsDynamic then "dynamic" else x.Location))
 
     printf "\n\n"
 
