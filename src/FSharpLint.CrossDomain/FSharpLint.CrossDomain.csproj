@@ -55,8 +55,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\FSharpLint.Worker\FSharpLint.Worker.fsproj">
-      <Project>{9a7cc4be-7adb-43ac-b972-e458671f8d04}</Project>
+    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
+      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
       <Name>FSharpLint.Worker</Name>
     </ProjectReference>
   </ItemGroup>

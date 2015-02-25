@@ -1,5 +1,6 @@
 ﻿module FSharpLint.FAKE
 
+open Fake
 open FSharpLint.Worker
 
 type LintOptions =
@@ -27,14 +28,14 @@ let private printException (e:System.Exception) =
 let private failedToParseFileError (file:string) parseException =
     printfn "%A" file
     printException parseException
-
+    (*
 /// the default only prints something if FSharpLint found a lint in a file
 let private defaultProgress = function
     | Starting(file)
     | ReachedEnd(file) -> ()
     | Failed(file, parseException) ->
         failedToParseFileError file parseException
-
+        *)
 let private defaultErrorReceived (error:Error) =
     error.Info + System.Environment.NewLine + error.FormattedError
         |> printf "%s"
@@ -42,7 +43,7 @@ let private defaultErrorReceived (error:Error) =
 let defaultLintOptions =
     {
         FinishEarly = System.Func<_>(defaultFinishEarly)
-        Progress = System.Action<Progress>(defaultProgress)
+        Progress = System.Action<Progress>(ignore)
         ErrorReceived = System.Action<Error>(defaultErrorReceived)
         FailBuildIfAnyWarnings = false
     }
@@ -59,21 +60,11 @@ let defaultLintOptions =
 ///         FSharpLint (fun o -> { o with ErrorReceived = System.Action<ErrorHandling.Error>(customErrorFunction) }) projectFile
 ///     )
 let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
-    let parameters = defaultLintOptions |> setParams
+    //let parameters = defaultLintOptions |> setParams
 
-    //traceStartTask "FSharpLint" projectFile
+    traceStartTask "FSharpLint" projectFile
 
     let numberOfWarnings, numberOfFiles = ref 0, ref 0
-    
-    System.AppDomain.CurrentDomain.GetAssemblies()
-        |> Array.iter (fun x -> 
-            printf 
-                "%s %s %s\n" 
-                x.FullName 
-                (if x.IsDynamic then "dynamic" else x.CodeBase) 
-                (if x.IsDynamic then "dynamic" else x.Location))
-
-    printf "\n\n"
 
     let fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
@@ -83,20 +74,10 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
     let evidence = System.AppDomain.CurrentDomain.Evidence
 
-    let appDomain = System.AppDomain.CreateDomain("Lint Domain", evidence, setup)
-    (*
-    System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(fun x args ->
-        let assembly = System.Reflection.Assembly.Load(args.Name)
-        if assembly <> null then
-            assembly
-        else
-            let parts = args.Name.Split(',')
-            let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+    let appDomain = System.AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
 
-            System.Reflection.Assembly.LoadFrom(file)))
-        *)
     let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
-
+    (*
     let errorReceived error = 
         incr numberOfWarnings
         parameters.ErrorReceived.Invoke(error)
@@ -105,21 +86,18 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
         match progress with
             | ReachedEnd(_) -> incr numberOfFiles
             | _ -> ()
-        parameters.Progress.Invoke(progress)
+        parameters.Progress.Invoke(progress)*)
 
-    let options = 
-        {
-            FSharpLint.Worker.FinishEarly = parameters.FinishEarly
-            Progress = parameters.Progress
-            ErrorReceived = parameters.ErrorReceived
-        }
+    let options = FSharpLint.Worker.LintOptions(FinishEarly = System.Func<_>(defaultFinishEarly), 
+                                                Progress = System.Action<_>(ignore), 
+                                                ErrorReceived = System.Action<_>(defaultErrorReceived))
 
-    match worker.RunLint projectFile (*options*) with
-        | Success when parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 ->
-            failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
-        | Success ->
-            printf "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
-        | Failure(error) ->
-            sprintf "Failed to lint %s. Failed with: %s" projectFile error |> printf "%s"
+    let result = worker.RunLint(projectFile, options)
+    //    | Success when parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 ->
+     //       failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
+    if result.IsSuccess then
+        printf "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
+    else
+        sprintf "Failed to lint %s. Failed with: %s" projectFile result.Message |> printf "%s"
 
-    //traceEndTask "FSharpLint" projectFile
+    traceEndTask "FSharpLint" projectFile

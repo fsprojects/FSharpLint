@@ -184,47 +184,37 @@ module RunLint =
 
         Ast.parseInput input 
             |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
-
+            (*
     let private toWorkerProgress = function
         | Starting(f) -> FSharpLint.Worker.Starting(f)
         | ReachedEnd(f) -> FSharpLint.Worker.ReachedEnd(f)
         | Failed(f, e) -> FSharpLint.Worker.Failed(f, e)
-
+        *)
     let private toWorkerRange (range:Microsoft.FSharp.Compiler.Range.range) =
-        {
-            FSharpLint.Worker.StartLine = range.StartLine
-            FSharpLint.Worker.StartColumn = range.StartColumn
-            FSharpLint.Worker.EndLine = range.EndLine
-            FSharpLint.Worker.EndColumn = range.EndColumn
-            FSharpLint.Worker.FileName = range.FileName
-        }
+        FSharpLint.Worker.Range(StartLine = range.StartLine,
+                                StartColumn = range.StartColumn,
+                                EndLine = range.EndLine,
+                                EndColumn = range.EndColumn,
+                                FileName = range.FileName)
                         
     let private toWorkerError (error:ErrorHandling.Error) = 
-        {
-            FSharpLint.Worker.Error.Info = error.Info
-            FSharpLint.Worker.Error.Range = toWorkerRange error.Range
-            FSharpLint.Worker.Error.Input = error.Input
-            FSharpLint.Worker.Error.FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Input
-        }
+        FSharpLint.Worker.Error(Info = error.Info,
+                                Range = toWorkerRange error.Range,
+                                Input = error.Input,
+                                FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Input)
 
     type FSharpLintWorker() = 
         inherit System.MarshalByRefObject()
 
         interface FSharpLint.Worker.IFSharpLintWorker with
-            member this.RunLint projectFile (*(options:FSharpLint.Worker.LintOptions)*) =
+            member this.RunLint(projectFile, options:FSharpLint.Worker.LintOptions) =
+            (*
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
-                    System.String.Format(formatString, args) |> FSharpLint.Worker.Failure
-
-                printf "\n\nRunLint"
+                    System.String.Format(formatString, args) |> FSharpLint.Worker.Failure*)
                     
                 System.AppDomain.CurrentDomain.GetAssemblies()
-                    |> Array.iter (fun x -> 
-                        printf 
-                            "%s %s %s\n" 
-                            x.FullName 
-                            (if x.IsDynamic then "dynamic" else x.CodeBase) 
-                            (if x.IsDynamic then "dynamic" else x.Location))
+                    |> Array.iter (fun x -> printf "%s\n" x.FullName)
 
                 printf "\n\n"
 
@@ -234,9 +224,13 @@ module RunLint =
                             FinishEarly = System.Func<_>(fun _ -> false)
                             ProjectFile = projectFile
                             Progress = System.Action<_>(ignore)
-                            ErrorReceived = System.Action<_>(ignore)
+                            ErrorReceived = System.Action<_>(toWorkerError >> options.ErrorReceived.Invoke)
                         }
 
+                    parseProject parseInfo |> ignore
+
+                    FSharpLint.Worker.Result.Success()
+                    (*
                     match parseProject parseInfo with
                         | Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
                             failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
@@ -253,13 +247,13 @@ module RunLint =
                         | Result.Failure(ProjectFile.FailedToResolveReferences) -> 
                             failed "ConsoleFailedToResolveReferences" [||]
                         | Result.Success -> 
-                            FSharpLint.Worker.Success
+                            FSharpLint.Worker.Success*)
                 with
                     | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                        FSharpLint.Worker.Failure(
+                        FSharpLint.Worker.Result.Failure(
                             "Lint failed while analysing " + 
                             projectFile + 
                             ".\nFailed with: " + 
                             System.String.Join("\n", errors))
                     | e -> 
-                        FSharpLint.Worker.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
+                        FSharpLint.Worker.Result.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)

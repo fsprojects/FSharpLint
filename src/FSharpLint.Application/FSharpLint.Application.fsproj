@@ -57,9 +57,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.fsproj">
+    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
       <Name>FSharpLint.Worker</Name>
-      <Project>{9a7cc4be-7adb-43ac-b972-e458671f8d04}</Project>
+      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Compiler.Service, Version=0.0.82.0, Culture=neutral, PublicKeyToken=178e2f793012a759">

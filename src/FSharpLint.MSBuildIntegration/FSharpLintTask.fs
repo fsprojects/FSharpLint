@@ -56,13 +56,14 @@ type FSharpLintTask() =
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
-
+        (*
         let progress = function
             | FSharpLint.Worker.Starting(_)
             | FSharpLint.Worker.ReachedEnd(_) -> ()
             | FSharpLint.Worker.Failed(filename, e) ->
                 logFailure(sprintf "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s" filename e.Message e.StackTrace)
-
+                
+            *)
         let neverFinishEarly = fun _ -> false
 
         let errorReceived (error:FSharpLint.Worker.Error) = 
@@ -76,17 +77,14 @@ type FSharpLintTask() =
                 logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
             else
                 logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+                
+        let options = FSharpLint.Worker.LintOptions(FinishEarly = System.Func<_>(neverFinishEarly), 
+                                                    Progress = System.Action<_>(ignore), 
+                                                    ErrorReceived = System.Action<_>(errorReceived))
 
-        let options = 
-            {
-                FSharpLint.Worker.LintOptions.FinishEarly = Func<_>(neverFinishEarly)
-                FSharpLint.Worker.LintOptions.Progress = System.Action<_>(progress)
-                FSharpLint.Worker.LintOptions.ErrorReceived = System.Action<_>(errorReceived)
-            }
+        let result = worker.RunLint(this.Project, null)
 
-        match worker.RunLint this.Project (*options*) with
-            | FSharpLint.Worker.Success -> ()
-            | FSharpLint.Worker.Failure(error) ->
-                logFailure(error)
+        if not result.IsSuccess then
+            logFailure(result.Message)
             
         true
