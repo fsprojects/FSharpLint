@@ -215,6 +215,8 @@ module RunLint =
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
                     System.String.Format(formatString, args) |> FSharpLint.Worker.Failure
+
+                printf "\n\nRunLint"
                     
                 System.AppDomain.CurrentDomain.GetAssemblies()
                     |> Array.iter (fun x -> 
@@ -226,8 +228,6 @@ module RunLint =
 
                 printf "\n\n"
 
-                FSharpLint.Worker.Failure "woof"
-                (*
                 try
                     let parseInfo =
                         {
@@ -263,4 +263,3 @@ module RunLint =
                             System.String.Join("\n", errors))
                     | e -> 
                         FSharpLint.Worker.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
-                        *)
