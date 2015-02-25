@@ -41,6 +41,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FAKE", "src\FSha
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Worker", "src\FSharpLint.Worker\FSharpLint.Worker.fsproj", "{9A7CC4BE-7ADB-43AC-B972-E458671F8D04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSharpLint.CrossDomain", "FSharpLint.CrossDomain\FSharpLint.CrossDomain.csproj", "{155D0F1F-FCFF-4054-9FD5-7B187B3EF62F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,10 @@ Global
 		{9A7CC4BE-7ADB-43AC-B972-E458671F8D04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A7CC4BE-7ADB-43AC-B972-E458671F8D04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A7CC4BE-7ADB-43AC-B972-E458671F8D04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{155D0F1F-FCFF-4054-9FD5-7B187B3EF62F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{155D0F1F-FCFF-4054-9FD5-7B187B3EF62F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{155D0F1F-FCFF-4054-9FD5-7B187B3EF62F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{155D0F1F-FCFF-4054-9FD5-7B187B3EF62F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
