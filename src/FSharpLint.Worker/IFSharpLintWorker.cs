@@ -7,18 +7,16 @@ using System.Threading.Tasks;
 
 namespace FSharpLint.Worker
 {
-    [ServiceContract]
-    public interface ILintReporter
-    {
-        [OperationContract]
-        void ReportProgress(Progress progress);
+    public delegate void ErrorReceivedEventHandler(Error error);
 
-        [OperationContract]
-        void ErrorReceived(Error error);
-    }
+    public delegate void ReportProgressEventHandler(Progress args); 
 
     public interface IFSharpLintWorker
     {
+        event ErrorReceivedEventHandler ErrorReceived;
+
+        event ReportProgressEventHandler ReportProgress;
+
         Result RunLint(string projectFile, LintOptions options);
     }
 }

@@ -206,14 +206,19 @@ module RunLint =
     type FSharpLintWorker() = 
         inherit System.MarshalByRefObject()
 
+        let errorReceivedEvent = DelegateEvent<FSharpLint.Worker.ErrorReceivedEventHandler>()
+
+        let reportProgressEvent = DelegateEvent<FSharpLint.Worker.ReportProgressEventHandler>()
+
         interface FSharpLint.Worker.IFSharpLintWorker with
+
+            [<CLIEvent>]
+            member this.ErrorReceived = errorReceivedEvent.Publish
+
+            [<CLIEvent>]
+            member this.ReportProgress = reportProgressEvent.Publish
+
             member this.RunLint(projectFile, options:FSharpLint.Worker.LintOptions) =
-
-                let binding = System.ServiceModel.NetNamedPipeBinding()
-                let address = System.ServiceModel.EndpointAddress("net.pipe://localhost/Lint")
-                use pipeFactory = new System.ServiceModel.ChannelFactory<FSharpLint.Worker.ILintReporter>(binding, address)
-
-                let pipeProxy = pipeFactory.CreateChannel()
 
 
             (*
@@ -232,7 +237,7 @@ module RunLint =
                             FinishEarly = System.Func<_>(fun _ -> false)
                             ProjectFile = projectFile
                             Progress = System.Action<_>(ignore)
-                            ErrorReceived = System.Action<_>(toWorkerError >> pipeProxy.ErrorReceived)
+                            ErrorReceived = System.Action<_>(fun x -> errorReceivedEvent.Trigger([| toWorkerError x |]))
                         }
 
                     parseProject parseInfo |> ignore
