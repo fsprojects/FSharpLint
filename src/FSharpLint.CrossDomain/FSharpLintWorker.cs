@@ -4,9 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FSharpLint.Worker;
+using System.ServiceModel;
 
 namespace FSharpLint.CrossDomain
 {
+    [ServiceContract]
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
+    public class Reporter : ILintReporter
+    {
+        private readonly LintOptions lintOptions;
+
+        public Reporter(LintOptions lintOptions)
+        {
+            this.lintOptions = lintOptions;
+        }
+
+        public void ReportProgress(Progress progress)
+        {
+            this.lintOptions.Progress(progress);
+        }
+
+        public void ErrorReceived(Error error)
+        {
+            this.lintOptions.ErrorReceived(error);
+        }
+    }
+
     public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.IFSharpLintWorker
     {
         public FSharpLint.Worker.Result RunLint(string projectFile, LintOptions options)
@@ -23,7 +46,18 @@ namespace FSharpLint.CrossDomain
 
             var worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") as FSharpLint.Worker.IFSharpLintWorker;
 
-            return worker.RunLint(projectFile, options);
+            using (var host = new ServiceHost(new Reporter(options), new[] { new Uri("net.pipe://localhost") }))
+            {
+                host.AddServiceEndpoint(typeof(ILintReporter), new NetNamedPipeBinding(), "Lint");
+
+                host.Open();
+
+                var result = worker.RunLint(projectFile, null);
+
+                host.Close();
+
+                return result;
+            }
         }
     }
 }

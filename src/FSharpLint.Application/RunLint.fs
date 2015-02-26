@@ -208,6 +208,14 @@ module RunLint =
 
         interface FSharpLint.Worker.IFSharpLintWorker with
             member this.RunLint(projectFile, options:FSharpLint.Worker.LintOptions) =
+
+                let binding = System.ServiceModel.NetNamedPipeBinding()
+                let address = System.ServiceModel.EndpointAddress("net.pipe://localhost/Lint")
+                use pipeFactory = new System.ServiceModel.ChannelFactory<FSharpLint.Worker.ILintReporter>(binding, address)
+
+                let pipeProxy = pipeFactory.CreateChannel()
+
+
             (*
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
@@ -224,7 +232,7 @@ module RunLint =
                             FinishEarly = System.Func<_>(fun _ -> false)
                             ProjectFile = projectFile
                             Progress = System.Action<_>(ignore)
-                            ErrorReceived = System.Action<_>(toWorkerError >> options.ErrorReceived.Invoke)
+                            ErrorReceived = System.Action<_>(toWorkerError >> pipeProxy.ErrorReceived)
                         }
 
                     parseProject parseInfo |> ignore
