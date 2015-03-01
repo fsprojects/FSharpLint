@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using FSharpLint.Worker;
 using System.ServiceModel;
 using System.Runtime.Remoting.Messaging;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace FSharpLint.CrossDomain
 {
@@ -15,7 +17,13 @@ namespace FSharpLint.CrossDomain
 
         public event ReportProgressEventHandler ReportProgress;
 
-        private LintOptions options { get; set; }
+        private LintOptions options;
+
+        private readonly BlockingCollection<Error> errorsReceived = new BlockingCollection<Error>();
+
+        private readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
+
+        private TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
 
         public FSharpLint.Worker.Result RunLint(string projectFile, LintOptions options)
         {
@@ -25,7 +33,7 @@ namespace FSharpLint.CrossDomain
 
             var directory = System.IO.Path.GetDirectoryName(fullPath);
 
-            var setup = new AppDomainSetup { PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true };
+            var setup = new AppDomainSetup { LoaderOptimization = LoaderOptimization.SingleDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true };
 
             var evidence = AppDomain.CurrentDomain.Evidence;
 
@@ -35,13 +43,35 @@ namespace FSharpLint.CrossDomain
 
             worker.ErrorReceived += new ErrorReceivedEventHandler(ReportError);
 
-            return worker.RunLint(projectFile, null);
+            Task task = new Task(ReportResults);
+
+            task.Start();
+
+            var result = worker.RunLint(projectFile, null);
+
+            cancelToken.Cancel(false);
+
+            task.Wait();
+
+            return result;
+        }
+
+        public void ReportResults()
+        {
+            while (!cancelToken.IsCancellationRequested)
+            {
+                try
+                {
+                    options.ErrorReceived(errorsReceived.Take(cancelToken.Token));
+                }
+                catch (OperationCanceledException) { }
+            }
         }
 
         [OneWay]
         public void ReportError(Error error)
         {
-            options.ErrorReceived(error);
+            errorsReceived.Add(error);
         }
     }
 }

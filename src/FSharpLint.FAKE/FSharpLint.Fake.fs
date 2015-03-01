@@ -38,7 +38,7 @@ let private defaultProgress = function
         *)
 let private defaultErrorReceived (error:Error) =
     error.Info + System.Environment.NewLine + error.FormattedError
-        |> printf "%s"
+        |> printf "\n%s\n"
 
 let defaultLintOptions =
     {
@@ -70,7 +70,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
     let directory = System.IO.Path.GetDirectoryName(fullPath)
 
-    let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
+    let setup = System.AppDomainSetup(LoaderOptimization = System.LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
 
     let evidence = System.AppDomain.CurrentDomain.Evidence
 

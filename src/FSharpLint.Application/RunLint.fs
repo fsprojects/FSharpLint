@@ -225,11 +225,6 @@ module RunLint =
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
                     System.String.Format(formatString, args) |> FSharpLint.Worker.Failure*)
-                    
-                System.AppDomain.CurrentDomain.GetAssemblies()
-                    |> Array.iter (fun x -> printf "%s\n" x.FullName)
-
-                printf "\n\n"
 
                 try
                     let parseInfo =
