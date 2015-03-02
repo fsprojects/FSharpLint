@@ -62,10 +62,3 @@ module RunLint =
         
     /// Parses and runs the linter on a string.
     val parseInput : input: string -> errorReceived: System.Action<ErrorHandling.Error> -> unit
-        
-    type FSharpLintWorker = 
-        inherit System.MarshalByRefObject
-
-        new : unit -> FSharpLintWorker
-
-        interface FSharpLint.Worker.IFSharpLintWorker

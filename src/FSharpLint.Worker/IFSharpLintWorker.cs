@@ -9,7 +9,7 @@ namespace FSharpLint.Worker
 {
     public delegate void ErrorReceivedEventHandler(Error error);
 
-    public delegate void ReportProgressEventHandler(Progress args); 
+    public delegate void ReportProgressEventHandler(Progress args);
 
     public interface IFSharpLintWorker
     {
@@ -17,6 +17,11 @@ namespace FSharpLint.Worker
 
         event ReportProgressEventHandler ReportProgress;
 
+        Result RunLint(string projectFile);
+    }
+
+    public interface ICrossDomainWorker
+    {
         Result RunLint(string projectFile, LintOptions options);
     }
 }

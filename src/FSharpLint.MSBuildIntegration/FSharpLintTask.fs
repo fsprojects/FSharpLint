@@ -82,7 +82,7 @@ type FSharpLintTask() =
                                                     Progress = System.Action<_>(ignore), 
                                                     ErrorReceived = System.Action<_>(errorReceived))
 
-        let result = worker.RunLint(this.Project, null)
+        let result = worker.RunLint(this.Project)
 
         if not result.IsSuccess then
             logFailure(result.Message)

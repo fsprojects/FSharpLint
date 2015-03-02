@@ -11,43 +11,29 @@ using System.Threading;
 
 namespace FSharpLint.CrossDomain
 {
-    public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.IFSharpLintWorker
+    public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.ICrossDomainWorker
     {
-        public event ErrorReceivedEventHandler ErrorReceived;
-
-        public event ReportProgressEventHandler ReportProgress;
-
         private LintOptions options;
 
-        private readonly BlockingCollection<Error> errorsReceived = new BlockingCollection<Error>();
+        private readonly BlockingCollection<object> reportsReceived = new BlockingCollection<object>();
 
         private readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
 
-        private TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
+        private readonly TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
 
         public FSharpLint.Worker.Result RunLint(string projectFile, LintOptions options)
         {
             this.options = options;
 
-            var fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
-            var directory = System.IO.Path.GetDirectoryName(fullPath);
-
-            var setup = new AppDomainSetup { LoaderOptimization = LoaderOptimization.SingleDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true };
-
-            var evidence = AppDomain.CurrentDomain.Evidence;
-
-            var appDomain = AppDomain.CreateDomain("Lint Domain", evidence, setup);
-
-            var worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") as FSharpLint.Worker.IFSharpLintWorker;
+            var worker = GetWorker();
 
             worker.ErrorReceived += new ErrorReceivedEventHandler(ReportError);
 
-            Task task = new Task(ReportResults);
+            var task = new Task(ReportResults);
 
             task.Start();
 
-            var result = worker.RunLint(projectFile, null);
+            var result = worker.RunLint(projectFile);
 
             cancelToken.Cancel(false);
 
@@ -62,7 +48,16 @@ namespace FSharpLint.CrossDomain
             {
                 try
                 {
-                    options.ErrorReceived(errorsReceived.Take(cancelToken.Token));
+                    var report = reportsReceived.Take(cancelToken.Token);
+
+                    if (report is Error)
+                    {
+                        options.ErrorReceived((Error)report);
+                    }
+                    else
+                    {
+                        options.Progress((Progress)report);
+                    }
                 }
                 catch (OperationCanceledException) { }
             }
@@ -71,7 +66,28 @@ namespace FSharpLint.CrossDomain
         [OneWay]
         public void ReportError(Error error)
         {
-            errorsReceived.Add(error);
+            reportsReceived.Add(error);
+        }
+
+        [OneWay]
+        public void ReportProgress(Progress progress)
+        {
+            reportsReceived.Add(progress);
+        }
+
+        private IFSharpLintWorker GetWorker()
+        {
+            var fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+            var directory = System.IO.Path.GetDirectoryName(fullPath);
+
+            var setup = new AppDomainSetup { LoaderOptimization = LoaderOptimization.SingleDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true };
+
+            var evidence = AppDomain.CurrentDomain.Evidence;
+
+            var appDomain = AppDomain.CreateDomain("Lint Domain", evidence, setup);
+
+            return appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker") as FSharpLint.Worker.IFSharpLintWorker;
         }
     }
 }

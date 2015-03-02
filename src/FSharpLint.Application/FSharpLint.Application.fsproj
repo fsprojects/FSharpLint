@@ -50,6 +50,7 @@
     <Compile Include="ProjectFile.fs" />
     <Compile Include="RunLint.fsi" />
     <Compile Include="RunLint.fs" />
+    <Compile Include="FSharpLintWorker.fs" />
     <None Include="packages.config" />
     <None Include="app.config" />
     <Compile Include="AssemblyInfo.fs">
