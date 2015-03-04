@@ -11,70 +11,23 @@ using System.Threading;
 
 namespace FSharpLint.CrossDomain
 {
-    public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.ICrossDomainWorker
+    public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.IFSharpLintWorker
     {
-        private LintOptions options;
+        public event ErrorReceivedEventHandler ErrorReceived;
 
-        private readonly BlockingCollection<object> reportsReceived = new BlockingCollection<object>();
+        public event ReportProgressEventHandler ReportProgress;
 
-        private readonly CancellationTokenSource cancelToken = new CancellationTokenSource();
-
-        private readonly TaskCompletionSource<bool> taskCompletionSource = new TaskCompletionSource<bool>();
-
-        public FSharpLint.Worker.Result RunLint(string projectFile, LintOptions options)
+        public FSharpLint.Worker.Result RunLint(string projectFile)
         {
-            this.options = options;
-
             var worker = GetWorker();
 
-            worker.ErrorReceived += new ErrorReceivedEventHandler(ReportError);
+            worker.ErrorReceived += ErrorReceived;
 
-            var task = new Task(ReportResults);
+            worker.ReportProgress += ReportProgress;
 
-            task.Start();
-
-            var result = worker.RunLint(projectFile);
-
-            cancelToken.Cancel(false);
-
-            task.Wait();
-
-            return result;
+            return worker.RunLint(projectFile);
         }
-
-        public void ReportResults()
-        {
-            while (!cancelToken.IsCancellationRequested)
-            {
-                try
-                {
-                    var report = reportsReceived.Take(cancelToken.Token);
-
-                    if (report is Error)
-                    {
-                        options.ErrorReceived((Error)report);
-                    }
-                    else
-                    {
-                        options.Progress((Progress)report);
-                    }
-                }
-                catch (OperationCanceledException) { }
-            }
-        }
-
-        [OneWay]
-        public void ReportError(Error error)
-        {
-            reportsReceived.Add(error);
-        }
-
-        [OneWay]
-        public void ReportProgress(Progress progress)
-        {
-            reportsReceived.Add(progress);
-        }
-
+        
         private IFSharpLintWorker GetWorker()
         {
             var fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;

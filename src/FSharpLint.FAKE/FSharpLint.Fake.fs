@@ -41,6 +41,80 @@ let defaultLintOptions =
         FailBuildIfAnyWarnings = false
     }
 
+open System
+
+type FSharpLintWorker() = 
+    inherit MarshalByRefObject() 
+
+    let reportsReceived = new Collections.Concurrent.BlockingCollection<obj>()
+
+    let cancelToken = new Threading.CancellationTokenSource()
+
+    let taskCompletionSource = Threading.Tasks.TaskCompletionSource<bool>()
+
+    [<DefaultValue>] val mutable options : FSharpLint.Worker.LintOptions
+
+    let getWorker () = 
+        let fullPath = Reflection.Assembly.GetExecutingAssembly().Location
+
+        let directory = IO.Path.GetDirectoryName(fullPath)
+
+        let setup = AppDomainSetup(LoaderOptimization = System.LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
+
+        let evidence = AppDomain.CurrentDomain.Evidence
+
+        let appDomain = AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
+
+        appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
+
+    member this.RunLint projectFile (options:FSharpLint.Worker.LintOptions) =
+        this.options <- options
+
+        let worker = getWorker()
+
+        ErrorReceivedEventHandler(this.ReportError) |> worker.add_ErrorReceived 
+
+        ReportProgressEventHandler(this.ReportProgress) |> worker.add_ReportProgress
+
+        use task = new Threading.Tasks.Task(Action(this.ReportResults))
+
+        task.Start()
+
+        let result = worker.RunLint(projectFile)
+
+        cancelToken.Cancel(false)
+
+        task.Wait()
+
+        result
+
+    member this.ReportResults() =
+        while not cancelToken.IsCancellationRequested do
+            try
+                match reportsReceived.Take(cancelToken.Token) with
+                    | :? Error as error -> this.options.ErrorReceived.Invoke(error)
+                    | :? Progress as progress -> this.options.Progress.Invoke(progress)
+                    | _ -> ()
+            with _ -> ()
+
+    member this.Dispose(disposing) =
+        if disposing then
+            reportsReceived.Dispose()
+            cancelToken.Dispose()
+
+    interface IDisposable with
+        member this.Dispose() =
+            this.Dispose(true)
+            GC.SuppressFinalize(this)
+
+    [<System.Runtime.Remoting.Messaging.OneWay>]
+    member this.ReportError(error:Error) =
+        reportsReceived.Add(error)
+
+    [<System.Runtime.Remoting.Messaging.OneWay>]
+    member this.ReportProgress(progress:Progress) =
+        reportsReceived.Add(progress)
+
 /// Runs FSharpLint on a project.
 /// ## Parameters
 /// 
@@ -58,18 +132,6 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     traceStartTask "FSharpLint" projectFile
 
     let numberOfWarnings, numberOfFiles = ref 0, ref 0
-
-    let fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
-    let directory = System.IO.Path.GetDirectoryName(fullPath)
-
-    let setup = System.AppDomainSetup(LoaderOptimization = System.LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
-
-    let evidence = System.AppDomain.CurrentDomain.Evidence
-
-    let appDomain = System.AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
-
-    let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.ICrossDomainWorker
     
     let errorReceived error = 
         incr numberOfWarnings
@@ -87,7 +149,8 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
                                                 Progress = System.Action<_>(parserProgress), 
                                                 ErrorReceived = System.Action<_>(errorReceived))
 
-    let result = worker.RunLint(projectFile, options)
+    use worker = new FSharpLintWorker()
+    let result = worker.RunLint projectFile options
 
     if result.IsSuccess && parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 then
         failwithf "Linted %s and failed the build as warnings were found. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings

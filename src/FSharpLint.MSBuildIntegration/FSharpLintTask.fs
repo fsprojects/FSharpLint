@@ -39,16 +39,6 @@ type FSharpLintTask() =
 
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", evidence, setup)
 
-        System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(fun x args ->
-            let assembly = System.Reflection.Assembly.Load(args.Name)
-            if assembly <> null then
-                assembly
-            else
-                let parts = args.Name.Split(',')
-                let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
-
-                System.Reflection.Assembly.LoadFrom(file)))
-        
         let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
@@ -56,15 +46,6 @@ type FSharpLintTask() =
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
-        (*
-        let progress = function
-            | FSharpLint.Worker.Starting(_)
-            | FSharpLint.Worker.ReachedEnd(_) -> ()
-            | FSharpLint.Worker.Failed(filename, e) ->
-                logFailure(sprintf "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s" filename e.Message e.StackTrace)
-                
-            *)
-        let neverFinishEarly = fun _ -> false
 
         let errorReceived (error:FSharpLint.Worker.Error) = 
             let filename = error.Range.FileName
@@ -77,10 +58,18 @@ type FSharpLintTask() =
                 logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
             else
                 logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
-                
-        let options = FSharpLint.Worker.LintOptions(FinishEarly = System.Func<_>(neverFinishEarly), 
-                                                    Progress = System.Action<_>(ignore), 
-                                                    ErrorReceived = System.Action<_>(errorReceived))
+
+        let reportProgress (progress:FSharpLint.Worker.Progress) =
+            if progress.State = FSharpLint.Worker.Progress.ProgressType.Failed then
+                sprintf 
+                    "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s" 
+                    progress.Filename 
+                    progress.Exception.Message 
+                    progress.Exception.StackTrace
+                    |> logFailure
+
+        worker.add_ErrorReceived(FSharpLint.Worker.ErrorReceivedEventHandler(errorReceived))
+        worker.add_ReportProgress(FSharpLint.Worker.ReportProgressEventHandler(reportProgress))
 
         let result = worker.RunLint(this.Project)
 

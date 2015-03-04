@@ -19,9 +19,4 @@ namespace FSharpLint.Worker
 
         Result RunLint(string projectFile);
     }
-
-    public interface ICrossDomainWorker
-    {
-        Result RunLint(string projectFile, LintOptions options);
-    }
 }
