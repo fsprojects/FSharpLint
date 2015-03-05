@@ -76,7 +76,7 @@ type FSharpLintWorker() =
 
         ReportProgressEventHandler(this.ReportProgress) |> worker.add_ReportProgress
 
-        use task = new Threading.Tasks.Task(Action(this.ReportResults))
+        let task = new Threading.Tasks.Task(Action(this.ReportResults))
 
         task.Start()
 
