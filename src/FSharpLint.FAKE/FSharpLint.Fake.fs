@@ -86,34 +86,47 @@ type FSharpLintWorker() =
 
         task.Wait()
 
+        this.ClearAnyReportsReceived()
+
         result
 
-    member this.ReportResults() =
-        while not cancelToken.IsCancellationRequested do
-            try
-                match reportsReceived.Take(cancelToken.Token) with
-                    | :? Error as error -> this.options.ErrorReceived.Invoke(error)
-                    | :? Progress as progress -> this.options.Progress.Invoke(progress)
-                    | _ -> ()
-            with _ -> ()
+    [<Runtime.Remoting.Messaging.OneWay>]
+    member this.ReportError(error:Error) =
+        reportsReceived.Add(error)
 
-    member this.Dispose(disposing) =
-        if disposing then
-            reportsReceived.Dispose()
-            cancelToken.Dispose()
+    [<Runtime.Remoting.Messaging.OneWay>]
+    member this.ReportProgress(progress:Progress) =
+        reportsReceived.Add(progress)
 
     interface IDisposable with
         member this.Dispose() =
             this.Dispose(true)
             GC.SuppressFinalize(this)
 
-    [<System.Runtime.Remoting.Messaging.OneWay>]
-    member this.ReportError(error:Error) =
-        reportsReceived.Add(error)
+    member private this.ClearAnyReportsReceived() =
+        let rec clearReportsReceived () =
+            if reportsReceived.Count > 0 then
+                reportsReceived.Take() |> this.PassReportToOptionsCallback
+                clearReportsReceived()
 
-    [<System.Runtime.Remoting.Messaging.OneWay>]
-    member this.ReportProgress(progress:Progress) =
-        reportsReceived.Add(progress)
+        clearReportsReceived()
+
+    member private this.PassReportToOptionsCallback = function
+        | :? Error as error -> this.options.ErrorReceived.Invoke(error)
+        | :? Progress as progress -> this.options.Progress.Invoke(progress)
+        | _ -> ()
+
+    member private this.ReportResults() =
+        while not cancelToken.IsCancellationRequested do
+            try
+                reportsReceived.Take(cancelToken.Token) 
+                    |> this.PassReportToOptionsCallback
+            with _ -> ()
+
+    member private this.Dispose(disposing) =
+        if disposing then
+            reportsReceived.Dispose()
+            cancelToken.Dispose()
 
 /// Runs FSharpLint on a project.
 /// ## Parameters
