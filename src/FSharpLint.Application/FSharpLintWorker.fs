@@ -67,6 +67,9 @@ module FSharpLintWorker =
                 try
                     let neverFinishEarly _ = false
 
+                    System.AppDomain.CurrentDomain.GetAssemblies()
+                        |> Seq.iter (fun x -> printf "%s\n" x.FullName)
+
                     let parseInfo =
                         {
                             FinishEarly = System.Func<_>(neverFinishEarly)
