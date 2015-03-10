@@ -56,18 +56,18 @@
     <Reference Include="FakeLib">
       <HintPath>..\..\packages\FAKE.Core.3.13.4\tools\FakeLib.dll</HintPath>
     </Reference>
-    <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
+    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.fsproj">
+    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
       <Name>FSharpLint.Worker</Name>
-      <Project>{9a7cc4be-7adb-43ac-b972-e458671f8d04}</Project>
+      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -56,8 +56,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Compiler.Service, Version=0.0.82.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
-      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.82\net45\FSharp.Compiler.Service.dll</HintPath>
+    <Reference Include="FSharp.Compiler.Service, Version=0.0.85.0, Culture=neutral, PublicKeyToken=178e2f793012a759">
+      <HintPath>..\..\lib\FSharp.Compiler.Service.0.0.85\net45\FSharp.Compiler.Service.dll</HintPath>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

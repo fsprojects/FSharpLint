@@ -57,11 +57,14 @@ type FSharpLintTask() =
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
 
-        let progress = function
-            | FSharpLint.Worker.Starting(_)
-            | FSharpLint.Worker.ReachedEnd(_) -> ()
-            | FSharpLint.Worker.Failed(filename, e) ->
-                logFailure(sprintf "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s" filename e.Message e.StackTrace)
+        let progress (progress:FSharpLint.Worker.Progress) =
+            if progress.State = FSharpLint.Worker.Progress.ProgressType.Failed then
+                sprintf 
+                    "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s"
+                    progress.Filename
+                    progress.Exception.Message
+                    progress.Exception.StackTrace
+                    |> logFailure
 
         let neverFinishEarly = fun _ -> false
 
@@ -77,16 +80,12 @@ type FSharpLintTask() =
             else
                 logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
 
-        let options = 
-            {
-                FSharpLint.Worker.LintOptions.FinishEarly = Func<_>(neverFinishEarly)
-                FSharpLint.Worker.LintOptions.Progress = System.Action<_>(progress)
-                FSharpLint.Worker.LintOptions.ErrorReceived = System.Action<_>(errorReceived)
-            }
+        worker.add_ErrorReceived(FSharpLint.Worker.ErrorReceivedEventHandler(errorReceived))
+        worker.add_ReportProgress(FSharpLint.Worker.ReportProgressEventHandler(progress))
 
-        match worker.RunLint this.Project options with
-            | FSharpLint.Worker.Success -> ()
-            | FSharpLint.Worker.Failure(error) ->
-                logFailure(error)
+        let result = worker.RunLint this.Project
+
+        if not result.IsSuccess then
+            logFailure result.Message
             
         true
