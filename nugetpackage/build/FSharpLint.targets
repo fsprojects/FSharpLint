@@ -13,6 +13,6 @@
   </PropertyGroup>
 
   <Target Name="FSharpLint" Condition="'$(FSharpLintEnabled)' != 'false'">
-    <FSharpLintTask Project="$(MSBuildProjectFullPath)" FSharpCoreDirectory="$(FSharpCoreDirectory)" />
+    <FSharpLintTask Project="$(MSBuildProjectFullPath)" />
   </Target>
 </Project>

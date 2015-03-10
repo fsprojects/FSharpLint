@@ -21,11 +21,23 @@ namespace FSharpLint.CrossDomain
         {
             var worker = GetWorker();
 
-            worker.ErrorReceived += ErrorReceived;
+            worker.ErrorReceived += new ErrorReceivedEventHandler(HandleError);
 
-            worker.ReportProgress += ReportProgress;
+            worker.ReportProgress += new ReportProgressEventHandler(HandleProgress);
 
             return worker.RunLint(projectFile);
+        }
+
+        [OneWay]
+        public void HandleError(Error error)
+        {
+            ErrorReceived(error);
+        }
+
+        [OneWay]
+        public void HandleProgress(Progress progress)
+        {
+            ReportProgress(progress);
         }
         
         private IFSharpLintWorker GetWorker()
