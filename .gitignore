@@ -176,6 +176,9 @@ TestResults.xml
 # Nuget outputs
 nuget/*.nupkg
 
-tools/
+tools/**/*
+!tools/FSharpLint/
+!tools/FSharpLint/*
+
 !docs/tools
 *.nupkg
