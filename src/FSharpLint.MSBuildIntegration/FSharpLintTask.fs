@@ -49,7 +49,7 @@ type FSharpLintTask() =
 
                 System.Reflection.Assembly.LoadFrom(file)))
         
-        let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.RunLint+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
+        let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
