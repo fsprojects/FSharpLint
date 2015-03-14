@@ -221,7 +221,7 @@ module HintMatcher =
                 | Expression.If(_) ->
                     matchIf arguments
 
-        and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =  
+        and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions)
                     ||> List.forall2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
@@ -355,7 +355,7 @@ module HintMatcher =
                 | Expression.PrefixOperator(_) ->
                     false
 
-        and private doPatternsMatch patterns hintExpressions =  
+        and private doPatternsMatch patterns hintExpressions =
             List.length patterns = List.length hintExpressions &&
                 (patterns, hintExpressions)
                     ||> List.forall2 (fun x y -> matchHintPattern (x, y))
@@ -430,7 +430,7 @@ module HintMatcher =
         match Map.find "Hints" hintRule.Settings with
             | Hints(stringHints) -> 
                 stringHints 
-                    |> List.filter (fun x -> not <| System.String.IsNullOrEmpty(x))
+                    |> List.filter (System.String.IsNullOrEmpty >> not)
                     |> List.map parseHint
             | _ -> 
                 raise <| ConfigurationException("Expected the Hints rule to contain a list of hints")

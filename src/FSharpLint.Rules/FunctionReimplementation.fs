@@ -139,7 +139,7 @@ module FunctionReimplementation =
                 let appliedValuesDoNotReferenceLambdaArgument appliedValues =
                     let lambdaArgumentNotReferenced = expressionReferencesIdentifier lambdaArgument >> not
 
-                    List.length appliedValues > 0 &&
+                    List.isEmpty appliedValues |> not &&
                     removeLastElement appliedValues
                          |> List.forall lambdaArgumentNotReferenced
 

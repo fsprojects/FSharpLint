@@ -52,7 +52,7 @@ type FSharpLintWorker() =
 
     let taskCompletionSource = Threading.Tasks.TaskCompletionSource<bool>()
 
-    [<DefaultValue>] val mutable options : FSharpLint.Worker.LintOptions
+    [<DefaultValue>] val mutable Options : FSharpLint.Worker.LintOptions
 
     let getWorker () = 
         let fullPath = Reflection.Assembly.GetExecutingAssembly().Location
@@ -68,7 +68,7 @@ type FSharpLintWorker() =
         appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
     member this.RunLint projectFile (options:FSharpLint.Worker.LintOptions) =
-        this.options <- options
+        this.Options <- options
 
         let worker = getWorker()
 
@@ -112,8 +112,8 @@ type FSharpLintWorker() =
         clearReportsReceived()
 
     member private this.PassReportToOptionsCallback = function
-        | :? Error as error -> this.options.ErrorReceived.Invoke(error)
-        | :? Progress as progress -> this.options.Progress.Invoke(progress)
+        | :? Error as error -> this.Options.ErrorReceived.Invoke(error)
+        | :? Progress as progress -> this.Options.Progress.Invoke(progress)
         | _ -> ()
 
     member private this.ReportResults() =

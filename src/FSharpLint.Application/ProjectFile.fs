@@ -101,7 +101,7 @@ module ProjectFile =
             let configFailures = configCheckers 
                                     |> (FSharpLint.Framework.LoadVisitors.checkConfigsForFailures config)
 
-            if List.length configFailures = 0 then
+            if List.isEmpty configFailures then
                 config |> Success
             else
                 Failure(FailedToLoadConfig(List.head configFailures))
