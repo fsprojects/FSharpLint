@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FSharpLintSettings>
+    <Analysers>
+        <Analyser AnalyserId="FSharpLint.Typography">
+            <Rules />
+            <AnalyserSettings>
+                <Property name="Enabled">False</Property>
+            </AnalyserSettings>
+        </Analyser>
+    </Analysers>
+</FSharpLintSettings>
