@@ -1,29 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FSharpLint.Worker;
-using System.ServiceModel;
-using System.Runtime.Remoting.Messaging;
-using System.Collections.Concurrent;
-using System.Threading;
+﻿/// FSharpLint, a linter for F#.
+/// Copyright (C) 2014 Matthew Mcveigh
+/// 
+/// This program is free software: you can redistribute it and/or modify
+/// it under the terms of the GNU General Public License as published by
+/// the Free Software Foundation, either version 3 of the License, or
+/// (at your option) any later version.
+/// 
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+/// 
+/// You should have received a copy of the GNU General Public License
+/// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace FSharpLint.CrossDomain
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Runtime.Remoting.Messaging;
+    using System.ServiceModel;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using FSharpLint.Worker;
+
     public class FSharpLintWorker : MarshalByRefObject, FSharpLint.Worker.IFSharpLintWorker
     {
+        /// <inheritdoc />
         public event ErrorReceivedEventHandler ErrorReceived;
 
+        /// <inheritdoc />
         public event ReportProgressEventHandler ReportProgress;
 
+        /// <inheritdoc />
         public FSharpLint.Worker.Result RunLint(string projectFile)
         {
-            var worker = GetWorker();
+            var worker = this.GetWorker();
 
-            worker.ErrorReceived += new ErrorReceivedEventHandler(HandleError);
+            worker.ErrorReceived += new ErrorReceivedEventHandler(this.HandleError);
 
-            worker.ReportProgress += new ReportProgressEventHandler(HandleProgress);
+            worker.ReportProgress += new ReportProgressEventHandler(this.HandleProgress);
 
             return worker.RunLint(projectFile);
         }
@@ -31,13 +50,13 @@ namespace FSharpLint.CrossDomain
         [OneWay]
         public void HandleError(Error error)
         {
-            ErrorReceived(error);
+            this.ErrorReceived(error);
         }
 
         [OneWay]
         public void HandleProgress(Progress progress)
         {
-            ReportProgress(progress);
+            this.ReportProgress(progress);
         }
         
         private IFSharpLintWorker GetWorker()
