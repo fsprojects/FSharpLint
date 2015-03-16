@@ -23,10 +23,21 @@ namespace FSharpLint.Worker
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Handles lint errors received while linting a project.
+    /// </summary>
+    /// <param name="error">Lint error.</param>
     public delegate void ErrorReceivedEventHandler(Error error);
 
-    public delegate void ReportProgressEventHandler(Progress args);
+    /// <summary>
+    /// Handles the current progress of lint running on a project.
+    /// </summary>
+    /// <param name="progress">Linter progress.</param>
+    public delegate void ReportProgressEventHandler(Progress progress);
 
+    /// <summary>
+    /// Worker interface to be used to implement proxy objects to run lint in separate app domains.
+    /// </summary>
     public interface IFSharpLintWorker
     {
         /// <summary>

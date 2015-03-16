@@ -52,7 +52,7 @@ type FSharpLintWorker() =
 
     let taskCompletionSource = Threading.Tasks.TaskCompletionSource<bool>()
 
-    [<DefaultValue>] val mutable Options : FSharpLint.Worker.LintOptions
+    [<DefaultValue>] val mutable Options : LintOptions
 
     let getWorker () = 
         let fullPath = Reflection.Assembly.GetExecutingAssembly().Location
@@ -67,7 +67,7 @@ type FSharpLintWorker() =
 
         appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
-    member this.RunLint projectFile (options:FSharpLint.Worker.LintOptions) =
+    member this.RunLint projectFile (options:LintOptions) =
         this.Options <- options
 
         let worker = getWorker()
@@ -156,11 +156,12 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
         parameters.Progress.Invoke(progress)
 
-    let neverFinishEarly _ = false
-
-    let options = FSharpLint.Worker.LintOptions(FinishEarly = System.Func<_>(neverFinishEarly), 
-                                                Progress = System.Action<_>(parserProgress), 
-                                                ErrorReceived = System.Action<_>(errorReceived))
+    let options = 
+        { 
+            Progress = System.Action<_>(parserProgress)
+            ErrorReceived = System.Action<_>(errorReceived)
+            FailBuildIfAnyWarnings = parameters.FailBuildIfAnyWarnings
+        }
 
     use worker = new FSharpLintWorker()
     let result = worker.RunLint projectFile options

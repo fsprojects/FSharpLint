@@ -22,6 +22,11 @@ namespace FSharpLint.Worker
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Specifies an area in a document.
+    /// Used to specify where a lint error has occurred.
+    /// C# representation of <see cref="Microsoft.FSharp.Compiler.Range.range"/>.
+    /// </summary>
     [Serializable]
     public class Range
     {

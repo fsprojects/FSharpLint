@@ -22,15 +22,33 @@ namespace FSharpLint.Worker
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents a lint error found in the user's code.
+    /// C# representation of <see cref="FSharpLint.Application.ErrorHandling.Error"/>.
+    /// </summary>
     [Serializable]
     public class Error
     {
+        /// <summary>
+        /// Gets or sets the description of the rule broken that caused the error.
+        /// </summary>
         public string Info { get; set; }
 
+        /// <summary>
+        /// Gets or sets the location of the error.
+        /// </summary>
         public Range Range { get; set; }
 
+        /// <summary>
+        /// Gets or sets the contents of the file containing the error.
+        /// </summary>
         public string Input { get; set; }
 
+        /// <summary>
+        /// Gets or sets an error message that can be displayed to the user.
+        /// Contains the broken rule's description, and the line containing the error with
+        /// the error marked.
+        /// </summary>
         public string FormattedError { get; set; }
     }
 }
