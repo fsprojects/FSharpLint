@@ -14,7 +14,7 @@ A console app that runs the linter against an F# project, taking the .fsproj fil
 
 ###FSharpLint.CrossDomain
 
-A worker proxy written in C#, this loads and runs the `FSharpLint.Application` worker proxy in a separate app domain. The reason for the existance of this is that mono seems to load FSharp.Core into any app domains when loaded from an application written in F#, so if we want FSharp.Core isolated then this worker can sit between the two F# app domains to make sure the FSharp.Core from the first app domain doesn't end up in the `FSharpLint.Application` worker's app domain.
+A worker proxy written in C#, this loads and runs the `FSharpLint.Application` worker proxy in a separate app domain. The reason for the existance of this is that mono seems to load `FSharp.Core` into any app domains loaded from an application written in F#, so if we want `FSharp.Core` isolated then this worker can sit between the two F# app domains to make sure the `FSharp.Core` from the first app domain doesn't end up in the `FSharpLint.Application` worker's app domain.
 
 ###FSharpLint.Framework
 
