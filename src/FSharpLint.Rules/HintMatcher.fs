@@ -439,13 +439,15 @@ module HintMatcher =
     let getHintsFromConfig = 
         let hints = ref None
 
-        fun (config:Map<string,Analyser>) ->
+        let getMemoizedHints config =
             match !hints with
                 | None ->
                     let parsedHints = getHints config
                     hints := Some(parsedHints)
                     parsedHints
                 | Some(hints) -> hints
+
+        getMemoizedHints
 
     let lambdaArgumentsToString (arguments:Argument list) = 
         let argumentToString = function

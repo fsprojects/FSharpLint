@@ -50,14 +50,16 @@ module NumberOfItems =
                     visitorInfo.PostError (items.[maxItems].Range) error)
 
     let validateFunction (constructorArguments:SynConstructorArgs) visitorInfo astNode = 
+        let checkNumberOfParameters maxParameters =
+            match constructorArguments with
+                | SynConstructorArgs.Pats(parameters) when List.length parameters > maxParameters -> 
+                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsFunctionError")
+                    let error = System.String.Format(errorFormatString, maxParameters)
+                    visitorInfo.PostError parameters.[maxParameters].Range error
+                | _ -> ()
+
         maxItemsForRule visitorInfo.Config astNode "MaxNumberOfFunctionParameters"
-            |> Option.iter (fun maxParameters ->
-                match constructorArguments with
-                    | SynConstructorArgs.Pats(parameters) when List.length parameters > maxParameters -> 
-                        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsFunctionError")
-                        let error = System.String.Format(errorFormatString, maxParameters)
-                        visitorInfo.PostError parameters.[maxParameters].Range error
-                    | _ -> ())
+            |> Option.iter checkNumberOfParameters
 
     let private getMembers (members:SynMemberDefn list) =
         let isPublic = function
@@ -123,14 +125,16 @@ module NumberOfItems =
                 countBooleanOperators total expr
             | _ -> total
 
-        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfBooleanOperatorsInCondition"
-            |> Option.iter (fun maxBooleanOperators ->
-                let numberOfBooleanOperators = countBooleanOperators 0 condition
+        let checkNumberOfBooleanOperatorsInCondition maxBooleanOperators =
+            let numberOfBooleanOperators = countBooleanOperators 0 condition
 
-                if numberOfBooleanOperators > maxBooleanOperators then
-                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
-                    let error = System.String.Format(errorFormatString, maxBooleanOperators)
-                    visitorInfo.PostError condition.Range error)
+            if numberOfBooleanOperators > maxBooleanOperators then
+                let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
+                let error = System.String.Format(errorFormatString, maxBooleanOperators)
+                visitorInfo.PostError condition.Range error
+
+        maxItemsForRule visitorInfo.Config astNode "MaxNumberOfBooleanOperatorsInCondition"
+            |> Option.iter checkNumberOfBooleanOperatorsInCondition
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with

@@ -29,17 +29,14 @@ type FSharpLintTask() =
     member val TreatWarningsAsErrors = false with get, set
 
     override this.Execute() = 
-        let fullPath = System.Reflection.Assembly.GetAssembly(this.GetType()).Location;
-
-        let directory = System.IO.Path.GetDirectoryName(fullPath)
+        let directory = System.Reflection.Assembly.GetAssembly(this.GetType()).Location
+                        |> System.IO.Path.GetDirectoryName
 
         let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
 
-        let evidence = System.AppDomain.CurrentDomain.Evidence
+        let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
-        let appDomain = System.AppDomain.CreateDomain("Lint Domain", evidence, setup)
-
-        System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(fun x args ->
+        let resolveAssembly _ (args:ResolveEventArgs) =
             let assembly = System.Reflection.Assembly.Load(args.Name)
             if assembly <> null then
                 assembly
@@ -47,7 +44,9 @@ type FSharpLintTask() =
                 let parts = args.Name.Split(',')
                 let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
 
-                System.Reflection.Assembly.LoadFrom(file)))
+                System.Reflection.Assembly.LoadFrom(file)
+            
+        System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(resolveAssembly))
         
         let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
