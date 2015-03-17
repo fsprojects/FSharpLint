@@ -67,49 +67,62 @@ module RunLint =
 
     open FSharpLint.Framework
 
-    let lintFile finishEarly (errorReceived:System.Action<ErrorHandling.Error>) (progress:System.Action<ParserProgress>) plugins config (parseInfo:Ast.ParseInfo) =
-        if not <| finishEarly() then
+    type LintInfo =
+        {
+            FinishEarly: unit -> bool
+            ErrorReceived: ErrorHandling.Error -> unit
+            ReportLinterProgress: ParserProgress -> unit
+            RulePlugins: LoadVisitors.VisitorPlugin list
+            Configuration: Map<string, Configuration.Analyser>
+        }
+
+    let lintFile lintInfo (parsedFileInfo:Ast.ParseInfo) =
+        if not <| lintInfo.FinishEarly() then
             let postError range error =
-                errorReceived.Invoke(
-                    {
-                        Info = error
-                        Range = range
-                        Input = parseInfo.Input
-                    })
+                {
+                    ErrorHandling.Info = error
+                    ErrorHandling.Range = range
+                    ErrorHandling.Input = parsedFileInfo.Input
+                } |> lintInfo.ErrorReceived
 
             let visitorInfo = 
                 {
-                    Ast.Config = config
+                    Ast.Config = lintInfo.Configuration
                     Ast.PostError = postError
                 }
 
             let visitPlainText = async {
                     let suppressMessageAttributes =
-                        if parseInfo.Input.Contains("SuppressMessage") then
-                            Ast.getSuppressMessageAttributesFromAst parseInfo.Ast
+                        if parsedFileInfo.Input.Contains("SuppressMessage") then
+                            Ast.getSuppressMessageAttributesFromAst parsedFileInfo.Ast
                         else []
 
-                    for visitor in plainTextVisitors plugins visitorInfo do
-                        visitor { Input = parseInfo.Input; File = parseInfo.File; SuppressedMessages = suppressMessageAttributes }
+                    for visitor in plainTextVisitors lintInfo.RulePlugins visitorInfo do
+                        visitor 
+                            { 
+                                Input = parsedFileInfo.Input
+                                File = parsedFileInfo.File
+                                SuppressedMessages = suppressMessageAttributes 
+                            }
                 }
 
             let visitAst = async {
                     try
-                        astVisitors plugins visitorInfo
-                            |> Ast.parse finishEarly parseInfo
+                        astVisitors lintInfo.RulePlugins visitorInfo
+                            |> Ast.parse lintInfo.FinishEarly parsedFileInfo
                     with 
                         | e -> 
-                            progress.Invoke(Failed(parseInfo.File, e))
+                            Failed(parsedFileInfo.File, e) |> lintInfo.ReportLinterProgress
                 }
 
-            progress.Invoke(Starting(parseInfo.File))
+            Starting(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
             [visitAst; visitPlainText]
                 |> Async.Parallel
                 |> Async.RunSynchronously
                 |> ignore
 
-            progress.Invoke(ReachedEnd(parseInfo.File))
+            ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getParseInfoForFileInProject checker projectOptions file =
         let input = System.IO.File.ReadAllText(file)
@@ -136,23 +149,28 @@ module RunLint =
         
     /// Parses and runs the linter on all the files in a project.
     let parseProject projectInformation = 
-        let finishEarly = fun _ -> projectInformation.FinishEarly.Invoke()
-
         let checker = FSharpChecker.Create()
         
         try
-            let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
-
             let projectFileInfo = FSharpProjectFileInfo.Parse(projectInformation.ProjectFile)
             
             try
-                let plugins = loadPlugins()
-
                 match ProjectFile.loadConfigForProject projectInformation.ProjectFile with
                     | ProjectFile.Result.Success(config) ->
+                        let projectOptions = checker.GetProjectOptionsFromProjectFile(projectInformation.ProjectFile)
+
+                        let lintInformation =
+                            {
+                                Configuration = config
+                                RulePlugins = loadPlugins()
+                                FinishEarly = projectInformation.FinishEarly.Invoke
+                                ErrorReceived = projectInformation.ErrorReceived.Invoke
+                                ReportLinterProgress = projectInformation.Progress.Invoke
+                            }
+
                         projectFileInfo.CompileFiles
                             |> Seq.map (getParseInfoForFileInProject checker projectOptions)
-                            |> Seq.iter (lintFile finishEarly projectInformation.ErrorReceived projectInformation.Progress plugins config)
+                            |> Seq.iter (lintFile lintInformation)
                 
                         Success
                     | ProjectFile.Result.Failure(x) -> Failure(x)
@@ -164,23 +182,35 @@ module RunLint =
                 Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectInformation.ProjectFile, e))
 
     let internal neverFinishEarly _ = false
-    let private ignoreProgress = System.Action<_>(ignore) 
         
     /// Parses and runs the linter on a single file.
-    let parseFile pathToFile errorReceived =
+    let parseFile pathToFile (errorReceived:System.Action<ErrorHandling.Error>) =
         let input = System.IO.File.ReadAllText(pathToFile)
-        let checker = FSharpChecker.Create()
-        let plugins = loadPlugins()
-        let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
 
-        Ast.parseFile pathToFile input 
-            |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
+        let lintInformation =
+            {
+                Configuration = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                RulePlugins = loadPlugins()
+                FinishEarly = neverFinishEarly
+                ErrorReceived = errorReceived.Invoke
+                ReportLinterProgress = ignore
+            }
+
+        let parsedFileInformation = Ast.parseFile pathToFile input
+
+        lintFile lintInformation parsedFileInformation
         
     /// Parses and runs the linter on a string.
-    let parseInput input errorReceived =
-        let checker = FSharpChecker.Create()
-        let plugins = loadPlugins()
-        let config = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+    let parseInput input (errorReceived:System.Action<ErrorHandling.Error>) =
+        let lintInformation =
+            {
+                Configuration = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                RulePlugins = loadPlugins()
+                FinishEarly = neverFinishEarly
+                ErrorReceived = errorReceived.Invoke
+                ReportLinterProgress = ignore
+            }
 
-        Ast.parseInput input 
-            |> lintFile neverFinishEarly errorReceived ignoreProgress plugins config
+        let parsedFileInformation = Ast.parseInput input
+
+        lintFile lintInformation parsedFileInformation
