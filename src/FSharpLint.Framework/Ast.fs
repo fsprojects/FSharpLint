@@ -482,10 +482,10 @@ module Ast =
     /// </param>
     let walk finishEarly rootNode visitor =
         /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
-        let rec walk finishEarly breadcrumbs suppressedMessages node visitor currentVisitMethod = 
+        let rec walk breadcrumbs suppressedMessages node visitor currentVisitMethod = 
             let suppressedMessages = getSuppressMessageAttributes node @ suppressedMessages
 
-            let walk = walk finishEarly (node :: breadcrumbs) suppressedMessages
+            let walk = walk (node :: breadcrumbs) suppressedMessages
 
             let children = traverseNode node
 
@@ -535,7 +535,7 @@ module Ast =
                 | children ->
                     walkChildren None 0 children
 
-        walk finishEarly [] [] rootNode visitor Continue
+        walk [] [] rootNode visitor Continue
 
     let walkFile finishEarly visitors = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 

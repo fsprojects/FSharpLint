@@ -32,28 +32,50 @@ module Binding =
 
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
+
+    type VisitorParameters =
+        {
+            VisitorInfo: VisitorInfo
+            CheckFile: FSharpCheckFileResults
+            AstNode: CurrentNode
+        }
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
-    let checkForBindingToAWildcard visitorInfo (astNode:CurrentNode) pattern range =
-        if "FavourIgnoreOverLetWild" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "FavourIgnoreOverLetWild") |> not then
+    let checkForBindingToAWildcard visitorParameters pattern range =
+        let isEnabled =
+            "FavourIgnoreOverLetWild" |> isRuleEnabled visitorParameters.VisitorInfo.Config &&
+            visitorParameters.AstNode.IsSuppressed(AnalyserName, "FavourIgnoreOverLetWild") |> not
+
+        if isEnabled then
             let rec findWildAndIgnoreParens = function
                 | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
                 | SynPat.Wild(_) -> true
                 | _ -> false
                 
             if findWildAndIgnoreParens pattern then
-                visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
+                visitorParameters.VisitorInfo.PostError 
+                    range 
+                    (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
 
+    let checkForWildcardNamedWithAsPattern visitorParameters pattern =
+        let isEnabled =
+            "WildcardNamedWithAsPattern" |> isRuleEnabled visitorParameters.VisitorInfo.Config &&
+            visitorParameters.AstNode.IsSuppressed(AnalyserName, "WildcardNamedWithAsPattern") |> not
 
-    let checkForWildcardNamedWithAsPattern visitorInfo (astNode:CurrentNode) pattern =
-        if "WildcardNamedWithAsPattern" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "WildcardNamedWithAsPattern") |> not then
+        if isEnabled then
             match pattern with
                 | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
-                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
+                    visitorParameters.VisitorInfo.PostError 
+                        range 
+                        (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
                 | _ -> ()
 
-    let checkForUselessBinding visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) pattern expr range =
-        if "UselessBinding" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "UselessBinding") |> not then
+    let checkForUselessBinding visitorParameters pattern expr range =
+        let isEnabled =
+            "UselessBinding" |> isRuleEnabled visitorParameters.VisitorInfo.Config &&
+            visitorParameters.AstNode.IsSuppressed(AnalyserName, "UselessBinding") |> not
+
+        if isEnabled then
             let rec findBindingIdentifier = function
                 | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
                 | SynPat.Named(_, ident, _, _, _) -> Some(ident)
@@ -65,10 +87,11 @@ module Binding =
                 | SynExpr.Ident(ident) ->
                     let isSymbolMutable (ident:Ident) =
                         let symbol =
-                            checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                            visitorParameters.CheckFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
                                 |> Async.RunSynchronously
 
-                        let isMutable (symbol:FSharpSymbolUse) = (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
+                        let isMutable (symbol:FSharpSymbolUse) = 
+                            (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
 
                         symbol |> Option.exists isMutable
 
@@ -77,10 +100,16 @@ module Binding =
                 
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
                 if exprIdentMatchesBindingIdent bindingIdent expr then
-                    visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
+                    visitorParameters.VisitorInfo.PostError 
+                        range 
+                        (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
 
-    let checkTupleOfWildcards visitorInfo (astNode:CurrentNode) pattern identifier =
-        if "TupleOfWildcards" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "TupleOfWildcards") |> not then
+    let checkTupleOfWildcards visitorParameters pattern identifier =
+        let isEnabled =
+            "TupleOfWildcards" |> isRuleEnabled visitorParameters.VisitorInfo.Config &&
+            visitorParameters.AstNode.IsSuppressed(AnalyserName, "TupleOfWildcards") |> not
+
+        if isEnabled then
             let rec isWildcard = function
                 | SynPat.Paren(pattern, _) -> isWildcard pattern
                 | SynPat.Wild(_) -> true
@@ -96,20 +125,27 @@ module Binding =
                     let errorFormat = FSharpLint.Framework.Resources.GetString("RulesTupleOfWildcardsError")
                     let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
                     let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                    visitorInfo.PostError range error
+                    visitorParameters.VisitorInfo.PostError range error
                 | _ -> ()
     
     let visitor visitorInfo checkFile (astNode:CurrentNode) = 
+        let visitorParameters = 
+            { 
+                VisitorInfo = visitorInfo
+                CheckFile = checkFile
+                AstNode = astNode
+            }
+
         match astNode.Node with
             | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) -> 
-                checkForBindingToAWildcard visitorInfo astNode pattern range
+                checkForBindingToAWildcard visitorParameters pattern range
                 if not isMutable then
-                    checkForUselessBinding visitorInfo checkFile astNode pattern expr range
+                    checkForUselessBinding visitorParameters pattern expr range
             | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
-                checkForWildcardNamedWithAsPattern visitorInfo astNode pattern
+                checkForWildcardNamedWithAsPattern visitorParameters pattern
             | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as pattern, _)]), _, _)) ->
                 let identifier = identifier.Lid |> List.map (fun x -> x.idText)
-                checkTupleOfWildcards visitorInfo astNode pattern identifier
+                checkTupleOfWildcards visitorParameters pattern identifier
             | _ -> ()
 
         Continue
