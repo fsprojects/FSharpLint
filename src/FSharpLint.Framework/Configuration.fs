@@ -26,6 +26,74 @@ open FSharp.Data
 /// so properties in the original configuration file not in the new configuration file will remain.
 module Configuration =
 
+    module IgnoreFiles =
+
+        open System
+        open System.IO
+        open System.Text.RegularExpressions
+
+        type IsDirectory = | IsDirectory of bool
+
+        type Ignore =
+            | Ignore of Regex list * IsDirectory
+            | Negate of Regex list * IsDirectory
+
+        let parseIgnorePath (path:string) = 
+            let globToRegex glob =
+                Regex(
+                    "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
+                    RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
+
+            let isDirectory = path.EndsWith("/")
+
+            let getRegexSegments (path:string) = 
+                path.Split([| '/' |], StringSplitOptions.RemoveEmptyEntries) 
+                    |> Array.map globToRegex
+
+            if path.StartsWith("!") then
+                getRegexSegments (path.Substring(1))
+                    |> Array.toList
+                    |> fun segments -> Negate(segments, IsDirectory(isDirectory))
+            else
+                getRegexSegments (if path.StartsWith(@"\!") then path.Substring(1) else path)
+                    |> Array.toList
+                    |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
+
+        let pathMatchesGlob (globs:Regex list) (path:string list) isDirectory = 
+            let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) = 
+                globSeqs |> List.choose (function
+                    | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
+                    | x -> None)
+
+            let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
+                match remainingPath with
+                    | currentSegment::[] when isDirectory -> false 
+                    | currentSegment::remaining -> 
+                        let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+
+                        let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
+
+                        let aGlobWasCompletelyMatched = currentlyMatchingGlobs |> List.exists List.isEmpty
+
+                        let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
+
+                        if matched then true
+                        else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
+                    | [] -> false
+
+            doesGlobSeqMatchPathSeq path []
+            
+        let shouldFileBeIgnored (filePath:string) (ignorePaths:Ignore list) = 
+            let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList
+
+            ignorePaths |> List.fold (fun isCurrentlyIgnored ignoreGlob -> 
+                match ignoreGlob with
+                    | Ignore(glob, IsDirectory(isDirectory)) 
+                        when not isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> true
+                    | Negate(glob, IsDirectory(isDirectory))
+                        when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
+                    | _ -> isCurrentlyIgnored) false
+
     /// Represents a configuration XML file.
     type private Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
 
