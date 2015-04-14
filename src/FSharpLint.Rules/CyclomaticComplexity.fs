@@ -30,7 +30,7 @@ module CyclomaticComplexity =
     [<Literal>]
     let AnalyserName = "FSharpLint.CyclomaticComplexity"
 
-    let configMaxCyclomaticComplexity (config:Map<string,Analyser>) =
+    let configMaxCyclomaticComplexity config =
         match isAnalyserEnabled config AnalyserName with
             | Some(analyserSettings) when analyserSettings.ContainsKey "MaxCyclomaticComplexity" ->
                 match analyserSettings.["MaxCyclomaticComplexity"] with
@@ -39,7 +39,7 @@ module CyclomaticComplexity =
             | Some(_)
             | None -> None
 
-    let configIncludeMatchStatements (config:Map<string,Analyser>) =
+    let configIncludeMatchStatements config =
         match isAnalyserEnabled config AnalyserName with
             | Some(analyserSettings) when analyserSettings.ContainsKey "IncludeMatchStatements" ->
                 match analyserSettings.["IncludeMatchStatements"] with

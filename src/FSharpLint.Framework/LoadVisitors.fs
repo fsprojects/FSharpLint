@@ -76,7 +76,7 @@ module LoadVisitors =
 
     /// Extension of IRegisterPlugin that gets passed a configuration file before the plugin is registered. 
     type IRegisterPluginWithConfigChecker =
-        abstract CheckConfig : Map<string, Configuration.Analyser> -> CheckConfigResult
+        abstract CheckConfig : Configuration.Configuration -> CheckConfigResult
 
         inherit IRegisterPlugin
 

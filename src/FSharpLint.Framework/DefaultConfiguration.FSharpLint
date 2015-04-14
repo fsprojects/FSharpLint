@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FSharpLintSettings>
+  <IgnoreFiles>
+    <![CDATA[
+      assemblyinfo.*
+    ]]>
+  </IgnoreFiles>
   <Analysers>
     <Analyser AnalyserId="FSharpLint.Hints">
       <Rules>

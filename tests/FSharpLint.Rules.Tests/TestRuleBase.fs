@@ -25,30 +25,34 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
 let emptyConfig =
-    Map.ofList 
-        [ 
-            ("", { 
-                Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
-                Settings = Map.ofList [] 
-            }) 
-        ]
+    {
+        IgnoreFiles = []
+        Analysers =
+            Map.ofList 
+                [ 
+                    ("", { 
+                        Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
+                        Settings = Map.ofList [] 
+                    }) 
+                ]
+    }
 
 [<AbstractClass>]
-type TestRuleBase(analyser:VisitorType, ?config:Map<string, Analyser>) =
+type TestRuleBase(analyser:VisitorType, ?analysers) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
     let config = 
-        match config with
-            | Some(c) -> c
+        match analysers with
+            | Some(analysers) -> { IgnoreFiles = []; Analysers = analysers }
             | None -> emptyConfig
 
-    member this.Parse(input, ?overrideConfig:Map<string, Analyser>) = 
+    member this.Parse(input, ?overrideAnalysers) = 
         let config =
-            match overrideConfig with
-                | Some(config) -> config
+            match overrideAnalysers with
+                | Some(overrideAnalysers) -> { IgnoreFiles = []; Analysers = overrideAnalysers }
                 | None -> config
 
         let visitorInfo = { PostError = postError; Config = config }

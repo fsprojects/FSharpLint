@@ -35,4 +35,4 @@ module ProjectFile =
 
     val internal loadRulesAssembly : unit -> System.Reflection.Assembly
 
-    val internal loadConfigForProject : projectFilePath:string -> Result<Map<string, FSharpLint.Framework.Configuration.Analyser>>
+    val internal loadConfigForProject : projectFilePath:string -> Result<FSharpLint.Framework.Configuration.Configuration>

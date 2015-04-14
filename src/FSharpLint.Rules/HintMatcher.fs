@@ -417,7 +417,7 @@ module HintMatcher =
 
     /// Gets a list of hints from the config file.
     let getHints config = 
-        let analyser = Map.find AnalyserName config
+        let analyser = Map.find AnalyserName config.Analysers
 
         let hintRule = Map.find "Hints" analyser.Rules
 

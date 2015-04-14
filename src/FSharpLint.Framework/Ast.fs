@@ -42,7 +42,7 @@ module Ast =
     type VisitorInfo =
         {
             /// The current lint config to be used by visitors.
-            Config: Map<string, Configuration.Analyser>
+            Config: Configuration.Configuration
 
             /// Used by visitors to report errors.
             PostError: range -> string -> unit

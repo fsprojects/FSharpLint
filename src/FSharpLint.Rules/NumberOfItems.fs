@@ -31,7 +31,7 @@ module NumberOfItems =
     [<Literal>]
     let AnalyserName = "FSharpLint.NumberOfItems"
 
-    let maxItemsForRule (config:Map<string,Analyser>) (astNode:CurrentNode) ruleName =
+    let maxItemsForRule config (astNode:CurrentNode) ruleName =
         match isRuleEnabled config AnalyserName ruleName with
             | Some(_, ruleSettings) 
                     when ruleSettings.ContainsKey "MaxItems" && astNode.IsSuppressed(AnalyserName, ruleName) |> not ->

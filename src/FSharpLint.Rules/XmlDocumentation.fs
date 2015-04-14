@@ -31,7 +31,7 @@ module XmlDocumentation =
     [<Literal>]
     let AnalyserName = "FSharpLint.XmlDocumentation"
 
-    let configExceptionHeader (config:Map<string,Analyser>) =
+    let configExceptionHeader config =
         match isRuleEnabled config AnalyserName "ExceptionDefinitionHeader" with
             | Some(_, ruleSettings) when ruleSettings.ContainsKey "Enabled" ->
                 match ruleSettings.["Enabled"] with

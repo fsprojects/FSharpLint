@@ -26,6 +26,39 @@ open FSharp.Data
 /// so properties in the original configuration file not in the new configuration file will remain.
 module Configuration =
 
+    /// Represents a configuration XML file.
+    type private Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
+
+    exception ConfigurationException of string
+
+    type Property =
+        | Enabled of bool
+        | Lines of int
+        | Depth of int
+        | MaxItems of int
+        | Length of int
+        | Hints of string list
+        | MaxCyclomaticComplexity of int
+        | IncludeMatchStatements of bool
+        | OneSpaceAllowedAfterOperator of bool
+        | NumberOfSpacesAllowed of int
+        | IgnoreBlankLines of bool
+
+    type Rule = 
+        {
+            Settings: Map<string, Property>
+        }
+
+    /// An analyser groups together related rules in the configuration file.
+    type Analyser = 
+        { 
+            Rules: Map<string, Rule> 
+            Settings: Map<string, Property>
+        }
+
+    let private parseLines (content:string) =
+        content.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList
+
     module IgnoreFiles =
 
         open System
@@ -59,7 +92,7 @@ module Configuration =
                     |> Array.toList
                     |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
 
-        let pathMatchesGlob (globs:Regex list) (path:string list) isDirectory = 
+        let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory = 
             let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) = 
                 globSeqs |> List.choose (function
                     | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
@@ -94,34 +127,13 @@ module Configuration =
                         when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
                     | _ -> isCurrentlyIgnored) false
 
-    /// Represents a configuration XML file.
-    type private Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
+        let getIgnorePathsFromConfig (configSettings:Config.FSharpLintSettings) =
+            configSettings.IgnoreFiles |> parseLines |> List.map parseIgnorePath
 
-    exception ConfigurationException of string
-
-    type Property =
-        | Enabled of bool
-        | Lines of int
-        | Depth of int
-        | MaxItems of int
-        | Length of int
-        | Hints of string list
-        | MaxCyclomaticComplexity of int
-        | IncludeMatchStatements of bool
-        | OneSpaceAllowedAfterOperator of bool
-        | NumberOfSpacesAllowed of int
-        | IgnoreBlankLines of bool
-
-    type Rule = 
+    type Configuration =
         {
-            Settings: Map<string, Property>
-        }
-
-    /// An analyser groups together related rules in the configuration file.
-    type Analyser = 
-        { 
-            Rules: Map<string, Rule> 
-            Settings: Map<string, Property>
+            IgnoreFiles: IgnoreFiles.Ignore list
+            Analysers: Map<string, Analyser>
         }
 
     let private parseProperty (property:Config.Property) =
@@ -141,7 +153,7 @@ module Configuration =
             | "IncludeMatchStatements" when property.Boolean.IsSome -> 
                 Some(IncludeMatchStatements(property.Boolean.Value)) 
             | "Hints" when property.String.IsSome ->
-                Some(Hints(property.String.Value.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList))
+                Some(Hints(parseLines property.String.Value))
             | "OneSpaceAllowedAfterOperator" when property.Boolean.IsSome -> 
                 Some(OneSpaceAllowedAfterOperator(property.Boolean.Value))
             | "NumberOfSpacesAllowed" when property.Number.IsSome -> 
@@ -178,13 +190,19 @@ module Configuration =
     /// Parse a configuration file.
     let configuration file = 
         let config = Config.Parse(file)
-        [ 
-            for analyser in config.Analysers do 
-                let settings = analyser.AnalyserSettings.Properties |> parseSettings |> Map.ofList
 
-                yield (analyser.AnalyserId, { Rules = getRules analyser; Settings = settings }) 
-        ]
-            |> Map.ofList
+        {
+            IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
+
+            Analysers =
+                [ 
+                    for analyser in config.Analysers do 
+                        let settings = analyser.AnalyserSettings.Properties |> parseSettings |> Map.ofList
+
+                        yield (analyser.AnalyserId, { Rules = getRules analyser; Settings = settings }) 
+                ]
+                    |> Map.ofList
+        }
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
         [ 
@@ -217,9 +235,12 @@ module Configuration =
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride file =
-        let newAnalysers = System.IO.File.ReadAllText(file) |> configuration
+        let newConfig = System.IO.File.ReadAllText(file) |> configuration
 
-        overwriteMap configToOverride newAnalysers overrideAnalysers
+        {
+            IgnoreFiles = newConfig.IgnoreFiles
+            Analysers = overwriteMap configToOverride.Analysers newConfig.Analysers overrideAnalysers
+        }
 
     /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
     /// This function loads and returns this default configuration.
@@ -234,13 +255,13 @@ module Configuration =
 
     /// Checks if a analyser in the configuration is enabled.
     /// Returns the analyser settings if the analyser was enabled; None otherwise.
-    let isAnalyserEnabled (config:Map<string,Analyser>) analyserName =
-        if not <| config.ContainsKey analyserName then
+    let isAnalyserEnabled config analyserName =
+        if not <| config.Analysers.ContainsKey analyserName then
             sprintf "Expected %s analyser in config." analyserName
                 |> ConfigurationException
                 |> raise
 
-        let analyserSettings = config.[analyserName].Settings
+        let analyserSettings = config.Analysers.[analyserName].Settings
 
         if analyserSettings.ContainsKey "Enabled" then
             match analyserSettings.["Enabled"] with 
@@ -254,7 +275,7 @@ module Configuration =
     let isRuleEnabled config analyserName ruleName =
         match isAnalyserEnabled config analyserName with
             | Some(analyserSettings) ->
-                let rules = config.[analyserName].Rules
+                let rules = config.Analysers.[analyserName].Rules
 
                 if not <| rules.ContainsKey ruleName then 
                     sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
