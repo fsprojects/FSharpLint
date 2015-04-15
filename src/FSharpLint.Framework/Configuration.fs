@@ -57,7 +57,10 @@ module Configuration =
         }
 
     let private parseLines (content:string) =
-        content.Split([|'\n'|]) |> Seq.map (fun x -> x.Trim()) |> Seq.toList
+        content.Split('\n') 
+            |> Seq.map (fun x -> x.Trim()) 
+            |> Seq.filter (System.String.IsNullOrWhiteSpace >> not) 
+            |> Seq.toList
 
     module IgnoreFiles =
 
@@ -116,7 +119,7 @@ module Configuration =
 
             doesGlobSeqMatchPathSeq path []
             
-        let shouldFileBeIgnored (filePath:string) (ignorePaths:Ignore list) = 
+        let shouldFileBeIgnored (ignorePaths:Ignore list) (filePath:string) = 
             let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList
 
             ignorePaths |> List.fold (fun isCurrentlyIgnored ignoreGlob -> 
