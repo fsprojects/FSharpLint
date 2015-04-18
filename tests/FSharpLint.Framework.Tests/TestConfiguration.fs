@@ -30,7 +30,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsTrue
 
     [<Test>]
@@ -40,7 +40,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "cat"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsFalse
 
     [<Test>]
@@ -50,7 +50,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths  @"D:\dog\source.fs"
             |> Assert.IsFalse
             
     [<Test>]
@@ -60,7 +60,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "source.fs/"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsFalse
     [<Test>]
     member self.``Ignoring all files in a given directory ignores a given file from the directory.``() = 
@@ -69,7 +69,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsTrue
 
     [<Test>]
@@ -79,7 +79,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/source1"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsFalse
 
     [<Test>]
@@ -90,10 +90,10 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "!source.*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsFalse
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source2.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source2.fs"
             |> Assert.IsTrue
 
     [<Test>]
@@ -105,7 +105,7 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored @"D:\dog\source.fs" ignorePaths
+        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
             |> Assert.IsTrue
 
     [<Test>]

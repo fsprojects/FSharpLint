@@ -18,20 +18,17 @@
 
 namespace FSharpLint.Framework
 
-open FSharp.Data
-
 /// Loads configuration files from xml into an object.
 /// When a configuration file has already been loaded, loading another one overwrites the existing configuration.
 /// The overwrite works by only changing existing properties with properties from the new file, 
 /// so properties in the original configuration file not in the new configuration file will remain.
 module Configuration =
 
-    /// Represents a configuration XML file.
-    type private Config = XmlProvider<"../FSharpLint.Framework/DefaultConfiguration.FSharpLint", Global = true>
+    open System.Xml.Linq
 
     exception ConfigurationException of string
 
-    type Property =
+    type Setting =
         | Enabled of bool
         | Lines of int
         | Depth of int
@@ -43,18 +40,6 @@ module Configuration =
         | OneSpaceAllowedAfterOperator of bool
         | NumberOfSpacesAllowed of int
         | IgnoreBlankLines of bool
-
-    type Rule = 
-        {
-            Settings: Map<string, Property>
-        }
-
-    /// An analyser groups together related rules in the configuration file.
-    type Analyser = 
-        { 
-            Rules: Map<string, Rule> 
-            Settings: Map<string, Property>
-        }
 
     let private parseLines (content:string) =
         content.Split('\n') 
@@ -130,81 +115,99 @@ module Configuration =
                         when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
                     | _ -> isCurrentlyIgnored) false
 
-        let getIgnorePathsFromConfig (configSettings:Config.FSharpLintSettings) =
-            configSettings.IgnoreFiles |> parseLines |> List.map parseIgnorePath
+        type IgnoreFilesUpdate = 
+            | Add
+            | Overwrite
+
+        type IgnoreFilesConfig =
+            {
+                Update: IgnoreFilesUpdate
+                Files: Ignore list
+            }
+
+        let private parseIgnoreFiles (ignoreFiles:XElement) =
+            let updateAttribute = ignoreFiles.Attribute(XName.op_Implicit "Update")
+
+            let isAddUpdate = updateAttribute <> null && updateAttribute.Value.ToUpperInvariant() = "ADD"
+
+            {
+                Files = ignoreFiles.Value.Trim() |> parseLines |> Seq.map parseIgnorePath |> Seq.toList
+                Update = if isAddUpdate then Add else Overwrite
+            }
+
+        let getIgnorePathsFromConfig (configRoot:XElement) =
+            configRoot.Element(XName.op_Implicit "IgnoreFiles") |> parseIgnoreFiles
+
+    type Rule =
+        {
+            Settings: Map<string, Setting>
+        }
+        
+    /// An analyser groups together related rules in the configuration file.
+    type Analyser =
+        {
+            Settings: Map<string, Setting>
+            Rules: Map<string, Rule>
+        }
 
     type Configuration =
         {
-            IgnoreFiles: IgnoreFiles.Ignore list
+            IgnoreFiles: IgnoreFiles.IgnoreFilesConfig
             Analysers: Map<string, Analyser>
         }
 
-    let private parseProperty (property:Config.Property) =
-        match property.Name with
-            | "Enabled" when property.Boolean.IsSome -> 
-                Some(Enabled(property.Boolean.Value))
-            | "Lines" when property.Number.IsSome -> 
-                Some(Lines(property.Number.Value))
-            | "Depth" when property.Number.IsSome -> 
-                Some(Depth(property.Number.Value))
-            | "Length" when property.Number.IsSome -> 
-                Some(Length(property.Number.Value))
-            | "MaxItems" when property.Number.IsSome -> 
-                Some(MaxItems(property.Number.Value)) 
-            | "MaxCyclomaticComplexity" when property.Number.IsSome -> 
-                Some(MaxCyclomaticComplexity(property.Number.Value)) 
-            | "IncludeMatchStatements" when property.Boolean.IsSome -> 
-                Some(IncludeMatchStatements(property.Boolean.Value)) 
-            | "Hints" when property.String.IsSome ->
-                Some(Hints(parseLines property.String.Value))
-            | "OneSpaceAllowedAfterOperator" when property.Boolean.IsSome -> 
-                Some(OneSpaceAllowedAfterOperator(property.Boolean.Value))
-            | "NumberOfSpacesAllowed" when property.Number.IsSome -> 
-                Some(NumberOfSpacesAllowed(property.Number.Value))
-            | "IgnoreBlankLines" when property.Boolean.IsSome -> 
-                Some(IgnoreBlankLines(property.Boolean.Value))
-            | _ -> 
-                None
+    let private parseSetting (setting:XElement) =
+        match setting.Name.LocalName with
+            | "Enabled" -> Enabled(setting.Value |> bool.Parse)
+            | "Lines" -> Lines(setting.Value |> int)
+            | "Depth" -> Depth(setting.Value |> int)
+            | "Length" -> Length(setting.Value |> int)
+            | "MaxItems" -> MaxItems(setting.Value |> int)
+            | "MaxCyclomaticComplexity" -> MaxCyclomaticComplexity(setting.Value |> int)
+            | "IncludeMatchStatements" -> IncludeMatchStatements(setting.Value |> bool.Parse)
+            | "Hints" -> Hints(parseLines setting.Value)
+            | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
+            | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
+            | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
+            | settingName -> 
+                sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
 
-    let private parseSettings properties =
-        [
-            for property in properties do
-                match parseProperty property with
-                    | Some(propertyVal) -> 
-                        yield (property.Name, propertyVal) 
-                    | None -> ()
-        ]
+    let toSetting (settingElement:XElement) = (settingElement.Name.LocalName, parseSetting settingElement)
 
-    let private parseRule (rule:Config.Rule) : Rule =
-        {
-            Settings = 
-                rule.RuleSettings.Properties 
-                    |> parseSettings
-                    |> Map.ofList
+    let parseRule (rule:XElement) : Rule =
+        { 
+            Settings = rule.Elements() |> Seq.map toSetting |> Map.ofSeq
         }
 
-    let private getRules (analyser:Config.Analyser) =
-        [ 
-            for rule in analyser.Rules do
-                yield (rule.Name, parseRule rule) 
-        ]
-            |> Map.ofList
+    let parseAnalyser (analyser:XElement) =
+        let rulesElement = analyser.Element(XName.op_Implicit "Rules")
+        
+        let toRule (ruleElement:XElement) = (ruleElement.Name.LocalName, parseRule ruleElement)
+
+        let analyserDetails =
+            {
+                Settings = analyser.Elements() 
+                    |> Seq.filter (fun x -> x.Name <> XName.op_Implicit "Rules") 
+                    |> Seq.map toSetting
+                    |> Map.ofSeq
+
+                Rules = 
+                    match rulesElement with
+                        | null -> Map.empty
+                        | _ -> rulesElement.Elements() |> Seq.map toRule |> Map.ofSeq
+            }
+
+        (analyser.Name.LocalName, analyserDetails)
 
     /// Parse a configuration file.
-    let configuration file = 
-        let config = Config.Parse(file)
+    let configuration (file:string) = 
+        use configReader = new System.IO.StringReader(file)
+        let config = XDocument.Load(configReader).Root
 
         {
             IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
 
-            Analysers =
-                [ 
-                    for analyser in config.Analysers do 
-                        let settings = analyser.AnalyserSettings.Properties |> parseSettings |> Map.ofList
-
-                        yield (analyser.AnalyserId, { Rules = getRules analyser; Settings = settings }) 
-                ]
-                    |> Map.ofList
+            Analysers = config.Element(XName.op_Implicit "Analysers").Elements() |> Seq.map parseAnalyser |> Map.ofSeq
         }
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =

@@ -28,7 +28,7 @@ module CyclomaticComplexity =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.CyclomaticComplexity"
+    let AnalyserName = "CyclomaticComplexity"
 
     let configMaxCyclomaticComplexity config =
         match isAnalyserEnabled config AnalyserName with

@@ -28,7 +28,7 @@ module RaiseWithTooManyArguments =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.RaiseWithTooManyArguments"
+    let AnalyserName = "RaiseWithTooManyArguments"
 
     let isRuleEnabled config ruleName =
         match isRuleEnabled config AnalyserName ruleName with

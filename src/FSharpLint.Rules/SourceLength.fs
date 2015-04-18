@@ -29,7 +29,7 @@ module SourceLength =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.SourceLength"
+    let AnalyserName = "SourceLength"
 
     let configLines config ruleName =
         match isRuleEnabled config AnalyserName ruleName with

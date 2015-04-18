@@ -26,7 +26,7 @@ open FSharpLint.Framework.LoadVisitors
 
 let emptyConfig =
     {
-        IgnoreFiles = []
+        IgnoreFiles = { Files = []; Update = IgnoreFiles.IgnoreFilesUpdate.Add }
         Analysers =
             Map.ofList 
                 [ 
@@ -46,13 +46,13 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
     let config = 
         match analysers with
-            | Some(analysers) -> { IgnoreFiles = []; Analysers = analysers }
+            | Some(analysers) -> { IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }; Analysers = analysers }
             | None -> emptyConfig
 
     member this.Parse(input, ?overrideAnalysers) = 
         let config =
             match overrideAnalysers with
-                | Some(overrideAnalysers) -> { IgnoreFiles = []; Analysers = overrideAnalysers }
+                | Some(overrideAnalysers) -> { IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }; Analysers = overrideAnalysers }
                 | None -> config
 
         let visitorInfo = { PostError = postError; Config = config }

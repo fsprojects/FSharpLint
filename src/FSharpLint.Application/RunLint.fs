@@ -168,7 +168,7 @@ module RunLint =
                                 ReportLinterProgress = projectInformation.Progress.Invoke
                             }
 
-                        let shouldFileBeIgnored = Configuration.IgnoreFiles.shouldFileBeIgnored config.IgnoreFiles
+                        let shouldFileBeIgnored = Configuration.IgnoreFiles.shouldFileBeIgnored config.IgnoreFiles.Files
 
                         projectFileInfo.CompileFiles
                             |> Seq.filter (shouldFileBeIgnored >> not)

@@ -29,7 +29,7 @@ module XmlDocumentation =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.XmlDocumentation"
+    let AnalyserName = "XmlDocumentation"
 
     let configExceptionHeader config =
         match isRuleEnabled config AnalyserName "ExceptionDefinitionHeader" with

@@ -26,7 +26,7 @@ module Typography =
     open FSharpLint.Framework.Ast
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.Typography"
+    let AnalyserName = "Typography"
 
     let isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome

@@ -29,7 +29,7 @@ module NumberOfItems =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.NumberOfItems"
+    let AnalyserName = "NumberOfItems"
 
     let maxItemsForRule config (astNode:CurrentNode) ruleName =
         match isRuleEnabled config AnalyserName ruleName with

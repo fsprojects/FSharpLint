@@ -29,7 +29,7 @@ module NestedStatements =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.NestedStatements"
+    let AnalyserName = "NestedStatements"
 
     let configDepth config =
         match isAnalyserEnabled config AnalyserName with

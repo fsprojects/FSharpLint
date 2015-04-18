@@ -31,7 +31,7 @@ module FunctionReimplementation =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.FunctionReimplementation"
+    let AnalyserName = "FunctionReimplementation"
 
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome 
