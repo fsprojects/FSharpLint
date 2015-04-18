@@ -243,8 +243,14 @@ module Configuration =
     let overrideConfiguration configToOverride file =
         let newConfig = System.IO.File.ReadAllText(file) |> configuration
 
+        let combineIgnoreFiles () = List.concat [newConfig.IgnoreFiles.Files; configToOverride.IgnoreFiles.Files]
+
         {
-            IgnoreFiles = newConfig.IgnoreFiles
+            IgnoreFiles = 
+                match newConfig.IgnoreFiles.Update with
+                    | IgnoreFiles.Overwrite -> newConfig.IgnoreFiles 
+                    | IgnoreFiles.Add -> { newConfig.IgnoreFiles with Files = combineIgnoreFiles() }
+
             Analysers = overwriteMap configToOverride.Analysers newConfig.Analysers overrideAnalysers
         }
 
