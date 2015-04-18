@@ -127,7 +127,6 @@ Target "CreatePackage" (fun _ ->
                     (System.String.Format("..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FSharp.Data.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
