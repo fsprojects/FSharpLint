@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FSharpLintSettings>
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
   <IgnoreFiles>
     <![CDATA[
       assemblyinfo.*
@@ -109,263 +109,263 @@
           f >> id ===> f
         ]]>
       </Hints>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </Hints>
 
     <NameConventions>
       <Rules>
         <IdentifiersMustNotContainUnderscores>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </IdentifiersMustNotContainUnderscores>
         
         <InterfaceNamesMustBeginWithI>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </InterfaceNamesMustBeginWithI>
         
         <ExceptionNamesMustEndWithException>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </ExceptionNamesMustEndWithException>
         
         <TypeNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </TypeNamesMustBePascalCase>
         
         <RecordFieldNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </RecordFieldNamesMustBePascalCase>
         
         <EnumCasesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </EnumCasesMustBePascalCase>
         
         <ModuleNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </ModuleNamesMustBePascalCase>
         
         <LiteralNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </LiteralNamesMustBePascalCase>
         
         <NamespaceNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </NamespaceNamesMustBePascalCase>
         
         <MemberNamesMustBePascalCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </MemberNamesMustBePascalCase>
         
         <ParameterMustBeCamelCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </ParameterMustBeCamelCase>
         
         <NonPublicValuesCamelCase>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </NonPublicValuesCamelCase>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </NameConventions>
     
     <SourceLength>
       <Rules>
         <MaxLinesInFunction>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInFunction>
         
         <MaxLinesInLambdaFunction>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>5</Lines>
         </MaxLinesInLambdaFunction>
         
         <MaxLinesInMatchLambdaFunction>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInMatchLambdaFunction>
         
         <MaxLinesInValue>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInValue>
         
         <MaxLinesInConstructor>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInConstructor>
         
         <MaxLinesInMember>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInMember>
         
         <MaxLinesInProperty>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>70</Lines>
         </MaxLinesInProperty>
         
         <MaxLinesInClass>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>500</Lines>
         </MaxLinesInClass>
         
         <MaxLinesInEnum>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>500</Lines>
         </MaxLinesInEnum>
         
         <MaxLinesInUnion>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>500</Lines>
         </MaxLinesInUnion>
         
         <MaxLinesInRecord>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>500</Lines>
         </MaxLinesInRecord>
         
         <MaxLinesInModule>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>1000</Lines>
         </MaxLinesInModule>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </SourceLength>
     
     <Typography>
       <Rules>
         <MaxLinesInFile>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Lines>1000</Lines>
         </MaxLinesInFile>
         
         <MaxCharactersOnLine>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <Length>120</Length>
         </MaxCharactersOnLine>
         
         <NoTabCharacters>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </NoTabCharacters>
         
         <TrailingNewLineInFile>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </TrailingNewLineInFile>
         
         <TrailingWhitespaceOnLine>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <NumberOfSpacesAllowed>1</NumberOfSpacesAllowed>
-          <OneSpaceAllowedAfterOperator>True</OneSpaceAllowedAfterOperator>
-          <IgnoreBlankLines>True</IgnoreBlankLines>
+          <OneSpaceAllowedAfterOperator>true</OneSpaceAllowedAfterOperator>
+          <IgnoreBlankLines>true</IgnoreBlankLines>
         </TrailingWhitespaceOnLine>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </Typography>
     
     <NestedStatements>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
       <Depth>8</Depth>
     </NestedStatements>
     
     <NumberOfItems>
       <Rules>
         <MaxNumberOfFunctionParameters>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <MaxItems>5</MaxItems>
         </MaxNumberOfFunctionParameters>
         
         <MaxNumberOfMembers>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <MaxItems>32</MaxItems>
         </MaxNumberOfMembers>
         
         <MaxNumberOfItemsInTuple>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <MaxItems>4</MaxItems>
         </MaxNumberOfItemsInTuple>
         
         <MaxNumberOfBooleanOperatorsInCondition>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
           <MaxItems>4</MaxItems>
         </MaxNumberOfBooleanOperatorsInCondition>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </NumberOfItems>
     
     <RaiseWithTooManyArguments>
       <Rules>
         <FailwithWithSingleArgument>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </FailwithWithSingleArgument>
 
         <RaiseWithSingleArgument>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </RaiseWithSingleArgument>
 
         <NullArgWithSingleArgument>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </NullArgWithSingleArgument>
 
         <InvalidOpWithSingleArgument>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </InvalidOpWithSingleArgument>
 
         <FailwithfWithArgumentsMatchingFormatString>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </FailwithfWithArgumentsMatchingFormatString>
 
         <InvalidArgWithTwoArguments>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </InvalidArgWithTwoArguments>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </RaiseWithTooManyArguments>
     
     <Binding>
       <Rules>
         <FavourIgnoreOverLetWild>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </FavourIgnoreOverLetWild>
 
         <UselessBinding>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </UselessBinding>
 
         <TupleOfWildcards>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </TupleOfWildcards>
 
         <WildcardNamedWithAsPattern>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </WildcardNamedWithAsPattern>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </Binding>
     
     <FunctionReimplementation>
       <Rules>
         <ReimplementsFunction>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </ReimplementsFunction>
 
         <CanBeReplacedWithComposition>
-          <Enabled>True</Enabled>
+          <Enabled>true</Enabled>
         </CanBeReplacedWithComposition>
       </Rules>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
     </FunctionReimplementation>
     
     <XmlDocumentation>
       <Rules>
         <ExceptionDefinitionHeader>
-          <Enabled>False</Enabled>
+          <Enabled>false</Enabled>
         </ExceptionDefinitionHeader>
       </Rules>
-      <Enabled>False</Enabled>
+      <Enabled>false</Enabled>
     </XmlDocumentation>
     
     <CyclomaticComplexity>
-      <Enabled>True</Enabled>
+      <Enabled>true</Enabled>
       <MaxCyclomaticComplexity>10</MaxCyclomaticComplexity>
-      <IncludeMatchStatements>False</IncludeMatchStatements>
+      <IncludeMatchStatements>false</IncludeMatchStatements>
     </CyclomaticComplexity>
   </Analysers>
 </FSharpLintSettings>
