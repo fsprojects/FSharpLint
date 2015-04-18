@@ -87,17 +87,17 @@ The tool can be run from the command line, or as an MSBuild task.
 
 ####Analysers
 
-* [FSharpLint.Hints](FSharpLint.Hints.html)
-* [FSharpLint.NameConventions](FSharpLint.NameConventions.html)
-* [FSharpLint.SourceLength](FSharpLint.SourceLength.html)
-* [FSharpLint.Typography](FSharpLint.Typography.html)
-* [FSharpLint.NestedStatements](FSharpLint.NestedStatements.html)
-* [FSharpLint.NumberOfItems](FSharpLint.NumberOfItems.html)
-* [FSharpLint.FunctionReimplementation](FSharpLint.FunctionReimplementation.html)
-* [FSharpLint.XmlDocumentation](FSharpLint.XmlDocumentation.html)
-* [FSharpLint.Binding](FSharpLint.Binding.html)
-* [FSharpLint.CyclomaticComplexity](FSharpLint.CyclomaticComplexity.html)
-* [FSharpLint.RaiseWithTooManyArguments](FSharpLint.RaiseWithTooManyArguments.html)
+* [Hints](Hints.html)
+* [NameConventions](NameConventions.html)
+* [SourceLength](SourceLength.html)
+* [Typography](Typography.html)
+* [NestedStatements](NestedStatements.html)
+* [NumberOfItems](NumberOfItems.html)
+* [FunctionReimplementation](FunctionReimplementation.html)
+* [XmlDocumentation](XmlDocumentation.html)
+* [Binding](Binding.html)
+* [CyclomaticComplexity](CyclomaticComplexity.html)
+* [RaiseWithTooManyArguments](RaiseWithTooManyArguments.html)
 
 Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
 
@@ -110,11 +110,8 @@ The configuration files are loaded in a specific order, files loaded after anoth
 The configuration rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplmentation analyser which has the default configuration of:
 
 	[lang=xml]
-    <Analyser AnalyserId="FSharpLint.FunctionReimplementation">
-      <Rules />
-      <AnalyserSettings>
-        <Property name="Enabled">True</Property>
-      </AnalyserSettings>
+    <FunctionReimplementation>
+      <Enabled>True</Enabled>
     </Analyser>
 
 To override to turn off you'd set enabled to false in your own configuration file as follows:
@@ -123,11 +120,8 @@ To override to turn off you'd set enabled to false in your own configuration fil
     <?xml version="1.0" encoding="utf-8"?>
 	<FSharpLintSettings>
 	    <Analysers>
-			<Analyser AnalyserId="FSharpLint.FunctionReimplementation">
-				<Rules />
-				<AnalyserSettings>
-					<Property name="Enabled">False</Property>
-				</AnalyserSettings>
+			<FunctionReimplementation>
+				<Enabled>True</Enabled>
 			</Analyser>
 		</Analysers>
 	</FSharpLintSettings>
@@ -142,41 +136,49 @@ The attribute can be applied to let bindings, modules, types, and exceptions. An
 
 Only two properties in the attribute need to be set to suppress a rule, these are: `Category` and `CheckId`. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.
 
-Category is the name of the analyser containing the rule to be suppressed e.g. `FSharpLint.NameConventions`.
+Category is the name of the analyser containing the rule to be suppressed e.g. `NameConventions`.
 
 CheckId is the name of the rule to be suppressed, or `*` to suppress all rules in the analyser e.g. `InterfaceNamesMustBeginWithI`.
 
 #####Example
 
-The following code breaks the rule `FSharpLint.NameConventions.InterfaceNamesMustBeginWithI`:
+The following code breaks the rule `NameConventions.InterfaceNamesMustBeginWithI`:
 
     type Printable =
         abstract member Print : unit -> unit
         
 It will result in the warning: `Interface identifiers should begin with the letter I found interface Printable`.
 
-We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "InterfaceNamesMustBeginWithI")>]`
+We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]`
 
 The following code has the `SuppressMessage` attribute applied to it, this code will generate no warning:
 
-    [<SuppressMessage("FSharpLint.NameConventions", "InterfaceNamesMustBeginWithI")>]
+    [<SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]
     type Printable =
         abstract member Print : unit -> unit
         
         
 This could also be written using property initialisers as:
 
-    [<SuppressMessage(Category = "FSharpLint.NameConventions", CheckId = "InterfaceNamesMustBeginWithI")>]
+    [<SuppressMessage(Category = "NameConventions", CheckId = "InterfaceNamesMustBeginWithI")>]
     type Printable =
         abstract member Print : unit -> unit
 
 ####Ignoring Files
 
-Specific F# source files can be excluded from being linted via the `.fsproj` file using the `ExcludeFromSourceAnalysis` element:
+In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:
 
-	<Compile Include="AssemblyInfo.fs">
-	  <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
-	</Compile>
+	<IgnoreFiles Update="Add">
+		<![CDATA[
+		  assemblyinfo.*
+		]]>
+	</IgnoreFiles>
+
+* The `Update` attribute can be set to `Add` or `Overwrite` (if the attribute does not exist it will default to `Overwrite`). `Add` will add the paths to existing paths, `Overwrite` will only use the paths you have specified.
+* The paths must be separated by new lines.
+* Directories in the path must be separated using `/`
+* If the path ends with a `/` then everything inside of a matching directory shall be excluded.
+* If the path does not end with a `/` then all matching files are excluded.
 
 ####Running Lint From An Application
 
