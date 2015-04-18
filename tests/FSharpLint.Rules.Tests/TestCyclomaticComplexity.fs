@@ -73,7 +73,7 @@ let x () =
         this.Parse("""
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.CyclomaticComplexity", "*")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("CyclomaticComplexity", "*")>]
 let x () =
     if true then
         if true then

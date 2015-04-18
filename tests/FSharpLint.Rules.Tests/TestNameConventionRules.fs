@@ -174,7 +174,7 @@ module Program
     member this.ClassNameIsCamelCaseSuppressed() = 
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "TypeNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "TypeNamesMustBePascalCase")>]
   type myClass2() as this =
     member this.PrintMessage() = ()"""
 
@@ -202,7 +202,7 @@ module Program
     member this.InterfaceNameDoesNotBeginWithISuppressed() = 
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "InterfaceNamesMustBeginWithI")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]
   type Printable =
     abstract member Print : unit -> unit"""
 
@@ -276,7 +276,7 @@ module Program
     member this.EnumCaseIsCamelCaseSuppressed() = 
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "EnumCasesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "EnumCasesMustBePascalCase")>]
   type MyEnum =
     | enumCase = 1"""
 
@@ -354,7 +354,7 @@ module Program
     member this.RecordFieldIsCamelCaseSuppressed() = 
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "RecordFieldNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "RecordFieldNamesMustBePascalCase")>]
   type Record = { dog: int }"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(4))
@@ -394,7 +394,7 @@ module program
     [<Test>]
     member this.ModuleNameIsCamelCaseSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "ModuleNamesMustBePascalCase")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ModuleNamesMustBePascalCase")>]
 module program
   let main = ()"""
 
@@ -470,7 +470,7 @@ module program
     member this.PrivateTupleIsPascalCaseSuppressed() = 
         this.Parse """
 module program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "NonPublicValuesCamelCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
   let private Cat, private dog = 1, 0"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(4))
@@ -577,7 +577,7 @@ module program
     member this.FunctionParameterIsPascalCaseSuppressed() = 
         this.Parse """
 module program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "NonPublicValuesCamelCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
   let main Dog = ()"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(4))
@@ -659,7 +659,7 @@ module program
     [<Test>]
     member this.PropertyIsCamelCaseSuppressed() = 
         this.Parse """
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "MemberNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "MemberNamesMustBePascalCase")>]
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
@@ -770,7 +770,7 @@ match 4 with
     member this.ActivePatternContainsUnderscoreSuppressed() = 
         this.Parse """
 module program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "IdentifiersMustNotContainUnderscores")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "IdentifiersMustNotContainUnderscores")>]
 let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
 
 match 4 with
@@ -863,7 +863,7 @@ exception MyError of string
     member this.ExceptionDoesNotEndWithExceptionSuppressed() = 
         this.Parse """
 module program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "ExceptionNamesMustEndWithException")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNamesMustEndWithException")>]
 exception MyError of string
 """
         
@@ -991,7 +991,7 @@ let cat = 5"""
         this.Parse """
 module program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NameConventions", "LiteralNamesMustBePascalCase")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "LiteralNamesMustBePascalCase")>]
 [<Literal>]
 let cat = 5"""
 

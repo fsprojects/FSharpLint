@@ -63,7 +63,7 @@ let dog =
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NestedStatements", "*")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NestedStatements", "*")>]
 let dog =
     if true then
         if true then

@@ -96,7 +96,7 @@ type TestNestedStatements() =
     [<Test>]
     member this.TooManyCharactersOnLineSuppressed() = 
         this.Parse """
-        [<SuppressMessage("FSharpLint.Typography", "MaxCharactersOnLine")>]
+        [<SuppressMessage("Typography", "MaxCharactersOnLine")>]
         let line = 55 + 77 + 77"""
 
         Assert.IsFalse(this.ErrorExistsAt(3, 11))
@@ -116,7 +116,7 @@ type TestNestedStatements() =
     [<Test>]
     member this.WhitespaceOnEndOfLineSuppressed() = 
         this.Parse """
-        [<SuppressMessage("FSharpLint.Typography", "TrailingWhitespaceOnLine")>]
+        [<SuppressMessage("Typography", "TrailingWhitespaceOnLine")>]
         module Dog =
             let line = 55 """
 
@@ -200,7 +200,7 @@ type TestNestedStatements() =
     [<Test>]
     member this.TabCharacterInFileSuppressed() = 
         this.Parse (sprintf """
-        [<SuppressMessage("FSharpLint.Typography", "NoTabCharacters")>]
+        [<SuppressMessage("Typography", "NoTabCharacters")>]
         %slet foo = true""" "\t")
 
         Assert.IsFalse(this.ErrorExistsAt(3, 8))

@@ -187,7 +187,7 @@ exception SomeException of string""" (generateNewLines ModuleLength))
     [<Test>]
     member this.ModuleTooManyLinesSuppressed() = 
         this.Parse (sprintf """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInModule")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInModule")>]
 module Program
 %s
 // Some exception.
@@ -221,7 +221,7 @@ let dog x =
         this.Parse (sprintf """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInFunction")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
 let dog x =
     %s
     ()""" (generateNewLines FunctionLength))
@@ -255,7 +255,7 @@ let dog =
         this.Parse (sprintf """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInValue")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInValue")>]
 let dog =
     %s
     ()""" (generateNewLines ValueLength))
@@ -291,7 +291,7 @@ let dog = function
         this.Parse (sprintf """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInMatchLambdaFunction")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInMatchLambdaFunction")>]
 let dog = function
 | Some(x) ->
     %s
@@ -333,7 +333,7 @@ let dog = fun x ->
         this.Parse (sprintf """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInLambdaFunction")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInLambdaFunction")>]
 let dog = fun x ->
     match x with
         | Some(x) ->
@@ -372,7 +372,7 @@ module Program
     member this.ClassTooManyLinesSuppressed() = 
         this.Parse (sprintf """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInClass")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
   type MyClass2() as this =
     %s
     member this.PrintMessage() = ()""" (generateNewLines 500))
@@ -402,7 +402,7 @@ module Program
     member this.InterfaceTooManyLinesSuppressed() = 
         this.Parse (sprintf """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInClass")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
   type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateNewLines ClassLength))
@@ -434,7 +434,7 @@ type MyClass(x) =
     member this.ConstructorTooManyLinesSuppressed() = 
         this.Parse (sprintf """
 module Program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInConstructor")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInConstructor")>]
 type MyClass(x) =
     new() = 
       %s
@@ -469,7 +469,7 @@ module Program
     member this.RecordTooManyLinesSuppressed() = 
         this.Parse (sprintf """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInRecord")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInRecord")>]
   type Record = 
     {
       %s 
@@ -491,7 +491,7 @@ module Program
     member this.PropertyTooManyLines() = 
         this.Parse (sprintf """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInProperty")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInProperty")>]
   type Class() =
     let mutable value = 10
     member this.Property1 with get() = 

@@ -75,7 +75,7 @@ type TestAst() =
     member this.GetSuppressMessageAttributesWithConstructorArgs() = 
         let attributes = 
             [
-                [stubConstString "FSharpLint.Analyser"; stubConstString "Rule"] 
+                [stubConstString "Analyser"; stubConstString "Rule"] 
                     |> stubTuple 
                     |> stubParen 
                     |> stubAttribute "SuppressMessage"
@@ -85,13 +85,13 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "Rule" }, attrs |> List.head |> fst)
+        Assert.AreEqual({ Category = "Analyser"; Rule = "Rule" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisers() = 
         let attributes = 
             [
-                [stubPropertyInitialiser "Category" "FSharpLint.Analyser"; stubPropertyInitialiser "CheckId" "*"] 
+                [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "CheckId" "*"] 
                     |> stubTuple 
                     |> stubParen 
                     |> stubAttribute "SuppressMessage"
@@ -101,13 +101,13 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
+        Assert.AreEqual({ Category = "Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() = 
         let attributes = 
             [
-                [stubPropertyInitialiser "SomeProp" "FSharpLint.Analyser"; stubPropertyInitialiser "CheckId" "*"] 
+                [stubPropertyInitialiser "SomeProp" "Analyser"; stubPropertyInitialiser "CheckId" "*"] 
                     |> stubTuple 
                     |> stubParen 
                     |> stubAttribute "SuppressMessage"
@@ -121,7 +121,7 @@ type TestAst() =
     member this.GetSuppressMessageAttributesWithPropertyInitialisersMissingCheckIdProperty() = 
         let attributes = 
             [
-                [stubPropertyInitialiser "Category" "FSharpLint.Analyser"; stubPropertyInitialiser "SomeProp" "*"] 
+                [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "SomeProp" "*"] 
                     |> stubTuple 
                     |> stubParen 
                     |> stubAttribute "SuppressMessage"
@@ -136,8 +136,8 @@ type TestAst() =
         let attributes = 
             [
                 [
-                    stubPropertyInitialiser "AnotherProp" "FSharpLint.gwegweg"
-                    stubPropertyInitialiser "Category" "FSharpLint.Analyser"
+                    stubPropertyInitialiser "AnotherProp" "gwegweg"
+                    stubPropertyInitialiser "Category" "Analyser"
                     stubPropertyInitialiser "CheckId" "*"
                 ] 
                     |> stubTuple 
@@ -149,37 +149,37 @@ type TestAst() =
 
         let attrs = getSuppressMessageAttributes binding
 
-        Assert.AreEqual({ Category = "FSharpLint.Analyser"; Rule = "*" }, attrs |> List.head |> fst)
+        Assert.AreEqual({ Category = "Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
     member this.IsAnalyserSuppressedWithAllAnalyserRulesSuppressed() = 
-        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "*" }]
+        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "Analyser"; Rule = "*" }]
 
-        Assert.IsTrue(currentNodeInfo.IsSuppressed("FSharpLint.Analyser"))
+        Assert.IsTrue(currentNodeInfo.IsSuppressed("Analyser"))
 
     [<Test>]
     member this.IsAnalyserWithDifferentNameSuppressedWithAllAnalyserRulesSuppressed() = 
-        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.SomeAnalyser"; Rule = "*" }]
+        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "SomeAnalyser"; Rule = "*" }]
 
-        Assert.IsFalse(currentNodeInfo.IsSuppressed("FSharpLint.Analyser"))
+        Assert.IsFalse(currentNodeInfo.IsSuppressed("Analyser"))
 
     [<Test>]
     member this.IsAnalyserSuppressedWithSpecificAnalyserRuleSuppressed() = 
-        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "Rule" }]
+        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "Analyser"; Rule = "Rule" }]
 
-        Assert.IsFalse(currentNodeInfo.IsSuppressed("FSharpLint.Analyser"))
+        Assert.IsFalse(currentNodeInfo.IsSuppressed("Analyser"))
 
     [<Test>]
     member this.IsRuleSuppressedWithSpecificAnalyserRuleSuppressed() = 
-        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "Rule" }]
+        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "Analyser"; Rule = "Rule" }]
 
-        Assert.IsTrue(currentNodeInfo.IsSuppressed("FSharpLint.Analyser", "Rule"))
+        Assert.IsTrue(currentNodeInfo.IsSuppressed("Analyser", "Rule"))
 
     [<Test>]
     member this.IsRuleSuppressedWithAllAnalyserRulesSuppressed() = 
-        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "FSharpLint.Analyser"; Rule = "*" }]
+        let currentNodeInfo = stubCurrentNodeInfo [{ Category = "Analyser"; Rule = "*" }]
 
-        Assert.IsTrue(currentNodeInfo.IsSuppressed("FSharpLint.Analyser", "Rule"))
+        Assert.IsTrue(currentNodeInfo.IsSuppressed("Analyser", "Rule"))
 
     [<Test>]
     member this.GetSuppressMessageAttributesFromAst() =

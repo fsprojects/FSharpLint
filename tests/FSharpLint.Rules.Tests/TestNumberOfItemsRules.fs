@@ -85,7 +85,7 @@ let foo one two three four five six = ()"""
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfFunctionParameters")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfFunctionParameters")>]
 let foo one two three four five six = ()"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
@@ -119,7 +119,7 @@ type Test() =
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfMembers")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfMembers")>]
 type Test() =
     member val One = 0 with get, set
     member val Two = 0 with get, set
@@ -270,7 +270,7 @@ let foo = (1, 2, 3, 4, 5, 6)"""
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfItemsInTuple")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfItemsInTuple")>]
 let foo = (1, 2, 3, 4, 5, 6)"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
@@ -307,7 +307,7 @@ if not true && (false && false) || true (&&) (false) then
     [<Test>]
     member this.FiveBooleanOperatorsSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.NumberOfItems", "MaxNumberOfBooleanOperatorsInCondition")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfBooleanOperatorsInCondition")>]
 module Program
 
 if not true && (false && false) || true (&&) (false) then
