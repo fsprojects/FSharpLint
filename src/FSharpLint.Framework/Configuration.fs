@@ -26,6 +26,11 @@ module Configuration =
 
     open System.Xml.Linq
 
+    type XElement with
+        member this.ElementByLocalName localName =
+            this.Elements() 
+                |> Seq.tryFind (fun x -> x.Name.LocalName = localName)
+
     exception ConfigurationException of string
 
     type Setting =
@@ -126,19 +131,20 @@ module Configuration =
             }
 
         let private parseIgnoreFiles (ignoreFiles:XElement) =
-            let updateAttribute = ignoreFiles.Attribute(XName.op_Implicit "Update")
-
-            let isAddUpdate = updateAttribute <> null && updateAttribute.Value.ToUpperInvariant() = "ADD"
+            let updateAttribute = ignoreFiles.Attributes() |> Seq.tryFind (fun x -> x.Name.LocalName = "Update")
 
             {
                 Files = ignoreFiles.Value.Trim() |> parseLines |> Seq.map parseIgnorePath |> Seq.toList
-                Update = if isAddUpdate then Add else Overwrite
+                Update = 
+                    match updateAttribute with
+                        | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
+                        | Some(_) | None -> Overwrite
             }
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
-            match configRoot.Element(XName.op_Implicit "IgnoreFiles") with
-                | null -> { Update = Add; Files = [] }
-                | ignoreFilesElement -> parseIgnoreFiles ignoreFilesElement
+            match configRoot.ElementByLocalName("IgnoreFiles") with
+                | Some(ignoreFilesElement) -> parseIgnoreFiles ignoreFilesElement
+                | None -> { Update = Add; Files = [] }
 
     type Rule =
         {
@@ -182,21 +188,19 @@ module Configuration =
         }
 
     let parseAnalyser (analyser:XElement) =
-        let rulesElement = analyser.Element(XName.op_Implicit "Rules")
-        
         let toRule (ruleElement:XElement) = (ruleElement.Name.LocalName, parseRule ruleElement)
 
         let analyserDetails =
             {
                 Settings = analyser.Elements() 
-                    |> Seq.filter (fun x -> x.Name <> XName.op_Implicit "Rules") 
+                    |> Seq.filter (fun x -> x.Name.LocalName <> "Rules") 
                     |> Seq.map toSetting
                     |> Map.ofSeq
 
                 Rules = 
-                    match rulesElement with
-                        | null -> Map.empty
-                        | _ -> rulesElement.Elements() |> Seq.map toRule |> Map.ofSeq
+                    match analyser.ElementByLocalName("Rules") with
+                        | Some(rulesElement) -> rulesElement.Elements() |> Seq.map toRule |> Map.ofSeq
+                        | None -> Map.empty
             }
 
         (analyser.Name.LocalName, analyserDetails)
@@ -210,9 +214,9 @@ module Configuration =
             IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
 
             Analysers = 
-                match config.Element(XName.op_Implicit "Analysers") with
-                    | null -> Map.empty
-                    | analysers -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
+                match config.ElementByLocalName("Analysers") with
+                    | Some(analysers) -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
+                    | None -> Map.empty
         }
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
