@@ -21,6 +21,10 @@ module TestConfiguration
 open NUnit.Framework
 open FSharpLint.Framework.Configuration
 
+type System.String with
+    member path.ToPlatformIndependentPath() =
+        path.Replace('\\', System.IO.Path.DirectorySeparatorChar)
+
 [<TestFixture>]
 type TestConfiguration() =
     [<Test>]
@@ -30,7 +34,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsTrue
 
     [<Test>]
@@ -40,7 +46,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "cat"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsFalse
 
     [<Test>]
@@ -50,7 +58,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths  @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths  path
             |> Assert.IsFalse
             
     [<Test>]
@@ -60,8 +70,11 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "source.fs/"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsFalse
+
     [<Test>]
     member self.``Ignoring all files in a given directory ignores a given file from the directory.``() = 
         let ignorePaths =
@@ -69,7 +82,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsTrue
 
     [<Test>]
@@ -79,7 +94,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/source1"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsFalse
 
     [<Test>]
@@ -90,10 +107,14 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "!source.*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsFalse
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source2.fs"
+        let path = @"D:\dog\source2.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsTrue
 
     [<Test>]
@@ -105,7 +126,9 @@ type TestConfiguration() =
                 IgnoreFiles.parseIgnorePath "dog/*"
             ]
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths @"D:\dog\source.fs"
+        let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
+
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path
             |> Assert.IsTrue
 
     [<Test>]
