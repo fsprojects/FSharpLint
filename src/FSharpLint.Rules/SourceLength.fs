@@ -29,9 +29,9 @@ module SourceLength =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.SourceLength"
+    let AnalyserName = "SourceLength"
 
-    let configLines (config:Map<string,Analyser>) ruleName =
+    let configLines config ruleName =
         match isRuleEnabled config AnalyserName ruleName with
             | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
                 match ruleSettings.["Lines"] with

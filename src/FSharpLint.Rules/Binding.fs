@@ -28,7 +28,7 @@ module Binding =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.Binding"
+    let AnalyserName = "Binding"
 
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome

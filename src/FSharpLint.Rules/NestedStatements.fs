@@ -29,9 +29,9 @@ module NestedStatements =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.NestedStatements"
+    let AnalyserName = "NestedStatements"
 
-    let configDepth (config:Map<string,Analyser>) =
+    let configDepth config =
         match isAnalyserEnabled config AnalyserName with
             | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
                 match analyserSettings.["Depth"] with

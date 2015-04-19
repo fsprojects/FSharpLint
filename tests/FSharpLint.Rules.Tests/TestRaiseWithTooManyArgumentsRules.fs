@@ -93,7 +93,7 @@ failwith "" "" """
     [<Test>]
     member this.FailwithWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "FailwithWithSingleArgument")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "FailwithWithSingleArgument")>]
 module Program
 
 failwith "" "" """
@@ -139,7 +139,7 @@ raise (System.ArgumentException("Divisor cannot be zero!")) "" """
     [<Test>]
     member this.RaiseWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "RaiseWithSingleArgument")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "RaiseWithSingleArgument")>]
 module Program
 
 raise (System.ArgumentException("Divisor cannot be zero!")) "" """
@@ -167,7 +167,7 @@ failwithf "%d %s" 4 "dog" 5 """
     [<Test>]
     member this.FailwithfWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "FailwithfWithArgumentsMatchingFormatString")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "FailwithfWithArgumentsMatchingFormatString")>]
 module Program
 
 failwithf "%d %s" 4 "dog" 5 """
@@ -204,7 +204,7 @@ nullArg "" "" """
     [<Test>]
     member this.NullArgWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "NullArgWithSingleArgument")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "NullArgWithSingleArgument")>]
 module Program
 
 nullArg "" "" """
@@ -232,7 +232,7 @@ invalidOp "" "" """
     [<Test>]
     member this.InvalidOpWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "InvalidOpWithSingleArgument")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "InvalidOpWithSingleArgument")>]
 module Program
 
 invalidOp "" "" """
@@ -260,7 +260,7 @@ invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
     [<Test>]
     member this.InvalidArgWithExtraArgumentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.RaiseWithTooManyArguments", "InvalidArgWithTwoArguments")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "InvalidArgWithTwoArguments")>]
 module Program
 
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """

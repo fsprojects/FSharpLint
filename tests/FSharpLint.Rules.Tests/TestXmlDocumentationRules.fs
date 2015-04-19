@@ -59,7 +59,7 @@ exception SomeException of string"""
     [<Test>]
     member this.ExceptionWithDoubleDashCommentSuppressed() = 
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.XmlDocumentation", "ExceptionDefinitionHeader")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "ExceptionDefinitionHeader")>]
 module Program
 
 // Some exception.

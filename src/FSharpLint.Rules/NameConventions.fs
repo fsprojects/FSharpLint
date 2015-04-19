@@ -33,7 +33,7 @@ module NameConventions =
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.NameConventions"
+    let AnalyserName = "NameConventions"
 
     let isRuleEnabled config ruleName =
         match isRuleEnabled config AnalyserName ruleName with

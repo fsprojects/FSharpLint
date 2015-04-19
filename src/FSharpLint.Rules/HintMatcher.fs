@@ -30,7 +30,7 @@ module HintMatcher =
     open FSharpLint.Framework.ExpressionUtilities
 
     [<Literal>]
-    let AnalyserName = "FSharpLint.Hints"
+    let AnalyserName = "Hints"
 
     let isAnalyserEnabled config =
         (isAnalyserEnabled config AnalyserName).IsSome
@@ -417,9 +417,7 @@ module HintMatcher =
 
     /// Gets a list of hints from the config file.
     let getHints config = 
-        let analyser = Map.find AnalyserName config
-
-        let hintRule = Map.find "Hints" analyser.Rules
+        let analyser = Map.find AnalyserName config.Analysers
 
         let parseHint hint =
             match run phint hint with
@@ -427,7 +425,7 @@ module HintMatcher =
                 | Failure(error, _, _) -> 
                     raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
 
-        match Map.find "Hints" hintRule.Settings with
+        match Map.find "Hints" analyser.Settings with
             | Hints(stringHints) -> 
                 stringHints 
                     |> List.filter (System.String.IsNullOrEmpty >> not)

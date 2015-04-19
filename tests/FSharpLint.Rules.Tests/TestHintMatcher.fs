@@ -32,14 +32,8 @@ let generateHintConfig hints =
         [ 
             (AnalyserName, 
                 { 
-                    Rules = Map.ofList 
-                        [ 
-                            ("Hints", 
-                                { 
-                                    Settings = Map.ofList [ ("Hints", Hints(hints)) ] 
-                                }) 
-                        ]
-                    Settings = Map.ofList [] 
+                    Rules = Map.empty 
+                    Settings = Map.ofList [ ("Hints", Hints(hints)) ]
                 }) 
         ]
     
@@ -187,7 +181,7 @@ let f = fun x -> x""", config)
         this.Parse("""
 module Goat
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Hints", "*")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("Hints", "*")>]
 let f = fun x -> x""", config)
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))

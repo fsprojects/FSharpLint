@@ -71,7 +71,7 @@ let f = fun a b -> a * b
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "*")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "*")>]
 let f = fun a b -> a * b
 """
 
@@ -82,7 +82,7 @@ let f = fun a b -> a * b
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "ReimplementsFunction")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "ReimplementsFunction")>]
 let f = fun a b -> a * b
 """
 
@@ -123,7 +123,7 @@ let f = fun x -> tan(cos(tan x))
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.FunctionReimplementation", "CanBeReplacedWithComposition")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "CanBeReplacedWithComposition")>]
 let f = fun x -> tan(cos(tan x))
 """
 

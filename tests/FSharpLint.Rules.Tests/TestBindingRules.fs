@@ -76,7 +76,7 @@ let _ = ()"""
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "FavourIgnoreOverLetWild")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "FavourIgnoreOverLetWild")>]
 let _ = ()"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
@@ -147,7 +147,7 @@ let mutable a = a"""
 module Program
 
 let a = 10
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "UselessBinding")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "UselessBinding")>]
 let a = a"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(6))
@@ -177,7 +177,7 @@ match [] with
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.Binding", "WildcardNamedWithAsPattern")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "WildcardNamedWithAsPattern")>]
 let f =
     match [] with
         | _ as x -> ()"""

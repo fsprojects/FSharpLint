@@ -73,7 +73,7 @@ module RunLint =
             ErrorReceived: ErrorHandling.Error -> unit
             ReportLinterProgress: ParserProgress -> unit
             RulePlugins: LoadVisitors.VisitorPlugin list
-            Configuration: Map<string, Configuration.Analyser>
+            Configuration: Configuration.Configuration
         }
 
     let lintFile lintInfo (parsedFileInfo:Ast.ParseInfo) =
@@ -168,7 +168,10 @@ module RunLint =
                                 ReportLinterProgress = projectInformation.Progress.Invoke
                             }
 
+                        let shouldFileBeIgnored = Configuration.IgnoreFiles.shouldFileBeIgnored config.IgnoreFiles.Files
+
                         projectFileInfo.CompileFiles
+                            |> Seq.filter (shouldFileBeIgnored >> not)
                             |> Seq.map (getParseInfoForFileInProject checker projectOptions)
                             |> Seq.iter (lintFile lintInformation)
                 
