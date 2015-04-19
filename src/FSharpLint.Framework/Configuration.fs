@@ -136,7 +136,9 @@ module Configuration =
             }
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
-            configRoot.Element(XName.op_Implicit "IgnoreFiles") |> parseIgnoreFiles
+            match configRoot.Element(XName.op_Implicit "IgnoreFiles") with
+                | null -> { Update = Add; Files = [] }
+                | ignoreFilesElement -> parseIgnoreFiles ignoreFilesElement
 
     type Rule =
         {
