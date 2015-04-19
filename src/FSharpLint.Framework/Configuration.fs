@@ -209,7 +209,10 @@ module Configuration =
         {
             IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
 
-            Analysers = config.Element(XName.op_Implicit "Analysers").Elements() |> Seq.map parseAnalyser |> Map.ofSeq
+            Analysers = 
+                match config.Element(XName.op_Implicit "Analysers") with
+                    | null -> Map.empty
+                    | analysers -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
         }
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
