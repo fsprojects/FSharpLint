@@ -80,6 +80,7 @@ module TestMSBuildTask =
             let requestData = BuildRequestData(ProjectInstance(projectFile), [| "build" |])
             
             let lintErrors = System.Collections.Generic.List<BuildEventArgs>()
+            let buildErrors = System.Collections.Generic.List<BuildEventArgs>()
             let tasks = System.Collections.Generic.List<TaskStartedEventArgs>()
 
             let logger = 
@@ -97,13 +98,22 @@ module TestMSBuildTask =
 
                     member this.Initialize(eventSource) = 
                         eventSource.WarningRaised.AddHandler(BuildWarningEventHandler(fun _ -> lintErrors.Add))
+                        eventSource.ErrorRaised.AddHandler(BuildErrorEventHandler(fun _ -> buildErrors.Add))
 
                         eventSource.TaskStarted.Add(tasks.Add)
 
                     member this.Shutdown() = ()
                 }
 
-            buildManager.Build(BuildParameters(Loggers = [logger]), requestData) |> ignore
+            let buildResult = buildManager.Build(BuildParameters(Loggers = [logger]), requestData)
+
+            if buildResult.OverallResult = BuildResultCode.Failure then
+                let errors = 
+                    buildErrors 
+                        |> Seq.map (fun x -> x.Message) 
+                        |> (String.concat System.Environment.NewLine)
+
+                Assert.Fail("Build failed because: " + errors)
 
             let errorMessages = lintErrors |> Seq.map (fun x -> x.Message) |> Seq.toList
 
