@@ -75,11 +75,7 @@ module TestMSBuildTask =
         member this.FunctionalTestMSBuildTask() = 
             let projectFile = getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
-        #if __MonoCS__
             let buildManager = BuildManager()
-        #else
-            use buildManager = new BuildManager()
-        #endif
 
             let requestData = BuildRequestData(ProjectInstance(projectFile), [| "build" |])
             
