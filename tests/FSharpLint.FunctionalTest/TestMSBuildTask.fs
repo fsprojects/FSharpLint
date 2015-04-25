@@ -77,7 +77,7 @@ module TestMSBuildTask =
 
             let buildManager = BuildManager()
 
-            let requestData = BuildRequestData(ProjectInstance(projectFile), [| "build" |])
+            let requestData = BuildRequestData(ProjectInstance(projectFile), [||])
             
             let lintErrors = System.Collections.Generic.List<BuildEventArgs>()
             let buildErrors = System.Collections.Generic.List<BuildEventArgs>()
