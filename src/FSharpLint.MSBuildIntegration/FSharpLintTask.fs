@@ -75,9 +75,9 @@ type FSharpLintTask() =
             let endColumn = error.Range.EndColumn + 1
 
             if treatWarningsAsErrors then
-                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
             else
-                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
 
         worker.add_ErrorReceived(FSharpLint.Worker.ErrorReceivedEventHandler(errorReceived))
         worker.add_ReportProgress(FSharpLint.Worker.ReportProgressEventHandler(progress))
