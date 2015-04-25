@@ -108,12 +108,22 @@ module TestMSBuildTask =
             let buildResult = buildManager.Build(BuildParameters(Loggers = [logger]), requestData)
 
             if buildResult.OverallResult = BuildResultCode.Failure then
-                let errors = 
-                    buildErrors 
-                        |> Seq.map (fun x -> x.Message) 
-                        |> (String.concat System.Environment.NewLine)
+                if buildResult.Exception = null then
+                    let errors = 
+                        buildErrors 
+                            |> Seq.map (fun x -> x.Message) 
+                            |> (String.concat System.Environment.NewLine)
 
-                Assert.Fail("Build failed because: " + errors)
+                    Assert.Fail("Build failed because: " + errors)
+                else
+                    let error = 
+                        sprintf 
+                            "Build failed because of an exception: %s%sStack trace: %s"
+                            buildResult.Exception.Message
+                            System.Environment.NewLine
+                            buildResult.Exception.StackTrace
+
+                    Assert.Fail(error)
 
             let errorMessages = lintErrors |> Seq.map (fun x -> x.Message) |> Seq.toList
 
