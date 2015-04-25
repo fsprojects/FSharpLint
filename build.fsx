@@ -157,7 +157,7 @@ Target "All" DoNothing
 
 "Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
 "Build" ==> "All"
-(*"RunTests" ==>*) "RunFunctionalTests" ==> "All"
+"RunFunctionalTests" ==> "All"
 "Lint" ==> "All"
 "GenerateDocs" ==> "All"
 "CreatePackage" ==> "All"
