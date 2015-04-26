@@ -42,12 +42,15 @@ type FSharpLintTask() =
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
         let resolveAssembly _ (args:ResolveEventArgs) =
+            this.Log.LogWarning("Resolving assembly")
+
             let assembly = System.Reflection.Assembly.Load(args.Name)
             if assembly <> null then
                 assembly
             else
                 let parts = args.Name.Split(',')
                 let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+                this.Log.LogWarning(sprintf "Trying to resolve %s" file)
 
                 System.Reflection.Assembly.LoadFrom(file)
             
