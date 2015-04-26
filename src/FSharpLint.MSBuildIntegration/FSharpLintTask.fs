@@ -34,6 +34,11 @@ type FSharpLintTask() =
 
         let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
 
+        System.IO.Directory.GetFiles(directory) 
+            |> String.concat System.Environment.NewLine
+            |> fun x -> directory + System.Environment.NewLine + x
+            |> this.Log.LogWarning
+
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
         let resolveAssembly _ (args:ResolveEventArgs) =
