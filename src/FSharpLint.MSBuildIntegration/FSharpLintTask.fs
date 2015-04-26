@@ -42,10 +42,12 @@ type FSharpLintTask() =
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
         let resolveAssembly _ (args:ResolveEventArgs) =
-            this.Log.LogWarning("Resolving assembly")
+            this.Log.LogWarning(sprintf "Resolving assembly %s" args.Name)
 
             let assembly = System.Reflection.Assembly.Load(args.Name)
             if assembly <> null then
+                
+                this.Log.LogWarning(sprintf "Loaded assembly %s" assembly.FullName)
                 assembly
             else
                 let parts = args.Name.Split(',')
