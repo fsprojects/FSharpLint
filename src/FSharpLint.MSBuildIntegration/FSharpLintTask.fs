@@ -44,7 +44,10 @@ type FSharpLintTask() =
         let resolveAssembly _ (args:ResolveEventArgs) =
             this.Log.LogWarning(sprintf "Resolving assembly %s" args.Name)
 
-            let assembly = System.Reflection.Assembly.Load(args.Name)
+            let assembly = 
+                try System.Reflection.Assembly.Load(args.Name)
+                with e -> failwithf "Exception when loading assembly: %A" e
+
             if assembly <> null then
                 
                 this.Log.LogWarning(sprintf "Loaded assembly %s" assembly.FullName)
