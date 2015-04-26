@@ -45,19 +45,20 @@ type FSharpLintTask() =
             this.Log.LogWarning(sprintf "Resolving assembly %s" args.Name)
 
             let assembly = 
-                try System.Reflection.Assembly.Load(args.Name)
-                with e -> failwithf "Exception when loading assembly: %A" e
+                try 
+                    match System.Reflection.Assembly.Load(args.Name) with
+                        | null -> None
+                        | assembly -> Some(assembly)
+                with _ -> None
 
-            if assembly <> null then
-                
-                this.Log.LogWarning(sprintf "Loaded assembly %s" assembly.FullName)
-                assembly
-            else
-                let parts = args.Name.Split(',')
-                let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
-                this.Log.LogWarning(sprintf "Trying to resolve %s" file)
+            match assembly with
+                | Some(assembly) -> assembly
+                | None -> 
+                    let parts = args.Name.Split(',')
+                    let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+                    this.Log.LogWarning(sprintf "Trying to resolve %s" file)
 
-                System.Reflection.Assembly.LoadFrom(file)
+                    System.Reflection.Assembly.LoadFrom(file)
             
         System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(resolveAssembly))
         
