@@ -34,16 +34,9 @@ type FSharpLintTask() =
 
         let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
 
-        System.IO.Directory.GetFiles(directory) 
-            |> String.concat System.Environment.NewLine
-            |> fun x -> directory + System.Environment.NewLine + x
-            |> this.Log.LogWarning
-
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
         let resolveAssembly _ (args:ResolveEventArgs) =
-            this.Log.LogWarning(sprintf "Resolving assembly %s" args.Name)
-
             let assembly = 
                 try 
                     match System.Reflection.Assembly.Load(args.Name) with
@@ -56,7 +49,6 @@ type FSharpLintTask() =
                 | None -> 
                     let parts = args.Name.Split(',')
                     let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
-                    this.Log.LogWarning(sprintf "Trying to resolve %s" file)
 
                     System.Reflection.Assembly.LoadFrom(file)
             
