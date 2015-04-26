@@ -20,10 +20,27 @@ namespace FSharpLint.FunctionalTest
 
 module TestMSBuildTask =
 
-    open Microsoft.Build.Execution
-    open Microsoft.Build.Framework
     open System.IO
     open NUnit.Framework
+
+    let msbuildProject projectFile =
+        let startInfo = System.Diagnostics.ProcessStartInfo
+                                (
+                                    FileName = Fake.MSBuildHelper.msBuildExe,
+                                    Arguments = projectFile,
+                                    RedirectStandardOutput = true,
+                                    UseShellExecute = false)
+
+        use app = System.Diagnostics.Process.Start(startInfo)
+                
+        app.Start() |> ignore
+
+        let output = System.Text.StringBuilder()
+        
+        while not app.StandardOutput.EndOfStream do
+            app.StandardOutput.ReadLine() |> output.Append |> ignore
+
+        output.ToString()
     
     [<TestFixture>]
     type TestMSBuildTask() =
@@ -75,57 +92,7 @@ module TestMSBuildTask =
         member this.FunctionalTestMSBuildTask() = 
             let projectFile = getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
-            let buildManager = BuildManager()
-
-            let requestData = BuildRequestData(ProjectInstance(projectFile), [||])
-            
-            let lintErrors = System.Collections.Generic.List<BuildEventArgs>()
-            let buildErrors = System.Collections.Generic.List<BuildEventArgs>()
-            let tasks = System.Collections.Generic.List<TaskStartedEventArgs>()
-
-            let logger = 
-                let parameters = ref ""
-                let verbosity = ref LoggerVerbosity.Normal
-
-                { new ILogger with 
-                    member this.Parameters
-                        with get () = !parameters
-                        and set (value) = parameters := value
-
-                    member this.Verbosity
-                        with get () = !verbosity
-                        and set (value) = verbosity := value
-
-                    member this.Initialize(eventSource) = 
-                        eventSource.WarningRaised.AddHandler(BuildWarningEventHandler(fun _ -> lintErrors.Add))
-                        eventSource.ErrorRaised.AddHandler(BuildErrorEventHandler(fun _ -> buildErrors.Add))
-
-                        eventSource.TaskStarted.Add(tasks.Add)
-
-                    member this.Shutdown() = ()
-                }
-
-            let buildResult = buildManager.Build(BuildParameters(Loggers = [logger]), requestData)
-
-            if buildResult.OverallResult = BuildResultCode.Failure then
-                if buildResult.Exception = null then
-                    let errors = 
-                        buildErrors 
-                            |> Seq.map (fun x -> x.Message) 
-                            |> (String.concat System.Environment.NewLine)
-
-                    Assert.Fail("Build failed because: " + errors)
-                else
-                    let error = 
-                        sprintf 
-                            "Build failed because of an exception: %s%sStack trace: %s"
-                            buildResult.Exception.Message
-                            System.Environment.NewLine
-                            buildResult.Exception.StackTrace
-
-                    Assert.Fail(error)
-
-            let errorMessages = lintErrors |> Seq.map (fun x -> x.Message) |> Seq.toList
+            let output = msbuildProject projectFile
 
             let expectedErrors =
                 [
@@ -138,5 +105,9 @@ module TestMSBuildTask =
                     "a<>true can be refactored into not a"
                     "List.head (List.sort x) can be refactored into List.min x"
                 ]
+
+            let allFound = List.forall (fun x -> output.Contains(x)) expectedErrors
+
+            let failInfo = sprintf "MSBuild output didn't contain expected lint warnings. output: %s" output
                 
-            Assert.AreEqual(expectedErrors, errorMessages)
+            Assert.IsTrue(allFound, failInfo)
