@@ -66,6 +66,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FSharpLint.Application\FSharpLint.Application.fsproj">
+      <Name>FSharpLint.Application</Name>
+      <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
       <Name>FSharpLint.Worker</Name>
       <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
