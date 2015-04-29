@@ -26,15 +26,20 @@ module TestFakeTask =
     let runFake() =
         let fakeExe = TestPackageHelper.getPath @"../../../../packages/FAKE/tools/FAKE.exe"
 
-        if Fake.EnvironmentHelper.isMono then
-            System.Diagnostics.Process.Start("chmod", "+x " + fakeExe) |> ignore
+        let workingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/"
+
+        let buildFile =
+            if Fake.EnvironmentHelper.isMono then
+               Path.Combine(workingDirectory, "testLintViaFake.fsx")
+            else
+                "testLintViaFake.fsx"
 
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
                                     FileName = fakeExe,
-                                    Arguments = "testLintViaFake.fsx",
+                                    Arguments = ,
                                     RedirectStandardOutput = true,
-                                    WorkingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/",
+                                    WorkingDirectory = ,
                                     UseShellExecute = false)
 
         use app = System.Diagnostics.Process.Start(startInfo)
