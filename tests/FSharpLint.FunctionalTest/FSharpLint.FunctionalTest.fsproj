@@ -46,6 +46,8 @@
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
     <Compile Include="TestConsoleApplication.fs" />
+    <Compile Include="TestPackageHelpers.fs" />
+    <Compile Include="TestFakeTask.fs" />
     <Compile Include="TestMSBuildTask.fs" />
     <None Include="packages.config" />
   </ItemGroup>

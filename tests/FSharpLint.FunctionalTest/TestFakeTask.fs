@@ -18,17 +18,18 @@
 
 namespace FSharpLint.FunctionalTest
 
-module TestMSBuildTask =
+module TestFakeTask =
 
     open System.IO
     open NUnit.Framework
 
-    let msbuildProject projectFile =
+    let runFake() =
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
-                                    FileName = Fake.MSBuildHelper.msBuildExe,
-                                    Arguments = projectFile,
+                                    FileName = TestPackageHelper.getPath @"../../../../packages/FAKE/tools/FAKE.exe",
+                                    Arguments = "testLintViaFake.fsx",
                                     RedirectStandardOutput = true,
+                                    WorkingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/",
                                     UseShellExecute = false)
 
         use app = System.Diagnostics.Process.Start(startInfo)
@@ -48,10 +49,10 @@ module TestMSBuildTask =
         member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles()
 
         [<Test>]
-        member this.FunctionalTestMSBuildTask() = 
+        member this.FunctionalTestFakeTask() = 
             let projectFile = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
-            let output = msbuildProject projectFile
+            let output = runFake()
 
             let expectedErrors =
                 [
@@ -67,6 +68,6 @@ module TestMSBuildTask =
 
             let allFound = List.forall (fun x -> output.Contains(x)) expectedErrors
 
-            let failInfo = sprintf "MSBuild output didn't contain expected lint warnings. output: %s" output
+            let failInfo = sprintf "FAKE output didn't contain expected lint warnings. output: %s" output
                 
             Assert.IsTrue(allFound, failInfo)
