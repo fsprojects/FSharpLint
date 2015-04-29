@@ -2,18 +2,7 @@
 
 open Fake
 open FSharpLint.Worker
-
-type LintOptions =
-    {
-        /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
-        Progress: System.Action<Progress>
-
-        /// Callback that's called when a lint error is detected.
-        ErrorReceived: System.Action<Error>
-
-        /// Fail the FAKE build script if one or more lint warnings are found in a project.
-        FailBuildIfAnyWarnings: bool
-    }
+open FSharpLint.Application.AppDomainWorker
 
 let private printException (e:System.Exception) =
     "Exception Message:" + e.Message + "Exception Stack Trace:" + e.StackTrace
@@ -42,91 +31,6 @@ let defaultLintOptions =
     }
 
 open System
-
-type FSharpLintWorker() = 
-    inherit MarshalByRefObject() 
-
-    let reportsReceived = new Collections.Concurrent.BlockingCollection<obj>()
-
-    let cancelToken = new Threading.CancellationTokenSource()
-
-    let taskCompletionSource = Threading.Tasks.TaskCompletionSource<bool>()
-
-    [<DefaultValue>] val mutable Options : LintOptions
-
-    let getWorker () = 
-        let fullPath = Reflection.Assembly.GetExecutingAssembly().Location
-
-        let directory = IO.Path.GetDirectoryName(fullPath)
-
-        let setup = AppDomainSetup(LoaderOptimization = System.LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
-
-        let evidence = AppDomain.CurrentDomain.Evidence
-
-        let appDomain = AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
-
-        appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
-
-    member this.RunLint projectFile (options:LintOptions) =
-        this.Options <- options
-
-        let worker = getWorker()
-
-        ErrorReceivedEventHandler(this.ReportError) |> worker.add_ErrorReceived 
-
-        ReportProgressEventHandler(this.ReportProgress) |> worker.add_ReportProgress
-
-        let task = new Threading.Tasks.Task(Action(this.ReportResults))
-
-        task.Start()
-
-        let result = worker.RunLint(projectFile)
-
-        cancelToken.Cancel(false)
-
-        task.Wait()
-
-        this.ClearAnyReportsReceived()
-
-        result
-
-    [<Runtime.Remoting.Messaging.OneWay>]
-    member this.ReportError(error:Error) =
-        reportsReceived.Add(error)
-
-    [<Runtime.Remoting.Messaging.OneWay>]
-    member this.ReportProgress(progress:Progress) =
-        reportsReceived.Add(progress)
-
-    interface IDisposable with
-        member this.Dispose() =
-            this.Dispose(true)
-            GC.SuppressFinalize(this)
-
-    member private this.ClearAnyReportsReceived() =
-        let rec clearReportsReceived () =
-            if reportsReceived.Count > 0 then
-                reportsReceived.Take() |> this.PassReportToOptionsCallback
-                clearReportsReceived()
-
-        clearReportsReceived()
-
-    member private this.PassReportToOptionsCallback = function
-        | :? Error as error -> this.Options.ErrorReceived.Invoke(error)
-        | :? Progress as progress -> this.Options.Progress.Invoke(progress)
-        | _ -> ()
-
-    member private this.ReportResults() =
-        while not cancelToken.IsCancellationRequested do
-            try
-                reportsReceived.Take(cancelToken.Token) 
-                    |> this.PassReportToOptionsCallback
-            with _ -> ()
-
-    member private this.Dispose(disposing) =
-        if disposing then
-            reportsReceived.Dispose()
-            cancelToken.Dispose()
 
 /// Runs FSharpLint on a project.
 /// ## Parameters
@@ -163,7 +67,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
             FailBuildIfAnyWarnings = parameters.FailBuildIfAnyWarnings
         }
 
-    use worker = new FSharpLintWorker()
+    use worker = new AppDomainWorker()
     let result = worker.RunLint projectFile options
 
     if result.IsSuccess && parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 then

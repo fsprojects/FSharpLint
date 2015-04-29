@@ -120,7 +120,7 @@ Target "CreatePackage" (fun _ ->
             Files = 
                 [
                     (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
-                    (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}*.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
@@ -157,7 +157,7 @@ Target "All" DoNothing
 
 "Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
 "Build" ==> "All"
-"RunTests" ==> "RunFunctionalTests" ==> "All"
+"RunFunctionalTests" ==> "RunTests" ==> "All"
 "Lint" ==> "All"
 "GenerateDocs" ==> "All"
 "CreatePackage" ==> "All"

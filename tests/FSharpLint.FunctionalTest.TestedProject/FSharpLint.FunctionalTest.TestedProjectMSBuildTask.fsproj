@@ -5,14 +5,13 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>69a2554e-2d5f-4bf7-a24f-76be8cab6a6f</ProjectGuid>
+    <ProjectGuid>3c435732-06b5-4406-ad79-bdd1f5124b12</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>FSharpLint.MSBuildIntegration</RootNamespace>
-    <AssemblyName>FSharpLint.MSBuildIntegration</AssemblyName>
+    <RootNamespace>FSharpLint.FunctionalTest.TestedProject</RootNamespace>
+    <AssemblyName>FSharpLint.FunctionalTest.TestedProject</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>FSharpLint.MSBuildIntegration</Name>
+    <Name>FSharpLint.FunctionalTest.TestedProject</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +21,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\FSharpLint.MSBuildIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FSharpLint.FunctionalTest.TestedProject.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +30,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Release\FSharpLint.MSBuildIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FSharpLint.FunctionalTest.TestedProject.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
@@ -43,20 +42,11 @@
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+   <Import Project="$(MSBuildProjectDirectory)\FSharpLint\build\FSharpLint.targets" />
   <ItemGroup>
-    <Compile Include="FSharpLintTask.fs" />
-    <None Include="app.config" />
-    <Compile Include="AssemblyInfo.fs">
-      <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
-    </Compile>
-    <None Include="packages.config" />
+    <Compile Include="TestHints.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build" />
-    <Reference Include="Microsoft.Build.Engine" />
-    <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -64,18 +54,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Application\FSharpLint.Application.fsproj">
-      <Name>FSharpLint.Application</Name>
-      <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
-      <Name>FSharpLint.Worker</Name>
-      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

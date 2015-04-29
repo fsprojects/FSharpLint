@@ -179,3 +179,5 @@ nuget/*.nupkg
 tools/
 !docs/tools
 *.nupkg
+
+tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint/

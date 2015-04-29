@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>FSharpLint</id>
+    <version>0.1.16</version>
+    <authors>Matthew Mcveigh</authors>
+    <owners>Matthew Mcveigh</owners>
+    <summary>Lint tool for F#.</summary>
+    <licenseUrl>https://github.com/fsprojects/FSharpLint/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/fsprojects/FSharpLint/</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/fsprojects/FSharpLint/master/docs/files/img/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lint tool for F#.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>F# fsharp lint FSharpLint</tags>
+    <dependencies></dependencies>
+    <references></references>
+  </metadata>
+  <files><file src="build\*" target="build" />
+<file src="..\src\FSharpLint.MSBuildIntegration\bin\Release\*.dll" />
+<file src="..\src\FSharpLint.FAKE\bin\Release\FSharpLint.FAKE.dll" />
+<file src="..\src\FSharpLint.CrossDomain\bin\Release\FSharpLint.CrossDomain.dll" />
+<file src="..\bin\FSharpLint.Rules.dll" />
+<file src="..\bin\FSharpLint.Framework.dll" />
+<file src="..\bin\FSharpLint.Application.dll" />
+<file src="..\bin\FSharp.Compiler.Service.dll" />
+<file src="..\bin\FParsecCS.dll" />
+<file src="..\bin\FParsec.dll" /></files>
+</package>

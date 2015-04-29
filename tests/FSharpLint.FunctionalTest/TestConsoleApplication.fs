@@ -65,8 +65,8 @@ module Tests =
                 Code = splitOutput.[i + 2]
             }
         ]
-
-    [<TestFixture>]
+        
+    [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
         [<Test>]
         member this.InvalidConfig() = 

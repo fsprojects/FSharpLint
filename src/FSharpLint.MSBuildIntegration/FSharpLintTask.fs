@@ -19,6 +19,8 @@
 namespace FSharpLint.MSBuildIntegration
 
 open System
+open FSharpLint.Worker
+open FSharpLint.Application.AppDomainWorker
 
 type FSharpLintTask() = 
     inherit Microsoft.Build.Utilities.Task()
@@ -37,14 +39,20 @@ type FSharpLintTask() =
         let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
 
         let resolveAssembly _ (args:ResolveEventArgs) =
-            let assembly = System.Reflection.Assembly.Load(args.Name)
-            if assembly <> null then
-                assembly
-            else
-                let parts = args.Name.Split(',')
-                let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+            let assembly = 
+                try 
+                    match System.Reflection.Assembly.Load(args.Name) with
+                        | null -> None
+                        | assembly -> Some(assembly)
+                with _ -> None
 
-                System.Reflection.Assembly.LoadFrom(file)
+            match assembly with
+                | Some(assembly) -> assembly
+                | None -> 
+                    let parts = args.Name.Split(',')
+                    let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+
+                    System.Reflection.Assembly.LoadFrom(file)
             
         System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(resolveAssembly))
         
@@ -75,14 +83,19 @@ type FSharpLintTask() =
             let endColumn = error.Range.EndColumn + 1
 
             if treatWarningsAsErrors then
-                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
+                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
             else
-                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.FormattedError, null)
-
-        worker.add_ErrorReceived(FSharpLint.Worker.ErrorReceivedEventHandler(errorReceived))
-        worker.add_ReportProgress(FSharpLint.Worker.ReportProgressEventHandler(progress))
-
-        let result = worker.RunLint this.Project
+                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
+        
+        let options = 
+            { 
+                Progress = System.Action<_>(progress)
+                ErrorReceived = System.Action<_>(errorReceived)
+                FailBuildIfAnyWarnings = treatWarningsAsErrors
+            }
+        
+        use worker = new AppDomainWorker()
+        let result = worker.RunLint this.Project options
 
         if not result.IsSuccess then
             logFailure result.Message
