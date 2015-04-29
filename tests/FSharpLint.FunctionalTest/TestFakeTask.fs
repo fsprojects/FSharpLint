@@ -24,9 +24,14 @@ module TestFakeTask =
     open NUnit.Framework
 
     let runFake() =
+        let fakeExe = TestPackageHelper.getPath @"../../../../packages/FAKE/tools/FAKE.exe"
+
+        if Fake.EnvironmentHelper.isMono then
+            System.Diagnostics.Process.Start("chmod", "+x " + fakeExe) |> ignore
+
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
-                                    FileName = TestPackageHelper.getPath @"../../../../packages/FAKE/tools/FAKE.exe",
+                                    FileName = fakeExe,
                                     Arguments = "testLintViaFake.fsx",
                                     RedirectStandardOutput = true,
                                     WorkingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/",
