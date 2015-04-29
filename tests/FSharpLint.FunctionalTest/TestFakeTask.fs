@@ -34,10 +34,18 @@ module TestFakeTask =
             else
                 "testLintViaFake.fsx"
 
+        let file = if Fake.EnvironmentHelper.isMono then "mono" else fakeExe
+
+        let arguments =
+            if Fake.EnvironmentHelper.isMono then
+                sprintf "%s %s" (System.IO.FileInfo(fakeExe).FullName) buildFile
+            else
+                buildFile 
+
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
-                                    FileName = System.IO.FileInfo(fakeExe).FullName,
-                                    Arguments = buildFile,
+                                    FileName = file,
+                                    Arguments = arguments,
                                     RedirectStandardOutput = true,
                                     WorkingDirectory = workingDirectory,
                                     UseShellExecute = false)
