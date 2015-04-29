@@ -37,9 +37,9 @@ module TestFakeTask =
         let startInfo = System.Diagnostics.ProcessStartInfo
                                 (
                                     FileName = fakeExe,
-                                    Arguments = ,
+                                    Arguments = buildFile,
                                     RedirectStandardOutput = true,
-                                    WorkingDirectory = ,
+                                    WorkingDirectory = workingDirectory,
                                     UseShellExecute = false)
 
         use app = System.Diagnostics.Process.Start(startInfo)
