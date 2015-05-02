@@ -45,7 +45,7 @@ module XmlDocumentation =
             | XmlDoc([||]) -> true
             | _ -> false
 
-    let visitor visitorInfo (checkFile:FSharpCheckFileResults) astNode = 
+    let visitor visitorInfo _ astNode = 
         match astNode.Node with
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
                 if configExceptionHeader visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "ExceptionDefinitionHeader") |> not then

@@ -563,15 +563,18 @@ module Ast =
 
     /// Parse a file.
     let parse finishEarly parseInfo visitors =
-        let checkFileResults = 
-            parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
-                |> Async.RunSynchronously
+        let checkFileResults = None
+//parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
+  //              |> Async.RunSynchronously
 
         match checkFileResults with
-            | FSharpCheckFileAnswer.Succeeded(res) -> 
-                let visitors = visitors |> List.map (fun visitor -> visitor res)
+            | Some(FSharpCheckFileAnswer.Succeeded(res)) -> 
+                let visitors = visitors |> List.map (fun visitor -> visitor (Some(res)))
                 walkFile finishEarly visitors parseInfo.Ast
-            | res -> raise <| CheckFileException("Checking files was aborted")
+            | Some(res) -> raise <| CheckFileException("Checking files was aborted")
+            | None -> 
+                let visitors = visitors |> List.map (fun visitor -> visitor None)
+                walkFile finishEarly visitors parseInfo.Ast
 
     type FailedToParseFile =
         {

@@ -181,64 +181,15 @@ module NameConventions =
                 let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsInterfaceError")
                 let error = System.String.Format(errorFormatString, identifier.idText)
                 visitorInfo.PostError identifier.idRange error
-
-    let isSymbolAnInterface = function
-        | Some(symbol:FSharpSymbolUse) ->
-            match symbol.Symbol with
-            | :? FSharpEntity as entity when entity.IsInterface -> true
-            | _ -> false
-        | None -> false
-
-    let checkComponentInfo visitorInfo astNode (checkFile:FSharpCheckFileResults) (identifier:LongIdent) =
-        let interfaceIdentifier = identifier.[List.length identifier - 1]
-        let interfaceRange = interfaceIdentifier.idRange
-
-        let startLine, endColumn = interfaceRange.StartLine, interfaceRange.EndColumn
-
-        let symbol = checkFile.GetSymbolUseAtLocation(startLine, endColumn, "", [interfaceIdentifier.idText])
-                                |> Async.RunSynchronously
-
-        /// Is symbol the same identifier but declared elsewhere?
-        let isSymbolAnExtensionType = function
-            | Some(symbol:FSharpSymbolUse) ->
-                match symbol.Symbol with
-                    | :? FSharpEntity as entity -> 
-                        entity.DeclarationLocation.Start <> interfaceRange.Start
-                        && entity.DisplayName = (interfaceIdentifier).idText
-                    | _ -> false
-            | None -> false
-                
-        if isSymbolAnInterface symbol then 
-            CheckIdentifiers.checkInterface visitorInfo astNode interfaceIdentifier
-        else if not <| isSymbolAnExtensionType symbol then
-            identifier |> List.iter (CheckIdentifiers.checkTypeName visitorInfo astNode)
             
     let isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
-    let isLiteral (attributes:SynAttributes) (checkFile:FSharpCheckFileResults) = 
+    let isLiteral (attributes:SynAttributes) = 
         let isLiteralAttribute (attribute:SynAttribute) =
-            let range = attribute.TypeName.Range
-            let names = attribute.TypeName.Lid |> List.map (fun x -> x.idText)
-            let symbol = checkFile.GetSymbolUseAtLocation(range.EndLine + 1, range.EndColumn, "", names)
-                            |> Async.RunSynchronously
-            match symbol with
-                | Some(symbol) -> 
-                    match symbol.Symbol with
-                        | :? FSharpEntity as entity when 
-                                entity.IsFSharpAbbreviation &&
-                                entity.AbbreviatedType.TypeDefinition.DisplayName = "LiteralAttribute" -> 
-                            match entity.AbbreviatedType.TypeDefinition.Namespace with
-                                | Some(name) when name.EndsWith("FSharp.Core") -> true
-                                | _ -> false
-                        | :? FSharpEntity as entity when 
-                                entity.IsClass && entity.DisplayName = "LiteralAttribute" -> 
-                            match entity.Namespace with
-                                | Some(name) when name.EndsWith("FSharp.Core") -> true
-                                | _ -> false
-                        | _ -> false
-                | _ -> false
+            let name = attribute.TypeName.Lid |> List.rev |> List.head
 
+            name.idText = "LiteralAttribute" || name.idText = "Literal"
         attributes |> List.exists isLiteralAttribute
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
@@ -261,8 +212,33 @@ module NameConventions =
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
                 CheckIdentifiers.checkEnumCase visitorInfo astNode identifier
                 Continue
-            | AstNode.ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _)) ->
-                checkComponentInfo visitorInfo astNode checkFile identifier
+            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) -> 
+                let isTypeExtensions =
+                    match typeDef with
+                        | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconAugmentation, _, _) -> true
+                        | _ -> false
+
+                let isInterface() =
+                    let hasConstructor = function 
+                        | SynMemberDefn.ImplicitCtor(_) -> true 
+                        | _ -> false
+
+                    match typeDef with
+                        | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconInterface, members, _)
+                        | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, _) -> 
+                            members |> List.exists hasConstructor |> not
+                        | _ -> false
+            
+                if not isTypeExtensions then
+                    match componentInfo with
+                        | SynComponentInfo.ComponentInfo(_, _, _, identifier, _, _, _, _) -> 
+                            let interfaceIdentifier = identifier.[List.length identifier - 1]
+                
+                            if isInterface() then 
+                                CheckIdentifiers.checkInterface visitorInfo astNode interfaceIdentifier
+                            else
+                                identifier |> List.iter (CheckIdentifiers.checkTypeName visitorInfo astNode)
+           
                 Continue
             | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
                 match unionCase with
@@ -281,8 +257,8 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        if isValue longIdentifier.Lid checkFile then
-                            CheckIdentifiers.checkNonPublicValue visitorInfo astNode longIdentifier.Lid.Head
+                        //if isValue longIdentifier.Lid checkFile then
+                        CheckIdentifiers.checkNonPublicValue visitorInfo astNode longIdentifier.Lid.Head
                     | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                         CheckIdentifiers.checkParameter visitorInfo astNode identifier
                     | _ -> ()
@@ -294,7 +270,7 @@ module NameConventions =
                     | _ -> ()
                 Continue
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-                if isLiteral attributes checkFile then
+                if isLiteral attributes then
                     match pattern with
                         | SynPat.Named(_, identifier, _, _, _) -> 
                             CheckIdentifiers.checkLiteral visitorInfo astNode identifier

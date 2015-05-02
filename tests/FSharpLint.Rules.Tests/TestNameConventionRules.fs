@@ -199,6 +199,16 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
+    member this.AbstractClassNameDoesNotBeginWithI() = 
+        this.Parse """
+module program
+  [<AbstractClass>]
+  type Printable() =
+    abstract member Print : unit -> unit"""
+
+        Assert.IsFalse(this.ErrorExistsAt(6, 7))
+
+    [<Test>]
     member this.InterfaceNameDoesNotBeginWithISuppressed() = 
         this.Parse """
 module Program

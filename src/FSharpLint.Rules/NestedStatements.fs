@@ -71,7 +71,7 @@ module NestedStatements =
                 | _ -> 
                     Some(visitor (depth + 1) visitorInfo checkFile))
     
-    let rec visitor depth (visitorInfo:VisitorInfo) (checkFile:FSharpCheckFileResults) astNode = 
+    let rec visitor depth (visitorInfo:VisitorInfo) checkFile astNode = 
         match astNode.Node with
             | AstNode.Binding(SynBinding.Binding(_))
             | AstNode.Expression(SynExpr.Lambda(_))

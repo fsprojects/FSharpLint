@@ -136,7 +136,7 @@ module HintMatcher =
                 LambdaArguments: Map<char, string>
                 Expression: SynExpr
                 Hint: Expression
-                FSharpCheckFileResults: FSharpCheckFileResults
+                FSharpCheckFileResults: FSharpCheckFileResults option
             }
 
             with 
@@ -172,16 +172,20 @@ module HintMatcher =
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
             match (leftExpr, opExpr) with 
                 | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
-                    let symbolUse = 
-                        arguments.FSharpCheckFileResults.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                            |> Async.RunSynchronously
+                    // TODO
+                    match arguments.FSharpCheckFileResults with
+                        | Some(checkFile) ->
+                            let symbolUse = 
+                                checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                                    |> Async.RunSynchronously
                                     
-                    match symbolUse with
-                        | Some(symbolUse) ->
-                            match symbolUse.Symbol with
-                                | :? FSharpParameter -> false
-                                | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
-                                | _ -> true
+                            match symbolUse with
+                                | Some(symbolUse) ->
+                                    match symbolUse.Symbol with
+                                        | :? FSharpParameter -> false
+                                        | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
+                                        | _ -> true
+                                | None -> true
                         | None -> true
                 | _ -> true
 
@@ -523,7 +527,7 @@ module HintMatcher =
 
         visitorInfo.PostError range error
 
-    let visitor getHints visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) = 
+    let visitor getHints visitorInfo checkFile (astNode:CurrentNode) = 
         if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
                 | AstNode.Expression(SynExpr.Paren(_)) -> Continue

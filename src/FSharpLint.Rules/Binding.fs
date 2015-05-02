@@ -36,7 +36,7 @@ module Binding =
     type VisitorParameters =
         {
             VisitorInfo: VisitorInfo
-            CheckFile: FSharpCheckFileResults
+            CheckFile: FSharpCheckFileResults option
             AstNode: CurrentNode
         }
             
@@ -87,8 +87,12 @@ module Binding =
                 | SynExpr.Ident(ident) ->
                     let isSymbolMutable (ident:Ident) =
                         let symbol =
-                            visitorParameters.CheckFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                                |> Async.RunSynchronously
+                            // TODO
+                            match visitorParameters.CheckFile with
+                                | Some(checkFile) ->
+                                    checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                                        |> Async.RunSynchronously
+                                | None -> None
 
                         let isMutable (symbol:FSharpSymbolUse) = 
                             (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable

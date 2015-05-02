@@ -118,13 +118,13 @@ module AstInfo =
                 | None when valInfo.ArgInfos.Length = 0 -> Value
                 | None -> Function
     
-    let identifierType (identifier:LongIdent) (checkFile:FSharpCheckFileResults) valData =
+    let identifierType (identifier:LongIdent) checkFile valData =
         match identifierTypeFromValData valData with
             | Value -> 
-                if isValue identifier checkFile then
+                //if isValue identifier checkFile then
                     Value
-                else
-                    Other
+                //else
+                  //  Other
             | identifierType -> identifierType
 
     let operatorIdentifiers = [
