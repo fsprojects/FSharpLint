@@ -124,10 +124,10 @@ module RunLint =
 
             ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
-    let getParseInfoForFileInProject checker projectOptions file =
+    let getParseInfoForFileInProject checker projectOptions checkFile file =
         let input = System.IO.File.ReadAllText(file)
 
-        Ast.parseFileInProject checker projectOptions file input
+        Ast.parseFileInProject checker projectOptions file checkFile input
 
     /// Provides information for controlling the parse of a project.
     type ProjectParseInfo =
@@ -172,7 +172,7 @@ module RunLint =
 
                         projectFileInfo.CompileFiles
                             |> Seq.filter (shouldFileBeIgnored >> not)
-                            |> Seq.map (getParseInfoForFileInProject checker projectOptions)
+                            |> Seq.map (getParseInfoForFileInProject checker projectOptions config.UseTypeChecker)
                             |> Seq.iter (lintFile lintInformation)
                 
                         Success
@@ -199,7 +199,7 @@ module RunLint =
                 ReportLinterProgress = ignore
             }
 
-        let parsedFileInformation = Ast.parseFile pathToFile input
+        let parsedFileInformation = Ast.parseFile pathToFile lintInformation.Configuration.UseTypeChecker input
 
         lintFile lintInformation parsedFileInformation
         
@@ -214,6 +214,6 @@ module RunLint =
                 ReportLinterProgress = ignore
             }
 
-        let parsedFileInformation = Ast.parseInput input
+        let parsedFileInformation = Ast.parseInput lintInformation.Configuration.UseTypeChecker input
 
         lintFile lintInformation parsedFileInformation

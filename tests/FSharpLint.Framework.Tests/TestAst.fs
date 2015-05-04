@@ -198,6 +198,6 @@ module Foo =
 [<SuppressMessage("Analyser", "Rule")>]
 let dog = ()"""
 
-        let parseInfo = parseInput input
+        let parseInfo = parseInput false input
 
         Assert.AreEqual(4, getSuppressMessageAttributesFromAst parseInfo.Ast |> List.length)

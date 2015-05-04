@@ -112,11 +112,11 @@ let a = List.iter (fun x -> ()) []"""
 
     [<Test>]
     member this.UslessBinding() = 
-        this.Parse """
+        this.Parse("""
 module Program
 
 let a = 10
-let a = a"""
+let a = a""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
@@ -153,11 +153,11 @@ let a = a"""
 
     [<Test>]
     member this.UslessBindingWithParens() = 
-        this.Parse """
+        this.Parse("""
 module Program
 
 let a = 10
-let ((a)) = ((a))"""
+let ((a)) = ((a))""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
         

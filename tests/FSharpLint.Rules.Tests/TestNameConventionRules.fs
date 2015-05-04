@@ -1079,12 +1079,12 @@ let Dog = 6"""
                 
     [<Test>]
     member this.CamelCaseTypeAbbreviationOfLiteral() =
-        this.Parse """
+        this.Parse("""
 module program
 
 type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
-let dog = 6"""
+let dog = 6""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(7, 4))
