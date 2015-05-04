@@ -257,7 +257,6 @@ module NameConventions =
             | AstNode.Pattern(pattern) ->
                 match pattern with
                     | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        //if isValue longIdentifier.Lid checkFile then
                         CheckIdentifiers.checkNonPublicValue visitorInfo astNode longIdentifier.Lid.Head
                     | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                         CheckIdentifiers.checkParameter visitorInfo astNode identifier
@@ -286,6 +285,29 @@ module NameConventions =
                                 Some(visitor visitorInfo checkFile)
 
                     ContinueWithVisitorsForChildren(getVisitorForChild)
+            | AstNode.Match(SynMatchClause.Clause(_, _, _, _, _)) -> 
+                let getVisitorForChild i child =
+                    match child with
+                        | Pattern(_) ->
+                            Some(matchClausePatternVisitor visitorInfo checkFile)
+                        | _ -> 
+                            Some(visitor visitorInfo checkFile)
+
+                ContinueWithVisitorsForChildren(getVisitorForChild)
+            | _ -> Continue
+    and matchClausePatternVisitor visitorInfo checkFile astNode = 
+        match astNode.Node with
+            | AstNode.Pattern(SynPat.Named(_, identifier, isThis, _, _)) when not isThis -> 
+                CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
+                Continue
+            | AstNode.Pattern(SynPat.LongIdent(longIdentifier, _, _, _, _, _)) ->
+                // Don't bother checking for camelCase as F# will warn for PascalCase
+                // in patterns outside of bindings
+                let identifier = longIdentifier.Lid.Head
+                if not <| isOperator identifier.idText then
+                    expectNoUnderscore visitorInfo.PostError identifier
+                        
+                Continue
             | _ -> Continue
     and 
         bindingPatternVisitor visitorInfo checkFile valData astNode = 
@@ -295,7 +317,7 @@ module NameConventions =
                         | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
                             let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-                            match identifierType longIdentifier.Lid checkFile valData with
+                            match identifierTypeFromValData valData with
                                 | Value | Function when isActivePattern lastIdent ->
                                     CheckIdentifiers.checkActivePattern visitorInfo astNode lastIdent
                                     Continue

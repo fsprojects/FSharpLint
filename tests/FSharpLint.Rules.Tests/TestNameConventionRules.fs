@@ -437,16 +437,6 @@ module program
     | _ -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(8, 6))
-
-    [<Test>]
-    member this.VariablePatternMatchIsPascalCase() = 
-        this.Parse """
-module program
-  let main = 
-    match true with
-    | Dog -> ()"""
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 6))
         
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 
