@@ -185,12 +185,38 @@ module NameConventions =
     let isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
-    let isLiteral (attributes:SynAttributes) = 
-        let isLiteralAttribute (attribute:SynAttribute) =
-            let name = attribute.TypeName.Lid |> List.rev |> List.head
+    let isLiteral (attributes:SynAttributes) (checkFile:FSharpCheckFileResults option) = 
+        match checkFile with
+            | Some(checkFile) ->
+                let isLiteralAttribute (attribute:SynAttribute) =
+                    let range = attribute.TypeName.Range
+                    let names = attribute.TypeName.Lid |> List.map (fun x -> x.idText)
+                    let symbol = checkFile.GetSymbolUseAtLocation(range.EndLine + 1, range.EndColumn, "", names)
+                                    |> Async.RunSynchronously
+                    match symbol with
+                        | Some(symbol) -> 
+                            match symbol.Symbol with
+                                | :? FSharpEntity as entity when 
+                                        entity.IsFSharpAbbreviation &&
+                                        entity.AbbreviatedType.TypeDefinition.DisplayName = "LiteralAttribute" -> 
+                                    match entity.AbbreviatedType.TypeDefinition.Namespace with
+                                        | Some(name) when name.EndsWith("FSharp.Core") -> true
+                                        | _ -> false
+                                | :? FSharpEntity as entity when 
+                                        entity.IsClass && entity.DisplayName = "LiteralAttribute" -> 
+                                    match entity.Namespace with
+                                        | Some(name) when name.EndsWith("FSharp.Core") -> true
+                                        | _ -> false
+                                | _ -> false
+                        | _ -> false
 
-            name.idText = "LiteralAttribute" || name.idText = "Literal"
-        attributes |> List.exists isLiteralAttribute
+                attributes |> List.exists isLiteralAttribute
+            | None ->
+                let isLiteralAttribute (attribute:SynAttribute) =
+                    let name = attribute.TypeName.Lid |> List.rev |> List.head
+
+                    name.idText = "LiteralAttribute" || name.idText = "Literal"
+                attributes |> List.exists isLiteralAttribute
 
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
@@ -269,7 +295,7 @@ module NameConventions =
                     | _ -> ()
                 Continue
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-                if isLiteral attributes then
+                if isLiteral attributes checkFile then
                     match pattern with
                         | SynPat.Named(_, identifier, _, _, _) -> 
                             CheckIdentifiers.checkLiteral visitorInfo astNode identifier
