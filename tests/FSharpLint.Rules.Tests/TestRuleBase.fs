@@ -26,6 +26,7 @@ open FSharpLint.Framework.LoadVisitors
 
 let emptyConfig =
     {
+        UseTypeChecker = false
         IgnoreFiles = { Files = []; Update = IgnoreFiles.IgnoreFilesUpdate.Add }
         Analysers =
             Map.ofList 
@@ -46,23 +47,35 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
     let config = 
         match analysers with
-            | Some(analysers) -> { IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }; Analysers = analysers }
+            | Some(analysers) -> 
+                { 
+                    UseTypeChecker = false
+                    IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }
+                    Analysers = analysers 
+                }
             | None -> emptyConfig
 
-    member this.Parse(input, ?overrideAnalysers) = 
+    member this.Parse(input:string, ?overrideAnalysers, ?checkInput) = 
         let config =
             match overrideAnalysers with
-                | Some(overrideAnalysers) -> { IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }; Analysers = overrideAnalysers }
+                | Some(overrideAnalysers) -> 
+                    { 
+                        UseTypeChecker = false
+                        IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }
+                        Analysers = overrideAnalysers 
+                    }
                 | None -> config
 
         let visitorInfo = { PostError = postError; Config = config }
 
+        let checkInput = match checkInput with | Some(x) -> x | None -> false
+
         match analyser with
             | Ast(visitor) ->
-                let parseInfo = parseInput input
+                let parseInfo = { parseInput checkInput input with CheckFiles = checkInput }
                 parse (fun _ -> false) parseInfo [visitor visitorInfo] |> ignore
             | PlainText(visitor) -> 
-                let parseInfo = parseInput input
+                let parseInfo = parseInput checkInput input
                 let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
                 visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
 

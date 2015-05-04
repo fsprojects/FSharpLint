@@ -199,6 +199,16 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
+    member this.AbstractClassNameDoesNotBeginWithI() = 
+        this.Parse """
+module program
+  [<AbstractClass>]
+  type Printable() =
+    abstract member Print : unit -> unit"""
+
+        Assert.IsFalse(this.ErrorExistsAt(6, 7))
+
+    [<Test>]
     member this.InterfaceNameDoesNotBeginWithISuppressed() = 
         this.Parse """
 module Program
@@ -427,16 +437,6 @@ module program
     | _ -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(8, 6))
-
-    [<Test>]
-    member this.VariablePatternMatchIsPascalCase() = 
-        this.Parse """
-module program
-  let main = 
-    match true with
-    | Dog -> ()"""
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 6))
         
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 
@@ -1079,12 +1079,12 @@ let Dog = 6"""
                 
     [<Test>]
     member this.CamelCaseTypeAbbreviationOfLiteral() =
-        this.Parse """
+        this.Parse("""
 module program
 
 type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
-let dog = 6"""
+let dog = 6""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(7, 4))

@@ -30,7 +30,7 @@ module TestFakeTask =
 
         let buildFile =
             if Fake.EnvironmentHelper.isMono then
-               System.IO.FileInfo(Path.Combine(workingDirectory, "testLintViaFake.fsx")).FullName
+                System.IO.FileInfo(Path.Combine(workingDirectory, "testLintViaFake.fsx")).FullName
             else
                 "testLintViaFake.fsx"
 

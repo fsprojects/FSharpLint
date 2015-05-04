@@ -136,7 +136,8 @@ module HintMatcher =
                 LambdaArguments: Map<char, string>
                 Expression: SynExpr
                 Hint: Expression
-                FSharpCheckFileResults: FSharpCheckFileResults
+                FSharpCheckFileResults: FSharpCheckFileResults option
+                Breadcrumbs: AstNode list
             }
 
             with 
@@ -172,17 +173,23 @@ module HintMatcher =
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
             match (leftExpr, opExpr) with 
                 | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
-                    let symbolUse = 
-                        arguments.FSharpCheckFileResults.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                            |> Async.RunSynchronously
+                    match arguments.FSharpCheckFileResults with
+                        | Some(checkFile) ->
+                            let symbolUse = 
+                                checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                                    |> Async.RunSynchronously
                                     
-                    match symbolUse with
-                        | Some(symbolUse) ->
-                            match symbolUse.Symbol with
-                                | :? FSharpParameter -> false
-                                | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
+                            match symbolUse with
+                                | Some(symbolUse) ->
+                                    match symbolUse.Symbol with
+                                        | :? FSharpParameter -> false
+                                        | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
+                                        | _ -> true
+                                | None -> true
+                        | None -> 
+                            match arguments.Breadcrumbs with
+                                | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> false
                                 | _ -> true
-                        | None -> true
                 | _ -> true
 
         let rec matchHintExpr arguments =
@@ -523,7 +530,7 @@ module HintMatcher =
 
         visitorInfo.PostError range error
 
-    let visitor getHints visitorInfo (checkFile:FSharpCheckFileResults) (astNode:CurrentNode) = 
+    let visitor getHints visitorInfo checkFile (astNode:CurrentNode) = 
         if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
                 | AstNode.Expression(SynExpr.Paren(_)) -> Continue
@@ -535,6 +542,7 @@ module HintMatcher =
                                 MatchExpression.Expression = expr
                                 MatchExpression.Hint = hint.Match
                                 MatchExpression.FSharpCheckFileResults = checkFile
+                                MatchExpression.Breadcrumbs = astNode.Breadcrumbs
                             }
 
                         if MatchExpression.matchHintExpr arguments then

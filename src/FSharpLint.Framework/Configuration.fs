@@ -160,6 +160,7 @@ module Configuration =
 
     type Configuration =
         {
+            UseTypeChecker: bool
             IgnoreFiles: IgnoreFiles.IgnoreFilesConfig
             Analysers: Map<string, Analyser>
         }
@@ -205,12 +206,19 @@ module Configuration =
 
         (analyser.Name.LocalName, analyserDetails)
 
+    let private getUseTypeChecker (config:XElement) =
+        match config.ElementByLocalName("UseTypeChecker") with
+            | None -> false
+            | Some(element) -> element.Value.ToUpperInvariant() = "TRUE"
+        
     /// Parse a configuration file.
     let configuration (file:string) = 
         use configReader = new System.IO.StringReader(file)
         let config = XDocument.Load(configReader).Root
 
         {
+            UseTypeChecker = getUseTypeChecker config
+
             IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
 
             Analysers = 
@@ -255,6 +263,8 @@ module Configuration =
         let combineIgnoreFiles () = List.concat [newConfig.IgnoreFiles.Files; configToOverride.IgnoreFiles.Files]
 
         {
+            UseTypeChecker = newConfig.UseTypeChecker
+
             IgnoreFiles = 
                 match newConfig.IgnoreFiles.Update with
                     | IgnoreFiles.Overwrite -> newConfig.IgnoreFiles 
