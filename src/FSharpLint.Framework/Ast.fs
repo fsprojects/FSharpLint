@@ -557,15 +557,20 @@ module Ast =
             Input: string
             Ast: ParsedInput
             FileParseResults: FSharpParseFileResults
+            CheckFiles: bool
         }
 
     exception CheckFileException of string
 
     /// Parse a file.
     let parse finishEarly parseInfo visitors =
-        let checkFileResults = None
-//parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
-  //              |> Async.RunSynchronously
+        let checkFileResults = 
+            if parseInfo.CheckFiles then
+                parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
+                     |> Async.RunSynchronously
+                     |> Some
+            else
+                None
 
         match checkFileResults with
             | Some(FSharpCheckFileAnswer.Succeeded(res)) -> 
@@ -595,6 +600,7 @@ module Ast =
                     Input = input
                     Ast = ast
                     FileParseResults = results
+                    CheckFiles = false
                 }
             | None -> 
                 let errorMessages = 

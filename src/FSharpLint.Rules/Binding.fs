@@ -74,39 +74,37 @@ module Binding =
         let isEnabled =
             "UselessBinding" |> isRuleEnabled visitorParameters.VisitorInfo.Config &&
             visitorParameters.AstNode.IsSuppressed(AnalyserName, "UselessBinding") |> not
+            
+        match visitorParameters.CheckFile with
+            | Some(checkFile) when isEnabled ->
+                let rec findBindingIdentifier = function
+                    | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
+                    | SynPat.Named(_, ident, _, _, _) -> Some(ident)
+                    | _ -> None
 
-        if isEnabled then
-            let rec findBindingIdentifier = function
-                | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
-                | SynPat.Named(_, ident, _, _, _) -> Some(ident)
-                | _ -> None
+                let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
+                    | SynExpr.Paren(expr, _, _, _) -> 
+                        exprIdentMatchesBindingIdent bindingIdent expr
+                    | SynExpr.Ident(ident) ->
+                        let isSymbolMutable (ident:Ident) =
+                            let symbol =
+                                checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                                    |> Async.RunSynchronously
 
-            let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
-                | SynExpr.Paren(expr, _, _, _) -> 
-                    exprIdentMatchesBindingIdent bindingIdent expr
-                | SynExpr.Ident(ident) ->
-                    let isSymbolMutable (ident:Ident) =
-                        let symbol =
-                            // TODO
-                            match visitorParameters.CheckFile with
-                                | Some(checkFile) ->
-                                    checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                                        |> Async.RunSynchronously
-                                | None -> None
+                            let isMutable (symbol:FSharpSymbolUse) = 
+                                (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
 
-                        let isMutable (symbol:FSharpSymbolUse) = 
-                            (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
+                            symbol |> Option.exists isMutable
 
-                        symbol |> Option.exists isMutable
+                        ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
+                    | _ -> false
 
-                    ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
-                | _ -> false
-                
-            findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
-                if exprIdentMatchesBindingIdent bindingIdent expr then
-                    visitorParameters.VisitorInfo.PostError 
-                        range 
-                        (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
+                findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
+                    if exprIdentMatchesBindingIdent bindingIdent expr then
+                        visitorParameters.VisitorInfo.PostError 
+                            range 
+                            (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
+             | _ -> ()              
 
     let checkTupleOfWildcards visitorParameters pattern identifier =
         let isEnabled =

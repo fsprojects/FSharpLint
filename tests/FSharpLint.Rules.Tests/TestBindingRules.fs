@@ -129,7 +129,6 @@ let mutable a = 10
 let a = a"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
-        ()
 
     [<Test>]
     member this.NotUslessBindingAsShadowingImmutableWithMutable() = 

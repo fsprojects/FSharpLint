@@ -137,6 +137,7 @@ module HintMatcher =
                 Expression: SynExpr
                 Hint: Expression
                 FSharpCheckFileResults: FSharpCheckFileResults option
+                Breadcrumbs: AstNode list
             }
 
             with 
@@ -172,7 +173,6 @@ module HintMatcher =
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
             match (leftExpr, opExpr) with 
                 | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
-                    // TODO
                     match arguments.FSharpCheckFileResults with
                         | Some(checkFile) ->
                             let symbolUse = 
@@ -186,7 +186,10 @@ module HintMatcher =
                                         | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                                         | _ -> true
                                 | None -> true
-                        | None -> true
+                        | None -> 
+                            match arguments.Breadcrumbs with
+                                | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> false
+                                | _ -> true
                 | _ -> true
 
         let rec matchHintExpr arguments =
@@ -539,6 +542,7 @@ module HintMatcher =
                                 MatchExpression.Expression = expr
                                 MatchExpression.Hint = hint.Match
                                 MatchExpression.FSharpCheckFileResults = checkFile
+                                MatchExpression.Breadcrumbs = astNode.Breadcrumbs
                             }
 
                         if MatchExpression.matchHintExpr arguments then
