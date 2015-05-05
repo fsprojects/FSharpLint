@@ -45,18 +45,21 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="ErrorHandling.fsi" />
     <Compile Include="ErrorHandling.fs" />
     <Compile Include="ProjectFile.fsi" />
     <Compile Include="ProjectFile.fs" />
     <Compile Include="RunLint.fsi" />
     <Compile Include="RunLint.fs" />
+    <Compile Include="FSharpLintWorker.fsi" />
     <Compile Include="FSharpLintWorker.fs" />
+    <Compile Include="AppDomainWorker.fsi" />
     <Compile Include="AppDomainWorker.fs" />
-    <None Include="packages.config" />
-    <None Include="app.config" />
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
+    <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">

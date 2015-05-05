@@ -24,24 +24,12 @@ module ErrorHandling =
     open System
     open Microsoft.FSharp.Compiler.Range
 
-    let getErrorMessage (range:range) =
-        let error = FSharpLint.Framework.Resources.GetString("LintError")
-        System.String.Format(error, range.FileName, range.StartLine, range.StartColumn)
+    val getErrorMessage: range:range -> string
 
     /// Generates error reporting information on where in a file an error has occured.
-    let errorInfoLine getErrorMessage (range:range) (input:string) =
-        let errorenousLine = input.Split('\n').[range.StartLine - 1].TrimEnd('\r')
-        let highlightColumnLine = 
-            if String.length errorenousLine = 0 then
-                "^"
-            else
-                errorenousLine 
-                    |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")
-                    |> Seq.reduce (+)
+    val errorInfoLine: getErrorMessage:(range -> string) -> range:range -> input:string -> string
 
-        (getErrorMessage range) + Environment.NewLine + errorenousLine + Environment.NewLine + highlightColumnLine
-
-    let getCompleteErrorText = errorInfoLine getErrorMessage
+    val getCompleteErrorText: (range -> string -> string)
 
     type Error =
         {
