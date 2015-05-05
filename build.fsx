@@ -26,7 +26,7 @@ let summary = "Lint tool for F#."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.1.16"
+let version = "0.2.0"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -121,6 +121,7 @@ Target "CreatePackage" (fun _ ->
                 [
                     (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
                     (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}src{0}FSharpLint.Worker{0}bin{0}Release{0}FSharpLint.Worker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
