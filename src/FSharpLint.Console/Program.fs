@@ -50,8 +50,8 @@ module Program =
 
         let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
 
-        let error = System.Action<ErrorHandling.Error>(fun error -> 
-            let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
+        let error = System.Action<LintWarning.Warning>(fun error -> 
+            let output = error.Info + System.Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
             System.Console.WriteLine(output))
 
         let parseInfo: RunLint.ProjectParseInfo =
@@ -64,8 +64,8 @@ module Program =
 
         RunLint.parseProject parseInfo
 
-    let private reportError = System.Action<ErrorHandling.Error>(fun error -> 
-        let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
+    let private reportError = System.Action<LintWarning.Warning>(fun error -> 
+        let output = error.Info + System.Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
         System.Console.WriteLine(output))
 
     let private runLintOnProject projectFile =
@@ -91,8 +91,8 @@ module Program =
             let error = FSharpLint.Framework.Resources.GetString("LintSourceError")
             System.String.Format(error, range.StartLine, range.StartColumn)
 
-        let reportError = System.Action<ErrorHandling.Error>(fun error -> 
-            let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine getErrorMessage error.Range error.Input
+        let reportError = System.Action<LintWarning.Warning>(fun error -> 
+            let output = error.Info + System.Environment.NewLine + LintWarning.warningInfoLine getErrorMessage error.Range error.Input
             System.Console.WriteLine(output))
 
         RunLint.parseInput source reportError
