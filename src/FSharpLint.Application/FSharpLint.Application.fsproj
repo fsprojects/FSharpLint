@@ -45,8 +45,8 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="ErrorHandling.fsi" />
-    <Compile Include="ErrorHandling.fs" />
+    <Compile Include="LintWarning.fsi" />
+    <Compile Include="LintWarning.fs" />
     <Compile Include="ProjectFile.fsi" />
     <Compile Include="ProjectFile.fs" />
     <Compile Include="RunLint.fsi" />

@@ -18,25 +18,28 @@
 
 namespace FSharpLint.Application
 
-/// Contains the functionality for reporting lint errors.
-module ErrorHandling =
+/// Contains functionality to help report lint warnings.
+module LintWarning =
 
-    open System
     open Microsoft.FSharp.Compiler.Range
 
-    val getErrorMessage: range:range -> string
+    /// Gets a message stating where a lint warning occured.
+    val getWarningMessage : range -> string
+    
+    /// Generates a message including highlighting where in the code the warning was found.
+    val warningInfoLine : getErrorMessage:(range -> string) -> range -> input:string -> string
 
-    /// Generates error reporting information on where in a file an error has occured.
-    val errorInfoLine: getErrorMessage:(range -> string) -> range:range -> input:string -> string
+    /// Generates a message including highlighting where in the code the warning was found along with
+    /// stating the location of where the warning occurred. (warningInfoLine and getWarningMessage) combined.
+    val getWarningWithLocation : (range -> string -> string)
 
-    val getCompleteErrorText: (range -> string -> string)
-
-    type Error =
+    /// A lint warning - information on where a lint rule was found to be broken.
+    type Warning =
         {
-            /// Description of the error.
+            /// Warning to display to the user.
             Info: string
 
-            /// Where the error was found.
+            /// Location of the warning.
             Range: range
 
             /// Entire input file, needed to display where in the file the error occurred.

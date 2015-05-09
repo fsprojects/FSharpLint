@@ -34,18 +34,18 @@ module FSharpLintWorker =
                                 EndColumn = range.EndColumn,
                                 FileName = range.FileName)
                         
-    let private toWorkerError (error:ErrorHandling.Error) = 
-        FSharpLint.Worker.Error(Info = error.Info,
-                                Range = toWorkerRange error.Range,
-                                Input = error.Input,
-                                FormattedError = ErrorHandling.getCompleteErrorText error.Range error.Input)
+    let private toWorkerWarning (warning:LintWarning.Warning) = 
+        FSharpLint.Worker.Error(Info = warning.Info,
+                                Range = toWorkerRange warning.Range,
+                                Input = warning.Input,
+                                FormattedError = LintWarning.getWarningWithLocation warning.Range warning.Input)
 
     type FSharpLintWorker() = 
         inherit System.MarshalByRefObject()
 
         let errorReceivedEvent = DelegateEvent<FSharpLint.Worker.ErrorReceivedEventHandler>()
 
-        let receivedError error = errorReceivedEvent.Trigger [| toWorkerError error |]
+        let receivedError error = errorReceivedEvent.Trigger [| toWorkerWarning error |]
 
         let reportProgressEvent = DelegateEvent<FSharpLint.Worker.ReportProgressEventHandler>()
 

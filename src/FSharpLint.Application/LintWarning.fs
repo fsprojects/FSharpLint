@@ -18,18 +18,19 @@
 
 namespace FSharpLint.Application
 
-/// Contains the functionality for reporting lint errors.
-module ErrorHandling =
+/// Contains functionality to help report lint warnings.
+module LintWarning =
 
     open System
     open Microsoft.FSharp.Compiler.Range
-
-    let getErrorMessage (range:range) =
+    
+    /// Gets a message stating where a lint warning occured.
+    let getWarningMessage (range:range) =
         let error = FSharpLint.Framework.Resources.GetString("LintError")
         System.String.Format(error, range.FileName, range.StartLine, range.StartColumn)
 
-    /// Generates error reporting information on where in a file an error has occured.
-    let errorInfoLine getErrorMessage (range:range) (input:string) =
+    /// Generates a message including highlighting where in the code the warning was found.
+    let warningInfoLine getErrorMessage (range:range) (input:string) =
         let errorenousLine = input.Split('\n').[range.StartLine - 1].TrimEnd('\r')
         let highlightColumnLine = 
             if String.length errorenousLine = 0 then
@@ -40,15 +41,18 @@ module ErrorHandling =
                     |> Seq.reduce (+)
 
         (getErrorMessage range) + Environment.NewLine + errorenousLine + Environment.NewLine + highlightColumnLine
-
-    let getCompleteErrorText = errorInfoLine getErrorMessage
-
-    type Error =
+        
+    /// Generates a message including highlighting where in the code the warning was found along with
+    /// stating the location of where the warning occurred. `warningInfoLine` and `getWarningMessage` combined.
+    let getWarningWithLocation = warningInfoLine getWarningMessage
+    
+    /// A lint warning - information on where a lint rule was found to be broken.
+    type Warning =
         {
-            /// Description of the error.
+            /// Warning to display to the user.
             Info: string
-
-            /// Where the error was found.
+            
+            /// Location of the warning.
             Range: range
 
             /// Entire input file, needed to display where in the file the error occurred.

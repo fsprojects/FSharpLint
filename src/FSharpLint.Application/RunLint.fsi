@@ -51,14 +51,14 @@ module RunLint =
             Progress: System.Action<ParserProgress>
 
             /// Callback that's called when a lint error is detected.
-            ErrorReceived: System.Action<ErrorHandling.Error>
+            ErrorReceived: System.Action<LintWarning.Warning>
         }
         
     /// Parses and runs the linter on all the files in a project.
     val parseProject : projectInformation: ProjectParseInfo -> Result
         
     /// Parses and runs the linter on a single file.
-    val parseFile : pathToFile: string -> errorReceived: System.Action<ErrorHandling.Error> -> unit
+    val parseFile : pathToFile: string -> errorReceived: System.Action<LintWarning.Warning> -> unit
         
     /// Parses and runs the linter on a string.
-    val parseInput : input: string -> errorReceived: System.Action<ErrorHandling.Error> -> unit
+    val parseInput : input: string -> errorReceived: System.Action<LintWarning.Warning> -> unit

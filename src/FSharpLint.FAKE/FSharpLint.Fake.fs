@@ -41,7 +41,7 @@ open System
 /// ## Sample usage
 ///
 ///     Target "Lint" (fun _ ->
-///         FSharpLint (fun o -> { o with ErrorReceived = System.Action<ErrorHandling.Error>(customErrorFunction) }) projectFile
+///         FSharpLint (fun o -> { o with ErrorReceived = System.Action<LintWarning.Error>(customErrorFunction) }) projectFile
 ///     )
 let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     let parameters = defaultLintOptions |> setParams

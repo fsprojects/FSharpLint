@@ -70,7 +70,7 @@ module RunLint =
     type LintInfo =
         {
             FinishEarly: unit -> bool
-            ErrorReceived: ErrorHandling.Error -> unit
+            ErrorReceived: LintWarning.Warning -> unit
             ReportLinterProgress: ParserProgress -> unit
             RulePlugins: LoadVisitors.VisitorPlugin list
             Configuration: Configuration.Configuration
@@ -80,9 +80,9 @@ module RunLint =
         if not <| lintInfo.FinishEarly() then
             let postError range error =
                 {
-                    ErrorHandling.Info = error
-                    ErrorHandling.Range = range
-                    ErrorHandling.Input = parsedFileInfo.Input
+                    LintWarning.Info = error
+                    LintWarning.Range = range
+                    LintWarning.Input = parsedFileInfo.Input
                 } |> lintInfo.ErrorReceived
 
             let visitorInfo = 
@@ -142,7 +142,7 @@ module RunLint =
             Progress: System.Action<ParserProgress>
 
             /// Callback that's called when a lint error is detected.
-            ErrorReceived: System.Action<ErrorHandling.Error>
+            ErrorReceived: System.Action<LintWarning.Warning>
         }
 
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -187,7 +187,7 @@ module RunLint =
     let internal neverFinishEarly _ = false
         
     /// Parses and runs the linter on a single file.
-    let parseFile pathToFile (errorReceived:System.Action<ErrorHandling.Error>) =
+    let parseFile pathToFile (errorReceived:System.Action<LintWarning.Warning>) =
         let input = System.IO.File.ReadAllText(pathToFile)
 
         let lintInformation =
@@ -204,7 +204,7 @@ module RunLint =
         lintFile lintInformation parsedFileInformation
         
     /// Parses and runs the linter on a string.
-    let parseInput input (errorReceived:System.Action<ErrorHandling.Error>) =
+    let parseInput input (errorReceived:System.Action<LintWarning.Warning>) =
         let lintInformation =
             {
                 Configuration = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
