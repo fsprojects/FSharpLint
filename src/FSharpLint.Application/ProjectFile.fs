@@ -60,7 +60,8 @@ module ProjectFile =
     /// e.g. if the project directory is C:\User\Matt\Project then a config file found in 
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     let private overideDefaultConfig projectFilePath defaultConfig checkConfig =
-        let subdirectories = getParentDirectories projectFilePath |> List.map (fun x -> x.FullName)
+        let projectFileDirectory = Path.GetDirectoryName projectFilePath
+        let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
 
         let rec loadAllConfigs configToOveride = function
             | path::paths ->
