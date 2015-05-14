@@ -82,6 +82,6 @@ module ParseFile =
         
     /// Parses source code using `FSharp.Compiler.Services`.
     let parseSource source configuration =
-        let file = "dog.fsx"
+        let file = "/home/user/Dog.test.fsx"
         
         parse configuration file source
