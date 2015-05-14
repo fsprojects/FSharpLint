@@ -47,8 +47,6 @@
   <ItemGroup>
     <Compile Include="LintWarning.fsi" />
     <Compile Include="LintWarning.fs" />
-    <Compile Include="ProjectFile.fsi" />
-    <Compile Include="ProjectFile.fs" />
     <Compile Include="RunLint.fsi" />
     <Compile Include="RunLint.fs" />
     <Compile Include="FSharpLintWorker.fsi" />

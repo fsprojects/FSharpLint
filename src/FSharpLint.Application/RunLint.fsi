@@ -21,6 +21,8 @@ namespace FSharpLint.Application
 /// Runs the lint on an entire project using a .fsproj file.
 module RunLint =
 
+    open FSharpLint.Framework
+
     /// Provides information on what the linter is currently doing.
     type ParserProgress =
         /// Started parsing a file.
@@ -34,9 +36,19 @@ module RunLint =
 
         member Filename : unit -> string
 
-    type Result = 
-        | Success
-        | Failure of ProjectFile.Error
+    type LintFailure =
+        | ProjectFileCouldNotBeFound of string
+        | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | UnableToFindProjectOutputPath of string
+        | UnableToFindReferencedProject of string
+        | FailedToLoadConfig of string
+        | RunTimeConfigError
+        | FailedToParseFile of ParseFile.ParseFileFailure
+        | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
+        
+    type Result<'t> = 
+        | Success of 't
+        | Failure of LintFailure
 
     /// Provides information for controlling the parse of a project.
     type ProjectParseInfo =
@@ -55,10 +67,10 @@ module RunLint =
         }
         
     /// Parses and runs the linter on all the files in a project.
-    val parseProject : projectInformation: ProjectParseInfo -> Result
+    val parseProject : projectInformation: ProjectParseInfo -> Result<unit>
         
     /// Parses and runs the linter on a single file.
-    val parseFile : pathToFile: string -> errorReceived: System.Action<LintWarning.Warning> -> unit
+    val parseFile : pathToFile: string -> (System.Action<LintWarning.Warning> -> Result<unit>)
         
     /// Parses and runs the linter on a string.
-    val parseInput : input: string -> errorReceived: System.Action<LintWarning.Warning> -> unit
+    val parseInput : input: string -> (System.Action<LintWarning.Warning> -> Result<unit>)

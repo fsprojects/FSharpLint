@@ -93,7 +93,7 @@ module Configuration =
 
             let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
                 match remainingPath with
-                    | currentSegment::[] when isDirectory -> false 
+                    | [currentSegment] when isDirectory -> false 
                     | currentSegment::remaining -> 
                         let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 

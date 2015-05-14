@@ -52,6 +52,7 @@
     <Compile Include="HintParser.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="ExpressionUtilities.fs" />
+    <Compile Include="ParseFile.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <None Include="packages.config" />

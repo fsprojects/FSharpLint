@@ -23,6 +23,7 @@ open Microsoft.FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
+open FSharpLint.Framework.ParseFile
 
 let emptyConfig =
     {
@@ -66,18 +67,19 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
                     }
                 | None -> config
 
-        let visitorInfo = { PostError = postError; Config = config }
-
         let checkInput = match checkInput with | Some(x) -> x | None -> false
 
-        match analyser with
-            | Ast(visitor) ->
-                let parseInfo = { parseInput checkInput input with CheckFiles = checkInput }
-                parse (fun _ -> false) parseInfo [visitor visitorInfo] |> ignore
-            | PlainText(visitor) -> 
-                let parseInfo = parseInput checkInput input
+        let config = { config with UseTypeChecker = checkInput }
+
+        let visitorInfo = { Config = config; PostError = postError }
+        
+        match parseSource input config, analyser with
+            | Success(parseInfo), Ast(visitor) ->
+                lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
+            | Success(parseInfo), PlainText(visitor) -> 
                 let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
                 visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
+            | _ -> failwith "Failed to parse input."
 
     member this.ErrorExistsAt(startLine, startColumn) =
         errorRanges

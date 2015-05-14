@@ -395,6 +395,8 @@ module Ast =
             /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
             Breadcrumbs: AstNode list
 
+            /// Suppressed message attributes that have been applied to the block of code 
+            /// the current node is within.
             SuppressedMessages: (SuppressedMessage * range) list
         }
 
@@ -464,6 +466,8 @@ module Ast =
 
         walk rootNode (getSuppressMessageAttributes rootNode)
 
+    /// Gets all the attributes used to suppress lint warnings in a file's AST for sections of code.
+    /// This function is for plaintext visitors so they can get the suppressions.
     let getSuppressMessageAttributesFromAst = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
             let walkRoot root =
@@ -480,7 +484,7 @@ module Ast =
     /// <param name="finishEarly">
     /// States whether to stop walking the tree, used for asynchronous environments to cancel the task.
     /// </param>
-    let walk finishEarly rootNode visitor =
+    let private walk finishEarly rootNode visitor =
         /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
         let rec walk breadcrumbs suppressedMessages node visitor currentVisitMethod = 
             let suppressedMessages = getSuppressMessageAttributes node @ suppressedMessages
@@ -517,8 +521,8 @@ module Ast =
                             | Visitor(visitor) -> visitChild child visitor
                             | End -> None
 
-                    /// If the result of walking the previous child was a walk visitor
-                    ///     Then pass that walk visitor to the sibling.
+                    // If the result of walking the previous child was a walk visitor
+                    //     Then pass that walk visitor to the sibling.
                     match walkChildReturnValue with
                         | Some(WalkWithVisitor(_)) ->
                             walkChildren walkChildReturnValue (childi + 1) children
@@ -529,93 +533,42 @@ module Ast =
 
             match children with
                 | [] ->
-                    /// We need this case for when we have walked down to a leaf node, 
-                    /// and that leaf node returns a walk visitor.
+                    // We need this case for when we have walked down to a leaf node, 
+                    // and that leaf node returns a walk visitor.
                     Some(visitChildrenMethod)
                 | children ->
                     walkChildren None 0 children
 
         walk [] [] rootNode visitor Continue
 
-    let walkFile finishEarly visitors = function
-        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
-            for moduleOrNamespace in moduleOrNamespaces do
-                Async.Parallel 
-                    [
-                        for visitor in visitors -> 
-                            async { return walk finishEarly (ModuleOrNamespace(moduleOrNamespace)) visitor }
-                    ] 
-                    |> Async.RunSynchronously 
-                    |> ignore
-        | ParsedInput.SigFile _ -> ()
-
-    type ParseInfo =
+    /// Information for a file to be linted that is given to the visitors for them to analyse.
+    type FileParseInfo =
         {
-            File: string
-            Checker: FSharpChecker
-            ProjectOptions: FSharpProjectOptions
-            Input: string
+            /// Contents of the file.
+            PlainText: string
+
+            /// File represented as an AST.
             Ast: ParsedInput
-            FileParseResults: FSharpParseFileResults
-            CheckFiles: bool
-        }
 
-    exception CheckFileException of string
+            /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+            TypeCheckResults: FSharpCheckFileResults option
 
-    /// Parse a file.
-    let parse finishEarly parseInfo visitors =
-        let checkFileResults = 
-            if parseInfo.CheckFiles then
-                parseInfo.Checker.CheckFileInProject(parseInfo.FileParseResults, parseInfo.File, 0, parseInfo.Input, parseInfo.ProjectOptions) 
-                     |> Async.RunSynchronously
-                     |> Some
-            else
-                None
-
-        match checkFileResults with
-            | Some(FSharpCheckFileAnswer.Succeeded(res)) -> 
-                let visitors = visitors |> List.map (fun visitor -> visitor (Some(res)))
-                walkFile finishEarly visitors parseInfo.Ast
-            | Some(res) -> raise <| CheckFileException("Checking files was aborted")
-            | None -> 
-                let visitors = visitors |> List.map (fun visitor -> visitor None)
-                walkFile finishEarly visitors parseInfo.Ast
-
-    type FailedToParseFile =
-        {
+            /// Path to the file.
             File: string
-            Errors: string list
         }
 
-    exception ParseException of FailedToParseFile
+    /// Lint a file.
+    let lintFile finishEarly fileInfo visitors =
+        let visitorsWithTypeCheck = visitors |> List.map (fun visitor -> visitor fileInfo.TypeCheckResults)
 
-    let parseFileInProject (checker:FSharpChecker) projectOptions file checkFile input =
-        let results = checker.ParseFileInProject(file, input, projectOptions) |> Async.RunSynchronously
-        match results.ParseTree with
-            | Some(ast) ->
-                {
-                    File = file
-                    Checker = checker
-                    ProjectOptions = projectOptions
-                    Input = input
-                    Ast = ast
-                    FileParseResults = results
-                    CheckFiles = checkFile
-                }
-            | None -> 
-                let errorMessages = 
-                    results.Errors
-                        |> Array.map (fun x -> x.Message)
-                        |> Array.toList
-
-                raise <| ParseException({ File = file; Errors = errorMessages })
-
-    let parseFile pathToFile checkFile input =
-        let checker = FSharpChecker.Create()
-        
-        let projectOptions = checker.GetProjectOptionsFromScript(pathToFile, input) |> Async.RunSynchronously
-
-        parseFileInProject checker projectOptions pathToFile checkFile input
-        
-    /// Parse a single string.
-    let parseInput checkFile = parseFile "/home/user/Dog.Test.fsx" checkFile
+        match fileInfo.Ast with
+            | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
+                for moduleOrNamespace in moduleOrNamespaces do
+                    Async.Parallel 
+                        [
+                            for visitor in visitorsWithTypeCheck -> 
+                                async { return walk finishEarly (ModuleOrNamespace(moduleOrNamespace)) visitor }
+                        ] 
+                        |> Async.RunSynchronously 
+                        |> ignore
+            | ParsedInput.SigFile _ -> ()

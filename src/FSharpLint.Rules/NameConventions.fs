@@ -311,7 +311,7 @@ module NameConventions =
                                 Some(visitor visitorInfo checkFile)
 
                     ContinueWithVisitorsForChildren(getVisitorForChild)
-            | AstNode.Match(SynMatchClause.Clause(_, _, _, _, _)) -> 
+            | AstNode.Match(SynMatchClause.Clause(_)) -> 
                 let getVisitorForChild i child =
                     match child with
                         | Pattern(_) ->

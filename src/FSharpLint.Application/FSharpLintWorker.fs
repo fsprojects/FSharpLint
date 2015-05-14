@@ -21,6 +21,8 @@ namespace FSharpLint.Application
 open RunLint
 
 module FSharpLintWorker =
+
+    open FSharpLint.Framework
     
     let private toWorkerProgress = function
         | Starting(f) -> FSharpLint.Worker.Progress.Starting(f)
@@ -34,18 +36,18 @@ module FSharpLintWorker =
                                 EndColumn = range.EndColumn,
                                 FileName = range.FileName)
                         
-    let private toWorkerWarning (warning:LintWarning.Warning) = 
-        FSharpLint.Worker.Error(Info = warning.Info,
-                                Range = toWorkerRange warning.Range,
-                                Input = warning.Input,
-                                FormattedError = LintWarning.getWarningWithLocation warning.Range warning.Input)
+    let private toWorkerError (error:LintWarning.Warning) = 
+        FSharpLint.Worker.Error(Info = error.Info,
+                                Range = toWorkerRange error.Range,
+                                Input = error.Input,
+                                FormattedError = LintWarning.getWarningWithLocation error.Range error.Input)
 
     type FSharpLintWorker() = 
         inherit System.MarshalByRefObject()
 
         let errorReceivedEvent = DelegateEvent<FSharpLint.Worker.ErrorReceivedEventHandler>()
 
-        let receivedError error = errorReceivedEvent.Trigger [| toWorkerWarning error |]
+        let receivedError error = errorReceivedEvent.Trigger [| toWorkerError error |]
 
         let reportProgressEvent = DelegateEvent<FSharpLint.Worker.ReportProgressEventHandler>()
 
@@ -75,29 +77,42 @@ module FSharpLintWorker =
                             ErrorReceived = System.Action<_>(receivedError)
                         }
 
+                    let getParseFailureReason = function
+                        | ParseFile.FailedToParseFile(failures) ->
+                            let getFailureReason (x:Microsoft.FSharp.Compiler.FSharpErrorInfo) =
+                                sprintf "failed to parse file %s, message: %s" x.FileName x.Message
+
+                            System.String.Join(", ", failures |> Array.map getFailureReason)
+                        | ParseFile.AbortedTypeCheck ->
+                            "Aborted type check."
+
                     match parseProject parseInfo with
-                        | Result.Failure(ProjectFile.ProjectFileCouldNotBeFound(projectPath)) -> 
+                        | Result.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
                             failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
-                        | Result.Failure(ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                        | Result.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
                             failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
-                        | Result.Failure(ProjectFile.UnableToFindProjectOutputPath(projectPath)) -> 
+                        | Result.Failure(UnableToFindProjectOutputPath(projectPath)) -> 
                             failed "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
-                        | Result.Failure(ProjectFile.UnableToFindReferencedProject(referencedProjectPath)) -> 
+                        | Result.Failure(UnableToFindReferencedProject(referencedProjectPath)) -> 
                             failed "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
-                        | Result.Failure(ProjectFile.FailedToLoadConfig(message)) -> 
+                        | Result.Failure(FailedToLoadConfig(message)) -> 
                             failed "ConsoleFailedToLoadConfig" [|message|]
-                        | Result.Failure(ProjectFile.RunTimeConfigError) -> 
+                        | Result.Failure(RunTimeConfigError) -> 
                             failed "ConsoleRunTimeConfigError" [||]
-                        | Result.Failure(ProjectFile.FailedToResolveReferences) -> 
-                            failed "ConsoleFailedToResolveReferences" [||]
-                        | Result.Success -> 
+                        | Result.Failure(FailedToParseFile(failure)) -> 
+                            FSharpLint.Worker.Result.Failure(
+                                "Lint failed while analysing " + 
+                                projectFile + 
+                                ".\nFailed with: " + 
+                                getParseFailureReason failure)
+                        | Result.Failure(FailedToParseFilesInProject(failures)) -> 
+                            FSharpLint.Worker.Result.Failure(
+                                "Lint failed while analysing " + 
+                                projectFile + 
+                                ".\nFailed with: " + 
+                                System.String.Join("\n", failures |> List.map getParseFailureReason))
+                        | Result.Success() -> 
                             FSharpLint.Worker.Result.Success()
                 with
-                    | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                        FSharpLint.Worker.Result.Failure(
-                            "Lint failed while analysing " + 
-                            projectFile + 
-                            ".\nFailed with: " + 
-                            System.String.Join("\n", errors))
                     | e -> 
                         FSharpLint.Worker.Result.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
