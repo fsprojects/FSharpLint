@@ -194,20 +194,14 @@ module Program =
             System.Console.WriteLine(System.String.Format(formatString, projectFile))
 
     let private startWithArguments arguments =
-        let projectFile = arguments |> List.tryPick (function | ProjectFile(file) -> Some(file) | _ -> None)
-
-        projectFile |> Option.iter start
-
         arguments
             |> List.iter (function 
                 | SingleFile(file) -> runLintOnFile file |> outputLintResult
                 | Source(source) -> runLintOnSource source |> outputLintResult
-                | _ -> ())
+                | ProjectFile(file) -> start file)
             
     [<EntryPoint>]
     let main argv =
-        let argv = [|"-f";@"C:\Users\Matt\Documents\GitHub\FSharpLint\src\FSharpLint.Framework\FSharpLint.Framework.fsproj"|]
-
         let parsedArguments = Array.toList argv |> parseArguments
 
         let argumentAreInvalid = 

@@ -48,10 +48,12 @@ module Tests =
                                     UseShellExecute = false)
 
         use app = System.Diagnostics.Process.Start(startInfo)
+
+        let output = app.StandardOutput.ReadToEnd()
                 
         app.WaitForExit()
 
-        app.StandardOutput.ReadToEnd()
+        output
 
     let getErrorsFromOutput (output:string) = 
         let splitOutput = output.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
