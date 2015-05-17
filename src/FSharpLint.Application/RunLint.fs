@@ -328,3 +328,19 @@ module RunLint =
         
     /// Parses and runs the linter on a string.
     let parseInput input = parse (ParseFile.parseSource input)
+
+    let lintTree fileParseInfo = 
+        let errors = System.Collections.Generic.LinkedList<LintWarning.Warning>()
+
+        let lintInformation =
+            {
+                Configuration = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                RulePlugins = LoadPlugins.loadPlugins()
+                FinishEarly = neverFinishEarly
+                ErrorReceived = fun error -> errors.AddLast(error) |> ignore
+                ReportLinterProgress = ignore
+            }
+
+        lintFile lintInformation fileParseInfo
+
+        errors |> Seq.toList

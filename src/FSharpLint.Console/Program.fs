@@ -198,7 +198,8 @@ module Program =
             |> List.iter (function 
                 | SingleFile(file) -> runLintOnFile file |> outputLintResult
                 | Source(source) -> runLintOnSource source |> outputLintResult
-                | ProjectFile(file) -> start file)
+                | ProjectFile(file) -> start file
+                | UnexpectedArgument(_) -> ())
             
     [<EntryPoint>]
     let main argv =
