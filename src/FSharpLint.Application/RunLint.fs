@@ -329,6 +329,7 @@ module RunLint =
     /// Parses and runs the linter on a string.
     let parseInput input = parse (ParseFile.parseSource input)
 
+    /// Lints a file that has already been parsed.
     let lintTree fileParseInfo = 
         let errors = System.Collections.Generic.LinkedList<LintWarning.Warning>()
 
