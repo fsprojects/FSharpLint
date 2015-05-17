@@ -29,12 +29,12 @@ let emptyConfig =
         UseTypeChecker = false
         IgnoreFiles = { Files = []; Update = IgnoreFiles.IgnoreFilesUpdate.Add }
         Analysers =
-            Map.ofList 
-                [ 
-                    ("", { 
+            Map.ofList
+                [
+                    ("", {
                         Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
-                        Settings = Map.ofList [] 
-                    }) 
+                        Settings = Map.ofList []
+                    })
                 ]
     }
 
@@ -45,7 +45,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
     let postError (range:range) error =
         errorRanges.Add(range, error)
 
-    let config = 
+    let config =
         match analysers with
             | Some(analysers) -> 
                 { 
@@ -74,7 +74,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
             | Ast(visitor) ->
                 let parseInfo = { parseInput checkInput input with CheckFiles = checkInput }
                 parse (fun _ -> false) parseInfo [visitor visitorInfo] |> ignore
-            | PlainText(visitor) -> 
+            | PlainText(visitor) ->
                 let parseInfo = parseInput checkInput input
                 let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
                 visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
@@ -91,10 +91,15 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         errorRanges
             |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
 
+    // prevent tests from passing if errors exist, just not on the line being checked
+    member this.NoErrorsExist =
+        errorRanges
+            |> Seq.isEmpty
+
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
             |> Seq.exists (fun (_, e) -> e = message)
 
     [<SetUp>]
-    member this.SetUp() = 
+    member this.SetUp() =
         errorRanges.Clear()

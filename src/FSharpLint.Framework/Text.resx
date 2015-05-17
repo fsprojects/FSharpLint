@@ -249,4 +249,7 @@
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Pointless function can be replaced with function composition.</value>
   </data>
+  <data name="RulesXmlDocumentationTypeError" xml:space="preserve">
+    <value>Expected type to have xml documentation.</value>
+  </data>
 </root>

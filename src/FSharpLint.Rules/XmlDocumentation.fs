@@ -20,7 +20,8 @@ namespace FSharpLint.Rules
 
 /// Rules to enforce the use of XML documentation in various places.
 module XmlDocumentation =
-    
+
+    open System
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -31,8 +32,8 @@ module XmlDocumentation =
     [<Literal>]
     let AnalyserName = "XmlDocumentation"
 
-    let configExceptionHeader config =
-        match isRuleEnabled config AnalyserName "ExceptionDefinitionHeader" with
+    let configExceptionHeader config name =
+        match isRuleEnabled config AnalyserName name with
             | Some(_, ruleSettings) when ruleSettings.ContainsKey "Enabled" ->
                 match ruleSettings.["Enabled"] with
                     | Enabled(true) -> true
@@ -42,20 +43,29 @@ module XmlDocumentation =
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
-            | XmlDoc([||]) -> true
+            | XmlDoc(xs) ->
+                let atLeastOneThatHasText ars = ars |> Array.exists (fun s -> not (String.IsNullOrWhiteSpace(s))) |> not
+                xs |> atLeastOneThatHasText
             | _ -> false
 
-    let visitor visitorInfo _ astNode = 
+    let visitor visitorInfo (checkFile:FSharpCheckFileResults) astNode =
         match astNode.Node with
-            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) -> 
-                if configExceptionHeader visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "ExceptionDefinitionHeader") |> not then
+            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) ->
+                if configExceptionHeader visitorInfo.Config "ExceptionDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "ExceptionDefinitionHeader") |> not then
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationExceptionError"))
+            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, memberDefn, rng)) ->
+                if configExceptionHeader visitorInfo.Config "TypeDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "TypeDefinitionHeader") |> not then
+                    let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationTypeError"))
             | _ -> ()
 
         Continue
 
-    type RegisterXmlDocumentationVisitor() = 
+    type RegisterXmlDocumentationVisitor() =
         let plugin =
             {
                 Name = AnalyserName

@@ -360,6 +360,9 @@
         <ExceptionDefinitionHeader>
           <Enabled>false</Enabled>
         </ExceptionDefinitionHeader>
+        <TypeDefinitionHeader>
+          <Enabled>false</Enabled>
+        </TypeDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
