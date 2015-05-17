@@ -119,10 +119,6 @@ module Program =
             let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
             System.Console.WriteLine(System.String.Format(formatString, projectPath))
 
-        | RunLint.UnableToFindReferencedProject(referencedProjectPath) ->
-            let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
-            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath))
-
         | RunLint.FailedToLoadConfig(message) ->
             let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
             System.Console.WriteLine(System.String.Format(formatString, message))

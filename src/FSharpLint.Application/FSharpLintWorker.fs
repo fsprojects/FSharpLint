@@ -93,8 +93,6 @@ module FSharpLintWorker =
                             failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
                         | Result.Failure(UnableToFindProjectOutputPath(projectPath)) -> 
                             failed "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
-                        | Result.Failure(UnableToFindReferencedProject(referencedProjectPath)) -> 
-                            failed "ConsoleUnableToFindReferencedProject" [|referencedProjectPath|]
                         | Result.Failure(FailedToLoadConfig(message)) -> 
                             failed "ConsoleFailedToLoadConfig" [|message|]
                         | Result.Failure(RunTimeConfigError) -> 

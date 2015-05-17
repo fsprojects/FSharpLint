@@ -49,6 +49,7 @@
     <Compile Include="TestFakeTask.fs" />
     <Compile Include="TestMSBuildTask.fs" />
     <None Include="packages.config" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">

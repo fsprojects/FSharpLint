@@ -40,7 +40,6 @@ module RunLint =
         | ProjectFileCouldNotBeFound of string
         | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
         | UnableToFindProjectOutputPath of string
-        | UnableToFindReferencedProject of string
         | FailedToLoadConfig of string
         | RunTimeConfigError
         | FailedToParseFile of ParseFile.ParseFileFailure

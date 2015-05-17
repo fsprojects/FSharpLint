@@ -67,6 +67,18 @@ module Tests =
                 Code = splitOutput.[i + 2]
             }
         ]
+
+    let expectedErrors =
+        [
+            "not (a=b) can be refactored into a<>b"
+            "not (a<>b) can be refactored into a=b"
+            "fun x -> x can be refactored into id"
+            "not true can be refactored into false"
+            "not false can be refactored into true"
+            "List.fold + 0 can be refactored into List.sum"
+            "a<>true can be refactored into not a"
+            "List.head (List.sort x) can be refactored into List.min x"
+        ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
@@ -83,14 +95,21 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.InvalidReferencedProjectFile() = 
+        member this.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesInvalidProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("referencesInvalidProject.fsproj"), sprintf "Output:\n%s" output)
+            let errors = getErrorsFromOutput output
+
+            expectedErrors 
+                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
+                                                   "Errors did not contain expected error:\n" + x +
+                                                   ". Program output:\n" + output))
+
+            Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
         member this.InvalidProjectFile() = 
@@ -113,14 +132,21 @@ module Tests =
             Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.UnableToFindReferencedProjectFile() = 
+        member this.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesNonExistantProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
+            
+            let errors = getErrorsFromOutput output
 
-            Assert.IsTrue(output.Contains("Could not find file") || output.Contains("not found"), sprintf "Output:\n%s" output)
+            expectedErrors 
+                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
+                                                   "Errors did not contain expected error:\n" + x +
+                                                   ". Program output:\n" + output))
+
+            Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
         member this.FunctionalTestConsoleApplication() = 
@@ -129,18 +155,6 @@ module Tests =
             let output = runConsoleApp arguments
 
             let errors = getErrorsFromOutput output
-
-            let expectedErrors =
-                [
-                    "not (a=b) can be refactored into a<>b"
-                    "not (a<>b) can be refactored into a=b"
-                    "fun x -> x can be refactored into id"
-                    "not true can be refactored into false"
-                    "not false can be refactored into true"
-                    "List.fold + 0 can be refactored into List.sum"
-                    "a<>true can be refactored into not a"
-                    "List.head (List.sort x) can be refactored into List.min x"
-                ]
 
             expectedErrors 
                 |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
