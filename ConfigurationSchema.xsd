@@ -216,6 +216,8 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ExceptionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="TypeDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="MemberDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
           </xs:sequence>
         </xs:complexType>
       </xs:element>

@@ -28,6 +28,7 @@ module XmlDocumentation =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
+    open Microsoft.FSharp.Compiler.Ast
 
     [<Literal>]
     let AnalyserName = "XmlDocumentation"
@@ -61,6 +62,12 @@ module XmlDocumentation =
                     let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationTypeError"))
+            | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, rng)) ->
+                if configExceptionHeader visitorInfo.Config "MemberDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "MemberDefinitionHeader") |> not then
+                    let (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationMemberError"))
             | _ -> ()
 
         Continue

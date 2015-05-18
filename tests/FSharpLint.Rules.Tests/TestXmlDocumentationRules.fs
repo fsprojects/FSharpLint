@@ -23,7 +23,7 @@ open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
-let config =
+let config name =
     Map.ofList
         [
             (AnalyserName,
@@ -34,25 +34,31 @@ let config =
                                 {
                                     Settings = Map.ofList
                                         [
-                                            ("Enabled", Enabled(true))
+                                            ("Enabled", Enabled("ExceptionDefinitionHeader" = name))
                                         ]
                                 });
                             ("TypeDefinitionHeader",
                                 {
                                     Settings = Map.ofList
                                         [
-                                            ("Enabled", Enabled(true))
+                                            ("Enabled", Enabled("TypeDefinitionHeader" = name))
                                         ]
-                                })
+                                });
+                            ("MemberDefinitionHeader",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled("MemberDefinitionHeader" = name))
+                                        ]
+                                });
                         ]
                     Settings = Map.ofList []
                 })
             ]
 
 [<TestFixture>]
-[<Category("InProgress")>]
-type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+type TestNameConventionRulesException() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ExceptionDefinitionHeader")
 
     [<Test>]
     member this.ExceptionWithDoubleDashComment() =
@@ -62,6 +68,7 @@ module Program
 // Some exception.
 exception SomeException of string"""
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(5, 0))
 
     [<Test>]
@@ -83,6 +90,7 @@ module Program
 (* Some exception. *)
 exception SomeException of string"""
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(5, 0))
 
     [<Test>]
@@ -102,6 +110,7 @@ module Program
 
 exception SomeException of string"""
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
@@ -111,17 +120,23 @@ module Program
 ///
 exception SomeException of string"""
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
+[<TestFixture>]
+type TestNameConventionRulesType() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "TypeDefinitionHeader")
 
     [<Test>]
     member this.TypeNoComment() =
         this.Parse """
 
 type IsAType =
+    /// this is a member
     member this.Test = true
         """
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
@@ -129,9 +144,11 @@ type IsAType =
         this.Parse """
 // this is a type
 type IsAType =
+    /// this is a member
     member this.Test = true
         """
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
@@ -140,6 +157,7 @@ type IsAType =
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "TypeDefinitionHeader")>]
 // this is a type
 type IsAType =
+    /// this is a member
     member this.Test = true
         """
 
@@ -150,9 +168,11 @@ type IsAType =
         this.Parse ("""
 /// """ + "\t" + """
 type IsAType =
+    /// this is a member
     member this.Test = true
         """)
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
@@ -160,9 +180,11 @@ type IsAType =
         this.Parse """
 (* This is a type *)
 type IsAType =
+    /// this is a member
     member this.Test = true
         """
 
+        Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
@@ -172,6 +194,85 @@ type IsAType =
 ///
 /// third line is still ok
 type IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+
+[<TestFixture>]
+type TestNameConventionRulesMember() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "MemberDefinitionHeader")
+
+    [<Test>]
+    member this.MemberNoComment() =
+        this.Parse """
+/// this is a type
+type IsAType =
+
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(5, 11), this.ErrorMsg)
+
+    [<Test>]
+    member this.MemberWithDoubleDashComment() =
+        this.Parse """
+/// this is a type
+type IsAType =
+    // this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+
+    [<Test>]
+    member this.MemberWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "MemberDefinitionHeader")>]
+/// this is a type
+type IsAType =
+    // this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.MemberWithWhitespaceXmlComment() =
+        this.Parse ("""
+/// This is a type
+type IsAType =
+    /// """ + "\t" + """
+    member this.Test = true
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+
+    [<Test>]
+    member this.MemberWithMultilineComment() =
+        this.Parse """
+/// This is a type
+type IsAType =
+    (* This is a type *)
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+
+    [<Test>]
+    member this.MemberWithXmlComment() =
+        this.Parse """
+/// This is a type
+type IsAType =
+    /// This is a member
+    ///
+    /// third line is still ok
     member this.Test = true
         """
 

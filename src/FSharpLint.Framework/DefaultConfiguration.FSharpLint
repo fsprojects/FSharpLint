@@ -363,6 +363,9 @@
         <TypeDefinitionHeader>
           <Enabled>false</Enabled>
         </TypeDefinitionHeader>
+        <MemberDefinitionHeader>
+          <Enabled>false</Enabled>
+        </MemberDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>

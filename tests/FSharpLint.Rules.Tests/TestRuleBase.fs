@@ -96,6 +96,15 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         errorRanges
             |> Seq.isEmpty
 
+    member this.ErrorsExist =
+        errorRanges
+            |> Seq.isEmpty |> not
+
+    member this.ErrorMsg =
+        errorRanges
+            |> Seq.map (fun (r, err) -> (sprintf "(%A %A -> %s)" r.StartRange r.EndRange err ))
+            |> (fun x -> System.String.Join("; ", x))
+
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
             |> Seq.exists (fun (_, e) -> e = message)
