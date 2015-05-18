@@ -30,6 +30,13 @@ let config name =
                 {
                     Rules = Map.ofList
                         [
+                            ("ModuleDefinitionHeader",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled("ModuleDefinitionHeader" = name))
+                                        ]
+                                });
                             ("ExceptionDefinitionHeader",
                                 {
                                     Settings = Map.ofList
@@ -55,6 +62,74 @@ let config name =
                     Settings = Map.ofList []
                 })
             ]
+
+[<TestFixture>]
+type TestNameConventionRulesModule() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ModuleDefinitionHeader")
+
+    [<Test>]
+    member this.ModuleWithDoubleDashComment() =
+        this.Parse """
+// Some module.
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(3, 0), this.ErrorMsg)
+
+    [<Test>]
+    member this.ModuleWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "ModuleDefinitionHeader")>]
+// Some module.
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.ModuleWithMultilineComment() =
+        this.Parse """
+(* Some module. *)
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(3, 0), this.ErrorMsg)
+
+    [<Test>]
+    member this.ModuleWithXmlComment() =
+        this.Parse """
+/// Some module.
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.ModuleNoComment() =
+        this.Parse """
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(2, 0), this.ErrorMsg)
+
+    [<Test>]
+    member this.ModuleWithEmptyXmlComment() =
+        this.Parse """
+///
+module Program
+
+exception SomeException of string"""
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(3, 0), this.ErrorMsg)
 
 [<TestFixture>]
 type TestNameConventionRulesException() =

@@ -357,6 +357,9 @@
     
     <XmlDocumentation>
       <Rules>
+        <ModuleDefinitionHeader>
+          <Enabled>false</Enabled>
+        </ModuleDefinitionHeader>
         <ExceptionDefinitionHeader>
           <Enabled>false</Enabled>
         </ExceptionDefinitionHeader>

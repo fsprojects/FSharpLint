@@ -215,6 +215,7 @@
       <xs:element name="Rules" maxOccurs="1" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="ModuleDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="ExceptionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TypeDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="MemberDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
