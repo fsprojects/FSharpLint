@@ -58,6 +58,13 @@ let config name =
                                             ("Enabled", Enabled("MemberDefinitionHeader" = name))
                                         ]
                                 });
+                            ("EnumDefinitionHeader",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled("EnumDefinitionHeader" = name))
+                                        ]
+                                });
                         ]
                     Settings = Map.ofList []
                 })
@@ -275,6 +282,14 @@ type IsAType =
 
         Assert.IsTrue(this.NoErrorsExist)
 
+    [<Test>]
+    member this.EnumTypeWithXmlComment() =
+        this.Parse """
+/// This is an enum type
+type Colors = Red=0 | Green=1 | Blue=2
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
 
 [<TestFixture>]
 type TestNameConventionRulesMember() =
@@ -352,3 +367,116 @@ type IsAType =
         """
 
         Assert.IsTrue(this.NoErrorsExist)
+
+[<TestFixture>]
+type TestNameConventionRulesEnum() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "EnumDefinitionHeader")
+
+    [<Test>]
+    member this.EnumNoComment() =
+        this.Parse """
+type Colors =
+    | Red=0
+    | Green=1
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(3), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(5), this.ErrorMsg)
+
+    [<Test>]
+    member this.EnumWithDoubleDashComment() =
+        this.Parse """
+type Colors =
+    // This is red
+    | Red=0
+    // This is green
+    | Green=1
+    // This is blue
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.EnumWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "EnumDefinitionHeader")>]
+type Colors =
+    // This is red
+    | Red=0
+    // This is green
+    | Green=1
+    // This is blue
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.EnumWithEmptyXmlComment() =
+        this.Parse ("""
+type Colors =
+    ///
+    | Red=0
+    ///
+    | Green=1
+    ///
+    | Blue=2
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.EnumWithMultilineComment() =
+        this.Parse """
+type Colors =
+    (* This is red *)
+    | Red=0
+    (* This is green *)
+    | Green=1
+    (* This is blue *)
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.EnumWithXmlComment() =
+        this.Parse """
+type Colors =
+    /// This is red
+    | Red=0
+    /// This is green
+    | Green=1
+    /// This is blue
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.EnumWithAMissingXmlComment() =
+        this.Parse """
+type Colors =
+    /// This is red
+    | Red=0
+    /// This is green
+    | Green=1
+    // This is blue
+    | Blue=2
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)

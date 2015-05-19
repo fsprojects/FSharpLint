@@ -28,7 +28,6 @@ module XmlDocumentation =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
-    open Microsoft.FSharp.Compiler.Ast
 
     [<Literal>]
     let AnalyserName = "XmlDocumentation"
@@ -73,6 +72,12 @@ module XmlDocumentation =
                     let (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationMemberError"))
+            | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
+                if configExceptionHeader visitorInfo.Config "EnumDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "EnumDefinitionHeader") |> not then
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationEnumError") +
+                            " " + id.idText)
             | _ -> ()
 
         Continue

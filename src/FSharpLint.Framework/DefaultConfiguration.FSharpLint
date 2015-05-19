@@ -369,6 +369,9 @@
         <MemberDefinitionHeader>
           <Enabled>false</Enabled>
         </MemberDefinitionHeader>
+        <EnumDefinitionHeader>
+          <Enabled>false</Enabled>
+        </EnumDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>

@@ -258,4 +258,7 @@
   <data name="RulesXmlDocumentationModuleError" xml:space="preserve">
     <value>Expected module to have xml documentation.</value>
   </data>
+  <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
+    <value>Expected enum to have xml documentation.</value>
+  </data>
 </root>

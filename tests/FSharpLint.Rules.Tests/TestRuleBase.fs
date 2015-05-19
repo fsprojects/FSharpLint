@@ -101,9 +101,13 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
             |> Seq.isEmpty |> not
 
     member this.ErrorMsg =
-        errorRanges
-            |> Seq.map (fun (r, err) -> (sprintf "(%A %A -> %s)" r.StartRange r.EndRange err ))
-            |> (fun x -> System.String.Join("; ", x))
+        match errorRanges with
+        | xs when xs.Count = 0 -> "No errors"
+        | _ as errRng ->
+            errorRanges
+                |> Seq.map (fun (r, err) -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
+                    r.StartRange.StartLine r.StartColumn r.EndRange.EndLine r.EndRange.EndColumn err ))
+                |> (fun x -> System.String.Join("; ", x))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
