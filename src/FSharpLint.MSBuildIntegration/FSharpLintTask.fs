@@ -34,10 +34,6 @@ type FSharpLintTask() =
         let directory = System.Reflection.Assembly.GetAssembly(this.GetType()).Location
                         |> System.IO.Path.GetDirectoryName
 
-        let setup = System.AppDomainSetup(PrivateBinPath = directory, ApplicationBase = directory)
-
-        let appDomain = System.AppDomain.CreateDomain("Lint Domain", null, setup)
-
         let resolveAssembly _ (args:ResolveEventArgs) =
             let assembly = 
                 try 
@@ -56,8 +52,6 @@ type FSharpLintTask() =
             
         System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(resolveAssembly))
         
-        let worker = appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
-
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
