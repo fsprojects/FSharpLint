@@ -259,6 +259,9 @@
     <value>Expected module to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
-    <value>Expected enum to have xml documentation.</value>
+    <value>Expected enum to have xml documentation:</value>
+  </data>
+  <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
+    <value>Expected union case to have xml documentation:</value>
   </data>
 </root>

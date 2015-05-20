@@ -65,6 +65,13 @@ let config name =
                                             ("Enabled", Enabled("EnumDefinitionHeader" = name))
                                         ]
                                 });
+                            ("UnionDefinitionHeader",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled("UnionDefinitionHeader" = name))
+                                        ]
+                                });
                         ]
                     Settings = Map.ofList []
                 })
@@ -480,3 +487,137 @@ type Colors =
 
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+[<TestFixture>]
+type TestNameConventionRulesUnion() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "UnionDefinitionHeader")
+
+    [<Test>]
+    member this.UnionNoComment() =
+        this.Parse """
+type Shape =
+    | Rectangle of width : float * length : float
+    | Circle of radius : float
+    | Shape
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(3), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(5), this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionWithDoubleDashComment() =
+        this.Parse """
+type Shape =
+    // this is a rectangle
+    | Rectangle of width : float * length : float
+    // this is a circle
+    | Circle of radius : float
+    // this is this
+    | Shape
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "UnionDefinitionHeader")>]
+type Shape =
+    // this is a rectangle
+    | Rectangle of width : float * length : float
+    // this is a circle
+    | Circle of radius : float
+    // this is this
+    | Shape
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.UnionWithEmptyXmlComment() =
+        this.Parse ("""
+type Shape =
+    ///
+    | Rectangle of width : float * length : float
+    ///
+    | Circle of radius : float
+    ///
+    | Shape
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionWithMultilineComment() =
+        this.Parse """
+type Shape =
+    (* this is a rectangle *)
+    | Rectangle of width : float * length : float
+    (* this is a circle *)
+    | Circle of radius : float
+    (* this is this *)
+    | Shape
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(8), this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionWithXmlComment() =
+        this.Parse """
+type Shape =
+    /// this is a rectangle
+    | Rectangle of width : float * length : float
+    /// this is a circle
+    | Circle of radius : float
+    /// this is this
+    | Shape
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionWithAMissingXmlComment() =
+        this.Parse """
+type Shape =
+    /// this is a rectangle
+    | Rectangle of width : float * length : float
+    // this is a circle
+    | Circle of radius : float
+    /// this is this
+    | Shape
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionSingleCaseWithXmlComment() =
+        this.Parse """
+type OrderId =
+    /// this is an order id
+    | OrderId of int
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.UnionSingleCaseWithNoXmlComment() =
+        this.Parse """
+type OrderId =
+
+    | OrderId of int
+        """
+
+        Assert.IsTrue(this.ErrorsExist, this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)

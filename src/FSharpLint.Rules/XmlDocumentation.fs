@@ -78,6 +78,12 @@ module XmlDocumentation =
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationEnumError") +
                             " " + id.idText)
+            | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, _, range)) ->
+                if configExceptionHeader visitorInfo.Config "UnionDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "UnionDefinitionHeader") |> not then
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationUnionError") +
+                            " " + id.idText)
             | _ -> ()
 
         Continue
