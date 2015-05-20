@@ -186,8 +186,8 @@ module RunLint =
 
     let internal neverFinishEarly _ = false
         
-    /// Parses and runs the linter on a single file.
-    let parseFile pathToFile (errorReceived:System.Action<ErrorHandling.Error>) =
+    /// Parses and runs the linter on a single file and a configuration
+    let parseFileWithConfig pathToFile (configuration:FSharpLint.Framework.Configuration.Configuration) (errorReceived:System.Action<ErrorHandling.Error>) =
         let input = System.IO.File.ReadAllText(pathToFile)
 
         let lintInformation =
@@ -201,13 +201,17 @@ module RunLint =
 
         let parsedFileInformation = Ast.parseFile pathToFile lintInformation.Configuration.UseTypeChecker input
 
-        lintFile lintInformation parsedFileInformation
+        lintFile lintInformation parsedFileInformation   
+
+    /// Parses and runs the linter on a single file.
+    let parseFile pathToFile (errorReceived:System.Action<ErrorHandling.Error>) =
+        parseFileWithConfig pathToFile (FSharpLint.Framework.Configuration.loadDefaultConfiguration()) errorReceived
         
-    /// Parses and runs the linter on a string.
-    let parseInput input (errorReceived:System.Action<ErrorHandling.Error>) =
+    /// Parses and runs the linter on a string with config.
+    let parseInputWithConfig input (configuration:FSharpLint.Framework.Configuration.Configuration) (errorReceived:System.Action<ErrorHandling.Error>) =
         let lintInformation =
             {
-                Configuration = FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                Configuration = configuration
                 RulePlugins = loadPlugins()
                 FinishEarly = neverFinishEarly
                 ErrorReceived = errorReceived.Invoke
@@ -217,3 +221,7 @@ module RunLint =
         let parsedFileInformation = Ast.parseInput lintInformation.Configuration.UseTypeChecker input
 
         lintFile lintInformation parsedFileInformation
+
+    /// Parses and runs the linter on a string.
+    let parseInput input  (errorReceived:System.Action<ErrorHandling.Error>) =
+        parseInputWithConfig input (FSharpLint.Framework.Configuration.loadDefaultConfiguration()) errorReceived
