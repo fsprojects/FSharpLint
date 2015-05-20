@@ -18,10 +18,12 @@ open System
 // The name of the project 
 // (used by attributes in AssemblyInfo, name of a NuGet package and directory in 'src')
 let project = "FSharpLint"
+let projectApi = "FSharpLintApi"
 
 // Short summary of the project
 // (used as description in AssemblyInfo and as a short summary for NuGet package)
 let summary = "Lint tool for F#."
+let summaryApi = "Lint tool for F#. Api to extend FSharpLint"
 
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
@@ -136,6 +138,39 @@ Target "CreatePackage" (fun _ ->
         "nugetpackage/FSharpLint.nuspec"
 )
 
+Target "CreateApiPackage" (fun _ ->
+    NuGet (fun p -> 
+        {p with
+            Authors = authors
+            Project = projectApi
+            Description = summaryApi
+            OutputPath = "nugetpackage"
+            Summary = summaryApi
+            WorkingDir = "nugetpackage"
+            Version = version
+            Publish = false
+            References = 
+                [
+                    ("FSharpLint.Rules.dll")
+                    ("FSharpLint.Framework.dll")
+                    ("FSharpLint.Application.dll")
+                    ("FSharp.Compiler.Service.dll")
+                    ("FParsecCS.dll")
+                    ("FParsec.dll")
+                ]            
+            Files = 
+                [
+                    (System.String.Format("..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                    (System.String.Format("..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                    (System.String.Format("..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                    (System.String.Format("..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                    (System.String.Format("..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                    (System.String.Format("..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
+                ]
+         })
+        "nugetpackage/FSharpLintApi.nuspec"
+)
+
 #I @"tools/FSharpLint.0.1.16/"
 #r @"tools/FSharpLint.0.1.16/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
@@ -158,9 +193,12 @@ Target "All" DoNothing
 
 "Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
 "Build" ==> "All"
+"CreatePackage" ==> "All"
+"CreateApiPackage" ==> "All"
 "RunFunctionalTests" ==> "RunTests" ==> "All"
 "Lint" ==> "All"
 "GenerateDocs" ==> "All"
-"CreatePackage" ==> "All"
+
+
 
 RunTargetOrDefault "All"
