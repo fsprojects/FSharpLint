@@ -193,11 +193,11 @@ Target "All" DoNothing
 
 "Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
 "Build" ==> "All"
-"CreatePackage" ==> "All"
-"CreateApiPackage" ==> "All"
 "RunFunctionalTests" ==> "RunTests" ==> "All"
 "Lint" ==> "All"
 "GenerateDocs" ==> "All"
+"CreatePackage" ==> "All"
+"CreateApiPackage" ==> "All"
 
 
 
