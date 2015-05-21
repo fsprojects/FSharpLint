@@ -270,4 +270,7 @@
   <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
     <value>Expected auto property to have xml documentation:</value>
   </data>
+  <data name="RulesXmlDocumentationLetError" xml:space="preserve">
+    <value>Expected let to have xml documentation.</value>
+  </data>
 </root>

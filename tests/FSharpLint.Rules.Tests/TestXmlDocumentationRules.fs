@@ -36,7 +36,8 @@ let config name =
                              "EnumDefinitionHeader";
                              "UnionDefinitionHeader";
                              "RecordDefinitionHeader";
-                             "AutoPropertyDefinitionHeader"]
+                             "AutoPropertyDefinitionHeader";
+                             "LetDefinitionHeader"]
                              |> List.map (fun ruleName ->
                                  (ruleName,
                                     {Rule.Settings = Map.ofList
@@ -796,3 +797,121 @@ type GeoCoord() =
 
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+
+[<TestFixture>]
+type TestNameConventionRulesLet() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "LetDefinitionHeader")
+
+    [<Test>]
+    member this.LetNoComment() =
+        this.Parse """
+type Sample() =
+
+    let Msg name = "Hello " + name
+
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)
+
+    [<Test>]
+    member this.LetWithDoubleDashComment() =
+        this.Parse """
+type Sample() =
+    // this is is a message
+    let Msg name = "Hello " + name
+    // this is a nested let
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)
+
+    [<Test>]
+    member this.LetWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "LetDefinitionHeader")>]
+type Sample() =
+    // this is is a message
+    let Msg name = "Hello " + name
+    // this is a nested let
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.LetWithEmptyXmlComment() =
+        this.Parse ("""
+type Sample() =
+    ///
+    let Msg name = "Hello " + name
+    ///
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)
+
+    [<Test>]
+    member this.LetWithMultilineComment() =
+        this.Parse """
+type Sample() =
+    (* this is is a message *)
+    let Msg name = "Hello " + name
+    (* this is a nested let *)
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)
+
+    [<Test>]
+    member this.LetWithXmlComment() =
+        this.Parse """
+type Sample() =
+    /// this is is a message
+    let Msg name = "Hello " + name
+    /// this is a nested let
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.LetWithAMissingXmlComment() =
+        this.Parse """
+type Sample() =
+    // this is is a message
+    let Msg name = "Hello " + name
+    /// this is a nested let
+    let nested name =
+        let msg = "Hello "
+        msg + name
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)

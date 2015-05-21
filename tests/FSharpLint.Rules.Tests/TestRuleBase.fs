@@ -91,6 +91,11 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         errorRanges
             |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
 
+    member this.NoErrorExistsOnLine(startLine) =
+        errorRanges
+            |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
+            |> not
+
     // prevent tests from passing if errors exist, just not on the line being checked
     member this.NoErrorsExist =
         errorRanges

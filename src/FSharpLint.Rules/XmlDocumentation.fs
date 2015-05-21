@@ -85,11 +85,19 @@ module XmlDocumentation =
                 if isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationAutoPropertyError")
 
+        | AstNode.MemberDefinition(SynMemberDefn.LetBindings(synBindings, _, _, range)) ->
+            if ruleEnabled visitorInfo astNode "LetDefinitionHeader" then
+                let evalBinding (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) =
+                    if isPreXmlDocEmpty xmlDoc then
+                        visitorInfo.PostError range (getString "RulesXmlDocumentationLetError")
+                synBindings |> List.iter evalBinding
+
         | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, rng)) ->
             if ruleEnabled visitorInfo astNode "TypeDefinitionHeader" then
                 let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
                 if isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationTypeError")
+
             if ruleEnabled visitorInfo astNode "RecordDefinitionHeader" then
                 let evalField (SynField.Field(_, _, id, _, _, xmlDoc, _, range)) =
                     if isPreXmlDocEmpty xmlDoc then
