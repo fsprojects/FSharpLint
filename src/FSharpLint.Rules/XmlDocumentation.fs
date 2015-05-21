@@ -23,8 +23,6 @@ module XmlDocumentation =
 
     open System
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -46,59 +44,58 @@ module XmlDocumentation =
             | XmlDoc(xs) ->
                 let atLeastOneThatHasText ars = ars |> Array.exists (fun s -> not (String.IsNullOrWhiteSpace(s))) |> not
                 xs |> atLeastOneThatHasText
-            | _ -> false
+
+    let getString str = FSharpLint.Framework.Resources.GetString(str)
+
+    let ruleEnabled visitorInfo (astNode:CurrentNode) ruleName =
+        configExceptionHeader visitorInfo.Config ruleName &&
+            astNode.IsSuppressed(AnalyserName, ruleName) |> not
+
+    let getIdText (id:Ident option) =
+        match id with
+        | None -> ""
+        | Some i -> " " + i.idText
 
     let visitor visitorInfo checkFile astNode =
         match astNode.Node with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, xmlDoc, _, _, range)) ->
-                if configExceptionHeader visitorInfo.Config "ModuleDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "ModuleDefinitionHeader") |> not then
+        | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, xmlDoc, _, _, range)) ->
+            if ruleEnabled visitorInfo astNode "ModuleDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                visitorInfo.PostError range (getString "RulesXmlDocumentationModuleError")
+
+        | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, xmlDoc, _, range)) ->
+            if ruleEnabled visitorInfo astNode "ExceptionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                visitorInfo.PostError range (getString "RulesXmlDocumentationExceptionError")
+
+        | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
+            if ruleEnabled visitorInfo astNode "EnumDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                visitorInfo.PostError range (getString "RulesXmlDocumentationEnumError" + " " + id.idText)
+
+        | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, _, range)) ->
+            if ruleEnabled visitorInfo astNode "UnionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                visitorInfo.PostError range (getString "RulesXmlDocumentationUnionError" + " " + id.idText)
+
+        | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, _)) ->
+            if ruleEnabled visitorInfo astNode "MemberDefinitionHeader" then
+                let (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
+                if isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (getString "RulesXmlDocumentationMemberError")
+
+        | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, rng)) ->
+            if ruleEnabled visitorInfo astNode "TypeDefinitionHeader" then
+                let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
+                if isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (getString "RulesXmlDocumentationTypeError")
+            if ruleEnabled visitorInfo astNode "RecordDefinitionHeader" then
+                let evalField (SynField.Field(_, _, id, _, _, xmlDoc, _, range)) =
                     if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationModuleError"))
-            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, xmlDoc, _, range)) ->
-                if configExceptionHeader visitorInfo.Config "ExceptionDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "ExceptionDefinitionHeader") |> not then
-                    if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationExceptionError"))
-            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, memberDefn, rng)) ->
-                if configExceptionHeader visitorInfo.Config "TypeDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "TypeDefinitionHeader") |> not then
-                    let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
-                    if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationTypeError"))
-                if configExceptionHeader visitorInfo.Config "RecordDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "RecordDefinitionHeader") |> not then
-                    let evalField (SynField.Field(_, _, id, _, _, xmlDoc, _, range)) =
-                        if isPreXmlDocEmpty xmlDoc then
-                            visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationRecordError")
-                                + (match id with
-                                   | None -> ""
-                                   | Some i -> " " + i.idText))
-                    match typeDefnRep with
-                    | Simple(simple, range) ->
-                        match simple with
-                        | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.iter evalField
-                        | _ -> ()
+                        visitorInfo.PostError range (getString "RulesXmlDocumentationRecordError" + getIdText id)
+                match typeDefnRep with
+                | Simple(simple, range) ->
+                    match simple with
+                    | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.iter evalField
                     | _ -> ()
-            | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, rng)) ->
-                if configExceptionHeader visitorInfo.Config "MemberDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "MemberDefinitionHeader") |> not then
-                    let (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
-                    if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationMemberError"))
-            | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
-                if configExceptionHeader visitorInfo.Config "EnumDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "EnumDefinitionHeader") |> not then
-                    if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationEnumError") +
-                            " " + id.idText)
-            | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, _, range)) ->
-                if configExceptionHeader visitorInfo.Config "UnionDefinitionHeader" &&
-                    astNode.IsSuppressed(AnalyserName, "UnionDefinitionHeader") |> not then
-                    if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationUnionError") +
-                            " " + id.idText)
-            | _ -> ()
+                | _ -> ()
+        | _ -> ()
 
         Continue
 

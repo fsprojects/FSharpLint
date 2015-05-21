@@ -23,63 +23,27 @@ open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
+/// set all XmlDocumentation rules to be disabled, except the one under test
 let config name =
     Map.ofList
         [
             (AnalyserName,
                 {
-                    Rules = Map.ofList
-                        [
-                            ("ModuleDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("ModuleDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("ExceptionDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("ExceptionDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("TypeDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("TypeDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("MemberDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("MemberDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("EnumDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("EnumDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("UnionDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("UnionDefinitionHeader" = name))
-                                        ]
-                                });
-                            ("RecordDefinitionHeader",
-                                {
-                                    Settings = Map.ofList
-                                        [
-                                            ("Enabled", Enabled("RecordDefinitionHeader" = name))
-                                        ]
-                                });
-                        ]
+                    Rules = ["ModuleDefinitionHeader";
+                             "ExceptionDefinitionHeader"
+                             "TypeDefinitionHeader";
+                             "MemberDefinitionHeader";
+                             "EnumDefinitionHeader";
+                             "UnionDefinitionHeader";
+                             "RecordDefinitionHeader"]
+                             |> List.map (fun ruleName ->
+                                 (ruleName,
+                                    {Rule.Settings = Map.ofList
+                                            [
+                                                ("Enabled", Enabled(ruleName = name))
+                                            ]
+                                    }))
+                             |> Map.ofList
                     Settings = Map.ofList []
                 })
             ]
