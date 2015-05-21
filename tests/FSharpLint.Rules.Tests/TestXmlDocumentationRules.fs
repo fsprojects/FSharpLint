@@ -23,7 +23,7 @@ open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
-/// set all XmlDocumentation rules to be disabled, except the one under test
+/// set all XmlDocumentation rules to be disabled, except the rule under test
 let config name =
     Map.ofList
         [

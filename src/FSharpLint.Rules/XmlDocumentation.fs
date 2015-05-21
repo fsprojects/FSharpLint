@@ -68,22 +68,21 @@ module XmlDocumentation =
 
         | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
             if ruleEnabled visitorInfo astNode "EnumDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (getString "RulesXmlDocumentationEnumError" + " " + id.idText)
+                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationEnumError", id.idText))
 
         | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, _, range)) ->
             if ruleEnabled visitorInfo astNode "UnionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (getString "RulesXmlDocumentationUnionError" + " " + id.idText)
+                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationUnionError", id.idText))
+
+        | AstNode.MemberDefinition(SynMemberDefn.AutoProperty(_, _, id, _, _, _, xmlDoc, _, _, rangeOpt, range)) ->
+            if ruleEnabled visitorInfo astNode "AutoPropertyDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationAutoPropertyError", id.idText))
 
         | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, _)) ->
             if ruleEnabled visitorInfo astNode "MemberDefinitionHeader" then
                 let (SynBinding.Binding(_, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
                 if isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationMemberError")
-
-        | AstNode.MemberDefinition(SynMemberDefn.AutoProperty(_, _, id, _, _, _, xmlDoc, _, _, rangeOpt, range)) ->
-            if ruleEnabled visitorInfo astNode "AutoPropertyDefinitionHeader" then
-                if isPreXmlDocEmpty xmlDoc then
-                    visitorInfo.PostError range (getString "RulesXmlDocumentationAutoPropertyError")
 
         | AstNode.MemberDefinition(SynMemberDefn.LetBindings(synBindings, _, _, range)) ->
             if ruleEnabled visitorInfo astNode "LetDefinitionHeader" then
@@ -101,7 +100,7 @@ module XmlDocumentation =
             if ruleEnabled visitorInfo astNode "RecordDefinitionHeader" then
                 let evalField (SynField.Field(_, _, id, _, _, xmlDoc, _, range)) =
                     if isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (getString "RulesXmlDocumentationRecordError" + getIdText id)
+                        visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
                 match typeDefnRep with
                 | Simple(simple, range) ->
                     match simple with

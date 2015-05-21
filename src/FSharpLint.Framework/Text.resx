@@ -259,16 +259,16 @@
     <value>Expected module to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
-    <value>Expected enum to have xml documentation:</value>
+    <value>Expected enum {0} to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
-    <value>Expected union case to have xml documentation:</value>
+    <value>Expected union case {0} to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
-    <value>Expected record case to have xml documentation:</value>
+    <value>Expected record case {0} to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
-    <value>Expected auto property to have xml documentation:</value>
+    <value>Expected auto property {0} to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationLetError" xml:space="preserve">
     <value>Expected let to have xml documentation.</value>
