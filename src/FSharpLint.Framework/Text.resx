@@ -264,4 +264,7 @@
   <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
     <value>Expected union case to have xml documentation:</value>
   </data>
+  <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
+    <value>Expected record case to have xml documentation:</value>
+  </data>
 </root>

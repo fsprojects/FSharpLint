@@ -72,6 +72,13 @@ let config name =
                                             ("Enabled", Enabled("UnionDefinitionHeader" = name))
                                         ]
                                 });
+                            ("RecordDefinitionHeader",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled("RecordDefinitionHeader" = name))
+                                        ]
+                                });
                         ]
                     Settings = Map.ofList []
                 })
@@ -621,3 +628,108 @@ type OrderId =
 
         Assert.IsTrue(this.ErrorsExist, this.ErrorMsg)
         Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+
+[<TestFixture>]
+type TestNameConventionRulesRecord() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "RecordDefinitionHeader")
+
+    [<Test>]
+    member this.RecordNoComment() =
+        this.Parse """
+type GeoCoord = {
+
+    lat: float
+
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.RecordWithDoubleDashComment() =
+        this.Parse """
+type GeoCoord = {
+    // this is latitude
+    lat: float
+    // this is longitude
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.RecordWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "RecordDefinitionHeader")>]
+type GeoCoord = {
+    // this is latitude
+    lat: float
+    // this is longitude
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.RecordWithEmptyXmlComment() =
+        this.Parse ("""
+type GeoCoord = {
+    ///
+    lat: float
+    ///
+    long: float
+    }
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.RecordWithMultilineComment() =
+        this.Parse """
+type GeoCoord = {
+    (* this is latitude *)
+    lat: float
+    (* this is longitude *)
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.RecordWithXmlComment() =
+        this.Parse """
+type GeoCoord = {
+    /// this is latitude
+    lat: float
+    /// this is longitude
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.RecordWithAMissingXmlComment() =
+        this.Parse """
+type GeoCoord = {
+    /// this is latitude
+    lat: float
+    // this is longitude
+    long: float
+    }
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)

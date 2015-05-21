@@ -372,6 +372,12 @@
         <EnumDefinitionHeader>
           <Enabled>false</Enabled>
         </EnumDefinitionHeader>
+        <UnionDefinitionHeader>
+          <Enabled>false</Enabled>
+        </UnionDefinitionHeader>
+        <RecordDefinitionHeader>
+          <Enabled>false</Enabled>
+        </RecordDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>

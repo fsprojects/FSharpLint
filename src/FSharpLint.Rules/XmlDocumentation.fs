@@ -66,6 +66,20 @@ module XmlDocumentation =
                     let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo
                     if isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationTypeError"))
+                if configExceptionHeader visitorInfo.Config "RecordDefinitionHeader" &&
+                    astNode.IsSuppressed(AnalyserName, "RecordDefinitionHeader") |> not then
+                    let evalField (SynField.Field(_, _, id, _, _, xmlDoc, _, range)) =
+                        if isPreXmlDocEmpty xmlDoc then
+                            visitorInfo.PostError range (FSharpLint.Framework.Resources.GetString("RulesXmlDocumentationRecordError")
+                                + (match id with
+                                   | None -> ""
+                                   | Some i -> " " + i.idText))
+                    match typeDefnRep with
+                    | Simple(simple, range) ->
+                        match simple with
+                        | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.iter evalField
+                        | _ -> ()
+                    | _ -> ()
             | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, rng)) ->
                 if configExceptionHeader visitorInfo.Config "MemberDefinitionHeader" &&
                     astNode.IsSuppressed(AnalyserName, "MemberDefinitionHeader") |> not then
