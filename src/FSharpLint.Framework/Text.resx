@@ -267,4 +267,7 @@
   <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
     <value>Expected record case to have xml documentation:</value>
   </data>
+  <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
+    <value>Expected auto property to have xml documentation:</value>
+  </data>
 </root>

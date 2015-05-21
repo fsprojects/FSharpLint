@@ -35,7 +35,8 @@ let config name =
                              "MemberDefinitionHeader";
                              "EnumDefinitionHeader";
                              "UnionDefinitionHeader";
-                             "RecordDefinitionHeader"]
+                             "RecordDefinitionHeader";
+                             "AutoPropertyDefinitionHeader"]
                              |> List.map (fun ruleName ->
                                  (ruleName,
                                     {Rule.Settings = Map.ofList
@@ -693,6 +694,104 @@ type GeoCoord = {
     // this is longitude
     long: float
     }
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+[<TestFixture>]
+type TestNameConventionRulesAutoProperty() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "AutoPropertyDefinitionHeader")
+
+    [<Test>]
+    member this.AutoPropertyNoComment() =
+        this.Parse """
+type GeoCoord() =
+    // this is latitude
+    member val Lat = 0 with get, set
+    // this is longitude
+    member val Long = 0 with get, set
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.AutoPropertyWithDoubleDashComment() =
+        this.Parse """
+type GeoCoord() =
+    // this is latitude
+    member val Lat = 0 with get, set
+    // this is longitude
+    member val Long = 0 with get, set
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.AutoPropertyWithDoubleDashCommentSuppressed() =
+        this.Parse """
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("XmlDocumentation", "AutoPropertyDefinitionHeader")>]
+type GeoCoord() =
+    // this is latitude
+    member val Lat = 0 with get, set
+    // this is longitude
+    member val Long = 0 with get, set
+        """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.AutoPropertyWithEmptyXmlComment() =
+        this.Parse ("""
+type GeoCoord() =
+    ///
+    member val Lat = 0 with get, set
+    ///
+    member val Long = 0 with get, set
+        """)
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.AutoPropertyWithMultilineComment() =
+        this.Parse """
+type GeoCoord() =
+    (* this is latitude *)
+    member val Lat = 0 with get, set
+    (* this is longitude *)
+    member val Long = 0 with get, set
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
+        Assert.IsTrue(this.ErrorExistsOnLine(6), this.ErrorMsg)
+
+    [<Test>]
+    member this.AutoPropertyWithXmlComment() =
+        this.Parse """
+type GeoCoord() =
+    /// this is latitude
+    member val Lat = 0 with get, set
+    /// this is longitude
+    member val Long = 0 with get, set
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.AutoPropertyWithAMissingXmlComment() =
+        this.Parse """
+type GeoCoord() =
+    /// this is latitude
+    member val Lat = 0 with get, set
+    // this is longitude
+    member val Long = 0 with get, set
         """
 
         Assert.IsTrue(this.ErrorsExist)

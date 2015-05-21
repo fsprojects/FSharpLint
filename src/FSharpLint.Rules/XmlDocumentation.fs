@@ -80,6 +80,11 @@ module XmlDocumentation =
                 if isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationMemberError")
 
+        | AstNode.MemberDefinition(SynMemberDefn.AutoProperty(_, _, id, _, _, _, xmlDoc, _, _, rangeOpt, range)) ->
+            if ruleEnabled visitorInfo astNode "AutoPropertyDefinitionHeader" then
+                if isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (getString "RulesXmlDocumentationAutoPropertyError")
+
         | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, rng)) ->
             if ruleEnabled visitorInfo astNode "TypeDefinitionHeader" then
                 let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, _, range)) = coreInfo

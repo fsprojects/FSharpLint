@@ -378,6 +378,9 @@
         <RecordDefinitionHeader>
           <Enabled>false</Enabled>
         </RecordDefinitionHeader>
+        <AutoPropertyDefinitionHeader>
+          <Enabled>false</Enabled>
+        </AutoPropertyDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
