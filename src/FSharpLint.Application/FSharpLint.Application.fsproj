@@ -47,8 +47,8 @@
   <ItemGroup>
     <Compile Include="LintWarning.fsi" />
     <Compile Include="LintWarning.fs" />
-    <Compile Include="RunLint.fsi" />
-    <Compile Include="RunLint.fs" />
+    <Compile Include="Lint.fsi" />
+    <Compile Include="Lint.fs" />
     <Compile Include="FSharpLintWorker.fsi" />
     <Compile Include="FSharpLintWorker.fs" />
     <Compile Include="AppDomainWorker.fsi" />
@@ -84,7 +84,7 @@
     <Reference Include="Microsoft.Build.Tasks.v12.0" />
     <Reference Include="Microsoft.Build.Utilities.v12.0" />
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core, Version=4.3.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

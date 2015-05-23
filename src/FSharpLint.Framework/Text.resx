@@ -144,9 +144,6 @@
   <data name="ConsoleRunTimeConfigError" xml:space="preserve">
     <value>Failed while reading from config at run time.</value>
   </data>
-  <data name="ConsoleUnableToFindProjectOutputPath" xml:space="preserve">
-    <value>MSBuild failed to get the output path for project file {0}</value>
-  </data>
   <data name="ConsoleUnableToFindReferencedProject" xml:space="preserve">
     <value>Referenced project {0} could not be found on disk.</value>
   </data>

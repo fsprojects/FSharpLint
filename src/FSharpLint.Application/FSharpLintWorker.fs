@@ -18,8 +18,6 @@
 
 namespace FSharpLint.Application
 
-open RunLint
-
 module FSharpLintWorker =
 
     open FSharpLint.Framework
@@ -71,10 +69,9 @@ module FSharpLintWorker =
 
                     let parseInfo =
                         {
-                            FinishEarly = System.Func<_>(neverFinishEarly)
-                            ProjectFile = projectFile
-                            Progress = System.Action<_>(receivedProgress)
-                            ErrorReceived = System.Action<_>(receivedError)
+                            FinishEarly = Some neverFinishEarly
+                            ReceivedWarning = Some receivedError
+                            Configuration = None
                         }
 
                     let getParseFailureReason = function
@@ -86,30 +83,28 @@ module FSharpLintWorker =
                         | ParseFile.AbortedTypeCheck ->
                             "Aborted type check."
 
-                    match parseProject parseInfo with
-                        | Result.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
+                    match lintProject parseInfo projectFile (Some receivedProgress) with
+                        | LintResult.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
                             failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
-                        | Result.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                        | LintResult.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
                             failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
-                        | Result.Failure(UnableToFindProjectOutputPath(projectPath)) -> 
-                            failed "ConsoleUnableToFindProjectOutputPath" [|projectPath|]
-                        | Result.Failure(FailedToLoadConfig(message)) -> 
+                        | LintResult.Failure(FailedToLoadConfig(message)) -> 
                             failed "ConsoleFailedToLoadConfig" [|message|]
-                        | Result.Failure(RunTimeConfigError) -> 
+                        | LintResult.Failure(RunTimeConfigError) -> 
                             failed "ConsoleRunTimeConfigError" [||]
-                        | Result.Failure(FailedToParseFile(failure)) -> 
+                        | LintResult.Failure(FailedToParseFile(failure)) -> 
                             FSharpLint.Worker.Result.Failure(
                                 "Lint failed while analysing " + 
                                 projectFile + 
                                 ".\nFailed with: " + 
                                 getParseFailureReason failure)
-                        | Result.Failure(FailedToParseFilesInProject(failures)) -> 
+                        | LintResult.Failure(FailedToParseFilesInProject(failures)) -> 
                             FSharpLint.Worker.Result.Failure(
                                 "Lint failed while analysing " + 
                                 projectFile + 
                                 ".\nFailed with: " + 
                                 System.String.Join("\n", failures |> List.map getParseFailureReason))
-                        | Result.Success() -> 
+                        | LintResult.Success(_) -> 
                             FSharpLint.Worker.Result.Success()
                 with
                     | e -> 

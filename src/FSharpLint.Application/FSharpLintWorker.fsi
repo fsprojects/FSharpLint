@@ -20,8 +20,6 @@ namespace FSharpLint.Application
 
 module FSharpLintWorker =
 
-    open RunLint
-
     type FSharpLintWorker = 
         inherit System.MarshalByRefObject
         interface FSharpLint.Worker.IFSharpLintWorker
