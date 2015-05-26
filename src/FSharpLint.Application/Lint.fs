@@ -56,7 +56,7 @@ module ConfigurationManagement =
     /// If you're loading your own configuration you should make sure that it overrides the default 
     /// configuration/overrides a configuration that has overriden the default configuration.
     let overrideDefaultConfiguration configurationToOverrideDefault =
-        overrideConfiguration (loadDefaultConfiguration()) configurationToOverrideDefault
+        overrideConfiguration defaultConfiguration configurationToOverrideDefault
 
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
@@ -119,7 +119,7 @@ module ConfigurationManagement =
 
         let config = 
             try
-                loadDefaultConfiguration() |> checkConfig
+                defaultConfiguration |> checkConfig
             with
                 | ConfigurationException(message) ->
                     ConfigurationResult.Failure(FailedToLoadConfig ("Failed to load default config: " + message))
@@ -178,8 +178,8 @@ module Lint =
                     
     module LoadPlugins =
 
-        /// Loads visitors implementing lint rules.
-        let loadPlugins () =
+        /// Loaded visitors implementing lint rules.
+        let plugins =
             FSharpLint.Framework.LoadVisitors.rulesAssembly
                 |> FSharpLint.Framework.LoadVisitors.loadPlugins
 
@@ -341,7 +341,7 @@ module Lint =
             let lintInformation =
                 {
                     Configuration = config
-                    RulePlugins = LoadPlugins.loadPlugins()
+                    RulePlugins = LoadPlugins.plugins
                     FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                     ErrorReceived = warningReceived
                     ReportLinterProgress = projectProgress
@@ -382,38 +382,6 @@ module Lint =
                     | Success() -> lintWarnings |> Seq.toList |> LintResult.Success 
                     | Failure(x) -> LintResult.Failure(x)
             | Failure(x) -> LintResult.Failure(x)
-            
-    /// Lints F# source code.
-    let lintSource optionalParams source =
-        let lintWarnings = LinkedList<LintWarning.Warning>()
-
-        let warningReceived (warning:LintWarning.Warning) =
-            lintWarnings.AddLast warning |> ignore
-
-            optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
-
-        let config = 
-            match optionalParams.Configuration with
-                | Some(userSuppliedConfig) -> userSuppliedConfig
-                | None -> FSharpLint.Framework.Configuration.loadDefaultConfiguration()
-
-        let lintInformation =
-            {
-                Configuration = config
-                RulePlugins = LoadPlugins.loadPlugins()
-                FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
-                ErrorReceived = warningReceived
-                ReportLinterProgress = ignore
-            }
-
-        let parser = ParseFile.parseSource source
-
-        match parser lintInformation.Configuration with
-            | ParseFile.Success(parseFileInformation) -> 
-                lint lintInformation parseFileInformation
-                lintWarnings |> Seq.toList |> LintResult.Success 
-            | ParseFile.Failed(failure) -> 
-                LintResult.Failure(FailedToParseFile(failure))
                 
     /// Lints F# source code that has already been parsed using 
     /// `FSharp.Compiler.Services` in the calling application.
@@ -428,12 +396,12 @@ module Lint =
         let config = 
             match optionalParams.Configuration with
                 | Some(userSuppliedConfig) -> userSuppliedConfig
-                | None -> FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                | None -> Configuration.defaultConfiguration
 
         let lintInformation =
             {
                 Configuration = config
-                RulePlugins = LoadPlugins.loadPlugins()
+                RulePlugins = LoadPlugins.plugins
                 FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                 ErrorReceived = warningReceived
                 ReportLinterProgress = ignore
@@ -450,36 +418,24 @@ module Lint =
         lint lintInformation parsedFileInfo
 
         lintWarnings |> Seq.toList |> LintResult.Success
-        
-    /// Lints an F# file from a given path to the `.fs` file.
-    let lintFile optionalParams filepath =
-        let lintWarnings = LinkedList<LintWarning.Warning>()
-
-        let warningReceived (warning:LintWarning.Warning) =
-            lintWarnings.AddLast warning |> ignore
-
-            optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
-
+            
+    /// Lints F# source code.
+    let lintSource optionalParams source =
         let config = 
             match optionalParams.Configuration with
                 | Some(userSuppliedConfig) -> userSuppliedConfig
-                | None -> FSharpLint.Framework.Configuration.loadDefaultConfiguration()
-        
-        let lintInformation =
-            {
-                Configuration = config
-                RulePlugins = LoadPlugins.loadPlugins()
-                FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
-                ErrorReceived = warningReceived
-                ReportLinterProgress = ignore
-            }
+                | None -> Configuration.defaultConfiguration
 
-        let parser = ParseFile.parseFile filepath
-
-        match parser lintInformation.Configuration with
+        match ParseFile.parseSource source config with
             | ParseFile.Success(parseFileInformation) -> 
-                lint lintInformation parseFileInformation
-                lintWarnings |> Seq.toList |> LintResult.Success
+                let parsedFileInfo =
+                    {
+                        Source = parseFileInformation.PlainText
+                        Ast = parseFileInformation.Ast
+                        TypeCheckResults = parseFileInformation.TypeCheckResults
+                    }
+
+                lintParsedSource optionalParams parsedFileInfo
             | ParseFile.Failed(failure) -> 
                 LintResult.Failure(FailedToParseFile(failure))
 
@@ -496,12 +452,12 @@ module Lint =
         let config = 
             match optionalParams.Configuration with
                 | Some(userSuppliedConfig) -> userSuppliedConfig
-                | None -> FSharpLint.Framework.Configuration.loadDefaultConfiguration()
+                | None -> Configuration.defaultConfiguration
         
         let lintInformation =
             {
                 Configuration = config
-                RulePlugins = LoadPlugins.loadPlugins()
+                RulePlugins = LoadPlugins.plugins
                 FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                 ErrorReceived = warningReceived
                 ReportLinterProgress = ignore
@@ -518,3 +474,23 @@ module Lint =
         lint lintInformation parsedFileInfo
 
         lintWarnings |> Seq.toList |> LintResult.Success
+        
+    /// Lints an F# file from a given path to the `.fs` file.
+    let lintFile optionalParams filepath =
+        let config = 
+            match optionalParams.Configuration with
+                | Some(userSuppliedConfig) -> userSuppliedConfig
+                | None -> Configuration.defaultConfiguration
+
+        match ParseFile.parseFile filepath config with
+            | ParseFile.Success(astFileParseInfo) -> 
+                let parsedFileInfo = 
+                    {
+                        Source = astFileParseInfo.PlainText
+                        Ast = astFileParseInfo.Ast
+                        TypeCheckResults = astFileParseInfo.TypeCheckResults
+                    }
+
+                lintParsedFile optionalParams parsedFileInfo filepath
+            | ParseFile.Failed(failure) -> 
+                LintResult.Failure(FailedToParseFile(failure))

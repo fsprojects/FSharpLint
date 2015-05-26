@@ -273,7 +273,7 @@ module Configuration =
 
     /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
     /// This function loads and returns this default configuration.
-    let loadDefaultConfiguration () =
+    let defaultConfiguration =
         let assembly = System.Reflection.Assembly.GetExecutingAssembly()
         let resourceName = "DefaultConfiguration.FSharpLint"
 
