@@ -24,7 +24,7 @@ namespace FSharpLint.Worker
 
     /// <summary>
     /// Represents a lint error found in the user's code.
-    /// C# representation of <see cref="FSharpLint.Application.ErrorHandling.Error"/>.
+    /// C# representation of <see cref="FSharpLint.Application.LintWarning.Error"/>.
     /// </summary>
     [Serializable]
     public class Error

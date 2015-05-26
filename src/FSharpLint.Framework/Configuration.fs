@@ -93,7 +93,7 @@ module Configuration =
 
             let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
                 match remainingPath with
-                    | currentSegment::[] when isDirectory -> false 
+                    | [currentSegment] when isDirectory -> false 
                     | currentSegment::remaining -> 
                         let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 
@@ -257,25 +257,23 @@ module Configuration =
     /// loaded are left alone.
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
-    let overrideConfiguration configToOverride file =
-        let newConfig = System.IO.File.ReadAllText(file) |> configuration
-
-        let combineIgnoreFiles () = List.concat [newConfig.IgnoreFiles.Files; configToOverride.IgnoreFiles.Files]
+    let overrideConfiguration configToOverride configToOverrideWith =
+        let combineIgnoreFiles () = List.concat [configToOverrideWith.IgnoreFiles.Files; configToOverride.IgnoreFiles.Files]
 
         {
-            UseTypeChecker = newConfig.UseTypeChecker
+            UseTypeChecker = configToOverrideWith.UseTypeChecker
 
             IgnoreFiles = 
-                match newConfig.IgnoreFiles.Update with
-                    | IgnoreFiles.Overwrite -> newConfig.IgnoreFiles 
-                    | IgnoreFiles.Add -> { newConfig.IgnoreFiles with Files = combineIgnoreFiles() }
+                match configToOverrideWith.IgnoreFiles.Update with
+                    | IgnoreFiles.Overwrite -> configToOverrideWith.IgnoreFiles 
+                    | IgnoreFiles.Add -> { configToOverrideWith.IgnoreFiles with Files = combineIgnoreFiles() }
 
-            Analysers = overwriteMap configToOverride.Analysers newConfig.Analysers overrideAnalysers
+            Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers
         }
 
     /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
     /// This function loads and returns this default configuration.
-    let loadDefaultConfiguration () =
+    let defaultConfiguration =
         let assembly = System.Reflection.Assembly.GetExecutingAssembly()
         let resourceName = "DefaultConfiguration.FSharpLint"
 

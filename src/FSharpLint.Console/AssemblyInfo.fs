@@ -4,9 +4,9 @@ open System.Reflection
 [<assembly: AssemblyTitleAttribute("FSharpLint")>]
 [<assembly: AssemblyProductAttribute("FSharpLint")>]
 [<assembly: AssemblyDescriptionAttribute("Lint tool for F#.")>]
-[<assembly: AssemblyVersionAttribute("0.1.16")>]
-[<assembly: AssemblyFileVersionAttribute("0.1.16")>]
+[<assembly: AssemblyVersionAttribute("0.2.0")>]
+[<assembly: AssemblyFileVersionAttribute("0.2.0")>]
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] Version = "0.1.16"
+    let [<Literal>] Version = "0.2.0"

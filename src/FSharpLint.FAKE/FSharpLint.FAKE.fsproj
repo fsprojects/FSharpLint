@@ -9,11 +9,12 @@
     <OutputType>Library</OutputType>
     <RootNamespace>FSharpLint.FAKE</RootNamespace>
     <AssemblyName>FSharpLint.FAKE</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
     <Name>FSharpLint.FAKE</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,15 +47,16 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <ItemGroup>
     <Compile Include="FSharpLint.Fake.fs" />
-    <None Include="app.config" />
     <None Include="packages.config" />
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
-      <HintPath>..\..\packages\FAKE.Core.3.13.4\tools\FakeLib.dll</HintPath>
+      <HintPath>..\..\packages\FAKE.Lib.3.33.0\lib\net451\FakeLib.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

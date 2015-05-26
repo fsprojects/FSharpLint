@@ -40,89 +40,91 @@ module Program =
         printException parseException
 
     let private parserProgress = function
-        | FSharpLint.Application.RunLint.Starting(_)
-        | FSharpLint.Application.RunLint.ReachedEnd(_) -> ()
-        | FSharpLint.Application.RunLint.Failed(file, parseException) ->
+        | Starting(_)
+        | ReachedEnd(_) -> ()
+        | Failed(file, parseException) ->
             failedToParseFileError file parseException
 
     let private runLint projectFile =
-        let finishEarly = System.Func<_>(fun _ -> false)
+        let warningReceived = fun (error:LintWarning.Warning) -> 
+            let output = error.Info + System.Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
+            System.Console.WriteLine output
 
-        let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
-
-        let error = System.Action<ErrorHandling.Error>(fun error -> 
-            let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
-            System.Console.WriteLine(output))
-
-        let parseInfo: RunLint.ProjectParseInfo =
+        let parseInfo =
             {
-                FinishEarly = finishEarly
-                ProjectFile = projectFile
-                Progress = parserProgress
-                ErrorReceived = error
+                FinishEarly = None
+                ReceivedWarning = Some warningReceived
+                Configuration = None
             }
 
-        RunLint.parseProject parseInfo
-
-    let private reportError = System.Action<ErrorHandling.Error>(fun error -> 
-        let output = error.Info + System.Environment.NewLine + ErrorHandling.getCompleteErrorText error.Range error.Input
-        System.Console.WriteLine(output))
-
-    let private runLintOnProject projectFile =
-        let finishEarly = System.Func<_>(fun _ -> false)
-
-        let parserProgress = System.Action<RunLint.ParserProgress>(parserProgress)
-
-        let parseInfo: RunLint.ProjectParseInfo =
-            {
-                FinishEarly = finishEarly
-                ProjectFile = projectFile
-                Progress = parserProgress
-                ErrorReceived = reportError
-            }
-
-        RunLint.parseProject parseInfo
+        lintProject parseInfo projectFile (Some parserProgress)
 
     let private runLintOnFile pathToFile =
-        RunLint.parseFile pathToFile reportError
+        let reportLintWarning (warning:LintWarning.Warning) =
+            let output = warning.Info + System.Environment.NewLine + LintWarning.getWarningWithLocation warning.Range warning.Input
+            System.Console.WriteLine(output)
+
+        let parseInfo =
+            {
+                FinishEarly = None
+                ReceivedWarning = Some reportLintWarning
+                Configuration = None
+            }
+
+        lintFile parseInfo pathToFile
 
     let private runLintOnSource source =
         let getErrorMessage (range:Microsoft.FSharp.Compiler.Range.range) =
             let error = FSharpLint.Framework.Resources.GetString("LintSourceError")
             System.String.Format(error, range.StartLine, range.StartColumn)
 
-        let reportError = System.Action<ErrorHandling.Error>(fun error -> 
-            let output = error.Info + System.Environment.NewLine + ErrorHandling.errorInfoLine getErrorMessage error.Range error.Input
-            System.Console.WriteLine(output))
+        let reportLintWarning (warning:LintWarning.Warning) = 
+            let output = warning.Info + System.Environment.NewLine + LintWarning.warningInfoLine getErrorMessage warning.Range warning.Input
+            System.Console.WriteLine(output)
 
-        RunLint.parseInput source reportError
+        let parseInfo =
+            {
+                FinishEarly = None
+                ReceivedWarning = Some reportLintWarning
+                Configuration = None
+            }
+
+        lintSource parseInfo source
+
+    let private getParseFailureReason = function
+        | ParseFile.FailedToParseFile(failures) ->
+            let getFailureReason (x:Microsoft.FSharp.Compiler.FSharpErrorInfo) =
+                sprintf "failed to parse file %s, message: %s" x.FileName x.Message
+
+            System.String.Join(", ", failures |> Array.map getFailureReason)
+        | ParseFile.AbortedTypeCheck ->
+            "Aborted type check."
 
     let private printFailedDescription = function
-        | ProjectFile.ProjectFileCouldNotBeFound(projectPath) ->
+        | ProjectFileCouldNotBeFound(projectPath) ->
             let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
             System.Console.WriteLine(System.String.Format(formatString, projectPath))
 
-        | ProjectFile.MSBuildFailedToLoadProjectFile(projectPath, e) ->
+        | MSBuildFailedToLoadProjectFile(projectPath, e) ->
             let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
             System.Console.WriteLine(System.String.Format(formatString, projectPath, e.Message))
 
-        | ProjectFile.UnableToFindProjectOutputPath(projectPath) ->
-            let formatString = Resources.GetString("ConsoleUnableToFindProjectOutputPath")
-            System.Console.WriteLine(System.String.Format(formatString, projectPath))
-
-        | ProjectFile.UnableToFindReferencedProject(referencedProjectPath) ->
-            let formatString = Resources.GetString("ConsoleUnableToFindReferencedProject")
-            System.Console.WriteLine(System.String.Format(formatString, referencedProjectPath))
-
-        | ProjectFile.FailedToLoadConfig(message) ->
+        | FailedToLoadConfig(message) ->
             let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
             System.Console.WriteLine(System.String.Format(formatString, message))
 
-        | ProjectFile.RunTimeConfigError ->
+        | RunTimeConfigError ->
             System.Console.WriteLine(Resources.GetString("ConsoleRunTimeConfigError"))
 
-        | ProjectFile.FailedToResolveReferences ->
-            System.Console.WriteLine(Resources.GetString("ConsoleFailedToResolveReferences"))
+        | FailedToParseFile(failure) ->             
+            System.Console.WriteLine(
+                "Lint failed to parse a file. Failed with: " + 
+                getParseFailureReason failure)
+
+        | FailedToParseFilesInProject(failures) -> 
+            System.Console.WriteLine(
+                "Lint failed to parse files. Failed with: " + 
+                System.String.Join("\n", failures |> List.map getParseFailureReason))
 
     type private Argument =
         | ProjectFile of string
@@ -159,22 +161,17 @@ module Program =
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
 
+    let private outputLintResult = function
+        | LintResult.Success(_) ->
+            System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
+        | LintResult.Failure(error) ->
+            printFailedDescription error
+
     let private start projectFile =
         if System.IO.File.Exists(projectFile) then
             try
-                match runLint projectFile with
-                    | RunLint.Success ->
-                        System.Console.WriteLine(Resources.GetString("ConsoleFinished"))
-                    | RunLint.Failure(error) ->
-                        printFailedDescription error
+                runLint projectFile |> outputLintResult
             with
-                | FSharpLint.Framework.Ast.ParseException({ File = file; Errors = errors }) ->
-                    System.Console.WriteLine(
-                        "Lint failed while analysing " + 
-                        projectFile + 
-                        "\nFailed to parse file: " + file + 
-                        ".\nFailed with: " + 
-                        System.String.Join("\n", errors))
                 | e -> 
                     System.Console.WriteLine("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
 
@@ -183,15 +180,12 @@ module Program =
             System.Console.WriteLine(System.String.Format(formatString, projectFile))
 
     let private startWithArguments arguments =
-        let projectFile = arguments |> List.tryPick (function | ProjectFile(file) -> Some(file) | _ -> None)
-
-        projectFile |> Option.iter start
-
         arguments
             |> List.iter (function 
-                | SingleFile(file) -> runLintOnFile file
-                | Source(source) -> runLintOnSource source
-                | _ -> ())
+                | SingleFile(file) -> runLintOnFile file |> outputLintResult
+                | Source(source) -> runLintOnSource source |> outputLintResult
+                | ProjectFile(file) -> start file
+                | UnexpectedArgument(_) -> ())
             
     [<EntryPoint>]
     let main argv =

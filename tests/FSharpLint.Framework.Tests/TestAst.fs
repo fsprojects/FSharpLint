@@ -20,6 +20,8 @@ module TestAst
 
 open NUnit.Framework
 open FSharpLint.Framework.Ast
+open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.ParseFile
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -198,6 +200,18 @@ module Foo =
 [<SuppressMessage("Analyser", "Rule")>]
 let dog = ()"""
 
-        let parseInfo = parseInput false input
+        let stubConfig =
+            {
+                UseTypeChecker = false
+                IgnoreFiles =
+                    {
+                        Update = IgnoreFiles.Overwrite
+                        Files = []
+                    }
+                Analysers = Map.ofList []
+            }
 
-        Assert.AreEqual(4, getSuppressMessageAttributesFromAst parseInfo.Ast |> List.length)
+        match parseSource input stubConfig with
+            | ParseFileResult.Success(result) ->
+                Assert.AreEqual(4, getSuppressMessageAttributesFromAst result.Ast |> List.length)
+            | _ -> failwith "Failed to parse input."

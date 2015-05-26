@@ -104,7 +104,7 @@ module Binding =
                         visitorParameters.VisitorInfo.PostError 
                             range 
                             (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
-             | _ -> ()              
+             | _ -> ()
 
     let checkTupleOfWildcards visitorParameters pattern identifier =
         let isEnabled =
