@@ -45,7 +45,7 @@ module TestMSBuildTask =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestMSBuildTask() =
         [<SetUp>]
-        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles()
+        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintMSBuildTaskTest"
 
         [<Test>]
         member this.FunctionalTestMSBuildTask() = 

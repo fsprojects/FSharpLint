@@ -62,9 +62,9 @@ module TestFakeTask =
         output.ToString()
     
     [<TestFixture(Category = "Acceptance Tests")>]
-    type TestMSBuildTask() =
+    type TestFakeTask() =
         [<SetUp>]
-        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles()
+        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintFakeTaskTest"
 
         [<Test>]
         member this.FunctionalTestFakeTask() = 

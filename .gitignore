@@ -180,4 +180,5 @@ tools/
 !docs/tools
 *.nupkg
 
-tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint/
+tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/
+tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintMSBuildTaskTest/

@@ -24,14 +24,14 @@ module TestPackageHelper =
     open NUnit.Framework
 
     let getPath (path:string) = path.Replace('/', Path.DirectorySeparatorChar)
-    
-    let taskDirectory = getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint/"
-
-    let taskBuildDirectory = Path.Combine(taskDirectory, "build")
 
     let copy toDirectory path = File.Copy(path, Path.Combine(toDirectory, Path.GetFileName(path)), true)
 
-    let copyFSharpLintTaskFiles() = 
+    let copyFSharpLintTaskFiles toDirectory = 
+        let taskDirectory = 
+            sprintf @"../../../FSharpLint.FunctionalTest.TestedProject/%s/" toDirectory
+                |> getPath
+
         let taskDirectoryExists = Directory.Exists(taskDirectory)
         if not taskDirectoryExists then
             Directory.CreateDirectory(taskDirectory) |> ignore
@@ -57,6 +57,8 @@ module TestPackageHelper =
         copyToTaskDir (@"../../../../src/FSharpLint.Rules/bin/" + binDir + "/FSharp.Compiler.Service.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Rules/bin/" + binDir + "/FParsecCS.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Rules/bin/" + binDir + "/FParsec.dll")
+
+        let taskBuildDirectory = Path.Combine(taskDirectory, "build")
 
         let taskBuildDirectoryExists = Directory.Exists(taskBuildDirectory)
         if not taskBuildDirectoryExists then

@@ -42,7 +42,7 @@
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.1\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
-   <Import Project="$(MSBuildProjectDirectory)\FSharpLint\build\FSharpLint.targets" />
+   <Import Project="$(MSBuildProjectDirectory)\FSharpLintMSBuildTaskTest\build\FSharpLint.targets" />
   <ItemGroup>
     <Compile Include="TestHints.fs" />
   </ItemGroup>
