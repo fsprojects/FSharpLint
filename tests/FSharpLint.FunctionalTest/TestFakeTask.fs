@@ -51,8 +51,6 @@ module TestFakeTask =
                                     UseShellExecute = false)
 
         use app = System.Diagnostics.Process.Start(startInfo)
-                
-        app.Start() |> ignore
 
         let output = System.Text.StringBuilder()
         
