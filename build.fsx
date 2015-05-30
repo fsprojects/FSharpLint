@@ -143,12 +143,12 @@ Target "CreateApiPackage" (fun _ ->
     let libDir = apiPackagingDir @@ "lib"
     CleanDirs [libDir]
 
-    CopyFile libDir "bin/FSharpLint.Rules.dll"
-    CopyFile libDir "bin/FSharpLint.Framework.dll"
-    CopyFile libDir "bin/FSharpLint.Application.dll"
-    CopyFile libDir "bin/FSharp.Compiler.Service.dll"
-    CopyFile libDir "bin/FParsecCS.dll"
-    CopyFile libDir "bin/FParsec.dll"
+    CopyFile libDir "./bin/FSharpLint.Rules.dll"
+    CopyFile libDir "./bin/FSharpLint.Framework.dll"
+    CopyFile libDir "./bin/FSharpLint.Application.dll"
+    CopyFile libDir "./bin/FSharp.Compiler.Service.dll"
+    CopyFile libDir "./bin/FParsecCS.dll"
+    CopyFile libDir "./bin/FParsec.dll"
 
     NuGet (fun p -> 
         { p with
