@@ -13,9 +13,6 @@
     <description>@description@</description>
     <releaseNotes>@releaseNotes@</releaseNotes>
     <copyright>Copyright 2014</copyright>
-    <tags>F# fsharp lint FSharpLint</tags>
-    @dependencies@
-    @references@
+    <tags>F# fsharp lint FSharpLint api</tags>
   </metadata>
-  @files@
 </package>

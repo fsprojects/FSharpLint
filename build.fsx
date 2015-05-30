@@ -31,6 +31,10 @@ let authors = [ "Matthew Mcveigh" ]
 let version = "0.2.0"
 let apiVersion = "0.0.1"
 
+let packagingRoot = "./packaging/"
+let toolPackagingDir = packagingRoot @@ "tool"
+let apiPackagingDir = packagingRoot @@ "api"
+
 // File system information 
 // (<solutionFile>.sln is built during the building process)
 let solutionFile  = "FSharpLint"
@@ -42,10 +46,6 @@ let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
 let gitHome = "https://github.com/fsprojects/FSharpLint"
 // The name of the project on GitHub
 let gitName = "FSharpLint"
-
-// --------------------------------------------------------------------------------------
-// END TODO: The rest of the file includes standard build steps 
-// --------------------------------------------------------------------------------------
 
 // Read additional information from the release notes document
 Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
@@ -115,61 +115,53 @@ Target "CreatePackage" (fun _ ->
             Authors = authors
             Project = project
             Description = summary                               
-            OutputPath = "nugetpackage"
+            OutputPath = packagingRoot
             Summary = summary
-            WorkingDir = "nugetpackage"
+            WorkingDir = toolPackagingDir
             Version = version
             Publish = false
             Files = 
                 [
                     (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
-                    (System.String.Format("..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}src{0}FSharpLint.Worker{0}bin{0}Release{0}FSharpLint.Worker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}src{0}FSharpLint.Worker{0}bin{0}Release{0}FSharpLint.Worker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
-                    (System.String.Format("..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                 ]
          })
-        "nugetpackage/FSharpLint.nuspec"
+        "FSharpLint.nuspec"
 )
 
 Target "CreateApiPackage" (fun _ ->
+    let libDir = apiPackagingDir @@ "lib"
+    CleanDirs [libDir]
+
+    CopyFile libDir "bin/FSharpLint.Rules.dll"
+    CopyFile libDir "bin/FSharpLint.Framework.dll"
+    CopyFile libDir "bin/FSharpLint.Application.dll"
+    CopyFile libDir "bin/FSharp.Compiler.Service.dll"
+    CopyFile libDir "bin/FParsecCS.dll"
+    CopyFile libDir "bin/FParsec.dll"
+
     NuGet (fun p -> 
-        {p with
+        { p with
             Authors = authors
             Project = projectApi
             Description = summaryApi
-            OutputPath = "nugetpackage"
+            OutputPath = packagingRoot
             Summary = summaryApi
-            WorkingDir = "nugetpackage"
+            WorkingDir = apiPackagingDir
             Version = apiVersion
             Publish = false
-            References = 
-                [
-                    "FSharpLint.Rules.dll"
-                    "FSharpLint.Framework.dll"
-                    "FSharpLint.Application.dll"
-                    "FSharp.Compiler.Service.dll"
-                    "FParsecCS.dll"
-                    "FParsec.dll"
-                ]            
-            Files = 
-                [
-                    (System.String.Format("..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                    (System.String.Format("..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                    (System.String.Format("..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                    (System.String.Format("..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                    (System.String.Format("..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                    (System.String.Format("..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), Some "lib", None)
-                ]
          })
-        "nugetpackage/FSharpLintApi.nuspec"
+        "FSharpLintApi.nuspec"
 )
 
 #I @"tools/FSharpLint.0.1.16/"
@@ -199,7 +191,5 @@ Target "All" DoNothing
 "GenerateDocs" ==> "All"
 "CreatePackage" ==> "All"
 "CreateApiPackage" ==> "All"
-
-
 
 RunTargetOrDefault "All"

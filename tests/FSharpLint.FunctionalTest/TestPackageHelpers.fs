@@ -66,4 +66,4 @@ module TestPackageHelper =
 
         let copyToTaskBuildDir = getPath >> (copy taskBuildDirectory)
 
-        copyToTaskBuildDir @"../../../../nugetpackage/build/FSharpLint.targets"
+        copyToTaskBuildDir @"../../../../packaging/tool/build/FSharpLint.targets"
