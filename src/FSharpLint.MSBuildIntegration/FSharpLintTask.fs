@@ -49,15 +49,17 @@ type FSharpLintTask() =
                     let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
 
                     System.Reflection.Assembly.LoadFrom(file)
+
+        let resolveAssemblyHandler = System.ResolveEventHandler(resolveAssembly)
             
-        System.AppDomain.CurrentDomain.add_AssemblyResolve(System.ResolveEventHandler(resolveAssembly))
+        System.AppDomain.CurrentDomain.add_AssemblyResolve(resolveAssemblyHandler)
         
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
-
+        
         let progress (progress:FSharpLint.Worker.Progress) =
             if progress.State = FSharpLint.Worker.Progress.ProgressType.Failed then
                 sprintf 
@@ -68,7 +70,7 @@ type FSharpLintTask() =
                     |> logFailure
 
         let neverFinishEarly = fun _ -> false
-
+        
         let errorReceived (error:FSharpLint.Worker.Error) = 
             let filename = error.Range.FileName
             let startLine = error.Range.StartLine
@@ -94,4 +96,6 @@ type FSharpLintTask() =
         if not result.IsSuccess then
             logFailure result.Message
             
+        System.AppDomain.CurrentDomain.remove_AssemblyResolve(resolveAssemblyHandler)
+
         true
