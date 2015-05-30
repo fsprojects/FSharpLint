@@ -176,7 +176,7 @@
 
         <MaxLinesInLambdaFunction>
           <Enabled>true</Enabled>
-          <Lines>5</Lines>
+          <Lines>7</Lines>
         </MaxLinesInLambdaFunction>
 
         <MaxLinesInMatchLambdaFunction>
@@ -240,7 +240,7 @@
         </MaxLinesInFile>
 
         <MaxCharactersOnLine>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
           <Length>120</Length>
         </MaxCharactersOnLine>
 
