@@ -29,6 +29,7 @@ let summaryApi = "Lint tool for F#. Api to extend FSharpLint"
 let authors = [ "Matthew Mcveigh" ]
 
 let version = "0.2.0"
+let apiVersion = "0.0.1"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -147,16 +148,16 @@ Target "CreateApiPackage" (fun _ ->
             OutputPath = "nugetpackage"
             Summary = summaryApi
             WorkingDir = "nugetpackage"
-            Version = version
+            Version = apiVersion
             Publish = false
             References = 
                 [
-                    ("FSharpLint.Rules.dll")
-                    ("FSharpLint.Framework.dll")
-                    ("FSharpLint.Application.dll")
-                    ("FSharp.Compiler.Service.dll")
-                    ("FParsecCS.dll")
-                    ("FParsec.dll")
+                    "FSharpLint.Rules.dll"
+                    "FSharpLint.Framework.dll"
+                    "FSharpLint.Application.dll"
+                    "FSharp.Compiler.Service.dll"
+                    "FParsecCS.dll"
+                    "FParsec.dll"
                 ]            
             Files = 
                 [
