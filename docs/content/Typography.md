@@ -44,7 +44,7 @@ Break the line up into multiple lines.
 
 #####Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`Enabled` - A boolean property that can enable and disable this rule. (Default false)
 
 `Length` - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)
 

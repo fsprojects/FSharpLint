@@ -44,7 +44,7 @@ Consider using a named function rather than a lambda function.
 #####Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
-`Lines` - Maximum number of lines in a lambda function. (Default 5)
+`Lines` - Maximum number of lines in a lambda function. (Default 7)
 
 ####MaxLinesInMatchLambdaFunction
 
