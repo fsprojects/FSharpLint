@@ -164,8 +164,8 @@ Target "CreateApiPackage" (fun _ ->
         "FSharpLintApi.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.0/"
-#r @"tools/FSharpLint.0.2.0/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.2.1/"
+#r @"tools/FSharpLint.0.2.1/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->
@@ -190,6 +190,5 @@ Target "All" DoNothing
 "Lint" ==> "All"
 "GenerateDocs" ==> "All"
 "CreatePackage" ==> "All"
-"CreateApiPackage" ==> "All"
 
 RunTargetOrDefault "All"
