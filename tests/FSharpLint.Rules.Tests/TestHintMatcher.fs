@@ -463,6 +463,20 @@ Bar.SomeMethod(foo = true)""", config)
         Assert.IsFalse(this.ErrorExistsOnLine(7))
 
     [<Test>]
+    member this.NamedParameterWithMoreThanOneParameterShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    static member SomeMethod(woof: int, foo: bool) = ()
+
+Bar.SomeMethod(woof = 5, foo = true)""", config)
+
+        Assert.IsFalse(this.ErrorExistsOnLine(7))
+
+    [<Test>]
     member this.PropertyInitShouldNotBeTreatedAsInfixOperation() = 
         let config = generateHintConfig ["x = true ===> x"]
         

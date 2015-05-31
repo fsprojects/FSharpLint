@@ -189,6 +189,8 @@ module HintMatcher =
                         | None -> 
                             match arguments.Breadcrumbs with
                                 | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> false
+                                | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> 
+                                    false
                                 | _ -> true
                 | _ -> true
 
