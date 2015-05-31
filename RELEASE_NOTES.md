@@ -1,6 +1,24 @@
+##### 0.2.0 - May 31 2015
+
+* Configuration has been updated to be simpler and verifiable via an XSD.
+* Type checking is now optional and off by default to speed up the linting.
+* More XML documentation rules have been added thanks to [jhamm](https://github.com/jhamm)
+* Files can now be ignored by specifying git ignore like globs in the configuration file.
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/78
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/90
+
+##### 0.1.16 - March 11 2015
+
+* Handling of project files is now performed by FSharp.Compiler.Service
+
+##### 0.1.15 - February 08 2015
+
+* Added `Enabled` config option to all analysers.
+
 ##### 0.1.14 - January 18 2015
 
 * Added a new rule `CanBeReplacedWithComposition` to the `FSharpLint.FunctionReimplementation` analyser: http://fsprojects.github.io/FSharpLint/FSharpLint.FunctionReimplementation.html
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
 
 ##### 0.1.13 - January 11 2015
 
