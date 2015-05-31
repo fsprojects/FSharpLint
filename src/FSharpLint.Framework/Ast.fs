@@ -130,8 +130,8 @@ module Ast =
             | _ -> []
 
     /// Extracts the child nodes to be visited from a given node.
-    [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.SourceLength", "MaxLinesInFunction")>]
-    [<System.Diagnostics.CodeAnalysis.SuppressMessage("FSharpLint.CyclomaticComplexity", "*")>]
+    [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
+    [<System.Diagnostics.CodeAnalysis.SuppressMessage("CyclomaticComplexity", "*")>]
     let traverseNode node =
         [
             match node with
