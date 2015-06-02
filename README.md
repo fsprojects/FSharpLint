@@ -25,7 +25,7 @@ A [package is availiable on nuget](https://www.nuget.org/packages/FSharpLint/) -
 
 ###Support
 
-* Mono 3.4.0 - [![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint)
+* Mono 3.10.0 - [![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint)
 * .NET - [![Windows CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
 
 ###Licensing
