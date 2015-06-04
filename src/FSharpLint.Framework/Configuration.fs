@@ -31,6 +31,15 @@ module Configuration =
             this.Elements() 
                 |> Seq.tryFind (fun x -> x.Name.LocalName = localName)
 
+    type Access =
+        | Public = 0
+        | Internal = 1
+        | Private = 2
+        | None = 3
+        | All = 4
+        | NotPrivate = 5
+        | NotPublic = 6
+
     exception ConfigurationException of string
 
     type Setting =
@@ -45,6 +54,7 @@ module Configuration =
         | OneSpaceAllowedAfterOperator of bool
         | NumberOfSpacesAllowed of int
         | IgnoreBlankLines of bool
+        | Access of Access
 
     let private parseLines (content:string) =
         content.Split('\n') 
@@ -165,6 +175,11 @@ module Configuration =
             Analysers: Map<string, Analyser>
         }
 
+    let private toAccess value =
+        let (valid, ret) = System.Enum.TryParse(value)
+        if not valid then sprintf "Found unknown XmlDocumentation Access value %s" value |> ConfigurationException |> raise
+        ret
+
     let private parseSetting (setting:XElement) =
         match setting.Name.LocalName with
             | "Enabled" -> Enabled(setting.Value |> bool.Parse)
@@ -178,7 +193,8 @@ module Configuration =
             | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
             | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
             | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
-            | settingName -> 
+            | "Access" -> Access(setting.Value |> toAccess)
+            | settingName ->
                 sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
 
     let toSetting (settingElement:XElement) = (settingElement.Name.LocalName, parseSetting settingElement)

@@ -27,6 +27,13 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="Access">
+    <xs:sequence>
+      <xs:element name="Access" maxOccurs="1" minOccurs="0" type="xs:string" />
+      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="Hints">
     <xs:sequence>
       <xs:element name="Hints" maxOccurs="1" minOccurs="0" type="xs:string" />
@@ -215,15 +222,15 @@
       <xs:element name="Rules" maxOccurs="1" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="ModuleDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="ExceptionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="TypeDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="MemberDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="EnumDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="UnionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="RecordDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="AutoPropertyDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="LetDefinitionHeader" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="ModuleDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="ExceptionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="TypeDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="MemberDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="EnumDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="UnionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="RecordDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="AutoPropertyDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
+            <xs:element name="LetDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
           </xs:sequence>
         </xs:complexType>
       </xs:element>
