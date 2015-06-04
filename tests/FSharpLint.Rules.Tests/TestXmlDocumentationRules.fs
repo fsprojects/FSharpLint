@@ -22,9 +22,10 @@ open NUnit.Framework
 open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
+open FSharpLint.Framework
 
-/// set all XmlDocumentation rules to be disabled, except the rule under test
-let config name =
+/// set all XmlDocumentation rules to None, except the rule under test
+let config name access =
     Map.ofList
         [
             (AnalyserName,
@@ -42,6 +43,7 @@ let config name =
                                  (ruleName,
                                     {Rule.Settings = Map.ofList
                                             [
+                                                ("Access", Access(if ruleName = name then access else Access.None))
                                                 ("Enabled", Enabled(ruleName = name))
                                             ]
                                     }))
@@ -52,7 +54,7 @@ let config name =
 
 [<TestFixture>]
 type TestNameConventionRulesModule() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ModuleDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ModuleDefinitionHeader" Access.All)
 
     [<Test>]
     member this.ModuleWithDoubleDashComment() =
@@ -120,7 +122,7 @@ exception SomeException of string"""
 
 [<TestFixture>]
 type TestNameConventionRulesException() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ExceptionDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ExceptionDefinitionHeader" Access.All)
 
     [<Test>]
     member this.ExceptionWithDoubleDashComment() =
@@ -187,7 +189,7 @@ exception SomeException of string"""
 
 [<TestFixture>]
 type TestNameConventionRulesType() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "TypeDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "TypeDefinitionHeader" Access.All)
 
     [<Test>]
     member this.TypeNoComment() =
@@ -273,7 +275,7 @@ type Colors = Red=0 | Green=1 | Blue=2
 
 [<TestFixture>]
 type TestNameConventionRulesMember() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "MemberDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "MemberDefinitionHeader" Access.All)
 
     [<Test>]
     member this.MemberNoComment() =
@@ -350,7 +352,7 @@ type IsAType =
 
 [<TestFixture>]
 type TestNameConventionRulesEnum() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "EnumDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "EnumDefinitionHeader" Access.All)
 
     [<Test>]
     member this.EnumNoComment() =
@@ -463,7 +465,7 @@ type Colors =
 
 [<TestFixture>]
 type TestNameConventionRulesUnion() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "UnionDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "UnionDefinitionHeader" Access.All)
 
     [<Test>]
     member this.UnionNoComment() =
@@ -597,7 +599,7 @@ type OrderId =
 
 [<TestFixture>]
 type TestNameConventionRulesRecord() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "RecordDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "RecordDefinitionHeader" Access.All)
 
     [<Test>]
     member this.RecordNoComment() =
@@ -702,7 +704,7 @@ type GeoCoord = {
 
 [<TestFixture>]
 type TestNameConventionRulesAutoProperty() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "AutoPropertyDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "AutoPropertyDefinitionHeader" Access.All)
 
     [<Test>]
     member this.AutoPropertyNoComment() =
@@ -801,7 +803,7 @@ type GeoCoord() =
 
 [<TestFixture>]
 type TestNameConventionRulesLet() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "LetDefinitionHeader")
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "LetDefinitionHeader" Access.All)
 
     [<Test>]
     member this.LetNoComment() =
@@ -915,3 +917,64 @@ type Sample() =
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine(4), this.ErrorMsg)
         Assert.IsTrue(this.NoErrorExistsOnLine(7), this.ErrorMsg)
+
+[<TestFixture>]
+type TestNameConventionRulesTypeAccessNotPrivate() =
+    inherit TestRuleBase.TestRuleBase(Ast(visitor), config "TypeDefinitionHeader" Access.NotPrivate)
+
+    [<Test>]
+    member this.PublicTypeNoComment() =
+        this.Parse """
+
+type public IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(3), this.ErrorMsg)
+
+    [<Test>]
+    member this.InternalTypeNoComment() =
+        this.Parse """
+
+type internal IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine(3), this.ErrorMsg)
+
+    [<Test>]
+    member this.PrivateTypeNoComment() =
+        this.Parse """
+
+type private IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.PublicTypeComment() =
+        this.Parse """
+/// this is a type
+type public IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+
+    [<Test>]
+    member this.InternalTypeComment() =
+        this.Parse """
+/// this is a type
+type internal IsAType =
+    /// this is a member
+    member this.Test = true
+        """
+
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
