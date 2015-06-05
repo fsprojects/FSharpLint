@@ -8,6 +8,9 @@ fi
 if [ ! -f tools\FSharpLint.0.2.1\FSharpLint.FAKE.dll ]; then
   mono .nuget/NuGet.exe install FSharpLint -OutputDirectory tools -Version 0.2.1
 fi
+if [ ! -f tools\FSharp.Formatting\FSharp.Formatting.fsx ]; then
+  mono .nuget/NuGet.exe install FSharp.Formatting -OutputDirectory tools -ExcludeVersion
+fi
 #workaround assembly resolution issues in build.fsx
 export FSHARPI=`which fsharpi`
 cat - > fsharpi <<"EOF"
