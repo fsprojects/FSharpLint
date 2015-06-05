@@ -112,7 +112,7 @@ The configuration rules are overridden by redefining any properties of an analys
 	[lang=xml]
     <FunctionReimplementation>
       <Enabled>True</Enabled>
-    </Analyser>
+    </FunctionReimplementation>
 
 To override to turn off you'd set enabled to false in your own configuration file as follows:
 
