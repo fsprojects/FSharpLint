@@ -195,25 +195,17 @@ For example to make the lint tool run with just the two hints: `not (a =  b) ===
     [lang=xml]
     <?xml version="1.0" encoding="utf-8"?>
     <FSharpLintSettings>
-      <Analysers>
-        <Analyser AnalyserId="FSharpLint.Hints">
-          <Rules>
-            <Rule Name="Hints">
-              <RuleSettings>
-                <Property name="Hints">
+        <Analysers>
+            <Hints>
+                <Hints>
                   <![CDATA[
                     not (a =  b) ===> a <> b
                     not (a <> b) ===> a =  b
                   ]]>
-                </Property>
-              </RuleSettings>
-            </Rule>
-          </Rules>
-          <AnalyserSettings>
-            <Property name="Enabled">True</Property>
-          </AnalyserSettings>
-        </Analyser>
-      </Analysers>
+                </Hints>
+                <Enabled>true</Enabled>
+            </Hints>
+        </Analysers>
     </FSharpLintSettings>
 
 ###Flaws

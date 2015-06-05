@@ -122,7 +122,7 @@ To override to turn off you'd set enabled to false in your own configuration fil
 	    <Analysers>
 			<FunctionReimplementation>
 				<Enabled>True</Enabled>
-			</Analyser>
+			</FunctionReimplementation>
 		</Analysers>
 	</FSharpLintSettings>
 
