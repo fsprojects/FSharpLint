@@ -27,9 +27,21 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="AccessEnumeration">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Public" />
+      <xs:enumeration value="Internal" />
+      <xs:enumeration value="Private" />
+      <xs:enumeration value="None" />
+      <xs:enumeration value="All" />
+      <xs:enumeration value="NotPrivate" />
+      <xs:enumeration value="NotPublic" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:complexType name="Access">
     <xs:sequence>
-      <xs:element name="Access" maxOccurs="1" minOccurs="0" type="xs:string" />
+      <xs:element name="Access" maxOccurs="1" minOccurs="0" type="AccessEnumeration" />
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
     </xs:sequence>
   </xs:complexType>
