@@ -218,6 +218,21 @@ module NameConventions =
                     name.idText = "LiteralAttribute" || name.idText = "Literal"
                 attributes |> List.exists isLiteralAttribute
 
+    let isUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
+        let symbol = checkFile.GetSymbolUseAtLocation(
+                        ident.idRange.StartLine, 
+                        ident.idRange.EndColumn, 
+                        "", 
+                        [ident.idText]) 
+                            |> Async.RunSynchronously
+
+        match symbol with
+            | Some(symbol) ->
+                match symbol.Symbol with
+                    | :? FSharpUnionCase -> true
+                    | _ -> false
+            | None -> false
+
     /// Gets a visitor that checks all nodes on the AST where an identifier may be declared, 
     /// and post errors if any violate best practice guidelines.
     let rec visitor visitorInfo checkFile astNode = 
@@ -282,8 +297,17 @@ module NameConventions =
                 Continue
             | AstNode.Pattern(pattern) ->
                 match pattern with
-                    | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
-                        CheckIdentifiers.checkNonPublicValue visitorInfo astNode longIdentifier.Lid.Head
+                    | SynPat.LongIdent(longIdentifier, _, _, (Pats([]) | NamePatPairs([], _)), _, _) 
+                            when longIdentifier.Lid.Length = 1 -> 
+                            
+                        let ident = longIdentifier.Lid.Head
+
+                        match checkFile with
+                            | Some(checkFile:FSharpCheckFileResults) when visitorInfo.Config.UseTypeChecker ->
+                                if not (isUnionCase checkFile ident) then
+                                    CheckIdentifiers.checkNonPublicValue visitorInfo astNode ident
+                            | _ -> 
+                                CheckIdentifiers.checkNonPublicValue visitorInfo astNode ident
                     | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                         CheckIdentifiers.checkParameter visitorInfo astNode identifier
                     | _ -> ()

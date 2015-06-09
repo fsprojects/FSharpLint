@@ -1088,3 +1088,77 @@ type Abbreviation = LiteralAttribute
 let dog = 6""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(7, 4))
+                
+    [<Test>]
+    member this.ParameterUnionCaseContainingValueDoesNotGenerateWarning() =
+        this.Parse("""
+module Program
+
+type SingleCaseDU = SingleCaseDU of int
+let extractInt (SingleCaseDU myInt) = 
+  myInt
+
+let singleCaseDU = SingleCaseDU 5
+
+let result = extractInt singleCaseDU""", checkInput = true)
+
+        Assert.IsTrue(this.NoErrorsExist)
+                
+    [<Test>]
+    member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
+        this.Parse("""
+module Program
+
+type SingleCaseDU = SingleCaseDU of int
+let extractInt (SingleCaseDU MyInt) = 
+  MyInt
+
+let singleCaseDU = SingleCaseDU 5
+
+let result = extractInt singleCaseDU""", checkInput = true)
+
+        Assert.IsTrue(this.ErrorsExist)
+                
+    [<Test>]
+    member this.UnionCaseInBindingContainingValueDoesNotGenerateWarning() =
+        this.Parse("""
+module Program
+
+type SingleCaseDU = SingleCaseDU of int
+
+let (SingleCaseDU myInt) = (SingleCaseDU 5)""", checkInput = true)
+
+        Assert.IsTrue(this.NoErrorsExist)
+                
+    [<Test>]
+    member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
+        this.Parse("""
+module Program
+
+type SingleCaseDU = SingleCaseDU of int
+
+let (SingleCaseDU MyInt) = (SingleCaseDU 5)""", checkInput = true)
+
+        Assert.IsTrue(this.ErrorsExist)
+                
+    [<Test>]
+    member this.UnionCaseWithoutValueGeneratesWarningWhenNotTypeCheckingInput() =
+        this.Parse("""
+module Program
+
+type SingleCaseDUNoValues = | SingleCaseDUNoValues
+
+let foo SingleCaseDUNoValues = ()""", checkInput = true)
+
+        Assert.IsTrue(this.ErrorsExist)
+                
+    [<Test>]
+    member this.UnionCaseWithoutValueDoesNotGenerateWarningWhenTypeCheckingInput() =
+        this.Parse("""
+module Program
+
+type SingleCaseDUNoValues = | SingleCaseDUNoValues
+
+let foo SingleCaseDUNoValues = ()""", checkInput = true)
+
+        Assert.IsTrue(this.NoErrorsExist)
