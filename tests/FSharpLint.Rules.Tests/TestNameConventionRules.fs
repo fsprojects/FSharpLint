@@ -1148,7 +1148,7 @@ module Program
 
 type SingleCaseDUNoValues = | SingleCaseDUNoValues
 
-let foo SingleCaseDUNoValues = ()""", checkInput = true)
+let foo SingleCaseDUNoValues = ()""", checkInput = false)
 
         Assert.IsTrue(this.ErrorsExist)
                 
