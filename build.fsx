@@ -18,18 +18,18 @@ open System
 // The name of the project 
 // (used by attributes in AssemblyInfo, name of a NuGet package and directory in 'src')
 let project = "FSharpLint"
-let projectApi = "FSharpLintApi"
+let projectApi = "FSharpLint.Core"
 
 // Short summary of the project
 // (used as description in AssemblyInfo and as a short summary for NuGet package)
 let summary = "Lint tool for F#."
-let summaryApi = "Lint tool for F#. Api to extend FSharpLint"
+let summaryApi = "FSharpLint Api (Lint tool for F#)."
 
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.0"
-let apiVersion = "0.0.1"
+let version = "0.2.2"
+let apiVersion = "0.0.2"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"
@@ -161,7 +161,7 @@ Target "CreateApiPackage" (fun _ ->
             Version = apiVersion
             Publish = false
          })
-        "FSharpLintApi.nuspec"
+        "FSharpLint.Core.nuspec"
 )
 
 #I @"tools/FSharpLint.0.2.1/"

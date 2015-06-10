@@ -12,7 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>@description@</description>
     <releaseNotes>@releaseNotes@</releaseNotes>
-    <copyright>Copyright 2014</copyright>
+    <copyright>Copyright 2015</copyright>
     <tags>F# fsharp lint FSharpLint api</tags>
   </metadata>
 </package>
