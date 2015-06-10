@@ -1,3 +1,13 @@
+##### 0.2.2 - June 9 2015
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/97 
+* XmlDoc rules now configurable to apply to code with certain access levels e.g. private or public. Thanks goes to Jon Hamm for implementing this feature
+
+##### 0.2.1 - May 31 2015
+
+* Included FSharp.Core 
+* Fixed bug where hints would accidentally match named parameters and property initialisers
+
 ##### 0.2.0 - May 31 2015
 
 * Configuration has been updated to be simpler and verifiable via an XSD.
