@@ -28,7 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.2"
+let version = "0.2.3"
 let apiVersion = "0.0.2"
 
 let packagingRoot = "./packaging/"

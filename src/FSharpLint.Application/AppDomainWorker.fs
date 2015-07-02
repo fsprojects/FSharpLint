@@ -46,7 +46,7 @@ module AppDomainWorker =
 
         [<DefaultValue>] val mutable Options : LintOptions
 
-        let getWorker () = 
+        let getAppDomain () =
             let fullPath = Reflection.Assembly.GetExecutingAssembly().Location
 
             let directory = IO.Path.GetDirectoryName(fullPath)
@@ -55,32 +55,38 @@ module AppDomainWorker =
 
             let evidence = AppDomain.CurrentDomain.Evidence
 
-            let appDomain = AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
+            AppDomain.CreateDomain("Cross Lang Domain", evidence, setup)
 
+        let getWorker (appDomain:AppDomain) = 
             appDomain.CreateInstanceAndUnwrap("FSharpLint.CrossDomain", "FSharpLint.CrossDomain.FSharpLintWorker") :?> FSharpLint.Worker.IFSharpLintWorker
 
         member this.RunLint projectFile (options:LintOptions) =
             this.Options <- options
 
-            let worker = getWorker()
+            let appDomain = getAppDomain()
 
-            ErrorReceivedEventHandler(this.ReportError) |> worker.add_ErrorReceived 
+            try
+                let worker = getWorker appDomain
 
-            ReportProgressEventHandler(this.ReportProgress) |> worker.add_ReportProgress
+                ErrorReceivedEventHandler(this.ReportError) |> worker.add_ErrorReceived 
 
-            let task = new Threading.Tasks.Task(Action(this.ReportResults))
+                ReportProgressEventHandler(this.ReportProgress) |> worker.add_ReportProgress
 
-            task.Start()
+                let task = new Threading.Tasks.Task(Action(this.ReportResults))
 
-            let result = worker.RunLint(projectFile)
+                task.Start()
 
-            cancelToken.Cancel(false)
+                let result = worker.RunLint(projectFile)
 
-            task.Wait()
+                cancelToken.Cancel(false)
 
-            this.ClearAnyReportsReceived()
+                task.Wait()
 
-            result
+                this.ClearAnyReportsReceived()
+
+                result
+            finally
+                AppDomain.Unload(appDomain)
 
         [<Runtime.Remoting.Messaging.OneWay>]
         member this.ReportError(error:Error) =

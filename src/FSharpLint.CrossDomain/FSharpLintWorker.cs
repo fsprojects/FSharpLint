@@ -49,13 +49,22 @@ namespace FSharpLint.CrossDomain
         /// <inheritdoc />
         public FSharpLint.Worker.Result RunLint(string projectFile)
         {
-            var worker = this.GetWorker();
+            var appDomain = this.GetAppDomain();
 
-            worker.ErrorReceived += new ErrorReceivedEventHandler(this.HandleError);
+            try
+            {
+                var worker = this.GetWorker(appDomain);
 
-            worker.ReportProgress += new ReportProgressEventHandler(this.HandleProgress);
+                worker.ErrorReceived += new ErrorReceivedEventHandler(this.HandleError);
 
-            return worker.RunLint(projectFile);
+                worker.ReportProgress += new ReportProgressEventHandler(this.HandleProgress);
+
+                return worker.RunLint(projectFile);
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
         }
 
         /// <summary>
@@ -89,23 +98,26 @@ namespace FSharpLint.CrossDomain
         /// separate app domain and returns a proxy to the worker.
         /// </summary>
         /// <returns>Proxy to the worker from FSharpLint.Application.</returns>
-        private IFSharpLintWorker GetWorker()
+        private IFSharpLintWorker GetWorker(AppDomain appDomain)
+        {
+            return (FSharpLint.Worker.IFSharpLintWorker)appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker");
+        }
+
+        private AppDomain GetAppDomain()
         {
             var fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
             var directory = System.IO.Path.GetDirectoryName(fullPath);
 
-            var setup = new AppDomainSetup 
-            { 
-                LoaderOptimization = LoaderOptimization.SingleDomain, 
-                PrivateBinPath = directory, 
-                ApplicationBase = directory, 
-                DisallowBindingRedirects = true 
+            var setup = new AppDomainSetup
+            {
+                LoaderOptimization = LoaderOptimization.SingleDomain,
+                PrivateBinPath = directory,
+                ApplicationBase = directory,
+                DisallowBindingRedirects = true
             };
 
-            var appDomain = AppDomain.CreateDomain("Lint Domain", null, setup);
-
-            return (FSharpLint.Worker.IFSharpLintWorker)appDomain.CreateInstanceAndUnwrap("FSharpLint.Application", "FSharpLint.Application.FSharpLintWorker+FSharpLintWorker");
+            return AppDomain.CreateDomain("Lint Domain", null, setup);
         }
     }
 }
