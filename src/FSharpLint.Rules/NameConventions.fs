@@ -54,25 +54,23 @@ module NameConventions =
         let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsCamelCaseError")
         System.String.Format(errorFormatString, identifier)
 
-    let expectNoUnderscore postError (identifier:Ident) =
-        if containsUnderscore identifier.idText then
-            let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
-            let error = System.String.Format(errorFormatString, identifier.idText)
-            postError identifier.idRange error
+    let underscoreError (identifier:string) = 
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
+        System.String.Format(errorFormatString, identifier)
 
     let expect predicate getError postError (identifier:Ident) =
-        if not <| isOperator identifier.idText then
-            expectNoUnderscore postError identifier
-
-            if not <| predicate identifier.idText then
-                let error = getError identifier.idText
-                postError identifier.idRange error
+        if not <| isOperator identifier.idText && not <| predicate identifier.idText then
+            let error = getError identifier.idText
+            postError identifier.idRange error
 
     /// Checks an identifier is camel case, if not an error is posted.
     let expectCamelCase = expect isCamelCase camelCaseError
     
     /// Checks an identifier is pascal case, if not an error is posted.
     let expectPascalCase = expect isPascalCase pascalCaseError
+    
+    /// Checks an identifier does not contain an underscore, if it does an error is posted.
+    let expectNoUnderscore = expect (containsUnderscore >> not) underscoreError
 
     module CheckIdentifiers =
         [<Literal>]

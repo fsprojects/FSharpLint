@@ -1162,3 +1162,17 @@ type SingleCaseDUNoValues = | SingleCaseDUNoValues
 let foo SingleCaseDUNoValues = ()""", checkInput = true)
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99 
+    /// (duplicated warning for underscore in identifier).
+    [<Test>]
+    member this.MemberWithUnderscoreDoesNotHaveDuplicateWarnings() = 
+        this.Parse """
+module Program
+
+type Cat() =
+    member x._Print() = ()"""
+
+        let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
+
+        Assert.AreEqual(2, numberOfErrors)
