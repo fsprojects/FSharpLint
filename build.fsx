@@ -28,8 +28,8 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.3"
-let apiVersion = "0.0.2"
+let version = "0.2.4"
+let apiVersion = "0.0.3"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"
@@ -146,7 +146,6 @@ Target "CreateApiPackage" (fun _ ->
     CopyFile libDir "./bin/FSharpLint.Rules.dll"
     CopyFile libDir "./bin/FSharpLint.Framework.dll"
     CopyFile libDir "./bin/FSharpLint.Application.dll"
-    CopyFile libDir "./bin/FSharp.Compiler.Service.dll"
     CopyFile libDir "./bin/FParsecCS.dll"
     CopyFile libDir "./bin/FParsec.dll"
 
@@ -160,6 +159,7 @@ Target "CreateApiPackage" (fun _ ->
             WorkingDir = apiPackagingDir
             Version = apiVersion
             Publish = false
+            Dependencies = getDependencies "./src/FSharpLint.Application/packages.config"
          })
         "FSharpLint.Core.nuspec"
 )
