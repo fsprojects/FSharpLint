@@ -57,11 +57,11 @@ module SourceLength =
     let rec visitor visitorInfo checkFile astNode = 
         match astNode.Node with
             | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
-                expectMaxLines visitorInfo astNode range "MaxLinesInLambdaFunction" "Lambda Function"
+                expectMaxLines visitorInfo astNode range "MaxLinesInLambdaFunction" "Lambda function"
 
                 Continue
             | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
-                expectMaxLines visitorInfo astNode range "MaxLinesInMatchLambdaFunction" "Match Lambda Function"
+                expectMaxLines visitorInfo astNode range "MaxLinesInMatchLambdaFunction" "Match lambda function"
 
                 Continue
             | AstNode.Binding(binding) ->
