@@ -262,10 +262,17 @@ module NameConventions =
                         | SynMemberDefn.ImplicitCtor(_) -> true 
                         | _ -> false
 
+                    let canBeInInterface = function 
+                        | SynMemberDefn.Open(_)
+                        | SynMemberDefn.AbstractSlot(_)
+                        | SynMemberDefn.Inherit(_) -> true
+                        | _ -> false
+
                     match typeDef with
                         | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconInterface, members, _)
                         | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, _) -> 
-                            members |> List.exists hasConstructor |> not
+                            members |> List.exists hasConstructor |> not &&
+                            members |> List.forall canBeInInterface
                         | _ -> false
             
                 if not isTypeExtensions then

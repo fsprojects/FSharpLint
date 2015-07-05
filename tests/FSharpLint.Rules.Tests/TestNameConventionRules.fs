@@ -189,6 +189,17 @@ module Program
 
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/100
+    /// (static classes were thought to be interfaces)
+    [<Test>]
+    member this.StaticClassIsNotTreatedAsInterface() = 
+        this.Parse """
+module Program
+  type Printable =
+    static member Print() = ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
     [<Test>]
     member this.InterfaceNameDoesNotBeginWithI() = 
         this.Parse """
