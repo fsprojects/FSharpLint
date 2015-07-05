@@ -85,11 +85,14 @@ module Lint =
             FinishEarly: (unit -> bool) option
 
             /// Provide your own FSharpLint configuration to the linter.
+            /// If not provided the default configuration will be used.
             Configuration: Configuration.Configuration option
 
             /// This function will be called every time the linter finds a broken rule.
             ReceivedWarning: (LintWarning.Warning -> unit) option
         }
+
+        member Default: OptionalLintParameters
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
     /// you want to lint then this can be used to provide the parsed information to prevent the 
