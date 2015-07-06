@@ -448,6 +448,29 @@ module program
     | _ -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(8, 6))
+
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
+    [<Test>]
+    member this.MnemonicWildcardInPatternMatch() = 
+        this.Parse """
+module program
+  let main = 
+    match true with
+    | _dog -> ()
+    | _ -> ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
+    member this.UnderscoreInMatchPatternIdent() = 
+        this.Parse """
+module program
+  let main = 
+    match true with
+    | d_og -> ()
+    | _ -> ()"""
+
+        Assert.IsTrue(this.ErrorExistsOnLine(5))
         
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 
