@@ -29,7 +29,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 let authors = [ "Matthew Mcveigh" ]
 
 let version = "0.2.4"
-let apiVersion = "0.0.3"
+let apiVersion = "0.0.4"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"
@@ -164,8 +164,8 @@ Target "CreateApiPackage" (fun _ ->
         "FSharpLint.Core.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.1/"
-#r @"tools/FSharpLint.0.2.1/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.2.4/"
+#r @"tools/FSharpLint.0.2.4/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->
