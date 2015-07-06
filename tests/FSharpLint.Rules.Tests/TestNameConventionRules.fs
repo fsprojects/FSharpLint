@@ -998,6 +998,16 @@ let cat = 5"""
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
         
     [<Test>]
+    member this.LiteralIsCamelCaseWithParen() =
+        this.Parse """
+module program
+
+[<Literal>]
+let (cat) = 5"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 5))
+        
+    [<Test>]
     member this.LiteralIsCamelCaseSuppressed() =
         this.Parse """
 module program

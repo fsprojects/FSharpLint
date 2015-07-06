@@ -325,10 +325,14 @@ module NameConventions =
                 Continue
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
                 if isLiteral attributes checkFile then
-                    match pattern with
+                    let rec checkLiteral = function
                         | SynPat.Named(_, identifier, _, _, _) -> 
                             CheckIdentifiers.checkLiteral visitorInfo astNode identifier
+                        | SynPat.Paren(p, _) ->
+                            checkLiteral p
                         | _ -> ()
+
+                    checkLiteral pattern
 
                     Stop
                 else
