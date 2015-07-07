@@ -28,7 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.4"
+let version = "0.2.5"
 let apiVersion = "0.0.4"
 
 let packagingRoot = "./packaging/"
@@ -128,6 +128,7 @@ Target "CreatePackage" (fun _ ->
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Core.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
@@ -164,8 +165,8 @@ Target "CreateApiPackage" (fun _ ->
         "FSharpLint.Core.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.4/"
-#r @"tools/FSharpLint.0.2.4/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.2.5/"
+#r @"tools/FSharpLint.0.2.5/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->
