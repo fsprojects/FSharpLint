@@ -26,6 +26,12 @@ module Configuration =
 
     open System.Xml.Linq
 
+    [<Literal>]
+    let private Namespace = @"https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd"
+
+    let private getName name =
+        XName.Get(name, Namespace)
+
     type XElement with
         member this.ElementByLocalName localName =
             this.Elements() 
@@ -42,6 +48,8 @@ module Configuration =
 
     exception ConfigurationException of string
 
+    open Microsoft.FSharp.Reflection
+
     type Setting =
         | Enabled of bool
         | Lines of int
@@ -55,6 +63,27 @@ module Configuration =
         | NumberOfSpacesAllowed of int
         | IgnoreBlankLines of bool
         | Access of Access
+
+    let private settingToXml = function
+        | Lines(x)
+        | Depth(x)
+        | MaxItems(x)
+        | MaxCyclomaticComplexity(x)
+        | Length(x)
+        | NumberOfSpacesAllowed(x) -> x :> obj
+        | IncludeMatchStatements(x)
+        | OneSpaceAllowedAfterOperator(x)
+        | Enabled(x)
+        | IgnoreBlankLines(x) -> x.ToString() :> obj
+        | Access(x) -> x :> obj
+        | Hints(x) -> 
+            String.concat System.Environment.NewLine x 
+                |> (fun x -> XCData(x)) :> obj
+
+    let private settingsToXml (settings:Map<string, Setting>) =
+        settings
+            |> Seq.map (fun x -> XElement(getName x.Key, settingToXml x.Value) :> obj)
+            |> Seq.toArray
 
     let private parseLines (content:string) =
         content.Split('\n') 
@@ -168,12 +197,46 @@ module Configuration =
             Rules: Map<string, Rule>
         }
 
+        member this.ToXml(name) =
+            let rulesContent =
+                this.Rules 
+                    |> Seq.map (fun x -> 
+                        let settingsXml = settingsToXml x.Value.Settings
+                        XElement(getName x.Key, settingsXml) :> obj)
+                    |> Seq.toArray
+
+            let content = 
+                [| 
+                    yield XElement(getName "Rules", rulesContent) :> obj
+                    yield! settingsToXml this.Settings
+                |]
+
+            XElement(getName name, content) :> obj
+
     type Configuration =
         {
             UseTypeChecker: bool
             IgnoreFiles: IgnoreFiles.IgnoreFilesConfig
             Analysers: Map<string, Analyser>
         }
+
+        member private this.IgnoreFilesToXml() = "" // TODO: store string representation in ignorefiles record
+
+        member private this.AnalysersToXml() = 
+            let analyserToXml (analyser:System.Collections.Generic.KeyValuePair<string, Analyser>) =
+                analyser.Value.ToXml(analyser.Key)
+
+            this.Analysers |> Seq.map analyserToXml |> Seq.toArray
+
+        member this.ToXmlDocument() =
+            XDocument(
+                XElement(
+                    getName "FSharpLintSettings", 
+                    XElement(getName "UseTypeChecker", this.UseTypeChecker.ToString()),
+                    XElement(getName "IgnoreFiles", this.IgnoreFilesToXml()),
+                    XElement(getName "Analysers", this.AnalysersToXml())
+                    )
+                )
 
     let private toAccess value =
         let (valid, ret) = System.Enum.TryParse(value)
