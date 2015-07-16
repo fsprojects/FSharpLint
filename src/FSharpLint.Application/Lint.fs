@@ -309,8 +309,7 @@ module Lint =
             ReceivedWarning: (LintWarning.Warning -> unit) option
         }
         
-        member this.Default 
-            with get() = { FinishEarly = None; Configuration = None; ReceivedWarning = None }
+        static member Default = { FinishEarly = None; Configuration = None; ReceivedWarning = None }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
     /// you want to lint then this can be used to provide the parsed information to prevent the 
