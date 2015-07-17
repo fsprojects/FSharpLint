@@ -92,7 +92,7 @@ module Lint =
             ReceivedWarning: (LintWarning.Warning -> unit) option
         }
 
-        member Default: OptionalLintParameters
+        static member Default: OptionalLintParameters
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
     /// you want to lint then this can be used to provide the parsed information to prevent the 
