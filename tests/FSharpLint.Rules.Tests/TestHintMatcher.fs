@@ -488,7 +488,52 @@ type Bar() =
 
 Bar(Foo = true) |> ignore""", config)
 
-        Assert.IsFalse(this.ErrorExistsOnLine(7))
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.PropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member val Foo = true with get, set
+
+new Bar(Foo = true) |> ignore""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.MultiplePropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member val Foo = true with get, set
+    member val Bar = true with get, set
+
+new Bar(Foo = true, Bar = true) |> ignore""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/108
+    /// Type arguments on a constructor were causing hint to be displayed for property initialisation.
+    [<Test>]
+    member this.PropertyInitWithTypeArgsShouldNotBeTreatedAsInfixOperation() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar<'a>() =
+    member val Foo = true with get, set
+
+Bar<_>(Foo = true) |> ignore""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.PropertyEqualityOperationShouldBeTreatedAsInfixOperation() = 

@@ -187,9 +187,12 @@ module HintMatcher =
                                         | _ -> true
                                 | None -> true
                         | None -> 
+                            /// Check if in `new` expr or function application (either could be a constructor).
                             match arguments.Breadcrumbs with
-                                | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> false
-                                | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, (SynExpr.LongIdent(_) | SynExpr.Ident(_)), _, _))::_ -> 
+                                | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.New(_))::_
+                                | _::AstNode.Expression(SynExpr.New(_))::_
+                                | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, _, _, _))::_
+                                | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, _, _, _))::_ -> 
                                     false
                                 | _ -> true
                 | _ -> true
