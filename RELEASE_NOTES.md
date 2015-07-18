@@ -1,3 +1,19 @@
+##### 0.2.6 - July 18 2015
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/108
+* `Default` property now static: https://github.com/fsprojects/FSharpLint/pull/107
+
+##### 0.2.5 - July 7 2015
+
+* FSharp.Core.dll is now included again
+
+##### 0.2.4 - July 6 2015
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/101
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/100
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/99
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/103
+
 ##### 0.2.3 - July 2 2015
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/98
