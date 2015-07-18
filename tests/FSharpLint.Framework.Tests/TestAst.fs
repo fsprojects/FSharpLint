@@ -202,12 +202,11 @@ let dog = ()"""
 
         let stubConfig =
             {
-                UseTypeChecker = false
+                UseTypeChecker = Some(false)
                 IgnoreFiles =
-                    {
-                        Update = IgnoreFiles.Overwrite
-                        Files = []
-                    }
+                    Some({ Update = IgnoreFiles.Overwrite
+                           Files = []
+                           Content = "" })
                 Analysers = Map.ofList []
             }
 

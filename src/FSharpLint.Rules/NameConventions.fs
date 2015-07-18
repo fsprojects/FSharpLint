@@ -303,7 +303,7 @@ module NameConventions =
                         let ident = longIdentifier.Lid.Head
 
                         match checkFile with
-                            | Some(checkFile:FSharpCheckFileResults) when visitorInfo.Config.UseTypeChecker ->
+                            | Some(checkFile:FSharpCheckFileResults) when visitorInfo.UseTypeChecker ->
                                 if not (isUnionCase checkFile ident) then
                                     CheckIdentifiers.checkNonPublicValue visitorInfo astNode ident
                             | _ -> 

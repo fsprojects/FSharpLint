@@ -167,6 +167,10 @@ module Configuration =
             {
                 Update: IgnoreFilesUpdate
                 Files: Ignore list
+
+                /// Unparsed value from the configuration XML file.
+                /// Stored so it can be written back out to a file.
+                Content: string
             }
 
         let private parseIgnoreFiles (ignoreFiles:XElement) =
@@ -178,12 +182,13 @@ module Configuration =
                     match updateAttribute with
                         | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
                         | Some(_) | None -> Overwrite
+                Content = ignoreFiles.Value
             }
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
             match configRoot.ElementByLocalName("IgnoreFiles") with
-                | Some(ignoreFilesElement) -> parseIgnoreFiles ignoreFilesElement
-                | None -> { Update = Add; Files = [] }
+                | Some(ignoreFilesElement) -> parseIgnoreFiles ignoreFilesElement |> Some
+                | None -> None
 
     type Rule =
         {
@@ -215,8 +220,8 @@ module Configuration =
 
     type Configuration =
         {
-            UseTypeChecker: bool
-            IgnoreFiles: IgnoreFiles.IgnoreFilesConfig
+            UseTypeChecker: bool option
+            IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
             Analysers: Map<string, Analyser>
         }
 
@@ -287,8 +292,8 @@ module Configuration =
 
     let private getUseTypeChecker (config:XElement) =
         match config.ElementByLocalName("UseTypeChecker") with
-            | None -> false
-            | Some(element) -> element.Value.ToUpperInvariant() = "TRUE"
+            | None -> None
+            | Some(element) -> element.Value.ToUpperInvariant() = "TRUE" |> Some
         
     /// Parse a configuration file.
     let configuration (file:string) = 
@@ -337,15 +342,23 @@ module Configuration =
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride configToOverrideWith =
-        let combineIgnoreFiles () = List.concat [configToOverrideWith.IgnoreFiles.Files; configToOverride.IgnoreFiles.Files]
-
         {
             UseTypeChecker = configToOverrideWith.UseTypeChecker
 
             IgnoreFiles = 
-                match configToOverrideWith.IgnoreFiles.Update with
-                    | IgnoreFiles.Overwrite -> configToOverrideWith.IgnoreFiles 
-                    | IgnoreFiles.Add -> { configToOverrideWith.IgnoreFiles with Files = combineIgnoreFiles() }
+                match configToOverrideWith.IgnoreFiles with
+                    | Some({ Update = IgnoreFiles.Overwrite }) -> 
+                        configToOverrideWith.IgnoreFiles 
+                    | Some({ Update = IgnoreFiles.Add } as newIgnore) -> 
+                        let combinedFiles = 
+                            match configToOverride.IgnoreFiles with
+                                | Some(previousIgnore) ->
+                                    newIgnore.Files @ previousIgnore.Files
+                                | None -> newIgnore.Files
+
+                        { newIgnore with Files = combinedFiles } |> Some
+                    | None ->
+                        configToOverride.IgnoreFiles
 
             Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers
         }

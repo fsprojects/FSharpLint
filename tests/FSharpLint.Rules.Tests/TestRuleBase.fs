@@ -27,8 +27,8 @@ open FSharpLint.Framework.ParseFile
 
 let emptyConfig =
     {
-        UseTypeChecker = false
-        IgnoreFiles = { Files = []; Update = IgnoreFiles.IgnoreFilesUpdate.Add }
+        UseTypeChecker = Some(false)
+        IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
         Analysers =
             Map.ofList
                 [
@@ -50,8 +50,8 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         match analysers with
             | Some(analysers) -> 
                 { 
-                    UseTypeChecker = false
-                    IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }
+                    UseTypeChecker = Some(false)
+                    IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
                     Analysers = analysers 
                 }
             | None -> emptyConfig
@@ -61,15 +61,15 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
             match overrideAnalysers with
                 | Some(overrideAnalysers) -> 
                     { 
-                        UseTypeChecker = false
-                        IgnoreFiles = { Files = []; Update = IgnoreFiles.Add }
+                        UseTypeChecker = Some(false)
+                        IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
                         Analysers = overrideAnalysers 
                     }
                 | None -> config
 
         let checkInput = match checkInput with | Some(x) -> x | None -> false
 
-        let config = { config with UseTypeChecker = checkInput }
+        let config = { config with UseTypeChecker = Some(checkInput) }
 
         let visitorInfo = { Config = config; PostError = postError }
         

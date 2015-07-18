@@ -48,6 +48,12 @@ module Ast =
             PostError: range -> string -> unit
         }
 
+        member this.UseTypeChecker
+            with get() = 
+                match this.Config.UseTypeChecker with
+                    | Some(true) -> true
+                    | Some(_) | None -> false
+
     /// Nodes in the AST to be visited.
     type AstNode =
         | Expression of SynExpr
