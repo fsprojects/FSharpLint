@@ -225,8 +225,6 @@ module Configuration =
             Analysers: Map<string, Analyser>
         }
 
-        member private this.IgnoreFilesToXml() = "" // TODO: store string representation in ignorefiles record
-
         member private this.AnalysersToXml() = 
             let analyserToXml (analyser:System.Collections.Generic.KeyValuePair<string, Analyser>) =
                 analyser.Value.ToXml(analyser.Key)
@@ -234,12 +232,31 @@ module Configuration =
             this.Analysers |> Seq.map analyserToXml |> Seq.toArray
 
         member this.ToXmlDocument() =
+            let content =
+                [|
+                    match this.IgnoreFiles with 
+                        | Some({ Content = content; Update = updateType }) -> 
+                            let value = 
+                                match updateType with 
+                                    | IgnoreFiles.Add -> "Add" 
+                                    | IgnoreFiles.Overwrite -> "Overwrite"
+
+                            let attr = XAttribute(XName.op_Implicit "Update", value)
+                            yield XElement(getName "IgnoreFiles", content, attr)
+                        | None -> ()
+
+                    match this.UseTypeChecker with 
+                        | Some(useTypeChecker) -> 
+                            yield XElement(getName "UseTypeChecker", useTypeChecker.ToString())
+                        | None -> ()
+
+                    yield XElement(getName "Analysers", this.AnalysersToXml())
+                |]
+
             XDocument(
                 XElement(
                     getName "FSharpLintSettings", 
-                    XElement(getName "UseTypeChecker", this.UseTypeChecker.ToString()),
-                    XElement(getName "IgnoreFiles", this.IgnoreFilesToXml()),
-                    XElement(getName "Analysers", this.AnalysersToXml())
+                    content
                     )
                 )
 
