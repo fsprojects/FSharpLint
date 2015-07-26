@@ -554,6 +554,9 @@ module HintMatcher =
                     None
             | _ -> None
 
+    /// Check a lambda function can be replaced with a function,
+    /// it will not be if the lambda is automatically getting
+    /// converted to a delegate type e.g. Func<T>.
     let lambdaCanBeReplacedWithFunction checkFile breadcrumbs (expr:SynExpr) =
         let isParameterDelegateType index methodIdent =
             match checkFile with
