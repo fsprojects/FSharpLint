@@ -21,6 +21,24 @@ namespace FSharpLint.Framework
 module ExpressionUtilities =
 
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.SourceCodeServices
+
+    let (|Identifier|_|) = function
+        | SynExpr.Ident(ident) -> Some([ident], ident.idRange)
+        | SynExpr.LongIdent(_, longIdent, _, _) -> Some(longIdent.Lid, longIdent.Range)
+        | _ -> None
+
+    let getSymbolFromIdent (checkFile:FSharpCheckFileResults option) expr =
+        match checkFile, expr with
+            | Some(checkFile), Identifier(ident, range) ->
+                let identNames = ident |> List.map (fun x -> x.idText)
+
+                checkFile.GetSymbolUseAtLocation(
+                    range.StartLine, 
+                    range.EndColumn, 
+                    "", 
+                    identNames) |> Async.RunSynchronously
+            | _ -> None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =

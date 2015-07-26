@@ -28,6 +28,7 @@ module FunctionReimplementation =
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Framework.ExpressionUtilities
     open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
@@ -164,7 +165,17 @@ module FunctionReimplementation =
         if canBeReplacedWithFunctionComposition expression then
             Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
 
-    let validateLambdaIsNotPointless parameters expression range visitorInfo =
+    let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) parameters expression range visitorInfo =
+        let isConstructor expr =
+            let symbol = getSymbolFromIdent checkFile expr
+
+            match symbol with
+                | Some(symbol) -> 
+                    symbol.Symbol.DisplayName = ".ctor" ||
+                    (symbol.Symbol :? FSharpMemberOrFunctionOrValue &&
+                     (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).CompiledName = ".ctor")
+                | Some(_) | None -> false
+        
         let rec isFunctionPointless expression = function
             | (parameter:Ident) :: parameters ->
                 match expression with
@@ -174,13 +185,23 @@ module FunctionReimplementation =
                     | _ -> None
             | [] -> 
                 match expression with
-                    | SynExpr.Ident(identifier) -> Some(identifier)
+                    | Identifier(ident, range) -> 
+                        if visitorInfo.FSharpVersion.Major >= 4 || 
+                           (not << isConstructor) expression then
+                            Some(ident)
+                        else
+                            None
                     | _ -> None
 
         isFunctionPointless expression parameters 
             |> Option.iter (fun identifier ->
+                let identifier = 
+                    identifier 
+                        |> List.map (fun x -> x.idText)
+                        |> String.concat "."
+
                 let errorFormatString = Resources.GetString("RulesReimplementsFunction")
-                let error = System.String.Format(errorFormatString, identifier.idText)
+                let error = System.String.Format(errorFormatString, identifier)
                 visitorInfo.PostError range error)
     
     let visitor visitorInfo checkFile astNode = 
@@ -191,7 +212,7 @@ module FunctionReimplementation =
                 if (not << List.isEmpty) parameters then
                     if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
                         && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
-                        validateLambdaIsNotPointless parameters expression lambda.Range visitorInfo
+                        validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
                     
                     if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
                             && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then

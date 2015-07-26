@@ -208,6 +208,7 @@ module Lint =
             ReportLinterProgress: ProjectProgress -> unit
             RulePlugins: LoadVisitors.VisitorPlugin list
             Configuration: Configuration.Configuration
+            FSharpVersion: System.Version
         }
 
     let lint lintInfo (parsedFileInfo:Ast.FileParseInfo) =
@@ -221,6 +222,7 @@ module Lint =
 
             let visitorInfo = 
                 {
+                    Ast.FSharpVersion = lintInfo.FSharpVersion
                     Ast.Config = lintInfo.Configuration
                     Ast.PostError = postError
                 }
@@ -262,6 +264,7 @@ module Lint =
 
     let getFilesInProject projectFilePath =
         try
+            let x = FSharpProjectFileInfo.Parse(projectFilePath)
             Success(FSharpProjectFileInfo.Parse(projectFilePath).CompileFiles)
         with
             | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
@@ -324,6 +327,9 @@ module Lint =
 
             /// Optional results of inferring the types on the AST (allows for a more accurate lint).
             TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
+
+            /// Version of F# the source code of the file was written in.
+            FSharpVersion: System.Version
         }
 
     open System.Collections.Generic
@@ -348,6 +354,7 @@ module Lint =
                     FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                     ErrorReceived = warningReceived
                     ReportLinterProgress = projectProgress
+                    FSharpVersion = System.Version(4, 0)
                 }
 
             let isIgnoredFile = 
@@ -408,6 +415,7 @@ module Lint =
                 FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                 ErrorReceived = warningReceived
                 ReportLinterProgress = ignore
+                FSharpVersion = parsedFileInfo.FSharpVersion
             }
 
         let parsedFileInfo =
@@ -423,7 +431,7 @@ module Lint =
         lintWarnings |> Seq.toList |> LintResult.Success
             
     /// Lints F# source code.
-    let lintSource optionalParams source =
+    let lintSource optionalParams source fsharpVersion =
         let config = 
             match optionalParams.Configuration with
                 | Some(userSuppliedConfig) -> userSuppliedConfig
@@ -436,6 +444,7 @@ module Lint =
                         Source = parseFileInformation.PlainText
                         Ast = parseFileInformation.Ast
                         TypeCheckResults = parseFileInformation.TypeCheckResults
+                        FSharpVersion = fsharpVersion
                     }
 
                 lintParsedSource optionalParams parsedFileInfo
@@ -464,6 +473,7 @@ module Lint =
                 FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                 ErrorReceived = warningReceived
                 ReportLinterProgress = ignore
+                FSharpVersion = parsedFileInfo.FSharpVersion
             }
 
         let parsedFileInfo =
@@ -479,7 +489,7 @@ module Lint =
         lintWarnings |> Seq.toList |> LintResult.Success
         
     /// Lints an F# file from a given path to the `.fs` file.
-    let lintFile optionalParams filepath =
+    let lintFile optionalParams filepath fsharpVersion =
         let config = 
             match optionalParams.Configuration with
                 | Some(userSuppliedConfig) -> userSuppliedConfig
@@ -492,6 +502,7 @@ module Lint =
                         Source = astFileParseInfo.PlainText
                         Ast = astFileParseInfo.Ast
                         TypeCheckResults = astFileParseInfo.TypeCheckResults
+                        FSharpVersion = fsharpVersion
                     }
 
                 lintParsedFile optionalParams parsedFileInfo filepath
