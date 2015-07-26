@@ -574,3 +574,18 @@ match [] with
 | _ -> ()""", config)
 
         Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
+    [<Test>]
+    member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type.``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+type TakesDelegate() =
+    member this.Foo(del:System.Action<string>) = ()
+    
+TakesDelegate().Foo(fun _ -> ())""", config, checkInput = true)
+
+        Assert.IsFalse(this.ErrorsExist)
