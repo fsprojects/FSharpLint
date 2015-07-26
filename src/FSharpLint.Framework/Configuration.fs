@@ -242,7 +242,7 @@ module Configuration =
                                     | IgnoreFiles.Overwrite -> "Overwrite"
 
                             let attr = XAttribute(XName.op_Implicit "Update", value)
-                            yield XElement(getName "IgnoreFiles", content, attr)
+                            yield XElement(getName "IgnoreFiles", XCData(content), attr)
                         | None -> ()
 
                     match this.UseTypeChecker with 

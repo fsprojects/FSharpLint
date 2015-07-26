@@ -25,6 +25,9 @@ type System.String with
     member path.ToPlatformIndependentPath() =
         path.Replace('\\', System.IO.Path.DirectorySeparatorChar)
 
+    member this.RemoveWhitepsace() =
+        System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
+
 [<TestFixture>]
 type TestConfiguration() =
     [<Test>]
@@ -140,3 +143,69 @@ type TestConfiguration() =
         let expectedMap = [ (1,"1"); (2,"5"); (3,"3"); (4,"1")  ] |> Map.ofList
 
         Assert.AreEqual(expectedMap, overwriteMap mapToBeOverwrited map (fun _ x -> x))
+
+    [<Test>]
+    member self.``Empty config writes correct XML document``() = 
+        let config =
+            {
+                UseTypeChecker = None
+                IgnoreFiles = None
+                Analysers = Map.empty
+            }
+
+        let doc = config.ToXmlDocument().ToString()
+
+        let expectedXml = 
+            """
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
+    <Analysers />
+</FSharpLintSettings>"""
+
+        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
+
+    [<Test>]
+    member self.``Config specifying to use type checker writes correct XML document``() = 
+        let config =
+            {
+                UseTypeChecker = Some(true)
+                IgnoreFiles = None
+                Analysers = Map.empty
+            }
+
+        let doc = config.ToXmlDocument().ToString()
+
+        let expectedXml = 
+            """
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
+    <UseTypeChecker>True</UseTypeChecker>
+    <Analysers />
+</FSharpLintSettings>"""
+
+        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
+
+    [<Test>]
+    member self.``Config specifying files to ignore writes correct XML document``() = 
+        let config =
+            {
+                UseTypeChecker = None
+                IgnoreFiles = Some({
+                                    Update = IgnoreFiles.IgnoreFilesUpdate.Add
+                                    Files = []
+                                    Content = "assemblyinfo.*"})
+                Analysers = Map.empty
+            }
+
+        let doc = config.ToXmlDocument().ToString()
+
+        let expectedXml = 
+            """
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
+    <IgnoreFiles Update="Add">
+        <![CDATA[
+          assemblyinfo.*
+        ]]>
+    </IgnoreFiles>
+    <Analysers />
+</FSharpLintSettings>"""
+
+        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
