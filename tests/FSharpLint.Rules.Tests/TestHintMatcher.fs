@@ -589,3 +589,33 @@ type TakesDelegate() =
 TakesDelegate().Foo(fun _ -> ())""", config, checkInput = true)
 
         Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
+    [<Test>]
+    member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type (more than one argument).``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+type TakesDelegate() =
+    member this.Foo(foo:string, del:System.Action<string>) = ()
+    
+TakesDelegate().Foo("", fun _ -> ())""", config, checkInput = true)
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
+    [<Test>]
+    member this.``Lambdas should be suggested to be functions if in method call that takes function type.``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+type TakesDelegate() =
+    member this.Foo(foo:string, del:string -> unit) = ()
+    
+TakesDelegate().Foo("", fun _ -> ())""", config, checkInput = true)
+
+        Assert.IsTrue(this.ErrorsExist)
