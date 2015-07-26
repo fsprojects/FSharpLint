@@ -460,7 +460,21 @@ type Bar() =
 
 Bar.SomeMethod(foo = true)""", config)
 
-        Assert.IsFalse(this.ErrorExistsOnLine(7))
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Named parameter in object method call should not be treated as infix operation``() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member this.SomeMethod(foo: bool) = ()
+
+Bar().SomeMethod(foo = true)""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.NamedParameterWithMoreThanOneParameterShouldNotBeTreatedAsInfixOperation() = 
@@ -474,7 +488,21 @@ type Bar() =
 
 Bar.SomeMethod(woof = 5, foo = true)""", config)
 
-        Assert.IsFalse(this.ErrorExistsOnLine(7))
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Named parameter in object method call with more than one arg should not be treated as infix operation``() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Bar() =
+    member this.SomeMethod(woof: int, foo: bool) = ()
+
+Bar().SomeMethod(woof = 5, foo = true)""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.PropertyInitShouldNotBeTreatedAsInfixOperation() = 
@@ -619,3 +647,35 @@ type TakesDelegate() =
 TakesDelegate().Foo("", fun _ -> ())""", config, checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
+    [<Test>]
+    member this.``Lambdas should be suggested to be functions if in obj method call that takes function type (multiple args).``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+type TakesDelegate() =
+    member this.Foo(foo:string, del:System.Action<string>) = ()
+    
+let object = TakesDelegate()
+object.Foo("", fun _ -> ())""", config, checkInput = true)
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
+    [<Test>]
+    member this.``Lambdas should be suggested to be functions if in obj method call that takes function type.``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+type TakesDelegate() =
+    member this.Foo(del:System.Action<string>) = ()
+    
+let object = TakesDelegate()
+object.Foo(fun _ -> ())""", config, checkInput = true)
+
+        Assert.IsFalse(this.ErrorsExist)

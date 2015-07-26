@@ -535,6 +535,54 @@ module HintMatcher =
 
         visitorInfo.PostError range error
 
+    let getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
+        let symbol =
+            checkFile.GetSymbolUseAtLocation(
+                methodIdent.Range.StartLine,
+                methodIdent.Range.EndColumn,
+                "", 
+                methodIdent.Lid |> List.map (fun x -> x.idText))
+                    |> Async.RunSynchronously
+
+        match symbol with
+            | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
+                let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+
+                if symbol.IsMember && (not << Seq.isEmpty) symbol.CurriedParameterGroups then
+                    symbol.CurriedParameterGroups.[0] |> Some
+                else
+                    None
+            | _ -> None
+
+    let lambdaCanBeReplacedWithFunction checkFile breadcrumbs (expr:SynExpr) =
+        let isParameterDelegateType index methodIdent =
+            match checkFile with
+                | Some(checkFile) ->
+                    let parameters = getMethodParameters checkFile methodIdent
+
+                    match parameters with
+                        | Some(parameters) when index < Seq.length parameters ->
+                            let parameter = parameters.[index]
+
+                            parameter.Type.HasTypeDefinition &&
+                            parameter.Type.TypeDefinition.IsDelegate
+                        | _ -> false
+                | None ->
+                    /// When we're unable to check the parameters 
+                    /// fallback to say it is delegate type.
+                    true
+
+        match breadcrumbs with
+            | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ -> 
+                let index = exprs |> List.tryFindIndex (fun x -> x.Range = expr.Range)
+
+                match index with
+                    | Some(index) -> not <| isParameterDelegateType index methodIdent
+                    | None -> false
+            | AstNode.Expression(lambdaExpr)::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_ when arg.Range = lambdaExpr.Range -> 
+                not <| isParameterDelegateType 0 methodIdent
+            | _ -> true
+
     let visitor getHints visitorInfo checkFile (astNode:CurrentNode) = 
         if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
             match astNode.Node with
@@ -551,57 +599,10 @@ module HintMatcher =
                             }
 
                         if MatchExpression.matchHintExpr arguments then
-                            let getMethodParameters (methodIdent:LongIdentWithDots) =
-                                match checkFile with
-                                    | Some(checkFile) -> 
-                                        let symbol =
-                                            checkFile.GetSymbolUseAtLocation(
-                                                methodIdent.Range.StartLine,
-                                                methodIdent.Range.EndColumn,
-                                                "", 
-                                                methodIdent.Lid |> List.map (fun x -> x.idText))
-                                                    |> Async.RunSynchronously
-
-                                        match symbol with
-                                            | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
-                                                let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
-
-                                                if symbol.IsMember && (not << Seq.isEmpty) symbol.CurriedParameterGroups then
-                                                    symbol.CurriedParameterGroups.[0] |> Some
-                                                else
-                                                    None
-                                            | _ -> None
-                                    | None -> None
-
                             match hint.Match, hint.Suggestion with
                                 | Expression.Lambda(_), Expression.Identifier(_) -> 
-                                    match astNode.Breadcrumbs with
-                                        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ -> 
-                                            let index = exprs |> List.tryFindIndex (fun x -> x.Range = expr.Range)
-
-                                            let parameters = getMethodParameters methodIdent
-
-                                            match parameters, index with
-                                                | Some(parameters), Some(index) when index < Seq.length parameters ->
-                                                    let parameter = parameters.[index]
-
-                                                    if not parameter.Type.HasTypeDefinition ||
-                                                       not parameter.Type.TypeDefinition.IsDelegate then
-                                                         hintError hint visitorInfo expr.Range
-                                                | _ -> ()
-                                        | AstNode.Expression(lambdaExpr)::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_ when arg.Range = lambdaExpr.Range -> 
-                                            let parameters = getMethodParameters methodIdent
-
-                                            match parameters with
-                                                | Some(parameters) when (not << Seq.isEmpty) parameters ->
-                                                    let parameter = parameters.[0]
-
-                                                    if not parameter.Type.HasTypeDefinition ||
-                                                       not parameter.Type.TypeDefinition.IsDelegate then
-                                                        hintError hint visitorInfo expr.Range
-                                                | _ -> ()
-                                        | _ ->
-                                            hintError hint visitorInfo expr.Range
+                                    if lambdaCanBeReplacedWithFunction checkFile astNode.Breadcrumbs expr then
+                                        hintError hint visitorInfo expr.Range
                                 | _ ->
                                     hintError hint visitorInfo expr.Range
 
