@@ -209,3 +209,78 @@ type TestConfiguration() =
 </FSharpLintSettings>"""
 
         Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
+
+    [<Test>]
+    member self.``Config specifying an analyser writes correct XML document``() = 
+        let rule = { Rule.Settings = [ ("Enabled", Enabled(true))  ] |> Map.ofList }
+
+        let analyser =
+            {
+                Settings = [ ("Enabled", Enabled(true))  ] |> Map.ofList
+                Rules = [ ("ReimplementsFunction", rule)  ] |> Map.ofList
+            }
+
+        let config =
+            {
+                UseTypeChecker = None
+                IgnoreFiles = None
+                Analysers = [ ("FunctionReimplementation", analyser)  ] |> Map.ofList
+            }
+
+        let doc = config.ToXmlDocument().ToString()
+
+        let expectedXml = 
+            """
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
+    <Analysers>
+        <FunctionReimplementation>
+          <Rules>
+            <ReimplementsFunction>
+              <Enabled>True</Enabled>
+            </ReimplementsFunction>
+          </Rules>
+          <Enabled>True</Enabled>
+        </FunctionReimplementation>
+    </Analysers>
+</FSharpLintSettings>"""
+
+        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
+
+    [<Test>]
+    member self.``Config specifying hints writes correct XML document``() = 
+        let hints =
+            [ "not (a =  b) ===> a <> b"
+              "not (a <> b) ===> a = b" ]
+
+        let analyser =
+            {
+                Settings = [ ("Hints", Hints(hints))  ] |> Map.ofList
+                Rules = Map.empty
+            }
+
+        let config =
+            {
+                UseTypeChecker = None
+                IgnoreFiles = None
+                Analysers = [ ("Hints", analyser)  ] |> Map.ofList
+            }
+
+        let doc = config.ToXmlDocument().ToString()
+
+        let expectedXml = 
+            """
+<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
+    <Analysers>
+        <Hints>
+            <Rules />
+            <Hints>
+                <![CDATA[
+                    not (a =  b) ===> a <> b
+                    not (a <> b) ===> a = b
+                ]]>
+            </Hints>
+        </Hints>
+    </Analysers>
+</FSharpLintSettings>"""
+
+        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
