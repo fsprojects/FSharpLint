@@ -23,10 +23,11 @@ The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the 
 
 A [package is availiable on nuget](https://www.nuget.org/packages/FSharpLint/) - it sets up msbuild to run the tool after build on any projects the package is installed onto.
 
-###Support
+###Build Status
 
-* Mono 3.10.0 - [![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint)
-* .NET - [![Windows CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
+Mono 4.0.2 | .NET 4.5
+---------- | --------
+[![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint) | [![.NET CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
 
 ###Licensing
 
@@ -41,3 +42,4 @@ Feel free to post an issue on [github](../../issues) if you have any questions, 
 - [@duckmatt](https://github.com/duckmatt)
 
 The default maintainer account for projects under "fsprojects" is [@fsprojectsgit](https://github.com/fsprojectsgit) - F# Community Project Incubation Space (repo management)
+
