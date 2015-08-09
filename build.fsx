@@ -29,7 +29,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 let authors = [ "Matthew Mcveigh" ]
 
 let version = "0.2.6"
-let apiVersion = "0.0.5"
+let apiVersion = "0.0.6"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"

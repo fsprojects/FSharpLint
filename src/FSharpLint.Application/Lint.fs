@@ -106,7 +106,7 @@ module ConfigurationManagement =
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     let loadConfigurationForProject projectFilePath =
         let configCheckers = 
-            FSharpLint.Framework.LoadVisitors.rulesAssembly
+            typeof<FSharpLint.Rules.Binding.RegisterBindingVisitor>.Assembly
                 |> FSharpLint.Framework.LoadVisitors.loadConfigCheckers
 
         let checkConfig config =
@@ -180,7 +180,7 @@ module Lint =
 
         /// Loaded visitors implementing lint rules.
         let plugins =
-            FSharpLint.Framework.LoadVisitors.rulesAssembly
+            typeof<FSharpLint.Rules.Binding.RegisterBindingVisitor>.Assembly
                 |> FSharpLint.Framework.LoadVisitors.loadPlugins
 
         /// Extracts a list of ast visitors from a general list of visitors.

@@ -29,15 +29,6 @@ module LoadVisitors =
     open FSharpLint.Framework
     open System.Linq
 
-    let rulesAssembly =
-        let directory =
-            System.Reflection.Assembly.GetExecutingAssembly().Location
-                |> System.IO.Path.GetDirectoryName
-
-        let rulesAssembly = sprintf "%s%c%s" directory System.IO.Path.DirectorySeparatorChar "FSharpLint.Rules.dll"
-
-        System.Reflection.Assembly.LoadFrom rulesAssembly
-
     /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
     type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> Ast.Visitor
 

@@ -116,7 +116,7 @@ module Program =
         | RunTimeConfigError ->
             System.Console.WriteLine(Resources.GetString("ConsoleRunTimeConfigError"))
 
-        | FailedToParseFile(failure) ->             
+        | FailedToParseFile(failure) ->
             System.Console.WriteLine(
                 "Lint failed to parse a file. Failed with: " + 
                 getParseFailureReason failure)
