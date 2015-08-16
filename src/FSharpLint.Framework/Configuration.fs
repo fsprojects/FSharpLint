@@ -429,3 +429,227 @@ module Configuration =
                 else
                     None
             | None -> None
+
+    /// Module to manage the loading and updating of configuration files.
+    /// Keeps loaded configurations cached in memory so they can be quickly retrieved.
+    module Management =
+
+        open System.IO
+
+        /// Represents a segment within a file system path.
+        /// A configuration is loaded for each segment in a path
+        /// so that a configuration at the end of the path being loaded
+        /// can override previous configuration files.
+        type PathNode =
+            {
+                /// Cached configuration file found at this segment in the path.
+                /// `None` when there is no configuration file found at this segment.
+                Configuration: Configuration option
+
+                /// Segment this node represents in a path.
+                /// e.g. it could be `SomeProj` in `C:\SomeSolution\SomeProj\`
+                Segment: string
+
+                /// Nodes located a directory down from this node.
+                /// e.g. if this node represents `C:\SomeSolution\SomeProj\`
+                /// the children could be `C:\SomeSolution\SomeProj\SomeDir\`
+                /// and `C:\SomeSolution\SomeProj\SomeDir2\`.
+                Children: PathNode list
+            }
+
+        let private stringToPath (path:string) = 
+            path.Split(Path.DirectorySeparatorChar)
+
+        let listStartsWith containingList listToCheck = 
+            let rec startsWith = function
+            | (x::checkRest, y::rest) -> 
+                if x = y then startsWith (checkRest, rest)
+                else false
+            | (_::_, []) -> false
+            | ([], _) -> true
+
+            startsWith (listToCheck, containingList)
+
+        let private pathToString path =
+            path |> String.concat (Path.DirectorySeparatorChar.ToString())
+
+        let private loadConfigForPath tryLoadConfig (currentPath:string list) (path:string array) = 
+            let paths = 
+                [ for i in currentPath.Length..path.Length - 1 -> 
+                    let path, segment = Array.toList path.[..i], path.[i]
+                    (path, segment) ]
+
+            let rec loadPaths = function
+            | (path, segment)::rest ->
+                [{ 
+                    Configuration = tryLoadConfig path
+                    Segment = segment
+                    Children = loadPaths rest }]
+            | [] -> []
+
+            loadPaths paths
+
+        let addPath tryLoadConfig node path = 
+            let path = stringToPath path
+
+            let pathStartsWith = listStartsWith (Array.toList path)
+
+            let rec copyNode node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                let childBreaksPath child = 
+                    (pathStartsWith >> not) (child.Segment::currentPath)
+
+                let children = 
+                    [ for child in node.Children do yield copyNode child currentPath ]
+
+                { node with 
+                    Children = 
+                        if pathStartsWith currentPath && node.Children |> List.forall childBreaksPath then
+                            [ yield! children; yield! loadConfigForPath tryLoadConfig currentPath path ]
+                        else
+                            children
+                }
+
+            copyNode node []
+
+        let removePath node path = 
+            let path = stringToPath path
+
+            let pathList = Array.toList path
+
+            let pathStartsWith = listStartsWith pathList
+
+            let rec nodeShouldBeRemoved currentPath node = 
+                let currentPath = node.Segment::currentPath
+
+                if currentPath = pathList then
+                    true
+                else
+                    match node.Children with
+                    | [child] -> nodeShouldBeRemoved currentPath child
+                    | _ -> false
+
+            let rec copyNode node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                { node with 
+                    Children = 
+                        [ for child in node.Children do 
+                            if not <| nodeShouldBeRemoved currentPath child then
+                                yield copyNode child currentPath ]
+                }
+
+            if nodeShouldBeRemoved [] node then
+                None
+            else
+                copyNode node [] |> Some
+
+        /// Attempts to get a path that is common to all paths
+        /// that have been added to a node.
+        /// If a given preferred path is found to be a common path then
+        /// that path will always be returned, useful if you want to prefer
+        /// the solution directory for example.
+        let commonPath node preferredPath = 
+            let rec getCommonDirs node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                match node.Children with 
+                | [commonDir] when currentPath <> preferredPath -> 
+                    node::(getCommonDirs commonDir currentPath)
+                | _ -> [node]
+
+            match getCommonDirs node [] with
+            | [commonDirectory] -> Some(commonDirectory)
+            | _ -> None
+
+        /// Tries to reload the configuration for all paths.
+        /// Call when the user has edited a configuration file on disk.
+        let refresh tryLoadConfig node = 
+            let rec copyNode node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                { node with 
+                    Configuration = tryLoadConfig copyNode
+                    Children = 
+                        [ for child in node.Children do yield copyNode child currentPath ]
+                }
+
+            copyNode node []
+
+        /// Gets the configuration file located at a given path.
+        /// The configuration file returned may be incomplete as it
+        /// will not have overrided any previous configuration files.
+        let partialConfig node path = 
+            let path = stringToPath path |> Array.toList
+        
+            let rec find node = function
+            | currentSegment::nextSegment::unmatchedPathSegments when currentSegment = node.Segment ->
+                let matchingChild =
+                    node.Children 
+                        |> List.tryFind (fun x -> x.Segment = nextSegment)
+
+                match matchingChild with
+                | Some(child) -> find child unmatchedPathSegments
+                | None -> None
+            | currentSegment::[] when currentSegment = node.Segment ->
+                node.Configuration
+            | _ -> None
+
+            find node path
+
+        let private tryOverrideConfig = function
+        | Some(configToOverride), Some(config) -> 
+            Some(overrideConfiguration configToOverride config)
+        | Some(x), None
+        | None, Some(x) -> Some(x)
+        | None, None -> None
+        
+        /// Gets the complete configuration file located at a given path.
+        /// "complete" configuration means that it has overridden any previous
+        /// configuration files.
+        let config node path = 
+            let path = stringToPath path |> Array.toList
+        
+            let rec find node configSoFar = function
+            | currentSegment::nextSegment::unmatchedPathSegments when currentSegment = node.Segment ->
+                let matchingChild =
+                    node.Children 
+                        |> List.tryFind (fun x -> x.Segment = nextSegment)
+
+                match matchingChild with
+                | Some(child) -> 
+                    let config = tryOverrideConfig (configSoFar, node.Configuration)
+                    find child config unmatchedPathSegments
+                | None -> None
+            | currentSegment::[] when currentSegment = node.Segment ->
+                tryOverrideConfig (configSoFar, node.Configuration)
+            | _ -> None
+
+            find node None path
+
+        /// Gets all paths that have currently been loaded so far.
+        let getPaths node = 
+            let rec getPaths node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                currentPath::[ for child in node.Children do yield! getPaths child currentPath ]
+
+            getPaths node []
+
+        /// Updates a configuration file at a given path.
+        let updateConfig node path config = 
+            let path = stringToPath path |> Array.toList
+
+            let rec copyNode node currentPath = 
+                let currentPath = node.Segment::currentPath
+
+                { node with 
+                    Configuration = 
+                        if path = currentPath then Some(config)
+                        else node.Configuration
+                    Children = 
+                        [ for child in node.Children do yield copyNode child currentPath ]
+                }
+
+            copyNode node []
