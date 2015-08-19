@@ -284,3 +284,72 @@ type TestConfiguration() =
 </FSharpLintSettings>"""
 
         Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
+
+    [<Test>]
+    member self.``Load two paths with same root with a common directory; loads expected tree.``() = 
+        let expectedLoadedConfigs = 
+            { Management.RootPaths = 
+                [ { Configuration = None
+                    Segment = "C:"
+                    Children = 
+                        [ { Configuration = None
+                            Segment = "Dog"
+                            Children = 
+                                [ { Configuration = None
+                                    Segment = "Goat"
+                                    Children = [] } 
+                                  { Configuration = None
+                                    Segment = "Cat"
+                                    Children = [] } ] } ] } ] }
+
+        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog\Goat"
+
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"C:\Dog\Cat"
+
+        Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
+
+    [<Test>]
+    member self.``Load two paths with different roots; loads expected tree.``() = 
+        let expectedLoadedConfigs = 
+            { Management.RootPaths = 
+                [ { Configuration = None
+                    Segment = "C:"
+                    Children = 
+                        [ { Configuration = None
+                            Segment = "Dog"
+                            Children = [] } ] }
+                  { Configuration = None
+                    Segment = "D:"
+                    Children = 
+                        [ { Configuration = None
+                            Segment = "Dog"
+                            Children = [] } ] } ] }
+
+        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog"
+
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"D:\Dog"
+
+        Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
+
+    [<Test>]
+    member self.``Load two paths with one a directory deeper than the other; loads expected tree.``() = 
+        let expectedLoadedConfigs = 
+            { Management.RootPaths = 
+                [ { Configuration = None
+                    Segment = "C:"
+                    Children = 
+                        [ { Configuration = None
+                            Segment = "Dog"
+                            Children = 
+                                [ { Configuration = None
+                                    Segment = "Goat"
+                                    Children = 
+                                        [ { Configuration = None
+                                            Segment = "Cat"
+                                            Children = [] } ] } ] } ] } ] }
+
+        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog\Goat"
+
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"C:\Dog\Goat\Cat"
+
+        Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)

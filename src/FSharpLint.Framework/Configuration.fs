@@ -457,18 +457,25 @@ module Configuration =
                 Children: PathNode list
             }
 
+        type LoadedConfigs =
+            {
+                RootPaths: PathNode list
+            }
+
         let private stringToPath (path:string) = 
             path.Split(Path.DirectorySeparatorChar)
 
-        let listStartsWith containingList listToCheck = 
-            let rec startsWith = function
-            | (x::checkRest, y::rest) -> 
-                if x = y then startsWith (checkRest, rest)
-                else false
-            | (_::_, []) -> false
-            | ([], _) -> true
+        let listEndsWith containingList listToCheck = 
+            let minListLength = List.length listToCheck
 
-            startsWith (listToCheck, containingList)
+            let rec endsWith = function
+            | (_::rest) as subList -> 
+                if subList = listToCheck then true
+                else endsWith rest
+            | x when List.length x < minListLength -> false
+            | [] -> false
+
+            endsWith containingList
 
         let private pathToString path =
             path |> String.concat (Path.DirectorySeparatorChar.ToString())
@@ -492,33 +499,37 @@ module Configuration =
         let addPath tryLoadConfig node path = 
             let path = stringToPath path
 
-            let pathStartsWith = listStartsWith (Array.toList path)
+            let pathEndsWith = listEndsWith (path |> Array.rev |> Array.toList)
 
             let rec copyNode node currentPath = 
                 let currentPath = node.Segment::currentPath
 
                 let childBreaksPath child = 
-                    (pathStartsWith >> not) (child.Segment::currentPath)
+                    (pathEndsWith >> not) (child.Segment::currentPath)
 
                 let children = 
                     [ for child in node.Children do yield copyNode child currentPath ]
 
                 { node with 
                     Children = 
-                        if pathStartsWith currentPath && node.Children |> List.forall childBreaksPath then
+                        if pathEndsWith currentPath && node.Children |> List.forall childBreaksPath then
                             [ yield! children; yield! loadConfigForPath tryLoadConfig currentPath path ]
                         else
-                            children
-                }
+                            children }
 
-            copyNode node []
+            let copiedRoots = [ for root in node.RootPaths -> copyNode root [] ]
+
+            { RootPaths = 
+                [ yield! copiedRoots
+                  if node.RootPaths |> List.forall (fun x -> (pathEndsWith >> not) [x.Segment]) then 
+                    yield! loadConfigForPath tryLoadConfig [] path ] }
 
         let removePath node path = 
-            let path = stringToPath path
+            let path = stringToPath path |> Array.rev
 
             let pathList = Array.toList path
 
-            let pathStartsWith = listStartsWith pathList
+            let pathStartsWith = listEndsWith pathList
 
             let rec nodeShouldBeRemoved currentPath node = 
                 let currentPath = node.Segment::currentPath
@@ -559,9 +570,12 @@ module Configuration =
                     node::(getCommonDirs commonDir currentPath)
                 | _ -> [node]
 
-            match getCommonDirs node [] with
-            | [commonDirectory] -> Some(commonDirectory)
-            | _ -> None
+            match node.RootPaths with
+            | [commonRoot] ->
+                match getCommonDirs commonRoot [] with
+                | [commonDirectory] -> Some(commonDirectory)
+                | _ -> None
+            | _ -> None            
 
         /// Tries to reload the configuration for all paths.
         /// Call when the user has edited a configuration file on disk.
@@ -575,7 +589,7 @@ module Configuration =
                         [ for child in node.Children do yield copyNode child currentPath ]
                 }
 
-            copyNode node []
+            { RootPaths = [ for root in node.RootPaths -> copyNode root [] ] }
 
         /// Gets the configuration file located at a given path.
         /// The configuration file returned may be incomplete as it
@@ -635,7 +649,8 @@ module Configuration =
 
                 currentPath::[ for child in node.Children do yield! getPaths child currentPath ]
 
-            getPaths node []
+            [ for root in node.RootPaths do 
+                yield! getPaths root []|> List.map (List.rev >> String.concat (Path.DirectorySeparatorChar.ToString())) ]
 
         /// Updates a configuration file at a given path.
         let updateConfig node path config = 
