@@ -20,6 +20,7 @@ module TestConfiguration
 
 open NUnit.Framework
 open FSharpLint.Framework.Configuration
+open Management
 
 type System.String with
     member path.ToPlatformIndependentPath() =
@@ -27,6 +28,8 @@ type System.String with
 
     member this.RemoveWhitepsace() =
         System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
+
+let emptyLoadedConfigs = { LoadedConfigs = Map.ofList []; PathsAdded = [] }
 
 [<TestFixture>]
 type TestConfiguration() =
@@ -288,68 +291,47 @@ type TestConfiguration() =
     [<Test>]
     member self.``Load two paths with same root with a common directory; loads expected tree.``() = 
         let expectedLoadedConfigs = 
-            { Management.RootPaths = 
-                [ { Configuration = None
-                    Segment = "C:"
-                    Children = 
-                        [ { Configuration = None
-                            Segment = "Dog"
-                            Children = 
-                                [ { Configuration = None
-                                    Segment = "Goat"
-                                    Children = [] } 
-                                  { Configuration = None
-                                    Segment = "Cat"
-                                    Children = [] } ] } ] } ] }
+            { LoadedConfigs = 
+                [ (["C:"], None)
+                  (["C:"; "Dog"], None)
+                  (["C:"; "Dog"; "Goat"], None)
+                  (["C:"; "Dog"; "Cat"], None) ] |> Map.ofList
+              PathsAdded = [ ["C:"; "Dog"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog\Goat"
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath @"C:\Dog\Goat")
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"C:\Dog\Cat"
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath @"C:\Dog\Cat")
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
 
     [<Test>]
     member self.``Load two paths with different roots; loads expected tree.``() = 
         let expectedLoadedConfigs = 
-            { Management.RootPaths = 
-                [ { Configuration = None
-                    Segment = "C:"
-                    Children = 
-                        [ { Configuration = None
-                            Segment = "Dog"
-                            Children = [] } ] }
-                  { Configuration = None
-                    Segment = "D:"
-                    Children = 
-                        [ { Configuration = None
-                            Segment = "Dog"
-                            Children = [] } ] } ] }
+            { LoadedConfigs = 
+                [ (["D:"], None)
+                  (["D:"; "Dog"], None)
+                  (["C:"], None)
+                  (["C:"; "Dog"], None) ] |> Map.ofList
+              PathsAdded = [ ["D:"; "Dog"]; ["C:"; "Dog"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog"
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath @"C:\Dog")
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"D:\Dog"
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath @"D:\Dog")
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
 
     [<Test>]
     member self.``Load two paths with one a directory deeper than the other; loads expected tree.``() = 
         let expectedLoadedConfigs = 
-            { Management.RootPaths = 
-                [ { Configuration = None
-                    Segment = "C:"
-                    Children = 
-                        [ { Configuration = None
-                            Segment = "Dog"
-                            Children = 
-                                [ { Configuration = None
-                                    Segment = "Goat"
-                                    Children = 
-                                        [ { Configuration = None
-                                            Segment = "Cat"
-                                            Children = [] } ] } ] } ] } ] }
+            { LoadedConfigs = 
+                [ (["C:"], None)
+                  (["C:"; "Dog"], None)
+                  (["C:"; "Dog"; "Goat"], None)
+                  (["C:"; "Dog"; "Goat"; "Cat"], None) ] |> Map.ofList
+              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) { Management.RootPaths = [] } @"C:\Dog\Goat"
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath @"C:\Dog\Goat")
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs @"C:\Dog\Goat\Cat"
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath @"C:\Dog\Goat\Cat")
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
