@@ -68,20 +68,20 @@ module Configuration =
         | Access of Access
 
     let private settingToXml = function
-        | Lines(x)
-        | Depth(x)
-        | MaxItems(x)
-        | MaxCyclomaticComplexity(x)
-        | Length(x)
-        | NumberOfSpacesAllowed(x) -> x :> obj
-        | IncludeMatchStatements(x)
-        | OneSpaceAllowedAfterOperator(x)
-        | Enabled(x)
-        | IgnoreBlankLines(x) -> x.ToString() :> obj
-        | Access(x) -> x :> obj
-        | Hints(x) -> 
-            String.concat System.Environment.NewLine x 
-                |> (fun x -> XCData(x)) :> obj
+    | Lines(x)
+    | Depth(x)
+    | MaxItems(x)
+    | MaxCyclomaticComplexity(x)
+    | Length(x)
+    | NumberOfSpacesAllowed(x) -> x :> obj
+    | IncludeMatchStatements(x)
+    | OneSpaceAllowedAfterOperator(x)
+    | Enabled(x)
+    | IgnoreBlankLines(x) -> x.ToString() :> obj
+    | Access(x) -> x :> obj
+    | Hints(x) -> 
+        String.concat System.Environment.NewLine x 
+            |> (fun x -> XCData(x)) :> obj
 
     let private settingsToXml (settings:Map<string, Setting>) =
         settings
@@ -135,19 +135,19 @@ module Configuration =
 
             let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
                 match remainingPath with
-                    | [currentSegment] when isDirectory -> false 
-                    | currentSegment::remaining -> 
-                        let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+                | [currentSegment] when isDirectory -> false 
+                | currentSegment::remaining -> 
+                    let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 
-                        let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
+                    let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
 
-                        let aGlobWasCompletelyMatched = currentlyMatchingGlobs |> List.exists List.isEmpty
+                    let aGlobWasCompletelyMatched = currentlyMatchingGlobs |> List.exists List.isEmpty
 
-                        let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
+                    let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
 
-                        if matched then true
-                        else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
-                    | [] -> false
+                    if matched then true
+                    else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
+                | [] -> false
 
             doesGlobSeqMatchPathSeq path []
             
@@ -179,14 +179,12 @@ module Configuration =
         let private parseIgnoreFiles (ignoreFiles:XElement) =
             let updateAttribute = ignoreFiles.Attributes() |> Seq.tryFind (fun x -> x.Name.LocalName = "Update")
 
-            {
-                Files = ignoreFiles.Value.Trim() |> parseLines |> Seq.map parseIgnorePath |> Seq.toList
-                Update = 
-                    match updateAttribute with
-                        | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
-                        | Some(_) | None -> Overwrite
-                Content = ignoreFiles.Value
-            }
+            { Files = ignoreFiles.Value.Trim() |> parseLines |> Seq.map parseIgnorePath |> Seq.toList
+              Update = 
+                match updateAttribute with
+                | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
+                | Some(_) | None -> Overwrite
+              Content = ignoreFiles.Value }
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
             match configRoot.ElementByLocalName("IgnoreFiles") with
@@ -214,10 +212,8 @@ module Configuration =
                     |> Seq.toArray
 
             let content = 
-                [| 
-                    yield XElement(getName "Rules", rulesContent) :> obj
-                    yield! settingsToXml this.Settings
-                |]
+                [| yield XElement(getName "Rules", rulesContent) :> obj
+                   yield! settingsToXml this.Settings |]
 
             XElement(getName name, content) :> obj
 
@@ -236,32 +232,25 @@ module Configuration =
 
         member this.ToXmlDocument() =
             let content =
-                [|
-                    match this.IgnoreFiles with 
-                        | Some({ Content = content; Update = updateType }) -> 
-                            let value = 
-                                match updateType with 
-                                    | IgnoreFiles.Add -> "Add" 
-                                    | IgnoreFiles.Overwrite -> "Overwrite"
+                [| match this.IgnoreFiles with 
+                   | Some({ Content = content; Update = updateType }) -> 
+                        let value = 
+                            match updateType with 
+                                | IgnoreFiles.Add -> "Add" 
+                                | IgnoreFiles.Overwrite -> "Overwrite"
 
-                            let attr = XAttribute(XName.op_Implicit "Update", value)
-                            yield XElement(getName "IgnoreFiles", XCData(content), attr)
-                        | None -> ()
+                        let attr = XAttribute(XName.op_Implicit "Update", value)
+                        yield XElement(getName "IgnoreFiles", XCData(content), attr)
+                   | None -> ()
 
-                    match this.UseTypeChecker with 
-                        | Some(useTypeChecker) -> 
-                            yield XElement(getName "UseTypeChecker", useTypeChecker.ToString())
-                        | None -> ()
+                   match this.UseTypeChecker with 
+                   | Some(useTypeChecker) -> 
+                        yield XElement(getName "UseTypeChecker", useTypeChecker.ToString())
+                   | None -> ()
 
-                    yield XElement(getName "Analysers", this.AnalysersToXml())
-                |]
+                   yield XElement(getName "Analysers", this.AnalysersToXml()) |]
 
-            XDocument(
-                XElement(
-                    getName "FSharpLintSettings", 
-                    content
-                    )
-                )
+            XDocument(XElement(getName "FSharpLintSettings", content))
 
     let private toAccess value =
         let (valid, ret) = System.Enum.TryParse(value)
@@ -270,89 +259,73 @@ module Configuration =
 
     let private parseSetting (setting:XElement) =
         match setting.Name.LocalName with
-            | "Enabled" -> Enabled(setting.Value |> bool.Parse)
-            | "Lines" -> Lines(setting.Value |> int)
-            | "Depth" -> Depth(setting.Value |> int)
-            | "Length" -> Length(setting.Value |> int)
-            | "MaxItems" -> MaxItems(setting.Value |> int)
-            | "MaxCyclomaticComplexity" -> MaxCyclomaticComplexity(setting.Value |> int)
-            | "IncludeMatchStatements" -> IncludeMatchStatements(setting.Value |> bool.Parse)
-            | "Hints" -> Hints(parseLines setting.Value)
-            | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
-            | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
-            | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
-            | "Access" -> Access(setting.Value |> toAccess)
-            | settingName ->
-                sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
+        | "Enabled" -> Enabled(setting.Value |> bool.Parse)
+        | "Lines" -> Lines(setting.Value |> int)
+        | "Depth" -> Depth(setting.Value |> int)
+        | "Length" -> Length(setting.Value |> int)
+        | "MaxItems" -> MaxItems(setting.Value |> int)
+        | "MaxCyclomaticComplexity" -> MaxCyclomaticComplexity(setting.Value |> int)
+        | "IncludeMatchStatements" -> IncludeMatchStatements(setting.Value |> bool.Parse)
+        | "Hints" -> Hints(parseLines setting.Value)
+        | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
+        | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
+        | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
+        | "Access" -> Access(setting.Value |> toAccess)
+        | settingName ->
+            sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
 
     let toSetting (settingElement:XElement) = (settingElement.Name.LocalName, parseSetting settingElement)
 
     let parseRule (rule:XElement) : Rule =
-        { 
-            Settings = rule.Elements() |> Seq.map toSetting |> Map.ofSeq
-        }
+        { Settings = rule.Elements() |> Seq.map toSetting |> Map.ofSeq }
 
     let parseAnalyser (analyser:XElement) =
         let toRule (ruleElement:XElement) = (ruleElement.Name.LocalName, parseRule ruleElement)
 
         let analyserDetails =
-            {
-                Settings = analyser.Elements() 
-                    |> Seq.filter (fun x -> x.Name.LocalName <> "Rules") 
-                    |> Seq.map toSetting
-                    |> Map.ofSeq
-
-                Rules = 
-                    match analyser.ElementByLocalName("Rules") with
-                        | Some(rulesElement) -> rulesElement.Elements() |> Seq.map toRule |> Map.ofSeq
-                        | None -> Map.empty
-            }
+            { Settings = analyser.Elements() 
+                |> Seq.filter (fun x -> x.Name.LocalName <> "Rules") 
+                |> Seq.map toSetting
+                |> Map.ofSeq
+              Rules = 
+                match analyser.ElementByLocalName("Rules") with
+                | Some(rulesElement) -> rulesElement.Elements() |> Seq.map toRule |> Map.ofSeq
+                | None -> Map.empty }
 
         (analyser.Name.LocalName, analyserDetails)
 
     let private getUseTypeChecker (config:XElement) =
         match config.ElementByLocalName("UseTypeChecker") with
-            | None -> None
-            | Some(element) -> element.Value.ToUpperInvariant() = "TRUE" |> Some
+        | None -> None
+        | Some(element) -> element.Value.ToUpperInvariant() = "TRUE" |> Some
         
     /// Parse a configuration file.
     let configuration (file:string) = 
         use configReader = new System.IO.StringReader(file)
         let config = XDocument.Load(configReader).Root
 
-        {
-            UseTypeChecker = getUseTypeChecker config
-
-            IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
-
-            Analysers = 
-                match config.ElementByLocalName("Analysers") with
-                    | Some(analysers) -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
-                    | None -> Map.empty
-        }
+        { UseTypeChecker = getUseTypeChecker config
+          IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
+          Analysers = 
+            match config.ElementByLocalName("Analysers") with
+            | Some(analysers) -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
+            | None -> Map.empty }
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
-        [ 
-            for keyValuePair in oldMap do
-                if newMap |> Map.containsKey keyValuePair.Key then
-                    yield (keyValuePair.Key, overwriteValue keyValuePair.Value newMap.[keyValuePair.Key])
-                else
-                    yield (keyValuePair.Key, keyValuePair.Value)
-        ]
-            |> Map.ofList
+        [ for keyValuePair in oldMap do
+            if newMap |> Map.containsKey keyValuePair.Key then
+                yield (keyValuePair.Key, overwriteValue keyValuePair.Value newMap.[keyValuePair.Key])
+            else
+                yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList
 
     let private overrideRuleSettings oldProperty newProperty = newProperty
 
     let private overrideRule (oldRule:Rule) (newRule:Rule) : Rule =
-        { 
-            Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings 
-        }
+        { Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings }
 
     let private overrideAnalysers oldRules newRules =
-        { 
-            Rules = overwriteMap oldRules.Rules newRules.Rules overrideRule 
-            Settings = overwriteMap oldRules.Settings newRules.Settings overrideRuleSettings
-        }
+        { Rules = overwriteMap oldRules.Rules newRules.Rules overrideRule 
+          Settings = overwriteMap oldRules.Settings newRules.Settings overrideRuleSettings }
 
     /// <summary>
     /// Loads a "higher precedence" configuration file. All the properties in the file we're loading overwrite 
@@ -362,26 +335,22 @@ module Configuration =
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride configToOverrideWith =
-        {
-            UseTypeChecker = configToOverrideWith.UseTypeChecker
-
-            IgnoreFiles = 
+        { UseTypeChecker = configToOverrideWith.UseTypeChecker
+          IgnoreFiles = 
                 match configToOverrideWith.IgnoreFiles with
-                    | Some({ Update = IgnoreFiles.Overwrite }) -> 
-                        configToOverrideWith.IgnoreFiles 
-                    | Some({ Update = IgnoreFiles.Add } as newIgnore) -> 
-                        let combinedFiles = 
-                            match configToOverride.IgnoreFiles with
-                                | Some(previousIgnore) ->
-                                    newIgnore.Files @ previousIgnore.Files
-                                | None -> newIgnore.Files
+                | Some({ Update = IgnoreFiles.Overwrite }) -> 
+                    configToOverrideWith.IgnoreFiles 
+                | Some({ Update = IgnoreFiles.Add } as newIgnore) -> 
+                    let combinedFiles = 
+                        match configToOverride.IgnoreFiles with
+                        | Some(previousIgnore) ->
+                            newIgnore.Files @ previousIgnore.Files
+                        | None -> newIgnore.Files
 
-                        { newIgnore with Files = combinedFiles } |> Some
-                    | None ->
-                        configToOverride.IgnoreFiles
-
-            Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers
-        }
+                    { newIgnore with Files = combinedFiles } |> Some
+                | None ->
+                    configToOverride.IgnoreFiles
+          Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers }
 
     let private getMapDifferences map (newMap:Map<_, _>) =
         map |> Map.filter (fun key value -> newMap.[key] <> value)
@@ -476,9 +445,16 @@ module Configuration =
 
         type Path = string list
 
+        /// Keeps configuration files loaded for a list of paths so that
+        /// they can be quickly retrieved and updated.
         type LoadedConfigs =
             {
+                /// Cached configurations for each path.
                 LoadedConfigs: Map<Path, Configuration option>
+
+                /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
+                /// for each full path. If you wanted to load the configurations for a solution
+                /// this should be a list of absolute paths to the project directories.
                 PathsAdded: Path list
             }
 
@@ -494,6 +470,8 @@ module Configuration =
 
             getAllPaths (path, [], []) |> List.rev
 
+        /// Loads all configurations needed to form a complete configuration for a given path.
+        /// A `complete configuration` is one that has overridden every configuration file in ancestor directories.
         let addPath tryLoadConfig loadedConfigs path =
             let pathHasAlreadyBeenLoaded = 
                 loadedConfigs.PathsAdded |> List.exists (fun x -> x = path)
@@ -526,6 +504,7 @@ module Configuration =
         let private isPathPartOfAnyPaths path paths =
             paths |> List.exists (fun x -> listStartsWith (x, path))
 
+        /// Removes a loaded path and all cached configurations that aren't used by any other paths.
         let removePath loadedConfigs path = 
             let pathNeverLoaded = 
                 loadedConfigs.PathsAdded |> List.exists (fun x -> x = path) |> not
@@ -544,6 +523,8 @@ module Configuration =
                 { PathsAdded = updatedPaths
                   LoadedConfigs = updatedConfigs }
 
+        /// With a given list of paths, any paths loaded not in the list will be removed
+        /// and any in the list but not loaded will be added. 
         let updatePaths tryLoadConfig loadedConfigs paths =
             let pathsToAdd =
                 paths 
@@ -596,8 +577,7 @@ module Configuration =
             { loadedConfigs with
                   LoadedConfigs = 
                     loadedConfigs.LoadedConfigs
-                        |> Map.map (fun configPath _ -> tryLoadConfig configPath)
-              }
+                        |> Map.map (fun configPath _ -> tryLoadConfig configPath) }
 
         /// Gets the configuration file located at a given path.
         /// The configuration file returned may be incomplete as it
@@ -635,6 +615,7 @@ module Configuration =
                   LoadedConfigs = loadedConfigs.LoadedConfigs 
                     |> Map.map (fun key value -> if key = path then config else value) }
 
+        /// Tries to normalise paths to a format that can be used as a path in <see cref="LoadedConfigs" />.
         let normalisePath (path:string) =
             Path.GetFullPath path
                 |> fun x -> x.Split([| Path.DirectorySeparatorChar |], 
