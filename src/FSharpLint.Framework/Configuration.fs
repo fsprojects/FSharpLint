@@ -27,6 +27,9 @@ module Configuration =
     open System.Xml.Linq
 
     [<Literal>]
+    let SettingsFileName = "Settings.FSharpLint"
+
+    [<Literal>]
     let private Namespace = @"https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd"
 
     let private getName name =
@@ -479,6 +482,9 @@ module Configuration =
                 PathsAdded: Path list
             }
 
+            static member Empty 
+                with get() = { LoadedConfigs = Map.ofList []; PathsAdded = [] }
+
         let private getAllPaths path =
             let rec getAllPaths = function
             | x::rest, currentPath, pathsFound ->
@@ -533,7 +539,7 @@ module Configuration =
                 let updatedConfigs =
                     loadedConfigs.LoadedConfigs 
                         |> Map.filter (fun configPath _ -> 
-                            isPathPartOfAnyPaths configPath updatedPaths |> not)
+                            isPathPartOfAnyPaths configPath updatedPaths)
 
                 { PathsAdded = updatedPaths
                   LoadedConfigs = updatedConfigs }
@@ -557,8 +563,8 @@ module Configuration =
         let rec private transpose matrix = 
             match matrix with 
             | (col::cols)::rows ->
-                let first = List.map List.head matrix
-                let rest = transpose (List.map List.tail matrix) 
+                let first = List.map (function [] -> None | h::_ -> Some h) matrix
+                let rest = transpose (List.map (function [] -> [] | _::t -> t) matrix) 
                 first :: rest
             | _ -> [] 
 
@@ -574,11 +580,15 @@ module Configuration =
                         | (first::_) as segments -> List.forall ((=) first) segments
                         | [] -> false)
                     |> Seq.toList
-                    
-            if listStartsWith (commonPath, preferredPath) then
-                commonPath
+                    |> List.choose List.head
+                 
+            if List.isEmpty commonPath then
+                None
             else
-                preferredPath
+                if listStartsWith (commonPath, preferredPath) then
+                    Some preferredPath
+                else
+                    Some commonPath
 
         /// Tries to reload the configuration for all paths.
         /// Call when the user has edited a configuration file on disk.
@@ -592,7 +602,7 @@ module Configuration =
         /// Gets the configuration file located at a given path.
         /// The configuration file returned may be incomplete as it
         /// will not have overrided any previous configuration files.
-        let partialConfig loadedConfigs path = 
+        let getPartialConfig loadedConfigs path = 
             let config =
                 loadedConfigs.LoadedConfigs 
                     |> Map.tryFind path
@@ -611,13 +621,13 @@ module Configuration =
         /// Gets the complete configuration file located at a given path.
         /// "complete" configuration means that it has overridden any previous
         /// configuration files.
-        let config loadedConfigs path = 
+        let getConfig loadedConfigs path = 
             let paths = getAllPaths path
 
             List.fold (fun config path -> 
                 match loadedConfigs.LoadedConfigs.TryFind path with
                 | Some(loadedConfig) -> tryOverrideConfig (config, loadedConfig)
-                | None -> config) None paths
+                | None -> config) (Some defaultConfiguration) paths
 
         /// Updates a configuration file at a given path.
         let updateConfig loadedConfigs path config = 

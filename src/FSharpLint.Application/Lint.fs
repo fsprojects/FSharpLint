@@ -25,9 +25,6 @@ module ConfigurationManagement =
 
     open System.IO
     open FSharpLint.Framework.Configuration
-
-    [<Literal>]
-    let SettingsFileName = "Settings.FSharpLint"
     
     /// Reason for the linter failing.
     type ConfigFailure =

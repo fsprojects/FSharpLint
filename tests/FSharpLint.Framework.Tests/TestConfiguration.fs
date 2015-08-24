@@ -335,3 +335,111 @@ type TestConfiguration() =
         let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath @"C:\Dog\Goat\Cat")
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
+
+    [<Test>]
+    member self.``Removing paths remove expected loaded configs.``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = 
+                [ (["C:"], None)
+                  (["C:"; "Dog"], None)
+                  (["C:"; "Dog"; "Goat"], None)
+                  (["C:"; "Dog"; "Goat"; "Cat"], None) ] |> Map.ofList
+              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
+
+        let updatedLoadedConfigs = 
+            Management.removePath loadedConfigs (normalisePath @"C:\Dog\Goat\Cat")
+
+        let expectedLoadedConfigs = 
+            { LoadedConfigs = 
+                [ (["C:"], None)
+                  (["C:"; "Dog"], None)
+                  (["C:"; "Dog"; "Goat"], None) ] |> Map.ofList
+              PathsAdded = [ ["C:"; "Dog"; "Goat"] ] }
+
+        Assert.AreEqual(expectedLoadedConfigs, updatedLoadedConfigs)
+
+        let updatedLoadedConfigs = 
+            Management.removePath updatedLoadedConfigs (normalisePath @"C:\Dog\Goat")
+
+        let expectedLoadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = [] }
+
+        Assert.AreEqual(expectedLoadedConfigs, updatedLoadedConfigs)
+
+    [<Test>]
+    member self.``Deepest common path is found when preferred path not found``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = 
+                [ ["C:"; "Dog"; "Goat"; "Cat"]
+                  ["C:"; "Dog"; "Goat"]
+                  ["C:"; "Dog"; "Goat"; "Shrimp"] ] }
+
+        let path = commonPath loadedConfigs ["C:";"NonExistant"]
+
+        Assert.AreEqual(Some(["C:"; "Dog"; "Goat"]), path)
+
+    [<Test>]
+    member self.``Preferred path is returned when it is a common path``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = 
+                [ ["C:"; "Dog"; "Goat"; "Cat"]
+                  ["C:"; "Dog"; "Goat"]
+                  ["C:"; "Dog"; "Goat"; "Shrimp"] ] }
+
+        let path = commonPath loadedConfigs ["C:";"Dog"]
+
+        Assert.AreEqual(Some(["C:"; "Dog"]), path)
+
+    [<Test>]
+    member self.``No path is returned when there is no common path``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = 
+                [ ["C:"; "Dog"; "Goat"; "Cat"]
+                  ["D:"; "Dog"; "Goat"; "Shrimp"] ] }
+
+        let path = commonPath loadedConfigs ["C:";"Dog"]
+
+        Assert.AreEqual(None, path)
+
+    [<Test>]
+    member self.``No path is returned when there are no paths added``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = [] }
+
+        let path = commonPath loadedConfigs ["C:";"Dog"]
+
+        Assert.AreEqual(None, path)
+
+    [<Test>]
+    member self.``Default configuration returned when there are no paths added``() = 
+        let loadedConfigs = 
+            { LoadedConfigs = [] |> Map.ofList
+              PathsAdded = [] }
+
+        let config = getConfig loadedConfigs ["C:";"Dog"]
+
+        Assert.AreEqual(Some defaultConfiguration, config)
+
+    [<Test>]
+    member self.``Overridden configuration returned when there is a path added``() = 
+        let loadedConfig = 
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = 
+                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                                 Rules = [] |> Map.ofList }] |> Map.ofList }
+
+        let loadedConfigs = 
+            { LoadedConfigs = [(["C:"], Some(loadedConfig))] |> Map.ofList
+              PathsAdded = [["C:"]] }
+
+        let config = getConfig loadedConfigs ["C:";"Dog"]
+
+        let expectedConfig = overrideConfiguration defaultConfiguration loadedConfig
+
+        Assert.AreEqual(Some expectedConfig, config)
