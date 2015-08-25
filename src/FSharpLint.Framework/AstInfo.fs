@@ -69,33 +69,6 @@ module AstInfo =
 
         isPublic true false path
 
-    /// Is an identifier being used to identify declaration of a value?
-    let isValue (identifier:LongIdent) (checkFile:FSharpCheckFileResults) =
-        if System.Char.IsUpper(identifier.Head.idText.[0]) && identifier.Length = 1 then
-            let identifier = identifier.Head
-
-            let startLine, endColumn = identifier.idRange.StartLine, identifier.idRange.EndColumn
-
-            let symbol = checkFile.GetSymbolUseAtLocation(startLine, endColumn, "", [identifier.idText])
-                            |> Async.RunSynchronously
-
-            match symbol with
-                | Some(symbol) ->
-                    match symbol.Symbol with
-                        | :? FSharpMemberOrFunctionOrValue as symbol -> 
-                            match symbol.ImplementationLocation with
-                                | Some(implLocation) -> 
-                                    /// If it's implemented elsewhere then it's not what we're looking for,
-                                    /// it's probably a literal being matched against.
-                                    let isImplementedHere = implLocation.StartRange = identifier.idRange.StartRange
-
-                                    isImplementedHere
-                                | None -> true
-                        | _ -> false
-                | None -> false
-        else 
-            identifier.Length = 1
-
     type IdentifierType =
         | Member
         | Function

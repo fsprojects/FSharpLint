@@ -41,6 +41,9 @@ module Ast =
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
     type VisitorInfo =
         {
+            /// Version of F# the source that's being analysed was written in.
+            FSharpVersion: Version
+
             /// The current lint config to be used by visitors.
             Config: Configuration.Configuration
 

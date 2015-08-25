@@ -129,6 +129,12 @@ module Binding =
                     let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
                     visitorParameters.VisitorInfo.PostError range error
                 | _ -> ()
+
+    let (|IsLetBinding|_|) breadcrumbs =
+        match breadcrumbs with 
+            | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))::_ 
+            | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _))::_ -> Some()
+            | _ -> None
     
     let visitor visitorInfo checkFile (astNode:CurrentNode) = 
         let visitorParameters = 
@@ -137,15 +143,15 @@ module Binding =
                 CheckFile = checkFile
                 AstNode = astNode
             }
-
-        match astNode.Node with
-            | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) -> 
+        
+        match astNode.Breadcrumbs, astNode.Node with
+            | IsLetBinding, AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) ->
                 checkForBindingToAWildcard visitorParameters pattern range
                 if not isMutable then
                     checkForUselessBinding visitorParameters pattern expr range
-            | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
+            | _, AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
                 checkForWildcardNamedWithAsPattern visitorParameters pattern
-            | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as pattern, _)]), _, _)) ->
+            | _, AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as pattern, _)]), _, _)) ->
                 let identifier = identifier.Lid |> List.map (fun x -> x.idText)
                 checkTupleOfWildcards visitorParameters pattern identifier
             | _ -> ()

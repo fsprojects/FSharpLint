@@ -67,6 +67,74 @@ let f = fun a b -> a * b
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.``Lambda reimplementing long identifier function issues error``() = 
+        this.Parse """
+module Program
+
+let f = fun a b -> List.map a b
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
+    [<Test>]
+    member this.``Lambda to pointfree constructor application should not be suggested unless using F# 4 or above``() = 
+        this.Parse("""
+module Program
+
+type Duck(info:string) =
+    do ()
+
+let f = List.map (fun x -> Duck x) ["1";"2"]
+
+open System
+let f = List.map (fun x -> Uri x) ["1";"2"]
+""", checkInput = true, fsharpVersion = System.Version(3, 1))
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
+    [<Test>]
+    member this.``Lambda to pointfree long identifer constructor application should not be suggested unless using F# 4 or above``() = 
+        this.Parse("""
+module Program
+
+let f = List.map (fun x -> System.Uri x) ["1";"2"]
+""", checkInput = true, fsharpVersion = System.Version(3, 1))
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
+    [<Test>]
+    member this.``Lambda to DU constructor application should be suggested when using any version of F#``() = 
+        this.Parse("""
+module Program
+
+type Cat = | Meower of string
+
+let f = List.map (fun x -> Meower x) ["1";"2"]
+""", checkInput = true, fsharpVersion = System.Version(3, 1))
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
+    [<Test>]
+    member this.``Lambda to pointfree constructor application should be suggested if using F# 4 or above``() = 
+        this.Parse("""
+module Program
+
+type Duck(info:string) =
+    do ()
+
+let f = List.map (fun x -> Duck x) ["1";"2"]
+
+open System
+let f = List.map (fun x -> String x) ["1";"2"]
+""", checkInput = true, fsharpVersion = System.Version(4, 0))
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
     member this.LambdaReimplementingMultiplcationIssuesErrorSuppressed() = 
         this.Parse """
 module Program

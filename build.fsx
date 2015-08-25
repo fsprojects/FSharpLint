@@ -28,8 +28,8 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.3"
-let apiVersion = "0.0.2"
+let version = "0.2.6"
+let apiVersion = "0.0.6"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"
@@ -128,6 +128,7 @@ Target "CreatePackage" (fun _ ->
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Core.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
@@ -146,7 +147,6 @@ Target "CreateApiPackage" (fun _ ->
     CopyFile libDir "./bin/FSharpLint.Rules.dll"
     CopyFile libDir "./bin/FSharpLint.Framework.dll"
     CopyFile libDir "./bin/FSharpLint.Application.dll"
-    CopyFile libDir "./bin/FSharp.Compiler.Service.dll"
     CopyFile libDir "./bin/FParsecCS.dll"
     CopyFile libDir "./bin/FParsec.dll"
 
@@ -160,12 +160,13 @@ Target "CreateApiPackage" (fun _ ->
             WorkingDir = apiPackagingDir
             Version = apiVersion
             Publish = false
+            Dependencies = getDependencies "./src/FSharpLint.Application/packages.config"
          })
         "FSharpLint.Core.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.1/"
-#r @"tools/FSharpLint.0.2.1/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.2.5/"
+#r @"tools/FSharpLint.0.2.5/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->

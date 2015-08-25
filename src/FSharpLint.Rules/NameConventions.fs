@@ -42,9 +42,11 @@ module NameConventions =
 
     let isPascalCase (identifier:string) = Regex.Match(identifier, @"^[A-Z]([a-z]|[A-Z]|\d)*").Success
 
-    let isCamelCase (identifier:string) = Regex.Match(identifier, @"^[a-z]([a-z]|[A-Z]|\d)*").Success
+    let isCamelCase (identifier:string) = Regex.Match(identifier, @"^_*[a-z]([a-z]|[A-Z]|\d)*").Success
 
     let containsUnderscore (identifier:string) = identifier.Contains("_")
+
+    let patternContainsUnderscore (identifier:string) = identifier.TrimStart('_') |> containsUnderscore
 
     let pascalCaseError (identifier:string) = 
         let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsPascalCaseError")
@@ -54,25 +56,25 @@ module NameConventions =
         let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsCamelCaseError")
         System.String.Format(errorFormatString, identifier)
 
-    let expectNoUnderscore postError (identifier:Ident) =
-        if containsUnderscore identifier.idText then
-            let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
-            let error = System.String.Format(errorFormatString, identifier.idText)
-            postError identifier.idRange error
+    let underscoreError (identifier:string) = 
+        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNamingConventionsUnderscoreError")
+        System.String.Format(errorFormatString, identifier)
 
     let expect predicate getError postError (identifier:Ident) =
-        if not <| isOperator identifier.idText then
-            expectNoUnderscore postError identifier
-
-            if not <| predicate identifier.idText then
-                let error = getError identifier.idText
-                postError identifier.idRange error
+        if not <| isOperator identifier.idText && not <| predicate identifier.idText then
+            let error = getError identifier.idText
+            postError identifier.idRange error
 
     /// Checks an identifier is camel case, if not an error is posted.
     let expectCamelCase = expect isCamelCase camelCaseError
     
     /// Checks an identifier is pascal case, if not an error is posted.
     let expectPascalCase = expect isPascalCase pascalCaseError
+    
+    /// Checks an identifier does not contain an underscore, if it does an error is posted.
+    let expectNoUnderscore = expect (containsUnderscore >> not) underscoreError
+
+    let expectNoUnderscoreInPattern = expect (patternContainsUnderscore >> not) underscoreError
 
     module CheckIdentifiers =
         [<Literal>]
@@ -81,17 +83,21 @@ module NameConventions =
         [<Literal>]
         let private TypeNamesMustBePascalCase = "TypeNamesMustBePascalCase"
 
-        let private expectNoUnderscore visitorInfo (astNode:CurrentNode) identifier = 
+        let private triggerNoUnderscoreRule expect visitorInfo (astNode:CurrentNode) identifier = 
             if IdentifiersMustNotContainUnderscores |> isRuleEnabled visitorInfo.Config && 
                astNode.IsSuppressed(AnalyserName, IdentifiersMustNotContainUnderscores) |> not then
-                expectNoUnderscore visitorInfo.PostError identifier
+                expect visitorInfo.PostError identifier
+
+        let private expectNoUnderscore = triggerNoUnderscoreRule expectNoUnderscore
+
+        let private expectNoUnderscoreInPattern = triggerNoUnderscoreRule expectNoUnderscoreInPattern
 
         let checkNonPublicValue visitorInfo (astNode:CurrentNode) (identifier:Ident) =
             if not <| isOperator identifier.idText then
                 if "NonPublicValuesCamelCase" |> isRuleEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName, "NonPublicValuesCamelCase") |> not then
                     expectCamelCase visitorInfo.PostError identifier
 
-                expectNoUnderscore visitorInfo astNode identifier
+                expectNoUnderscoreInPattern visitorInfo astNode identifier
 
         let checkPublicValue visitorInfo (astNode:CurrentNode) (identifier:Ident) =
             if not <| isOperator identifier.idText then
@@ -157,7 +163,7 @@ module NameConventions =
                         let error = System.String.Format(errorFormatString, ident)
                         visitorInfo.PostError identifier.idRange error
 
-                identifier.idText.Split([|'|'|]).Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
+                identifier.idText.Split('|').Where(fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
                     |> Seq.iter error
 
         let checkException visitorInfo (astNode:CurrentNode) identifier =
@@ -264,10 +270,17 @@ module NameConventions =
                         | SynMemberDefn.ImplicitCtor(_) -> true 
                         | _ -> false
 
+                    let canBeInInterface = function 
+                        | SynMemberDefn.Open(_)
+                        | SynMemberDefn.AbstractSlot(_)
+                        | SynMemberDefn.Inherit(_) -> true
+                        | _ -> false
+
                     match typeDef with
                         | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconInterface, members, _)
                         | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, _) -> 
-                            members |> List.exists hasConstructor |> not
+                            members |> List.exists hasConstructor |> not &&
+                            members |> List.forall canBeInInterface
                         | _ -> false
             
                 if not isTypeExtensions then
@@ -320,10 +333,14 @@ module NameConventions =
                 Continue
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
                 if isLiteral attributes checkFile then
-                    match pattern with
+                    let rec checkLiteral = function
                         | SynPat.Named(_, identifier, _, _, _) -> 
                             CheckIdentifiers.checkLiteral visitorInfo astNode identifier
+                        | SynPat.Paren(p, _) ->
+                            checkLiteral p
                         | _ -> ()
+
+                    checkLiteral pattern
 
                     Stop
                 else
@@ -355,7 +372,7 @@ module NameConventions =
                 // in patterns outside of bindings
                 let identifier = longIdentifier.Lid.Head
                 if not <| isOperator identifier.idText then
-                    expectNoUnderscore visitorInfo.PostError identifier
+                    expectNoUnderscoreInPattern visitorInfo.PostError identifier
                         
                 Continue
             | _ -> Continue

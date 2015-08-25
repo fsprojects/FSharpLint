@@ -189,6 +189,17 @@ module Program
 
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/100
+    /// (static classes were thought to be interfaces)
+    [<Test>]
+    member this.StaticClassIsNotTreatedAsInterface() = 
+        this.Parse """
+module Program
+  type Printable =
+    static member Print() = ()"""
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
     [<Test>]
     member this.InterfaceNameDoesNotBeginWithI() = 
         this.Parse """
@@ -437,6 +448,29 @@ module program
     | _ -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(8, 6))
+
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
+    [<Test>]
+    member this.MnemonicWildcardInPatternMatch() = 
+        this.Parse """
+module program
+  let main = 
+    match true with
+    | _dog -> ()
+    | _ -> ()"""
+
+        Assert.IsFalse(this.ErrorExistsOnLine(5))
+
+    [<Test>]
+    member this.UnderscoreInMatchPatternIdent() = 
+        this.Parse """
+module program
+  let main = 
+    match true with
+    | d_og -> ()
+    | _ -> ()"""
+
+        Assert.IsTrue(this.ErrorExistsOnLine(5))
         
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() = 
@@ -987,6 +1021,16 @@ let cat = 5"""
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
         
     [<Test>]
+    member this.LiteralIsCamelCaseWithParen() =
+        this.Parse """
+module program
+
+[<Literal>]
+let (cat) = 5"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 5))
+        
+    [<Test>]
     member this.LiteralIsCamelCaseSuppressed() =
         this.Parse """
 module program
@@ -1162,3 +1206,17 @@ type SingleCaseDUNoValues = | SingleCaseDUNoValues
 let foo SingleCaseDUNoValues = ()""", checkInput = true)
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99 
+    /// (duplicated warning for underscore in identifier).
+    [<Test>]
+    member this.MemberWithUnderscoreDoesNotHaveDuplicateWarnings() = 
+        this.Parse """
+module Program
+
+type Cat() =
+    member x._Print() = ()"""
+
+        let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
+
+        Assert.AreEqual(2, numberOfErrors)

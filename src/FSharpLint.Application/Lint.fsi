@@ -85,11 +85,14 @@ module Lint =
             FinishEarly: (unit -> bool) option
 
             /// Provide your own FSharpLint configuration to the linter.
+            /// If not provided the default configuration will be used.
             Configuration: Configuration.Configuration option
 
             /// This function will be called every time the linter finds a broken rule.
             ReceivedWarning: (LintWarning.Warning -> unit) option
         }
+
+        static member Default: OptionalLintParameters
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
     /// you want to lint then this can be used to provide the parsed information to prevent the 
@@ -104,6 +107,9 @@ module Lint =
 
             /// Optional results of inferring the types on the AST (allows for a more accurate lint).
             TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
+
+            /// Version of F# the source code of the file was written in.
+            FSharpVersion: System.Version
         }
 
     /// Reason for the linter failing.
@@ -137,14 +143,14 @@ module Lint =
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> progress:(ProjectProgress -> unit) option -> LintResult
 
     /// Lints F# source code.
-    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
+    val lintSource : optionalParams:OptionalLintParameters -> source:string -> fsharpVersion:System.Version -> LintResult
 
     /// Lints F# source code that has already been parsed using 
     /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> LintResult
+    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> fsharpVersion:System.Version -> LintResult
 
     /// Lints an F# file that has already been parsed using 
     /// `FSharp.Compiler.Services` in the calling application. 

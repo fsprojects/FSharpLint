@@ -56,7 +56,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
                 }
             | None -> emptyConfig
 
-    member this.Parse(input:string, ?overrideAnalysers, ?checkInput) = 
+    member this.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion) = 
         let config =
             match overrideAnalysers with
                 | Some(overrideAnalysers) -> 
@@ -71,7 +71,9 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
         let config = { config with UseTypeChecker = Some(checkInput) }
 
-        let visitorInfo = { Config = config; PostError = postError }
+        let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
+
+        let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version }
         
         match parseSource input config, analyser with
             | Success(parseInfo), Ast(visitor) ->

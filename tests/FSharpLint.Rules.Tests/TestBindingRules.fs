@@ -160,6 +160,20 @@ let a = 10
 let ((a)) = ((a))""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/101
+    /// (a use binding will dispose the value so is not useless)
+    [<Test>]
+    member this.UseBindingWithSameNameDoesNotCauseUselessBindingError() = 
+        this.Parse("""
+module Program
+
+type Cat() =
+    static member CreateList(reader:TextReader) = 
+        use reader = reader
+        reader.ReadToEnd()""", checkInput = true)
+
+        Assert.IsFalse(this.ErrorExistsOnLine(6))
         
     [<Test>]
     member this.WildcardNamedWithAsPattern() = 

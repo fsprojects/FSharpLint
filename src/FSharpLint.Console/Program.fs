@@ -116,7 +116,7 @@ module Program =
         | RunTimeConfigError ->
             System.Console.WriteLine(Resources.GetString("ConsoleRunTimeConfigError"))
 
-        | FailedToParseFile(failure) ->             
+        | FailedToParseFile(failure) ->
             System.Console.WriteLine(
                 "Lint failed to parse a file. Failed with: " + 
                 getParseFailureReason failure)
@@ -182,8 +182,8 @@ module Program =
     let private startWithArguments arguments =
         arguments
             |> List.iter (function 
-                | SingleFile(file) -> runLintOnFile file |> outputLintResult
-                | Source(source) -> runLintOnSource source |> outputLintResult
+                | SingleFile(file) -> runLintOnFile file (System.Version(4, 0)) |> outputLintResult
+                | Source(source) -> runLintOnSource source (System.Version(4, 0)) |> outputLintResult
                 | ProjectFile(file) -> start file
                 | UnexpectedArgument(_) -> ())
             
