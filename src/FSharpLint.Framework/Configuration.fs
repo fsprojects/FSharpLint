@@ -526,15 +526,12 @@ module Configuration =
         /// With a given list of paths, any paths loaded not in the list will be removed
         /// and any in the list but not loaded will be added. 
         let updatePaths tryLoadConfig loadedConfigs paths =
-            let pathsToAdd =
-                paths 
-                    |> List.filter (fun newPath -> 
-                        loadedConfigs.PathsAdded |> List.forall (fun existingPath -> existingPath <> newPath))
+            let existingPaths = Set.ofList loadedConfigs.PathsAdded
+            let newPaths = Set.ofList paths
 
-            let pathsToRemove =
-                loadedConfigs.PathsAdded
-                    |> List.filter (fun newPath -> 
-                        paths |> List.forall (fun existingPath -> existingPath <> newPath))
+            let pathsToAdd = Set.difference newPaths existingPaths |> List.ofSeq
+
+            let pathsToRemove = Set.difference existingPaths newPaths |> List.ofSeq
 
             let loadedConfigs = pathsToAdd |> List.fold (addPath tryLoadConfig) loadedConfigs
             let loadedConfigs = pathsToRemove |> List.fold removePath loadedConfigs
