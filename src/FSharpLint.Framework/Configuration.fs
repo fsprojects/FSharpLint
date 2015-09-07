@@ -352,8 +352,8 @@ module Configuration =
                     configToOverride.IgnoreFiles
           Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers }
 
-    let private getMapDifferences map (newMap:Map<_, _>) =
-        map |> Map.filter (fun key value -> newMap.[key] <> value)
+    let private getMapDifferences (map:Map<_, _>) (newMap:Map<_, _>) =
+        newMap |> Map.filter (fun key value -> map.[key] <> value)
 
     let private getAnalyserDifferences analyser newAnalyser =
         { Settings = getMapDifferences analyser.Settings newAnalyser.Settings
