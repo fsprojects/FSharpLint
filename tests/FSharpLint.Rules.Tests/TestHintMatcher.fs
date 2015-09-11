@@ -28,18 +28,22 @@ open FSharpLint.Framework.HintMatcher
 open FSharpLint.Framework.LoadVisitors
 
 let generateHintConfig hints =
+    let parseHints hints =
+        let parseHint hint =
+            match CharParsers.run phint hint with
+            | FParsec.CharParsers.Success(hint, _, _) -> hint
+            | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
+
+        List.map (fun x -> { Hint = x; ParsedHint = parseHint x }) hints
+
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.empty 
-                    Settings = Map.ofList [ ("Hints", Hints(hints)) ]
-                }) 
-        ]
+        [ (AnalyserName, 
+            { Rules = Map.empty 
+              Settings = Map.ofList [ ("Hints", Hints(parseHints hints)) ] }) ]
     
 [<TestFixture>]
 type TestHintMatcher() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor getHints))
+    inherit TestRuleBase.TestRuleBase(Ast(visitor getHintsFromConfig))
 
     [<Test>]
     member this.MatchNotEqualHint() = 

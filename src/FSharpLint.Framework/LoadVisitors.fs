@@ -69,43 +69,6 @@ module LoadVisitors =
     type IRegisterPlugin =
         abstract RegisterPlugin : VisitorPlugin with get
 
-    [<RequireQualifiedAccess>]
-    type CheckConfigResult =
-        | Failed of string
-        | Success
-
-    /// Extension of IRegisterPlugin that gets passed a configuration file before the plugin is registered. 
-    type IRegisterPluginWithConfigChecker =
-        abstract CheckConfig : Configuration.Configuration -> CheckConfigResult
-
-        inherit IRegisterPlugin
-
-    /// Loads all implementations of IRegisterPluginWithConfigChecker from a given assembly.
-    let loadConfigCheckers (assembly:System.Reflection.Assembly) =
-        let isConfigCheckerType (t:System.Type) =
-            t.GetInterfaces().Contains(typeof<IRegisterPluginWithConfigChecker>)
-                && t.GetConstructor(System.Type.EmptyTypes) <> null
-
-        assembly.GetTypes()
-                |> Array.filter isConfigCheckerType
-                |> Array.toList
-
-    /// <summary>
-    /// Gets a list of failures that occurred when checking a given config file using a given list of checkConfigs.
-    /// </summary>
-    /// <param name="checkConfigs">
-    /// List of config checkers, these can be loaded from an assembly using loadConfigCheckers
-    /// </param>
-    let checkConfigsForFailures config checkConfigs =
-        let instanceFromType (t:System.Type) = System.Activator.CreateInstance(t) :?> IRegisterPluginWithConfigChecker
-        let checkConfiguration (configChecker:IRegisterPluginWithConfigChecker) = configChecker.CheckConfig(config)
-        let getConfigurationFailures = function 
-            | CheckConfigResult.Failed(failMessage) -> Some(failMessage) 
-            | CheckConfigResult.Success -> None
-
-        checkConfigs
-            |> List.choose (instanceFromType >> checkConfiguration >> getConfigurationFailures)
-
     /// Loads all registered visitors (files containing a class implementing IRegisterPlugin) from a given assembly.
     let loadPlugins (assembly:System.Reflection.Assembly) =
         let isPluginType (t:System.Type) = 

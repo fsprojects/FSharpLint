@@ -42,13 +42,15 @@ module Configuration =
 
     exception ConfigurationException of string
 
+    type Hint = { Hint: string; ParsedHint: HintParser.Hint }
+
     type Setting =
         | Enabled of bool
         | Lines of int
         | Depth of int
         | MaxItems of int
         | Length of int
-        | Hints of string list
+        | Hints of Hint list
         | MaxCyclomaticComplexity of int
         | IncludeMatchStatements of bool
         | OneSpaceAllowedAfterOperator of bool
@@ -180,6 +182,17 @@ module Configuration =
         if not valid then sprintf "Found unknown XmlDocumentation Access value %s" value |> ConfigurationException |> raise
         ret
 
+    let private parseHints (hintsText:string) =
+        let parseHint hint =
+            match FParsec.CharParsers.run HintParser.phint hint with
+            | FParsec.CharParsers.Success(hint, _, _) -> hint
+            | FParsec.CharParsers.Failure(error, _, _) -> 
+                raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
+
+        parseLines hintsText 
+            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+            |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
+
     let private parseSetting (setting:XElement) =
         match setting.Name.LocalName with
             | "Enabled" -> Enabled(setting.Value |> bool.Parse)
@@ -189,7 +202,7 @@ module Configuration =
             | "MaxItems" -> MaxItems(setting.Value |> int)
             | "MaxCyclomaticComplexity" -> MaxCyclomaticComplexity(setting.Value |> int)
             | "IncludeMatchStatements" -> IncludeMatchStatements(setting.Value |> bool.Parse)
-            | "Hints" -> Hints(parseLines setting.Value)
+            | "Hints" -> Hints(parseHints setting.Value)
             | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
             | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
             | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)

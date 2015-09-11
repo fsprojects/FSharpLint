@@ -45,11 +45,11 @@
   <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition=" Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="HintParser.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
     <Compile Include="LoadVisitors.fs" />
-    <Compile Include="HintParser.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="ExpressionUtilities.fs" />
     <Compile Include="ParseFile.fs" />

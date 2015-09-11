@@ -72,7 +72,7 @@ module ConfigurationManagement =
     /// The closer they are to the project directory the higher precedence they have.
     /// e.g. if the project directory is C:\User\Matt\Project then a config file found in 
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
-    let private loadUserConfigFiles projectFilePath defaultConfig checkConfig =
+    let private loadUserConfigFiles projectFilePath defaultConfig =
         let projectFileDirectory = Path.GetDirectoryName projectFilePath
         let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
 
@@ -82,11 +82,12 @@ module ConfigurationManagement =
 
                 if File.Exists(filename) then
                     try
-                        let newConfig = File.ReadAllText filename |> configuration
+                        let newConfig = 
+                            File.ReadAllText filename 
+                                |> configuration
+                                |> (overrideConfiguration configToOveride)
 
-                        match overrideConfiguration configToOveride newConfig |> checkConfig with
-                            | ConfigurationResult.Success(config) -> loadAllConfigs config paths
-                            | failure -> failure
+                        loadAllConfigs newConfig paths
                     with
                         | ConfigurationException(message) ->
                             ConfigurationResult.Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
@@ -105,28 +106,7 @@ module ConfigurationManagement =
     /// e.g. if the project directory is C:\User\Matt\Project then a config file found in 
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     let loadConfigurationForProject projectFilePath =
-        let configCheckers = 
-            typeof<FSharpLint.Rules.Binding.RegisterBindingVisitor>.Assembly
-                |> FSharpLint.Framework.LoadVisitors.loadConfigCheckers
-
-        let checkConfig config =
-            let configFailures = configCheckers 
-                                    |> (FSharpLint.Framework.LoadVisitors.checkConfigsForFailures config)
-
-            match configFailures with
-                | [] -> config |> ConfigurationResult.Success
-                | firstFailure::_ -> ConfigurationResult.Failure(FailedToLoadConfig(firstFailure))
-
-        let config = 
-            try
-                defaultConfiguration |> checkConfig
-            with
-                | ConfigurationException(message) ->
-                    ConfigurationResult.Failure(FailedToLoadConfig ("Failed to load default config: " + message))
-
-        match config with
-            | ConfigurationResult.Success(config) -> loadUserConfigFiles projectFilePath config checkConfig
-            | x -> x
+        loadUserConfigFiles projectFilePath defaultConfiguration
 
 /// Provides an API for running FSharpLint from within another application. 
 [<AutoOpen>]
@@ -277,8 +257,8 @@ module Lint =
     let loadConfigurationFilesForProject projectFilePath =
         try
             match ConfigurationManagement.loadConfigurationForProject projectFilePath with
-                | ConfigurationManagement.Success(config) -> Success(config)
-                | ConfigurationManagement.Failure(x) -> Failure(configFailureToLintFailure x)
+                | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
+                | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
         with 
             | FSharpLint.Framework.Configuration.ConfigurationException(_) -> 
                 Failure(RunTimeConfigError)
