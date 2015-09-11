@@ -389,6 +389,10 @@
           <Access>None</Access>
           <Enabled>false</Enabled>
         </AutoPropertyDefinitionHeader>
+        <LetDefinitionHeader>
+          <Access>None</Access>
+          <Enabled>false</Enabled>
+        </LetDefinitionHeader>
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
