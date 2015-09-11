@@ -427,38 +427,6 @@ module HintMatcher =
                     matchAndPatterns (List.rev patterns, hint)
                 | _ -> false
 
-    /// Gets a list of hints from the config file.
-    let getHints config = 
-        let analyser = Map.find AnalyserName config.Analysers
-
-        let parseHint hint =
-            match run phint hint with
-                | Success(hint, _, _) -> hint
-                | Failure(error, _, _) -> 
-                    raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
-
-        match Map.find "Hints" analyser.Settings with
-            | Hints(stringHints) -> 
-                stringHints 
-                    |> List.filter (System.String.IsNullOrEmpty >> not)
-                    |> List.map parseHint
-            | _ -> 
-                raise <| ConfigurationException("Expected the Hints rule to contain a list of hints")
-
-    /// Memoized getHints.
-    let getHintsFromConfig = 
-        let hints = ref None
-
-        let getMemoizedHints config =
-            match !hints with
-                | None ->
-                    let parsedHints = getHints config
-                    hints := Some(parsedHints)
-                    parsedHints
-                | Some(hints) -> hints
-
-        getMemoizedHints
-
     let lambdaArgumentsToString (arguments:Argument list) = 
         let argumentToString = function
             | Argument.Wildcard -> "_"
@@ -623,6 +591,19 @@ module HintMatcher =
         else
             Stop
 
+    let getHintsFromConfig config =
+        let analyser = Map.find AnalyserName config.Analysers
+
+        match Map.tryFind "Hints" analyser.Settings with
+        | Some(Hints(hints)) -> 
+            hints |> List.map (fun x -> x.ParsedHint)
+        | _ ->
+            System.Diagnostics.Debug.Assert(
+                false, 
+                "Hints analyser was not in the configuration.")
+
+            []
+
     type RegisterHintVisitor() = 
         let plugin =
             {
@@ -630,13 +611,5 @@ module HintMatcher =
                 Visitor = Ast(visitor getHintsFromConfig)
             }
 
-        interface IRegisterPluginWithConfigChecker with
+        interface IRegisterPlugin with
             member this.RegisterPlugin with get() = plugin
-
-            member this.CheckConfig config = 
-                try
-                    getHintsFromConfig config |> ignore
-                    CheckConfigResult.Success
-                with
-                    | ConfigurationException(message) ->
-                        CheckConfigResult.Failed(message)

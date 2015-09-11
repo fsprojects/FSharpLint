@@ -19,6 +19,7 @@
 module TestConfiguration
 
 open NUnit.Framework
+open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.Configuration
 open Management
 
@@ -251,9 +252,11 @@ type TestConfiguration() =
 
     [<Test>]
     member self.``Config specifying hints writes correct XML document``() = 
+        let parsedHint = { Match = Expression.Wildcard; Suggestion = Expression.Wildcard }
+
         let hints =
-            [ "not (a =  b) ===> a <> b"
-              "not (a <> b) ===> a = b" ]
+            [ { Hint = "not (a =  b) ===> a <> b"; ParsedHint = parsedHint }
+              { Hint = "not (a <> b) ===> a = b"; ParsedHint = parsedHint } ]
 
         let analyser =
             {
