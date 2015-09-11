@@ -185,11 +185,14 @@ Target "GenerateDocs" (fun _ ->
 
 Target "All" DoNothing
 
-"Clean" ==> "RestorePackages" ==> "AssemblyInfo" ==> "Build"
-"Build" ==> "All"
-"RunFunctionalTests" ==> "RunTests" ==> "All"
-"Lint" ==> "All"
-"GenerateDocs" ==> "All"
-"CreatePackage" ==> "All"
+"Clean" ==> 
+    "RestorePackages" ==> 
+    "AssemblyInfo" ==> 
+    "Build" ==> 
+    "RunFunctionalTests" ==> 
+    "RunTests" ==> 
+    "Lint" ==> 
+    "GenerateDocs" ==> 
+    "CreatePackage" ==> "All"
 
 RunTargetOrDefault "All"
