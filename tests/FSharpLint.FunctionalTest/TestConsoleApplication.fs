@@ -69,16 +69,14 @@ module Tests =
         ]
 
     let expectedErrors =
-        [
-            "not (a=b) can be refactored into a<>b"
-            "not (a<>b) can be refactored into a=b"
-            "fun x -> x can be refactored into id"
-            "not true can be refactored into false"
-            "not false can be refactored into true"
-            "List.fold + 0 can be refactored into List.sum"
-            "a<>true can be refactored into not a"
-            "List.head (List.sort x) can be refactored into List.min x"
-        ]
+        [ "`not (a=b)` might be able to be refactored into `a<>b`."
+          "`not (a<>b)` might be able to be refactored into `a=b`."
+          "`fun x -> x` might be able to be refactored into `id`."
+          "`not true` might be able to be refactored into `false`."
+          "`not false` might be able to be refactored into `true`."
+          "`List.fold + 0` might be able to be refactored into `List.sum`."
+          "`a<>true` might be able to be refactored into `not a`."
+          "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
