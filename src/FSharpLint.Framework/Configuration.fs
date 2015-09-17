@@ -367,18 +367,67 @@ module Configuration =
           Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers }
 
     let private getMapDifferences (map:Map<_, _>) (newMap:Map<_, _>) =
-        newMap |> Map.filter (fun key value -> map.[key] <> value)
+        newMap |> Map.filter (fun key value -> 
+            match map.TryFind key with
+            | Some(x) -> x <> value
+            | None -> true)
 
     let private getAnalyserDifferences analyser newAnalyser =
         { Settings = getMapDifferences analyser.Settings newAnalyser.Settings
           Rules = getMapDifferences analyser.Rules newAnalyser.Rules }
 
+    /// Merges settings from `diff` and `partial` with settings from
+    /// `diff` taking precedence.
+    let private mergeSettings full diff partial =
+        full
+            |> Map.toList 
+            |> List.choose (fun (key, _) -> 
+                match Map.tryFind key diff with
+                | Some(value) -> Some(key, value)
+                | None ->
+                    match Map.tryFind key partial with
+                    | Some(value) -> Some(key, value)
+                    | None -> None) 
+            |> Map.ofList
+            
+    /// Merges rules from `diff` and `partial` with rules and settings 
+    /// within rules from `diff` taking precedence.
+    let private mergeRules (full:Map<_, Rule>) (diff:Map<_, Rule>) partial =
+        full
+            |> Map.toList
+            |> List.choose (fun (ruleName, ruleToUpdate) ->
+                let findRule = Map.tryFind ruleName
+
+                match (findRule diff, findRule partial) with
+                | Some(diff), None -> Some(ruleName, diff)
+                | None, Some(partial) -> Some(ruleName, partial)
+                | Some(diff), Some(partial) ->
+                    let rule = 
+                        { Rule.Settings = 
+                            mergeSettings ruleToUpdate.Settings 
+                                          diff.Settings 
+                                          partial.Settings }
+                    Some(ruleName, rule)
+                | None, None -> None)
+            |> Map.ofList
+
+    /// Updates a partial config adding only changes - so only what is needed is added to the config.
     let updateConfigMap fullUpdatedConfig fullConfigToUpdate partialConfigToUpdate =
+        let mergeAnalyser updatedAnalyser analyserDiff partialAnalyser =
+            { Rules = 
+                mergeRules updatedAnalyser.Rules
+                           analyserDiff.Rules
+                           partialAnalyser.Rules
+              Settings = 
+                mergeSettings updatedAnalyser.Settings 
+                              analyserDiff.Settings 
+                              partialAnalyser.Settings }
+
         let updatedAnalysers =
             fullConfigToUpdate.Analysers 
                 |> Map.toList
-                |> List.fold (fun (partialAnalysers:Map<_, _>) (key, analyserToUpdate) -> 
-                    let updatedAnalyser = fullUpdatedConfig.Analysers.[key]
+                |> List.choose (fun (analyserName, analyserToUpdate) -> 
+                    let updatedAnalyser = fullUpdatedConfig.Analysers.[analyserName]
                     
                     let diff = getAnalyserDifferences analyserToUpdate updatedAnalyser
 
@@ -386,17 +435,13 @@ module Configuration =
                         diff.Rules.Count = 0 && 
                         diff.Settings.Count = 0
 
-                    if noUpdates then
-                        partialAnalysers
-                    else if partialAnalysers.ContainsKey key then
-                        partialAnalysers
-                            |> Map.map (fun partialkey value -> 
-                                if key = partialkey then
-                                    overrideAnalysers value diff
-                                else
-                                    value)
-                    else
-                        partialAnalysers.Add(key, diff)) partialConfigToUpdate.Analysers
+                    match partialConfigToUpdate.Analysers.TryFind analyserName with
+                    | Some(partialAnalyser) -> 
+                        let analyser = mergeAnalyser updatedAnalyser diff partialAnalyser
+                        Some(analyserName, analyser)
+                    | None when noUpdates -> None
+                    | None -> Some(analyserName, diff)) 
+                |> Map.ofList
 
         { fullUpdatedConfig with
             Analysers = updatedAnalysers }

@@ -446,3 +446,42 @@ type TestConfiguration() =
         let expectedConfig = overrideConfiguration defaultConfiguration loadedConfig
 
         Assert.AreEqual(Some expectedConfig, config)
+
+    [<Test>]
+    member self.``Update config updates differences``() = 
+        let configFromAnalysers analysers =
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = analysers }
+            
+        let partialConfigToUpdate = 
+            [ "Dog", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                       Rules = [] |> Map.ofList } ] 
+                |> Map.ofList 
+                |> configFromAnalysers
+            
+        let fullUpdatedConfig = 
+            [ "Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                              Rules = [] |> Map.ofList } 
+              "Dog", { Settings = [("Enabled", Enabled(true))] |> Map.ofList
+                       Rules = [("Woofs", { Rule.Settings = [("Enabled", Enabled(true))] |> Map.ofList })] |> Map.ofList } ] 
+                |> Map.ofList 
+                |> configFromAnalysers
+            
+        let fullConfigToUpdate = 
+            [ "Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                              Rules = [] |> Map.ofList } 
+              "Dog", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                       Rules = [] |> Map.ofList } ] 
+                |> Map.ofList 
+                |> configFromAnalysers
+
+        let updatedConfig = updateConfigMap fullUpdatedConfig fullConfigToUpdate partialConfigToUpdate
+            
+        let expectedConfig = 
+             [ "Dog", { Settings = [("Enabled", Enabled(true))] |> Map.ofList
+                        Rules = [("Woofs", { Rule.Settings = [("Enabled", Enabled(true))] |> Map.ofList })] |> Map.ofList } ] 
+                |> Map.ofList 
+                |> configFromAnalysers
+
+        Assert.AreEqual(expectedConfig, updatedConfig)
