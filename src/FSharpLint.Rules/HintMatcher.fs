@@ -24,6 +24,7 @@ module HintMatcher =
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FParsec
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.HintParser
     open FSharpLint.Framework.Configuration
@@ -499,10 +500,16 @@ module HintMatcher =
 
     let hintError hint visitorInfo range =
         let matched = hintToString hint.Match
-        let suggestion = hintToString hint.Suggestion
 
-        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesHintRefactor")
-        let error = System.String.Format(errorFormatString, matched, suggestion)
+        let error =
+            match hint.Suggestion with
+            | Suggestion.Expr(expr) -> 
+                let suggestion = hintToString expr
+                let errorFormatString = Resources.GetString("RulesHintRefactor")
+                System.String.Format(errorFormatString, matched, suggestion)
+            | Suggestion.Message(message) -> 
+                let errorFormatString = Resources.GetString("RulesHintSuggestion")
+                System.String.Format(errorFormatString, matched, message)
 
         visitorInfo.PostError range error
 
@@ -576,7 +583,7 @@ module HintMatcher =
 
                         if MatchExpression.matchHintExpr arguments then
                             match hint.Match, hint.Suggestion with
-                                | Expression.Lambda(_), Expression.Identifier(_) -> 
+                                | Expression.Lambda(_), Suggestion.Expr(Expression.Identifier(_)) -> 
                                     if lambdaCanBeReplacedWithFunction checkFile astNode.Breadcrumbs expr then
                                         hintError hint visitorInfo expr.Range
                                 | _ ->

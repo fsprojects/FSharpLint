@@ -165,6 +165,9 @@
   <data name="RulesHintRefactor" xml:space="preserve">
     <value>`{0}` might be able to be refactored into `{1}`.</value>
   </data>
+  <data name="RulesHintSuggestion" xml:space="preserve">
+    <value>`{0}`; suggestion: {1}.</value>
+  </data>
   <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">
     <value>Expected a camel case identifier, found `{0}`.</value>
   </data>

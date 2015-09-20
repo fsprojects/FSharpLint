@@ -118,7 +118,7 @@ type TestHintStringAndCharacterLiterals() =
     [<Test>]
     member this.String() = 
         match run StringAndCharacterLiterals.pliteralstring "\"d\\tog\\064\\u0040\\U00000040goat\"" with
-            | Success(hint, _, _) -> Assert.AreEqual(String("d\tog@@@goat"), hint)
+            | Success(hint, _, _) -> Assert.AreEqual("d\tog@@@goat", hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
@@ -460,7 +460,7 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.Variable('x')
-                Suggestion = Expression.Variable('x')
+                Suggestion = Suggestion.Expr(Expression.Variable('x'))
             }
 
         match run phint "x ===> x" with
@@ -476,7 +476,7 @@ type TestHintParser() =
                         Expression.Identifier(["not"])
                         Expression.Constant(Bool(true))
                     ]
-                Suggestion = Expression.Constant(Bool(false))
+                Suggestion = Suggestion.Expr(Expression.Constant(Bool(false)))
             }
 
         match run phint "not true ===> false" with
@@ -488,17 +488,14 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.FunctionApplication
-                    [
-                        Expression.Identifier(["List"; "fold"])
-                        Expression.Identifier(["+"])
-                        Expression.Constant(Int32(0))
-                        Expression.Variable('x')
-                    ]
-                Suggestion = Expression.FunctionApplication
-                    [
-                        Expression.Identifier(["List"; "sum"])
-                        Expression.Variable('x')
-                    ]
+                    [ Expression.Identifier(["List"; "fold"])
+                      Expression.Identifier(["+"])
+                      Expression.Constant(Int32(0))
+                      Expression.Variable('x') ]
+                Suggestion = Suggestion.Expr(
+                                Expression.FunctionApplication(
+                                    [ Expression.Identifier(["List"; "sum"])
+                                      Expression.Variable('x') ]))
             }
 
         match run phint "List.fold (+) 0 x ===> List.sum x" with
@@ -510,11 +507,9 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.Lambda(
-                            { 
-                                Arguments = [Argument.Variable('x')]
-                                Body = Expression.Variable('x')
-                            })
-                Suggestion = Expression.Identifier(["id"])
+                            { Arguments = [Argument.Variable('x')]
+                              Body = Expression.Variable('x') })
+                Suggestion = Suggestion.Expr(Expression.Identifier(["id"]))
             }
 
         match run phint "fun x -> x ===> id" with
@@ -584,7 +579,7 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
-                Suggestion = Expression.Identifier(["id"])
+                Suggestion = Suggestion.Expr(Expression.Identifier(["id"]))
             }
             
         match run phint "(x, y) ===> id" with
@@ -596,11 +591,9 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.FunctionApplication(
-                            [
-                                Expression.Identifier(["fst"])
-                                Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
-                            ])
-                Suggestion = Expression.Variable('x')
+                            [ Expression.Identifier(["fst"])
+                              Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) ])
+                Suggestion = Suggestion.Expr(Expression.Variable('x'))
             }
             
         match run phint "fst (x, y) ===> x" with
@@ -612,7 +605,7 @@ type TestHintParser() =
         let expected =
             {
                 Match = Expression.InfixOperator("::", Expression.Variable('x'), Expression.List([]))
-                Suggestion = Expression.List([Expression.Variable('x')])
+                Suggestion = Suggestion.Expr(Expression.List([Expression.Variable('x')]))
             }
             
         match run phint "x::[] ===> [x]" with
@@ -624,7 +617,7 @@ type TestHintParser() =
         let expected =
             {
                 Match = Expression.Array([Expression.Variable('x')])
-                Suggestion = Expression.Variable('x')
+                Suggestion = Suggestion.Expr(Expression.Variable('x'))
             }
             
         match run phint "[|x|] ===> x" with
@@ -636,11 +629,10 @@ type TestHintParser() =
         let expected =
             {
                 Match = Expression.If(
-                                        Expression.Variable('x'),
-                                        Expression.Constant(Constant.Bool(true)),
-                                        Some(Expression.Constant(Constant.Bool(false)))
-                                     )
-                Suggestion = Expression.Variable('x')
+                            Expression.Variable('x'),
+                            Expression.Constant(Constant.Bool(true)),
+                            Some(Expression.Constant(Constant.Bool(false))))
+                Suggestion = Suggestion.Expr(Expression.Variable('x'))
             }
             
         match run phint "if x then true else false ===> x" with
@@ -652,18 +644,47 @@ type TestHintParser() =
         let expected = 
             {
                 Match = Expression.FunctionApplication(
-                            [
-                                Expression.Identifier(["List";"head"])
-                                Expression.Parentheses(
-                                    Expression.FunctionApplication(
-                                        [
-                                            Expression.Identifier(["List";"sort"])
-                                            Expression.Variable('x')
-                                        ]))
-                            ])
-                Suggestion = Expression.FunctionApplication([Expression.Identifier(["List";"min"]);Expression.Variable('x')])
+                            [ Expression.Identifier(["List";"head"])
+                              Expression.Parentheses(
+                                  Expression.FunctionApplication(
+                                      [ Expression.Identifier(["List";"sort"])
+                                        Expression.Variable('x') ])) ])
+                Suggestion = Suggestion.Expr(
+                                Expression.FunctionApplication(
+                                    [ Expression.Identifier(["List";"min"])
+                                      Expression.Variable('x') ]))
             }
 
         match run phint "List.head (List.sort x) ===> List.min x" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.``Suggestion with literal string message parsed correctly.``() = 
+        let expected = 
+            { Match = Expression.Constant(Constant.Unit)
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "() ===> m\"Message\"" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.``Suggestion with verbatim literal string message parsed correctly.``() = 
+        let expected = 
+            { Match = Expression.Constant(Constant.Unit)
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "() ===> m@\"Message\"" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.``Suggestion with triple quoted string message parsed correctly.``() = 
+        let expected = 
+            { Match = Expression.Constant(Constant.Unit)
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "() ===> m\"\"\"Message\"\"\"" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
             | Failure(message, _, _) -> Assert.Fail(message)

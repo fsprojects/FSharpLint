@@ -695,3 +695,15 @@ do
     ignore 0""", config, checkInput = true)
 
         this.ErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.") |> Assert.IsTrue
+        
+    [<Test>]
+    member this.``Suggestion as a message presents correct error message.``() = 
+        let config = generateHintConfig ["() ===> m\"Message\""]
+        
+        this.Parse("""
+module Goat
+
+do
+    ()""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`()`; suggestion: Message.") |> Assert.IsTrue

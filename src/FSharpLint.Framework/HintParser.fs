@@ -70,10 +70,14 @@ module HintParser =
         | Array of Expression list
         | If of Expression * Expression * Expression option
 
+    type Suggestion =
+        | Expr of Expression
+        | Message of string
+
     type Hint =
         {
             Match: Expression
-            Suggestion: Expression
+            Suggestion: Suggestion
         }
 
     let charListToString charList =
@@ -267,9 +271,9 @@ module HintParser =
             skipChar '\'' >>. pcharchar .>> pchar '\''
                 |>> Char
 
-        let pliteralstring: Parser<Constant, unit> =
+        let pliteralstring: Parser<string, unit> =
             skipChar '"' >>. many pstringchar .>> skipChar '"'
-                |>> (charListToString >> String)
+                |>> charListToString
 
         let private pverbatimstringchar: (CharStream<unit> -> Reply<char>) =
             choice
@@ -281,9 +285,9 @@ module HintParser =
                     pstring "\"\"" >>% '"'
                 ]
 
-        let pverbatimstring: Parser<Constant, unit> =
+        let pverbatimstring: Parser<string, unit> =
             pstring "@\"" >>. many pverbatimstringchar .>> pchar '"'
-                |>> (charListToString >> String)
+                |>> charListToString
 
         let private psimplechar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\'';'\\';'"']
@@ -303,9 +307,9 @@ module HintParser =
             skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
                 |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
 
-        let ptriplequotedstring: Parser<Constant, unit> =
+        let ptriplequotedstring: Parser<string, unit> =
             skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
-                |>> (charListToString >> String)
+                |>> charListToString
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.
@@ -437,12 +441,12 @@ module HintParser =
                     attempt pbool
                     attempt punit
                     attempt StringAndCharacterLiterals.pcharacter
-                    attempt StringAndCharacterLiterals.pliteralstring
-                    attempt StringAndCharacterLiterals.pverbatimstring
+                    attempt StringAndCharacterLiterals.pliteralstring |>> String
+                    attempt StringAndCharacterLiterals.pverbatimstring |>> String
                     attempt StringAndCharacterLiterals.pbytechar
                     attempt StringAndCharacterLiterals.pbytearray
                     attempt StringAndCharacterLiterals.pverbatimbytearray
-                    attempt StringAndCharacterLiterals.ptriplequotedstring
+                    attempt StringAndCharacterLiterals.ptriplequotedstring |>> String
                     attempt NumericLiterals.psbyte
                     attempt NumericLiterals.pbyte
                     attempt NumericLiterals.pint16
@@ -658,6 +662,17 @@ module HintParser =
 
             pexpressionImpl := opp.ExpressionParser
 
+    let private psuggestion: Parser<Suggestion, Unit> =
+        let pstring =
+            choice 
+                [ StringAndCharacterLiterals.ptriplequotedstring
+                  StringAndCharacterLiterals.pverbatimstring
+                  StringAndCharacterLiterals.pliteralstring ]
+
+        choice 
+            [ attempt (pchar 'm' >>. pstring |>> Suggestion.Message)
+              Expressions.pexpression |>> Suggestion.Expr ]
+
     let phint: Parser<Hint, unit> = 
         let phintcenter: Parser<unit, unit> = 
             spaces 
@@ -669,7 +684,7 @@ module HintParser =
 
             do! phintcenter
 
-            let! s = Expressions.pexpression
+            let! s = psuggestion
 
             return { Match = m; Suggestion = s }
         }
