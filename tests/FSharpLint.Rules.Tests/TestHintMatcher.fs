@@ -683,3 +683,15 @@ let object = TakesDelegate()
 object.Foo(fun _ -> ())""", config, checkInput = true)
 
         Assert.IsFalse(this.ErrorsExist)
+        
+    [<Test>]
+    member this.``Operator identifier is correctly written out as an operator symbol in the error message.``() = 
+        let config = generateHintConfig ["0 ===> FSharpLint.(+)"]
+        
+        this.Parse("""
+module Goat
+
+do
+    ignore 0""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.") |> Assert.IsTrue

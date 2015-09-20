@@ -122,6 +122,9 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         this.ErrorsAt(startLine, startColumn)
             |> Seq.exists (fun (_, e) -> e = message)
 
+    member this.ErrorWithMessageExists(message) =
+        errorRanges |> Seq.exists (fun (_, e) -> e = message)
+
     [<SetUp>]
     member this.SetUp() =
         errorRanges.Clear()

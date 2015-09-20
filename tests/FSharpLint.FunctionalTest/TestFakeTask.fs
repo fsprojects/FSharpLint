@@ -76,7 +76,7 @@ module TestFakeTask =
                   "`fun x -> x` might be able to be refactored into `id`."
                   "`not true` might be able to be refactored into `false`."
                   "`not false` might be able to be refactored into `true`."
-                  "`List.fold + 0` might be able to be refactored into `List.sum`."
+                  "`List.fold ( + ) 0` might be able to be refactored into `List.sum`."
                   "`a<>true` might be able to be refactored into `not a`."
                   "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
 

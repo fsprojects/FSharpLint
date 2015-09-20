@@ -21,6 +21,7 @@ namespace FSharpLint.Framework
 module HintMatcher =
 
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FParsec
     open FSharpLint.Framework.Ast
@@ -471,7 +472,9 @@ module HintMatcher =
         | Expression.Constant(constant) -> 
             constantToString constant
         | Expression.Identifier(identifier) ->
-            String.concat "." identifier
+            identifier
+                |> List.map DemangleOperatorName
+                |> String.concat "."
         | Expression.FunctionApplication(expressions) ->
             expressions |> surroundExpressionsString hintToString "" "" " "
         | Expression.InfixOperator(operator, leftHint, rightHint) ->
