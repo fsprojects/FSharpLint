@@ -116,6 +116,12 @@ type TestHintStringAndCharacterLiterals() =
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
+    member this.StringIncludingSingleQuote() = 
+        match run StringAndCharacterLiterals.pliteralstring "\"'\"" with
+            | Success(hint, _, _) -> Assert.AreEqual("'", hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
     member this.String() = 
         match run StringAndCharacterLiterals.pliteralstring "\"d\\tog\\064\\u0040\\U00000040goat\"" with
             | Success(hint, _, _) -> Assert.AreEqual("d\tog@@@goat", hint)
@@ -686,5 +692,15 @@ type TestHintParser() =
               Suggestion = Suggestion.Message("Message") }
 
         match run phint "() ===> m\"\"\"Message\"\"\"" with
+            | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+            | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member this.``Parses null into a null expression.``() = 
+        let expected = 
+            { Match = Expression.Null
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "null ===> m\"\"\"Message\"\"\"" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
             | Failure(message, _, _) -> Assert.Fail(message)

@@ -707,3 +707,16 @@ do
     ()""", config, checkInput = true)
 
         this.ErrorWithMessageExists("`()`; suggestion: Message.") |> Assert.IsTrue
+        
+    [<Test>]
+    member this.``Hints matches null in an expression correctly.``() = 
+        let config = generateHintConfig ["x = null ===> m\"Use pattern matching to null check\""]
+        
+        this.Parse("""
+module Goat
+
+do
+    let x = System.Collections.ArrayList()
+    x = null |> ignore""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`x=null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue

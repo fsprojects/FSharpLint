@@ -109,6 +109,11 @@
           id x ===> x
           id >> f ===> f
           f >> id ===> f
+          
+          x = null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
+          null = x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
+          x <> null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
+          null <> x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
         ]]>
       </Hints>
       <Enabled>true</Enabled>

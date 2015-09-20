@@ -76,6 +76,7 @@ module Tests =
           "`not false` might be able to be refactored into `true`."
           "`List.fold ( + ) 0` might be able to be refactored into `List.sum`."
           "`a<>true` might be able to be refactored into `not a`."
+          "`x=null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
           "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]

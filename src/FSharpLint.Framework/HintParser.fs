@@ -69,6 +69,7 @@ module HintParser =
         | List of Expression list
         | Array of Expression list
         | If of Expression * Expression * Expression option
+        | Null
 
     type Suggestion =
         | Expr of Expression
@@ -206,7 +207,7 @@ module HintParser =
             pnotchar ['\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
 
         let private psimplestringchar: Parser<char, unit> =
-            pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
+            pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\']
 
         let private punicodegraphshort: Parser<char, unit> = 
             skipString "\\u"
@@ -575,6 +576,7 @@ module HintParser =
             choice 
                 [
                     attempt pif
+                    attempt (pstring "null") |>> (fun _ -> Expression.Null)
                     attempt Constants.pconstant
                     attempt plambda
                     attempt pvariable
