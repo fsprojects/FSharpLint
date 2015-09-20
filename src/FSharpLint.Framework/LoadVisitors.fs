@@ -72,11 +72,21 @@ module LoadVisitors =
     /// Loads all registered visitors (files containing a class implementing IRegisterPlugin) from a given assembly.
     let loadPlugins (assembly:System.Reflection.Assembly) =
         let isPluginType (t:System.Type) = 
-            t.GetInterfaces().Contains(typeof<IRegisterPlugin>) && t.GetConstructor(System.Type.EmptyTypes) <> null
-        let instanceFromType (t:System.Type) = System.Activator.CreateInstance(t) :?> IRegisterPlugin
-        let getPluginFromInstance (x:IRegisterPlugin) = x.RegisterPlugin
+            if t.GetInterfaces().Contains(typeof<IRegisterPlugin>) then
+                match t.GetConstructor(System.Type.EmptyTypes) with
+                | null -> false
+                | _ -> true
+            else
+                false
+
+        let pluginFromType (t:System.Type) = 
+            if isPluginType t then
+                match System.Activator.CreateInstance(t) with
+                | :? IRegisterPlugin as plugin -> Some(plugin.RegisterPlugin)
+                | _ -> None
+            else
+                None
 
         assembly.GetTypes()
-                |> Array.filter isPluginType
-                |> Array.map (instanceFromType >> getPluginFromInstance)
+                |> Array.choose pluginFromType
                 |> Array.toList

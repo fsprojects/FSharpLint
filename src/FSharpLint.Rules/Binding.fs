@@ -92,7 +92,9 @@ module Binding =
                                     |> Async.RunSynchronously
 
                             let isMutable (symbol:FSharpSymbolUse) = 
-                                (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).IsMutable
+                                match symbol.Symbol with
+                                | :? FSharpMemberOrFunctionOrValue as v -> v.IsMutable
+                                | _ -> false
 
                             symbol |> Option.exists isMutable
 
