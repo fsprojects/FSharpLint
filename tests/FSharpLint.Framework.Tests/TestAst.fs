@@ -215,3 +215,24 @@ let dog = ()"""
             | ParseFileResult.Success(result) ->
                 Assert.AreEqual(4, getSuppressMessageAttributesFromAst result.Ast |> List.length)
             | _ -> failwith "Failed to parse input."
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/125
+    [<Test>]
+    member this.``Deep AST should not cause a stack overflow.``() =
+        let input = @"let x = [" + (String.concat "" [for _ in 0..5000 -> "0;"]) + "]"
+
+        let stubConfig =
+            { UseTypeChecker = false
+              IgnoreFiles =
+                { Update = IgnoreFiles.Overwrite
+                  Files = [] }
+              Analysers = Map.ofList [] }
+
+        match parseSource input stubConfig with
+        | ParseFileResult.Success(result) -> 
+            let visitWholeTree = fun _ _ -> 
+                Assert.Less(System.Diagnostics.StackTrace().FrameCount, 1000)
+                Continue
+
+            lintFile (fun _ -> false) result [visitWholeTree]
+        | _ -> failwith "Failed to parse input."
