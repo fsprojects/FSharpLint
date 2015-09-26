@@ -23,6 +23,7 @@ namespace FSharpLint.Framework
 module Ast =
 
     open System
+    open System.Collections.Generic
     open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.Ast
@@ -332,7 +333,8 @@ module Ast =
                 | Expression(SynExpr.LibraryOnlyStaticOptimization(_))
                 | Expression(SynExpr.LibraryOnlyUnionCaseFieldGet(_))
                 | Expression(SynExpr.LibraryOnlyUnionCaseFieldSet(_))
-                | Expression(SynExpr.ArbitraryAfterError(_)) -> ()
+                | Expression(SynExpr.ArbitraryAfterError(_)) -> 
+                    ()
                 | SimplePattern(SynSimplePat.Id(_)) -> ()
                 | SimplePattern(SynSimplePat.Typed(simplePattern, synType, _)) ->
                     yield SimplePattern(simplePattern)
@@ -435,30 +437,6 @@ module Ast =
             /// e.g. to sum the number of if statements in a function.
             | WalkWithVisitor of Visitor * (unit -> unit)
 
-    /// Check if the return value of walking children is the end of a visitor walk.
-    let private checkAtEndOfWalk visitChildrenMethod walkChildrenReturnValue =
-        match visitChildrenMethod, walkChildrenReturnValue with
-            | WalkWithVisitor(_), _ -> 
-                walkChildrenReturnValue
-            | _, Some(WalkWithVisitor(_, atEndOfWalkFunc)) -> 
-                atEndOfWalkFunc()
-                None
-            | _ -> 
-                walkChildrenReturnValue
-
-    /// Work out which visitor to use to visit a given child.
-    let private (|Visitor|UseExisting|End|) (visitChildrenMethod, currentWalkVisitor, childi, child)  =
-        match visitChildrenMethod, currentWalkVisitor with
-            | _, Some(WalkWithVisitor(visitor, _)) -> Visitor(visitor)
-            | Continue, _ -> UseExisting
-            | Stop, _ -> End
-            | ContinueWithVisitor(visitor), _ -> Visitor(visitor)
-            | ContinueWithVisitorsForChildren(getVisitorForChild), _ -> 
-                match getVisitorForChild childi child with
-                    | Some(visitor) -> Visitor(visitor)
-                    | None -> End
-            | WalkWithVisitor(visitor, _), _ -> Visitor(visitor)
-
     let private walkTreeToGetSuppressMessageAttributes rootNode =
         let rec walk node suppressedMessageAttributes =
             let getAttributesForChild attrs child = 
@@ -479,6 +457,10 @@ module Ast =
 
             roots |> List.collect walkRoot
         | ParsedInput.SigFile(_) -> []
+
+    type ToWalk =
+    | Node of AstNode * AstNode list * (SuppressedMessage * range) list * Visitor
+    | EndOfWalk
         
     /// <summary>
     /// Walks an abstract syntax tree from a given root node and applies a visitor to each node in the tree.
@@ -488,61 +470,76 @@ module Ast =
     /// States whether to stop walking the tree, used for asynchronous environments to cancel the task.
     /// </param>
     let private walk finishEarly rootNode visitor =
-        /// <param name="breadcrumbs">List of parent nodes e.g. (parent, parent of parent, ...).</param>
-        let rec walk breadcrumbs suppressedMessages node visitor currentVisitMethod = 
-            let suppressedMessages = getSuppressMessageAttributes node @ suppressedMessages
+        let nodesToVisit = Stack<_>()
 
-            let walk = walk (node :: breadcrumbs) suppressedMessages
+        nodesToVisit.Push(Node(rootNode, [], [], visitor))
 
-            let children = traverseNode node
+        let mutable walkVisitor = None
 
-            let currentNode = 
-                { 
-                    Node = node
-                    ChildNodes = children
-                    Breadcrumbs = breadcrumbs
-                    SuppressedMessages = suppressedMessages
-                }
+        while (Seq.isEmpty >> not) nodesToVisit && (finishEarly >> not) () do
+            match nodesToVisit.Pop() with
+            | Node(node, breadcrumbs, suppressedMessages, visitor) -> 
+                let suppressedMessages = getSuppressMessageAttributes node @ suppressedMessages
+                        
+                let children = traverseNode node |> List.rev
 
-            let visitChildrenMethod = visitor currentNode
+                let currentNode = 
+                    { 
+                        Node = node
+                        ChildNodes = children
+                        Breadcrumbs = breadcrumbs
+                        SuppressedMessages = suppressedMessages
+                    }
 
-            /// If the child returns a walk visitor then that walk visitor is returned;
-            /// otherwise the current visit method is returned.
-            let visitChild child = function
-                | visitor when not <| finishEarly() -> 
-                    let result = walk child visitor visitChildrenMethod
-                    match currentVisitMethod, result with
-                        | _, Some(WalkWithVisitor(_)) -> result
-                        | _ -> Some(currentVisitMethod)
-                | _ -> None
+                let breadcrumbs = node :: breadcrumbs
 
-            let rec walkChildren walkVisitor childi = function
-                | child :: children -> 
-                    let walkChildReturnValue =
-                        match visitChildrenMethod, walkVisitor, childi, child with
-                            | UseExisting -> visitChild child visitor
-                            | Visitor(visitor) -> visitChild child visitor
-                            | End -> None
+                let visitor =
+                    match walkVisitor with
+                    | Some(visitor, _) -> visitor
+                    | None -> visitor
+            
+                match visitor currentNode with
+                /// Visit children with the current visitor.
+                | Continue -> 
+                    for child in children do 
+                        nodesToVisit.Push(Node(child, breadcrumbs, suppressedMessages, visitor))
 
-                    // If the result of walking the previous child was a walk visitor
-                    //     Then pass that walk visitor to the sibling.
-                    match walkChildReturnValue with
-                        | Some(WalkWithVisitor(_)) ->
-                            walkChildren walkChildReturnValue (childi + 1) children
-                        | _ -> 
-                            walkChildren walkVisitor (childi + 1) children
-                | [] -> 
-                    checkAtEndOfWalk visitChildrenMethod walkVisitor
+                /// Enables state to be passed down to children.
+                | ContinueWithVisitor(visitor) -> 
+                    for child in children do
+                        nodesToVisit.Push(Node(child, breadcrumbs, suppressedMessages, visitor))
 
-            match children with
-                | [] ->
-                    // We need this case for when we have walked down to a leaf node, 
-                    // and that leaf node returns a walk visitor.
-                    Some(visitChildrenMethod)
-                | children ->
-                    walkChildren None 0 children
+                /// Enables state to be passed down to certain children.
+                | ContinueWithVisitorsForChildren(getVisitor) -> 
+                    let stackChildren i child =
+                        let visitor =
+                            match getVisitor i child with
+                            | Some(visitor) -> visitor
+                            | None -> visitor
 
-        walk [] [] rootNode visitor Continue
+                        nodesToVisit.Push(Node(child, breadcrumbs, suppressedMessages, visitor))
+
+                    Seq.iteri (fun i -> stackChildren (Seq.length children - i - 1)) children
+
+                /// Enables state to be passed along a walk of a tree. 
+                /// e.g. to sum the number of if statements in a function.
+                | WalkWithVisitor(visitor, notify) -> 
+                    if Option.isNone walkVisitor then
+                        nodesToVisit.Push(EndOfWalk)
+
+                    walkVisitor <- Some(visitor, notify)
+
+                    for child in children do
+                        nodesToVisit.Push(Node(child, breadcrumbs, suppressedMessages, visitor))
+
+                /// Do not visit any children.
+                | Stop -> ()
+            | EndOfWalk -> 
+                match walkVisitor with
+                | Some(_, notify) -> notify()
+                | None -> ()
+
+                walkVisitor <- None
 
     /// Information for a file to be linted that is given to the visitors for them to analyse.
     type FileParseInfo =

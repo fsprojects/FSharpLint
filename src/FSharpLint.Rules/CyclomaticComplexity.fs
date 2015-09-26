@@ -93,7 +93,7 @@ module CyclomaticComplexity =
                 | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) when astNode.IsSuppressed(AnalyserName) |> not ->
                     let getVisitorForChild _ child =
                         match child with
-                            | AstNode.Pattern(_) ->
+                            | AstNode.Expression(_) ->
                                 Some(countDecisionPathsVisitor visitorInfo checkFile expr.Range 0)
                             | _ -> 
                                 Some(findBindingVisitor visitorInfo checkFile)
