@@ -374,6 +374,18 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
+    member this.``Keyword should not be parsed as identifier.``() = 
+        match run Expressions.pexpression "fun" with
+            | Success(_) -> Assert.Fail()
+            | Failure(m, _, _) -> Assert.Pass()
+
+    [<Test>]
+    member this.``Keyword in back ticks should be parsed as identifier.``() = 
+        match run Expressions.pexpression "``fun``" with
+            | Success(hint, _, _) -> Assert.AreEqual(Expression.Identifier(["fun"]), hint)
+            | Failure(_) -> Assert.Fail()
+
+    [<Test>]
     member this.ExpressionUnit() = 
         match run Expressions.pexpression "(   )" with
             | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Unit), hint)

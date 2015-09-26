@@ -19,6 +19,7 @@
 namespace FSharpLint.Framework
 
 open FParsec
+open Microsoft.FSharp.Compiler.Lexhelp
 
 module HintParser =
 
@@ -121,6 +122,13 @@ module HintParser =
         let private pidenttext: Parser<char list, unit> = 
             pidentstartchar .>>. many pidentchar
                 |>> fun (start, rest) -> start::rest
+                >>= fun ident -> 
+                    let identStr = System.String.Join("", ident)
+
+                    let isKeyword = List.exists ((=) identStr) Keywords.keywordNames
+
+                    if isKeyword then fail (sprintf "Unexpected keyword %s" identStr)
+                    else preturn ident
 
         let private pident: (CharStream<unit> -> Reply<char list>) = 
             let chars = ['`'; '\n'; '\r'; '\t']
