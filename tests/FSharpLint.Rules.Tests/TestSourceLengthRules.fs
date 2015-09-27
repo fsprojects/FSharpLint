@@ -60,222 +60,157 @@ let EnumLength = 500
 let ModuleLength = 1000
 
 let config = 
-    Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [ 
-                            ("MaxLinesInFunction", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(FunctionLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInLambdaFunction", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(LambdaFunctionLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInMatchLambdaFunction", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(MatchLambdaFunctionLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInValue", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(ValueLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInConstructor", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(ConstructorLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInMember", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(MemberLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInProperty", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(PropertyLength))
-                                        ] 
-                                }) 
-                            ("MaxLinesInClass", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(ClassLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInEnum", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(EnumLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInUnion", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(UnionLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInRecord", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(RecordLength)) 
-                                        ] 
-                                }) 
-                            ("MaxLinesInModule", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("Lines", Lines(ModuleLength)) 
-                                        ] 
-                                }) 
-                        ] 
-                    Settings = Map.ofList []
-                }) 
-        ]
+    Map.ofList [ (AnalyserName, 
+                  { Rules = 
+                        Map.ofList [ ("MaxLinesInFunction", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(FunctionLength)) ] })
+                                     ("MaxLinesInLambdaFunction", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(LambdaFunctionLength)) ] })
+                                     ("MaxLinesInMatchLambdaFunction", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(MatchLambdaFunctionLength)) ] })
+                                     ("MaxLinesInValue", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(ValueLength)) ] })
+                                     ("MaxLinesInConstructor", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(ConstructorLength)) ] })
+                                     ("MaxLinesInMember", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(MemberLength)) ] })
+                                     ("MaxLinesInProperty", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(PropertyLength)) ] })
+                                     ("MaxLinesInClass", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(ClassLength)) ] })
+                                     ("MaxLinesInEnum", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(EnumLength)) ] })
+                                     ("MaxLinesInUnion", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(UnionLength)) ] })
+                                     ("MaxLinesInRecord", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(RecordLength)) ] })
+                                     ("MaxLinesInModule", 
+                                      { Settings = 
+                                            Map.ofList [ ("Enabled", Enabled(true))
+                                                         ("Lines", Lines(ModuleLength)) ] }) ]
+                    Settings = Map.ofList [] }) ]
 
-let generateNewLines numNewLines =
-    Array.create numNewLines "\n" |> String.concat ""
+let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.concat ""
 
 [<TestFixture>]
-type TestSourceLengthRules() =
+type TestSourceLengthRules() = 
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
-
+    
     [<Test>]
     member this.ModuleTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 %s
 // Some exception.
 exception SomeException of string""" (generateNewLines ModuleLength))
-
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
-
+    
     [<Test>]
     member this.ModuleTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInModule")>]
 module Program
 %s
 // Some exception.
 exception SomeException of string""" (generateNewLines ModuleLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(3))
-
+    
     [<Test>]
     member this.ModuleNotTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 %s
 // Some exception.
 exception SomeException of string""" (generateNewLines (ModuleLength - 4)))
-
         Assert.IsFalse(this.ErrorExistsAt(2, 0))
-
+    
     [<Test>]
     member this.FunctionTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog x =
     %s
     ()""" (generateNewLines FunctionLength))
-
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.FunctionTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
 let dog x =
     %s
     ()""" (generateNewLines FunctionLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(5))
-
+    
     [<Test>]
     member this.FunctionNotTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog x =
     %s
     ()""" (generateNewLines (FunctionLength - 4)))
-
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.ValueTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog =
     %s
     ()""" (generateNewLines ValueLength))
-
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.ValueTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInValue")>]
 let dog =
     %s
     ()""" (generateNewLines ValueLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(5))
-
+    
     [<Test>]
     member this.ValueNotTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog =
     %s
     ()""" (generateNewLines (ValueLength - 4)))
-
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.MatchFunctionTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog = function
@@ -283,12 +218,11 @@ let dog = function
     %s
     ()
 | None -> ()""" (generateNewLines MatchLambdaFunctionLength))
-
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
-
+    
     [<Test>]
     member this.MatchFunctionTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInMatchLambdaFunction")>]
@@ -297,12 +231,11 @@ let dog = function
     %s
     ()
 | None -> ()""" (generateNewLines MatchLambdaFunctionLength))
-
         Assert.IsFalse(this.ErrorExistsAt(5, 10))
-
+    
     [<Test>]
     member this.MatchFunctionNotTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog = function
@@ -310,12 +243,11 @@ let dog = function
     %s
     ()
 | None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5)))
-
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.LambdaFunctionTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 let dog = fun x ->
@@ -325,12 +257,26 @@ let dog = fun x ->
             ()
         | None -> ()
         """ (generateNewLines LambdaFunctionLength))
-
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
+    
+    [<Test>]
+    member this.``Multiple arguments in a lamba should not be treated as separate lambdas.``() = 
+        this.Parse(sprintf """
+module Program
 
+let dog = fun x y ->
+    match x with
+        | Some(x) ->
+            %s
+            ()
+        | None -> ()
+        """ (generateNewLines LambdaFunctionLength))
+
+        Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
+    
     [<Test>]
     member this.LambdaFunctionTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInLambdaFunction")>]
@@ -341,9 +287,8 @@ let dog = fun x ->
             ()
         | None -> ()
         """ (generateNewLines LambdaFunctionLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(5))
-
+    
     [<Test>]
     member this.LambdaFunctionNotTooManyLines() = 
         this.Parse """
@@ -355,84 +300,76 @@ let dog = fun x ->
             ()
         | None -> ()
         """
-
         Assert.IsFalse(this.ErrorExistsAt(4, 10))
-
+    
     [<Test>]
     member this.ClassTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   type MyClass2() as this =
     %s
     member this.PrintMessage() = ()""" (generateNewLines 500))
-
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.ClassTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
   type MyClass2() as this =
     %s
     member this.PrintMessage() = ()""" (generateNewLines 500))
-
         Assert.IsFalse(this.ErrorExistsOnLine(4))
-
+    
     [<Test>]
     member this.ClassNotTooManyLines() = 
         this.Parse """
 module Program
   type MyClass2() as this =
     member this.PrintMessage() = ()"""
-
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.InterfaceTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateNewLines ClassLength))
-
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.InterfaceTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
   type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateNewLines ClassLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(4))
-
+    
     [<Test>]
     member this.InterfaceNotTooManyLines() = 
         this.Parse """
 module Program
   type IPrintable =
     abstract member Print : unit -> unit"""
-
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.ConstructorTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 type MyClass(x) =
     new() = 
       %s
       MyClass(0)
       """ (generateNewLines ConstructorLength))
-
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.ConstructorTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInConstructor")>]
 type MyClass(x) =
@@ -440,34 +377,30 @@ type MyClass(x) =
       %s
       MyClass(0)
       """ (generateNewLines ConstructorLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(5))
-
+    
     [<Test>]
     member this.ConstructorNotTooManyLines() = 
         this.Parse """
 module Program
 type MyClass(x) =
     new() = MyClass(0)"""
-
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
-
+    
     [<Test>]
     member this.RecordTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   type Record = 
     {
       %s 
       dog: int 
     }""" (generateNewLines RecordLength))
-
-
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.RecordTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInRecord")>]
   type Record = 
@@ -475,21 +408,18 @@ module Program
       %s 
       dog: int 
     }""" (generateNewLines RecordLength))
-
-
         Assert.IsFalse(this.ErrorExistsOnLine(4))
-
+    
     [<Test>]
     member this.RecordNotTooManyLines() = 
         this.Parse """
 module Program
   type Record = { dog: int }"""
-
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
-
+    
     [<Test>]
     member this.PropertyTooManyLines() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInProperty")>]
   type Class() =
@@ -497,21 +427,19 @@ module Program
     member this.Property1 with get() = 
         %s
         value""" (generateNewLines PropertyLength))
-
         Assert.IsFalse(this.ErrorExistsOnLine(6))
-
+    
     [<Test>]
     member this.PropertyTooManyLinesSuppressed() = 
-        this.Parse (sprintf """
+        this.Parse(sprintf """
 module Program
   type Class() =
     let mutable value = 10
     member this.Property1 with get() = 
         %s
         value""" (generateNewLines PropertyLength))
-
         Assert.IsTrue(this.ErrorExistsAt(5, 31))
-
+    
     [<Test>]
     member this.PropertyNotTooManyLines() = 
         this.Parse """
@@ -520,5 +448,4 @@ module Program
     let mutable value = 10
     member this.Property1 with get() = 
         value"""
-
         Assert.IsFalse(this.ErrorExistsAt(5, 31))

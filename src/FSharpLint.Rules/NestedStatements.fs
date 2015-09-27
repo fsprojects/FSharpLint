@@ -22,6 +22,7 @@ module NestedStatements =
     
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework.Ast
+    open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
 
@@ -42,14 +43,6 @@ module NestedStatements =
         System.String.Format(errorFormatString, depth)
 
     exception UnexpectedNodeTypeException of string
-
-    /// Lambda arguments (after the first argument) are curried and represented as such internally.
-    /// e.g. fun x y -> () will be represented in the AST as fun x -> fun y -> ().
-    /// This function returns true if the given lambda is an argument.
-    let isLambdaALambdaArgument = function
-        | AstNode.Expression(SynExpr.Lambda(_, _, _, SynExpr.Lambda(_, _, _, _, nestedRange), range)) -> 
-            range.StartLine = nestedRange.StartLine && range.StartColumn = nestedRange.StartColumn
-        | _ -> false
 
     /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
     /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
