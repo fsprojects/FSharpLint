@@ -18,10 +18,8 @@
 
 module TestHintMatcher
 
-open System.Linq
 open NUnit.Framework
 open FParsec
-open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.HintMatcher
@@ -683,3 +681,40 @@ let object = TakesDelegate()
 object.Foo(fun _ -> ())""", config, checkInput = true)
 
         Assert.IsFalse(this.ErrorsExist)
+        
+    [<Test>]
+    member this.``Operator identifier is correctly written out as an operator symbol in the error message.``() = 
+        let config = generateHintConfig ["0 ===> FSharpLint.(+)"]
+        
+        this.Parse("""
+module Goat
+
+do
+    ignore 0""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.") |> Assert.IsTrue
+        
+    [<Test>]
+    member this.``Suggestion as a message presents correct error message.``() = 
+        let config = generateHintConfig ["() ===> m\"Message\""]
+        
+        this.Parse("""
+module Goat
+
+do
+    ()""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`()`; suggestion: Message.") |> Assert.IsTrue
+        
+    [<Test>]
+    member this.``Hints matches null in an expression correctly.``() = 
+        let config = generateHintConfig ["x = null ===> m\"Use pattern matching to null check\""]
+        
+        this.Parse("""
+module Goat
+
+do
+    let x = System.Collections.ArrayList()
+    x = null |> ignore""", config, checkInput = true)
+
+        this.ErrorWithMessageExists("`x=null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue

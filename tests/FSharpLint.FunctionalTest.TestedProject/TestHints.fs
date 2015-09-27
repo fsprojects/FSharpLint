@@ -20,6 +20,10 @@ let main () =
     if x <> true then
         ()
 
+    let x = System.Collections.ArrayList()
+
+    if x = null then ()
+
     let woof = [1;2;3] |> List.sort |> List.head
 
     ()

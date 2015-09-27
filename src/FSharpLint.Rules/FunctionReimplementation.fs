@@ -23,7 +23,7 @@ namespace FSharpLint.Rules
 module FunctionReimplementation =
     
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
+    open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
@@ -171,9 +171,10 @@ module FunctionReimplementation =
 
             match symbol with
                 | Some(symbol) -> 
-                    symbol.Symbol.DisplayName = ".ctor" ||
-                    (symbol.Symbol :? FSharpMemberOrFunctionOrValue &&
-                     (symbol.Symbol :?> FSharpMemberOrFunctionOrValue).CompiledName = ".ctor")
+                    match symbol.Symbol with 
+                    | s when s.DisplayName = ".ctor" -> true
+                    | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
+                    | _ -> false
                 | Some(_) | None -> false
         
         let rec isFunctionPointless expression = function
@@ -185,7 +186,7 @@ module FunctionReimplementation =
                     | _ -> None
             | [] -> 
                 match expression with
-                    | Identifier(ident, range) -> 
+                    | Identifier(ident, _) -> 
                         if visitorInfo.FSharpVersion.Major >= 4 || 
                            (not << isConstructor) expression then
                             Some(ident)
@@ -197,7 +198,7 @@ module FunctionReimplementation =
             |> Option.iter (fun identifier ->
                 let identifier = 
                     identifier 
-                        |> List.map (fun x -> x.idText)
+                        |> List.map (fun x -> DemangleOperatorName x.idText)
                         |> String.concat "."
 
                 let errorFormatString = Resources.GetString("RulesReimplementsFunction")
@@ -229,4 +230,4 @@ module FunctionReimplementation =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

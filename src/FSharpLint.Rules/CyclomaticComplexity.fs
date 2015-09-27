@@ -21,8 +21,6 @@ namespace FSharpLint.Rules
 module CyclomaticComplexity =
     
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -93,7 +91,7 @@ module CyclomaticComplexity =
                 | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) when astNode.IsSuppressed(AnalyserName) |> not ->
                     let getVisitorForChild _ child =
                         match child with
-                            | AstNode.Pattern(_) ->
+                            | AstNode.Expression(_) ->
                                 Some(countDecisionPathsVisitor visitorInfo checkFile expr.Range 0)
                             | _ -> 
                                 Some(findBindingVisitor visitorInfo checkFile)
@@ -109,4 +107,4 @@ module CyclomaticComplexity =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

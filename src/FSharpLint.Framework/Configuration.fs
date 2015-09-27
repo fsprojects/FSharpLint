@@ -25,7 +25,6 @@ namespace FSharpLint.Framework
 module Configuration =
 
     open System.Xml.Linq
-    open Microsoft.FSharp.Reflection
 
     [<Literal>]
     let SettingsFileName = "Settings.FSharpLint"
@@ -69,33 +68,33 @@ module Configuration =
         | Access of Access
 
     let private settingToXml = function
-    | Lines(x)
-    | Depth(x)
-    | MaxItems(x)
-    | MaxCyclomaticComplexity(x)
-    | Length(x)
-    | NumberOfSpacesAllowed(x) -> x :> obj
-    | IncludeMatchStatements(x)
-    | OneSpaceAllowedAfterOperator(x)
-    | Enabled(x)
-    | IgnoreBlankLines(x) -> x.ToString() :> obj
-    | Access(x) -> x :> obj
-    | Hints(hints) -> 
-        hints
+        | Lines(x)
+        | Depth(x)
+        | MaxItems(x)
+        | MaxCyclomaticComplexity(x)
+        | Length(x)
+        | NumberOfSpacesAllowed(x) -> x :> obj
+        | IncludeMatchStatements(x)
+        | OneSpaceAllowedAfterOperator(x)
+        | Enabled(x)
+        | IgnoreBlankLines(x) -> x.ToString() :> obj
+        | Access(x) -> x :> obj
+        | Hints(hints) -> 
+            hints
             |> List.map (fun x -> x.Hint)
             |> String.concat System.Environment.NewLine
             |> (fun x -> XCData(x)) :> obj
 
     let private settingsToXml (settings:Map<string, Setting>) =
         settings
-            |> Seq.map (fun x -> XElement(getName x.Key, settingToXml x.Value) :> obj)
-            |> Seq.toArray
+        |> Seq.map (fun x -> XElement(getName x.Key, settingToXml x.Value) :> obj)
+        |> Seq.toArray
 
     let private parseLines (content:string) =
         content.Split('\n') 
-            |> Seq.map (fun x -> x.Trim()) 
-            |> Seq.filter (System.String.IsNullOrWhiteSpace >> not) 
-            |> Seq.toList
+        |> Seq.map (fun x -> x.Trim()) 
+        |> Seq.filter (System.String.IsNullOrWhiteSpace >> not) 
+        |> Seq.toList
 
     module IgnoreFiles =
 
@@ -119,26 +118,26 @@ module Configuration =
 
             let getRegexSegments (path:string) = 
                 path.Split([| '/' |], StringSplitOptions.RemoveEmptyEntries) 
-                    |> Array.map globToRegex
+                |> Array.map globToRegex
 
             if path.StartsWith("!") then
                 getRegexSegments (path.Substring(1))
-                    |> Array.toList
-                    |> fun segments -> Negate(segments, IsDirectory(isDirectory))
+                |> Array.toList
+                |> fun segments -> Negate(segments, IsDirectory(isDirectory))
             else
                 getRegexSegments (if path.StartsWith(@"\!") then path.Substring(1) else path)
-                    |> Array.toList
-                    |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
+                |> Array.toList
+                |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
 
         let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory = 
             let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) = 
                 globSeqs |> List.choose (function
                     | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
-                    | x -> None)
+                    | _ -> None)
 
             let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
                 match remainingPath with
-                | [currentSegment] when isDirectory -> false 
+                | [_] when isDirectory -> false 
                 | currentSegment::remaining -> 
                     let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 
@@ -159,25 +158,23 @@ module Configuration =
 
             ignorePaths |> List.fold (fun isCurrentlyIgnored ignoreGlob -> 
                 match ignoreGlob with
-                    | Ignore(glob, IsDirectory(isDirectory)) 
-                        when not isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> true
-                    | Negate(glob, IsDirectory(isDirectory))
-                        when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
-                    | _ -> isCurrentlyIgnored) false
+                | Ignore(glob, IsDirectory(isDirectory)) 
+                    when not isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> true
+                | Negate(glob, IsDirectory(isDirectory))
+                    when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
+                | _ -> isCurrentlyIgnored) false
 
         type IgnoreFilesUpdate = 
             | Add
             | Overwrite
 
         type IgnoreFilesConfig =
-            {
-                Update: IgnoreFilesUpdate
-                Files: Ignore list
+            { Update: IgnoreFilesUpdate
+              Files: Ignore list
 
-                /// Unparsed value from the configuration XML file.
-                /// Stored so it can be written back out to a file.
-                Content: string
-            }
+              /// Unparsed value from the configuration XML file.
+              /// Stored so it can be written back out to a file.
+              Content: string }
 
         let private parseIgnoreFiles (ignoreFiles:XElement) =
             let updateAttribute = ignoreFiles.Attributes() |> Seq.tryFind (fun x -> x.Name.LocalName = "Update")
@@ -191,20 +188,15 @@ module Configuration =
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
             match configRoot.ElementByLocalName("IgnoreFiles") with
-                | Some(ignoreFilesElement) -> parseIgnoreFiles ignoreFilesElement |> Some
-                | None -> None
+            | Some(ignoreFilesElement) -> parseIgnoreFiles ignoreFilesElement |> Some
+            | None -> None
 
-    type Rule =
-        {
-            Settings: Map<string, Setting>
-        }
+    type Rule =  { Settings: Map<string, Setting> }
         
     /// An analyser groups together related rules in the configuration file.
     type Analyser =
-        {
-            Settings: Map<string, Setting>
-            Rules: Map<string, Rule>
-        }
+        { Settings: Map<string, Setting>
+          Rules: Map<string, Rule> }
 
         member this.ToXml(name) =
             let rulesContent =
@@ -221,11 +213,9 @@ module Configuration =
             XElement(getName name, content) :> obj
 
     type Configuration =
-        {
-            UseTypeChecker: bool option
-            IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
-            Analysers: Map<string, Analyser>
-        }
+        { UseTypeChecker: bool option
+          IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
+          Analysers: Map<string, Analyser> }
 
         member private this.AnalysersToXml() = 
             let analyserToXml (analyser:System.Collections.Generic.KeyValuePair<string, Analyser>) =
@@ -268,8 +258,8 @@ module Configuration =
                 raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
 
         parseLines hintsText 
-            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
-            |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
+        |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+        |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
 
     let private parseSetting (setting:XElement) =
         match setting.Name.LocalName with
@@ -332,7 +322,7 @@ module Configuration =
             else
                 yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList
 
-    let private overrideRuleSettings oldProperty newProperty = newProperty
+    let private overrideRuleSettings _ newProperty = newProperty
 
     let private overrideRule (oldRule:Rule) (newRule:Rule) : Rule =
         { Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings }
@@ -380,36 +370,36 @@ module Configuration =
     /// `diff` taking precedence.
     let private mergeSettings full diff partial =
         full
-            |> Map.toList 
-            |> List.choose (fun (key, _) -> 
-                match Map.tryFind key diff with
+        |> Map.toList 
+        |> List.choose (fun (key, _) -> 
+            match Map.tryFind key diff with
+            | Some(value) -> Some(key, value)
+            | None ->
+                match Map.tryFind key partial with
                 | Some(value) -> Some(key, value)
-                | None ->
-                    match Map.tryFind key partial with
-                    | Some(value) -> Some(key, value)
-                    | None -> None) 
-            |> Map.ofList
+                | None -> None) 
+        |> Map.ofList
             
     /// Merges rules from `diff` and `partial` with rules and settings 
     /// within rules from `diff` taking precedence.
     let private mergeRules (full:Map<_, Rule>) (diff:Map<_, Rule>) partial =
         full
-            |> Map.toList
-            |> List.choose (fun (ruleName, ruleToUpdate) ->
-                let findRule = Map.tryFind ruleName
+        |> Map.toList
+        |> List.choose (fun (ruleName, ruleToUpdate) ->
+            let findRule = Map.tryFind ruleName
 
-                match (findRule diff, findRule partial) with
-                | Some(diff), None -> Some(ruleName, diff)
-                | None, Some(partial) -> Some(ruleName, partial)
-                | Some(diff), Some(partial) ->
-                    let rule = 
-                        { Rule.Settings = 
-                            mergeSettings ruleToUpdate.Settings 
-                                          diff.Settings 
-                                          partial.Settings }
-                    Some(ruleName, rule)
-                | None, None -> None)
-            |> Map.ofList
+            match (findRule diff, findRule partial) with
+            | Some(diff), None -> Some(ruleName, diff)
+            | None, Some(partial) -> Some(ruleName, partial)
+            | Some(diff), Some(partial) ->
+                let rule = 
+                    { Rule.Settings = 
+                        mergeSettings ruleToUpdate.Settings 
+                                        diff.Settings 
+                                        partial.Settings }
+                Some(ruleName, rule)
+            | None, None -> None)
+        |> Map.ofList
 
     /// Updates a partial config adding only changes - so only what is needed is added to the config.
     let updateConfigMap fullUpdatedConfig fullConfigToUpdate partialConfigToUpdate =
@@ -425,23 +415,23 @@ module Configuration =
 
         let updatedAnalysers =
             fullConfigToUpdate.Analysers 
-                |> Map.toList
-                |> List.choose (fun (analyserName, analyserToUpdate) -> 
-                    let updatedAnalyser = fullUpdatedConfig.Analysers.[analyserName]
+            |> Map.toList
+            |> List.choose (fun (analyserName, analyserToUpdate) -> 
+                let updatedAnalyser = fullUpdatedConfig.Analysers.[analyserName]
                     
-                    let diff = getAnalyserDifferences analyserToUpdate updatedAnalyser
+                let diff = getAnalyserDifferences analyserToUpdate updatedAnalyser
 
-                    let noUpdates = 
-                        diff.Rules.Count = 0 && 
-                        diff.Settings.Count = 0
+                let noUpdates = 
+                    diff.Rules.Count = 0 && 
+                    diff.Settings.Count = 0
 
-                    match partialConfigToUpdate.Analysers.TryFind analyserName with
-                    | Some(partialAnalyser) -> 
-                        let analyser = mergeAnalyser updatedAnalyser diff partialAnalyser
-                        Some(analyserName, analyser)
-                    | None when noUpdates -> None
-                    | None -> Some(analyserName, diff)) 
-                |> Map.ofList
+                match partialConfigToUpdate.Analysers.TryFind analyserName with
+                | Some(partialAnalyser) -> 
+                    let analyser = mergeAnalyser updatedAnalyser diff partialAnalyser
+                    Some(analyserName, analyser)
+                | None when noUpdates -> None
+                | None -> Some(analyserName, diff)) 
+            |> Map.ofList
 
         { fullUpdatedConfig with
             Analysers = updatedAnalysers }
@@ -462,39 +452,38 @@ module Configuration =
     let isAnalyserEnabled config analyserName =
         if not <| config.Analysers.ContainsKey analyserName then
             sprintf "Expected %s analyser in config." analyserName
-                |> ConfigurationException
-                |> raise
+            |> ConfigurationException
+            |> raise
 
         let analyserSettings = config.Analysers.[analyserName].Settings
 
         if analyserSettings.ContainsKey "Enabled" then
             match analyserSettings.["Enabled"] with 
-                | Enabled(true) -> Some(analyserSettings)
-                | _ -> None
-        else
-            Some(analyserSettings)
+            | Enabled(true) -> Some(analyserSettings)
+            | _ -> None
+        else Some(analyserSettings)
 
     /// Checks if a rule in the configuration is enabled and the analyser it's within is also enabled.
     /// Returns the analyser settings and rule settings if the rule was enabled; None otherwise.
     let isRuleEnabled config analyserName ruleName =
         match isAnalyserEnabled config analyserName with
-            | Some(analyserSettings) ->
-                let rules = config.Analysers.[analyserName].Rules
+        | Some(analyserSettings) ->
+            let rules = config.Analysers.[analyserName].Rules
 
-                if not <| rules.ContainsKey ruleName then 
-                    sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
-                        |> ConfigurationException
-                        |> raise
+            if not <| rules.ContainsKey ruleName then 
+                sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
+                |> ConfigurationException
+                |> raise
 
-                let ruleSettings = rules.[ruleName].Settings
+            let ruleSettings = rules.[ruleName].Settings
 
-                if ruleSettings.ContainsKey "Enabled" then
-                    match ruleSettings.["Enabled"] with 
-                        | Enabled(true) -> Some(analyserSettings, ruleSettings)
-                        | _ -> None
-                else
-                    None
-            | None -> None
+            if ruleSettings.ContainsKey "Enabled" then
+                match ruleSettings.["Enabled"] with 
+                | Enabled(true) -> Some(analyserSettings, ruleSettings)
+                | _ -> None
+            else
+                None
+        | None -> None
 
     /// Module to manage the loading and updating of configuration files.
     /// Keeps loaded configurations cached in memory so they can be quickly retrieved.
@@ -507,25 +496,22 @@ module Configuration =
         /// Keeps configuration files loaded for a list of paths so that
         /// they can be quickly retrieved and updated.
         type LoadedConfigs =
-            {
-                /// Cached configurations for each path.
-                LoadedConfigs: Map<Path, Configuration option>
+            { /// Cached configurations for each path.
+              LoadedConfigs: Map<Path, Configuration option>
 
-                /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
-                /// for each full path. If you wanted to load the configurations for a solution
-                /// this should be a list of absolute paths to the project directories.
-                PathsAdded: Path list
-            }
+              /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
+              /// for each full path. If you wanted to load the configurations for a solution
+              /// this should be a list of absolute paths to the project directories.
+              PathsAdded: Path list }
 
-            static member Empty 
-                with get() = { LoadedConfigs = Map.ofList []; PathsAdded = [] }
+            static member Empty = { LoadedConfigs = Map.ofList []; PathsAdded = [] }
 
         let private getAllPaths path =
             let rec getAllPaths = function
-            | x::rest, currentPath, pathsFound ->
-                let pathFound = currentPath@[x]
-                getAllPaths (rest, pathFound, pathFound::pathsFound)
-            | [], _, pathsFound -> pathsFound
+                | x::rest, currentPath, pathsFound ->
+                    let pathFound = currentPath@[x]
+                    getAllPaths (rest, pathFound, pathFound::pathsFound)
+                | [], _, pathsFound -> pathsFound
 
             getAllPaths (path, [], []) |> List.rev
 
@@ -535,8 +521,7 @@ module Configuration =
             let pathHasAlreadyBeenLoaded = 
                 loadedConfigs.PathsAdded |> List.exists (fun x -> x = path)
 
-            if pathHasAlreadyBeenLoaded then
-                loadedConfigs
+            if pathHasAlreadyBeenLoaded then loadedConfigs
             else
                 let paths = getAllPaths path
 
@@ -576,8 +561,8 @@ module Configuration =
 
                 let updatedConfigs =
                     loadedConfigs.LoadedConfigs 
-                        |> Map.filter (fun configPath _ -> 
-                            isPathPartOfAnyPaths configPath updatedPaths)
+                    |> Map.filter (fun configPath _ -> 
+                        isPathPartOfAnyPaths configPath updatedPaths)
 
                 { PathsAdded = updatedPaths
                   LoadedConfigs = updatedConfigs }
@@ -613,19 +598,15 @@ module Configuration =
         let commonPath loadedConfigs preferredPath =
             let commonPath =
                 transpose loadedConfigs.PathsAdded
-                    |> Seq.takeWhile (function 
-                        | (first::_) as segments -> List.forall ((=) first) segments
-                        | [] -> false)
-                    |> Seq.toList
-                    |> List.choose List.head
+                |> Seq.takeWhile (function 
+                    | (first::_) as segments -> List.forall ((=) first) segments
+                    | [] -> false)
+                |> Seq.toList
+                |> List.choose List.head
                  
-            if List.isEmpty commonPath then
-                None
-            else
-                if listStartsWith (commonPath, preferredPath) then
-                    Some preferredPath
-                else
-                    Some commonPath
+            if List.isEmpty commonPath then None
+            else if listStartsWith (commonPath, preferredPath) then Some preferredPath
+            else Some commonPath
 
         /// Tries to reload the configuration for all paths.
         /// Call when the user has edited a configuration file on disk.
@@ -633,15 +614,13 @@ module Configuration =
             { loadedConfigs with
                   LoadedConfigs = 
                     loadedConfigs.LoadedConfigs
-                        |> Map.map (fun configPath _ -> tryLoadConfig configPath) }
+                    |> Map.map (fun configPath _ -> tryLoadConfig configPath) }
 
         /// Gets the configuration file located at a given path.
         /// The configuration file returned may be incomplete as it
         /// will not have overrided any previous configuration files.
         let getPartialConfig loadedConfigs path = 
-            let config =
-                loadedConfigs.LoadedConfigs 
-                    |> Map.tryFind path
+            let config = Map.tryFind path loadedConfigs.LoadedConfigs
 
             match config with
             | Some(Some(config)) -> Some(config)
@@ -669,11 +648,11 @@ module Configuration =
         let updateConfig loadedConfigs path config = 
             { loadedConfigs with
                   LoadedConfigs = loadedConfigs.LoadedConfigs 
-                    |> Map.map (fun key value -> if key = path then config else value) }
+                                  |> Map.map (fun key value -> if key = path then config else value) }
 
         /// Tries to normalise paths to a format that can be used as a path in <see cref="LoadedConfigs" />.
         let normalisePath (path:string) =
             Path.GetFullPath path
-                |> fun x -> x.Split([| Path.DirectorySeparatorChar |], 
-                                    System.StringSplitOptions.RemoveEmptyEntries)
-                |> Array.toList
+            |> fun x -> x.Split([| Path.DirectorySeparatorChar |], 
+                                System.StringSplitOptions.RemoveEmptyEntries)
+            |> Array.toList

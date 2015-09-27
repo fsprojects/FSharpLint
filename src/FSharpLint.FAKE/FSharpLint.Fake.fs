@@ -30,8 +30,6 @@ let defaultLintOptions =
         FailBuildIfAnyWarnings = false
     }
 
-open System
-
 /// Runs FSharpLint on a project.
 /// ## Parameters
 /// 

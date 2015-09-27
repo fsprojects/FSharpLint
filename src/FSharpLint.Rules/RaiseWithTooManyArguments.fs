@@ -22,7 +22,6 @@ module RaiseWithTooManyArguments =
     
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -45,10 +44,6 @@ module RaiseWithTooManyArguments =
             when ident.idText = identifier && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
                 Some()
         | _ -> None
-
-    type private DoesHaveFormatString =
-        | HasFormatString
-        | NoFormatString
 
     type private CheckFunctionInfo =
         {
@@ -144,7 +139,7 @@ module RaiseWithTooManyArguments =
                 Range = range
             } hasTooManyArguments
     
-    let visitor visitorInfo checkFile astNode = 
+    let visitor visitorInfo _ astNode = 
         match astNode.Node with
             | AstNode.Expression(SynExpr.App(_, _, _, _, range) as expr) -> 
                 let flattenedExpression = FSharpLint.Framework.ExpressionUtilities.flattenFunctionApplication expr
@@ -167,4 +162,4 @@ module RaiseWithTooManyArguments =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

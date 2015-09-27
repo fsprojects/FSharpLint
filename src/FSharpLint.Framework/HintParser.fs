@@ -19,6 +19,7 @@
 namespace FSharpLint.Framework
 
 open FParsec
+open Microsoft.FSharp.Compiler.Lexhelp
 
 module HintParser =
 
@@ -49,10 +50,8 @@ module HintParser =
         | Variable of char
 
     type Lambda<'t> =
-        {
-            Arguments: Argument list
-            Body: 't
-        }
+        { Arguments: Argument list
+          Body: 't }
 
     [<RequireQualifiedAccess>]
     type Expression =
@@ -69,12 +68,15 @@ module HintParser =
         | List of Expression list
         | Array of Expression list
         | If of Expression * Expression * Expression option
+        | Null
+
+    type Suggestion =
+        | Expr of Expression
+        | Message of string
 
     type Hint =
-        {
-            Match: Expression
-            Suggestion: Expression
-        }
+        { Match: Expression
+          Suggestion: Suggestion }
 
     let charListToString charList =
         Seq.fold (fun x y -> x + y.ToString()) "" charList
@@ -90,14 +92,13 @@ module HintParser =
             pischar ['!';'%';'&';'*';'+';'-';'.';'/';'<';'=';'>';'@';'^';'|';'~']
 
         let opchars =
-                [
-                    '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
-                    '#';'^';'!';'?';'/';'.';':';',';//'(';')';'[';']'
-                ]
+            [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
+              '#';'^';'!';'?';'/';'.';':';',' ]
 
         let poperator: Parser<char list, unit> =
-            pfirstopchar .>>. many (pischar opchars)
-                |>> fun (x, rest) -> x::rest
+            pfirstopchar 
+            .>>. many (pischar opchars)
+            |>> fun (x, rest) -> x::rest
 
     /// Need to change isLetter so that it's using unicode character classes.
     module Identifiers =
@@ -106,67 +107,61 @@ module HintParser =
 
         let private pidentchar: Parser<char, unit> = 
             choice
-                [
-                    satisfy isLetter
-                    satisfy isDigit
-                    pchar '\''
-                    pchar '_'
-                ]
+                [ satisfy isLetter
+                  satisfy isDigit
+                  pchar '\''
+                  pchar '_' ]
 
         let private pidenttext: Parser<char list, unit> = 
             pidentstartchar .>>. many pidentchar
-                |>> fun (start, rest) -> start::rest
+            |>> fun (start, rest) -> start::rest
+            >>= fun ident -> 
+                let identStr = System.String.Join("", ident)
+
+                let isKeyword = List.exists ((=) identStr) Keywords.keywordNames
+
+                if isKeyword then fail (sprintf "Unexpected keyword %s" identStr)
+                else preturn ident
 
         let private pident: (CharStream<unit> -> Reply<char list>) = 
             let chars = ['`'; '\n'; '\r'; '\t']
 
             choice
-                [
-                    pidenttext
-                    skipString "``" 
-                        >>. many1
-                                (choice
-                                    [
-                                        attempt (pnotchar chars)
-                                        attempt (pchar '`' >>. pnotchar chars)
-                                    ])
-                        .>> skipString "``"
-                ]
+                [ pidenttext
+                  skipString "``" 
+                  >>. many1
+                          (choice
+                              [ attempt (pnotchar chars)
+                                attempt (pchar '`' >>. pnotchar chars) ])
+                  .>> skipString "``" ]
 
         let private plongident: (CharStream<unit> -> Reply<char list list>) = 
             choice
-                [
-                    attempt (sepBy1 pident (skipChar '.'))
-                    pident |>> fun x -> [x]
-                ]
+                [ attempt (sepBy1 pident (skipChar '.'))
+                  pident |>> fun x -> [x] ]
 
         let private pidentorop: (CharStream<unit> -> Reply<char list>) =
             choice
-                [
-                    attempt pident
-                    skipChar '(' 
-                        .>> spaces
-                        >>. Operators.poperator 
-                        .>> spaces
-                        .>> skipChar ')'
-                ]
+                [ attempt pident
+                  skipChar '(' 
+                  .>> spaces
+                  >>. Operators.poperator 
+                  .>> spaces
+                  .>> skipChar ')' ]
 
         let plongidentorop: Parser<string list, unit> = 
             choice
-                [
-                    attempt pident 
-                        .>>. many (attempt (skipChar '.' >>. pident))
-                        .>>. opt (skipChar '.' >>. pidentorop)
-                        |>> fun ((startIdent, idents), operator) -> 
-                                let identifiers = startIdent::idents
-                                match operator with
-                                    | Some(operator) ->
-                                        identifiers@[operator]
-                                    | None -> identifiers
-                    attempt (pidentorop |>> fun x -> [x])
-                    plongident
-                ]
-                    |>> List.map charListToString
+                [ attempt pident 
+                  .>>. many (attempt (skipChar '.' >>. pident))
+                  .>>. opt (skipChar '.' >>. pidentorop)
+                  |>> fun ((startIdent, idents), operator) -> 
+                      let identifiers = startIdent::idents
+                      match operator with
+                      | Some(operator) -> identifiers@[operator]
+                      | None -> identifiers
+                  attempt (pidentorop |>> fun x -> [x])
+                  plongident ]
+                |>> List.map charListToString
 
     module StringAndCharacterLiterals =
         let private hexToCharacter hex =
@@ -176,114 +171,110 @@ module HintParser =
             char(System.Convert.ToInt32(dec, 10))
 
         let private escapeMap =
-            [ 
-                ('"', '\"')
-                ('\\', '\\')
-                ('\'', '\'')
-                ('n', '\n')
-                ('t', '\t')
-                ('b', '\b')
-                ('r', '\r')
-                ('a', '\a')
-                ('f', '\f')
-                ('v', '\v')
-            ] |> Map.ofList
+            [ ('"', '\"')
+              ('\\', '\\')
+              ('\'', '\'')
+              ('n', '\n')
+              ('t', '\t')
+              ('b', '\b')
+              ('r', '\r')
+              ('a', '\a')
+              ('f', '\f')
+              ('v', '\v') ] |> Map.ofList
 
         let private pescapechar: Parser<char, unit> = 
             skipChar '\\'
-                >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
-                |>> fun x -> Map.find x escapeMap
+            >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
+            |>> fun x -> Map.find x escapeMap
 
         let private pnonescapechars: Parser<char, unit> =
             skipChar '\\'
-                >>. pnotchar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
+            >>. pnotchar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
 
         let private psimplecharchar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
 
         let private psimplestringchar: Parser<char, unit> =
-            pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\';'\'']
+            pnotchar ['"';'\n';'\t';'\r';'\b';'\a';'\f';'\v';'\\']
 
         let private punicodegraphshort: Parser<char, unit> = 
             skipString "\\u"
-                >>. many1 hex
-                >>= fun x ->
-                    if x.Length <> 4 then
-                        fail "Unicode graph short must be 4 hex characters long"
-                    else
-                        preturn (x |> charListToString |> hexToCharacter)
+            >>. many1 hex
+            >>= fun x ->
+                if x.Length <> 4 then
+                    fail "Unicode graph short must be 4 hex characters long"
+                else
+                    preturn (x |> charListToString |> hexToCharacter)
 
         let private punicodegraphlong: Parser<char, unit> =
             skipString "\\U"
-                >>. many1 hex
-                >>= fun x ->
-                    if x.Length <> 8 then
-                        fail "Unicode graph long must be 8 hex characters long"
-                    else
-                        preturn (x |> charListToString |> hexToCharacter)
+            >>. many1 hex
+            >>= fun x ->
+                if x.Length <> 8 then
+                    fail "Unicode graph long must be 8 hex characters long"
+                else
+                    preturn (x |> charListToString |> hexToCharacter)
 
         let private ptrigraph: Parser<char, unit> =
             skipChar '\\'
-                >>. many1 digit
-                >>= fun x ->
-                    if x.Length <> 3 then
-                        fail "Trigraph must be 3 characters long"
-                    else
-                        preturn (x |> charListToString |> decimalToCharacter)
+            >>. many1 digit
+            >>= fun x ->
+                if x.Length <> 3 then
+                    fail "Trigraph must be 3 characters long"
+                else
+                    preturn (x |> charListToString |> decimalToCharacter)
 
         let private pnewline: Parser<char, unit> = 
             pchar '\n' <|> (skipChar '\r' >>. skipChar '\n' >>% '\n')
 
         let private pcharchar: (CharStream<unit> -> Reply<char>) =
             choice 
-                [
-                    attempt psimplecharchar
-                    attempt pescapechar
-                    attempt ptrigraph
-                    punicodegraphshort
-                ]
+                [ attempt psimplecharchar
+                  attempt pescapechar
+                  attempt ptrigraph
+                  punicodegraphshort ]
 
         let private pstringchar: (CharStream<unit> -> Reply<char>) =
             choice
-                [
-                    attempt psimplestringchar
-                    attempt ptrigraph
-                    attempt punicodegraphlong
-                    attempt punicodegraphshort
-                    attempt pescapechar
-                    attempt pnonescapechars
-                    pnewline
-                ]
+                [ attempt psimplestringchar
+                  attempt ptrigraph
+                  attempt punicodegraphlong
+                  attempt punicodegraphshort
+                  attempt pescapechar
+                  attempt pnonescapechars
+                  pnewline ]
 
         let private pstringelem, private pstringelemImpl = createParserForwardedToRef()
         do pstringelemImpl :=
             choice
-                [
-                    attempt pstringchar
-                    skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem
-                ]
+                [ attempt pstringchar
+                  skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]
 
         let pcharacter: Parser<Constant, unit> =
-            skipChar '\'' >>. pcharchar .>> pchar '\''
-                |>> Char
+            skipChar '\'' 
+            >>. pcharchar 
+            .>> pchar '\''
+            |>> Char
 
-        let pliteralstring: Parser<Constant, unit> =
-            skipChar '"' >>. many pstringchar .>> skipChar '"'
-                |>> (charListToString >> String)
+        let pliteralstring: Parser<string, unit> =
+            skipChar '"' 
+            >>. many pstringchar 
+            .>> skipChar '"'
+            |>> charListToString
 
         let private pverbatimstringchar: (CharStream<unit> -> Reply<char>) =
             choice
-                [
-                    pstringelem
-                    pnonescapechars
-                    pnewline
-                    pchar '\\'
-                    pstring "\"\"" >>% '"'
-                ]
+                [ pstringelem
+                  pnonescapechars
+                  pnewline
+                  pchar '\\'
+                  pstring "\"\"" >>% '"' ]
 
-        let pverbatimstring: Parser<Constant, unit> =
-            pstring "@\"" >>. many pverbatimstringchar .>> pchar '"'
-                |>> (charListToString >> String)
+        let pverbatimstring: Parser<string, unit> =
+            pstring "@\"" 
+            >>. many pverbatimstringchar 
+            .>> pchar '"'
+            |>> charListToString
 
         let private psimplechar: Parser<char, unit> =
             pnotchar ['\n';'\t';'\r';'\b';'\'';'\\';'"']
@@ -292,20 +283,28 @@ module HintParser =
             pescapechar <|> psimplechar
 
         let pbytechar: Parser<Constant, unit> =
-            skipChar '\'' >>. psimpleorescapechar .>> skipString "'B"
-                |>> (byte >> Byte)
+            skipChar '\'' 
+            >>. psimpleorescapechar 
+            .>> skipString "'B"
+            |>> (byte >> Byte)
 
         let pbytearray: Parser<Constant, unit> = 
-            skipChar '"' >>. many pstringchar .>> skipString "\"B"
-                |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
+            skipChar '"' 
+            >>. many pstringchar 
+            .>> skipString "\"B"
+            |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
 
         let pverbatimbytearray: Parser<Constant, unit> = 
-            skipString "@\"" >>. many pverbatimstringchar .>> skipString "\"B"
-                |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
+            skipString "@\"" 
+            >>. many pverbatimstringchar 
+            .>> skipString "\"B"
+            |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
 
-        let ptriplequotedstring: Parser<Constant, unit> =
-            skipString "\"\"\"" >>. many psimpleorescapechar .>> skipString "\"\"\""
-                |>> (charListToString >> String)
+        let ptriplequotedstring: Parser<string, unit> =
+            skipString "\"\"\"" 
+            >>. many psimpleorescapechar 
+            .>> skipString "\"\"\""
+            |>> charListToString
 
     /// Not supporting hex single and hex float right now.
     /// Decimal float currently will lose precision.
@@ -314,75 +313,85 @@ module HintParser =
 
         let private minusString (minus:char option, charList) =
             if minus.IsSome then '-' :: charList else charList
-                |> charListToString
+            |> charListToString
 
         let private phexint: Parser<char list, unit> =
             skipChar '0' 
-                >>. (skipChar 'x' <|> skipChar 'X')
-                >>. many1 hex
-                |>> fun x -> '0'::'x'::x
+            >>. (skipChar 'x' <|> skipChar 'X')
+            >>. many1 hex
+            |>> fun x -> '0'::'x'::x
 
         let private poctalint: Parser<char list, unit> =
             skipChar '0'
-                >>. (skipChar 'o' <|> skipChar 'O')
-                >>. many1 octal
-                |>> fun x -> '0'::'o'::x
+            >>. (skipChar 'o' <|> skipChar 'O')
+            >>. many1 octal
+            |>> fun x -> '0'::'o'::x
 
         let private pbinaryint: Parser<char list, unit> =
             skipChar '0'
-                >>. (skipChar 'b' <|> skipChar 'B')
-                >>. many1 (pchar '0' <|> pchar '1')
-                |>> fun x -> '0'::'b'::x
+            >>. (skipChar 'b' <|> skipChar 'B')
+            >>. many1 (pchar '0' <|> pchar '1')
+            |>> fun x -> '0'::'b'::x
 
         let private pint: (CharStream<unit> -> Reply<char list>) =
             choice
-                [
-                    attempt phexint
-                    attempt poctalint
-                    attempt pbinaryint
-                    many1 digit
-                ]
+                [ attempt phexint
+                  attempt poctalint
+                  attempt pbinaryint
+                  many1 digit ]
 
         let psbyte: Parser<Constant, unit> = 
-            (opt pminus) .>>. pint .>> skipChar 'y'
-                |>> (minusString >> sbyte >> SByte)
+            opt pminus
+            .>>. pint 
+            .>> skipChar 'y'
+            |>> (minusString >> sbyte >> SByte)
 
         let pbyte: Parser<Constant, unit> = 
-            pint .>> skipString "uy"
-                |>> (charListToString >> byte >> Byte)
+            pint 
+            .>> skipString "uy"
+            |>> (charListToString >> byte >> Byte)
 
         let pint16: Parser<Constant, unit> = 
-            (opt pminus) .>>. pint .>> skipChar 's'
-                |>> (minusString >> int16 >> Int16)
+            opt pminus
+            .>>. pint .>> skipChar 's'
+            |>> (minusString >> int16 >> Int16)
 
         let puint16: Parser<Constant, unit> = 
-            pint .>> skipString "us"
-                |>> (charListToString >> uint16 >> UInt16)
+            pint 
+            .>> skipString "us"
+            |>> (charListToString >> uint16 >> UInt16)
 
         let puint32: Parser<Constant, unit> = 
-            pint .>> (skipString "u" <|> skipString "ul")
-                |>> (charListToString >> uint32 >> UInt32)
+            pint 
+            .>> (skipString "u" <|> skipString "ul")
+            |>> (charListToString >> uint32 >> UInt32)
 
         let pnativeint: Parser<Constant, unit> = 
-            (opt pminus) .>>. pint .>> skipChar 'n'
-                |>> (minusString >> int64 >> nativeint >> IntPtr)
+            opt pminus
+            .>>. pint .>> skipChar 'n'
+            |>> (minusString >> int64 >> nativeint >> IntPtr)
 
         let punativeint: Parser<Constant, unit> = 
-            pint .>> pstring "un"
-                |>> (charListToString >> uint64 >> unativeint >> UIntPtr)
+            pint 
+            .>> pstring "un"
+            |>> (charListToString >> uint64 >> unativeint >> UIntPtr)
 
         let pint64: Parser<Constant, unit> = 
-            (opt pminus) .>>. pint .>> skipChar 'L'
-                |>> (minusString >> int64 >> Int64)
+            opt pminus
+            .>>. pint 
+            .>> skipChar 'L'
+            |>> (minusString >> int64 >> Int64)
 
         let puint64: Parser<Constant, unit> = 
-            pint .>> (skipString "UL" <|> skipString "uL")
-                >>= (charListToString >> uint64 >> UInt64 >> preturn)
+            pint 
+            .>> (skipString "UL" <|> skipString "uL")
+            >>= (charListToString >> uint64 >> UInt64 >> preturn)
 
         let psingle: Parser<Constant, unit> =
-            (opt pminus) .>>. 
-                pfloat .>> (skipChar 'F' <|> skipChar 'f')
-                    |>> fun (minus, x) -> Single(if minus.IsSome then -float32(x) else float32(x))
+            opt pminus 
+            .>>. pfloat 
+            .>> (skipChar 'F' <|> skipChar 'f')
+            |>> fun (minus, x) -> Single(if minus.IsSome then -float32(x) else float32(x))
 
         let private numberFormat = 
             NumberLiteralOptions.AllowMinusSign
@@ -392,72 +401,72 @@ module HintParser =
         let private pnumber: Parser<Constant, unit> =
             numberLiteral numberFormat "number"
             |>> fun nl ->
-                    if nl.IsInteger then Int32(int32 nl.String)
-                    else Double(double nl.String)
+                if nl.IsInteger then Int32(int32 nl.String)
+                else Double(double nl.String)
 
         let pint32: Parser<Constant, unit> = pnumber .>> optional (skipChar 'l')
 
         let pdouble: Parser<Constant, unit> = pnumber
 
         let pbignum: Parser<Constant, unit> =
-            (opt pminus) .>>. pint .>>. anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
-                |>> fun (x, t) -> UserNum(bigint.Parse(minusString x), t)
+            opt pminus
+            .>>. pint 
+            .>>. anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
+            |>> fun (x, t) -> UserNum(bigint.Parse(minusString x), t)
 
         let pdecimal: Parser<Constant, unit> =
             let pdecimalint: Parser<Constant, unit> =
-                (opt pminus) .>>. pint .>> (skipChar 'M' <|> skipChar 'm')
-                    |>> (minusString >> decimal >> Decimal)
+                opt pminus
+                .>>. pint 
+                .>> (skipChar 'M' <|> skipChar 'm')
+                |>> (minusString >> decimal >> Decimal)
 
             let pdecimalfloat: Parser<Constant, unit> =
-                (opt pminus) .>>. pfloat .>> (skipChar 'M' <|> skipChar 'm')
-                    |>> fun (minus, x) -> Decimal(decimal (if minus.IsSome then -x else x))
+                opt pminus
+                .>>. pfloat 
+                .>> (skipChar 'M' <|> skipChar 'm')
+                |>> fun (minus, x) -> Decimal(decimal (if minus.IsSome then -x else x))
 
             choice 
-                [
-                    attempt pdecimalint
-                    pdecimalfloat
-                ]
+                [ attempt pdecimalint
+                  pdecimalfloat ]
 
     module Constants =
         let private pbool: (CharStream<unit> -> Reply<Constant>) = 
             choice
-                [
-                    skipString "true" >>% Bool(true)
-                    skipString "false" >>% Bool(false)
-                ]
+                [ skipString "true" >>% Bool(true)
+                  skipString "false" >>% Bool(false) ]
 
         let private punit: Parser<Constant, unit> = 
             skipString "(" 
-                >>. ((spaces >>. skipString ")") <|> skipString ")")
-                >>% Unit
+            >>. ((spaces >>. skipString ")") <|> skipString ")")
+            >>% Unit
 
         let pconstant: Parser<Expression, unit> = 
             choice
-                [
-                    attempt pbool
-                    attempt punit
-                    attempt StringAndCharacterLiterals.pcharacter
-                    attempt StringAndCharacterLiterals.pliteralstring
-                    attempt StringAndCharacterLiterals.pverbatimstring
-                    attempt StringAndCharacterLiterals.pbytechar
-                    attempt StringAndCharacterLiterals.pbytearray
-                    attempt StringAndCharacterLiterals.pverbatimbytearray
-                    attempt StringAndCharacterLiterals.ptriplequotedstring
-                    attempt NumericLiterals.psbyte
-                    attempt NumericLiterals.pbyte
-                    attempt NumericLiterals.pint16
-                    attempt NumericLiterals.puint16
-                    attempt NumericLiterals.puint32
-                    attempt NumericLiterals.pnativeint
-                    attempt NumericLiterals.punativeint
-                    attempt NumericLiterals.pint64
-                    attempt NumericLiterals.puint64
-                    attempt NumericLiterals.psingle
-                    attempt NumericLiterals.pbignum
-                    attempt NumericLiterals.pdecimal
-                    attempt NumericLiterals.pdouble
-                    NumericLiterals.pint32
-                ] |>> Expression.Constant
+                [ attempt pbool
+                  attempt punit
+                  attempt StringAndCharacterLiterals.pcharacter
+                  attempt StringAndCharacterLiterals.pliteralstring |>> String
+                  attempt StringAndCharacterLiterals.pverbatimstring |>> String
+                  attempt StringAndCharacterLiterals.pbytechar
+                  attempt StringAndCharacterLiterals.pbytearray
+                  attempt StringAndCharacterLiterals.pverbatimbytearray
+                  attempt StringAndCharacterLiterals.ptriplequotedstring |>> String
+                  attempt NumericLiterals.psbyte
+                  attempt NumericLiterals.pbyte
+                  attempt NumericLiterals.pint16
+                  attempt NumericLiterals.puint16
+                  attempt NumericLiterals.puint32
+                  attempt NumericLiterals.pnativeint
+                  attempt NumericLiterals.punativeint
+                  attempt NumericLiterals.pint64
+                  attempt NumericLiterals.puint64
+                  attempt NumericLiterals.psingle
+                  attempt NumericLiterals.pbignum
+                  attempt NumericLiterals.pdecimal
+                  attempt NumericLiterals.pdouble
+                  NumericLiterals.pint32 ] |>> Expression.Constant
 
     module Expressions =
 
@@ -467,8 +476,8 @@ module HintParser =
 
         let pvariable: Parser<Expression, unit> = 
             satisfy isLetter 
-                .>> notFollowedBy (satisfy isLetter)
-                |>> Expression.Variable
+            .>> notFollowedBy (satisfy isLetter)
+            |>> Expression.Variable
 
         let pargumentvariable: Parser<Argument, unit> = satisfy isLetter |>> Argument.Variable
 
@@ -480,58 +489,48 @@ module HintParser =
 
         let pif: Parser<Expression, unit> =
             skipString "if"
-                >>. spaces
-                >>. pexpression
-                .>> spaces
-                .>> skipString "then"
-                .>>. pexpression
-                .>>. opt (skipString "else" >>. pexpression)
-                |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr)
+            >>. spaces
+            >>. pexpression
+            .>> spaces
+            .>> skipString "then"
+            .>>. pexpression
+            .>>. opt (skipString "else" >>. pexpression)
+            |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr)
 
         let ptuple: Parser<Expression, unit> = 
             skipChar '(' 
-                >>. pexpression
-                .>> skipChar ',' 
-                .>>. sepEndBy1 pexpression (skipChar ',')
-                .>> skipChar ')' 
-                |>> fun (func, rest) -> Expression.Tuple(func::rest)
+            >>. pexpression
+            .>> skipChar ',' 
+            .>>. sepEndBy1 pexpression (skipChar ',')
+            .>> skipChar ')' 
+            |>> fun (func, rest) -> Expression.Tuple(func::rest)
 
         let plist: Parser<Expression, unit> = 
             skipChar '['
-                >>. spaces
-                >>. sepEndBy pexpression (skipChar ';')
-                .>> spaces
-                .>> skipChar ']'
-                |>> Expression.List
+            >>. spaces
+            >>. sepEndBy pexpression (skipChar ';')
+            .>> spaces
+            .>> skipChar ']'
+            |>> Expression.List
 
         let parray: Parser<Expression, unit> = 
             skipString "[|"
-                >>. spaces
-                >>. sepEndBy pexpression (skipChar ';')
-                .>> spaces
-                .>> skipString "|]"
-                |>> Expression.Array
-
-        let private plambdastart: Parser<Argument list, unit> = 
-            skipString "fun"
-                >>. spaces1
-                >>. plambdaarguments
-
-        let private plambdaend: Parser<Expression, unit> =
-            skipString "->" 
-                >>. spaces
-                >>. pexpression
+            >>. spaces
+            >>. sepEndBy pexpression (skipChar ';')
+            .>> spaces
+            .>> skipString "|]"
+            |>> Expression.Array
 
         let plambda: Parser<Expression, unit> = 
             let plambdastart: Parser<Argument list, unit> = 
                 skipString "fun"
-                    >>. spaces1
-                    >>. plambdaarguments
+                >>. spaces1
+                >>. plambdaarguments
 
             let plambdaend: Parser<Expression, unit> =
                 skipString "->" 
-                    >>. spaces
-                    >>. pexpression
+                >>. spaces
+                >>. pexpression
 
             parse {
                 let! arguments = plambdastart
@@ -543,23 +542,21 @@ module HintParser =
 
         let papplication =
             choice 
-                [
-                    attempt Constants.pconstant
-                    attempt pvariable
-                    attempt pwildcard
-                    attempt Identifiers.plongidentorop |>> Expression.Identifier
-                    attempt ptuple
-                    attempt plist
-                    attempt parray
-                    attempt pparentheses
-                ]
+                [ attempt Constants.pconstant
+                  attempt pvariable
+                  attempt pwildcard
+                  attempt Identifiers.plongidentorop |>> Expression.Identifier
+                  attempt ptuple
+                  attempt plist
+                  attempt parray
+                  attempt pparentheses ]
 
         let pfunctionapplication: Parser<Expression, unit> =
             Identifiers.plongidentorop 
-                |>> Expression.Identifier
-                .>> spaces
-                .>>. sepEndBy1 papplication spaces
-                |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
+            |>> Expression.Identifier
+            .>> spaces
+            .>>. sepEndBy1 papplication spaces
+            |>> fun (func, rest) -> Expression.FunctionApplication(func::rest)
 
         let opp = OperatorPrecedenceParser<Expression, string, unit>()
 
@@ -569,20 +566,19 @@ module HintParser =
         opp.TermParser <- 
             spaces >>.
             choice 
-                [
-                    attempt pif
-                    attempt Constants.pconstant
-                    attempt plambda
-                    attempt pvariable
-                    attempt pwildcard
-                    attempt pfunctionapplication
-                    attempt Identifiers.plongidentorop |>> Expression.Identifier
-                    attempt ptuple
-                    attempt plist
-                    attempt parray
-                    attempt pparentheses
-                    prefixoperatorterm
-                ] .>> spaces
+                [ attempt pif
+                  attempt (pstring "null") |>> (fun _ -> Expression.Null)
+                  attempt Constants.pconstant
+                  attempt plambda
+                  attempt pvariable
+                  attempt pwildcard
+                  attempt pfunctionapplication
+                  attempt Identifiers.plongidentorop |>> Expression.Identifier
+                  attempt ptuple
+                  attempt plist
+                  attempt parray
+                  attempt pparentheses
+                  prefixoperatorterm ] .>> spaces
 
         // a helper function for adding infix operators to opp
         let addInfixOperator prefix precedence associativity =
@@ -658,18 +654,29 @@ module HintParser =
 
             pexpressionImpl := opp.ExpressionParser
 
+    let private psuggestion: Parser<Suggestion, Unit> =
+        let pstring =
+            choice 
+                [ StringAndCharacterLiterals.ptriplequotedstring
+                  StringAndCharacterLiterals.pverbatimstring
+                  StringAndCharacterLiterals.pliteralstring ]
+
+        choice 
+            [ attempt (pchar 'm' >>. pstring |>> Suggestion.Message)
+              Expressions.pexpression |>> Suggestion.Expr ]
+
     let phint: Parser<Hint, unit> = 
         let phintcenter: Parser<unit, unit> = 
             spaces 
-                .>> skipString "===>"
-                .>> spaces
+            .>> skipString "===>"
+            .>> spaces
 
         parse {
             let! m = Expressions.pexpression 
 
             do! phintcenter
 
-            let! s = Expressions.pexpression
+            let! s = psuggestion
 
             return { Match = m; Suggestion = s }
         }

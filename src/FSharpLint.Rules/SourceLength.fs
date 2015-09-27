@@ -22,7 +22,6 @@ module SourceLength =
     
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
@@ -54,7 +53,7 @@ module SourceLength =
                 visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
             | _ -> ()
     
-    let rec visitor visitorInfo checkFile astNode = 
+    let rec visitor visitorInfo _ astNode = 
         match astNode.Node with
             | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
                 expectMaxLines visitorInfo astNode range "MaxLinesInLambdaFunction" "Lambda function"
@@ -66,9 +65,7 @@ module SourceLength =
                 Continue
             | AstNode.Binding(binding) ->
                 match binding with
-                    | SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _) -> 
-                        let length = length binding.RangeOfBindingAndRhs
-
+                    | SynBinding.Binding(_, _, _, _, _, _, valData, _, _, _, _, _) ->
                         let expectMaxLines = expectMaxLines visitorInfo astNode binding.RangeOfBindingAndRhs
 
                         match identifierTypeFromValData valData with
@@ -85,7 +82,7 @@ module SourceLength =
                             | Other -> ()
 
                         Continue
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, range)) when isModule -> 
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, isModule, _, _, _, _, range)) when isModule -> 
                 expectMaxLines visitorInfo astNode range "MaxLinesInModule" "Module"
 
                 Continue
@@ -114,4 +111,4 @@ module SourceLength =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

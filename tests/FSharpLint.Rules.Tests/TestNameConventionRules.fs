@@ -131,19 +131,19 @@ type TestNameConventionRules() =
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
 
     [<Test>]
-    member this.IsPascalCase() = 
+    member __.IsPascalCase() = 
         Assert.IsTrue(isPascalCase "DogInBin")
 
         Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
-    member this.IsCamelCase() = 
+    member __.IsCamelCase() = 
         Assert.IsTrue(isCamelCase "dogInBin")
 
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member this.ContainsUnderScore() = 
+    member __.ContainsUnderScore() = 
         Assert.IsTrue(containsUnderscore "dog_")
 
         Assert.IsTrue(containsUnderscore "_dog")
@@ -856,7 +856,7 @@ module program
 exception MyError of string
 """
 
-        let error = "Expected pascal case identifier but was MyError"
+        let error = "Expected a pascal case identifier, found `MyError`."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -867,7 +867,7 @@ module program
 exception myError of string
 """
 
-        let error = "Expected pascal case identifier but was myError"
+        let error = "Expected a pascal case identifier, found `myError`."
         
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -878,7 +878,7 @@ module program
 exception MyErrorException of string
 """
 
-        let error = "Exception identifier should end with 'Exception', but was MyErrorException"
+        let error = "Exception identifier expected to end with 'Exception', found `MyErrorException`."
         
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -889,8 +889,8 @@ module program
 exception MyError of string
 """
 
-        let error = "Exception identifier should end with 'Exception', but was MyError"
-        
+        let error = "Exception identifier expected to end with 'Exception', found `MyError`."
+
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]

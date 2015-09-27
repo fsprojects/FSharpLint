@@ -19,7 +19,6 @@
 namespace FSharpLint.MSBuildIntegration
 
 open System
-open FSharpLint.Worker
 open FSharpLint.Application.AppDomainWorker
 
 type FSharpLintTask() = 
@@ -68,8 +67,6 @@ type FSharpLintTask() =
                     progress.Exception.Message
                     progress.Exception.StackTrace
                     |> logFailure
-
-        let neverFinishEarly = fun _ -> false
         
         let errorReceived (error:FSharpLint.Worker.Error) = 
             let filename = error.Range.FileName

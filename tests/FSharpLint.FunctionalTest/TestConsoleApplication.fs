@@ -69,21 +69,20 @@ module Tests =
         ]
 
     let expectedErrors =
-        [
-            "not (a=b) can be refactored into a<>b"
-            "not (a<>b) can be refactored into a=b"
-            "fun x -> x can be refactored into id"
-            "not true can be refactored into false"
-            "not false can be refactored into true"
-            "List.fold + 0 can be refactored into List.sum"
-            "a<>true can be refactored into not a"
-            "List.head (List.sort x) can be refactored into List.min x"
-        ]
+        [ "`not (a=b)` might be able to be refactored into `a<>b`."
+          "`not (a<>b)` might be able to be refactored into `a=b`."
+          "`fun x -> x` might be able to be refactored into `id`."
+          "`not true` might be able to be refactored into `false`."
+          "`not false` might be able to be refactored into `true`."
+          "`List.fold ( + ) 0` might be able to be refactored into `List.sum`."
+          "`a<>true` might be able to be refactored into `not a`."
+          "`x=null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
+          "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
         [<Test>]
-        member this.InvalidConfig() = 
+        member __.InvalidConfig() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
             System.IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
@@ -95,7 +94,7 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
+        member __.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesInvalidProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -112,7 +111,7 @@ module Tests =
             Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
-        member this.InvalidProjectFile() = 
+        member __.InvalidProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/invalidProjectFile.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -122,7 +121,7 @@ module Tests =
             Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.UnableToFindProjectFile() = 
+        member __.UnableToFindProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/iuniubi.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -132,7 +131,7 @@ module Tests =
             Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
+        member __.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesNonExistantProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -149,7 +148,7 @@ module Tests =
             Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
-        member this.FunctionalTestConsoleApplication() = 
+        member __.FunctionalTestConsoleApplication() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
             let output = runConsoleApp arguments

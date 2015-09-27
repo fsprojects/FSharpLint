@@ -67,6 +67,16 @@ let f = fun a b -> a * b
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.``Operator ident is displayed in error as an operator symbol.``() = 
+        this.Parse """
+module Program
+
+let f = fun a b -> a * b
+"""
+
+        this.ErrorMsg.Contains "`( * )`" |> Assert.IsTrue
+
+    [<Test>]
     member this.``Lambda reimplementing long identifier function issues error``() = 
         this.Parse """
 module Program

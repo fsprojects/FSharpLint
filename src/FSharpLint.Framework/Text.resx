@@ -148,100 +148,103 @@
     <value>Error in file {0} on line {1} starting at column {2}</value>
   </data>
   <data name="RulesCyclomaticComplexityError" xml:space="preserve">
-    <value>Binding with cyclomatic complexity of {0} found, expecting bindings to have a cyclomatic complexity of less than {1}.</value>
+    <value>This binding has a cyclomatic complexity of {0}, expecting a cyclomatic complexity of less than {1}.</value>
   </data>
   <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
-    <value>Expected failwithf's arguments to match the format string (there were too many arguments).</value>
+    <value>`failwithf` has more arguments than were found in its format string, these further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesFailwithWithSingleArgument" xml:space="preserve">
-    <value>Expected failwith to have a single argument.</value>
+    <value>`failwith` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
-    <value>Favour using the ignore function rather than let _ = ...</value>
+    <value>The `ignore` function is usually favoured over `let _ = ...` when ignoring the result of an expression.</value>
   </data>
   <data name="RulesReimplementsFunction" xml:space="preserve">
-    <value>Pointless function redefines {0}</value>
+    <value>If `{0}` has no mutable arguments partially applied then the lambda can be removed.</value>
   </data>
   <data name="RulesHintRefactor" xml:space="preserve">
-    <value>{0} can be refactored into {1}</value>
+    <value>`{0}` might be able to be refactored into `{1}`.</value>
+  </data>
+  <data name="RulesHintSuggestion" xml:space="preserve">
+    <value>`{0}`; suggestion: {1}.</value>
   </data>
   <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">
-    <value>Expected camel case identifier but was {0}</value>
+    <value>Expected a camel case identifier, found `{0}`.</value>
   </data>
   <data name="RulesNamingConventionsExceptionError" xml:space="preserve">
-    <value>Exception identifier should end with 'Exception', but was {0}</value>
+    <value>Exception identifier expected to end with 'Exception', found `{0}`.</value>
   </data>
   <data name="RulesNamingConventionsInterfaceError" xml:space="preserve">
-    <value>Interface identifiers should begin with the letter I found interface {0}</value>
+    <value>Interface identifiers expected to begin with the letter I, found interface `{0}`.</value>
   </data>
   <data name="RulesNamingConventionsPascalCaseError" xml:space="preserve">
-    <value>Expected pascal case identifier but was {0}</value>
+    <value>Expected a pascal case identifier, found `{0}`.</value>
   </data>
   <data name="RulesNamingConventionsUnderscoreError" xml:space="preserve">
-    <value>Identifiers should not contain underscores, but one was found in: {0}</value>
+    <value>Identifiers expected to not contain underscores, an underscore was found in: `{0}`.</value>
   </data>
   <data name="RulesNestedStatementsError" xml:space="preserve">
-    <value>Code should not be nested more deeply than a depth of {0}</value>
+    <value>Code expected not to be nested more deeply than a depth of {0}.</value>
   </data>
   <data name="RulesNumberOfItemsBooleanConditionsError" xml:space="preserve">
-    <value>Conditions should contain at most {0} boolean operators</value>
+    <value>Conditions expected to contain at most {0} boolean operators.</value>
   </data>
   <data name="RulesNumberOfItemsClassMembersError" xml:space="preserve">
-    <value>Class must have a maximum of {0} members</value>
+    <value>Class expected to have a maximum of {0} members.</value>
   </data>
   <data name="RulesNumberOfItemsFunctionError" xml:space="preserve">
-    <value>Functions should have a maximum of {0} parameters</value>
+    <value>Functions expected to have a maximum of {0} parameters.</value>
   </data>
   <data name="RulesNumberOfItemsTupleError" xml:space="preserve">
-    <value>Tuple should have a maximum of {0} items</value>
+    <value>Tuple expected to have a maximum of {0} items.</value>
   </data>
   <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
-    <value>Expected raise to have a single argument.</value>
+    <value>`raise` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesSourceLengthError" xml:space="preserve">
-    <value>{0}s should be less than {1} lines long, was {2} lines long.</value>
+    <value>{0} was {2} lines long, expected to be less than {1} lines long.</value>
   </data>
   <data name="RulesTypographyFileLengthError" xml:space="preserve">
-    <value>Files should be less than {0} lines long.</value>
+    <value>File expected to be less than {0} lines long.</value>
   </data>
   <data name="RulesTypographyLineLengthError" xml:space="preserve">
-    <value>Lines should be less than {0} characters long.</value>
+    <value>Line expected to be less than {0} characters long.</value>
   </data>
   <data name="RulesTypographyTabCharacterError" xml:space="preserve">
-    <value>File should not contain tab characters.</value>
+    <value>Found tab character (`\t`) in file.</value>
   </data>
   <data name="RulesTypographyTrailingLineError" xml:space="preserve">
-    <value>File should not have a trailing new line.</value>
+    <value>Found trailing whitespace line at end of file.</value>
   </data>
   <data name="RulesTypographyTrailingWhitespaceError" xml:space="preserve">
-    <value>Lines should not have trailing whitespace.</value>
+    <value>Found trailing whitespace at end of line.</value>
   </data>
   <data name="RulesUselessBindingError" xml:space="preserve">
-    <value>Useless binding.</value>
+    <value>Binding appears to have no purpose.</value>
   </data>
   <data name="RulesWildcardNamedWithAsPattern" xml:space="preserve">
-    <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` can simply be `x`</value>
+    <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` can simply be `x`.</value>
   </data>
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>
   <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
-    <value>Expected invalidArg to have two arguments.</value>
+    <value>`invalidArg` should have two arguments, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesInvalidOpWithSingleArgument" xml:space="preserve">
-    <value>Expected invalidOp to have a single argument.</value>
+    <value>`invalidOp` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
-    <value>Expected nullArg to have a single argument.</value>
+    <value>`nullArg` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesTupleOfWildcardsError" xml:space="preserve">
-    <value>A constructor argument in a pattern that is a tuple consisting of entirely wildcards can be replaced with a single wildcard. {0} can be replaced with {1}</value>
+    <value>A constructor argument in a pattern that is a tuple consisting of entirely wildcards can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
   </data>
   <data name="LintSourceError" xml:space="preserve">
     <value>Error on line {0} starting at column {1}</value>
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
-    <value>Pointless function can be replaced with function composition.</value>
+    <value>If no mutable arguments are partially applied in the chain of function calls, then the function calls and lambda could be replaced with composition. e.g. `fun x -> x |> isValid |> not` could be replaced with `isValid >> not`.</value>
   </data>
   <data name="RulesXmlDocumentationTypeError" xml:space="preserve">
     <value>Expected type to have xml documentation.</value>
@@ -253,16 +256,16 @@
     <value>Expected module to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
-    <value>Expected enum {0} to have xml documentation.</value>
+    <value>Expected enum `{0}` to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
-    <value>Expected union case {0} to have xml documentation.</value>
+    <value>Expected union case `{0}` to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
-    <value>Expected record case {0} to have xml documentation.</value>
+    <value>Expected record case `{0}` to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
-    <value>Expected auto property {0} to have xml documentation.</value>
+    <value>Expected auto property `{0}` to have xml documentation.</value>
   </data>
   <data name="RulesXmlDocumentationLetError" xml:space="preserve">
     <value>Expected let to have xml documentation.</value>

@@ -20,7 +20,6 @@ namespace FSharpLint.FunctionalTest
 
 module TestMSBuildTask =
 
-    open System.IO
     open NUnit.Framework
 
     let msbuildProject projectFile =
@@ -43,25 +42,24 @@ module TestMSBuildTask =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestMSBuildTask() =
         [<SetUp>]
-        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintMSBuildTaskTest"
+        member __.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintMSBuildTaskTest"
 
         [<Test>]
-        member this.FunctionalTestMSBuildTask() = 
+        member __.FunctionalTestMSBuildTask() = 
             let projectFile = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
             let output = msbuildProject projectFile
 
             let expectedErrors =
-                [
-                    "not (a=b) can be refactored into a<>b"
-                    "not (a<>b) can be refactored into a=b"
-                    "fun x -> x can be refactored into id"
-                    "not true can be refactored into false"
-                    "not false can be refactored into true"
-                    "List.fold + 0 can be refactored into List.sum"
-                    "a<>true can be refactored into not a"
-                    "List.head (List.sort x) can be refactored into List.min x"
-                ]
+                [ "`not (a=b)` might be able to be refactored into `a<>b`."
+                  "`not (a<>b)` might be able to be refactored into `a=b`."
+                  "`fun x -> x` might be able to be refactored into `id`."
+                  "`not true` might be able to be refactored into `false`."
+                  "`not false` might be able to be refactored into `true`."
+                  "`List.fold ( + ) 0` might be able to be refactored into `List.sum`."
+                  "`a<>true` might be able to be refactored into `not a`."
+                  "`x=null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
+                  "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
 
             let allFound = List.forall (fun x -> output.Contains(x)) expectedErrors
 
