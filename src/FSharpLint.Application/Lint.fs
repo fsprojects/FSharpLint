@@ -25,9 +25,6 @@ module ConfigurationManagement =
 
     open System.IO
     open FSharpLint.Framework.Configuration
-
-    [<Literal>]
-    let SettingsFileName = "Settings.FSharpLint"
     
     /// Reason for the linter failing.
     type ConfigFailure =
@@ -337,12 +334,16 @@ module Lint =
                     FSharpVersion = System.Version(4, 0)
                 }
 
-            let isIgnoredFile = 
-                (Configuration.IgnoreFiles.shouldFileBeIgnored config.IgnoreFiles.Files) >> not
+            let isIgnoredFile filePath = 
+                match config.IgnoreFiles with
+                    | Some({ Files = ignoreFiles }) -> 
+                        Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles filePath
+                    | None -> 
+                        false
 
             let parsedFiles =
                 files
-                    |> List.filter isIgnoredFile
+                    |> List.filter (not << isIgnoredFile)
                     |> List.map (fun file -> ParseFile.parseFile file config)
                             
             let failedFiles = parsedFiles |> List.choose getFailedFiles

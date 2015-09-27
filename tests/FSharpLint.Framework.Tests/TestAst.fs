@@ -201,12 +201,11 @@ let dog = ()"""
 
         let stubConfig =
             {
-                UseTypeChecker = false
+                UseTypeChecker = Some(false)
                 IgnoreFiles =
-                    {
-                        Update = IgnoreFiles.Overwrite
-                        Files = []
-                    }
+                    Some({ Update = IgnoreFiles.Overwrite
+                           Files = []
+                           Content = "" })
                 Analysers = Map.ofList []
             }
 
@@ -221,10 +220,11 @@ let dog = ()"""
         let input = @"let x = [" + (String.concat "" [for _ in 0..5000 -> "0;"]) + "]"
 
         let stubConfig =
-            { UseTypeChecker = false
+            { UseTypeChecker = Some(false)
               IgnoreFiles =
-                { Update = IgnoreFiles.Overwrite
-                  Files = [] }
+                { IgnoreFiles.IgnoreFilesConfig.Update = IgnoreFiles.Overwrite
+                  IgnoreFiles.IgnoreFilesConfig.Files = []
+                  IgnoreFiles.IgnoreFilesConfig.Content = "" } |> Some
               Analysers = Map.ofList [] }
 
         match parseSource input stubConfig with
