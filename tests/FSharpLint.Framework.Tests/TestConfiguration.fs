@@ -264,9 +264,9 @@ type TestConfiguration() =
                   (["C:"; "Dog"; "Cat"], None) ] |> Map.ofList
               PathsAdded = [ ["C:"; "Dog"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath (@"C:\Dog\Goat".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs [ "C:"; "Dog"; "Goat" ]
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath (@"C:\Dog\Cat".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs [ "C:"; "Dog"; "Cat" ]
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
 
@@ -280,9 +280,9 @@ type TestConfiguration() =
                   (["C:"; "Dog"], None) ] |> Map.ofList
               PathsAdded = [ ["D:"; "Dog"]; ["C:"; "Dog"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath (@"C:\Dog".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs [ "C:"; "Dog" ]
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath (@"D:\Dog".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs [ "D:"; "Dog" ]
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
 
@@ -296,9 +296,9 @@ type TestConfiguration() =
                   (["C:"; "Dog"; "Goat"; "Cat"], None) ] |> Map.ofList
               PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
 
-        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs (normalisePath (@"C:\Dog\Goat".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs ["C:"; "Dog"; "Goat"]
 
-        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs (normalisePath (@"C:\Dog\Goat\Cat".ToPlatformIndependentPath()))
+        let loadedConfigs = Management.addPath (fun _ -> None) loadedConfigs ["C:"; "Dog"; "Goat"; "Cat" ]
 
         Assert.AreEqual(expectedLoadedConfigs, loadedConfigs)
 
@@ -313,7 +313,7 @@ type TestConfiguration() =
               PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
 
         let updatedLoadedConfigs = 
-            Management.removePath loadedConfigs (normalisePath (@"C:\Dog\Goat\Cat".ToPlatformIndependentPath()))
+            Management.removePath loadedConfigs [ "C:"; "Dog"; "Goat"; "Cat" ]
 
         let expectedLoadedConfigs = 
             { LoadedConfigs = 
@@ -325,7 +325,7 @@ type TestConfiguration() =
         Assert.AreEqual(expectedLoadedConfigs, updatedLoadedConfigs)
 
         let updatedLoadedConfigs = 
-            Management.removePath updatedLoadedConfigs (normalisePath (@"C:\Dog\Goat".ToPlatformIndependentPath()))
+            Management.removePath updatedLoadedConfigs [ "C:"; "Dog"; "Goat" ]
 
         let expectedLoadedConfigs = 
             { LoadedConfigs = [] |> Map.ofList
