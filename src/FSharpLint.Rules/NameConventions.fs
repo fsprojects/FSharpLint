@@ -25,7 +25,6 @@ module NameConventions =
     open System.Linq
     open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
@@ -344,7 +343,7 @@ module NameConventions =
 
                     Stop
                 else
-                    let getVisitorForChild i child =
+                    let getVisitorForChild _ child =
                         match child with
                             | Pattern(_) ->
                                 Some(bindingPatternVisitor visitorInfo checkFile valData)
@@ -353,7 +352,7 @@ module NameConventions =
 
                     ContinueWithVisitorsForChildren(getVisitorForChild)
             | AstNode.Match(SynMatchClause.Clause(_)) -> 
-                let getVisitorForChild i child =
+                let getVisitorForChild _ child =
                     match child with
                         | Pattern(_) ->
                             Some(matchClausePatternVisitor visitorInfo checkFile)
@@ -362,7 +361,7 @@ module NameConventions =
 
                 ContinueWithVisitorsForChildren(getVisitorForChild)
             | _ -> Continue
-    and matchClausePatternVisitor visitorInfo checkFile astNode = 
+    and matchClausePatternVisitor visitorInfo _ astNode = 
         match astNode.Node with
             | AstNode.Pattern(SynPat.Named(_, identifier, isThis, _, _)) when not isThis -> 
                 CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
@@ -381,7 +380,7 @@ module NameConventions =
             match astNode.Node with
                 | AstNode.Pattern(pattern) ->
                     match pattern with
-                        | SynPat.LongIdent(longIdentifier, identifier, _, _, _, _) -> 
+                        | SynPat.LongIdent(longIdentifier, _, _, _, _, _) -> 
                             let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
                             match identifierTypeFromValData valData with
@@ -413,4 +412,4 @@ module NameConventions =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

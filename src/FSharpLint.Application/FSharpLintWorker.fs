@@ -54,12 +54,12 @@ module FSharpLintWorker =
         interface FSharpLint.Worker.IFSharpLintWorker with
 
             [<CLIEvent>]
-            member this.ErrorReceived = errorReceivedEvent.Publish
+            member __.ErrorReceived = errorReceivedEvent.Publish
 
             [<CLIEvent>]
-            member this.ReportProgress = reportProgressEvent.Publish
+            member __.ReportProgress = reportProgressEvent.Publish
 
-            member this.RunLint(projectFile) =
+            member __.RunLint(projectFile) =
                 let failed resouce args = 
                     let formatString = FSharpLint.Framework.Resources.GetString resouce
                     System.String.Format(formatString, args) |> FSharpLint.Worker.Result.Failure

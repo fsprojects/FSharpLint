@@ -24,7 +24,6 @@ module FunctionReimplementation =
     
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
-    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
@@ -187,7 +186,7 @@ module FunctionReimplementation =
                     | _ -> None
             | [] -> 
                 match expression with
-                    | Identifier(ident, range) -> 
+                    | Identifier(ident, _) -> 
                         if visitorInfo.FSharpVersion.Major >= 4 || 
                            (not << isConstructor) expression then
                             Some(ident)
@@ -231,4 +230,4 @@ module FunctionReimplementation =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

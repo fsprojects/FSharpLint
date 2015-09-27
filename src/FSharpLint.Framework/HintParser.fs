@@ -525,16 +525,6 @@ module HintParser =
                 .>> skipString "|]"
                 |>> Expression.Array
 
-        let private plambdastart: Parser<Argument list, unit> = 
-            skipString "fun"
-                >>. spaces1
-                >>. plambdaarguments
-
-        let private plambdaend: Parser<Expression, unit> =
-            skipString "->" 
-                >>. spaces
-                >>. pexpression
-
         let plambda: Parser<Expression, unit> = 
             let plambdastart: Parser<Argument list, unit> = 
                 skipString "fun"

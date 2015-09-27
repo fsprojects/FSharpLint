@@ -23,7 +23,6 @@ module HintMatcher =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open FParsec
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.HintParser
@@ -303,7 +302,7 @@ module HintMatcher =
                     arguments.SubHint(opExpr, Expression.Identifier([op])) |> matchHintExpr &&
                     arguments.SubHint(rightExpr, right) |> matchHintExpr &&
                     arguments.SubHint(leftExpr, left) |> matchHintExpr
-                | SynExpr.App(_, _, infixExpr, rightExpr, _) as application, 
+                | SynExpr.App(_, _, infixExpr, rightExpr, _), 
                         Expression.InfixOperator(op, left, right) -> 
 
                     match removeParens infixExpr with
@@ -317,7 +316,7 @@ module HintMatcher =
 
         and private matchPrefixOperation arguments =
             match (arguments.Expression, arguments.Hint) with
-                | SynExpr.App(_, _, opExpr, rightExpr, _) as application, 
+                | SynExpr.App(_, _, opExpr, rightExpr, _), 
                         Expression.PrefixOperator(op, expr) -> 
                     arguments.SubHint(opExpr, Expression.Identifier(["~" + op])) |> matchHintExpr &&
                     arguments.SubHint(rightExpr, expr) |> matchHintExpr
@@ -462,7 +461,7 @@ module HintMatcher =
         | Constant.String(x) -> "\"" + x + "\""
         | Constant.UIntPtr(x) -> x.ToString()
         | Constant.IntPtr(x) -> x.ToString()
-        | Constant.UserNum(x, char) -> x.ToString()
+        | Constant.UserNum(x, _) -> x.ToString()
         | Constant.Unit -> "()"
 
     let private surroundExpressionsString hintToString left right sep expressions =
@@ -627,4 +626,4 @@ module HintMatcher =
               Visitor = Ast(visitor getHintsFromConfig) }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

@@ -62,12 +62,10 @@ module TestFakeTask =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestFakeTask() =
         [<SetUp>]
-        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintFakeTaskTest"
+        member __.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintFakeTaskTest"
 
         [<Test>]
-        member this.FunctionalTestFakeTask() = 
-            let projectFile = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
-
+        member __.FunctionalTestFakeTask() = 
             let output = runFake()
 
             let expectedErrors =

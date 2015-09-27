@@ -82,7 +82,7 @@ module Tests =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
         [<Test>]
-        member this.InvalidConfig() = 
+        member __.InvalidConfig() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
             System.IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
@@ -94,7 +94,7 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
+        member __.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesInvalidProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -111,7 +111,7 @@ module Tests =
             Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
-        member this.InvalidProjectFile() = 
+        member __.InvalidProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/invalidProjectFile.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -121,7 +121,7 @@ module Tests =
             Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.UnableToFindProjectFile() = 
+        member __.UnableToFindProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/iuniubi.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -131,7 +131,7 @@ module Tests =
             Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member this.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
+        member __.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
             let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesNonExistantProject.fsproj"
 
             let arguments = sprintf "-f %s" projectFile
@@ -148,7 +148,7 @@ module Tests =
             Assert.AreEqual(expectedErrors.Length, errors.Length)
 
         [<Test>]
-        member this.FunctionalTestConsoleApplication() = 
+        member __.FunctionalTestConsoleApplication() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
             let output = runConsoleApp arguments

@@ -21,8 +21,6 @@ namespace FSharpLint.Console
 module Program =
 
     open FSharpLint.Framework
-    open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.Configuration
     open FSharpLint.Application
 
     let private help () =

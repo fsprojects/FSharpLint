@@ -21,10 +21,7 @@ namespace FSharpLint.Rules
 module NestedStatements =
     
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
 
@@ -122,4 +119,4 @@ module NestedStatements =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

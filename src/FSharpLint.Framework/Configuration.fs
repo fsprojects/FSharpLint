@@ -101,11 +101,11 @@ module Configuration =
             let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) = 
                 globSeqs |> List.choose (function
                     | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
-                    | x -> None)
+                    | _ -> None)
 
             let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs = 
                 match remainingPath with
-                    | [currentSegment] when isDirectory -> false 
+                    | [_] when isDirectory -> false 
                     | currentSegment::remaining -> 
                         let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 
@@ -266,7 +266,7 @@ module Configuration =
         ]
             |> Map.ofList
 
-    let private overrideRuleSettings oldProperty newProperty = newProperty
+    let private overrideRuleSettings _ newProperty = newProperty
 
     let private overrideRule (oldRule:Rule) (newRule:Rule) : Rule =
         { 

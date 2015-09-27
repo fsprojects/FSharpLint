@@ -244,8 +244,8 @@ module Lint =
 
     let getFilesInProject projectFilePath =
         try
-            let x = FSharpProjectFileInfo.Parse(projectFilePath)
-            Success(FSharpProjectFileInfo.Parse(projectFilePath).CompileFiles)
+            let projectFileInfo = FSharpProjectFileInfo.Parse(projectFilePath)
+            Success(projectFileInfo.CompileFiles)
         with
             | :? Microsoft.Build.Exceptions.InvalidProjectFileException as e ->
                 Failure(MSBuildFailedToLoadProjectFile(projectFilePath, e))

@@ -21,7 +21,6 @@ namespace FSharpLint.Rules
 module Binding =
     
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
@@ -121,7 +120,7 @@ module Binding =
 
             let constructorString numberOfWildcards =
                 let constructorName = identifier |> String.concat "."
-                let arguments = [ for i in 1..numberOfWildcards -> "_" ] |> String.concat ", "
+                let arguments = Array.create numberOfWildcards "_" |> String.concat ", "
                 constructorName + "(" + arguments + ")"
 
             match pattern with
@@ -168,4 +167,4 @@ module Binding =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

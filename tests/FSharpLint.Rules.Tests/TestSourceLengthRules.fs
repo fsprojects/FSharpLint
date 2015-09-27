@@ -168,7 +168,7 @@ let config =
         ]
 
 let generateNewLines numNewLines =
-    [ for i in 1..numNewLines do yield "\n" ] |> String.concat ""
+    Array.create numNewLines "\n" |> String.concat ""
 
 [<TestFixture>]
 type TestSourceLengthRules() =

@@ -131,19 +131,19 @@ type TestNameConventionRules() =
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
 
     [<Test>]
-    member this.IsPascalCase() = 
+    member __.IsPascalCase() = 
         Assert.IsTrue(isPascalCase "DogInBin")
 
         Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
-    member this.IsCamelCase() = 
+    member __.IsCamelCase() = 
         Assert.IsTrue(isCamelCase "dogInBin")
 
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member this.ContainsUnderScore() = 
+    member __.ContainsUnderScore() = 
         Assert.IsTrue(containsUnderscore "dog_")
 
         Assert.IsTrue(containsUnderscore "_dog")

@@ -56,7 +56,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
                 }
             | None -> emptyConfig
 
-    member this.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion) = 
+    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion) = 
         let config =
             match overrideAnalysers with
                 | Some(overrideAnalysers) -> 
@@ -83,36 +83,36 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
                 visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
             | _ -> failwith "Failed to parse input."
 
-    member this.ErrorExistsAt(startLine, startColumn) =
+    member __.ErrorExistsAt(startLine, startColumn) =
         errorRanges
             |> Seq.exists (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
 
-    member this.ErrorsAt(startLine, startColumn) =
+    member __.ErrorsAt(startLine, startColumn) =
         errorRanges
             |> Seq.filter (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
 
-    member this.ErrorExistsOnLine(startLine) =
+    member __.ErrorExistsOnLine(startLine) =
         errorRanges
             |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
 
-    member this.NoErrorExistsOnLine(startLine) =
+    member __.NoErrorExistsOnLine(startLine) =
         errorRanges
             |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
             |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
-    member this.NoErrorsExist =
+    member __.NoErrorsExist =
         errorRanges
             |> Seq.isEmpty
 
-    member this.ErrorsExist =
+    member __.ErrorsExist =
         errorRanges
             |> Seq.isEmpty |> not
 
-    member this.ErrorMsg =
+    member __.ErrorMsg =
         match errorRanges with
         | xs when xs.Count = 0 -> "No errors"
-        | _ as errRng ->
+        | _ ->
             errorRanges
                 |> Seq.map (fun (r, err) -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
                     r.StartRange.StartLine r.StartColumn r.EndRange.EndLine r.EndRange.EndColumn err ))
@@ -122,9 +122,9 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         this.ErrorsAt(startLine, startColumn)
             |> Seq.exists (fun (_, e) -> e = message)
 
-    member this.ErrorWithMessageExists(message) =
+    member __.ErrorWithMessageExists(message) =
         errorRanges |> Seq.exists (fun (_, e) -> e = message)
 
     [<SetUp>]
-    member this.SetUp() =
+    member __.SetUp() =
         errorRanges.Clear()

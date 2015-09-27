@@ -24,7 +24,6 @@ module Ast =
 
     open System
     open System.Collections.Generic
-    open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -170,7 +169,7 @@ module Ast =
                     yield ComponentInfo(componentInfo)
                     yield TypeRepresentation(typeRepresentation)
                     for x in members do yield MemberDefinition(x)
-                | TypeRepresentation(ObjectModel(typeKind, members, _)) ->
+                | TypeRepresentation(ObjectModel(_, members, _)) ->
                     for x in members do yield MemberDefinition(x)
                 | TypeRepresentation(Simple(typeSimpleRepresentation, _)) ->
                     yield TypeSimpleRepresentation(typeSimpleRepresentation)
@@ -217,7 +216,7 @@ module Ast =
                     yield Expression(expression1)
                 | MemberDefinition(SynMemberDefn.Member(binding, _)) ->
                     yield Binding(binding)
-                | MemberDefinition(SynMemberDefn.ImplicitCtor(_, attributes, patterns, identifier, _)) ->
+                | MemberDefinition(SynMemberDefn.ImplicitCtor(_, _, patterns, _, _)) ->
                     for x in patterns do yield SimplePattern(x)
                 | MemberDefinition(SynMemberDefn.ImplicitInherit(synType, expression, _, _)) ->
                     yield Type(synType)
@@ -276,11 +275,11 @@ module Ast =
                 | Expression(SynExpr.Tuple(expressions, _, _))
                 | Expression(SynExpr.ArrayOrList(_, expressions, _)) ->
                     for x in expressions do yield Expression(x)
-                | Expression(SynExpr.Record(synType, expression, _, _)) ->
+                | Expression(SynExpr.Record(_, expression, _, _)) ->
                     match expression with
                         | Some(e, _) -> yield Expression(e)
                         | None -> ()
-                | Expression(SynExpr.ObjExpr(synType, expressionAndIdentifier, bindings, interfaces, _, _)) ->
+                | Expression(SynExpr.ObjExpr(synType, _, bindings, _, _, _)) ->
                     yield Type(synType)
                     for x in bindings do yield Binding(x)
                 | Expression(SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _))
@@ -339,7 +338,7 @@ module Ast =
                 | SimplePattern(SynSimplePat.Typed(simplePattern, synType, _)) ->
                     yield SimplePattern(simplePattern)
                     yield Type(synType)
-                | SimplePattern(SynSimplePat.Attrib(simplePattern, attributes, _)) ->
+                | SimplePattern(SynSimplePat.Attrib(simplePattern, _, _)) ->
                     yield SimplePattern(simplePattern)
                 | SimplePatterns(SynSimplePats.SimplePats(simplePatterns, _)) ->
                     for x in simplePatterns do yield SimplePattern(x)

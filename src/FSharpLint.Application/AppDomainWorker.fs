@@ -42,8 +42,6 @@ module AppDomainWorker =
 
         let cancelToken = new Threading.CancellationTokenSource()
 
-        let taskCompletionSource = Threading.Tasks.TaskCompletionSource<bool>()
-
         [<DefaultValue>] val mutable Options : LintOptions
 
         let getAppDomain () =
@@ -89,11 +87,11 @@ module AppDomainWorker =
                 AppDomain.Unload(appDomain)
 
         [<Runtime.Remoting.Messaging.OneWay>]
-        member this.ReportError(error:Error) =
+        member __.ReportError(error:Error) =
             reportsReceived.Add(error)
 
         [<Runtime.Remoting.Messaging.OneWay>]
-        member this.ReportProgress(progress:Progress) =
+        member __.ReportProgress(progress:Progress) =
             reportsReceived.Add(progress)
 
         interface IDisposable with
@@ -121,7 +119,7 @@ module AppDomainWorker =
                         |> this.PassReportToOptionsCallback
                 with _ -> ()
 
-        member private this.Dispose(disposing) =
+        member private __.Dispose(disposing) =
             if disposing then
                 reportsReceived.Dispose()
                 cancelToken.Dispose()

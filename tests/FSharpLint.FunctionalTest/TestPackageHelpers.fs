@@ -21,7 +21,6 @@ namespace FSharpLint.FunctionalTest
 module TestPackageHelper =
 
     open System.IO
-    open NUnit.Framework
 
     let getPath (path:string) = path.Replace('/', Path.DirectorySeparatorChar)
 

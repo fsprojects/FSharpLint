@@ -22,8 +22,6 @@ namespace FSharpLint.Rules
 module NumberOfItems =
     
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -119,7 +117,7 @@ module NumberOfItems =
                     countBooleanOperators (total + 1) expr
                 else
                     countBooleanOperators total expr
-            | SynExpr.App(_, _, expr, expr2, _) as application ->
+            | SynExpr.App(_, _, expr, expr2, _) ->
                 total + countBooleanOperators 0 expr + countBooleanOperators 0 expr2
             | SynExpr.Paren(expr, _, _, _) ->
                 countBooleanOperators total expr
@@ -136,7 +134,7 @@ module NumberOfItems =
         maxItemsForRule visitorInfo.Config astNode "MaxNumberOfBooleanOperatorsInCondition"
             |> Option.iter checkNumberOfBooleanOperatorsInCondition
     
-    let visitor visitorInfo checkFile astNode = 
+    let visitor visitorInfo _ astNode = 
         match astNode.Node with
             | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
                 validateFunction constructorArguments visitorInfo astNode
@@ -166,4 +164,4 @@ module NumberOfItems =
             }
 
         interface IRegisterPlugin with
-            member this.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin with get() = plugin

@@ -18,10 +18,8 @@
 
 module TestHintMatcher
 
-open System.Linq
 open NUnit.Framework
 open FParsec
-open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.HintMatcher

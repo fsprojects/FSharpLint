@@ -21,7 +21,6 @@ namespace FSharpLint.Framework
 module AstInfo =
 
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open Ast
     
     let isPublic path =

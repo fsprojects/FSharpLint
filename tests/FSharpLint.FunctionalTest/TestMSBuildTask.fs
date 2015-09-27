@@ -20,7 +20,6 @@ namespace FSharpLint.FunctionalTest
 
 module TestMSBuildTask =
 
-    open System.IO
     open NUnit.Framework
 
     let msbuildProject projectFile =
@@ -43,10 +42,10 @@ module TestMSBuildTask =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestMSBuildTask() =
         [<SetUp>]
-        member this.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintMSBuildTaskTest"
+        member __.CopyFSharpLintTaskFiles() = TestPackageHelper.copyFSharpLintTaskFiles "FSharpLintMSBuildTaskTest"
 
         [<Test>]
-        member this.FunctionalTestMSBuildTask() = 
+        member __.FunctionalTestMSBuildTask() = 
             let projectFile = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
             let output = msbuildProject projectFile

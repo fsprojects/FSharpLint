@@ -28,7 +28,7 @@ type System.String with
 [<TestFixture>]
 type TestConfiguration() =
     [<Test>]
-    member self.``Ignore all files ignores any given file.``() = 
+    member __.``Ignore all files ignores any given file.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "*"
@@ -40,7 +40,7 @@ type TestConfiguration() =
             |> Assert.IsTrue
 
     [<Test>]
-    member self.``Ignoring a file name not inside a path does not ignore the path``() = 
+    member __.``Ignoring a file name not inside a path does not ignore the path``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "cat"
@@ -52,7 +52,7 @@ type TestConfiguration() =
             |> Assert.IsFalse
 
     [<Test>]
-    member self.``Ignoring a file doesn't ignore a directory.``() = 
+    member __.``Ignoring a file doesn't ignore a directory.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "dog"
@@ -64,7 +64,7 @@ type TestConfiguration() =
             |> Assert.IsFalse
             
     [<Test>]
-    member self.``Ignoring a directory doesn't ignore a file.``() = 
+    member __.``Ignoring a directory doesn't ignore a file.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "source.fs/"
@@ -76,7 +76,7 @@ type TestConfiguration() =
             |> Assert.IsFalse
 
     [<Test>]
-    member self.``Ignoring all files in a given directory ignores a given file from the directory.``() = 
+    member __.``Ignoring all files in a given directory ignores a given file from the directory.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "dog/*"
@@ -88,7 +88,7 @@ type TestConfiguration() =
             |> Assert.IsTrue
 
     [<Test>]
-    member self.``Ignoring a file that does not exist inside a directory that does exist does not ignore the file.``() = 
+    member __.``Ignoring a file that does not exist inside a directory that does exist does not ignore the file.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "dog/source1"
@@ -100,7 +100,7 @@ type TestConfiguration() =
             |> Assert.IsFalse
 
     [<Test>]
-    member self.``Ignoring the contents of a directory and then negating a specific file ignores all files other than the negated file.``() = 
+    member __.``Ignoring the contents of a directory and then negating a specific file ignores all files other than the negated file.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "dog/*"
@@ -118,7 +118,7 @@ type TestConfiguration() =
             |> Assert.IsTrue
 
     [<Test>]
-    member self.``Ingoring a file that was previously negated ignores the file.``() = 
+    member __.``Ingoring a file that was previously negated ignores the file.``() = 
         let ignorePaths =
             [
                 IgnoreFiles.parseIgnorePath "dog/*"
@@ -132,7 +132,7 @@ type TestConfiguration() =
             |> Assert.IsTrue
 
     [<Test>]
-    member self.OverwriteMap() = 
+    member __.OverwriteMap() = 
         let mapToBeOverwrited = [ (1,"1"); (2,"2"); (3,"3"); (4,"5") ] |> Map.ofList
 
         let map = [ (2,"5"); (4,"1");  ] |> Map.ofList
