@@ -165,8 +165,8 @@ Target "CreateApiPackage" (fun _ ->
         "FSharpLint.Core.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.5/"
-#r @"tools/FSharpLint.0.2.5/FSharpLint.FAKE.dll"
+#I @"tools/FSharpLint.0.2.7/"
+#r @"tools/FSharpLint.0.2.7/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->
