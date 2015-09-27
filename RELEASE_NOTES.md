@@ -1,3 +1,17 @@
+##### 0.2.7 - September 27 2015
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/126
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/125
+* Added feature - now able to write a message as a suggestion in hints: https://github.com/fsprojects/FSharpLint/issues/117
+* Added feature - nulls can now be matched against in hints: https://github.com/fsprojects/FSharpLint/commit/89050c3bc6020477b3b9d50a4ce541aa09b9a270
+* Fixed bug - lambda length warnings would be repeated for each argument: https://github.com/fsprojects/FSharpLint/commit/bc49dd6d58ebbbe8f2cdb4857e011fcaf14d9982
+* Enhancement - display operators as symbols in eta reduction suggestions: https://github.com/fsprojects/FSharpLint/commit/1b2f115e71b560ccf8019ef5f14df79f0fd62201
+* Enhancement - updated warning messages: https://github.com/fsprojects/FSharpLint/commit/49e579ca35de70902def6bb30835593140be7abd
+* Partially fixed bug (fixed when type checking enabled): https://github.com/fsprojects/FSharpLint/issues/113
+* Partially fixed bug (fixed when type checking enabled): https://github.com/fsprojects/FSharpLint/issues/109
+* Configuration can now be written back to XML.
+* Configuration API updated to provide management of configuration files.
+
 ##### 0.2.6 - July 18 2015
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/108
