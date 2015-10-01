@@ -169,6 +169,20 @@ module HintMatcher =
 
             removeMatchClauses 0
 
+        let private (|PossiblyInMethod|PossiblyInConstructor|NotInMethod|) breadcrumbs =
+            let (|PossiblyMethodCallOrConstructor|_|) = function
+                | SynExpr.App(_, false, _, _, _) -> Some()
+                | _ -> None
+
+            match breadcrumbs with
+            | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.New(_))::_
+            | _::AstNode.Expression(SynExpr.New(_))::_ ->
+                PossiblyInConstructor
+            | _::AstNode.Expression(PossiblyMethodCallOrConstructor)::_
+            | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
+                PossiblyInMethod
+            | _ -> NotInMethod
+
         /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
         /// or a named parameter in a method call.
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
@@ -177,7 +191,10 @@ module HintMatcher =
                 match arguments.FSharpCheckFileResults with
                 | Some(checkFile) ->
                     let symbolUse = 
-                        checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                        checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, 
+                                                         ident.idRange.EndColumn, 
+                                                         "", 
+                                                         [ident.idText])
                         |> Async.RunSynchronously
                                     
                     match symbolUse with
@@ -190,10 +207,8 @@ module HintMatcher =
                 | None -> 
                     /// Check if in `new` expr or function application (either could be a constructor).
                     match arguments.Breadcrumbs with
-                    | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.New(_))::_
-                    | _::AstNode.Expression(SynExpr.New(_))::_
-                    | _::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, _, _, _))::_
-                    | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, false, _, _, _))::_ -> 
+                    | PossiblyInMethod 
+                    | PossiblyInConstructor -> 
                         false
                     | _ -> true
             | _ -> true

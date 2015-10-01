@@ -492,6 +492,23 @@ Bar.SomeMethod(woof = 5, foo = true)""", config)
 
         Assert.IsFalse(this.ErrorsExist)
 
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/128
+    [<Test>]
+    member this.``Named parameters in non-atomic method call must not be treated as infix operations.``() = 
+        let config = generateHintConfig ["x = false ===> not x"]
+        
+        this.Parse("""
+module Goat
+
+do
+    let parser = UnionArgParser.Create<'T>()
+    let results = 
+        parser.Parse
+            (inputs = args, raiseOnUsage = false, ignoreMissing = true, 
+             errorHandler = ProcessExiter())""", config)
+
+        Assert.IsFalse(this.ErrorsExist)
+
     [<Test>]
     member this.``Named parameter in object method call with more than one arg should not be treated as infix operation``() = 
         let config = generateHintConfig ["x = true ===> x"]
