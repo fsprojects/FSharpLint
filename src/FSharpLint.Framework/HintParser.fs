@@ -19,7 +19,7 @@
 namespace FSharpLint.Framework
 
 open FParsec
-open Microsoft.FSharp.Compiler.Lexhelp
+open Microsoft.FSharp.Compiler.SourceCodeServices
 
 module HintParser =
 
@@ -118,7 +118,7 @@ module HintParser =
             >>= fun ident -> 
                 let identStr = System.String.Join("", ident)
 
-                let isKeyword = List.exists ((=) identStr) Keywords.keywordNames
+                let isKeyword = List.exists ((=) identStr) PrettyNaming.KeywordNames
 
                 if isKeyword then fail (sprintf "Unexpected keyword %s" identStr)
                 else preturn ident
