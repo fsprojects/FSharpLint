@@ -91,44 +91,46 @@ module FunctionReimplementation =
     let rec expressionReferencesIdentifier (ident:Ident) expression =
         let rec expressionReferencesIdentifier isFound expr = 
             match (isFound, expr) with
-                | NotFound, Expression(SynExpr.Ident(exprIdent)) when exprIdent.idText = ident.idText ->
+            | NotFound, Expression(SynExpr.Ident(exprIdent))
+            | NotFound, Expression(SynExpr.LongIdent(_, LongIdentWithDots.LongIdentWithDots(exprIdent::_, _), _, _))
+                    when exprIdent.idText = ident.idText ->
+                Found
+            | NotFound, Expression(SynExpr.Lambda(_) as lambda) when lambdaArgumentsShadowIdent ident lambda -> 
+                NotFound
+            | NotFound, Expression(SynExpr.LetOrUseBang(_, _, _, pattern, expression, bodyExpr, _))
+            | NotFound, Expression(SynExpr.LetOrUse(_, _, [SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)], bodyExpr, _)) -> 
+                match expressionReferencesIdentifier NotFound (Expression(expression)) with
+                | Found -> 
                     Found
-                | NotFound, Expression(SynExpr.Lambda(_) as lambda) when lambdaArgumentsShadowIdent ident lambda -> 
-                    NotFound
-                | NotFound, Expression(SynExpr.LetOrUseBang(_, _, _, pattern, expression, bodyExpr, _))
-                | NotFound, Expression(SynExpr.LetOrUse(_, _, [SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)], bodyExpr, _)) -> 
-                    match expressionReferencesIdentifier NotFound (Expression(expression)) with
-                        | Found -> 
-                            Found
-                        | NotFound | Shadowed when patternShadowsIdentifier ident (Pattern(pattern)) -> 
-                            Shadowed
-                        | _ -> 
-                            match expressionReferencesIdentifier NotFound (Expression(bodyExpr)) with
-                                | Shadowed -> NotFound
-                                | isFound -> isFound
-                | NotFound, Expression(SynExpr.For(_, iteratorIdent, startExpr, _, finishExpr, _, _)) when iteratorIdent.idText = ident.idText -> 
-                    match expressionReferencesIdentifier NotFound (Expression(startExpr)) with
-                        | Found -> 
-                            Found
-                        | _ -> 
-                            match expressionReferencesIdentifier NotFound (Expression(finishExpr)) with
-                                | Found -> Found
-                                | _ -> NotFound
-                | NotFound, Expression(SynExpr.ForEach(_, _, _, pattern, expr, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
-                    match expressionReferencesIdentifier NotFound (Expression(expr)) with
-                        | Found -> Found
-                        | _ -> NotFound
-                | NotFound, Match(SynMatchClause.Clause(pattern, _, _, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
-                    NotFound
-                | NotFound, expr ->
-                    match expr |> traverseNode |> List.fold expressionReferencesIdentifier NotFound with
-                        | Shadowed -> NotFound
-                        | isFound -> isFound
-                | (isFound, _) -> isFound
+                | NotFound | Shadowed when patternShadowsIdentifier ident (Pattern(pattern)) -> 
+                    Shadowed
+                | _ -> 
+                    match expressionReferencesIdentifier NotFound (Expression(bodyExpr)) with
+                    | Shadowed -> NotFound
+                    | isFound -> isFound
+            | NotFound, Expression(SynExpr.For(_, iteratorIdent, startExpr, _, finishExpr, _, _)) when iteratorIdent.idText = ident.idText -> 
+                match expressionReferencesIdentifier NotFound (Expression(startExpr)) with
+                | Found -> 
+                    Found
+                | _ -> 
+                    match expressionReferencesIdentifier NotFound (Expression(finishExpr)) with
+                    | Found -> Found
+                    | _ -> NotFound
+            | NotFound, Expression(SynExpr.ForEach(_, _, _, pattern, expr, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
+                match expressionReferencesIdentifier NotFound (Expression(expr)) with
+                | Found -> Found
+                | _ -> NotFound
+            | NotFound, Match(SynMatchClause.Clause(pattern, _, _, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
+                NotFound
+            | NotFound, expr ->
+                match expr |> traverseNode |> List.fold expressionReferencesIdentifier NotFound with
+                | Shadowed -> NotFound
+                | isFound -> isFound
+            | (isFound, _) -> isFound
 
         match expression |> Expression |> expressionReferencesIdentifier NotFound with
-            | Found -> true
-            | NotFound | Shadowed -> false
+        | Found -> true
+        | NotFound | Shadowed -> false
 
     let validateLambdaCannotBeReplacedWithComposition parameters expression range visitorInfo =
         let canBeReplacedWithFunctionComposition expression = 
@@ -142,25 +144,24 @@ module FunctionReimplementation =
 
                     List.isEmpty appliedValues |> not &&
                     removeLastElement appliedValues
-                         |> List.forall lambdaArgumentNotReferenced
+                    |> List.forall lambdaArgumentNotReferenced
 
                 match ExpressionUtilities.flattenFunctionApplication expression with
-                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
-                            when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
+                | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
+                        when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
 
-                        match getLastElement appliedValues with
-                            | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
-                                lastArgument.idText = lambdaArgument.idText
-                            | SynExpr.App(_) as nextFunction ->
-                                lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
-                            | _ -> 
-                                false
+                    match getLastElement appliedValues with
+                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                        lastArgument.idText = lambdaArgument.idText
+                    | SynExpr.App(_) as nextFunction ->
+                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
                     | _ -> false
+                | _ -> false
 
             match parameters with
-                | [singleParameter] -> 
-                    lambdaArgumentIsLastApplicationInFunctionCalls expression singleParameter 1
-                | _ -> false
+            | [singleParameter] -> 
+                lambdaArgumentIsLastApplicationInFunctionCalls expression singleParameter 1
+            | _ -> false
             
         if canBeReplacedWithFunctionComposition expression then
             Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
@@ -170,29 +171,29 @@ module FunctionReimplementation =
             let symbol = getSymbolFromIdent checkFile expr
 
             match symbol with
-                | Some(symbol) -> 
-                    match symbol.Symbol with 
-                    | s when s.DisplayName = ".ctor" -> true
-                    | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
-                    | _ -> false
-                | Some(_) | None -> false
+            | Some(symbol) -> 
+                match symbol.Symbol with 
+                | s when s.DisplayName = ".ctor" -> true
+                | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
+                | _ -> false
+            | Some(_) | None -> false
         
         let rec isFunctionPointless expression = function
             | (parameter:Ident) :: parameters ->
                 match expression with
-                    | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
-                        when identifier.idText = parameter.idText ->
-                            isFunctionPointless expression parameters
-                    | _ -> None
+                | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
+                    when identifier.idText = parameter.idText ->
+                        isFunctionPointless expression parameters
+                | _ -> None
             | [] -> 
                 match expression with
-                    | Identifier(ident, _) -> 
-                        if visitorInfo.FSharpVersion.Major >= 4 || 
-                           (not << isConstructor) expression then
-                            Some(ident)
-                        else
-                            None
-                    | _ -> None
+                | Identifier(ident, _) -> 
+                    if visitorInfo.FSharpVersion.Major >= 4 || 
+                       (not << isConstructor) expression then
+                        Some(ident)
+                    else
+                        None
+                | _ -> None
 
         isFunctionPointless expression parameters 
             |> Option.iter (fun identifier ->
@@ -207,27 +208,25 @@ module FunctionReimplementation =
     
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
-            | AstNode.Expression(SynExpr.Lambda(_) as lambda) ->
-                let (parameters, expression) = getLambdaParametersAndExpression lambda
+        | AstNode.Expression(SynExpr.Lambda(_) as lambda) ->
+            let (parameters, expression) = getLambdaParametersAndExpression lambda
 
-                if (not << List.isEmpty) parameters then
-                    if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
-                        && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
-                        validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
+            if (not << List.isEmpty) parameters then
+                if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
+                    && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
+                    validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
                     
-                    if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
-                            && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
-                        validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
-            | _ -> ()
+                if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
+                        && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
+                    validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
+        | _ -> ()
 
         Continue
 
     type RegisterFunctionReimplementationVisitor() = 
         let plugin =
-            {
-                Name = AnalyserName
-                Visitor = Ast(visitor)
-            }
+            { Name = AnalyserName
+              Visitor = Ast(visitor) }
 
         interface IRegisterPlugin with
-            member __.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin = plugin

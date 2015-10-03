@@ -25,32 +25,16 @@ open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [
-                            ("CanBeReplacedWithComposition", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("ReimplementsFunction", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                        ]
-                    Settings = Map.ofList 
-                        [ 
-                            ("Enabled", Enabled(true))
-                        ]
-                })
-            ]
+        [ (AnalyserName, 
+            { Rules = Map.ofList 
+                [ ("CanBeReplacedWithComposition", 
+                    { Settings = Map.ofList 
+                        [ ("Enabled", Enabled(true)) ] }) 
+                  ("ReimplementsFunction", 
+                    { Settings = Map.ofList 
+                        [ ("Enabled", Enabled(true)) ] }) ]
+              Settings = Map.ofList 
+                [ ("Enabled", Enabled(true)) ] }) ]
 
 [<TestFixture>]
 type TestFunctionReimplementationRules() =
@@ -153,7 +137,7 @@ module Program
 let f = fun a b -> a * b
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaReimplementingMultiplcationIssuesErrorSuppressedWithRuleName() = 
@@ -164,7 +148,7 @@ module Program
 let f = fun a b -> a * b
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() = 
@@ -174,7 +158,7 @@ module Program
 let f = fun a b -> a * 1
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaReimplementingCeilingFunctionIssuesError() = 
@@ -205,7 +189,7 @@ module Program
 let f = fun x -> tan(cos(tan x))
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
@@ -237,7 +221,7 @@ let y = 0
 let f = fun x -> tan y x |> cos x |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError4() = 
@@ -248,7 +232,7 @@ let y = 0
 let f = fun x -> tan x x |> cos y |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError5() = 
@@ -259,7 +243,7 @@ let y = 0
 let f = fun x -> tan y x |> cos (fun _ -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError6() = 
@@ -312,7 +296,7 @@ let f = fun x ->
                         y) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError10() = 
@@ -327,7 +311,7 @@ let f = fun x ->
                         x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError11() = 
@@ -340,7 +324,7 @@ let f = fun x ->
         |> cos (function | y -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError12() = 
@@ -366,7 +350,7 @@ let f = fun x ->
         |> cos (fun _ -> match x with | _ -> 0) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError14() = 
@@ -379,7 +363,7 @@ let f = fun x ->
         |> cos (fun _ -> match y with | _ -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError15() = 
@@ -405,7 +389,7 @@ let f = fun x ->
         |> cos (fun _ -> for y = 0 to 10 do ignore x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError17() = 
@@ -431,7 +415,7 @@ let f = fun x ->
         |> cos (fun _ -> for y = 0 to x do ()) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaWithUnitParameterDoesNotIssueError() = 
@@ -443,7 +427,7 @@ let x = 6
 let f = fun () -> ceil x
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(6, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LambdaWithWildcardParameterDoesNotIssueError() = 
@@ -455,7 +439,7 @@ let x = 6
 let f = fun _ -> ceil x
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(6, 8))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.MultiplcationLambdaWithWildcardParameterDoesNotIssueError() = 
@@ -467,4 +451,17 @@ let x = 6
 let f = fun a b _ -> a * b
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(6, 8))
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/130
+    [<Test>]
+    member this.``No suggestion should be given for function composition when the lambda's parameter's property/field is accessed``() = 
+        this.Parse """
+module Program
+
+let x = 6
+
+let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
+"""
+
+        Assert.IsFalse(this.ErrorsExist)

@@ -61,19 +61,19 @@ module ExpressionUtilities =
         let rec flattenFunctionApplication exprs = function
             | SynExpr.App(_, _, x, y, _) -> 
                 match removeParens x with
-                    | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) ->
-                        let opIdent = identAsDecompiledOpName op
+                | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) ->
+                    let opIdent = identAsDecompiledOpName op
 
-                        if isForwardPipeOperator opIdent then
-                            let flattened = flattenFunctionApplication [] y
-                            flattened@[rightExpr]
-                        else if isBackwardPipeOperator opIdent then
-                            let flattened = flattenFunctionApplication [] rightExpr
-                            flattened@[y]
-                        else
-                            flattenFunctionApplication (removeParens y::exprs) (removeParens x)
-                    | _ -> 
+                    if isForwardPipeOperator opIdent then
+                        let flattened = flattenFunctionApplication [] y
+                        flattened@[rightExpr]
+                    else if isBackwardPipeOperator opIdent then
+                        let flattened = flattenFunctionApplication [] rightExpr
+                        flattened@[y]
+                    else
                         flattenFunctionApplication (removeParens y::exprs) (removeParens x)
+                | _ -> 
+                    flattenFunctionApplication (removeParens y::exprs) (removeParens x)
             | x -> 
                 x::exprs
 
