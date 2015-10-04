@@ -24,17 +24,14 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
 let config = 
+    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
+
     Map.ofList 
         [ (AnalyserName, 
             { Rules = Map.ofList 
-                [ ("CanBeReplacedWithComposition", 
-                    { Settings = Map.ofList 
-                        [ ("Enabled", Enabled(true)) ] }) 
-                  ("ReimplementsFunction", 
-                    { Settings = Map.ofList 
-                        [ ("Enabled", Enabled(true)) ] }) ]
-              Settings = Map.ofList 
-                [ ("Enabled", Enabled(true)) ] }) ]
+                [ ("CanBeReplacedWithComposition", ruleEnabled) 
+                  ("ReimplementsFunction", ruleEnabled) ]
+              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
 
 [<TestFixture>]
 type TestFunctionReimplementationRules() =

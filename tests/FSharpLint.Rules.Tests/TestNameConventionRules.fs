@@ -24,107 +24,25 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
 let config = 
+    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
+
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [ 
-                            ("IdentifiersMustNotContainUnderscores", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("InterfaceNamesMustBeginWithI", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("ExceptionNamesMustEndWithException", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("TypeNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("ParameterMustBeCamelCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("RecordFieldNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("EnumCasesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("ModuleNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("LiteralNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("NamespaceNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("MemberNamesMustBePascalCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("PublicValuesPascalOrCamelCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                            ("NonPublicValuesCamelCase", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                        ] 
-                                }) 
-                        ] 
-                    Settings = Map.ofList []
-                }) 
-        ]
+        [ (AnalyserName, 
+            { Rules = Map.ofList 
+                [ ("IdentifiersMustNotContainUnderscores", ruleEnabled) 
+                  ("InterfaceNamesMustBeginWithI", ruleEnabled) 
+                  ("ExceptionNamesMustEndWithException", ruleEnabled) 
+                  ("TypeNamesMustBePascalCase", ruleEnabled) 
+                  ("ParameterMustBeCamelCase", ruleEnabled) 
+                  ("RecordFieldNamesMustBePascalCase", ruleEnabled) 
+                  ("EnumCasesMustBePascalCase", ruleEnabled) 
+                  ("ModuleNamesMustBePascalCase", ruleEnabled) 
+                  ("LiteralNamesMustBePascalCase", ruleEnabled) 
+                  ("NamespaceNamesMustBePascalCase", ruleEnabled) 
+                  ("MemberNamesMustBePascalCase", ruleEnabled) 
+                  ("PublicValuesPascalOrCamelCase", ruleEnabled) 
+                  ("NonPublicValuesCamelCase", ruleEnabled) ] 
+              Settings = Map.ofList [] }) ]
 
 [<TestFixture>]
 type TestNameConventionRules() =

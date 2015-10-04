@@ -24,49 +24,18 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
 let config = 
+    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
+
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [
-                            ("FailwithWithSingleArgument", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("RaiseWithSingleArgument", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("NullArgWithSingleArgument", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("InvalidOpWithSingleArgument", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("InvalidArgWithTwoArguments", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("FailwithfWithArgumentsMatchingFormatString", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                        ]
-                    Settings = Map.ofList 
-                        [
-                            ("Enabled", Enabled(true))
-                        ]
-                }) 
-        ]
+        [ (AnalyserName, 
+            { Rules = Map.ofList 
+                [ ("FailwithWithSingleArgument", ruleEnabled) 
+                  ("RaiseWithSingleArgument", ruleEnabled) 
+                  ("NullArgWithSingleArgument", ruleEnabled) 
+                  ("InvalidOpWithSingleArgument", ruleEnabled) 
+                  ("InvalidArgWithTwoArguments", ruleEnabled) 
+                  ("FailwithfWithArgumentsMatchingFormatString", ruleEnabled) ]
+              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
 
 [<TestFixture>]
 type TestRaiseWithTooManyArgumentsRules() =

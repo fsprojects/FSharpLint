@@ -22,6 +22,7 @@ module Binding =
     
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -33,11 +34,9 @@ module Binding =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
     type VisitorParameters =
-        {
-            VisitorInfo: VisitorInfo
-            CheckFile: FSharpCheckFileResults option
-            AstNode: CurrentNode
-        }
+        { VisitorInfo: VisitorInfo
+          CheckFile: FSharpCheckFileResults option
+          AstNode: CurrentNode }
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
     let checkForBindingToAWildcard visitorParameters pattern range =
@@ -54,7 +53,7 @@ module Binding =
             if findWildAndIgnoreParens pattern then
                 visitorParameters.VisitorInfo.PostError 
                     range 
-                    (FSharpLint.Framework.Resources.GetString("RulesFavourIgnoreOverLetWildError"))
+                    (Resources.GetString("RulesFavourIgnoreOverLetWildError"))
 
     let checkForWildcardNamedWithAsPattern visitorParameters pattern =
         let isEnabled =
@@ -63,11 +62,11 @@ module Binding =
 
         if isEnabled then
             match pattern with
-                | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
-                    visitorParameters.VisitorInfo.PostError 
-                        range 
-                        (FSharpLint.Framework.Resources.GetString("RulesWildcardNamedWithAsPattern"))
-                | _ -> ()
+            | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
+                visitorParameters.VisitorInfo.PostError 
+                    range 
+                    (Resources.GetString("RulesWildcardNamedWithAsPattern"))
+            | _ -> ()
 
     let checkForUselessBinding visitorParameters pattern expr range =
         let isEnabled =
@@ -75,37 +74,37 @@ module Binding =
             visitorParameters.AstNode.IsSuppressed(AnalyserName, "UselessBinding") |> not
             
         match visitorParameters.CheckFile with
-            | Some(checkFile) when isEnabled ->
-                let rec findBindingIdentifier = function
-                    | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
-                    | SynPat.Named(_, ident, _, _, _) -> Some(ident)
-                    | _ -> None
+        | Some(checkFile) when isEnabled ->
+            let rec findBindingIdentifier = function
+                | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
+                | SynPat.Named(_, ident, _, _, _) -> Some(ident)
+                | _ -> None
 
-                let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
-                    | SynExpr.Paren(expr, _, _, _) -> 
-                        exprIdentMatchesBindingIdent bindingIdent expr
-                    | SynExpr.Ident(ident) ->
-                        let isSymbolMutable (ident:Ident) =
-                            let symbol =
-                                checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                                    |> Async.RunSynchronously
+            let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
+                | SynExpr.Paren(expr, _, _, _) -> 
+                    exprIdentMatchesBindingIdent bindingIdent expr
+                | SynExpr.Ident(ident) ->
+                    let isSymbolMutable (ident:Ident) =
+                        let symbol =
+                            checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                            |> Async.RunSynchronously
 
-                            let isMutable (symbol:FSharpSymbolUse) = 
-                                match symbol.Symbol with
-                                | :? FSharpMemberOrFunctionOrValue as v -> v.IsMutable
-                                | _ -> false
+                        let isMutable (symbol:FSharpSymbolUse) = 
+                            match symbol.Symbol with
+                            | :? FSharpMemberOrFunctionOrValue as v -> v.IsMutable
+                            | _ -> false
 
-                            symbol |> Option.exists isMutable
+                        symbol |> Option.exists isMutable
 
-                        ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
-                    | _ -> false
+                    ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
+                | _ -> false
 
-                findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
-                    if exprIdentMatchesBindingIdent bindingIdent expr then
-                        visitorParameters.VisitorInfo.PostError 
-                            range 
-                            (FSharpLint.Framework.Resources.GetString("RulesUselessBindingError")))
-             | _ -> ()
+            findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
+                if exprIdentMatchesBindingIdent bindingIdent expr then
+                    visitorParameters.VisitorInfo.PostError 
+                        range 
+                        (Resources.GetString("RulesUselessBindingError")))
+            | _ -> ()
 
     let checkTupleOfWildcards visitorParameters pattern identifier =
         let isEnabled =
@@ -124,47 +123,58 @@ module Binding =
                 constructorName + "(" + arguments + ")"
 
             match pattern with
-                | SynPat.Tuple(patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
-                    let errorFormat = FSharpLint.Framework.Resources.GetString("RulesTupleOfWildcardsError")
-                    let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
-                    let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                    visitorParameters.VisitorInfo.PostError range error
-                | _ -> ()
+            | SynPat.Tuple(patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
+                let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
+                let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
+                let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
+                visitorParameters.VisitorInfo.PostError range error
+            | _ -> ()
 
     let (|IsLetBinding|_|) breadcrumbs =
         match breadcrumbs with 
-            | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))::_ 
-            | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _))::_ -> Some()
+        | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))::_ 
+        | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _))::_ -> Some()
+        | _ -> None
+
+    let isTupleMemberArgs breadcrumbs tupleRange =
+        let (|MemberBindingArgs|_|) bindingPattern =
+            match bindingPattern with
+            | SynBinding.Binding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _) ->
+                match args with
+                | SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as args, _)]) -> Some(args)
+                | _ -> None
             | _ -> None
+
+        match breadcrumbs with 
+        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, range)))::AstNode.MemberDefinition(_)::_ -> 
+            tupleRange = range
+        | _ -> false
     
     let visitor visitorInfo checkFile (astNode:CurrentNode) = 
         let visitorParameters = 
-            { 
-                VisitorInfo = visitorInfo
-                CheckFile = checkFile
-                AstNode = astNode
-            }
+            { VisitorInfo = visitorInfo
+              CheckFile = checkFile
+              AstNode = astNode }
         
         match astNode.Breadcrumbs, astNode.Node with
-            | IsLetBinding, AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) ->
-                checkForBindingToAWildcard visitorParameters pattern range
-                if not isMutable then
-                    checkForUselessBinding visitorParameters pattern expr range
-            | _, AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
-                checkForWildcardNamedWithAsPattern visitorParameters pattern
-            | _, AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_) as pattern, _)]), _, _)) ->
+        | IsLetBinding, AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) ->
+            checkForBindingToAWildcard visitorParameters pattern range
+            if not isMutable then
+                checkForUselessBinding visitorParameters pattern expr range
+        | _, AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
+            checkForWildcardNamedWithAsPattern visitorParameters pattern
+        | _, AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, range) as pattern, _)]), _, _)) ->
+            if (not << isTupleMemberArgs astNode.Breadcrumbs) range then
                 let identifier = identifier.Lid |> List.map (fun x -> x.idText)
                 checkTupleOfWildcards visitorParameters pattern identifier
-            | _ -> ()
+        | _ -> ()
 
         Continue
 
     type RegisterBindingVisitor() = 
         let plugin =
-            {
-                Name = AnalyserName
-                Visitor = Ast(visitor)
-            }
+            { Name = AnalyserName
+              Visitor = Ast(visitor) }
 
         interface IRegisterPlugin with
-            member __.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin = plugin

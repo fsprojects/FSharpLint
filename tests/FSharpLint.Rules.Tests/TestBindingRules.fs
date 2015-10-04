@@ -24,39 +24,16 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
 
 let config = 
+    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
+
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [
-                            ("FavourIgnoreOverLetWild", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("UselessBinding", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("WildcardNamedWithAsPattern", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                            ("TupleOfWildcards", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ ("Enabled", Enabled(true)) ] 
-                                }) 
-                        ]
-                    Settings = Map.ofList 
-                        [
-                            ("Enabled", Enabled(true))
-                        ]
-                }) 
-        ]
+        [ (AnalyserName, 
+            { Rules = Map.ofList 
+                [ ("FavourIgnoreOverLetWild", ruleEnabled) 
+                  ("UselessBinding", ruleEnabled) 
+                  ("WildcardNamedWithAsPattern", ruleEnabled) 
+                  ("TupleOfWildcards", ruleEnabled) ]
+              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
 
 [<TestFixture>]
 type TestBindingRules() =
@@ -79,7 +56,7 @@ module Program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "FavourIgnoreOverLetWild")>]
 let _ = ()"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.LetWildcardMultilaneStatementOfUnit() = 
@@ -108,7 +85,7 @@ module Program
 
 let a = List.iter (fun x -> ()) []"""
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 4))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.UslessBinding() = 
@@ -128,7 +105,7 @@ module Program
 let mutable a = 10
 let a = a"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.NotUslessBindingAsShadowingImmutableWithMutable() = 
@@ -138,7 +115,7 @@ module Program
 let a = 10
 let mutable a = a"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.UslessBindingSuppressed() = 
@@ -149,7 +126,7 @@ let a = 10
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "UselessBinding")>]
 let a = a"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(6))
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.UslessBindingWithParens() = 
@@ -172,8 +149,8 @@ type Cat() =
     static member CreateList(reader:TextReader) = 
         use reader = reader
         reader.ReadToEnd()""", checkInput = true)
-
-        Assert.IsFalse(this.ErrorExistsOnLine(6))
+        
+        Assert.IsFalse(this.ErrorsExist)
         
     [<Test>]
     member this.WildcardNamedWithAsPattern() = 
@@ -194,8 +171,8 @@ module Program
 let f =
     match [] with
         | _ as x -> ()"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(7))
+        
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.NamedPattern() = 
@@ -204,8 +181,8 @@ module Program
 
 match [] with
     | x -> ()"""
-
-        Assert.IsFalse(this.ErrorExistsAt(5, 6))
+    
+        Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.TupleOfWildcards() = 
@@ -218,3 +195,35 @@ match Persian(1, 3) with
     | Persian(_, _) -> ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(7, 14))
+
+    [<Test>]
+    member this.``Method's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+        this.Parse """
+module Program
+
+type Cat() = 
+    member __.Persian(_, _) = ()"""
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Constructor's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+        this.Parse """
+module Program
+
+type Cat() = 
+    new(_, _) = Cat()
+
+    member __.Persian(_) = ()"""
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Method with type argument's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+        this.Parse """
+module Program
+
+type Cat() = 
+    member __.Persian<'t>(_, _) = ()"""
+
+        Assert.IsFalse(this.ErrorsExist)
