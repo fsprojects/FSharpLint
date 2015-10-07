@@ -238,7 +238,7 @@
     <value>`nullArg` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="RulesTupleOfWildcardsError" xml:space="preserve">
-    <value>A constructor argument in a pattern that is a tuple consisting of entirely wildcards can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
+    <value>A pattern that is a tuple consisting of entirely wildcards can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
   </data>
   <data name="LintSourceError" xml:space="preserve">
     <value>Error on line {0} starting at column {1}</value>
