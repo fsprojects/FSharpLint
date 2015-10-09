@@ -232,10 +232,7 @@ module Lint =
             ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getProjectFileInfo projectFilePath (checker:FSharpChecker) =
-        try 
-            let projectInfo = FSharpProjectFileInfo.Parse(projectFilePath)
-            let projectOptions = checker.GetProjectOptionsFromProjectFile(projectFilePath)
-            Success(projectInfo, projectOptions)
+        try Success(checker.GetProjectOptionsFromProjectFile(projectFilePath))
         with
         | :? InvalidProjectFileException as e ->
             Failure(MSBuildFailedToLoadProjectFile(projectFilePath, e))
@@ -356,8 +353,13 @@ module Lint =
             | Failure(x) -> Failure(x)
 
         match getProjectFileInfo projectFilePath checker with
-        | Success(projectFileInfo, projectOptions) ->
-            match loadConfigAndParseFilesInProject projectFileInfo.CompileFiles projectOptions with
+        | Success(projectOptions) ->
+            let compileFiles = 
+                projectOptions.OtherOptions 
+                |> Seq.filter (fun x -> x.StartsWith "-" |> not)
+                |> Seq.toList
+
+            match loadConfigAndParseFilesInProject compileFiles projectOptions with
             | Success() -> lintWarnings |> Seq.toList |> LintResult.Success 
             | Failure(x) -> LintResult.Failure(x)
         | Failure(x) -> LintResult.Failure(x)
