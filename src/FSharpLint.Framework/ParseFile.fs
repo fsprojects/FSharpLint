@@ -34,55 +34,53 @@ module ParseFile =
         | Failed of ParseFileFailure
         | Success of 't
         
-    let private parse configuration file source =
-        let checker = FSharpChecker.Create()
-        
-        let options = 
-            checker.GetProjectOptionsFromScript(file, source) 
-                |> Async.RunSynchronously
-
+    let private parse configuration file source (checker:FSharpChecker, options) =
         let parseResults = 
             checker.ParseFileInProject(file, source, options)
-                |> Async.RunSynchronously
+            |> Async.RunSynchronously
 
         let typeCheckFile () =
             match configuration.UseTypeChecker with
-                | Some(true) ->
-                    let results = 
-                        checker.CheckFileInProject(parseResults, file, 0, source, options) 
-                            |> Async.RunSynchronously
+            | Some(true) ->
+                let results = 
+                    checker.CheckFileInProject(parseResults, file, 0, source, options) 
+                    |> Async.RunSynchronously
 
-                    match results with
-                        | FSharpCheckFileAnswer.Succeeded(x) -> 
-                            Success(Some(x))
-                        | FSharpCheckFileAnswer.Aborted -> 
-                            Failed(AbortedTypeCheck)
-                | Some(false) | None ->
-                    Success(None)
+                match results with
+                | FSharpCheckFileAnswer.Succeeded(x) -> Success(Some(x))
+                | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
+            | Some(false) | None -> Success(None)
 
         match parseResults.ParseTree with
-            | Some(parseTree) -> 
-                match typeCheckFile() with
-                    | Success(typeCheckResults) ->
-                        {
-                            Ast.PlainText = source
-                            Ast.Ast = parseTree
-                            Ast.TypeCheckResults = typeCheckResults
-                            Ast.File = file
-                        } |> Success
-                    | Failed(_) -> 
-                        Failed(AbortedTypeCheck)
-            | None -> 
-                Failed(FailedToParseFile(parseResults.Errors))
+        | Some(parseTree) -> 
+            match typeCheckFile() with
+            | Success(typeCheckResults) ->
+                { Ast.PlainText = source
+                  Ast.Ast = parseTree
+                  Ast.TypeCheckResults = typeCheckResults
+                  Ast.File = file } |> Success
+            | Failed(_) -> Failed(AbortedTypeCheck)
+        | None -> Failed(FailedToParseFile(parseResults.Errors))
 
     /// Parses a file using `FSharp.Compiler.Services`.
-    let parseFile file configuration =
+    let parseFile file configuration (checker:FSharpChecker) options =
         let source = System.IO.File.ReadAllText(file)
+
+        let options =
+            match options with
+            | Some(existingOptions) -> existingOptions
+            | None -> 
+                checker.GetProjectOptionsFromScript(file, source) 
+                |> Async.RunSynchronously
         
-        parse configuration file source
+        parse configuration file source (checker, options)
         
     /// Parses source code using `FSharp.Compiler.Services`.
-    let parseSource source configuration =
+    let parseSource source configuration (checker:FSharpChecker) =
         let file = "/home/user/Dog.test.fsx"
         
-        parse configuration file source
+        let options = 
+            checker.GetProjectOptionsFromScript(file, source) 
+            |> Async.RunSynchronously
+
+        parse configuration file source (checker, options)

@@ -100,15 +100,8 @@ module Tests =
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
-            
-            let errors = getErrorsFromOutput output
 
-            expectedErrors 
-                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
-                                                   "Errors did not contain expected error:\n" + x +
-                                                   ". Program output:\n" + output))
-
-            Assert.AreEqual(expectedErrors.Length, errors.Length)
+            Assert.IsTrue(output.Contains("could not load the project file"), "Did not find could not load project file error. Program output:\n" + output)
 
         [<Test>]
         member __.InvalidProjectFile() = 
@@ -138,14 +131,7 @@ module Tests =
 
             let output = runConsoleApp arguments
             
-            let errors = getErrorsFromOutput output
-
-            expectedErrors 
-                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
-                                                   "Errors did not contain expected error:\n" + x +
-                                                   ". Program output:\n" + output))
-
-            Assert.AreEqual(expectedErrors.Length, errors.Length)
+            Assert.IsTrue(output.Contains("Could not find file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.FunctionalTestConsoleApplication() = 

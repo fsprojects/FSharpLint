@@ -20,6 +20,7 @@ module TestRuleBase
 
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.Range
+open Microsoft.FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.LoadVisitors
@@ -75,7 +76,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
         let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version }
         
-        match parseSource input config, analyser with
+        match parseSource input config (FSharpChecker.Create()), analyser with
             | Success(parseInfo), Ast(visitor) ->
                 lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
             | Success(parseInfo), PlainText(visitor) -> 

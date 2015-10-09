@@ -24,6 +24,7 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.Ast
+open Microsoft.FSharp.Compiler.SourceCodeServices
 
 let stubBinding attributes =
     SynBinding.Binding(None, 
@@ -209,7 +210,7 @@ let dog = ()"""
                 Analysers = Map.ofList []
             }
 
-        match parseSource input stubConfig with
+        match parseSource input stubConfig (FSharpChecker.Create()) with
             | ParseFileResult.Success(result) ->
                 Assert.AreEqual(4, getSuppressMessageAttributesFromAst result.Ast |> List.length)
             | _ -> failwith "Failed to parse input."
@@ -227,7 +228,7 @@ let dog = ()"""
                   IgnoreFiles.IgnoreFilesConfig.Content = "" } |> Some
               Analysers = Map.ofList [] }
 
-        match parseSource input stubConfig with
+        match parseSource input stubConfig (FSharpChecker.Create()) with
         | ParseFileResult.Success(result) -> 
             let visitWholeTree = fun _ _ -> 
                 Assert.Less(System.Diagnostics.StackTrace().FrameCount, 1000)
