@@ -31,4 +31,4 @@ fi
 
 run .paket/paket.exe restore
 
-run packages/FAKE/tools/FAKE.exe "$@" $FSIARGS build.fsx
+run packages/tools/FAKE/tools/FAKE.exe "$@" $FSIARGS build.fsx
