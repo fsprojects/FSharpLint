@@ -57,7 +57,6 @@
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
@@ -66,8 +65,7 @@
       <Private>True</Private>
     </ProjectReference>
     <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\..\packages\FSharp.Compiler.Service.1.4.0.6\lib\net45\FSharp.Compiler.Service.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.dll</HintPath>

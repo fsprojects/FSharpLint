@@ -49,7 +49,6 @@
     <Compile Include="TestPackageHelpers.fs" />
     <Compile Include="TestFakeTask.fs" />
     <Compile Include="TestMSBuildTask.fs" />
-    <None Include="packages.config" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
@@ -62,8 +61,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\NUnit\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

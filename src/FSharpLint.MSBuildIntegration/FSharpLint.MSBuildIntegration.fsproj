@@ -48,7 +48,6 @@
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build" />

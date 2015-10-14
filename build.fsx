@@ -2,7 +2,7 @@
 // FAKE build script 
 // --------------------------------------------------------------------------------------
 
-#r @"packages/FAKE/tools/FakeLib.dll"
+#r @"packages/tools/FAKE/tools/FakeLib.dll"
 open Fake 
 open Fake.Git
 open Fake.AssemblyInfoFile
@@ -165,8 +165,8 @@ Target "CreateApiPackage" (fun _ ->
         "FSharpLint.Core.nuspec"
 )
 
-#I @"tools/FSharpLint.0.2.7/"
-#r @"tools/FSharpLint.0.2.7/FSharpLint.FAKE.dll"
+#I @"packages/tools/FSharpLint/"
+#r @"packages/tools/FSharpLint/FSharpLint.FAKE.dll"
 open FSharpLint.FAKE
 
 Target "Lint" (fun _ ->
