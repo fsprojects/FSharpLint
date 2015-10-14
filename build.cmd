@@ -1,15 +1,14 @@
 @echo off
 cls
-if not exist packages\FAKE\tools\Fake.exe (
-  .nuget\nuget.exe install FAKE -OutputDirectory packages -ExcludeVersion
+
+.paket\paket.bootstrapper.exe
+if errorlevel 1 (
+  exit /b %errorlevel%
 )
-if not exist tools\NUnit.Runners\tools\nunit-console.exe (
-  .nuget\nuget.exe install NUnit.Runners -OutputDirectory tools -ExcludeVersion
+
+.paket\paket.exe restore
+if errorlevel 1 (
+  exit /b %errorlevel%
 )
-if not exist tools\FSharpLint.0.2.7\FSharpLint.FAKE.dll (
-  .nuget\nuget.exe install FSharpLint -OutputDirectory tools -Version 0.2.7
-)
-if not exist tools\FSharp.Formatting\FSharp.Formatting.fsx (
-  .nuget\nuget.exe install FSharp.Formatting -OutputDirectory tools -ExcludeVersion
-)
-packages\FAKE\tools\FAKE.exe build.fsx %*
+
+packages\tools\FAKE\tools\FAKE.exe build.fsx %*

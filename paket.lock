@@ -1,0 +1,21 @@
+NUGET
+  remote: https://nuget.org/api/v2
+  specs:
+    FAKE.Lib (4.5.6)
+    FSharp.Compiler.Service (1.4.0.6)
+    ilmerge (2.14.1208)
+    NUnit (2.6.4)
+
+GROUP Tools
+NUGET
+  remote: https://nuget.org/api/v2
+  specs:
+    FAKE (4.6.2)
+    FSharp.Compiler.Service (0.0.90)
+    FSharp.Formatting (2.11.0)
+      FSharp.Compiler.Service (>= 0.0.90 <= 1.3)
+      FSharpVSPowerTools.Core (1.9.0)
+    FSharpLint (0.2.7)
+    FSharpVSPowerTools.Core (1.9.0)
+      FSharp.Compiler.Service (>= 0.0.90)
+    NUnit.Runners (2.6.4)

@@ -1,25 +1,34 @@
-#!/bin/bash
-if [ ! -f packages/FAKE/tools/FAKE.exe ]; then
-  mono .nuget/NuGet.exe install FAKE -OutputDirectory packages -ExcludeVersion
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+cd `dirname $0`
+
+FSIARGS=""
+OS=${OS:-"unknown"}
+if [[ "$OS" != "Windows_NT" ]]
+then
+  FSIARGS="--fsiargs -d:MONO"
 fi
-if [ ! -f tools\NUnit.Runners\tools\nunit-console.exe ]; then
-  mono .nuget/NuGet.exe install NUnit.Runners -OutputDirectory tools -ExcludeVersion
+
+function run() {
+  if [[ "$OS" != "Windows_NT" ]]
+  then
+    mono "$@"
+  else
+    "$@"
+  fi
+}
+
+run .paket/paket.bootstrapper.exe
+
+if [[ "$OS" != "Windows_NT" ]] &&
+       [ ! -e ~/.config/.mono/certs ]
+then
+  mozroots --import --sync --quiet
 fi
-if [ ! -f tools\FSharpLint.0.2.7\FSharpLint.FAKE.dll ]; then
-  mono .nuget/NuGet.exe install FSharpLint -OutputDirectory tools -Version 0.2.7
-fi
-if [ ! -f tools\FSharp.Formatting\FSharp.Formatting.fsx ]; then
-  mono .nuget/NuGet.exe install FSharp.Formatting -OutputDirectory tools -ExcludeVersion
-fi
-#workaround assembly resolution issues in build.fsx
-export FSHARPI=`which fsharpi`
-cat - > fsharpi <<"EOF"
-#!/bin/bash
-libdir=$PWD/packages/FAKE/tools/
-$FSHARPI --lib:$libdir $@
-EOF
-chmod +x fsharpi
-mono packages/FAKE/tools/FAKE.exe build.fsx $@
-EXITCODE=$?
-rm fsharpi
-exit $EXITCODE
+
+run .paket/paket.exe restore
+
+run packages/tools/FAKE/tools/FAKE.exe "$@" $FSIARGS build.fsx

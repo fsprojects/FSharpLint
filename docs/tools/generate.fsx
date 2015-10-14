@@ -20,11 +20,11 @@ let info =
 // For typical project, no changes are needed below
 // --------------------------------------------------------------------------------------
 
-#I "../../tools/FSharpVSPowerTools.Core/lib/net45"
-#I "../../tools/FSharp.Formatting/lib/net40"
-#I "../../tools/FSharp.Compiler.Service/lib/net45"
-#r "../../packages/FAKE/tools/NuGet.Core.dll"
-#r "../../packages/FAKE/tools/FakeLib.dll"
+#I "../../packages/tools/FSharpVSPowerTools.Core/lib/net45"
+#I "../../packages/tools/FSharp.Formatting/lib/net40"
+#I "../../packages/tools/FSharp.Compiler.Service/lib/net45"
+#r "../../packages/tools/FAKE/tools/NuGet.Core.dll"
+#r "../../packages/tools/FAKE/tools/FakeLib.dll"
 #r "FSharpVSPowerTools.Core.dll"
 #r "RazorEngine.dll"
 #r "FSharp.Literate.dll"

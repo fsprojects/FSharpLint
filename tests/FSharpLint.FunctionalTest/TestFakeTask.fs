@@ -24,7 +24,7 @@ module TestFakeTask =
     open NUnit.Framework
 
     let runFake() =
-        let fakeExe = TestPackageHelper.getPath @"../../../../packages/FAKE/tools/FAKE.exe"
+        let fakeExe = TestPackageHelper.getPath @"../../../../packages/tools/FAKE/tools/FAKE.exe"
 
         let workingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/"
 
