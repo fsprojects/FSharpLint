@@ -465,6 +465,19 @@ let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
+    member this.``No suggestion should be given for function composition when an infix operator is in the expression``() = 
+        this.Parse """
+module Program
+
+let x = 6
+
+let f = (fun value -> state + (findCoefficient conversion.Coefficients key) * value) 
+"""
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
+    [<Test>]
     member this.``No suggestion should be given for function composition when lambda has multiple arguments``() = 
         this.Parse """
 module Program
