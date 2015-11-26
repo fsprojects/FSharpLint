@@ -462,3 +462,16 @@ let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
 """
 
         Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
+    [<Test>]
+    member this.``No suggestion should be given for function composition when lambda has multiple arguments``() = 
+        this.Parse """
+module Program
+
+let x = 6
+
+let f = fun s1 s2 -> concat s1 s2 |> parse
+"""
+
+        Assert.IsFalse(this.ErrorsExist)

@@ -153,7 +153,7 @@ module FunctionReimplementation =
                     match getLastElement appliedValues with
                     | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
                         lastArgument.idText = lambdaArgument.idText
-                    | SynExpr.App(_) as nextFunction ->
+                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
                         lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
                     | _ -> false
                 | _ -> false
@@ -209,16 +209,21 @@ module FunctionReimplementation =
     let visitor visitorInfo checkFile astNode = 
         match astNode.Node with
         | AstNode.Expression(SynExpr.Lambda(_) as lambda) ->
-            let (parameters, expression) = getLambdaParametersAndExpression lambda
+            match astNode.Breadcrumbs with
+            | AstNode.Expression(SynExpr.Lambda(_))::_ -> 
+                // We're currently inside a curried function
+                ()
+            | _ ->
+                let (parameters, expression) = getLambdaParametersAndExpression lambda
 
-            if (not << List.isEmpty) parameters then
-                if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
-                    && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
-                    validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
+                if (not << List.isEmpty) parameters then
+                    if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
+                        && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
+                        validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
                     
-                if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
-                        && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
-                    validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
+                    if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
+                            && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
+                        validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
         | _ -> ()
 
         Continue

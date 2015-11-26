@@ -264,7 +264,7 @@
         </TrailingNewLineInFile>
 
         <TrailingWhitespaceOnLine>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
           <NumberOfSpacesAllowed>1</NumberOfSpacesAllowed>
           <OneSpaceAllowedAfterOperator>true</OneSpaceAllowedAfterOperator>
           <IgnoreBlankLines>true</IgnoreBlankLines>
