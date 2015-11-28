@@ -82,7 +82,7 @@ open System
 let f = List.map (fun x -> Uri x) ["1";"2"]
 """, checkInput = true, fsharpVersion = System.Version(3, 1))
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -93,7 +93,7 @@ module Program
 let f = List.map (fun x -> System.Uri x) ["1";"2"]
 """, checkInput = true, fsharpVersion = System.Version(3, 1))
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -134,7 +134,7 @@ module Program
 let f = fun a b -> a * b
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaReimplementingMultiplcationIssuesErrorSuppressedWithRuleName() = 
@@ -145,7 +145,7 @@ module Program
 let f = fun a b -> a * b
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() = 
@@ -155,7 +155,7 @@ module Program
 let f = fun a b -> a * 1
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaReimplementingCeilingFunctionIssuesError() = 
@@ -186,7 +186,7 @@ module Program
 let f = fun x -> tan(cos(tan x))
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
@@ -218,7 +218,7 @@ let y = 0
 let f = fun x -> tan y x |> cos x |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError4() = 
@@ -229,7 +229,7 @@ let y = 0
 let f = fun x -> tan x x |> cos y |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError5() = 
@@ -240,7 +240,7 @@ let y = 0
 let f = fun x -> tan y x |> cos (fun _ -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError6() = 
@@ -293,7 +293,7 @@ let f = fun x ->
                         y) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError10() = 
@@ -308,7 +308,7 @@ let f = fun x ->
                         x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError11() = 
@@ -321,7 +321,7 @@ let f = fun x ->
         |> cos (function | y -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError12() = 
@@ -347,7 +347,7 @@ let f = fun x ->
         |> cos (fun _ -> match x with | _ -> 0) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError14() = 
@@ -360,7 +360,7 @@ let f = fun x ->
         |> cos (fun _ -> match y with | _ -> x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError15() = 
@@ -386,7 +386,7 @@ let f = fun x ->
         |> cos (fun _ -> for y = 0 to 10 do ignore x) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError17() = 
@@ -412,7 +412,7 @@ let f = fun x ->
         |> cos (fun _ -> for y = 0 to x do ()) |> tan y
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaWithUnitParameterDoesNotIssueError() = 
@@ -424,7 +424,7 @@ let x = 6
 let f = fun () -> ceil x
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.LambdaWithWildcardParameterDoesNotIssueError() = 
@@ -436,7 +436,7 @@ let x = 6
 let f = fun _ -> ceil x
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.MultiplcationLambdaWithWildcardParameterDoesNotIssueError() = 
@@ -448,7 +448,7 @@ let x = 6
 let f = fun a b _ -> a * b
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/130
     [<Test>]
@@ -461,7 +461,7 @@ let x = 6
 let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
@@ -474,7 +474,7 @@ let x = 6
 let f = (fun value -> state + (findCoefficient conversion.Coefficients key) * value) 
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
@@ -487,4 +487,4 @@ let x = 6
 let f = fun s1 s2 -> concat s1 s2 |> parse
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()

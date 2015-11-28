@@ -53,28 +53,19 @@ module ExpressionUtilities =
         | x -> x
         
     let flattenFunctionApplication expr =
-        let listContains value list = List.exists ((=) value) list
-
-        let isForwardPipeOperator op = ["|>";"||>";"|||>"] |> listContains op
-        let isBackwardPipeOperator op = ["<|";"<||";"<|||"] |> listContains op
-
-        let rec flattenFunctionApplication exprs = function
+        let rec flatten exprs = function
             | SynExpr.App(_, _, x, y, _) -> 
                 match removeParens x with
-                | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) ->
-                    let opIdent = identAsDecompiledOpName op
-
-                    if isForwardPipeOperator opIdent then
-                        let flattened = flattenFunctionApplication [] y
+                | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) as infixApp ->
+                    match identAsDecompiledOpName op with
+                    | "|>" | "||>" | "|||>" ->
+                        let flattened = flatten [] y
                         flattened@[rightExpr]
-                    else if isBackwardPipeOperator opIdent then
-                        let flattened = flattenFunctionApplication [] rightExpr
+                    | "<|" | "<||" | "<|||" ->
+                        let flattened = flatten [] rightExpr
                         flattened@[y]
-                    else
-                        flattenFunctionApplication (removeParens y::exprs) (removeParens x)
-                | _ -> 
-                    flattenFunctionApplication (removeParens y::exprs) (removeParens x)
-            | x -> 
-                x::exprs
+                    | _ -> [infixApp]
+                | x -> flatten (removeParens y::exprs) x
+            | x -> x::exprs
 
-        flattenFunctionApplication [] expr
+        flatten [] expr

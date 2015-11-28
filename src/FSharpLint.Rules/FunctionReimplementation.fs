@@ -146,15 +146,18 @@ module FunctionReimplementation =
                     removeLastElement appliedValues
                     |> List.forall lambdaArgumentNotReferenced
 
-                match ExpressionUtilities.flattenFunctionApplication expression with
-                | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
-                        when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
+                match expression with
+                | SynExpr.App(_, false, _, _, _) as nonInfixApp ->
+                    match ExpressionUtilities.flattenFunctionApplication nonInfixApp with
+                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
+                            when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
 
-                    match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
-                        lastArgument.idText = lambdaArgument.idText
-                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
-                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        match getLastElement appliedValues with
+                        | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                            lastArgument.idText = lambdaArgument.idText
+                        | SynExpr.App(_, false, _, _, _) as nextFunction ->
+                            lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        | _ -> false
                     | _ -> false
                 | _ -> false
 
