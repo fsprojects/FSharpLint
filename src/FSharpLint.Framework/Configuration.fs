@@ -38,7 +38,7 @@ module Configuration =
     type XElement with
         member this.ElementByLocalName localName =
             this.Elements() 
-                |> Seq.tryFind (fun x -> x.Name.LocalName = localName)
+            |> Seq.tryFind (fun x -> x.Name.LocalName = localName)
 
     type Access =
         | Public = 0
@@ -534,7 +534,7 @@ module Configuration =
                             loadedConfigs |> Map.add path (tryLoadConfig path)
 
                         updateLoadedConfigs updatedLoadedConfigs rest
-                | [] -> loadedConfigs                
+                | [] -> loadedConfigs
 
                 { PathsAdded = path::loadedConfigs.PathsAdded
                   LoadedConfigs = updateLoadedConfigs loadedConfigs.LoadedConfigs paths }
