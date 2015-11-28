@@ -182,7 +182,7 @@
       <Rules>
         <MaxLinesInFunction>
           <Enabled>true</Enabled>
-          <Lines>70</Lines>
+          <Lines>100</Lines>
         </MaxLinesInFunction>
 
         <MaxLinesInLambdaFunction>
@@ -192,22 +192,22 @@
 
         <MaxLinesInMatchLambdaFunction>
           <Enabled>true</Enabled>
-          <Lines>70</Lines>
+          <Lines>100</Lines>
         </MaxLinesInMatchLambdaFunction>
 
         <MaxLinesInValue>
           <Enabled>true</Enabled>
-          <Lines>70</Lines>
+          <Lines>100</Lines>
         </MaxLinesInValue>
 
         <MaxLinesInConstructor>
           <Enabled>true</Enabled>
-          <Lines>70</Lines>
+          <Lines>100</Lines>
         </MaxLinesInConstructor>
 
         <MaxLinesInMember>
           <Enabled>true</Enabled>
-          <Lines>70</Lines>
+          <Lines>100</Lines>
         </MaxLinesInMember>
 
         <MaxLinesInProperty>
