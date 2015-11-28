@@ -20,7 +20,9 @@ namespace FSharpLint.Rules
 
 module NestedStatements =
     
+    open System
     open Microsoft.FSharp.Compiler.Ast
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
@@ -31,16 +33,15 @@ module NestedStatements =
 
     let configDepth config =
         match isAnalyserEnabled config AnalyserName with
-            | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
-                match analyserSettings.["Depth"] with
-                    | Depth(l) -> Some(l)
-                    | _ -> None
-            | Some(_)
-            | None -> None
+        | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
+            match analyserSettings.["Depth"] with
+            | Depth(l) -> Some(l)
+            | _ -> None
+        | Some(_) | None -> None
 
     let error (depth:int) =
-        let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesNestedStatementsError")
-        System.String.Format(errorFormatString, depth)
+        let errorFormatString = Resources.GetString("RulesNestedStatementsError")
+        String.Format(errorFormatString, depth)
 
     exception UnexpectedNodeTypeException of string
 
@@ -56,60 +57,52 @@ module NestedStatements =
     let elseIfVisitor visitor depth visitorInfo checkFile =
         ContinueWithVisitorsForChildren (fun childi childNode ->
             match (childi, childNode) with
-                | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
-                    Some(visitor depth visitorInfo checkFile)
-                | _ -> 
-                    Some(visitor (depth + 1) visitorInfo checkFile))
+            | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
+                Some(visitor depth visitorInfo checkFile)
+            | _ -> Some(visitor (depth + 1) visitorInfo checkFile))
     
     let rec visitor depth (visitorInfo:VisitorInfo) checkFile astNode = 
         match astNode.Node with
-            | AstNode.Binding(SynBinding.Binding(_))
-            | AstNode.Expression(SynExpr.Lambda(_))
-            | AstNode.Expression(SynExpr.MatchLambda(_))
-            | AstNode.Expression(SynExpr.IfThenElse(_))
-            | AstNode.Expression(SynExpr.Lazy(_))
-            | AstNode.Expression(SynExpr.Match(_))
-            | AstNode.Expression(SynExpr.Record(_))
-            | AstNode.Expression(SynExpr.ObjExpr(_))
-            | AstNode.Expression(SynExpr.TryFinally(_))
-            | AstNode.Expression(SynExpr.TryWith(_))
-            | AstNode.Expression(SynExpr.Tuple(_))
-            | AstNode.Expression(SynExpr.Quote(_))
-            | AstNode.Expression(SynExpr.While(_))
-            | AstNode.Expression(SynExpr.For(_))
-            | AstNode.Expression(SynExpr.ForEach(_)) as node 
-                    when astNode.IsSuppressed(AnalyserName) |> not && 
-                         not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
+        | AstNode.Binding(SynBinding.Binding(_))
+        | AstNode.Expression(SynExpr.Lambda(_))
+        | AstNode.Expression(SynExpr.MatchLambda(_))
+        | AstNode.Expression(SynExpr.IfThenElse(_))
+        | AstNode.Expression(SynExpr.Lazy(_))
+        | AstNode.Expression(SynExpr.Match(_))
+        | AstNode.Expression(SynExpr.Record(_))
+        | AstNode.Expression(SynExpr.ObjExpr(_))
+        | AstNode.Expression(SynExpr.TryFinally(_))
+        | AstNode.Expression(SynExpr.TryWith(_))
+        | AstNode.Expression(SynExpr.Tuple(_))
+        | AstNode.Expression(SynExpr.Quote(_))
+        | AstNode.Expression(SynExpr.While(_))
+        | AstNode.Expression(SynExpr.For(_))
+        | AstNode.Expression(SynExpr.ForEach(_)) as node 
+                when astNode.IsSuppressed(AnalyserName) |> not && 
+                        not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
 
-                let range () =
-                    match node with 
-                        | AstNode.Expression(node) ->
-                            node.Range
-                        | AstNode.Binding(node) -> 
-                            node.RangeOfBindingAndRhs
-                        | _ -> 
-                            raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
+            let range () =
+                match node with 
+                | AstNode.Expression(node) -> node.Range
+                | AstNode.Binding(node) -> node.RangeOfBindingAndRhs
+                | _ -> raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
 
-                match configDepth visitorInfo.Config with
-                    | Some(errorDepth) when depth >= errorDepth ->
-                        visitorInfo.PostError (range()) (error errorDepth)
-                        Stop
-                    | Some(_) ->
-                        match astNode.Node with
-                            | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-                                elseIfVisitor visitor depth visitorInfo checkFile
-                            | _ ->
-                                ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
-                    | None -> 
-                        Stop
-            | _ -> Continue
+            match configDepth visitorInfo.Config with
+            | Some(errorDepth) when depth >= errorDepth ->
+                visitorInfo.PostError (range()) (error errorDepth)
+                Stop
+            | Some(_) ->
+                match astNode.Node with
+                | AstNode.Expression(SynExpr.IfThenElse(_)) ->
+                    elseIfVisitor visitor depth visitorInfo checkFile
+                | _ -> ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
+            | None -> Stop
+        | _ -> Continue
 
     type RegisterNestedStatementsVisitor() = 
         let plugin =
-            {
-                Name = AnalyserName
-                Visitor = Ast(visitor 0)
-            }
+            { Name = AnalyserName
+              Visitor = Ast(visitor 0) }
 
         interface IRegisterPlugin with
-            member __.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin = plugin

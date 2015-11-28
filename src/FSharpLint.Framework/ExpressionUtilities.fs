@@ -20,6 +20,7 @@ namespace FSharpLint.Framework
 
 module ExpressionUtilities =
 
+    open Microsoft.FSharp.Compiler
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
 
@@ -30,22 +31,21 @@ module ExpressionUtilities =
 
     let getSymbolFromIdent (checkFile:FSharpCheckFileResults option) expr =
         match checkFile, expr with
-            | Some(checkFile), Identifier(ident, range) ->
-                let identNames = ident |> List.map (fun x -> x.idText)
+        | Some(checkFile), Identifier(ident, range) ->
+            let identNames = ident |> List.map (fun x -> x.idText)
 
-                checkFile.GetSymbolUseAtLocation(
-                    range.StartLine, 
-                    range.EndColumn, 
-                    "", 
-                    identNames) |> Async.RunSynchronously
-            | _ -> None
+            checkFile.GetSymbolUseAtLocation(
+                range.StartLine, 
+                range.EndColumn, 
+                "", 
+                identNames) |> Async.RunSynchronously
+        | _ -> None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =
         if ident.idText.StartsWith("op_") then
-            Microsoft.FSharp.Compiler.PrettyNaming.DecompileOpName ident.idText
-        else 
-            ident.idText
+            PrettyNaming.DecompileOpName ident.idText
+        else ident.idText
 
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function

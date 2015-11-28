@@ -32,30 +32,29 @@ module XmlDocumentation =
 
     let isAccessEnabled setting access =
         match setting, access with
-            | Access(Access.Public),     SynAccess.Public
-            | Access(Access.Internal),   SynAccess.Internal
-            | Access(Access.Private),    SynAccess.Private
-            | Access(Access.All),        SynAccess.Public
-            | Access(Access.All),        SynAccess.Internal
-            | Access(Access.All),        SynAccess.Private
-            | Access(Access.NotPrivate), SynAccess.Public
-            | Access(Access.NotPrivate), SynAccess.Internal
-            | Access(Access.NotPublic),  SynAccess.Internal
-            | Access(Access.NotPublic),  SynAccess.Private -> true
-            | Access(Access.None), _ -> false
-            | _ -> false
+        | Access(Access.Public),     SynAccess.Public
+        | Access(Access.Internal),   SynAccess.Internal
+        | Access(Access.Private),    SynAccess.Private
+        | Access(Access.All),        SynAccess.Public
+        | Access(Access.All),        SynAccess.Internal
+        | Access(Access.All),        SynAccess.Private
+        | Access(Access.NotPrivate), SynAccess.Public
+        | Access(Access.NotPrivate), SynAccess.Internal
+        | Access(Access.NotPublic),  SynAccess.Internal
+        | Access(Access.NotPublic),  SynAccess.Private -> true
+        | Access(Access.None), _
+        | _ -> false
 
     let isAccessEnabledOpt setting access =
         match setting, access with
-            | Some(set), Some(acc) -> isAccessEnabled set acc
-            | Some(Access(Access.None)), _ -> false
-            | Some(_), _ -> true // any except none
-            | _ -> false
+        | Some(set), Some(acc) -> isAccessEnabled set acc
+        | Some(Access(Access.None)), _ -> false
+        | Some(_), _ -> true // any except none
+        | _ -> false
 
     let getSettings config name =
-        match isRuleEnabled config AnalyserName name with
-            | Some(_, ruleSettings)  -> Some ruleSettings
-            | None -> None
+        isRuleEnabled config AnalyserName name
+        |> Option.bind (snd >> Some)
 
     let getAccessSetting config name =
         match getSettings config name with
@@ -70,24 +69,23 @@ module XmlDocumentation =
 
     let configExceptionHeader config name =
         match getSettings config name with
-            | Some(ruleSettings) when ruleSettings.ContainsKey "Access" ->
-                match ruleSettings.["Access"] with
-                    | Access(Access.Public)
-                    | Access(Access.Internal)
-                    | Access(Access.Private)
-                    | Access(Access.All)
-                    | Access(Access.NotPrivate)
-                    | Access(Access.NotPublic) -> true
-                    | Access(Access.None) -> false
-                    | _ -> false
-            | Some(_)
-            | None -> false
+        | Some(ruleSettings) when ruleSettings.ContainsKey "Access" ->
+            match ruleSettings.["Access"] with
+            | Access(Access.Public)
+            | Access(Access.Internal)
+            | Access(Access.Private)
+            | Access(Access.All)
+            | Access(Access.NotPrivate)
+            | Access(Access.NotPublic) -> true
+            | Access(Access.None) -> false
+            | _ -> false
+        | Some(_) | None -> false
 
     let isPreXmlDocEmpty (preXmlDoc:PreXmlDoc) =
         match preXmlDoc.ToXmlDoc() with
-            | XmlDoc(xs) ->
-                let atLeastOneThatHasText ars = ars |> Array.exists (fun s -> not (String.IsNullOrWhiteSpace(s))) |> not
-                xs |> atLeastOneThatHasText
+        | XmlDoc(xs) ->
+            let atLeastOneThatHasText ars = ars |> Array.exists (String.IsNullOrWhiteSpace >> not) |> not
+            xs |> atLeastOneThatHasText
 
     let getString str = FSharpLint.Framework.Resources.GetString(str)
 
@@ -154,10 +152,8 @@ module XmlDocumentation =
                     if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                         visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
                 match typeDefnRep with
-                | Simple(simple, _) ->
-                    match simple with
-                    | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.iter evalField
-                    | _ -> ()
+                | Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
+                    fields |> List.iter evalField
                 | _ -> ()
         | _ -> ()
 
@@ -165,10 +161,8 @@ module XmlDocumentation =
 
     type RegisterXmlDocumentationVisitor() =
         let plugin =
-            {
-                Name = AnalyserName
-                Visitor = Ast(visitor)
-            }
+            { Name = AnalyserName
+              Visitor = Ast(visitor) }
 
         interface IRegisterPlugin with
-            member __.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin = plugin

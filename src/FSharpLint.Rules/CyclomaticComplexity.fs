@@ -20,7 +20,9 @@ namespace FSharpLint.Rules
 
 module CyclomaticComplexity =
     
+    open System
     open Microsoft.FSharp.Compiler.Ast
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.LoadVisitors
@@ -30,21 +32,19 @@ module CyclomaticComplexity =
 
     let configMaxCyclomaticComplexity config =
         match isAnalyserEnabled config AnalyserName with
-            | Some(analyserSettings) when analyserSettings.ContainsKey "MaxCyclomaticComplexity" ->
-                match analyserSettings.["MaxCyclomaticComplexity"] with
-                    | MaxCyclomaticComplexity(l) -> Some(l)
-                    | _ -> None
-            | Some(_)
-            | None -> None
+        | Some(analyserSettings) when analyserSettings.ContainsKey "MaxCyclomaticComplexity" ->
+            match analyserSettings.["MaxCyclomaticComplexity"] with
+            | MaxCyclomaticComplexity(l) -> Some(l)
+            | _ -> None
+        | Some(_) | None -> None
 
     let configIncludeMatchStatements config =
         match isAnalyserEnabled config AnalyserName with
-            | Some(analyserSettings) when analyserSettings.ContainsKey "IncludeMatchStatements" ->
-                match analyserSettings.["IncludeMatchStatements"] with
-                    | IncludeMatchStatements(includeMatchStatements) -> includeMatchStatements
-                    | _ -> true
-            | Some(_)
-            | None -> true
+        | Some(analyserSettings) when analyserSettings.ContainsKey "IncludeMatchStatements" ->
+            match analyserSettings.["IncludeMatchStatements"] with
+            | IncludeMatchStatements(includeMatchStatements) -> includeMatchStatements
+            | _ -> true
+        | Some(_) | None -> true
 
     let isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
@@ -54,57 +54,53 @@ module CyclomaticComplexity =
         let finishedWalk = finishedWalk visitorInfo range
 
         match astNode.Node with
-            | AstNode.Expression(expression) when isAnalyserEnabled visitorInfo.Config ->
-                match expression with
-                    | SynExpr.For(_)
-                    | SynExpr.ForEach(_)
-                    | SynExpr.While(_)
-                    | SynExpr.IfThenElse(_)  -> 
-                        WalkWithVisitor(visitor (count + 1), finishedWalk (count + 1))
-                    | SynExpr.Ident(ident) 
-                            when 
-                                ident.idText = "op_BooleanAnd" || 
-                                ident.idText = "op_BooleanOr" ->
+        | AstNode.Expression(expression) when isAnalyserEnabled visitorInfo.Config ->
+            match expression with
+            | SynExpr.For(_)
+            | SynExpr.ForEach(_)
+            | SynExpr.While(_)
+            | SynExpr.IfThenElse(_)  -> 
+                WalkWithVisitor(visitor (count + 1), finishedWalk (count + 1))
+            | SynExpr.Ident(ident) 
+                    when 
+                        ident.idText = "op_BooleanAnd" || 
+                        ident.idText = "op_BooleanOr" ->
 
-                        WalkWithVisitor(visitor (count + 1), finishedWalk (count + 1))
-                    | SynExpr.Match(_, _, matchClauses, _, _) 
-                            when configIncludeMatchStatements visitorInfo.Config -> 
+                WalkWithVisitor(visitor (count + 1), finishedWalk (count + 1))
+            | SynExpr.Match(_, _, matchClauses, _, _) 
+                    when configIncludeMatchStatements visitorInfo.Config -> 
 
-                        let count = count + List.length matchClauses - 1
-                        WalkWithVisitor(visitor count, finishedWalk count)
-                    | _ -> 
-                        WalkWithVisitor(visitor count, finishedWalk count)
+                let count = count + List.length matchClauses - 1
+                WalkWithVisitor(visitor count, finishedWalk count)
             | _ -> 
                 WalkWithVisitor(visitor count, finishedWalk count)
+        | _ -> 
+            WalkWithVisitor(visitor count, finishedWalk count)
     and
         finishedWalk visitorInfo range count () = 
             match configMaxCyclomaticComplexity visitorInfo.Config with
-                | Some(maxCount) when count > maxCount ->
-                    let errorFormatString = FSharpLint.Framework.Resources.GetString("RulesCyclomaticComplexityError")
-                    let error = System.String.Format(errorFormatString, count, maxCount)
+            | Some(maxCount) when count > maxCount ->
+                let errorFormatString = Resources.GetString("RulesCyclomaticComplexityError")
+                let error = String.Format(errorFormatString, count, maxCount)
 
-                    visitorInfo.PostError range error
-                | _ -> ()
+                visitorInfo.PostError range error
+            | _ -> ()
     and 
         findBindingVisitor visitorInfo checkFile (astNode:CurrentNode) : VisitorResult =
             match astNode.Node with
-                | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) when astNode.IsSuppressed(AnalyserName) |> not ->
-                    let getVisitorForChild _ child =
-                        match child with
-                            | AstNode.Expression(_) ->
-                                Some(countDecisionPathsVisitor visitorInfo checkFile expr.Range 0)
-                            | _ -> 
-                                Some(findBindingVisitor visitorInfo checkFile)
+            | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, _, _, expr, _, _)) when astNode.IsSuppressed(AnalyserName) |> not ->
+                let getVisitorForChild _ child =
+                    match child with
+                    | AstNode.Expression(_) -> Some(countDecisionPathsVisitor visitorInfo checkFile expr.Range 0)
+                    | _ -> Some(findBindingVisitor visitorInfo checkFile)
 
-                    ContinueWithVisitorsForChildren(getVisitorForChild)
-                | _ -> Continue
+                ContinueWithVisitorsForChildren(getVisitorForChild)
+            | _ -> Continue
 
     type RegisterCyclomaticComplexityVisitor() = 
         let plugin =
-            {
-                Name = AnalyserName
-                Visitor = Ast(findBindingVisitor)
-            }
+            { Name = AnalyserName
+              Visitor = Ast(findBindingVisitor) }
 
         interface IRegisterPlugin with
-            member __.RegisterPlugin with get() = plugin
+            member __.RegisterPlugin = plugin
