@@ -1,12 +1,13 @@
 ﻿module FSharpLint.FAKE
 
+open System
 open Fake
 open FSharpLint.Worker
 open FSharpLint.Application.AppDomainWorker
 
-let private printException (e:System.Exception) =
+let private printException (e:Exception) =
     "Exception Message:" + e.Message + "Exception Stack Trace:" + e.StackTrace
-        |> System.Console.WriteLine
+    |> Console.WriteLine
 
 let private failedToParseFileError (file:string) parseException =
     printfn "%A" file
@@ -15,20 +16,18 @@ let private failedToParseFileError (file:string) parseException =
 /// the default only prints something if FSharpLint found a lint in a file
 let private defaultProgress (progress:Progress) = 
     match progress.State with
-        | Progress.ProgressType.Failed ->
-            failedToParseFileError progress.Filename progress.Exception
-        | _ -> ()
+    | Progress.ProgressType.Failed ->
+        failedToParseFileError progress.Filename progress.Exception
+    | _ -> ()
 
 let private defaultErrorReceived (error:Error) =
     error.Info + System.Environment.NewLine + error.FormattedError
-        |> System.Console.WriteLine
+    |> Console.WriteLine
 
 let defaultLintOptions =
-    {
-        Progress = System.Action<Progress>(defaultProgress)
-        ErrorReceived = System.Action<Error>(defaultErrorReceived)
-        FailBuildIfAnyWarnings = false
-    }
+    { Progress = Action<_>(defaultProgress)
+      ErrorReceived = Action<_>(defaultErrorReceived)
+      FailBuildIfAnyWarnings = false }
 
 /// Runs FSharpLint on a project.
 /// ## Parameters
@@ -59,11 +58,9 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
         parameters.Progress.Invoke(progress)
 
     let options = 
-        { 
-            Progress = System.Action<_>(parserProgress)
-            ErrorReceived = System.Action<_>(errorReceived)
-            FailBuildIfAnyWarnings = parameters.FailBuildIfAnyWarnings
-        }
+        { Progress = System.Action<_>(parserProgress)
+          ErrorReceived = System.Action<_>(errorReceived)
+          FailBuildIfAnyWarnings = parameters.FailBuildIfAnyWarnings }
 
     use worker = new AppDomainWorker()
     let result = worker.RunLint projectFile options

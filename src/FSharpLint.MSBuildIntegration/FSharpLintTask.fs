@@ -19,7 +19,10 @@
 namespace FSharpLint.MSBuildIntegration
 
 open System
+open System.IO
+open System.Reflection
 open FSharpLint.Application.AppDomainWorker
+open FSharpLint.Worker
 
 type FSharpLintTask() = 
     inherit Microsoft.Build.Utilities.Task()
@@ -30,28 +33,29 @@ type FSharpLintTask() =
     member val TreatWarningsAsErrors = false with get, set
 
     override this.Execute() = 
-        let directory = System.Reflection.Assembly.GetAssembly(this.GetType()).Location
-                        |> System.IO.Path.GetDirectoryName
+        let directory = 
+            Assembly.GetAssembly(this.GetType()).Location
+            |> Path.GetDirectoryName
 
         let resolveAssembly _ (args:ResolveEventArgs) =
             let assembly = 
                 try 
-                    match System.Reflection.Assembly.Load(args.Name) with
-                        | null -> None
-                        | assembly -> Some(assembly)
+                    match Assembly.Load(args.Name) with
+                    | null -> None
+                    | assembly -> Some(assembly)
                 with _ -> None
 
             match assembly with
                 | Some(assembly) -> assembly
                 | None -> 
                     let parts = args.Name.Split(',')
-                    let file = System.IO.Path.Combine(directory, parts.[0].Trim() + ".dll")
+                    let file = Path.Combine(directory, parts.[0].Trim() + ".dll")
 
-                    System.Reflection.Assembly.LoadFrom(file)
+                    Assembly.LoadFrom(file)
 
-        let resolveAssemblyHandler = System.ResolveEventHandler(resolveAssembly)
+        let resolveAssemblyHandler = ResolveEventHandler(resolveAssembly)
             
-        System.AppDomain.CurrentDomain.add_AssemblyResolve(resolveAssemblyHandler)
+        AppDomain.CurrentDomain.add_AssemblyResolve(resolveAssemblyHandler)
         
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
@@ -59,8 +63,8 @@ type FSharpLintTask() =
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
         
-        let progress (progress:FSharpLint.Worker.Progress) =
-            if progress.State = FSharpLint.Worker.Progress.ProgressType.Failed then
+        let progress (progress:Progress) =
+            if progress.State = Progress.ProgressType.Failed then
                 sprintf 
                     "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s"
                     progress.Filename
@@ -68,7 +72,7 @@ type FSharpLintTask() =
                     progress.Exception.StackTrace
                     |> logFailure
         
-        let errorReceived (error:FSharpLint.Worker.Error) = 
+        let errorReceived (error:Error) = 
             let filename = error.Range.FileName
             let startLine = error.Range.StartLine
             let startColumn = error.Range.StartColumn + 1
@@ -81,18 +85,15 @@ type FSharpLintTask() =
                 logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
         
         let options = 
-            { 
-                Progress = System.Action<_>(progress)
-                ErrorReceived = System.Action<_>(errorReceived)
-                FailBuildIfAnyWarnings = treatWarningsAsErrors
-            }
+            { Progress = Action<_>(progress)
+              ErrorReceived = Action<_>(errorReceived)
+              FailBuildIfAnyWarnings = treatWarningsAsErrors }
         
         use worker = new AppDomainWorker()
         let result = worker.RunLint this.Project options
 
-        if not result.IsSuccess then
-            logFailure result.Message
+        if not result.IsSuccess then logFailure result.Message
             
-        System.AppDomain.CurrentDomain.remove_AssemblyResolve(resolveAssemblyHandler)
+        AppDomain.CurrentDomain.remove_AssemblyResolve(resolveAssemblyHandler)
 
         true
