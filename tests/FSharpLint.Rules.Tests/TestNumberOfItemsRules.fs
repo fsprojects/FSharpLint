@@ -25,47 +25,25 @@ open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList 
-                        [ 
-                            ("MaxNumberOfFunctionParameters", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("MaxItems", MaxItems(5)) 
-                                        ] 
-                                }) 
-                            ("MaxNumberOfItemsInTuple", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("MaxItems", MaxItems(5)) 
-                                        ] 
-                                }) 
-                            ("MaxNumberOfMembers", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("MaxItems", MaxItems(5)) 
-                                        ] 
-                                }) 
-                            ("MaxNumberOfBooleanOperatorsInCondition", 
-                                { 
-                                    Settings = Map.ofList 
-                                        [ 
-                                            ("Enabled", Enabled(true)) 
-                                            ("MaxItems", MaxItems(4)) 
-                                        ] 
-                                }) 
-                        ]
-                    Settings = Map.ofList []
-                }) 
-        ]
+        [ (AnalyserName, 
+                { Rules = Map.ofList 
+                    [ ("MaxNumberOfFunctionParameters", 
+                        { Settings = Map.ofList 
+                            [ ("Enabled", Enabled(true)) 
+                              ("MaxItems", MaxItems(5)) ] }) 
+                      ("MaxNumberOfItemsInTuple", 
+                        { Settings = Map.ofList 
+                            [ ("Enabled", Enabled(true)) 
+                              ("MaxItems", MaxItems(5)) ] }) 
+                      ("MaxNumberOfMembers", 
+                        { Settings = Map.ofList 
+                            [ ("Enabled", Enabled(true)) 
+                              ("MaxItems", MaxItems(5)) ] }) 
+                      ("MaxNumberOfBooleanOperatorsInCondition", 
+                        { Settings = Map.ofList 
+                            [ ("Enabled", Enabled(true)) 
+                              ("MaxItems", MaxItems(4)) ] }) ]
+                  Settings = Map.empty }) ]
 
 [<TestFixture>]
 type TestNumberOfItemsRules() =
@@ -88,7 +66,7 @@ module Program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfFunctionParameters")>]
 let foo one two three four five six = ()"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FiveParameters() = 
@@ -97,7 +75,7 @@ module Program
 
 let foo one two three four five = ()"""
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 27))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixClassProperties() = 
@@ -127,8 +105,8 @@ type Test() =
     member val Four = 0 with get, set
     member val Five = 0 with get, set
     member val Six = 0 with get, set"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(11))
+    
+        this.AssertNoWarnings()
             
     [<Test>]
     member this.FiveClassProperties() = 
@@ -141,8 +119,8 @@ type Test() =
     member val Three = 0 with get, set
     member val Four = 0 with get, set
     member val Five = 0 with get, set"""
-
-        Assert.IsFalse(this.ErrorExistsAt(9, 11))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixClassAbstractMethods() = 
@@ -170,8 +148,8 @@ type Test() =
     abstract member Three: unit -> unit
     abstract member Four: unit -> unit
     abstract member Five: unit -> unit"""
-
-        Assert.IsFalse(this.ErrorExistsAt(9, 4))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixClassMethods() = 
@@ -200,8 +178,8 @@ type Test() =
     member this.Four() = ()
     member this.Five() = ()
     private member this.Six() = ()"""
-
-        Assert.IsFalse(this.ErrorExistsAt(10, 19))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FiveClassMethods() = 
@@ -214,8 +192,8 @@ type Test() =
     member this.Three() = ()
     member this.Four() = ()
     member this.Five() = ()"""
-
-        Assert.IsFalse(this.ErrorExistsAt(9, 11))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixTupleItemsExpressionConstructor() = 
@@ -227,7 +205,18 @@ type Test(a,b,c,d,e,f) =
 
 let dog = Test(1,2,3,4,5,6)"""
 
-        Assert.IsFalse(this.ErrorExistsAt(7, 25))
+        this.AssertNoWarnings()
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/141
+    /// Note: we are just disabling all warnings for tuples in function applications
+    /// because in a lot of places the user won't have control over the definition
+    /// of the function - the definition of a function should be where the lint is warning.
+    [<Test>]
+    member this.``Tuple with too many items in a functiona application must never issue a warning.``() = 
+        this.Parse """
+foo (1,2,3,4,5,6)"""
+
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixTupleItemsExpressionConstructorWithNew() = 
@@ -239,7 +228,7 @@ type Test(a,b,c,d,e,f) =
 
 let dog = new Test(1,2,3,4,5,6)"""
 
-        Assert.IsFalse(this.ErrorExistsAt(7, 29))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixTupleItemsExpressionCallingMethod() = 
@@ -253,8 +242,8 @@ let test = Test()
 
 let dog =
     test.One(1,2,3,4,5,6)"""
-
-        Assert.IsFalse(this.ErrorExistsAt(10, 23))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.SixTupleItemsExpression() = 
@@ -273,7 +262,7 @@ module Program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfItemsInTuple")>]
 let foo = (1, 2, 3, 4, 5, 6)"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FiveTupleItemsExpression() = 
@@ -282,7 +271,7 @@ module Program
 
 let foo = (1, 2, 3, 4, 5)"""
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 23))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FourBooleanOperators() = 
@@ -291,8 +280,8 @@ module Program
 
 if not true && (false && false) || true then
     ()"""
-
-        Assert.IsFalse(this.ErrorExistsAt(4, 3))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FiveBooleanOperators() = 
@@ -312,5 +301,5 @@ module Program
 
 if not true && (false && false) || true (&&) (false) then
     ()"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+    
+        this.AssertNoWarnings()

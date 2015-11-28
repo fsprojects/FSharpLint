@@ -116,5 +116,8 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
     member __.ErrorWithMessageExists(message) =
         errorRanges |> Seq.exists (fun (_, e) -> e = message)
 
+    member this.AssertNoWarnings() =
+        Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
+
     [<SetUp>]
     member __.SetUp() = errorRanges.Clear()
