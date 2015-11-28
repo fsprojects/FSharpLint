@@ -79,18 +79,16 @@ module Lint =
 
     /// Optional parameters that can be provided to the linter.
     type OptionalLintParameters =
-        {
-            /// This function will be called as the linter progresses through the AST of each file.
-            /// The linter will stop linting if this function returns true.
-            FinishEarly: (unit -> bool) option
+        { /// This function will be called as the linter progresses through the AST of each file.
+          /// The linter will stop linting if this function returns true.
+          FinishEarly: (unit -> bool) option
 
-            /// Provide your own FSharpLint configuration to the linter.
-            /// If not provided the default configuration will be used.
-            Configuration: Configuration.Configuration option
+          /// Provide your own FSharpLint configuration to the linter.
+          /// If not provided the default configuration will be used.
+          Configuration: Configuration.Configuration option
 
-            /// This function will be called every time the linter finds a broken rule.
-            ReceivedWarning: (LintWarning.Warning -> unit) option
-        }
+          /// This function will be called every time the linter finds a broken rule.
+          ReceivedWarning: (LintWarning.Warning -> unit) option }
 
         static member Default: OptionalLintParameters
 
@@ -98,19 +96,17 @@ module Lint =
     /// you want to lint then this can be used to provide the parsed information to prevent the 
     /// linter from parsing the file again.
     type ParsedFileInformation =
-        {
-            /// File represented as an AST.
-            Ast: Microsoft.FSharp.Compiler.Ast.ParsedInput
+        { /// File represented as an AST.
+          Ast: Microsoft.FSharp.Compiler.Ast.ParsedInput
 
-            /// Contents of the file.
-            Source: string
+          /// Contents of the file.
+          Source: string
 
-            /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-            TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
+          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+          TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
 
-            /// Version of F# the source code of the file was written in.
-            FSharpVersion: System.Version
-        }
+          /// Version of F# the source code of the file was written in.
+          FSharpVersion: System.Version }
 
     /// Reason for the linter failing.
     type LintFailure =

@@ -217,7 +217,7 @@ module Lint =
             let visitAst = async {
                     try
                         LoadPlugins.astVisitors lintInfo.RulePlugins visitorInfo
-                            |> Ast.lintFile lintInfo.FinishEarly parsedFileInfo
+                        |> Ast.lintFile lintInfo.FinishEarly parsedFileInfo
                     with 
                     | e -> Failed(parsedFileInfo.File, e) |> lintInfo.ReportLinterProgress
                 }
@@ -249,8 +249,7 @@ module Lint =
             | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
             | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
         with 
-        | Configuration.ConfigurationException(_) -> 
-            Failure(RunTimeConfigError)
+        | Configuration.ConfigurationException(_) -> Failure(RunTimeConfigError)
 
     let getFailedFiles = function 
         | ParseFile.Failed(failure) -> Some(failure) 

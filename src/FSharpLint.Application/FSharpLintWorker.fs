@@ -20,12 +20,14 @@ namespace FSharpLint.Application
 
 module FSharpLintWorker =
 
+    open System
     open FSharpLint.Framework
+    open FSharpLint.Worker
     
     let private toWorkerProgress = function
-        | Starting(f) -> FSharpLint.Worker.Progress.Starting(f)
-        | ReachedEnd(f) -> FSharpLint.Worker.Progress.ReachedEnd(f)
-        | Failed(f, e) -> FSharpLint.Worker.Progress.Failed(f, e)
+        | Starting(f) -> Progress.Starting(f)
+        | ReachedEnd(f) -> Progress.ReachedEnd(f)
+        | Failed(f, e) -> Progress.Failed(f, e)
 
     let private toWorkerRange (range:Microsoft.FSharp.Compiler.Range.range) =
         FSharpLint.Worker.Range(StartLine = range.StartLine,
@@ -41,17 +43,17 @@ module FSharpLintWorker =
                                 FormattedError = LintWarning.getWarningWithLocation error.Range error.Input)
 
     type FSharpLintWorker() = 
-        inherit System.MarshalByRefObject()
+        inherit MarshalByRefObject()
 
-        let errorReceivedEvent = DelegateEvent<FSharpLint.Worker.ErrorReceivedEventHandler>()
+        let errorReceivedEvent = DelegateEvent<ErrorReceivedEventHandler>()
 
         let receivedError error = errorReceivedEvent.Trigger [| toWorkerError error |]
 
-        let reportProgressEvent = DelegateEvent<FSharpLint.Worker.ReportProgressEventHandler>()
+        let reportProgressEvent = DelegateEvent<ReportProgressEventHandler>()
 
         let receivedProgress progress = reportProgressEvent.Trigger [| toWorkerProgress progress |]
 
-        interface FSharpLint.Worker.IFSharpLintWorker with
+        interface IFSharpLintWorker with
 
             [<CLIEvent>]
             member __.ErrorReceived = errorReceivedEvent.Publish
@@ -61,51 +63,48 @@ module FSharpLintWorker =
 
             member __.RunLint(projectFile) =
                 let failed resouce args = 
-                    let formatString = FSharpLint.Framework.Resources.GetString resouce
-                    System.String.Format(formatString, args) |> FSharpLint.Worker.Result.Failure
+                    let formatString = Resources.GetString resouce
+                    String.Format(formatString, args) |> Result.Failure
 
                 try
                     let neverFinishEarly _ = false
 
                     let parseInfo =
-                        {
-                            FinishEarly = Some neverFinishEarly
-                            ReceivedWarning = Some receivedError
-                            Configuration = None
-                        }
+                        { FinishEarly = Some neverFinishEarly
+                          ReceivedWarning = Some receivedError
+                          Configuration = None }
 
                     let getParseFailureReason = function
                         | ParseFile.FailedToParseFile(failures) ->
                             let getFailureReason (x:Microsoft.FSharp.Compiler.FSharpErrorInfo) =
                                 sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
-                            System.String.Join(", ", failures |> Array.map getFailureReason)
-                        | ParseFile.AbortedTypeCheck ->
-                            "Aborted type check."
+                            String.Join(", ", failures |> Array.map getFailureReason)
+                        | ParseFile.AbortedTypeCheck -> "Aborted type check."
 
                     match lintProject parseInfo projectFile (Some receivedProgress) with
-                        | LintResult.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
-                            failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
-                        | LintResult.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
-                            failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
-                        | LintResult.Failure(FailedToLoadConfig(message)) -> 
-                            failed "ConsoleFailedToLoadConfig" [|message|]
-                        | LintResult.Failure(RunTimeConfigError) -> 
-                            failed "ConsoleRunTimeConfigError" [||]
-                        | LintResult.Failure(FailedToParseFile(failure)) -> 
-                            FSharpLint.Worker.Result.Failure(
-                                "Lint failed while analysing " + 
-                                projectFile + 
-                                ".\nFailed with: " + 
-                                getParseFailureReason failure)
-                        | LintResult.Failure(FailedToParseFilesInProject(failures)) -> 
-                            FSharpLint.Worker.Result.Failure(
-                                "Lint failed while analysing " + 
-                                projectFile + 
-                                ".\nFailed with: " + 
-                                System.String.Join("\n", failures |> List.map getParseFailureReason))
-                        | LintResult.Success(_) -> 
-                            FSharpLint.Worker.Result.Success()
+                    | LintResult.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
+                        failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
+                    | LintResult.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
+                        failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+                    | LintResult.Failure(FailedToLoadConfig(message)) -> 
+                        failed "ConsoleFailedToLoadConfig" [|message|]
+                    | LintResult.Failure(RunTimeConfigError) -> 
+                        failed "ConsoleRunTimeConfigError" [||]
+                    | LintResult.Failure(FailedToParseFile(failure)) -> 
+                        Result.Failure(
+                            "Lint failed while analysing " + 
+                            projectFile + 
+                            ".\nFailed with: " + 
+                            getParseFailureReason failure)
+                    | LintResult.Failure(FailedToParseFilesInProject(failures)) -> 
+                        Result.Failure(
+                            "Lint failed while analysing " + 
+                            projectFile + 
+                            ".\nFailed with: " + 
+                            String.Join("\n", failures |> List.map getParseFailureReason))
+                    | LintResult.Success(_) -> Result.Success()
                 with
-                    | e -> 
-                        FSharpLint.Worker.Result.Failure("Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace)
+                | e -> 
+                    "Lint failed while analysing " + projectFile + ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace
+                    |> Result.Failure

@@ -27,18 +27,17 @@ module LintWarning =
     /// Gets a message stating where a lint warning occured.
     let getWarningMessage (range:range) =
         let error = FSharpLint.Framework.Resources.GetString("LintError")
-        System.String.Format(error, range.FileName, range.StartLine, range.StartColumn)
+        String.Format(error, range.FileName, range.StartLine, range.StartColumn)
 
     /// Generates a message including highlighting where in the code the warning was found.
     let warningInfoLine getErrorMessage (range:range) (input:string) =
         let errorenousLine = input.Split('\n').[range.StartLine - 1].TrimEnd('\r')
         let highlightColumnLine = 
-            if String.length errorenousLine = 0 then
-                "^"
+            if String.length errorenousLine = 0 then "^"
             else
                 errorenousLine 
-                    |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")
-                    |> Seq.reduce (+)
+                |> Seq.mapi (fun i x -> if i = range.StartColumn then "^" else " ")
+                |> Seq.reduce (+)
 
         (getErrorMessage range) + Environment.NewLine + errorenousLine + Environment.NewLine + highlightColumnLine
         
@@ -48,13 +47,11 @@ module LintWarning =
     
     /// A lint warning - information on where a lint rule was found to be broken.
     type Warning =
-        {
-            /// Warning to display to the user.
-            Info: string
+        { /// Warning to display to the user.
+          Info: string
             
-            /// Location of the warning.
-            Range: range
+          /// Location of the warning.
+          Range: range
 
-            /// Entire input file, needed to display where in the file the error occurred.
-            Input: string
-        }
+          /// Entire input file, needed to display where in the file the error occurred.
+          Input: string }

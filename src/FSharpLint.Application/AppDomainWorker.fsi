@@ -24,16 +24,14 @@ module AppDomainWorker =
     open FSharpLint.Worker
 
     type LintOptions =
-        {
-            /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
-            Progress: System.Action<Progress>
+        { /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
+          Progress: System.Action<Progress>
 
-            /// Callback that's called when a lint error is detected.
-            ErrorReceived: System.Action<Error>
+          /// Callback that's called when a lint error is detected.
+          ErrorReceived: System.Action<Error>
 
-            /// Fail the build if one or more lint warnings are found in a project.
-            FailBuildIfAnyWarnings: bool
-        }
+          /// Fail the build if one or more lint warnings are found in a project.
+          FailBuildIfAnyWarnings: bool }
 
     type AppDomainWorker = 
         inherit MarshalByRefObject

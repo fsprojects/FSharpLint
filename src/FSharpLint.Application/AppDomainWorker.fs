@@ -24,16 +24,14 @@ module AppDomainWorker =
     open FSharpLint.Worker
 
     type LintOptions =
-        {
-            /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
-            Progress: System.Action<Progress>
+        { /// Callback that's called at the start and end of parsing each file (or when a file fails to be parsed).
+          Progress: Action<Progress>
 
-            /// Callback that's called when a lint error is detected.
-            ErrorReceived: System.Action<Error>
+          /// Callback that's called when a lint error is detected.
+          ErrorReceived: Action<Error>
 
-            /// Fail the build if one or more lint warnings are found in a project.
-            FailBuildIfAnyWarnings: bool
-        }
+          /// Fail the build if one or more lint warnings are found in a project.
+          FailBuildIfAnyWarnings: bool }
 
     type AppDomainWorker() = 
         inherit MarshalByRefObject() 
@@ -49,7 +47,7 @@ module AppDomainWorker =
 
             let directory = IO.Path.GetDirectoryName(fullPath)
 
-            let setup = AppDomainSetup(LoaderOptimization = System.LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
+            let setup = AppDomainSetup(LoaderOptimization = LoaderOptimization.MultiDomain, PrivateBinPath = directory, ApplicationBase = directory, DisallowBindingRedirects = true)
 
             let evidence = AppDomain.CurrentDomain.Evidence
 
@@ -116,7 +114,7 @@ module AppDomainWorker =
             while not cancelToken.IsCancellationRequested do
                 try
                     reportsReceived.Take(cancelToken.Token) 
-                        |> this.PassReportToOptionsCallback
+                    |> this.PassReportToOptionsCallback
                 with _ -> ()
 
         member private __.Dispose(disposing) =

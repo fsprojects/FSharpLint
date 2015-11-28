@@ -35,13 +35,11 @@ module LintWarning =
 
     /// A lint warning - information on where a lint rule was found to be broken.
     type Warning =
-        {
-            /// Warning to display to the user.
-            Info: string
+        { /// Warning to display to the user.
+          Info: string
 
-            /// Location of the warning.
-            Range: range
+          /// Location of the warning.
+          Range: range
 
-            /// Entire input file, needed to display where in the file the error occurred.
-            Input: string
-        }
+          /// Entire input file, needed to display where in the file the error occurred.
+          Input: string }
