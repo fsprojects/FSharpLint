@@ -71,6 +71,22 @@ type TestNameConventionRules() =
         Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
+    member this.``Unit of measure issues no casing naming warning.``() = 
+        this.Parse """
+[<Measure>] type L
+
+[<Measure>] type usGal"""
+
+        Assert.IsFalse(this.ErrorsExist, "Unexpected warning: " + this.ErrorMsg)
+
+    [<Test>]
+    member this.``Unit of measure issues underscore naming warning.``() = 
+        this.Parse """
+[<Measure>] type us_Gal"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
     member this.ClassNameIsPascalCase() = 
         this.Parse """
 module Program

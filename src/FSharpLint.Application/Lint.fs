@@ -391,7 +391,7 @@ module Lint =
             { Ast.PlainText = parsedFileInfo.Source
               Ast.Ast = parsedFileInfo.Ast
               Ast.TypeCheckResults = parsedFileInfo.TypeCheckResults
-              Ast.File = "/home/user/Dog.test.fsx" }
+              Ast.File = "/home/user/Dog.Test.fsx" }
 
         lint lintInformation parsedFileInfo
 

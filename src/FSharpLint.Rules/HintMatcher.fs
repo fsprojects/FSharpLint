@@ -68,7 +68,7 @@ module HintMatcher =
                 LambdaArgumentMatch.Variable(variable, identifier.idText)
             | Argument.Wildcard -> 
                 LambdaArgumentMatch.Wildcard(isWildcard)
-            | _ -> LambdaArgumentMatch.NoMatch            
+            | _ -> LambdaArgumentMatch.NoMatch
             
     [<RequireQualifiedAccess>]
     type LambdaMatch =

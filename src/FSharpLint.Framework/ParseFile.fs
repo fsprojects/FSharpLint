@@ -77,7 +77,7 @@ module ParseFile =
         
     /// Parses source code using `FSharp.Compiler.Services`.
     let parseSource source configuration (checker:FSharpChecker) =
-        let file = "/home/user/Dog.test.fsx"
+        let file = "/home/user/Dog.Test.fsx"
         
         let options = 
             checker.GetProjectOptionsFromScript(file, source) 
