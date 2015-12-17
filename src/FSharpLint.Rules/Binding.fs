@@ -146,6 +146,7 @@ module Binding =
             | _ -> None
 
         match breadcrumbs with 
+        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, range)))::AstNode.Expression(SynExpr.ObjExpr(_))::_
         | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, range)))::AstNode.MemberDefinition(_)::_ -> 
             tupleRange = range
         | _ -> false
