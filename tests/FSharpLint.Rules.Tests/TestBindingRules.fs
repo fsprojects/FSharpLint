@@ -227,3 +227,17 @@ type Cat() =
     member __.Persian<'t>(_, _) = ()"""
 
         Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Method's parameter list of wildcards in object expressions should not be treated as tuple of wildcards.``() =
+        this.Parse """
+module Program
+
+type I =
+    abstract member Two : bool * bool -> bool
+
+let x =
+    { new I with
+        member __.Two(_, _) = false }"""
+
+        Assert.IsFalse(this.ErrorsExist)
