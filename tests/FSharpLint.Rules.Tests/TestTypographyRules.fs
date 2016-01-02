@@ -206,7 +206,19 @@ type TestNestedStatements() =
         Assert.IsFalse(this.ErrorExistsAt(3, 8))
 
     [<Test>]
-    member this.NewLineOnEndOfFile() = 
+    member this.``Tab character in literal strings are not reported``() =
+        this.Parse (sprintf """
+            let a = @"a%sb"
+            let b = %s
+            a%sb
+            %s
+            """ "\t" "\"\"\"" "\t" "\"\"\"")
+
+        Assert.IsFalse(this.ErrorExistsAt(2, 23))
+        Assert.IsFalse(this.ErrorExistsAt(4, 13))
+
+    [<Test>]
+    member this.NewLineOnEndOfFile() =
         this.Parse ("let dog = 9" + System.Environment.NewLine)
 
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
