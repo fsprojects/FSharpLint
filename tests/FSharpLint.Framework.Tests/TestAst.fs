@@ -236,3 +236,28 @@ let dog = ()"""
 
             lintFile (fun _ -> false) result [visitWholeTree]
         | _ -> failwith "Failed to parse input."
+
+    [<Test>]
+    member __.GetStringLiteralsFromAst() =
+        let input =
+            """
+module Foo =
+    let value = "value"
+
+let dog = "dog"
+let escaped = @"test" """
+
+        let stubConfig =
+            {
+                UseTypeChecker = Some(false)
+                IgnoreFiles =
+                    Some({ Update = IgnoreFiles.Overwrite
+                           Files = []
+                           Content = "" })
+                Analysers = Map.ofList []
+            }
+
+        match parseSource input stubConfig (FSharpChecker.Create()) with
+            | ParseFileResult.Success(result) ->
+                Assert.AreEqual(3, getStringLiteralsFromAst result.Ast |> List.length)
+            | _ -> failwith "Failed to parse input."

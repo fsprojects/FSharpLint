@@ -37,6 +37,7 @@ module LoadVisitors =
             File: string
             Input: string
             SuppressedMessages: (Ast.SuppressedMessage * range) list
+            StringLiterals: (string * range) list
         }
 
         with

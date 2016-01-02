@@ -132,6 +132,12 @@ module Ast =
             |> List.map (fun x -> (x, range))
         | _ -> []
 
+    /// Gets any string literal contained in a given node in the AST.
+    let getStringLiterals node =
+        match node with
+        | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> [value, range]
+        | _ -> []
+
     /// Extracts the child nodes to be visited from a given node.
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("CyclomaticComplexity", "*")>]
@@ -411,6 +417,27 @@ module Ast =
             let walkRoot root =
                 ModuleOrNamespace(root)
                 |> walkTreeToGetSuppressMessageAttributes
+
+            roots |> List.collect walkRoot
+        | ParsedInput.SigFile(_) -> []
+
+    let private walkTreeToGetStringLiterals rootNode =
+        let rec walk node stringLiterals =
+            let getStringLiteralsForChild literals child = 
+                getStringLiterals child @ walk child literals
+
+            traverseNode node
+            |> List.fold getStringLiteralsForChild stringLiterals
+
+        walk rootNode (getStringLiterals rootNode)
+
+    /// Gets all the string literals in a file's AST.
+    /// This function is for plaintext visitors so they can make decisions based on string literals.
+    let getStringLiteralsFromAst = function
+        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
+            let walkRoot root =
+                ModuleOrNamespace(root)
+                |> walkTreeToGetStringLiterals
 
             roots |> List.collect walkRoot
         | ParsedInput.SigFile(_) -> []

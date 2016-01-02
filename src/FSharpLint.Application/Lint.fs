@@ -206,12 +206,14 @@ module Lint =
                         if parsedFileInfo.PlainText.Contains("SuppressMessage") then
                             Ast.getSuppressMessageAttributesFromAst parsedFileInfo.Ast
                         else []
+                    let stringLiterals = Ast.getStringLiteralsFromAst parsedFileInfo.Ast
 
                     for visitor in LoadPlugins.plainTextVisitors lintInfo.RulePlugins visitorInfo do
                         visitor 
                             { Input = parsedFileInfo.PlainText
                               File = parsedFileInfo.File
-                              SuppressedMessages = suppressMessageAttributes }
+                              SuppressedMessages = suppressMessageAttributes
+                              StringLiterals = stringLiterals }
                 }
 
             let visitAst = async {
