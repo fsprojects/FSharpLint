@@ -400,47 +400,34 @@ module Ast =
             /// e.g. to sum the number of if statements in a function.
             | WalkWithVisitor of Visitor * (unit -> unit)
 
-    let private walkTreeToGetSuppressMessageAttributes rootNode =
-        let rec walk node suppressedMessageAttributes =
-            let getAttributesForChild attrs child = 
-                getSuppressMessageAttributes child @ walk child attrs
+    let private walkTreeToCollect mapping rootNode =
+        let rec walk node results =
+            let collectForChild results child = 
+                mapping child @ walk child results
 
             traverseNode node
-            |> List.fold getAttributesForChild suppressedMessageAttributes
+            |> List.fold collectForChild results
 
-        walk rootNode (getSuppressMessageAttributes rootNode)
+        walk rootNode (mapping rootNode)
+
+    let private collectFromAst mapping = function
+        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
+            let walkRoot root =
+                ModuleOrNamespace(root)
+                |> walkTreeToCollect mapping
+
+            roots |> List.collect walkRoot
+        | ParsedInput.SigFile(_) -> []
 
     /// Gets all the attributes used to suppress lint warnings in a file's AST for sections of code.
     /// This function is for plaintext visitors so they can get the suppressions.
-    let getSuppressMessageAttributesFromAst = function
-        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
-            let walkRoot root =
-                ModuleOrNamespace(root)
-                |> walkTreeToGetSuppressMessageAttributes
-
-            roots |> List.collect walkRoot
-        | ParsedInput.SigFile(_) -> []
-
-    let private walkTreeToGetStringLiterals rootNode =
-        let rec walk node stringLiterals =
-            let getStringLiteralsForChild literals child = 
-                getStringLiterals child @ walk child literals
-
-            traverseNode node
-            |> List.fold getStringLiteralsForChild stringLiterals
-
-        walk rootNode (getStringLiterals rootNode)
+    let getSuppressMessageAttributesFromAst =
+        collectFromAst getSuppressMessageAttributes
 
     /// Gets all the string literals in a file's AST.
     /// This function is for plaintext visitors so they can make decisions based on string literals.
-    let getStringLiteralsFromAst = function
-        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
-            let walkRoot root =
-                ModuleOrNamespace(root)
-                |> walkTreeToGetStringLiterals
-
-            roots |> List.collect walkRoot
-        | ParsedInput.SigFile(_) -> []
+    let getStringLiteralsFromAst =
+        collectFromAst getStringLiterals
 
     type ToWalk =
     | Node of AstNode * AstNode list * (SuppressedMessage * range) list * Visitor
