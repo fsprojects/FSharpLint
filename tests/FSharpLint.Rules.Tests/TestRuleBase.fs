@@ -71,7 +71,13 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
             lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
         | Success(parseInfo), PlainText(visitor) -> 
             let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
-            visitor visitorInfo { File = ""; Input = input; SuppressedMessages = suppressedMessages }
+            let stringLiterals = getStringLiteralsFromAst parseInfo.Ast
+            visitor
+                visitorInfo
+                { File = ""
+                  Input = input
+                  SuppressedMessages = suppressedMessages
+                  StringLiterals = stringLiterals }
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =

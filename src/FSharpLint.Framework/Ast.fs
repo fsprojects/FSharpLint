@@ -132,6 +132,12 @@ module Ast =
             |> List.map (fun x -> (x, range))
         | _ -> []
 
+    /// Gets any string literal contained in a given node in the AST.
+    let getStringLiterals node =
+        match node with
+        | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> [value, range]
+        | _ -> []
+
     /// Extracts the child nodes to be visited from a given node.
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
     [<System.Diagnostics.CodeAnalysis.SuppressMessage("CyclomaticComplexity", "*")>]
@@ -394,26 +400,34 @@ module Ast =
             /// e.g. to sum the number of if statements in a function.
             | WalkWithVisitor of Visitor * (unit -> unit)
 
-    let private walkTreeToGetSuppressMessageAttributes rootNode =
-        let rec walk node suppressedMessageAttributes =
-            let getAttributesForChild attrs child = 
-                getSuppressMessageAttributes child @ walk child attrs
+    let private walkTreeToCollect mapping rootNode =
+        let rec walk node results =
+            let collectForChild results child = 
+                mapping child @ walk child results
 
             traverseNode node
-            |> List.fold getAttributesForChild suppressedMessageAttributes
+            |> List.fold collectForChild results
 
-        walk rootNode (getSuppressMessageAttributes rootNode)
+        walk rootNode (mapping rootNode)
 
-    /// Gets all the attributes used to suppress lint warnings in a file's AST for sections of code.
-    /// This function is for plaintext visitors so they can get the suppressions.
-    let getSuppressMessageAttributesFromAst = function
+    let private collectFromAst mapping = function
         | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,roots,_)) ->
             let walkRoot root =
                 ModuleOrNamespace(root)
-                |> walkTreeToGetSuppressMessageAttributes
+                |> walkTreeToCollect mapping
 
             roots |> List.collect walkRoot
         | ParsedInput.SigFile(_) -> []
+
+    /// Gets all the attributes used to suppress lint warnings in a file's AST for sections of code.
+    /// This function is for plaintext visitors so they can get the suppressions.
+    let getSuppressMessageAttributesFromAst =
+        collectFromAst getSuppressMessageAttributes
+
+    /// Gets all the string literals in a file's AST.
+    /// This function is for plaintext visitors so they can make decisions based on string literals.
+    let getStringLiteralsFromAst =
+        collectFromAst getStringLiterals
 
     type ToWalk =
     | Node of AstNode * AstNode list * (SuppressedMessage * range) list * Visitor

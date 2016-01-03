@@ -155,7 +155,15 @@ module Typography =
 
                 if indexOfTab >= 0 then
                     let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                    if plaintextVisitorInfo.IsSuppressed(range, AnalyserName, "NoTabCharacters") |> not then
+                    let isSuppressed range =
+                        plaintextVisitorInfo.IsSuppressed(range, AnalyserName, "NoTabCharacters")
+                    let rangeContainsOtherRange (containingRange:range) (range:range) =
+                        posGeq range.Start containingRange.Start &&
+                        posGeq containingRange.End range.End
+                    let isInStringLiteral range =
+                        plaintextVisitorInfo.StringLiterals
+                        |> Seq.exists (fun (_, literalRange) -> rangeContainsOtherRange literalRange range)
+                    if (isSuppressed range || isInStringLiteral range) |> not then
                         visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
 
     let analyseLine (visitorInfo:VisitorInfo) mkRange suppressMessageAttributes lineNumber (line:string) = 
