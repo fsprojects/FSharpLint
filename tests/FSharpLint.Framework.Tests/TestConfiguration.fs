@@ -30,7 +30,7 @@ type System.String with
     member this.RemoveWhitepsace() =
         System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
 
-let emptyLoadedConfigs = { LoadedConfigs = Map.ofList []; PathsAdded = [] }
+let emptyLoadedConfigs = { LoadedConfigs = Map.ofList []; PathsAdded = []; GlobalConfigs = [] }
 
 [<TestFixture>]
 type TestConfiguration() =
@@ -262,7 +262,8 @@ type TestConfiguration() =
                   (["C:"; "Dog"], None)
                   (["C:"; "Dog"; "Goat"], None)
                   (["C:"; "Dog"; "Cat"], None) ] |> Map.ofList
-              PathsAdded = [ ["C:"; "Dog"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
+              PathsAdded = [ ["C:"; "Dog"; "Cat"]; ["C:"; "Dog"; "Goat"] ]
+              GlobalConfigs = [] }
 
         let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs [ "C:"; "Dog"; "Goat" ]
 
@@ -278,7 +279,8 @@ type TestConfiguration() =
                   (["D:"; "Dog"], None)
                   (["C:"], None)
                   (["C:"; "Dog"], None) ] |> Map.ofList
-              PathsAdded = [ ["D:"; "Dog"]; ["C:"; "Dog"] ] }
+              PathsAdded = [ ["D:"; "Dog"]; ["C:"; "Dog"] ]
+              GlobalConfigs = [] }
 
         let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs [ "C:"; "Dog" ]
 
@@ -294,7 +296,8 @@ type TestConfiguration() =
                   (["C:"; "Dog"], None)
                   (["C:"; "Dog"; "Goat"], None)
                   (["C:"; "Dog"; "Goat"; "Cat"], None) ] |> Map.ofList
-              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
+              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ]
+              GlobalConfigs = [] }
 
         let loadedConfigs = Management.addPath (fun _ -> None) emptyLoadedConfigs ["C:"; "Dog"; "Goat"]
 
@@ -310,7 +313,8 @@ type TestConfiguration() =
                   (["C:"; "Dog"], None)
                   (["C:"; "Dog"; "Goat"], None)
                   (["C:"; "Dog"; "Goat"; "Cat"], None) ] |> Map.ofList
-              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ] }
+              PathsAdded = [ ["C:"; "Dog"; "Goat"; "Cat"]; ["C:"; "Dog"; "Goat"] ]
+              GlobalConfigs = [] }
 
         let updatedLoadedConfigs = 
             Management.removePath loadedConfigs [ "C:"; "Dog"; "Goat"; "Cat" ]
@@ -320,7 +324,8 @@ type TestConfiguration() =
                 [ (["C:"], None)
                   (["C:"; "Dog"], None)
                   (["C:"; "Dog"; "Goat"], None) ] |> Map.ofList
-              PathsAdded = [ ["C:"; "Dog"; "Goat"] ] }
+              PathsAdded = [ ["C:"; "Dog"; "Goat"] ]
+              GlobalConfigs = [] }
 
         Assert.AreEqual(expectedLoadedConfigs, updatedLoadedConfigs)
 
@@ -329,7 +334,8 @@ type TestConfiguration() =
 
         let expectedLoadedConfigs = 
             { LoadedConfigs = [] |> Map.ofList
-              PathsAdded = [] }
+              PathsAdded = []
+              GlobalConfigs = [] }
 
         Assert.AreEqual(expectedLoadedConfigs, updatedLoadedConfigs)
 
@@ -340,7 +346,8 @@ type TestConfiguration() =
               PathsAdded = 
                 [ ["C:"; "Dog"; "Goat"; "Cat"]
                   ["C:"; "Dog"; "Goat"]
-                  ["C:"; "Dog"; "Goat"; "Shrimp"] ] }
+                  ["C:"; "Dog"; "Goat"; "Shrimp"] ]
+              GlobalConfigs = [] }
 
         let path = commonPath loadedConfigs ["C:";"NonExistant"]
 
@@ -353,7 +360,8 @@ type TestConfiguration() =
               PathsAdded = 
                 [ ["C:"; "Dog"; "Goat"; "Cat"]
                   ["C:"; "Dog"; "Goat"]
-                  ["C:"; "Dog"; "Goat"; "Shrimp"] ] }
+                  ["C:"; "Dog"; "Goat"; "Shrimp"] ]
+              GlobalConfigs = [] }
 
         let path = commonPath loadedConfigs ["C:";"Dog"]
 
@@ -365,7 +373,8 @@ type TestConfiguration() =
             { LoadedConfigs = [] |> Map.ofList
               PathsAdded = 
                 [ ["C:"; "Dog"; "Goat"; "Cat"]
-                  ["D:"; "Dog"; "Goat"; "Shrimp"] ] }
+                  ["D:"; "Dog"; "Goat"; "Shrimp"] ]
+              GlobalConfigs = [] }
 
         let path = commonPath loadedConfigs ["C:";"Dog"]
 
@@ -375,7 +384,8 @@ type TestConfiguration() =
     member __.``No path is returned when there are no paths added``() = 
         let loadedConfigs = 
             { LoadedConfigs = [] |> Map.ofList
-              PathsAdded = [] }
+              PathsAdded = []
+              GlobalConfigs = [] }
 
         let path = commonPath loadedConfigs ["C:";"Dog"]
 
@@ -385,7 +395,8 @@ type TestConfiguration() =
     member __.``Default configuration returned when there are no paths added``() = 
         let loadedConfigs = 
             { LoadedConfigs = [] |> Map.ofList
-              PathsAdded = [] }
+              PathsAdded = []
+              GlobalConfigs = [] }
 
         let config = getConfig loadedConfigs ["C:";"Dog"]
 
@@ -402,7 +413,8 @@ type TestConfiguration() =
 
         let loadedConfigs = 
             { LoadedConfigs = [(["C:"], Some(loadedConfig))] |> Map.ofList
-              PathsAdded = [["C:"]] }
+              PathsAdded = [["C:"]]
+              GlobalConfigs = [] }
 
         let config = getConfig loadedConfigs ["C:";"Dog"]
 
