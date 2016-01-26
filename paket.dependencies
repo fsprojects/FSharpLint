@@ -2,6 +2,7 @@ source https://nuget.org/api/v2
 
 nuget NUnit
 nuget FSharp.Compiler.Service
+nuget FSharp.Compiler.Service.ProjectCracker
 nuget FAKE.Lib
 
 group Tools
