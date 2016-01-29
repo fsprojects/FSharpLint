@@ -50,6 +50,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Compiler.Service">
+      <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
@@ -68,9 +71,9 @@
       <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
-      <Name>FSharpLint.Worker</Name>
-      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
+    <ProjectReference Include="..\FSharpLint.Framework\FSharpLint.Framework.fsproj">
+      <Name>FSharpLint.Framework</Name>
+      <Project>{94220ba0-e632-4f4f-8f6d-a11a5aa52636}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

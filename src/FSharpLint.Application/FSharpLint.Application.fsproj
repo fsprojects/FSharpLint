@@ -49,21 +49,19 @@
     <Compile Include="LintWarning.fs" />
     <Compile Include="Lint.fsi" />
     <Compile Include="Lint.fs" />
-    <Compile Include="FSharpLintWorker.fsi" />
     <Compile Include="FSharpLintWorker.fs" />
-    <Compile Include="AppDomainWorker.fsi" />
-    <Compile Include="AppDomainWorker.fs" />
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
     <None Include="app.config" />
+    <None Include="FSharp.Compiler.Service.ProjectCrackerTool.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="FSharp.Compiler.Service.ProjectCrackerTool.exe.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
-      <Name>FSharpLint.Worker</Name>
-      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
-      <Private>True</Private>
-    </ProjectReference>
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
     </Reference>

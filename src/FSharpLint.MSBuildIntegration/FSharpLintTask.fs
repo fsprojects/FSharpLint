@@ -18,11 +18,8 @@
 
 namespace FSharpLint.MSBuildIntegration
 
-open System
-open System.IO
-open System.Reflection
-open FSharpLint.Application.AppDomainWorker
-open FSharpLint.Worker
+open FSharpLint.Application
+open FSharpLint.Application.FSharpLintWorker
 
 type FSharpLintTask() = 
     inherit Microsoft.Build.Utilities.Task()
@@ -32,47 +29,25 @@ type FSharpLintTask() =
 
     member val TreatWarningsAsErrors = false with get, set
 
-    override this.Execute() = 
-        let directory = 
-            Assembly.GetAssembly(this.GetType()).Location
-            |> Path.GetDirectoryName
-
-        let resolveAssembly _ (args:ResolveEventArgs) =
-            let assembly = 
-                try 
-                    match Assembly.Load(args.Name) with
-                    | null -> None
-                    | assembly -> Some(assembly)
-                with _ -> None
-
-            match assembly with
-                | Some(assembly) -> assembly
-                | None -> 
-                    let parts = args.Name.Split(',')
-                    let file = Path.Combine(directory, parts.[0].Trim() + ".dll")
-
-                    Assembly.LoadFrom(file)
-
-        let resolveAssemblyHandler = ResolveEventHandler(resolveAssembly)
-            
-        AppDomain.CurrentDomain.add_AssemblyResolve(resolveAssemblyHandler)
-        
+    override this.Execute() =         
         // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
         let logFailure:(string -> unit) = this.Log.LogWarning
         
-        let progress (progress:Progress) =
-            if progress.State = Progress.ProgressType.Failed then
+        let progress (progress:ProjectProgress) =
+            match progress with
+            | Failed(filename, e) ->
                 sprintf 
                     "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s"
-                    progress.Filename
-                    progress.Exception.Message
-                    progress.Exception.StackTrace
+                    filename
+                    e.Message
+                    e.StackTrace
                     |> logFailure
+            | _ -> ()
         
-        let errorReceived (error:Error) = 
+        let errorReceived (error:LintWarning.Warning) = 
             let filename = error.Range.FileName
             let startLine = error.Range.StartLine
             let startColumn = error.Range.StartColumn + 1
@@ -85,15 +60,12 @@ type FSharpLintTask() =
                 logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
         
         let options = 
-            { Progress = Action<_>(progress)
-              ErrorReceived = Action<_>(errorReceived)
-              FailBuildIfAnyWarnings = treatWarningsAsErrors }
+            { ReceivedWarning = Some(errorReceived)
+              FinishEarly = None
+              Configuration = None }
         
-        use worker = new AppDomainWorker()
-        let result = worker.RunLint this.Project options
-
-        if not result.IsSuccess then logFailure result.Message
-            
-        AppDomain.CurrentDomain.remove_AssemblyResolve(resolveAssemblyHandler)
+        match FSharpLintWorker.RunLint(this.Project, options, Some(progress)) with
+        | Success -> ()
+        | Failure(message) -> logFailure message
 
         true

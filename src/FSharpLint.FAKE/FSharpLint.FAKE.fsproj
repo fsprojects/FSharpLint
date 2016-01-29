@@ -58,6 +58,9 @@
       <HintPath>..\..\packages\FAKE.Lib.3.33.0\lib\net451\FakeLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.Compiler.Service">
+      <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
     </Reference>
@@ -72,9 +75,9 @@
       <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.Worker\FSharpLint.Worker.csproj">
-      <Name>FSharpLint.Worker</Name>
-      <Project>{f3e6454b-7442-44fd-a1c0-7fafaa67f414}</Project>
+    <ProjectReference Include="..\FSharpLint.Framework\FSharpLint.Framework.fsproj">
+      <Name>FSharpLint.Framework</Name>
+      <Project>{94220ba0-e632-4f4f-8f6d-a11a5aa52636}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
