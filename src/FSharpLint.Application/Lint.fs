@@ -234,7 +234,11 @@ module Lint =
             ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getProjectFileInfo projectFilePath =
-        try Success(ProjectCracker.GetProjectOptionsFromProjectFile(projectFilePath))
+        // Setting `FSharpLintEnabled` to `false` is very important as `ProjectCracker` can build the project file,
+        // so if run as an msbuild task without this property we'd end up with an infinite loop of builds (taking out the machine).
+        let msBuildProperties = ["FSharpLintEnabled", "false"]
+
+        try Success(ProjectCracker.GetProjectOptionsFromProjectFile(projectFilePath, msBuildProperties))
         with
         | :? InvalidProjectFileException as e ->
             Failure(MSBuildFailedToLoadProjectFile(projectFilePath, e))
