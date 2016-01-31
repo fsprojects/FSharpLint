@@ -29,7 +29,7 @@ module TestPackageHelper =
     let copyFSharpLintTaskFiles toDirectory = 
         let taskDirectory = 
             sprintf @"../../../FSharpLint.FunctionalTest.TestedProject/%s/" toDirectory
-                |> getPath
+            |> getPath
 
         let taskDirectoryExists = Directory.Exists(taskDirectory)
         if not taskDirectoryExists then
@@ -44,7 +44,6 @@ module TestPackageHelper =
                 "Release"
             #endif
 
-        copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharp.Core.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharpLint.MSBuildIntegration.dll")
 
         copyToTaskDir (@"../../../../src/FSharpLint.FAKE/bin/" + binDir + "/FSharpLint.FAKE.dll")
