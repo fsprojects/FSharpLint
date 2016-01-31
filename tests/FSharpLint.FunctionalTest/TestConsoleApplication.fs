@@ -20,14 +20,13 @@ namespace FSharpLint.FunctionalTest
 
 module Tests =
 
+    open System
     open NUnit.Framework
 
     type Error =
-        {
-            Description: string
-            Location: string
-            Code: string
-        }
+        { Description: string
+          Location: string
+          Code: string }
 
         override this.ToString() =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
@@ -40,14 +39,13 @@ module Tests =
                 @"../../../../bin/fsharplint.exe"
             #endif
 
-        let startInfo = System.Diagnostics.ProcessStartInfo
-                                (
-                                    FileName = filename,
-                                    Arguments = arguments,
-                                    RedirectStandardOutput = true,
-                                    UseShellExecute = false)
+        let startInfo = Diagnostics.ProcessStartInfo
+                                (FileName = IO.Path.GetFullPath filename,
+                                 Arguments = arguments,
+                                 RedirectStandardOutput = true,
+                                 UseShellExecute = false)
 
-        use app = System.Diagnostics.Process.Start(startInfo)
+        use app = Diagnostics.Process.Start(startInfo)
 
         let output = app.StandardOutput.ReadToEnd()
                 
@@ -56,17 +54,14 @@ module Tests =
         output
 
     let getErrorsFromOutput (output:string) = 
-        let splitOutput = output.Split([|System.Environment.NewLine|], System.StringSplitOptions.None)
+        let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
 
         let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
 
         [ for i in errorIndexes -> 
-            {
-                Description = splitOutput.[i]
-                Location = splitOutput.[i + 1]
-                Code = splitOutput.[i + 2]
-            }
-        ]
+            { Description = splitOutput.[i]
+              Location = splitOutput.[i + 1]
+              Code = splitOutput.[i + 2] } ]
 
     let expectedErrors =
         [ "`not (a=b)` might be able to be refactored into `a<>b`."
@@ -85,11 +80,11 @@ module Tests =
         member __.InvalidConfig() = 
             let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
 
-            System.IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
+            IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
 
             let output = runConsoleApp arguments
 
-            System.IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
+            IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
 
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
@@ -142,8 +137,8 @@ module Tests =
             let errors = getErrorsFromOutput output
 
             expectedErrors 
-                |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
-                                                   "Errors did not contain expected error:\n" + x +
-                                                   ". Program output:\n" + output))
+            |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
+                                               "Errors did not contain expected error:\n" + x +
+                                               ". Program output:\n" + output))
 
             Assert.AreEqual(expectedErrors.Length, errors.Length)

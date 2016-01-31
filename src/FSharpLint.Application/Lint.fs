@@ -234,12 +234,28 @@ module Lint =
             ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getProjectFileInfo projectFilePath =
-        try Success(ProjectCracker.GetProjectOptionsFromProjectFile(projectFilePath))
-        with
-        | :? InvalidProjectFileException as e ->
-            Failure(MSBuildFailedToLoadProjectFile(projectFilePath, e))
-        | :? FileNotFoundException as e ->
-            Failure(MSBuildFailedToLoadProjectFile(projectFilePath, InvalidProjectFileException(e.Message, e)))
+        // TODO: Find how to extract exceptions from ProjectCracker API rather than parsing them.
+        let parseExceptionMessage str =
+            let message = Text.RegularExpressions.Regex.Match(str, @"^.+Exception: (.*) Line \d")
+            if message.Success && message.Groups.Count = 2 then
+                InvalidProjectFileException message.Groups.[1].Value
+            else
+                InvalidProjectFileException str
+
+        // Setting `FSharpLintEnabled` to `false` is very important as `ProjectCracker` can build the project file,
+        // so if run as an msbuild task without this property we'd end up with an infinite loop of builds (taking out the machine).
+        let msBuildProperties = ["FSharpLintEnabled", "false"]
+
+        let projectOptions, log = 
+            ProjectCracker.GetProjectOptionsFromProjectFileLogged(projectFilePath, msBuildProperties)
+
+        let invalidProjectFile, fileNotFound = 
+            "Microsoft.Build.Exceptions.InvalidProjectFileException", "System.IO.FileNotFoundException"
+
+        match log.TryFind projectFilePath with
+        | Some(logStr) when logStr.StartsWith(invalidProjectFile) || logStr.StartsWith(fileNotFound) -> 
+            Failure(MSBuildFailedToLoadProjectFile(projectFilePath, parseExceptionMessage logStr))
+        | None | Some(_) -> Success projectOptions
 
     let configFailureToLintFailure = function
         | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)

@@ -124,15 +124,16 @@ Target "CreatePackage" (fun _ ->
                 [
                     (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}src{0}FSharpLint.Worker{0}bin{0}Release{0}FSharpLint.Worker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}src{0}FSharpLint.CrossDomain{0}bin{0}Release{0}FSharpLint.CrossDomain.dll", System.IO.Path.DirectorySeparatorChar), None, None)
 
                     (System.String.Format("..{0}..{0}bin{0}FSharp.Core.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCracker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCrackerTool.exe", System.IO.Path.DirectorySeparatorChar), None, None)
+                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCrackerTool.exe.config", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                     (System.String.Format("..{0}..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
                 ]
