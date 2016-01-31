@@ -40,7 +40,7 @@ module Tests =
             #endif
 
         let startInfo = Diagnostics.ProcessStartInfo
-                                (FileName = filename,
+                                (FileName = IO.Path.GetFullPath filename,
                                  Arguments = arguments,
                                  RedirectStandardOutput = true,
                                  UseShellExecute = false)

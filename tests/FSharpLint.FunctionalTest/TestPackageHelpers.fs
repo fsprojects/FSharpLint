@@ -45,6 +45,7 @@ module TestPackageHelper =
             #endif
 
         copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharpLint.MSBuildIntegration.dll")
+        copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharp.Core.dll")
 
         copyToTaskDir (@"../../../../src/FSharpLint.FAKE/bin/" + binDir + "/FSharpLint.FAKE.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Application/bin/" + binDir + "/FSharpLint.Application.dll")
