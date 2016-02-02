@@ -403,6 +403,26 @@ type TestConfiguration() =
         Assert.AreEqual(Some defaultConfiguration, config)
 
     [<Test>]
+    member __.``Overridden global configuration returned when a global path has been added``() = 
+        let loadedConfig = 
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = 
+                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                                 Rules = [] |> Map.ofList }] |> Map.ofList }
+
+        let loadedConfigs = 
+            { LoadedConfigs = Map.empty
+              PathsAdded = []
+              GlobalConfigs = [{ Path = ["C:";"User";".config"]; Name = "User Wide"; Configuration = Some(loadedConfig) }] }
+
+        let config = getConfig loadedConfigs ["C:";"User";".config"]
+
+        let expectedConfig = overrideConfiguration defaultConfiguration loadedConfig
+
+        Assert.AreEqual(Some expectedConfig, config)
+
+    [<Test>]
     member __.``Overridden configuration returned when there is a path added``() = 
         let loadedConfig = 
             { UseTypeChecker = None
@@ -419,6 +439,33 @@ type TestConfiguration() =
         let config = getConfig loadedConfigs ["C:";"Dog"]
 
         let expectedConfig = overrideConfiguration defaultConfiguration loadedConfig
+
+        Assert.AreEqual(Some expectedConfig, config)
+
+    [<Test>]
+    member __.``Overridden configuration overrides global config``() = 
+        let globalConfig = 
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = 
+                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                                 Rules = [] |> Map.ofList }] |> Map.ofList }
+        let loadedConfig = 
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = 
+                ["Binding", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
+                              Rules = [] |> Map.ofList }] |> Map.ofList }
+
+        let loadedConfigs = 
+            { LoadedConfigs = [(["C:"], Some(loadedConfig))] |> Map.ofList
+              PathsAdded = [["C:"]]
+              GlobalConfigs = [{ Path = ["C:";"User";".config"]; Name = "User Wide"; Configuration = Some(globalConfig) }] }
+
+        let config = getConfig loadedConfigs ["C:";"Dog"]
+
+        let overridenGlobalConfig = overrideConfiguration defaultConfiguration globalConfig
+        let expectedConfig = overrideConfiguration overridenGlobalConfig loadedConfig
 
         Assert.AreEqual(Some expectedConfig, config)
 

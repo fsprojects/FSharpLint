@@ -652,17 +652,19 @@ module Configuration =
         /// "complete" configuration means that it has overridden any previous
         /// configuration files.
         let getConfig loadedConfigs path = 
-            let globalConfigs =
-                loadedConfigs.GlobalConfigs 
-                |> Seq.takeWhile (fun x -> x.Path <> path)
-                |> Seq.toList
+            let (globalConfigs, pathWasAGlobalConfig) =
+                let rec takeUntilPathMatch built = function
+                | config::_ when config.Path = path -> (config::built, true)
+                | config::rest -> takeUntilPathMatch (config::built) rest
+                | [] -> (built, false)
+
+                takeUntilPathMatch [] loadedConfigs.GlobalConfigs 
+                |> fun (configs, matchFound) -> (List.rev configs, matchFound)
 
             let globalConfig =
                 globalConfigs
                 |> List.map (fun x -> x.Configuration)
                 |> List.fold tryOverrideConfig (Some defaultConfiguration)
-
-            let pathWasAGlobalConfig = globalConfigs |> List.exists (fun x -> x.Path = path)
 
             if pathWasAGlobalConfig then globalConfig
             else
