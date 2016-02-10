@@ -76,6 +76,8 @@ module Ast =
         | ConstructorArguments of SynConstructorArgs
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
+        | FuncApp of SynExpr list
+        | Identifier of string
 
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
     let getSuppressMessageAttributes node =
