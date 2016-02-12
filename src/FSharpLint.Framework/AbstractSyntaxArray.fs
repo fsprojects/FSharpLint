@@ -342,7 +342,7 @@ module AbstractSyntaxArray =
         member __.Identifier = identifierHashCode
         member __.Depth = depth
  
-    let private astToArray hint =
+    let astToArray hint =
         let astRoot =
             match hint with
             | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_)) -> 
@@ -354,13 +354,19 @@ module AbstractSyntaxArray =
 
         let inline add x = 
             left.Push x
-            nodes.Enqueue x
+
+            let hashCode = 
+                match x with 
+                | Identifier(ident) -> ident.GetHashCode() 
+                | _ -> 0
+
+            nodes.Enqueue (Node(num x, hashCode, uint16 left.Count))
 
         add astRoot
 
         while left.Count > 0 do
             let node = left.Pop()
 
-            traverseNode node |> List.rev |> List.iter add
+            AstTemp.traverseNode node |> List.rev |> List.iter add
 
         nodes.ToArray()
