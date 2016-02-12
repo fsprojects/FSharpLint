@@ -77,6 +77,145 @@ module HintParser =
     type Hint =
         { Match: Expression
           Suggestion: Suggestion }
+          
+    /// Provides a way of creating a single list from any number of hint ASTs.
+    /// Means we can simply iterate over a single list for each node in the F# tree
+    /// when matching hints rather than check each hint AST for each node.
+    module MergeSyntaxTrees =
+
+        open System.Collections.Generic
+ 
+        type MergedHintKey =
+            | InfixOperator of string
+            | PrefixOperator of string
+            | FunctionApplication
+            | Wildcard
+            | Variable of char
+            | Identifier of string list
+            | Constant of Constant
+            | Parentheses
+            | Lambda of Argument list
+            | Tuple
+            | List
+            | Array
+            | If
+            | Null
+ 
+        type Node =
+            { Edges: Node list
+              Depth: int
+              Match: MergedHintKey
+              Suggestions: Suggestion list }
+ 
+        let private getKeyAndChildren = function
+            | Expression.InfixOperator(opIdent, lhs, rhs) ->
+                InfixOperator(opIdent), [lhs; rhs]
+            | Expression.PrefixOperator(opIdent, expr) ->
+                PrefixOperator(opIdent), [expr]
+            | Expression.FunctionApplication(exprs) ->
+                FunctionApplication, exprs
+            | Expression.Parentheses(expr) ->
+                Parentheses, [expr]
+            | Expression.Lambda(lambda) ->
+                Lambda(lambda.Arguments), [lambda.Body]
+            | Expression.Tuple(exprs) ->
+                Tuple, exprs
+            | Expression.List(exprs) ->
+                List, exprs
+            | Expression.Array(exprs) ->
+                Array, exprs
+            | Expression.If(ifCond, bodyExpr, elseExpr) ->
+                If, [ yield ifCond
+                      yield bodyExpr
+                      match elseExpr with 
+                      | Some(elseExpr) -> yield elseExpr 
+                      | _ -> () ]
+            | Expression.Null ->
+                Null, []
+            | Expression.Wildcard ->
+                Wildcard, []
+            | Expression.Variable(c) ->
+                Variable(c), []
+            | Expression.Identifier(ident) ->
+                Identifier(ident), []
+            | Expression.Constant(cons) ->
+                Constant(cons), []
+ 
+        let private hintToList (hint:Hint) =
+            let nodes = Queue<_>()
+ 
+            let rec depthFirstTraversal expr depth =
+                let key, children = getKeyAndChildren expr
+ 
+                nodes.Enqueue((key, depth))
+ 
+                for child in children do
+                    depthFirstTraversal child (depth + 1)
+ 
+            depthFirstTraversal hint.Match 0
+ 
+            (nodes |> Seq.toList, hint.Suggestion)
+ 
+        type private HintList = (MergedHintKey * int) list * Suggestion
+ 
+        type private TransposedNode =
+            | HintNode of key:MergedHintKey * depth:int * rest:HintList
+            | EndOfHint of Suggestion
+ 
+        /// Gets the head of each given list
+        let private transposeHead hintLists =
+            let rec transposeHead builtList = function
+                | (((key, depth)::tail), suggestion)::rest -> 
+                    let restOfHintList = (tail, suggestion)
+                    let next = HintNode(key, depth, restOfHintList)::builtList
+                    transposeHead next rest
+                | ([], suggestion)::rest -> 
+                    let next = EndOfHint(suggestion)::builtList
+                    transposeHead next rest
+                | [] -> builtList
+ 
+            transposeHead [] hintLists
+ 
+        let mergeHints hints =
+            let rec getEdges transposed =
+                transposed
+                |> Seq.choose 
+                    (function 
+                    | HintNode(key, depth, rest) -> Some(key, depth, rest) 
+                    | EndOfHint(_) -> None)
+                |> Seq.groupBy (fun (key, depth, _) -> key, depth)
+                |> Seq.map 
+                    (fun ((key, depth), items) -> 
+                        let hints = 
+                            items 
+                            |> Seq.map (function (_, _, hint) -> hint) 
+                            |> Seq.toList
+ 
+                        mergeHints hints key depth)
+                |> Seq.toList
+            
+            and mergeHints hints key depth =
+                let transposed = transposeHead hints
+ 
+                let edges = getEdges transposed
+ 
+                let suggestions =
+                    transposed
+                    |> Seq.choose 
+                        (function 
+                        | HintNode(_) -> None 
+                        | EndOfHint(suggestion) -> Some(suggestion))
+                    |> Seq.toList
+ 
+                { Edges = edges 
+                  Depth = depth
+                  Match = key
+                  Suggestions = suggestions }
+ 
+            let transposed = 
+                hints |> List.map hintToList |> transposeHead
+ 
+            getEdges transposed
 
     let charListToString charList =
         Seq.fold (fun x y -> x + y.ToString()) "" charList

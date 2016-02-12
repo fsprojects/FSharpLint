@@ -21,6 +21,44 @@ module TestHintParser
 open NUnit.Framework
 open FSharpLint.Framework.HintParser
 open FParsec
+open MergeSyntaxTrees
+
+[<TestFixture>]
+type TestMergeSyntaxTrees() =
+
+    [<Test>]
+    member __.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() = 
+        
+        match run phint "List.map id ===> id", run phint "List.map x ===> x" with
+            | Success(hint, _, _), Success(hint2, _, _) -> 
+                let expectedEdges =
+                    [{ Edges = []
+                       Depth = 1
+                       Match = MergedHintKey.Variable('x')
+                       Suggestions = [Expr(Expression.Variable('x'))] }
+                     { Edges = []
+                       Depth = 1
+                       Match = MergedHintKey.Identifier(["id"])
+                       Suggestions = [Expr(Expression.Identifier(["id"]))] }]
+
+                let expectedMergedList =
+                    [{ Edges = 
+                        [{ Edges = expectedEdges
+                           Depth = 1
+                           Match = MergedHintKey.Identifier(["List"; "map"])
+                           Suggestions = [] }]
+                       Depth = 0
+                       Match = MergedHintKey.FunctionApplication
+                       Suggestions = [] }]
+
+                let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
+
+                Assert.AreEqual(expectedMergedList, mergedHint)
+            | _ -> Assert.Fail()
+
+    [<Test>]
+    member __.``Merge no hints gives no merged lists``() = 
+        Assert.AreEqual([], MergeSyntaxTrees.mergeHints [])
 
 [<TestFixture>]
 type TestHintOperators() =
