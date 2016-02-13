@@ -24,21 +24,21 @@ namespace FSharpLint.Framework
 /// by just adding a single new file to a project without having to modify any other files.
 module LoadVisitors =
 
+    open System
+    open System.Linq
+    open System.Reflection
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
-    open System.Linq
 
     /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
     type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> Ast.Visitor
 
     type PlainTextVisitorInfo =
-        {
-            File: string
-            Input: string
-            SuppressedMessages: (Ast.SuppressedMessage * range) list
-            StringLiterals: (string * range) list
-        }
+        { File: string
+          Input: string
+          SuppressedMessages: (Ast.SuppressedMessage * range) list
+          StringLiterals: (string * range) list }
 
         with
             /// Has a given rule been suppressed by SuppressMessageAttribute?
@@ -61,33 +61,31 @@ module LoadVisitors =
         | PlainText of PlainTextVisitor
 
     type VisitorPlugin =
-        {
-            Name: string
-            Visitor: VisitorType
-        }
+        { Name: string
+          Visitor: VisitorType }
 
     /// Interface to be implemented to register a plugin.
     type IRegisterPlugin =
         abstract RegisterPlugin : VisitorPlugin with get
 
     /// Loads all registered visitors (files containing a class implementing IRegisterPlugin) from a given assembly.
-    let loadPlugins (assembly:System.Reflection.Assembly) =
-        let isPluginType (t:System.Type) = 
+    let loadPlugins (assembly:Assembly) =
+        let isPluginType (t:Type) = 
             if t.GetInterfaces().Contains(typeof<IRegisterPlugin>) then
-                match t.GetConstructor(System.Type.EmptyTypes) with
+                match t.GetConstructor(Type.EmptyTypes) with
                 | null -> false
                 | _ -> true
             else
                 false
 
-        let pluginFromType (t:System.Type) = 
+        let pluginFromType t = 
             if isPluginType t then
-                match System.Activator.CreateInstance(t) with
+                match Activator.CreateInstance(t) with
                 | :? IRegisterPlugin as plugin -> Some(plugin.RegisterPlugin)
                 | _ -> None
             else
                 None
 
         assembly.GetTypes()
-                |> Array.choose pluginFromType
-                |> Array.toList
+        |> Array.choose pluginFromType
+        |> Array.toList
