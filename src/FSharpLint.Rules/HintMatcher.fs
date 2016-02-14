@@ -582,44 +582,18 @@ module HintMatcher =
             not <| isParameterDelegateType 0 methodIdent
         | _ -> true
 
-    let visitor getHints visitorInfo checkFile (astNode:CurrentNode) = 
-        if isAnalyserEnabled visitorInfo.Config && astNode.IsSuppressed(AnalyserName) |> not then
-            match astNode.Node with
-            | AstNode.Expression(SynExpr.Paren(_)) -> Continue
-            | AstNode.Expression(expr) -> 
-                for hint in getHints visitorInfo.Config do
-                    let arguments =
-                        { MatchExpression.LambdaArguments = Map.ofList []
-                          MatchExpression.Expression = expr
-                          MatchExpression.Hint = hint.Match
-                          MatchExpression.FSharpCheckFileResults = checkFile
-                          MatchExpression.Breadcrumbs = astNode.Breadcrumbs }
+    let visitor getHints visitorInfo (syntaxArray:AbstractSyntaxArray.Node []) = 
+        let hints = getHints visitorInfo.Config
 
-                    if MatchExpression.matchHintExpr arguments then
-                        match hint.Match, hint.Suggestion with
-                        | Expression.Lambda(_), Suggestion.Expr(Expression.Identifier(_)) -> 
-                            if lambdaCanBeReplacedWithFunction checkFile astNode.Breadcrumbs expr then
-                                hintError hint visitorInfo expr.Range
-                        | _ ->
-                            hintError hint visitorInfo expr.Range
-
-                Continue
-            | AstNode.Pattern(SynPat.Paren(_)) -> Continue
-            | AstNode.Pattern(pattern) ->
-                for hint in getHints visitorInfo.Config do
-                    if MatchPattern.matchHintPattern (pattern, hint.Match) then
-                        hintError hint visitorInfo pattern.Range
-                    
-                Continue
-            | _ -> Continue
-        else
-            Stop
+        ()
 
     let getHintsFromConfig config =
         let analyser = Map.find AnalyserName config.Analysers
 
         match Map.tryFind "Hints" analyser.Settings with
-        | Some(Hints(hints)) -> List.map (fun x -> x.ParsedHint) hints
+        | Some(Hints(hints)) -> 
+            List.map (fun x -> x.ParsedHint) hints
+            |> MergeSyntaxTrees.mergeHints
         | _ ->
             Debug.Assert(false, "Hints analyser was not in the configuration.")
             []
@@ -627,7 +601,7 @@ module HintMatcher =
     type RegisterHintVisitor() = 
         let plugin =
             { Name = AnalyserName
-              Visitor = Ast(visitor getHintsFromConfig) }
+              Visitor = SyntaxArray(visitor getHintsFromConfig) }
 
         interface IRegisterPlugin with
             member __.RegisterPlugin = plugin

@@ -56,9 +56,13 @@ module LoadVisitors =
     /// Visitor that visists the plain text of the F# files in a project.
     type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit
 
+    // TODO: Support suppressed messages.
+    type SyntaxArrayVisitor = Ast.VisitorInfo -> AbstractSyntaxArray.Node [] -> unit
+
     type VisitorType =
         | Ast of AstVisitor
         | PlainText of PlainTextVisitor
+        | SyntaxArray of SyntaxArrayVisitor
 
     type VisitorPlugin =
         { Name: string
