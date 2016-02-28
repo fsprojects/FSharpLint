@@ -20,7 +20,10 @@ module TestAbstractSyntaxArray
 
 open System.IO
 open System.Diagnostics
+open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
+open Microsoft.FSharp.Compiler.Ast
+open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open NUnit.Framework
 
@@ -30,9 +33,7 @@ type TestAst() =
     [<Literal>]
     let SourceFile = "../../TypeChecker.fs"
 
-    let generateAst () =
-        let source = File.ReadAllText SourceFile
-
+    let generateAst source =
         let checker = FSharpChecker.Create()
 
         let options = 
@@ -50,7 +51,7 @@ type TestAst() =
     [<Category("Performance")>]
     [<Test>]
     member __.``Check performance of walking tree for matching hints``() = 
-        let tree = generateAst()
+        let tree = File.ReadAllText SourceFile |> generateAst
 
         let stopwatch = Stopwatch.StartNew()
 
@@ -58,7 +59,8 @@ type TestAst() =
 
         stopwatch.Stop()
 
-        Assert.Less(stopwatch.ElapsedMilliseconds, 150)
+        Assert.Less(stopwatch.ElapsedMilliseconds, 200)
+        System.Console.WriteLine(sprintf "Built array in %d milliseconds." stopwatch.ElapsedMilliseconds)
     
         let stopwatch = Stopwatch.StartNew()
 
@@ -69,11 +71,36 @@ type TestAst() =
         let mutable i = 0
         while i < length - 1 do
             let node = array.[i]
-            if node.SyntaxNode = SyntaxNode.Identifier then
-                foundListFoldIdent <- foundListFoldIdent || node.Identifier = listFoldHashCode
+            if node.SyntaxNode = SyntaxNode.Identifier && node.Identifier = listFoldHashCode then
+                foundListFoldIdent <- true
             i <- i + 1
 
         stopwatch.Stop()
 
         Assert.IsTrue(foundListFoldIdent)
         Assert.Less(stopwatch.ElapsedMilliseconds, 5)
+        System.Console.WriteLine(sprintf "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds)
+
+    [<Test>]
+    member __.``Syntax array constructed from AST in valid order.``() = 
+        let tree = generateAst "List.map (fun x y -> id x) woofs"
+
+        let array = astToArray tree
+
+        let actual = array |> Array.map (fun x -> (x.SyntaxNode, x.Identifier))
+
+        let expected =
+            [ (SyntaxNode.FuncApp, 0)
+              (SyntaxNode.Identifier, "List.map".GetHashCode())
+              (SyntaxNode.Lambda, 0)
+              (SyntaxNode.LambdaArg, 0)
+              (SyntaxNode.Identifier, "x".GetHashCode())
+              (SyntaxNode.LambdaArg, 0)
+              (SyntaxNode.Identifier, "y".GetHashCode())
+              (SyntaxNode.LambdaBody, 0)
+              (SyntaxNode.FuncApp, 0)
+              (SyntaxNode.Identifier, "id".GetHashCode())
+              (SyntaxNode.Identifier, "x".GetHashCode())
+              (SyntaxNode.Identifier, "woofs".GetHashCode()) ]
+
+        Assert.AreEqual(expected, actual)

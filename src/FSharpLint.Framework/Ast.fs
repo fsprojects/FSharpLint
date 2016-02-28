@@ -52,6 +52,10 @@ module Ast =
             | Some(true) -> true
             | Some(_) | None -> false
 
+    type LambdaArg = LambdaArg of SynSimplePats
+
+    type LambdaBody = LambdaBody of SynExpr
+
     /// Nodes in the AST to be visited.
     type AstNode =
         | Expression of SynExpr
@@ -77,7 +81,11 @@ module Ast =
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
         | FuncApp of SynExpr list
+        | Lambda of LambdaArg list * LambdaBody
+        | LambdaArg of LambdaArg
+        | LambdaBody of LambdaBody
         | Identifier of string
+        | If of cond:SynExpr * body:SynExpr * elseIfs:(SynExpr * SynExpr) list * ``else``:SynExpr option
 
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
     let getSuppressMessageAttributes node =

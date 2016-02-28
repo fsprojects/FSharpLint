@@ -46,6 +46,23 @@ module AstTemp =
 
         flatten [] expr
 
+    let flattenLambda lambda =
+        let (|IsCurriedLambda|_|) = function
+            | SynExpr.Lambda(_, _, parameter, (SynExpr.Lambda(_) as inner), _) as outer when outer.Range = inner.Range ->
+                Some(parameter, inner)
+            | _ -> None
+
+        let rec getLambdaParametersAndExpression parameters = function
+            | IsCurriedLambda(parameter, curriedLambda) ->
+                getLambdaParametersAndExpression (parameter::parameters) curriedLambda
+            | SynExpr.Lambda(_, _, parameter, body, _) ->
+                (parameter::parameters |> List.rev, body)
+            | body -> 
+                assert false
+                (parameters |> List.rev, body)
+
+        getLambdaParametersAndExpression [] lambda
+        
     let inline private longIdentToString (longIdent:LongIdent) =
         longIdent |> List.map (fun x -> x.idText) |> String.concat "."
 
@@ -179,8 +196,6 @@ module AstTemp =
         | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _)
         | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) -> 
             [Pattern pattern; Expression expression; Expression expression1]
-        | SynExpr.Lambda(_, _, simplePatterns, expression, _) -> 
-            [SimplePatterns simplePatterns; Expression expression]
         | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
             matchClauses |> List.map Match
         | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _)
@@ -188,22 +203,23 @@ module AstTemp =
             Expression expression::(matchClauses |> List.map Match)
         | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> 
             Expression expression::(types |> List.map Type)
-        | SynExpr.IfThenElse(expression, expression1, Some(elseExpr), _, _, _, _) -> 
-            [Expression expression; Expression expression1; Expression elseExpr]
-        | SynExpr.IfThenElse(expression, expression1, None, _, _, _, _) -> 
-            [Expression expression; Expression expression1]
         | SynExpr.New(_, synType, expression, _) 
         | SynExpr.TypeTest(expression, synType, _)
         | SynExpr.Upcast(expression, synType, _)
         | SynExpr.Downcast(expression, synType, _) -> 
             [Expression expression; Type synType]
-        | SynExpr.App(_) as app -> 
-            flattenFunctionApplication app |> List.map Expression
         | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
             [ yield! bindings |> List.map Binding
               yield Expression expression ]
+        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression(cond);Expression(body)]
+        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> [Expression(cond);Expression(body);Expression(elseExpr)]
+              
         | SynExpr.Ident(ident) -> [Identifier(ident.idText)]
         | SynExpr.LongIdent(_, ident, _, _) -> [Identifier(longIdentWithDotsToString ident)]
+        | SynExpr.Lambda(_) as lambda -> 
+            let (args, body) = flattenLambda lambda
+            [Lambda(args |> List.map LambdaArg.LambdaArg, LambdaBody.LambdaBody(body))]
+        | SynExpr.App(_) as app -> [FuncApp(flattenFunctionApplication app)]
 
     let inline private typeSimpleRepresentationChildren node =
         match node with 
@@ -226,7 +242,7 @@ module AstTemp =
         | SynSimplePat.Typed(simplePattern, synType, _) -> 
             [SimplePattern simplePattern; Type synType]
         | SynSimplePat.Attrib(simplePattern, _, _) -> [SimplePattern simplePattern]
-        | SynSimplePat.Id(_) -> []
+        | SynSimplePat.Id(identifier, _, _, _, _, _) -> [Identifier(identifier.idText)]
 
     let inline private matchChildren node =
         match node with 
@@ -270,10 +286,26 @@ module AstTemp =
         | InterfaceImplementation(InterfaceImpl(synType, bindings, _)) -> 
             Type synType::(bindings |> List.map Binding)
         | TypeRepresentation(x) -> typeRepresentationChildren x
+        | FuncApp(exprs) -> exprs |> List.map Expression
+        | Lambda(args, body) -> [yield! args |> List.map LambdaArg; yield LambdaBody(body)]
+        | LambdaBody(LambdaBody.LambdaBody(body)) -> [Expression(body)]
+        | LambdaArg(LambdaArg.LambdaArg(arg)) -> [SimplePatterns(arg)]
+
+        | If(cond, body, elseIfs, Some(elseBody)) -> 
+            [ yield Expression(cond); yield Expression(body); 
+              for (elseIfCond, elseIfBody) in elseIfs do 
+                  yield Expression(elseIfCond)
+                  yield Expression(elseIfBody)
+              yield Expression(elseBody) ]
+        | If(cond, body, elseIfs, None) -> 
+            [ yield Expression(cond); yield Expression(body); 
+              for (elseIfCond, elseIfBody) in elseIfs do 
+                  yield Expression(elseIfCond)
+                  yield Expression(elseIfBody) ]
+
         | ComponentInfo(_)
         | EnumCase(_)
         | UnionCase(_)
-        | FuncApp(_)
         | Identifier(_)
         | TypeParameter(_) -> []
 
@@ -284,89 +316,96 @@ module AbstractSyntaxArray =
     open Microsoft.FSharp.Compiler.Ast
 
     type SyntaxNode =
-        | ModuleDeclaration = 1uy
-        | ModuleOrNamespace = 2uy
-        | Binding = 3uy
-        | ExceptionDefinition = 4uy
-        | ExceptionRepresentation = 5uy
-        | TypeDefinition = 6uy
-        | TypeSimpleRepresentation = 7uy
-        | Type = 8uy
-        | Match = 9uy
-        | MemberDefinition = 10uy
-        | Field = 11uy
-        | Pattern = 12uy
-        | ConstructorArguments = 13uy
-        | Expression = 14uy
-        | SimplePattern = 15uy
-        | SimplePatterns = 16uy
-        | InterfaceImplementation = 17uy
-        | TypeRepresentation = 18uy
-        | ComponentInfo = 19uy
-        | EnumCase = 20uy
-        | UnionCase = 21uy
-        | FuncApp = 22uy
-        | Identifier = 23uy
-        | TypeParameter = 24uy
+        | Identifier = 1uy
+        | Constant = 2uy
+        | Null = 3uy
+        | Expression = 4uy
+        | FuncApp = 5uy
 
-    let num x =
-        match x with
-        | ModuleDeclaration(_) -> SyntaxNode.ModuleDeclaration
-        | ModuleOrNamespace(_) -> SyntaxNode.ModuleOrNamespace
-        | AstNode.Binding(_) -> SyntaxNode.Binding
-        | ExceptionDefinition(_) -> SyntaxNode.ExceptionDefinition
-        | ExceptionRepresentation(_) -> SyntaxNode.ExceptionRepresentation
-        | TypeDefinition(_) -> SyntaxNode.TypeDefinition
-        | TypeSimpleRepresentation(_) -> SyntaxNode.TypeSimpleRepresentation
-        | Type(_) -> SyntaxNode.Type
-        | Match(_) -> SyntaxNode.Match
-        | MemberDefinition(_) -> SyntaxNode.MemberDefinition
-        | AstNode.Field(_) -> SyntaxNode.Field
-        | Pattern(_) -> SyntaxNode.Pattern
-        | ConstructorArguments(_) -> SyntaxNode.ConstructorArguments
-        | Expression(_) -> SyntaxNode.Expression
-        | SimplePattern(_) -> SyntaxNode.SimplePattern
-        | SimplePatterns(_) -> SyntaxNode.SimplePatterns
-        | InterfaceImplementation(_) -> SyntaxNode.InterfaceImplementation
-        | TypeRepresentation(_) -> SyntaxNode.TypeRepresentation
-        | AstNode.ComponentInfo(_) -> SyntaxNode.ComponentInfo
-        | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
-        | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
+        | If = 10uy
+
+        | Lambda = 20uy
+        | LambdaArg = 21uy
+        | LambdaBody = 22uy
+
+        | ArrayOrList = 30uy
+        | Tuple = 31uy
+
+        | Other = 255uy
+
+    let private astNodeToSyntaxNode = function
+        | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
+        | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
+        | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
+        | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Expression(SynExpr.Const(_)) -> SyntaxNode.Constant
+        | Lambda(_) -> SyntaxNode.Lambda
+        | LambdaArg(_) -> SyntaxNode.LambdaArg
+        | LambdaBody(_) -> SyntaxNode.LambdaBody
         | FuncApp(_) -> SyntaxNode.FuncApp
         | Identifier(_) -> SyntaxNode.Identifier
-        | TypeParameter(_) -> SyntaxNode.TypeParameter
+
+        | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_) | SynExpr.App(_) | SynExpr.Lambda(_)) -> SyntaxNode.Other
+
+        | Expression(_) -> SyntaxNode.Expression
+        | If(_) -> SyntaxNode.If
+
+        | ModuleOrNamespace(_)
+        | ModuleDeclaration(_)
+        | AstNode.Binding(_)
+        | ExceptionDefinition(_)
+        | ExceptionRepresentation(_)
+        | TypeDefinition(_)
+        | TypeSimpleRepresentation(_)
+        | AstNode.Field(_)
+        | Type(_)
+        | Match(_)
+        | TypeParameter(_)
+        | MemberDefinition(_)
+        | Pattern(_)
+        | ConstructorArguments(_)
+        | SimplePattern(_)
+        | SimplePatterns(_)
+        | InterfaceImplementation(_)
+        | TypeRepresentation(_)
+        | AstNode.ComponentInfo(_)
+        | AstNode.EnumCase(_)
+        | AstNode.UnionCase(_)
+        | AstNode.If(_) -> SyntaxNode.Other
 
     [<Struct>]
-    type Node(syntaxNode: SyntaxNode, identifierHashCode: int, depth: uint16) = 
+    type Node(syntaxNode: SyntaxNode, identifierHashCode: int, actual: AstNode) = 
         member __.SyntaxNode = syntaxNode
         member __.Identifier = identifierHashCode
-        member __.Depth = depth
- 
+        member __.Actual = actual
+        
     let astToArray hint =
         let astRoot =
             match hint with
             | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_)) -> 
                 ModuleOrNamespace moduleOrNamespaces.[0]
             | ParsedInput.SigFile _ -> failwith "Expected implementation file."
-
-        let nodes = Queue<_>()
+        
+        let nodes = List<_>()
         let left = Stack<_>()
 
-        let inline add x = 
-            left.Push x
-
-            let hashCode = 
-                match x with 
-                | Identifier(ident) -> ident.GetHashCode() 
-                | _ -> 0
-
-            nodes.Enqueue (Node(num x, hashCode, uint16 left.Count))
-
-        add astRoot
+        left.Push astRoot
 
         while left.Count > 0 do
-            let node = left.Pop()
+            let astNode = left.Pop()
 
-            AstTemp.traverseNode node |> List.rev |> List.iter add
+            AstTemp.traverseNode astNode |> List.rev |> List.iter left.Push
 
-        nodes.ToArray()
+            let hashCode = 
+                match astNode with 
+                | Identifier(ident) -> ident.GetHashCode()
+                | _ -> 0
+
+            match astNodeToSyntaxNode astNode with
+            | SyntaxNode.Other -> ()
+            | syntaxNode -> 
+                nodes.Add (Node(syntaxNode, hashCode, astNode))
+
+        let nodes = nodes.ToArray()
+
+        nodes

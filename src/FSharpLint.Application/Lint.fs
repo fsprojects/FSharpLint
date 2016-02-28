@@ -171,13 +171,15 @@ module Lint =
                 match plugin.Visitor with
                 | LoadVisitors.Ast(visitor) -> 
                     yield visitor visitorInfo
-                | LoadVisitors.PlainText(_) -> () ]
+                | LoadVisitors.PlainText(_) -> ()
+                | LoadVisitors.SyntaxArray(_) -> () ]
         
         /// Extracts a list of plain text visitors from a general list of visitors.
         let plainTextVisitors (plugins:LoadVisitors.VisitorPlugin list) visitorInfo =
             [ for plugin in plugins do
                 match plugin.Visitor with
                 | LoadVisitors.Ast(_) -> ()
+                | LoadVisitors.SyntaxArray(_) -> ()
                 | LoadVisitors.PlainText(visitor) -> 
                     yield visitor visitorInfo ]
 
