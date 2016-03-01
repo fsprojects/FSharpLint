@@ -378,6 +378,16 @@ module AbstractSyntaxArray =
         member __.SyntaxNode = syntaxNode
         member __.Identifier = identifierHashCode
         member __.Actual = actual
+
+    [<Struct>]
+    type private PossibleSkip(skipPosition: int, depth: uint16) = 
+        member __.SkipPosition = skipPosition
+        member __.Depth = depth
+
+    [<Struct>]
+    type private StackedNode(node: AstNode, depth: uint16) = 
+        member __.Node = node
+        member __.Depth = depth
         
     let astToArray hint =
         let astRoot =
@@ -385,16 +395,30 @@ module AbstractSyntaxArray =
             | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_)) -> 
                 ModuleOrNamespace moduleOrNamespaces.[0]
             | ParsedInput.SigFile _ -> failwith "Expected implementation file."
-        
+    
         let nodes = List<_>()
         let left = Stack<_>()
+        let possibleSkips = Stack<PossibleSkip>()
+        let skips = Dictionary<_, _>()
 
-        left.Push astRoot
+        let inline tryAddPossibleSkips depth =
+            while possibleSkips.Count > 0 && possibleSkips.Peek().Depth >= depth do
+                let nodePosition = possibleSkips.Pop().SkipPosition
+                let numberOfChildren = nodes.Count - nodePosition - 1
+                if numberOfChildren > 0 then
+                    skips.Add(nodePosition, numberOfChildren)
+
+        left.Push (StackedNode(astRoot, 0us))
 
         while left.Count > 0 do
-            let astNode = left.Pop()
+            let stackedNode = left.Pop()
+            let astNode = stackedNode.Node
+            let depth = stackedNode.Depth
+        
+            tryAddPossibleSkips depth
 
-            AstTemp.traverseNode astNode |> List.rev |> List.iter left.Push
+            let children = AstTemp.traverseNode astNode
+            children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1us)))
 
             let hashCode = 
                 match astNode with 
@@ -404,8 +428,17 @@ module AbstractSyntaxArray =
             match astNodeToSyntaxNode astNode with
             | SyntaxNode.Other -> ()
             | syntaxNode -> 
+                if not children.IsEmpty then
+                    possibleSkips.Push (PossibleSkip(nodes.Count, depth))
                 nodes.Add (Node(syntaxNode, hashCode, astNode))
+        
+        tryAddPossibleSkips 0us
 
         let nodes = nodes.ToArray()
+    
+        let skipArray = Array.zeroCreate nodes.Length
+    
+        for entry in skips do
+            skipArray.[entry.Key] <- entry.Value
 
-        nodes
+        (nodes, skipArray)

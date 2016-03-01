@@ -55,7 +55,7 @@ type TestAst() =
 
         let stopwatch = Stopwatch.StartNew()
 
-        let array = astToArray tree
+        let (array, _) = astToArray tree
 
         stopwatch.Stop()
 
@@ -85,7 +85,7 @@ type TestAst() =
     member __.``Syntax array constructed from AST in valid order.``() = 
         let tree = generateAst "List.map (fun x y -> id x) woofs"
 
-        let array = astToArray tree
+        let (array, skipArray) = astToArray tree
 
         let actual = array |> Array.map (fun x -> (x.SyntaxNode, x.Identifier))
 
@@ -104,3 +104,4 @@ type TestAst() =
               (SyntaxNode.Identifier, "woofs".GetHashCode()) ]
 
         Assert.AreEqual(expected, actual)
+        Assert.AreEqual([11;0;8;1;0;1;0;3;2;0;0;0], skipArray)
