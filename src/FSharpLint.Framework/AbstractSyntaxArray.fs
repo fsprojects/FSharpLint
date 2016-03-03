@@ -321,6 +321,7 @@ module AbstractSyntaxArray =
         | Null = 3uy
         | Expression = 4uy
         | FuncApp = 5uy
+        | Unit = 6uy
 
         | If = 10uy
 
@@ -338,6 +339,7 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
         | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
         | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
         | Expression(SynExpr.Const(_)) -> SyntaxNode.Constant
         | Lambda(_) -> SyntaxNode.Lambda
         | LambdaArg(_) -> SyntaxNode.LambdaArg
@@ -380,12 +382,35 @@ module AbstractSyntaxArray =
         member __.Actual = actual
 
     [<Struct>]
-    type private PossibleSkip(skipPosition: int, depth: uint16) = 
+    type private PossibleSkip(skipPosition: int, depth: int) = 
         member __.SkipPosition = skipPosition
         member __.Depth = depth
 
+    let private getHashCode node = 
+        match node with
+        | Identifier(x) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Char(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Decimal(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Double(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Int16(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Int32(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Int64(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.Single(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.String(x, _), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.UInt32(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> x.GetHashCode()
+        | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> x.GetHashCode()
+        | _ -> 0
+
     [<Struct>]
-    type private StackedNode(node: AstNode, depth: uint16) = 
+    type private StackedNode(node: AstNode, depth: int) = 
         member __.Node = node
         member __.Depth = depth
         
@@ -401,14 +426,14 @@ module AbstractSyntaxArray =
         let possibleSkips = Stack<PossibleSkip>()
         let skips = Dictionary<_, _>()
 
-        let inline tryAddPossibleSkips depth =
+        let tryAddPossibleSkips depth =
             while possibleSkips.Count > 0 && possibleSkips.Peek().Depth >= depth do
                 let nodePosition = possibleSkips.Pop().SkipPosition
                 let numberOfChildren = nodes.Count - nodePosition - 1
                 if numberOfChildren > 0 then
                     skips.Add(nodePosition, numberOfChildren)
 
-        left.Push (StackedNode(astRoot, 0us))
+        left.Push (StackedNode(astRoot, 0))
 
         while left.Count > 0 do
             let stackedNode = left.Pop()
@@ -418,21 +443,16 @@ module AbstractSyntaxArray =
             tryAddPossibleSkips depth
 
             let children = AstTemp.traverseNode astNode
-            children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1us)))
-
-            let hashCode = 
-                match astNode with 
-                | Identifier(ident) -> ident.GetHashCode()
-                | _ -> 0
+            children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1)))
 
             match astNodeToSyntaxNode astNode with
             | SyntaxNode.Other -> ()
             | syntaxNode -> 
                 if not children.IsEmpty then
                     possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-                nodes.Add (Node(syntaxNode, hashCode, astNode))
+                nodes.Add (Node(syntaxNode, getHashCode astNode, astNode))
         
-        tryAddPossibleSkips 0us
+        tryAddPossibleSkips 0
 
         let nodes = nodes.ToArray()
     
