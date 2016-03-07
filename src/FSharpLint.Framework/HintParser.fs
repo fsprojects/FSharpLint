@@ -43,15 +43,6 @@ module HintParser =
         | String of string
         | Unit
         | Bool of bool
-        
-    [<RequireQualifiedAccess>]
-    type Argument = 
-        | Wildcard
-        | Variable of char
-
-    type Lambda<'t> =
-        { Arguments: Argument list
-          Body: 't }
 
     [<RequireQualifiedAccess>]
     type Expression =
@@ -63,12 +54,16 @@ module HintParser =
         | Identifier of string list
         | Constant of Constant
         | Parentheses of Expression
-        | Lambda of Lambda<Expression>
+        | Lambda of LambdaArg list * LambdaBody
+        | LambdaBody of LambdaBody
+        | LambdaArg of LambdaArg
         | Tuple of Expression list
         | List of Expression list
         | Array of Expression list
         | If of Expression * Expression * Expression option
         | Null
+    and LambdaArg = LambdaArg of Expression
+    and LambdaBody = LambdaBody of Expression
 
     type Suggestion =
         | Expr of Expression
@@ -84,93 +79,131 @@ module HintParser =
     module MergeSyntaxTrees =
 
         open System.Collections.Generic
- 
-        type MergedHintKey =
-            | InfixOperator of string
-            | PrefixOperator of string
-            | FunctionApplication
-            | Wildcard
-            | Variable of char
-            | Identifier of string list
-            | Constant of Constant
-            | Parentheses
-            | Lambda of Argument list
-            | Tuple
-            | List
-            | Array
-            | If
-            | Null
+
+        type SyntaxHintNode =
+            | Identifier = 1uy
+            | Constant = 2uy
+            | Null = 3uy
+            | Expression = 4uy
+            | FuncApp = 5uy
+            | Unit = 6uy
+
+            | If = 10uy
+
+            | Lambda = 20uy
+            | LambdaArg = 21uy
+            | LambdaBody = 22uy
+
+            | ArrayOrList = 30uy
+            | Tuple = 31uy
+
+            | Variable = 40uy
+            | Wildcard = 41uy
  
         type Node =
-            { Edges: Node list
+            { Edges: Edges
               Depth: int
-              Match: MergedHintKey
-              Suggestions: Suggestion list }
+              Match: SyntaxHintNode
+              MatchedHint: Hint list }
+        and Edges = 
+            | AllMatch of Node list
+            | LookupMatch of Dictionary<int, Node>
  
-        let private getKeyAndChildren = function
-            | Expression.InfixOperator(opIdent, lhs, rhs) ->
-                InfixOperator(opIdent), [lhs; rhs]
-            | Expression.PrefixOperator(opIdent, expr) ->
-                PrefixOperator(opIdent), [expr]
-            | Expression.FunctionApplication(exprs) ->
-                FunctionApplication, exprs
-            | Expression.Parentheses(expr) ->
-                Parentheses, [expr]
-            | Expression.Lambda(lambda) ->
-                Lambda(lambda.Arguments), [lambda.Body]
-            | Expression.Tuple(exprs) ->
-                Tuple, exprs
-            | Expression.List(exprs) ->
-                List, exprs
-            | Expression.Array(exprs) ->
-                Array, exprs
+        let rec private getKey = function
+            | Expression.InfixOperator(_)
+            | Expression.FunctionApplication(_)
+            | Expression.PrefixOperator(_) -> SyntaxHintNode.FuncApp
+            | Expression.Parentheses(expr) -> getKey expr
+            | Expression.Lambda(_) -> SyntaxHintNode.Lambda
+            | Expression.LambdaArg(_) -> SyntaxHintNode.LambdaArg
+            | Expression.LambdaBody(_) -> SyntaxHintNode.LambdaBody
+            | Expression.Tuple(_) -> SyntaxHintNode.Tuple
+            | Expression.List(_)
+            | Expression.Array(_) -> SyntaxHintNode.ArrayOrList
+            | Expression.If(_) -> SyntaxHintNode.If
+            | Expression.Identifier(_) -> SyntaxHintNode.Identifier
+            | Expression.Constant(Constant.Unit) -> SyntaxHintNode.Unit
+            | Expression.Constant(_) -> SyntaxHintNode.Constant
+            | Expression.Null -> SyntaxHintNode.Null
+            | Expression.Wildcard -> SyntaxHintNode.Wildcard
+            | Expression.Variable(_) -> SyntaxHintNode.Variable
+ 
+        let rec private getChildren = function
+            | Expression.InfixOperator(_, lhs, rhs) -> [lhs; rhs]
+            | Expression.PrefixOperator(_, expr) -> [expr]
+            | Expression.Parentheses(expr) -> getChildren expr
+            | Expression.Lambda(args, LambdaBody(body)) ->
+                [for LambdaArg(arg) in args do yield arg; yield body]
+            | Expression.LambdaArg(LambdaArg(arg)) -> [arg]
+            | Expression.LambdaBody(LambdaBody(body)) -> [body]
+            | Expression.FunctionApplication(exprs)
+            | Expression.Tuple(exprs)
+            | Expression.List(exprs)
+            | Expression.Array(exprs) -> exprs
             | Expression.If(ifCond, bodyExpr, elseExpr) ->
-                If, [ yield ifCond
-                      yield bodyExpr
-                      match elseExpr with 
-                      | Some(elseExpr) -> yield elseExpr 
-                      | _ -> () ]
-            | Expression.Null ->
-                Null, []
-            | Expression.Wildcard ->
-                Wildcard, []
-            | Expression.Variable(c) ->
-                Variable(c), []
-            | Expression.Identifier(ident) ->
-                Identifier(ident), []
-            | Expression.Constant(cons) ->
-                Constant(cons), []
+                [ yield ifCond
+                  yield bodyExpr
+                  match elseExpr with 
+                  | Some(elseExpr) -> yield elseExpr 
+                  | _ -> () ]
+            | Expression.Identifier(_)
+            | Expression.Constant(_)
+            | Expression.Null
+            | Expression.Wildcard
+            | Expression.Variable(_) -> []
+
+        let private getHashCode node = 
+            match node with
+            | Expression.Identifier(x) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Char(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Decimal(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Double(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Int16(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Int32(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Int64(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.IntPtr(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.SByte(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.Single(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.String(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.UInt16(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.UInt32(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.UInt64(x)) -> x.GetHashCode() |> Some
+            | Expression.Constant(Constant.UIntPtr(x)) -> x.GetHashCode() |> Some
+            | _ -> None
  
         let private hintToList (hint:Hint) =
             let nodes = Queue<_>()
  
             let rec depthFirstTraversal expr depth =
-                let key, children = getKeyAndChildren expr
+                let children = getChildren expr
  
-                nodes.Enqueue((key, depth))
+                nodes.Enqueue(expr, depth)
  
                 for child in children do
                     depthFirstTraversal child (depth + 1)
  
             depthFirstTraversal hint.Match 0
  
-            (nodes |> Seq.toList, hint.Suggestion)
+            (nodes |> Seq.toList, hint)
  
-        type private HintList = (MergedHintKey * int) list * Suggestion
+        type private HintList = (Expression * int) list * Hint
  
         type private TransposedNode =
-            | HintNode of key:MergedHintKey * depth:int * rest:HintList
-            | EndOfHint of Suggestion
+            | HintNode of key:Expression * depth:int * rest:HintList
+            | EndOfHint of Hint
  
         /// Gets the head of each given list
         let private transposeHead hintLists =
             let rec transposeHead builtList = function
-                | (((key, depth)::tail), suggestion)::rest -> 
-                    let restOfHintList = (tail, suggestion)
+                | (((key, depth)::tail), hint)::rest -> 
+                    let restOfHintList = (tail, hint)
                     let next = HintNode(key, depth, restOfHintList)::builtList
                     transposeHead next rest
-                | ([], suggestion)::rest -> 
-                    let next = EndOfHint(suggestion)::builtList
+                | ([], hint)::rest -> 
+                    let next = EndOfHint(hint)::builtList
                     transposeHead next rest
                 | [] -> builtList
  
@@ -181,14 +214,14 @@ module HintParser =
                 transposed
                 |> Seq.choose 
                     (function 
-                    | HintNode(key, depth, rest) -> Some(key, depth, rest) 
+                    | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest) 
                     | EndOfHint(_) -> None)
-                |> Seq.groupBy (fun (key, depth, _) -> key, depth)
+                |> Seq.groupBy (fun (key, _, depth, _) -> key, depth)
                 |> Seq.map 
                     (fun ((key, depth), items) -> 
                         let hints = 
                             items 
-                            |> Seq.map (function (_, _, hint) -> hint) 
+                            |> Seq.map (function (_, _, _, hint) -> hint) 
                             |> Seq.toList
  
                         mergeHints hints key depth)
@@ -199,18 +232,18 @@ module HintParser =
  
                 let edges = getEdges transposed
  
-                let suggestions =
+                let matchedHints =
                     transposed
                     |> Seq.choose 
                         (function 
                         | HintNode(_) -> None 
-                        | EndOfHint(suggestion) -> Some(suggestion))
+                        | EndOfHint(hint) -> Some(hint))
                     |> Seq.toList
  
-                { Edges = edges 
+                { Edges = AllMatch(edges) 
                   Depth = depth
                   Match = key
-                  Suggestions = suggestions }
+                  MatchedHint = matchedHints }
  
             let transposed = 
                 hints |> List.map hintToList |> transposeHead
@@ -611,16 +644,14 @@ module HintParser =
 
         let pwildcard: Parser<Expression, unit> = skipString "_" >>% Expression.Wildcard
 
-        let pargumentwildcard: Parser<Argument, unit> = skipString "_" >>% Argument.Wildcard
-
         let pvariable: Parser<Expression, unit> = 
             satisfy isLetter 
             .>> notFollowedBy (satisfy isLetter)
             |>> Expression.Variable
 
-        let pargumentvariable: Parser<Argument, unit> = satisfy isLetter |>> Argument.Variable
+        let pargumentvariable: Parser<Expression, unit> = satisfy isLetter |>> Expression.Variable
 
-        let plambdaarguments: Parser<Argument list, unit> = sepEndBy1 (pargumentvariable <|> pargumentwildcard) spaces1
+        let plambdaarguments: Parser<Expression list, unit> = sepEndBy1 (pargumentvariable <|> pwildcard) spaces1
 
         let pexpression, private pexpressionImpl = createParserForwardedToRef()
 
@@ -661,7 +692,7 @@ module HintParser =
             |>> Expression.Array
 
         let plambda: Parser<Expression, unit> = 
-            let plambdastart: Parser<Argument list, unit> = 
+            let plambdastart: Parser<Expression list, unit> = 
                 skipString "fun"
                 >>. spaces1
                 >>. plambdaarguments
@@ -676,7 +707,7 @@ module HintParser =
 
                 let! body = plambdaend
 
-                return Expression.Lambda({ Arguments = arguments; Body = body })
+                return Expression.Lambda(arguments |> List.map LambdaArg, LambdaBody(body))
             }
 
         let papplication =
