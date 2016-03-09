@@ -101,13 +101,13 @@ module HintParser =
             | Wildcard = 41uy
  
         type Node =
-            { Edges: Edges
+            { Edges: Edge list
               Depth: int
               Match: SyntaxHintNode
               MatchedHint: Hint list }
-        and Edges = 
-            | AllMatch of Node list
-            | LookupMatch of Dictionary<int, Node>
+        and Edge = 
+            | AggreggatedNode of Node
+            | HashCodeLookupNode of SyntaxHintNode * Dictionary<int, Node>
  
         let rec private getKey = function
             | Expression.InfixOperator(_)
@@ -154,25 +154,25 @@ module HintParser =
 
         let private getHashCode node = 
             match node with
-            | Expression.Identifier(x) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Char(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Decimal(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Double(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Int16(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Int32(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Int64(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.IntPtr(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.SByte(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.Single(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.String(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.UInt16(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.UInt32(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.UInt64(x)) -> x.GetHashCode() |> Some
-            | Expression.Constant(Constant.UIntPtr(x)) -> x.GetHashCode() |> Some
-            | _ -> None
+            | Expression.Identifier(x) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Char(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Decimal(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Double(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Int16(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Int32(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Int64(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.IntPtr(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.SByte(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.Single(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.String(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.UInt16(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.UInt32(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.UInt64(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.UIntPtr(x)) -> x.GetHashCode() 
+            | _ -> 0
  
         let private hintToList (hint:Hint) =
             let nodes = Queue<_>()
@@ -219,12 +219,29 @@ module HintParser =
                 |> Seq.groupBy (fun (key, _, depth, _) -> key, depth)
                 |> Seq.map 
                     (fun ((key, depth), items) -> 
-                        let hints = 
+                        match key with
+                        | SyntaxHintNode.Identifier
+                        | SyntaxHintNode.Constant ->
+                            let map = Dictionary<_, _>()
+
                             items 
-                            |> Seq.map (function (_, _, _, hint) -> hint) 
-                            |> Seq.toList
+                            |> Seq.groupBy (fun (_, expr, _, _) -> getHashCode expr) 
+                            |> Seq.iter (fun (hashcode, items) -> 
+                                let hints = 
+                                    items 
+                                    |> Seq.map (function (_, _, _, hint) -> hint) 
+                                    |> Seq.toList
+                                
+                                map.Add(hashcode, mergeHints hints key depth))
  
-                        mergeHints hints key depth)
+                            HashCodeLookupNode(key, map)
+                        | _ ->
+                            let hints = 
+                                items 
+                                |> Seq.map (function (_, _, _, hint) -> hint) 
+                                |> Seq.toList
+                            
+                            AggreggatedNode(mergeHints hints key depth))
                 |> Seq.toList
             
             and mergeHints hints key depth =
@@ -240,7 +257,7 @@ module HintParser =
                         | EndOfHint(hint) -> Some(hint))
                     |> Seq.toList
  
-                { Edges = AllMatch(edges) 
+                { Edges = edges
                   Depth = depth
                   Match = key
                   MatchedHint = matchedHints }
