@@ -34,22 +34,28 @@ type TestMergeSyntaxTrees() =
                 let expectedEdges =
                     [{ Edges = []
                        Depth = 1
-                       Match = MergedHintKey.Variable('x')
-                       Suggestions = [Expr(Expression.Variable('x'))] }
+                       Match = SyntaxHintNode.Variable //MergedHintKey.Variable('x')
+                       MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
+                                                                                 Expression.Variable('x')])
+                                        Suggestion = Expr(Expression.Variable('x')) }] }
+                     |> AggreggatedNode
                      { Edges = []
                        Depth = 1
-                       Match = MergedHintKey.Identifier(["id"])
-                       Suggestions = [Expr(Expression.Identifier(["id"]))] }]
+                       Match = SyntaxHintNode.Identifier
+                       MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
+                                                                                 Expression.Identifier(["id"])])
+                                        Suggestion = Expr(Expression.Identifier(["id"])) }] }
+                     |> AggreggatedNode]
 
                 let expectedMergedList =
                     [{ Edges = 
                         [{ Edges = expectedEdges
                            Depth = 1
-                           Match = MergedHintKey.Identifier(["List"; "map"])
-                           Suggestions = [] }]
+                           Match = SyntaxHintNode.Identifier
+                           MatchedHint = [] } |> AggreggatedNode]
                        Depth = 0
-                       Match = MergedHintKey.FunctionApplication
-                       Suggestions = [] }]
+                       Match = SyntaxHintNode.FuncApp
+                       MatchedHint = [] }]
 
                 let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
 
@@ -375,7 +381,7 @@ type TestHintParser() =
     [<Test>]
     member __.ArgumentVariable() = 
         match run Expressions.pargumentvariable "x " with
-            | Success(hint, _, _) -> Assert.AreEqual(Argument.Variable('x'), hint)
+            | Success(hint, _, _) -> Assert.AreEqual(LambdaArg(Expression.Variable('x')), hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
@@ -385,21 +391,13 @@ type TestHintParser() =
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ArgumentWildcard() = 
-        match run Expressions.pargumentwildcard "_" with
-            | Success(hint, _, _) -> Assert.AreEqual(Argument.Wildcard, hint)
-            | Failure(message, _, _) -> Assert.Fail(message)
-
-    [<Test>]
     member __.LambdaArguments() = 
         let expected =
-            [
-                Argument.Variable('x')
-                Argument.Variable('y')
-                Argument.Variable('g')
-                Argument.Wildcard
-                Argument.Variable('f')
-            ]
+            [ LambdaArg(Expression.Variable('x'))
+              LambdaArg(Expression.Variable('y'))
+              LambdaArg(Expression.Variable('g'))
+              LambdaArg(Expression.Wildcard)
+              LambdaArg(Expression.Variable('f')) ]
 
         match run Expressions.plambdaarguments "x y g _ f" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -502,10 +500,8 @@ type TestHintParser() =
     member __.Lambda() = 
         let expected = 
             Expression.Lambda(
-                {
-                    Arguments = [Argument.Variable('x'); Argument.Variable('y'); Argument.Wildcard]
-                    Body = Expression.Parentheses(Expression.InfixOperator("+", Expression.Variable('x'), Expression.Variable('y')))
-                })
+                [LambdaArg(Expression.Variable('x')); LambdaArg(Expression.Variable('y')); LambdaArg(Expression.Wildcard)],
+                LambdaBody(Expression.Parentheses(Expression.InfixOperator("+", Expression.Variable('x'), Expression.Variable('y')))))
 
         match run Expressions.plambda "fun x y _ -> (x + y)" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -514,10 +510,8 @@ type TestHintParser() =
     [<Test>]
     member __.XEqualsXHint() = 
         let expected = 
-            {
-                Match = Expression.Variable('x')
-                Suggestion = Suggestion.Expr(Expression.Variable('x'))
-            }
+            { Match = Expression.Variable('x')
+              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
 
         match run phint "x ===> x" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -526,14 +520,10 @@ type TestHintParser() =
     [<Test>]
     member __.NotTrueIsFalseHint() = 
         let expected = 
-            {
-                Match = Expression.FunctionApplication
-                    [
-                        Expression.Identifier(["not"])
-                        Expression.Constant(Bool(true))
-                    ]
-                Suggestion = Suggestion.Expr(Expression.Constant(Bool(false)))
-            }
+            { Match = Expression.FunctionApplication
+                  [ Expression.Identifier(["not"])
+                    Expression.Constant(Bool(true)) ]
+              Suggestion = Suggestion.Expr(Expression.Constant(Bool(false))) }
 
         match run phint "not true ===> false" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -561,12 +551,8 @@ type TestHintParser() =
     [<Test>]
     member __.IdHint() = 
         let expected = 
-            {
-                Match = Expression.Lambda(
-                            { Arguments = [Argument.Variable('x')]
-                              Body = Expression.Variable('x') })
-                Suggestion = Suggestion.Expr(Expression.Identifier(["id"]))
-            }
+            { Match = Expression.Lambda([LambdaArg(Expression.Variable('x'))], LambdaBody(Expression.Variable('x')))
+              Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
 
         match run phint "fun x -> x ===> id" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -633,10 +619,8 @@ type TestHintParser() =
     [<Test>]
     member __.TupleHint() = 
         let expected = 
-            {
-                Match = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
-                Suggestion = Suggestion.Expr(Expression.Identifier(["id"]))
-            }
+            { Match = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
+              Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
             
         match run phint "(x, y) ===> id" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -659,10 +643,8 @@ type TestHintParser() =
     [<Test>]
     member __.ListHint() = 
         let expected =
-            {
-                Match = Expression.InfixOperator("::", Expression.Variable('x'), Expression.List([]))
-                Suggestion = Suggestion.Expr(Expression.List([Expression.Variable('x')]))
-            }
+            { Match = Expression.InfixOperator("::", Expression.Variable('x'), Expression.List([]))
+              Suggestion = Suggestion.Expr(Expression.List([Expression.Variable('x')])) }
             
         match run phint "x::[] ===> [x]" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -671,10 +653,8 @@ type TestHintParser() =
     [<Test>]
     member __.ArrayHint() = 
         let expected =
-            {
-                Match = Expression.Array([Expression.Variable('x')])
-                Suggestion = Suggestion.Expr(Expression.Variable('x'))
-            }
+            { Match = Expression.Array([Expression.Variable('x')])
+              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
             
         match run phint "[|x|] ===> x" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
