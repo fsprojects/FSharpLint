@@ -57,7 +57,7 @@ module LoadVisitors =
     type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit
 
     // TODO: Support suppressed messages.
-    type SyntaxArrayVisitor = Ast.VisitorInfo -> AbstractSyntaxArray.Node [] -> unit
+    type SyntaxArrayVisitor = Ast.VisitorInfo -> AbstractSyntaxArray.Node [] -> int [] -> unit
 
     type VisitorType =
         | Ast of AstVisitor

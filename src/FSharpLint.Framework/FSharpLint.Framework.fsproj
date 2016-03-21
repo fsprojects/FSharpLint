@@ -54,6 +54,7 @@
     <Compile Include="Resources.fs" />
     <Compile Include="ExpressionUtilities.fs" />
     <Compile Include="ParseFile.fs" />
+    <Compile Include="FuzzyHintMatcher.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <EmbeddedResource Include="Text.resx">

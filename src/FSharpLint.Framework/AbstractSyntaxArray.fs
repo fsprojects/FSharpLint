@@ -317,11 +317,10 @@ module AbstractSyntaxArray =
 
     type SyntaxNode =
         | Identifier = 1uy
-        | Constant = 2uy
-        | Null = 3uy
-        | Expression = 4uy
-        | FuncApp = 5uy
-        | Unit = 6uy
+        | Null = 2uy
+        | Expression = 3uy
+        | FuncApp = 4uy
+        | Unit = 5uy
 
         | If = 10uy
 
@@ -331,6 +330,24 @@ module AbstractSyntaxArray =
 
         | ArrayOrList = 30uy
         | Tuple = 31uy
+            
+        | ConstantBool = 51uy
+        | ConstantByte = 52uy
+        | ConstantChar = 53uy
+        | ConstantDecimal = 54uy
+        | ConstantDouble = 55uy
+        | ConstantInt16 = 56uy
+        | ConstantInt32 = 57uy
+        | ConstantInt64 = 58uy
+        | ConstantIntPtr = 59uy
+        | ConstantSByte = 60uy
+        | ConstantSingle = 61uy
+        | ConstantString = 62uy
+        | ConstantUInt16 = 63uy
+        | ConstantUInt32 = 64uy
+        | ConstantUInt64 = 65uy
+        | ConstantUIntPtr = 66uy
+        | ConstantBytes = 67uy
 
         | Other = 255uy
 
@@ -340,7 +357,22 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
         | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
         | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
-        | Expression(SynExpr.Const(_)) -> SyntaxNode.Constant
+        | Expression(SynExpr.Const(SynConst.Bool(_), _)) -> SyntaxNode.ConstantBool
+        | Expression(SynExpr.Const(SynConst.Byte(_), _)) -> SyntaxNode.ConstantByte
+        | Expression(SynExpr.Const(SynConst.Bytes(_), _)) -> SyntaxNode.ConstantBytes
+        | Expression(SynExpr.Const(SynConst.Char(_), _)) -> SyntaxNode.ConstantChar
+        | Expression(SynExpr.Const(SynConst.Decimal(_), _)) -> SyntaxNode.ConstantDecimal
+        | Expression(SynExpr.Const(SynConst.Int16(_), _)) -> SyntaxNode.ConstantInt16
+        | Expression(SynExpr.Const(SynConst.Int32(_), _)) -> SyntaxNode.ConstantInt32
+        | Expression(SynExpr.Const(SynConst.Int64(_), _)) -> SyntaxNode.ConstantInt64
+        | Expression(SynExpr.Const(SynConst.IntPtr(_), _)) -> SyntaxNode.ConstantIntPtr
+        | Expression(SynExpr.Const(SynConst.SByte(_), _)) -> SyntaxNode.ConstantSByte
+        | Expression(SynExpr.Const(SynConst.Single(_), _)) -> SyntaxNode.ConstantSingle
+        | Expression(SynExpr.Const(SynConst.String(_), _)) -> SyntaxNode.ConstantString
+        | Expression(SynExpr.Const(SynConst.UInt16(_), _)) -> SyntaxNode.ConstantUInt16
+        | Expression(SynExpr.Const(SynConst.UInt32(_), _)) -> SyntaxNode.ConstantUInt32
+        | Expression(SynExpr.Const(SynConst.UInt64(_), _)) -> SyntaxNode.ConstantUInt64
+        | Expression(SynExpr.Const(SynConst.UIntPtr(_), _)) -> SyntaxNode.ConstantUIntPtr
         | Lambda(_) -> SyntaxNode.Lambda
         | LambdaArg(_) -> SyntaxNode.LambdaArg
         | LambdaBody(_) -> SyntaxNode.LambdaBody

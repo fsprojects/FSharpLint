@@ -82,11 +82,10 @@ module HintParser =
 
         type SyntaxHintNode =
             | Identifier = 1uy
-            | Constant = 2uy
-            | Null = 3uy
-            | Expression = 4uy
-            | FuncApp = 5uy
-            | Unit = 6uy
+            | Null = 2uy
+            | Expression = 3uy
+            | FuncApp = 4uy
+            | Unit = 5uy
 
             | If = 10uy
 
@@ -99,6 +98,24 @@ module HintParser =
 
             | Variable = 40uy
             | Wildcard = 41uy
+            
+            | ConstantBool = 51uy
+            | ConstantByte = 52uy
+            | ConstantChar = 53uy
+            | ConstantDecimal = 54uy
+            | ConstantDouble = 55uy
+            | ConstantInt16 = 56uy
+            | ConstantInt32 = 57uy
+            | ConstantInt64 = 58uy
+            | ConstantIntPtr = 59uy
+            | ConstantSByte = 60uy
+            | ConstantSingle = 61uy
+            | ConstantString = 62uy
+            | ConstantUInt16 = 63uy
+            | ConstantUInt32 = 64uy
+            | ConstantUInt64 = 65uy
+            | ConstantUIntPtr = 66uy
+            | ConstantBytes = 67uy
  
         type Node =
             { Edges: Edge list
@@ -106,7 +123,7 @@ module HintParser =
               Match: SyntaxHintNode
               MatchedHint: Hint list }
         and Edge = 
-            | AggreggatedNode of Node
+            | AggreggatedNode of SyntaxHintNode * Node
             | HashCodeLookupNode of SyntaxHintNode * Dictionary<int, Node>
  
         let rec private getKey = function
@@ -123,7 +140,22 @@ module HintParser =
             | Expression.If(_) -> SyntaxHintNode.If
             | Expression.Identifier(_) -> SyntaxHintNode.Identifier
             | Expression.Constant(Constant.Unit) -> SyntaxHintNode.Unit
-            | Expression.Constant(_) -> SyntaxHintNode.Constant
+            | Expression.Constant(Constant.Bool(_)) -> SyntaxHintNode.ConstantBool
+            | Expression.Constant(Constant.Byte(_)) -> SyntaxHintNode.ConstantByte
+            | Expression.Constant(Constant.Bytes(_)) -> SyntaxHintNode.ConstantBytes
+            | Expression.Constant(Constant.Char(_)) -> SyntaxHintNode.ConstantChar
+            | Expression.Constant(Constant.Decimal(_)) -> SyntaxHintNode.ConstantDecimal
+            | Expression.Constant(Constant.Int16(_)) -> SyntaxHintNode.ConstantInt16
+            | Expression.Constant(Constant.Int32(_)) -> SyntaxHintNode.ConstantInt32
+            | Expression.Constant(Constant.Int64(_)) -> SyntaxHintNode.ConstantInt64
+            | Expression.Constant(Constant.IntPtr(_)) -> SyntaxHintNode.ConstantIntPtr
+            | Expression.Constant(Constant.SByte(_)) -> SyntaxHintNode.ConstantSByte
+            | Expression.Constant(Constant.Single(_)) -> SyntaxHintNode.ConstantSingle
+            | Expression.Constant(Constant.String(_)) -> SyntaxHintNode.ConstantString
+            | Expression.Constant(Constant.UInt16(_)) -> SyntaxHintNode.ConstantUInt16
+            | Expression.Constant(Constant.UInt32(_)) -> SyntaxHintNode.ConstantUInt32
+            | Expression.Constant(Constant.UInt64(_)) -> SyntaxHintNode.ConstantUInt64
+            | Expression.Constant(Constant.UIntPtr(_)) -> SyntaxHintNode.ConstantUIntPtr
             | Expression.Null -> SyntaxHintNode.Null
             | Expression.Wildcard -> SyntaxHintNode.Wildcard
             | Expression.Variable(_) -> SyntaxHintNode.Variable
@@ -221,7 +253,23 @@ module HintParser =
                     (fun ((key, depth), items) -> 
                         match key with
                         | SyntaxHintNode.Identifier
-                        | SyntaxHintNode.Constant ->
+                        | SyntaxHintNode.ConstantBool
+                        | SyntaxHintNode.ConstantByte
+                        | SyntaxHintNode.ConstantBytes
+                        | SyntaxHintNode.ConstantChar
+                        | SyntaxHintNode.ConstantDecimal
+                        | SyntaxHintNode.ConstantDouble
+                        | SyntaxHintNode.ConstantInt16
+                        | SyntaxHintNode.ConstantInt32
+                        | SyntaxHintNode.ConstantInt64
+                        | SyntaxHintNode.ConstantIntPtr
+                        | SyntaxHintNode.ConstantSByte
+                        | SyntaxHintNode.ConstantSingle
+                        | SyntaxHintNode.ConstantString
+                        | SyntaxHintNode.ConstantUInt16
+                        | SyntaxHintNode.ConstantUInt32
+                        | SyntaxHintNode.ConstantUInt64
+                        | SyntaxHintNode.ConstantUIntPtr ->
                             let map = Dictionary<_, _>()
 
                             items 
@@ -241,7 +289,7 @@ module HintParser =
                                 |> Seq.map (function (_, _, _, hint) -> hint) 
                                 |> Seq.toList
                             
-                            AggreggatedNode(mergeHints hints key depth))
+                            AggreggatedNode(key, mergeHints hints key depth))
                 |> Seq.toList
             
             and mergeHints hints key depth =

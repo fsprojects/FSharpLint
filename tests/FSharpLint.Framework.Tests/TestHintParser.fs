@@ -38,21 +38,21 @@ type TestMergeSyntaxTrees() =
                        MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
                                                                                  Expression.Variable('x')])
                                         Suggestion = Expr(Expression.Variable('x')) }] }
-                     |> AggreggatedNode
+                     |> fun x -> AggreggatedNode(x.Match, x)
                      { Edges = []
                        Depth = 1
                        Match = SyntaxHintNode.Identifier
                        MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
                                                                                  Expression.Identifier(["id"])])
                                         Suggestion = Expr(Expression.Identifier(["id"])) }] }
-                     |> AggreggatedNode]
+                     |> fun x -> AggreggatedNode(x.Match, x)]
 
                 let expectedMergedList =
                     [{ Edges = 
                         [{ Edges = expectedEdges
                            Depth = 1
                            Match = SyntaxHintNode.Identifier
-                           MatchedHint = [] } |> AggreggatedNode]
+                           MatchedHint = [] } |> fun x -> AggreggatedNode(x.Match, x)]
                        Depth = 0
                        Match = SyntaxHintNode.FuncApp
                        MatchedHint = [] }]

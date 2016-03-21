@@ -585,7 +585,7 @@ module HintMatcher =
             not <| isParameterDelegateType 0 methodIdent
         | _ -> true
 
-    let visitor getHints visitorInfo (syntaxArray:AbstractSyntaxArray.Node []) = 
+    let visitor getHints visitorInfo (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
         let (hintKeywordTree:MergeSyntaxTrees.Edge list) = getHints visitorInfo.Config
 
         let mutable i = 0
