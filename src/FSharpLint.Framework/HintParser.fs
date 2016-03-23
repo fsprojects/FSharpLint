@@ -116,6 +116,7 @@ module HintParser =
             | ConstantUInt64 = 65uy
             | ConstantUIntPtr = 66uy
             | ConstantBytes = 67uy
+            | ConstantUserNum = 68uy
  
         type Node =
             { Edges: Edge list
@@ -155,6 +156,7 @@ module HintParser =
             | Expression.Constant(Constant.UInt32(_)) -> SyntaxHintNode.ConstantUInt32
             | Expression.Constant(Constant.UInt64(_)) -> SyntaxHintNode.ConstantUInt64
             | Expression.Constant(Constant.UIntPtr(_)) -> SyntaxHintNode.ConstantUIntPtr
+            | Expression.Constant(Constant.UserNum(_)) -> SyntaxHintNode.ConstantUserNum
             | Expression.Null -> SyntaxHintNode.Null
             | Expression.Wildcard -> SyntaxHintNode.Wildcard
             | Expression.Variable(_) -> SyntaxHintNode.Variable
@@ -203,6 +205,7 @@ module HintParser =
             | Expression.Constant(Constant.UInt32(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.UInt64(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.UIntPtr(x)) -> x.GetHashCode() 
+            | Expression.Constant(Constant.UserNum(x, y)) -> (x, y).GetHashCode() 
             | _ -> 0
  
         let private hintToList (hint:Hint) =

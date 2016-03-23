@@ -66,9 +66,6 @@ module AstTemp =
     let inline private longIdentToString (longIdent:LongIdent) =
         longIdent |> List.map (fun x -> x.idText) |> String.concat "."
 
-    let inline private longIdentWithDotsToString (LongIdentWithDots(longIdent, _)) =
-        longIdentToString longIdent
-
     let inline private moduleDeclarationChildren node = 
         match node with
         | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) -> 
@@ -214,8 +211,8 @@ module AstTemp =
         | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression(cond);Expression(body)]
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> [Expression(cond);Expression(body);Expression(elseExpr)]
               
-        | SynExpr.Ident(ident) -> [Identifier(ident.idText)]
-        | SynExpr.LongIdent(_, ident, _, _) -> [Identifier(longIdentWithDotsToString ident)]
+        | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
+        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
         | SynExpr.Lambda(_) as lambda -> 
             let (args, body) = flattenLambda lambda
             [Lambda(args |> List.map LambdaArg.LambdaArg, LambdaBody.LambdaBody(body))]
@@ -242,7 +239,7 @@ module AstTemp =
         | SynSimplePat.Typed(simplePattern, synType, _) -> 
             [SimplePattern simplePattern; Type synType]
         | SynSimplePat.Attrib(simplePattern, _, _) -> [SimplePattern simplePattern]
-        | SynSimplePat.Id(identifier, _, _, _, _, _) -> [Identifier(identifier.idText)]
+        | SynSimplePat.Id(identifier, _, _, _, _, _) -> [Identifier([identifier.idText])]
 
     let inline private matchChildren node =
         match node with 
@@ -408,8 +405,8 @@ module AbstractSyntaxArray =
         | AstNode.If(_) -> SyntaxNode.Other
 
     [<Struct>]
-    type Node(syntaxNode: SyntaxNode, hashcode: int, actual: AstNode) = 
-        member __.Hashcode = (syntaxNode, hashcode).GetHashCode()
+    type Node(hashcode: int, actual: AstNode) = 
+        member __.Hashcode = hashcode
         member __.Actual = actual
 
     [<Struct>]
@@ -419,7 +416,7 @@ module AbstractSyntaxArray =
 
     let private getHashCode node = 
         match node with
-        | Identifier(x) -> x.GetHashCode()
+        | Identifier(x) when (List.isEmpty >> not) x -> (Seq.last x).GetHashCode() 
         | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> x.GetHashCode()
         | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> x.GetHashCode()
         | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> x.GetHashCode()
@@ -481,7 +478,7 @@ module AbstractSyntaxArray =
             | syntaxNode -> 
                 if not children.IsEmpty then
                     possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-                nodes.Add (Node(syntaxNode, getHashCode astNode, astNode))
+                nodes.Add (Node((syntaxNode, getHashCode astNode).GetHashCode(), astNode))
         
         tryAddPossibleSkips 0
 

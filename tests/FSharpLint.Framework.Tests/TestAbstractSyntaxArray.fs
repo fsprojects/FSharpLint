@@ -65,13 +65,13 @@ type TestAst() =
         let stopwatch = Stopwatch.StartNew()
 
         let length = Array.length array
-        let listFoldHashCode = "List.fold".GetHashCode()
+        let listFoldHashCode = (SyntaxNode.Identifier, "fold").GetHashCode()
 
         let mutable foundListFoldIdent = false
         let mutable i = 0
         while i < length - 1 do
             let node = array.[i]
-            if node.SyntaxNode = SyntaxNode.Identifier && node.Identifier = listFoldHashCode then
+            if node.Hashcode = listFoldHashCode then
                 foundListFoldIdent <- true
             i <- i + 1
 
@@ -87,21 +87,21 @@ type TestAst() =
 
         let (array, skipArray) = astToArray tree
 
-        let actual = array |> Array.map (fun x -> (x.SyntaxNode, x.Identifier))
+        let actual = array |> Array.map (fun x -> x.Hashcode)
 
         let expected =
-            [ (SyntaxNode.FuncApp, 0)
-              (SyntaxNode.Identifier, "List.map".GetHashCode())
-              (SyntaxNode.Lambda, 0)
-              (SyntaxNode.LambdaArg, 0)
-              (SyntaxNode.Identifier, "x".GetHashCode())
-              (SyntaxNode.LambdaArg, 0)
-              (SyntaxNode.Identifier, "y".GetHashCode())
-              (SyntaxNode.LambdaBody, 0)
-              (SyntaxNode.FuncApp, 0)
-              (SyntaxNode.Identifier, "id".GetHashCode())
-              (SyntaxNode.Identifier, "x".GetHashCode())
-              (SyntaxNode.Identifier, "woofs".GetHashCode()) ]
+            [ (SyntaxNode.FuncApp, 0).GetHashCode()
+              (SyntaxNode.Identifier, "map").GetHashCode()
+              (SyntaxNode.Lambda, 0).GetHashCode()
+              (SyntaxNode.LambdaArg, 0).GetHashCode()
+              (SyntaxNode.Identifier, "x").GetHashCode()
+              (SyntaxNode.LambdaArg, 0).GetHashCode()
+              (SyntaxNode.Identifier, "y").GetHashCode()
+              (SyntaxNode.LambdaBody, 0).GetHashCode()
+              (SyntaxNode.FuncApp, 0).GetHashCode()
+              (SyntaxNode.Identifier, "id").GetHashCode()
+              (SyntaxNode.Identifier, "x").GetHashCode()
+              (SyntaxNode.Identifier, "woofs").GetHashCode() ]
 
         Assert.AreEqual(expected, actual)
         Assert.AreEqual([11;0;8;1;0;1;0;3;2;0;0;0], skipArray)

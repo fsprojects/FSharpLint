@@ -84,7 +84,7 @@ module Ast =
         | Lambda of LambdaArg list * LambdaBody
         | LambdaArg of LambdaArg
         | LambdaBody of LambdaBody
-        | Identifier of string
+        | Identifier of string list
         | If of cond:SynExpr * body:SynExpr * elseIfs:(SynExpr * SynExpr) list * ``else``:SynExpr option
 
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
