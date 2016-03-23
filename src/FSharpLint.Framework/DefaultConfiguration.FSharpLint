@@ -260,7 +260,7 @@
         </NoTabCharacters>
 
         <TrailingNewLineInFile>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
         </TrailingNewLineInFile>
 
         <TrailingWhitespaceOnLine>
