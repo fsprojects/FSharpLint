@@ -22,12 +22,18 @@ open NUnit.Framework
 open FSharpLint.Framework.HintParser
 open FParsec
 open MergeSyntaxTrees
+open System.Collections.Generic
 
 [<TestFixture>]
 type TestMergeSyntaxTrees() =
 
     [<Test>]
     member __.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() = 
+
+        let nodeToEdge node =
+            let edge = Dictionary<int, Node>()
+            edge.Add((node.Match).GetHashCode(), node)
+            edge
         
         match run phint "List.map id ===> id", run phint "List.map x ===> x" with
             | Success(hint, _, _), Success(hint2, _, _) -> 
@@ -38,21 +44,21 @@ type TestMergeSyntaxTrees() =
                        MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
                                                                                  Expression.Variable('x')])
                                         Suggestion = Expr(Expression.Variable('x')) }] }
-                     |> fun x -> AggreggatedNode(x.Match, x)
+                     |> nodeToEdge
                      { Edges = []
                        Depth = 1
                        Match = SyntaxHintNode.Identifier
                        MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
                                                                                  Expression.Identifier(["id"])])
                                         Suggestion = Expr(Expression.Identifier(["id"])) }] }
-                     |> fun x -> AggreggatedNode(x.Match, x)]
+                     |> nodeToEdge]
 
                 let expectedMergedList =
                     [{ Edges = 
                         [{ Edges = expectedEdges
                            Depth = 1
                            Match = SyntaxHintNode.Identifier
-                           MatchedHint = [] } |> fun x -> AggreggatedNode(x.Match, x)]
+                           MatchedHint = [] } |> nodeToEdge]
                        Depth = 0
                        Match = SyntaxHintNode.FuncApp
                        MatchedHint = [] }]
