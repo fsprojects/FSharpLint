@@ -24,11 +24,11 @@ open MergeSyntaxTrees
 module FuzzyHintMatcher =        
 
     let inline isMatch (syntaxNode:AbstractSyntaxArray.Node) (hintNode:Edge) = 
-        match hintNode.TryGetValue syntaxNode.Hashcode with
+        match hintNode.Lookup.TryGetValue syntaxNode.Hashcode with
         | true, node -> Some(node)
         | false, _ -> None
 
-    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edge list) notify = 
+    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edge []) notify = 
         assert (nodeArray.Length = skipArray.Length)
 
         let len = nodeArray.Length
@@ -39,16 +39,16 @@ module FuzzyHintMatcher =
 
             let hints =
                 hints 
-                |> List.collect (fun hintEdge -> 
+                |> Array.collect (fun hintEdge -> 
                     match isMatch syntaxNode hintEdge with 
                     | Some(matchedNode) -> 
                         for matchedHint in matchedNode.MatchedHint do 
                             notify syntaxNode matchedHint
 
                         matchedNode.Edges
-                    | None -> [])
+                    | None -> [||])
 
-            if i + 1 < len && not hints.IsEmpty then
+            if i + 1 < len && hints.Length > 0 then
                 checkTrie (i + 1) hints notify
 
         let mutable i = 0

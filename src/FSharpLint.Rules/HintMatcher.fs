@@ -586,18 +586,13 @@ module HintMatcher =
         | _ -> true
 
     let visitor getHints visitorInfo (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
-        let (hintKeywordTree:MergeSyntaxTrees.Edge list) = getHints visitorInfo.Config
+        let (hintKeywordTree:MergeSyntaxTrees.Edge []) = getHints visitorInfo.Config
 
         let mutable i = 0
         let syntaxArrayLength = syntaxArray.Length
 
         while i < syntaxArrayLength do
-            let syntaxNode = syntaxArray.[i]
-
-            match hintKeywordTree with
-            | node::_ -> ()
-            | [] -> ()
-            
+            let syntaxNode = syntaxArray.[i]            
 
             i <- i + 1
 
@@ -610,7 +605,7 @@ module HintMatcher =
             |> MergeSyntaxTrees.mergeHints
         | _ ->
             Debug.Assert(false, "Hints analyser was not in the configuration.")
-            []
+            [||]
 
     type RegisterHintVisitor() = 
         let plugin =

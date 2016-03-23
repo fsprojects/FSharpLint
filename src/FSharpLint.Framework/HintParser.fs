@@ -118,11 +118,13 @@ module HintParser =
             | ConstantBytes = 67uy
  
         type Node =
-            { Edges: Edge list
+            { Edges: Edge array
               Depth: int
               Match: SyntaxHintNode
               MatchedHint: Hint list }
-        and Edge = Dictionary<int, Node>
+        and Edge = 
+            { Lookup: Dictionary<int, Node>
+              AnyMatch: (char option * Node) list }
  
         let rec private getKey = function
             | Expression.InfixOperator(_)
@@ -239,6 +241,10 @@ module HintParser =
                 | [] -> builtList
  
             transposeHead [] hintLists
+
+        let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> false | _ -> true
+
+        let getHints items = items |> Seq.map (function (_, _, _, hint) -> hint) |> Seq.toList
  
         let mergeHints hints =
             let rec getEdges transposed =
@@ -253,17 +259,25 @@ module HintParser =
                         let map = Dictionary<_, _>()
 
                         items 
+                        |> Seq.filter (isAnyMatch >> not)
                         |> Seq.groupBy (fun (key, expr, _, _) -> (key, getHashCode expr).GetHashCode()) 
                         |> Seq.iter (fun (hashcode, items) -> 
-                            let hints = 
-                                items 
-                                |> Seq.map (function (_, _, _, hint) -> hint) 
-                                |> Seq.toList
-                                
-                            map.Add(hashcode, mergeHints hints key depth))
+                            map.Add(hashcode, mergeHints (getHints items) key depth))
+
+                        let anyMatches = 
+                            items 
+                            |> Seq.choose (fun (node, expr, _, _) ->
+                                match node, expr with
+                                | SyntaxHintNode.Wildcard, Expression.Wildcard -> 
+                                    Some(None, mergeHints (getHints items) key depth)
+                                | SyntaxHintNode.Variable, Expression.Variable(var) -> 
+                                    Some(Some(var), mergeHints (getHints items) key depth)
+                                | _ -> None)
+                            |> Seq.toList
  
-                        map)
-                |> Seq.toList
+                        { Lookup = map
+                          AnyMatch = anyMatches })
+                |> Seq.toArray
             
             and mergeHints hints key depth =
                 let transposed = transposeHead hints
