@@ -408,9 +408,8 @@ module AbstractSyntaxArray =
         | AstNode.If(_) -> SyntaxNode.Other
 
     [<Struct>]
-    type Node(syntaxNode: SyntaxNode, identifierHashCode: int, actual: AstNode) = 
-        member __.SyntaxNode = syntaxNode
-        member __.Identifier = identifierHashCode
+    type Node(syntaxNode: SyntaxNode, hashcode: int, actual: AstNode) = 
+        member __.Hashcode = (syntaxNode, hashcode).GetHashCode()
         member __.Actual = actual
 
     [<Struct>]

@@ -122,9 +122,7 @@ module HintParser =
               Depth: int
               Match: SyntaxHintNode
               MatchedHint: Hint list }
-        and Edge = 
-            | AggreggatedNode of SyntaxHintNode * Node
-            | HashCodeLookupNode of SyntaxHintNode * Dictionary<int, Node>
+        and Edge = Dictionary<int, Node>
  
         let rec private getKey = function
             | Expression.InfixOperator(_)
@@ -145,6 +143,7 @@ module HintParser =
             | Expression.Constant(Constant.Bytes(_)) -> SyntaxHintNode.ConstantBytes
             | Expression.Constant(Constant.Char(_)) -> SyntaxHintNode.ConstantChar
             | Expression.Constant(Constant.Decimal(_)) -> SyntaxHintNode.ConstantDecimal
+            | Expression.Constant(Constant.Double(_)) -> SyntaxHintNode.ConstantDouble
             | Expression.Constant(Constant.Int16(_)) -> SyntaxHintNode.ConstantInt16
             | Expression.Constant(Constant.Int32(_)) -> SyntaxHintNode.ConstantInt32
             | Expression.Constant(Constant.Int64(_)) -> SyntaxHintNode.ConstantInt64
@@ -186,7 +185,7 @@ module HintParser =
 
         let private getHashCode node = 
             match node with
-            | Expression.Identifier(x) -> x.GetHashCode() 
+            | Expression.Identifier(x) when (List.isEmpty >> not) x -> (Seq.last x).GetHashCode() 
             | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() 
@@ -251,45 +250,19 @@ module HintParser =
                 |> Seq.groupBy (fun (key, _, depth, _) -> key, depth)
                 |> Seq.map 
                     (fun ((key, depth), items) -> 
-                        match key with
-                        | SyntaxHintNode.Identifier
-                        | SyntaxHintNode.ConstantBool
-                        | SyntaxHintNode.ConstantByte
-                        | SyntaxHintNode.ConstantBytes
-                        | SyntaxHintNode.ConstantChar
-                        | SyntaxHintNode.ConstantDecimal
-                        | SyntaxHintNode.ConstantDouble
-                        | SyntaxHintNode.ConstantInt16
-                        | SyntaxHintNode.ConstantInt32
-                        | SyntaxHintNode.ConstantInt64
-                        | SyntaxHintNode.ConstantIntPtr
-                        | SyntaxHintNode.ConstantSByte
-                        | SyntaxHintNode.ConstantSingle
-                        | SyntaxHintNode.ConstantString
-                        | SyntaxHintNode.ConstantUInt16
-                        | SyntaxHintNode.ConstantUInt32
-                        | SyntaxHintNode.ConstantUInt64
-                        | SyntaxHintNode.ConstantUIntPtr ->
-                            let map = Dictionary<_, _>()
+                        let map = Dictionary<_, _>()
 
-                            items 
-                            |> Seq.groupBy (fun (_, expr, _, _) -> getHashCode expr) 
-                            |> Seq.iter (fun (hashcode, items) -> 
-                                let hints = 
-                                    items 
-                                    |> Seq.map (function (_, _, _, hint) -> hint) 
-                                    |> Seq.toList
-                                
-                                map.Add(hashcode, mergeHints hints key depth))
- 
-                            HashCodeLookupNode(key, map)
-                        | _ ->
+                        items 
+                        |> Seq.groupBy (fun (key, expr, _, _) -> (key, getHashCode expr).GetHashCode()) 
+                        |> Seq.iter (fun (hashcode, items) -> 
                             let hints = 
                                 items 
                                 |> Seq.map (function (_, _, _, hint) -> hint) 
                                 |> Seq.toList
-                            
-                            AggreggatedNode(key, mergeHints hints key depth))
+                                
+                            map.Add(hashcode, mergeHints hints key depth))
+ 
+                        map)
                 |> Seq.toList
             
             and mergeHints hints key depth =
