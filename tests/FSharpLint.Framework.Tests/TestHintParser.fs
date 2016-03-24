@@ -29,43 +29,37 @@ type TestMergeSyntaxTrees() =
 
     [<Test>]
     member __.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() = 
+        let toDictionary list = 
+            let dictionary = Dictionary<int, Node>()
+            for (x, y) in list do dictionary.Add(x, y)
+            dictionary
 
-        let nodeToEdge node =
-            let edge = Dictionary<int, Node>()
-            edge.Add((node.Match).GetHashCode(), node)
-            edge
-        
-        match run phint "List.map id ===> id", run phint "List.map x ===> x" with
+        match run phint "List.map id ===> id", run phint "List.map woof ===> woof" with
             | Success(hint, _, _), Success(hint2, _, _) -> 
                 let expectedEdges =
-                    [{ Edges = []
-                       Depth = 1
-                       Match = SyntaxHintNode.Variable //MergedHintKey.Variable('x')
-                       MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
-                                                                                 Expression.Variable('x')])
-                                        Suggestion = Expr(Expression.Variable('x')) }] }
-                     |> nodeToEdge
-                     { Edges = []
-                       Depth = 1
-                       Match = SyntaxHintNode.Identifier
-                       MatchedHint = [{ Match = Expression.FunctionApplication([ Expression.Identifier(["List"; "map"])
-                                                                                 Expression.Identifier(["id"])])
-                                        Suggestion = Expr(Expression.Identifier(["id"])) }] }
-                     |> nodeToEdge]
+                    { Lookup = 
+                        [ ((SyntaxHintNode.Identifier, "map".GetHashCode()).GetHashCode(), 
+                           { Edges = 
+                               { Lookup = 
+                                   [ ((SyntaxHintNode.Identifier, "woof".GetHashCode()).GetHashCode(), 
+                                      { Edges = Edges.Empty
+                                        MatchedHint = [hint2] })
+                                     ((SyntaxHintNode.Identifier, "id".GetHashCode()).GetHashCode(), 
+                                      { Edges = Edges.Empty
+                                        MatchedHint = [hint] }) ] |> toDictionary
+                                 AnyMatch = [] }
+                             MatchedHint = [] }) ] |> toDictionary
+                      AnyMatch = [] }
 
-                let expectedMergedList =
-                    [{ Edges = 
-                        [{ Edges = expectedEdges
-                           Depth = 1
-                           Match = SyntaxHintNode.Identifier
-                           MatchedHint = [] } |> nodeToEdge]
-                       Depth = 0
-                       Match = SyntaxHintNode.FuncApp
-                       MatchedHint = [] }]
-
+                let expectedRoot = 
+                    { Lookup = 
+                        [((SyntaxHintNode.FuncApp, 0).GetHashCode(), 
+                          { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
+                      AnyMatch = [] }
+                      
                 let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
 
-                Assert.AreEqual(expectedMergedList, mergedHint)
+                Assert.AreEqual(expectedRoot, mergedHint)
             | _ -> Assert.Fail()
 
     [<Test>]
