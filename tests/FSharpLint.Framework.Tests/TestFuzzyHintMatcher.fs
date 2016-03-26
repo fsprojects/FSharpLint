@@ -159,8 +159,100 @@ type TestAst() =
         let hintTrie = MergeSyntaxTrees.mergeHints hints
     
         let stopwatch = Stopwatch.StartNew()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
-        possibleMatches array skipArray hintTrie (fun n1 n2 hint -> matches.Add(n1, hint))
-
-        Assert.Less(stopwatch.ElapsedMilliseconds, 5)
+        stopwatch.Stop()
+        Assert.Less(stopwatch.ElapsedMilliseconds, 50)
         System.Console.WriteLine(sprintf "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Lambda with wildcard argument is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = fun _ -> ()
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun _ -> () ===> ignore"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Function application is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = List.isEmpty []
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.isEmpty [] ===> true"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Function application with variable is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let numbers = [1;2;3]
+    let y = numbers |> List.rev |> List.rev
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.rev (List.rev x) ===> x"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+        
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Lambda with variable argument is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = fun x -> x
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Lambda with variable argument is correctly discarded by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = fun x -> 0
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(0, matches.Count)

@@ -21,36 +21,35 @@ namespace FSharpLint.Framework
 open HintParser
 open MergeSyntaxTrees
 
-module FuzzyHintMatcher =        
+module FuzzyHintMatcher =    
 
-    let inline isMatch (syntaxNode:AbstractSyntaxArray.Node) (hintNode:Edges) = 
-        match hintNode.Lookup.TryGetValue syntaxNode.Hashcode with
-        | true, node -> Some(node)
-        | false, _ -> None
+    let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) notify =
+        trie.MatchedHint |> List.iter notify
+
+        if i < nodeArray.Length then
+            let node = nodeArray.[i]
+
+            match trie.Edges.Lookup.TryGetValue node.Hashcode with
+            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray notify
+            | false, _ -> ()
+
+        trie.Edges.AnyMatch 
+        |> List.iter (fun (var, trie) -> 
+            match var with 
+            | Some(var) -> () 
+            | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray notify)
 
     let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edges) notify = 
         assert (nodeArray.Length = skipArray.Length)
 
         let len = nodeArray.Length
-        (*
-        let rec checkTrie i hints notify =
-            let syntaxNode = nodeArray.[i]
-            let skip = skipArray.[i]
 
-            let hints =
-                match isMatch syntaxNode hints with 
-                | Some(matchedNode) -> 
-                    for matchedHint in matchedNode.MatchedHint do 
-                        notify syntaxNode matchedHint
-
-                    matchedNode.Edges |> ignore
-                    ()
-                | None -> ()
-
-            if i + 1 < len && hints > 0 then
-                checkTrie (i + 1) hints notify
-                *)
         let mutable i = 0
         while i < len do
-            //checkTrie i hintTrie (notify nodeArray.[i])
+            let node = nodeArray.[i]
+            
+            match hintTrie.Lookup.TryGetValue node.Hashcode with
+            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (notify node)
+            | false, _ -> ()
+
             i <- i + 1
