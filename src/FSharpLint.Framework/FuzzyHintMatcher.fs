@@ -20,24 +20,44 @@ namespace FSharpLint.Framework
 
 open HintParser
 open MergeSyntaxTrees
+open System.Collections.Generic
 
-module FuzzyHintMatcher =    
+module FuzzyHintMatcher =
 
-    let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) notify =
+    let isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) = 
+        let skipI = skipArray.[i]
+        let skipJ = skipArray.[j]
+
+        if skipI = skipJ then
+            Array.zip [|i..i + skipI|] [|j..j + skipJ|]
+            |> Array.forall (fun (i, j) -> 
+                i < nodeArray.Length && 
+                j < nodeArray.Length && 
+                nodeArray.[i].Hashcode = nodeArray.[j].Hashcode)
+        else false
+
+    let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (boundVariables:Dictionary<_, _>) notify =
         trie.MatchedHint |> List.iter notify
 
         if i < nodeArray.Length then
             let node = nodeArray.[i]
 
             match trie.Edges.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray notify
+            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
             | false, _ -> ()
 
         trie.Edges.AnyMatch 
         |> List.iter (fun (var, trie) -> 
             match var with 
-            | Some(var) -> () 
-            | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray notify)
+            | Some(var) -> 
+                match boundVariables.TryGetValue var with 
+                | true, varI when isMatch varI i nodeArray skipArray  -> 
+                    checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                | false, _ -> 
+                    boundVariables.Add(var, i)
+                    checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                | true, _ -> ()
+            | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify)
 
     let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edges) notify = 
         assert (nodeArray.Length = skipArray.Length)
@@ -49,7 +69,7 @@ module FuzzyHintMatcher =
             let node = nodeArray.[i]
             
             match hintTrie.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (notify node)
+            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (Dictionary<_, _>()) (notify node)
             | false, _ -> ()
 
             i <- i + 1

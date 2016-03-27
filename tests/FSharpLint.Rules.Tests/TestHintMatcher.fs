@@ -18,12 +18,16 @@
 
 module TestHintMatcher
 
+open System.Diagnostics
+open System.IO
 open NUnit.Framework
 open FParsec
+open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.HintMatcher
 open FSharpLint.Framework.LoadVisitors
+open Microsoft.FSharp.Compiler.SourceCodeServices
 
 let generateHintConfig hints =
     let parseHints hints =
@@ -42,6 +46,49 @@ let generateHintConfig hints =
 [<TestFixture>]
 type TestHintMatcher() =
     inherit TestRuleBase.TestRuleBase(SyntaxArray(visitor getHintsFromConfig))
+
+    [<Literal>]
+    let SourceFile = "../../../FSharpLint.Framework.Tests/TypeChecker.fs"
+
+    let generateAst source =
+        let checker = FSharpChecker.Create()
+
+        let options = 
+            checker.GetProjectOptionsFromScript(SourceFile, source) 
+            |> Async.RunSynchronously
+
+        let parseResults =
+            checker.ParseFileInProject(SourceFile, source, options)
+            |> Async.RunSynchronously
+        
+        match parseResults.ParseTree with
+        | Some(parseTree) -> parseTree
+        | None -> failwith "Failed to parse file."
+
+    [<Category("Performance")>]
+    [<Test>]
+    member __.``Check performance of fuzzy matching hints``() = 
+        let tree = File.ReadAllText SourceFile |> generateAst
+
+        let stopwatch = Stopwatch.StartNew()
+
+        let (array, skipArray) = astToArray tree
+
+        stopwatch.Stop()
+
+        Assert.Less(stopwatch.ElapsedMilliseconds, 200)
+        System.Console.WriteLine(sprintf "Built array in %d milliseconds." stopwatch.ElapsedMilliseconds)
+
+        let config = 
+            { UseTypeChecker = None
+              IgnoreFiles = None
+              Analysers = generateHintConfig [] }
+
+        visitor 
+            (fun _ -> MergeSyntaxTrees.Edges.Empty)  
+            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()) }
+            array
+            skipArray
 
     [<Test>]
     member this.MatchNotEqualHint() = 

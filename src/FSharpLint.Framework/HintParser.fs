@@ -55,8 +55,8 @@ module HintParser =
         | Constant of Constant
         | Parentheses of Expression
         | Lambda of LambdaArg list * LambdaBody
-        | LambdaBody of LambdaBody
-        | LambdaArg of LambdaArg
+        | LambdaBody of Expression
+        | LambdaArg of Expression
         | Tuple of Expression list
         | List of Expression list
         | Array of Expression list
@@ -181,8 +181,8 @@ module HintParser =
             | Expression.Parentheses(expr) -> getChildren expr
             | Expression.Lambda(args, LambdaBody(body)) ->
                 [for LambdaArg(arg) in args do yield arg; yield body]
-            | Expression.LambdaArg(LambdaArg(arg)) -> [arg]
-            | Expression.LambdaBody(LambdaBody(body)) -> [body]
+            | Expression.LambdaArg(arg) -> [arg]
+            | Expression.LambdaBody(body) -> [body]
             | Expression.FunctionApplication(exprs)
             | Expression.Tuple(exprs)
             | Expression.List(exprs)
@@ -777,7 +777,9 @@ module HintParser =
 
                 let! body = plambdaend
 
-                return Expression.Lambda(arguments |> List.map LambdaArg, LambdaBody(body))
+                return Expression.Lambda
+                    (arguments |> List.map (Expression.LambdaArg >> LambdaArg), 
+                     LambdaBody(Expression.LambdaBody(body)))
             }
 
         let papplication =
