@@ -252,6 +252,8 @@ module HintMatcher =
                 matchArray arguments
             | Expression.If(_) ->
                 matchIf arguments
+            | Expression.LambdaArg(_)
+            | Expression.LambdaBody(_) -> false
 
         and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             List.length expressions = List.length hintExpressions &&
@@ -384,6 +386,8 @@ module HintMatcher =
                 matchArray (pattern, hint)
             | Expression.FunctionApplication(_)
             | Expression.Lambda(_)
+            | Expression.LambdaArg(_)
+            | Expression.LambdaBody(_)
             | Expression.If(_)
             | Expression.InfixOperator(_)
             | Expression.PrefixOperator(_) ->
@@ -496,9 +500,9 @@ module HintMatcher =
             "(" + hintToString hint + ")"
         | Expression.Lambda(arguments, LambdaBody(body)) -> 
             "fun " + lambdaArgumentsToString arguments + " -> " + hintToString body
-        | Expression.LambdaArg(LambdaArg(argument)) ->
+        | Expression.LambdaArg(argument) ->
             hintToString argument
-        | Expression.LambdaBody(LambdaBody(body)) ->
+        | Expression.LambdaBody(body) ->
             hintToString body
         | Expression.Tuple(expressions) ->
             expressions |> surroundExpressionsString hintToString "(" ")" ","
@@ -585,16 +589,36 @@ module HintMatcher =
             not <| isParameterDelegateType 0 methodIdent
         | _ -> true
 
-    let visitor getHints visitorInfo (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
-        let (hintKeywordTree:MergeSyntaxTrees.Edges) = getHints visitorInfo.Config
+    let confirmFuzzyMatch visitorInfo checkFile (node:AbstractSyntaxArray.Node) (hint:HintParser.Hint) =
+        match node.Actual.Node with
+        | AstNode.Expression(SynExpr.Paren(_)) -> ()
+        | AstNode.Expression(expr) -> 
+            let arguments =
+                { MatchExpression.LambdaArguments = Map.ofList []
+                  MatchExpression.Expression = expr
+                  MatchExpression.Hint = hint.Match
+                  MatchExpression.FSharpCheckFileResults = checkFile
+                  MatchExpression.Breadcrumbs = node.Actual.Breadcrumbs }
 
-        let mutable i = 0
-        let syntaxArrayLength = syntaxArray.Length
+            if MatchExpression.matchHintExpr arguments then
+                match hint.Match, hint.Suggestion with
+                | Expression.Lambda(_), Suggestion.Expr(Expression.Identifier(_)) -> 
+                    if lambdaCanBeReplacedWithFunction checkFile node.Actual.Breadcrumbs expr then
+                        hintError hint visitorInfo expr.Range
+                | _ ->
+                    hintError hint visitorInfo expr.Range
+        | AstNode.Pattern(SynPat.Paren(_)) -> ()
+        | AstNode.Pattern(pattern) ->
+            if MatchPattern.matchHintPattern (pattern, hint.Match) then
+                hintError hint visitorInfo pattern.Range
+        | _ -> ()
 
-        while i < syntaxArrayLength do
-            let syntaxNode = syntaxArray.[i]            
+    let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
+        let hintKeywordTree = getHints visitorInfo.Config
 
-            i <- i + 1
+        let confirmFuzzyMatch = confirmFuzzyMatch visitorInfo checkFile
+
+        FuzzyHintMatcher.possibleMatches syntaxArray skipArray hintKeywordTree confirmFuzzyMatch
 
     let getHintsFromConfig config =
         let analyser = Map.find AnalyserName config.Analysers

@@ -320,6 +320,7 @@ module AbstractSyntaxArray =
     open System.Collections.Generic
     open Ast
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.Range
 
     type SyntaxNode =
         | Identifier = 1uy
@@ -413,8 +414,18 @@ module AbstractSyntaxArray =
         | AstNode.UnionCase(_)
         | AstNode.If(_) -> SyntaxNode.Other
 
+    type ActualNode = 
+        { Node: AstNode
+
+          /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
+          Breadcrumbs: AstNode list
+
+          /// Suppressed message attributes that have been applied to the block of code 
+          /// the current node is within.
+          SuppressedMessages: (SuppressedMessage * range) list }
+
     [<Struct>]
-    type Node(hashcode: int, actual: AstNode) = 
+    type Node(hashcode: int, actual: ActualNode) = 
         member __.Hashcode = hashcode
         member __.Actual = actual
 
@@ -487,7 +498,12 @@ module AbstractSyntaxArray =
             | syntaxNode -> 
                 if not children.IsEmpty then
                     possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-                nodes.Add (Node((syntaxNode, getHashCode astNode).GetHashCode(), astNode))
+
+                let actualNode =
+                    { Node = astNode
+                      Breadcrumbs = []
+                      SuppressedMessages = [] }
+                nodes.Add (Node((syntaxNode, getHashCode astNode).GetHashCode(), actualNode))
         
         tryAddPossibleSkips 0
 

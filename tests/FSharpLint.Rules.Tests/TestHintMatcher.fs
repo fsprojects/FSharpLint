@@ -87,6 +87,7 @@ type TestHintMatcher() =
         visitor 
             (fun _ -> MergeSyntaxTrees.Edges.Empty)  
             { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()) }
+            None
             array
             skipArray
 

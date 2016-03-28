@@ -24,7 +24,7 @@ open System.Collections.Generic
 
 module FuzzyHintMatcher =
 
-    let isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) = 
+    let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) = 
         let skipI = skipArray.[i]
         let skipJ = skipArray.[j]
 
@@ -36,7 +36,7 @@ module FuzzyHintMatcher =
                 nodeArray.[i].Hashcode = nodeArray.[j].Hashcode)
         else false
 
-    let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (boundVariables:Dictionary<_, _>) notify =
+    let rec private checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (boundVariables:Dictionary<_, _>) notify =
         trie.MatchedHint |> List.iter notify
 
         if i < nodeArray.Length then

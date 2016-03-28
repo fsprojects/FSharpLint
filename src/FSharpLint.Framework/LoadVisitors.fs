@@ -31,9 +31,6 @@ module LoadVisitors =
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
 
-    /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
-    type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> Ast.Visitor
-
     type PlainTextVisitorInfo =
         { File: string
           Input: string
@@ -53,11 +50,14 @@ module LoadVisitors =
 
                 this.SuppressedMessages |> List.exists isAnalyserSuppressed
 
+    /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
+    type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> Ast.Visitor
+
     /// Visitor that visists the plain text of the F# files in a project.
     type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit
 
     // TODO: Support suppressed messages.
-    type SyntaxArrayVisitor = Ast.VisitorInfo -> AbstractSyntaxArray.Node [] -> int [] -> unit
+    type SyntaxArrayVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> AbstractSyntaxArray.Node [] -> int [] -> unit
 
     type VisitorType =
         | Ast of AstVisitor

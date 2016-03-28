@@ -69,6 +69,9 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
         match parseSource input config (FSharpChecker.Create()), analyser with
         | Success(parseInfo), Ast(visitor) ->
             lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
+        | Success(parseInfo), SyntaxArray(visitor) ->
+            let (syntaxArray, skipArray) = FSharpLint.Framework.AbstractSyntaxArray.astToArray parseInfo.Ast
+            visitor visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
         | Success(parseInfo), PlainText(visitor) -> 
             let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
             let stringLiterals = getStringLiteralsFromAst parseInfo.Ast
