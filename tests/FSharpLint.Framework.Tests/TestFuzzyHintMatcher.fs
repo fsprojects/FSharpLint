@@ -204,6 +204,42 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
+    member __.``Infix application is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = 1 + 0
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"x + 0 ===> x"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
+    member __.``Prefix application is correctly found by fuzzy matcher``() = 
+        let source = @"
+do
+    let y = -1
+    ()"
+
+        let (array, skipArray) = generateAst source |> astToArray
+
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"-1 ===> x"]
+
+        let matches = ResizeArray()
+        
+        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+
+        Assert.AreEqual(1, matches.Count)
+
+    [<Category("Hint Matcher")>]
+    [<Test>]
     member __.``Function application with variable is correctly found by fuzzy matcher``() = 
         let source = @"
 do
