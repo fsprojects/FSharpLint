@@ -64,7 +64,7 @@ type TestMergeSyntaxTrees() =
 
     [<Test>]
     member __.``Merge no hints gives no merged lists``() = 
-        Assert.AreEqual([], MergeSyntaxTrees.mergeHints [])
+        Assert.AreEqual(MergeSyntaxTrees.Edges.Empty, MergeSyntaxTrees.mergeHints [])
 
 [<TestFixture>]
 type TestHintOperators() =
@@ -381,7 +381,7 @@ type TestHintParser() =
     [<Test>]
     member __.ArgumentVariable() = 
         match run Expressions.pargumentvariable "x " with
-            | Success(hint, _, _) -> Assert.AreEqual(LambdaArg(Expression.Variable('x')), hint)
+            | Success(hint, _, _) -> Assert.AreEqual(Expression.Variable('x'), hint)
             | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
@@ -393,11 +393,11 @@ type TestHintParser() =
     [<Test>]
     member __.LambdaArguments() = 
         let expected =
-            [ LambdaArg(Expression.Variable('x'))
-              LambdaArg(Expression.Variable('y'))
-              LambdaArg(Expression.Variable('g'))
-              LambdaArg(Expression.Wildcard)
-              LambdaArg(Expression.Variable('f')) ]
+            [ Expression.Variable('x')
+              Expression.Variable('y')
+              Expression.Variable('g')
+              Expression.Wildcard
+              Expression.Variable('f') ]
 
         match run Expressions.plambdaarguments "x y g _ f" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -500,8 +500,13 @@ type TestHintParser() =
     member __.Lambda() = 
         let expected = 
             Expression.Lambda(
-                [LambdaArg(Expression.Variable('x')); LambdaArg(Expression.Variable('y')); LambdaArg(Expression.Wildcard)],
-                LambdaBody(Expression.Parentheses(Expression.InfixOperator("+", Expression.Variable('x'), Expression.Variable('y')))))
+                [ LambdaArg(Expression.LambdaArg(Expression.Variable('x')))
+                  LambdaArg(Expression.LambdaArg(Expression.Variable('y')))
+                  LambdaArg(Expression.LambdaArg(Expression.Wildcard))],
+                LambdaBody(
+                    Expression.LambdaBody(
+                        Expression.Parentheses(
+                            Expression.InfixOperator("+", Expression.Variable('x'), Expression.Variable('y'))))))
 
         match run Expressions.plambda "fun x y _ -> (x + y)" with
             | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -551,7 +556,9 @@ type TestHintParser() =
     [<Test>]
     member __.IdHint() = 
         let expected = 
-            { Match = Expression.Lambda([LambdaArg(Expression.Variable('x'))], LambdaBody(Expression.Variable('x')))
+            { Match = Expression.Lambda
+                ([LambdaArg(Expression.LambdaArg(Expression.Variable('x')))], 
+                 LambdaBody(Expression.LambdaBody(Expression.Variable('x'))))
               Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
 
         match run phint "fun x -> x ===> id" with
