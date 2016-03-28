@@ -225,12 +225,12 @@ do
     member __.``Prefix application is correctly found by fuzzy matcher``() = 
         let source = @"
 do
-    let y = -1
+    let y = ~~~1
     ()"
 
         let (array, skipArray) = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"-1 ===> x"]
+        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"~~~1 ===> x"]
 
         let matches = ResizeArray()
         
