@@ -605,7 +605,7 @@ module HintMatcher =
                 if MatchExpression.doExpressionsMatch expressions hintExpressions arguments then
                     hintError hint visitorInfo range
             | _ -> ()
-        | AstNode.Lambda(args, body) -> 
+        | AstNode.Lambda(args, body, range) -> 
             ()
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 

@@ -222,9 +222,9 @@ module AstTemp =
               
         | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
         | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
-        | SynExpr.Lambda(_) as lambda -> 
+        | SynExpr.Lambda(_, _, _, _, range) as lambda -> 
             let (args, body) = flattenLambda lambda
-            [Lambda(args |> List.map LambdaArg.LambdaArg, LambdaBody.LambdaBody(body))]
+            [Lambda(args |> List.map LambdaArg.LambdaArg, LambdaBody.LambdaBody(body), range)]
         | SynExpr.App(_, _, _, _, range) as app -> [FuncApp(flattenFunctionApplication app, range)]
 
     let inline private typeSimpleRepresentationChildren node =
@@ -293,7 +293,7 @@ module AstTemp =
             Type synType::(bindings |> List.map Binding)
         | TypeRepresentation(x) -> typeRepresentationChildren x
         | FuncApp(exprs, _) -> exprs |> List.map Expression
-        | Lambda(args, body) -> [yield! args |> List.map LambdaArg; yield LambdaBody(body)]
+        | Lambda(args, body, _) -> [yield! args |> List.map LambdaArg; yield LambdaBody(body)]
         | LambdaBody(LambdaBody.LambdaBody(body)) -> [Expression(body)]
         | LambdaArg(LambdaArg.LambdaArg(arg)) -> [SimplePatterns(arg)]
 

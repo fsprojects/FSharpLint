@@ -81,7 +81,7 @@ module Ast =
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
         | FuncApp of SynExpr list * range
-        | Lambda of LambdaArg list * LambdaBody
+        | Lambda of LambdaArg list * LambdaBody * range
         | LambdaArg of LambdaArg
         | LambdaBody of LambdaBody
         | Identifier of string list
