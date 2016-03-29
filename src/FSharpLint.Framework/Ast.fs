@@ -80,7 +80,7 @@ module Ast =
         | ConstructorArguments of SynConstructorArgs
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
-        | FuncApp of SynExpr list
+        | FuncApp of SynExpr list * range
         | Lambda of LambdaArg list * LambdaBody
         | LambdaArg of LambdaArg
         | LambdaBody of LambdaBody

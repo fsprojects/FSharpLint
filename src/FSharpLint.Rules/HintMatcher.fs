@@ -239,8 +239,6 @@ module HintMatcher =
             | Expression.Constant(_)
             | Expression.Identifier(_) ->
                 matchExpr expr = Some(arguments.Hint)
-            | Expression.FunctionApplication(_) ->
-                matchFunctionApplication arguments
             | Expression.InfixOperator(_) ->
                 matchInfixOperation arguments
             | Expression.PrefixOperator(_) ->
@@ -257,10 +255,11 @@ module HintMatcher =
                 matchArray arguments
             | Expression.If(_) ->
                 matchIf arguments
+            | Expression.FunctionApplication(_)
             | Expression.LambdaArg(_)
             | Expression.LambdaBody(_) -> false
 
-        and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
+        and doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions) ||> List.forall2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
 
@@ -273,14 +272,6 @@ module HintMatcher =
                 arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
-            | _ -> false
-
-        and private matchFunctionApplication arguments =
-            match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.App(_) as application), Expression.FunctionApplication(hintExpressions) -> 
-                let expressions = flattenFunctionApplication application |> List.map AstNode.Expression
-
-                doExpressionsMatch expressions hintExpressions arguments
             | _ -> false
 
         and private matchLambda arguments =
@@ -598,19 +589,27 @@ module HintMatcher =
         | _ -> true
 
     let confirmFuzzyMatch visitorInfo checkFile (node:AbstractSyntaxArray.Node) (hint:HintParser.Hint) =
+        let constructInitialArguments () =
+            { MatchExpression.LambdaArguments = Map.ofList []
+              MatchExpression.Expression = node.Actual.Node
+              MatchExpression.Hint = hint.Match
+              MatchExpression.FSharpCheckFileResults = checkFile
+              MatchExpression.Breadcrumbs = node.Actual.Breadcrumbs }
+
         match node.Actual.Node with
-        | AstNode.FuncApp(exprs) -> 
-            ()
+        | AstNode.FuncApp(exprs, range) -> 
+            match hint.Match with
+            | Expression.FunctionApplication(hintExpressions) -> 
+                let expressions = exprs |> List.map AstNode.Expression
+                let arguments = constructInitialArguments ()
+                if MatchExpression.doExpressionsMatch expressions hintExpressions arguments then
+                    hintError hint visitorInfo range
+            | _ -> ()
         | AstNode.Lambda(args, body) -> 
             ()
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 
-            let arguments =
-                { MatchExpression.LambdaArguments = Map.ofList []
-                  MatchExpression.Expression = node.Actual.Node
-                  MatchExpression.Hint = hint.Match
-                  MatchExpression.FSharpCheckFileResults = checkFile
-                  MatchExpression.Breadcrumbs = node.Actual.Breadcrumbs }
+            let arguments = constructInitialArguments ()
 
             if MatchExpression.matchHintExpr arguments then
                 match hint.Match, hint.Suggestion with
