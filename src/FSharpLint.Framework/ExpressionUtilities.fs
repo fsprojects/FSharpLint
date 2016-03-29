@@ -47,6 +47,8 @@ module ExpressionUtilities =
             PrettyNaming.DecompileOpName ident.idText
         else ident.idText
 
+    let identAsCompiledOpName = PrettyNaming.CompileOpName 
+
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x

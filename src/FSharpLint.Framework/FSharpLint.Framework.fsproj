@@ -51,6 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition=" Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="ExpressionUtilities.fs" />
     <Compile Include="HintParser.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Ast.fs" />
@@ -58,7 +59,6 @@
     <Compile Include="AbstractSyntaxArray.fs" />
     <Compile Include="LoadVisitors.fs" />
     <Compile Include="Resources.fs" />
-    <Compile Include="ExpressionUtilities.fs" />
     <Compile Include="ParseFile.fs" />
     <Compile Include="FuzzyHintMatcher.fs" />
     <None Include="README.md" />

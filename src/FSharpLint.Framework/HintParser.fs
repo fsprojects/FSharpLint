@@ -201,7 +201,11 @@ module HintParser =
 
         let private getHashCode node = 
             match node with
-            | Expression.Identifier(x) when (List.isEmpty >> not) x -> (Seq.last x).GetHashCode() 
+            | Expression.Identifier(identifier) when (List.isEmpty >> not) identifier -> 
+                identifier
+                |> Seq.last
+                |> ExpressionUtilities.identAsCompiledOpName
+                |> hash
             | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() 
             | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() 
