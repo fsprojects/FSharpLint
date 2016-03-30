@@ -673,7 +673,7 @@ type TestHintParser() =
             { Match = Expression.If(
                             Expression.Variable('x'),
                             Expression.Constant(Constant.Bool(true)),
-                            Some(Expression.Constant(Constant.Bool(false))))
+                            Some(Expression.Else(Expression.Constant(Constant.Bool(false)))))
               Suggestion = Suggestion.Expr(Expression.Variable('x')) }
             
         match run phint "if x then true else false ===> x" with

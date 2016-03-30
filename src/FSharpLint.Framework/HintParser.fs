@@ -60,7 +60,8 @@ module HintParser =
         | Tuple of Expression list
         | List of Expression list
         | Array of Expression list
-        | If of Expression * Expression * Expression option
+        | If of cond:Expression * body:Expression * ``else``:Expression option
+        | Else of Expression
         | Null
     and LambdaArg = LambdaArg of Expression
     and LambdaBody = LambdaBody of Expression
@@ -86,8 +87,9 @@ module HintParser =
             | Expression = 3uy
             | FuncApp = 4uy
             | Unit = 5uy
-
+            
             | If = 10uy
+            | Else = 11uy
 
             | Lambda = 20uy
             | LambdaArg = 21uy
@@ -151,6 +153,7 @@ module HintParser =
             | Expression.List(_)
             | Expression.Array(_) -> SyntaxHintNode.ArrayOrList
             | Expression.If(_) -> SyntaxHintNode.If
+            | Expression.Else(_) -> SyntaxHintNode.Else
             | Expression.Identifier(_) -> SyntaxHintNode.Identifier
             | Expression.Constant(Constant.Unit) -> SyntaxHintNode.Unit
             | Expression.Constant(Constant.Bool(_)) -> SyntaxHintNode.ConstantBool
@@ -187,12 +190,9 @@ module HintParser =
             | Expression.Tuple(exprs)
             | Expression.List(exprs)
             | Expression.Array(exprs) -> exprs
-            | Expression.If(ifCond, bodyExpr, elseExpr) ->
-                [ yield ifCond
-                  yield bodyExpr
-                  match elseExpr with 
-                  | Some(elseExpr) -> yield elseExpr 
-                  | _ -> () ]
+            | Expression.If(ifCond, bodyExpr, Some(elseExpr)) -> [ifCond; bodyExpr; elseExpr]
+            | Expression.If(ifCond, bodyExpr, None) -> [ifCond; bodyExpr]
+            | Expression.Else(x) -> [x]
             | Expression.Identifier(_)
             | Expression.Constant(_)
             | Expression.Null
@@ -739,7 +739,7 @@ module HintParser =
             .>> skipString "then"
             .>>. pexpression
             .>>. opt (skipString "else" >>. pexpression)
-            |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr)
+            |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr |> Option.map Expression.Else)
 
         let ptuple: Parser<Expression, unit> = 
             skipChar '(' 

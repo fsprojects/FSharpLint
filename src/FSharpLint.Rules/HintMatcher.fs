@@ -245,8 +245,6 @@ module HintMatcher =
                 matchPrefixOperation arguments
             | Expression.Parentheses(hint) -> 
                 arguments.SubHint(expr, hint) |> matchHintExpr
-            | Expression.Lambda(_) -> 
-                matchLambda arguments
             | Expression.Tuple(_) ->
                 matchTuple arguments
             | Expression.List(_) ->
@@ -255,9 +253,16 @@ module HintMatcher =
                 matchArray arguments
             | Expression.If(_) ->
                 matchIf arguments
-            | Expression.FunctionApplication(_)
+            | Expression.FunctionApplication(exprs) -> 
+                // todo match function app.
+                false
+            | Expression.Lambda(_) -> 
+                // todo: rewrite lambda match.
+                matchLambda arguments
             | Expression.LambdaArg(_)
-            | Expression.LambdaBody(_) -> false
+            | Expression.LambdaBody(_) -> 
+                // todo: write lambda arg and body matches
+                false
 
         and doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             List.length expressions = List.length hintExpressions &&
@@ -606,7 +611,12 @@ module HintMatcher =
                     hintError hint visitorInfo range
             | _ -> ()
         | AstNode.Lambda(args, body, range) -> 
-            ()
+            match hint.Match with
+            | Expression.Lambda(args, body) -> 
+                // todo: match args and body
+                ()
+            | _ -> ()
+        | AstNode.If(cond, body, elseExpr) -> ()
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 
             let arguments = constructInitialArguments ()

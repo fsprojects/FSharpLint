@@ -217,9 +217,8 @@ module AstTemp =
         | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
             [ yield! bindings |> List.map Binding
               yield Expression expression ]
-        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression(cond);Expression(body)]
-        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> [Expression(cond);Expression(body);Expression(elseExpr)]
-              
+        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [If(cond, body, None)]
+        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> [If(cond, body, Some(Else.Else(elseExpr)))]
         | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
         | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
         | SynExpr.Lambda(_, _, _, _, range) as lambda -> 
@@ -297,17 +296,9 @@ module AstTemp =
         | LambdaBody(LambdaBody.LambdaBody(body)) -> [Expression(body)]
         | LambdaArg(LambdaArg.LambdaArg(arg)) -> [SimplePatterns(arg)]
 
-        | If(cond, body, elseIfs, Some(elseBody)) -> 
-            [ yield Expression(cond); yield Expression(body); 
-              for (elseIfCond, elseIfBody) in elseIfs do 
-                  yield Expression(elseIfCond)
-                  yield Expression(elseIfBody)
-              yield Expression(elseBody) ]
-        | If(cond, body, elseIfs, None) -> 
-            [ yield Expression(cond); yield Expression(body); 
-              for (elseIfCond, elseIfBody) in elseIfs do 
-                  yield Expression(elseIfCond)
-                  yield Expression(elseIfBody) ]
+        | If(cond, body, Some(elseBody)) -> [Expression(cond); Expression(body); Else(elseBody)]
+        | If(cond, body, None) -> [Expression(cond); Expression(body)]
+        | Else(Else.Else(x)) -> [Expression x]
 
         | ComponentInfo(_)
         | EnumCase(_)
@@ -328,8 +319,9 @@ module AbstractSyntaxArray =
         | Expression = 3uy
         | FuncApp = 4uy
         | Unit = 5uy
-
+        
         | If = 10uy
+        | Else = 11uy
 
         | Lambda = 20uy
         | LambdaArg = 21uy
@@ -390,6 +382,7 @@ module AbstractSyntaxArray =
 
         | Expression(_) -> SyntaxNode.Expression
         | If(_) -> SyntaxNode.If
+        | Else(_) -> SyntaxNode.Else
 
         | ModuleOrNamespace(_)
         | ModuleDeclaration(_)
@@ -411,8 +404,7 @@ module AbstractSyntaxArray =
         | TypeRepresentation(_)
         | AstNode.ComponentInfo(_)
         | AstNode.EnumCase(_)
-        | AstNode.UnionCase(_)
-        | AstNode.If(_) -> SyntaxNode.Other
+        | AstNode.UnionCase(_) -> SyntaxNode.Other
 
     type ActualNode = 
         { Node: AstNode
