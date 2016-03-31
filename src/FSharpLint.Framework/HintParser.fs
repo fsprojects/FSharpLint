@@ -183,7 +183,8 @@ module HintParser =
             | Expression.PrefixOperator(_, expr) -> [expr]
             | Expression.Parentheses(expr) -> getChildren expr
             | Expression.Lambda(args, LambdaBody(body)) ->
-                [for LambdaArg(arg) in args do yield arg; yield body]
+                [ for LambdaArg(arg) in args -> arg
+                  yield body ]
             | Expression.LambdaArg(arg) -> [arg]
             | Expression.LambdaBody(body) -> [body]
             | Expression.FunctionApplication(exprs)
@@ -293,10 +294,8 @@ module HintParser =
                     |> Seq.choose  
                         (fun (expr, items) -> 
                             match expr with
-                            | Expression.Wildcard -> 
-                                Some(None, mergeHints (getHints items))
-                            | Expression.Variable(var) -> 
-                                Some(Some(var), mergeHints (getHints items))
+                            | Expression.Wildcard -> Some(None, mergeHints (getHints items))
+                            | Expression.Variable(var) -> Some(Some(var), mergeHints (getHints items))
                             | _ -> None)
                     |> Seq.toList
 
