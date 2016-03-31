@@ -541,7 +541,7 @@ module HintMatcher =
     /// Check a lambda function can be replaced with a function,
     /// it will not be if the lambda is automatically getting
     /// converted to a delegate type e.g. Func<T>.
-    let lambdaCanBeReplacedWithFunction checkFile breadcrumbs (expr:SynExpr) =
+    let lambdaCanBeReplacedWithFunction checkFile breadcrumbs range =
         let isParameterDelegateType index methodIdent =
             match checkFile with
             | Some(checkFile) ->
@@ -562,7 +562,7 @@ module HintMatcher =
         match breadcrumbs with
         | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
         | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
-            let index = exprs |> List.tryFindIndex (fun x -> x.Range = expr.Range)
+            let index = exprs |> List.tryFindIndex (fun x -> x.Range = range)
 
             match index with
             | Some(index) -> not <| isParameterDelegateType index methodIdent
@@ -594,7 +594,8 @@ module HintMatcher =
             | Expression.Lambda(_) -> 
                 let arguments = constructInitialArguments ()
                 if MatchExpression.matchLambda arguments then
-                    hintError hint visitorInfo range
+                    if lambdaCanBeReplacedWithFunction checkFile node.Actual.Breadcrumbs range then
+                        hintError hint visitorInfo range
             | _ -> ()
         | AstNode.If(_, _, _, range) -> 
             let arguments = constructInitialArguments ()
@@ -603,14 +604,8 @@ module HintMatcher =
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 
             let arguments = constructInitialArguments ()
-
             if MatchExpression.matchHintExpr arguments then
-                match hint.Match, hint.Suggestion with
-                | Expression.Lambda(_), Suggestion.Expr(Expression.Identifier(_)) -> 
-                    if lambdaCanBeReplacedWithFunction checkFile node.Actual.Breadcrumbs expr then
-                        hintError hint visitorInfo expr.Range
-                | _ ->
-                    hintError hint visitorInfo expr.Range
+                hintError hint visitorInfo expr.Range
         | AstNode.Pattern(SynPat.Paren(_)) -> ()
         | AstNode.Pattern(pattern) ->
             if MatchPattern.matchHintPattern (pattern, hint.Match) then

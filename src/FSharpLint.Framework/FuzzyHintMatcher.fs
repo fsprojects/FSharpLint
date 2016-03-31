@@ -46,18 +46,18 @@ module FuzzyHintMatcher =
             | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
             | false, _ -> ()
 
-        trie.Edges.AnyMatch 
-        |> List.iter (fun (var, trie) -> 
-            match var with 
-            | Some(var) -> 
-                match boundVariables.TryGetValue var with 
-                | true, varI when isMatch varI i nodeArray skipArray  -> 
-                    checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
-                | false, _ -> 
-                    boundVariables.Add(var, i)
-                    checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
-                | true, _ -> ()
-            | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify)
+            trie.Edges.AnyMatch 
+            |> List.iter (fun (var, trie) -> 
+                match var with 
+                | Some(var) -> 
+                    match boundVariables.TryGetValue var with 
+                    | true, varI when isMatch varI i nodeArray skipArray  -> 
+                        checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                    | false, _ -> 
+                        boundVariables.Add(var, i)
+                        checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                    | true, _ -> ()
+                | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify)
 
     let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edges) notify = 
         assert (nodeArray.Length = skipArray.Length)
