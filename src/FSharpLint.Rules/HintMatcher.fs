@@ -50,64 +50,48 @@ module HintMatcher =
         
     [<RequireQualifiedAccess>]
     type LambdaArgumentMatch =
-        | Variable of char * string
-        /// bool = whether or not argument was actually a wildcard (could be false if the hint argument is a wildcard but the actual argument was not).
-        | Wildcard of bool
+        | Variable of variable:char * identifier:string
+        | Wildcard
         | NoMatch
 
-    let matchLambdaArgument argument argumentToMatch = 
-        match extractSimplePatterns argument with
+    let matchLambdaArgument (LambdaArg.LambdaArg(hintArg), Ast.LambdaArg(actualArg)) = 
+        match extractSimplePatterns actualArg with
         | [] -> LambdaArgumentMatch.NoMatch
         | simplePattern::_ ->
             let identifier, isCompilerGenerated = extractIdent simplePattern
 
             let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
 
-            (* todo
-            match argumentToMatch with
-            | Argument.Variable(variable) when not isWildcard -> 
+            match hintArg with
+            | Expression.LambdaArg(Expression.Variable(variable)) when not isWildcard -> 
                 LambdaArgumentMatch.Variable(variable, identifier.idText)
-            | Argument.Wildcard -> 
-                LambdaArgumentMatch.Wildcard(isWildcard)
+            | Expression.LambdaArg(Expression.Wildcard) -> LambdaArgumentMatch.Wildcard
             | _ -> LambdaArgumentMatch.NoMatch
-            *)
-
-            LambdaArgumentMatch.NoMatch
 
     [<RequireQualifiedAccess>]
     type LambdaMatch =
-        | Match of SynExpr * Map<char, string> * int
+        | Match of Map<char, string>
         | NoMatch
 
-    let matchLambdaArguments arguments lambdaExpr =
-        let rec matchLambdaArguments arguments matches numberOfWildcards = function
-            | SynExpr.Lambda(_, _, argument, expr, _) -> 
-                match arguments with
-                | head :: tail ->
-                    let atEndOfArguments = List.isEmpty tail
-                    
-                    match matchLambdaArgument argument head with
-                    | LambdaArgumentMatch.Variable(var, ident) ->
-                        let matches = (var, ident)::matches
-                        if atEndOfArguments then
-                            LambdaMatch.Match(expr, Map.ofList matches, numberOfWildcards)
-                        else
-                            matchLambdaArguments tail matches numberOfWildcards expr
-                    | LambdaArgumentMatch.Wildcard(isWildcard) ->
-                        let numberOfWildcards = numberOfWildcards + if isWildcard then 1 else 0
+    let matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArgs:Ast.LambdaArg list) =
+        if List.length hintArgs <> List.length actualArgs then
+            LambdaMatch.NoMatch
+        else
+            let matches =
+                List.zip hintArgs actualArgs
+                |> List.map matchLambdaArgument
 
-                        if atEndOfArguments then
-                            LambdaMatch.Match(expr, Map.ofList matches, numberOfWildcards)
-                        else
-                            matchLambdaArguments tail matches numberOfWildcards expr
-                    | LambdaArgumentMatch.NoMatch ->
-                        LambdaMatch.NoMatch
-                | [] -> 
-                    LambdaMatch.NoMatch
-            | _ -> 
+            let allArgsMatch = matches |> List.forall (function LambdaArgumentMatch.NoMatch -> false | _ -> true)
+
+            if allArgsMatch then
+                matches 
+                |> List.choose (function 
+                    | LambdaArgumentMatch.Variable(variable, ident) -> Some(variable, ident) 
+                    | _ -> None)
+                |> Map.ofList
+                |> LambdaMatch.Match
+            else
                 LambdaMatch.NoMatch
-
-        matchLambdaArguments arguments [] 0 lambdaExpr
 
     /// Converts a SynConst (FSharp AST) into a Constant (hint AST).
     let matchConst = function
@@ -256,13 +240,9 @@ module HintMatcher =
             | Expression.FunctionApplication(exprs) -> 
                 // todo match function app.
                 false
-            | Expression.Lambda(_) -> 
-                // todo: rewrite lambda match.
-                matchLambda arguments
+            | Expression.Lambda(_) -> matchLambda arguments
             | Expression.LambdaArg(_)
-            | Expression.LambdaBody(_) -> 
-                // todo: write lambda arg and body matches
-                false
+            | Expression.LambdaBody(_) -> false
             | Expression.Else(_) -> false
 
         and doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
@@ -280,15 +260,12 @@ module HintMatcher =
                 arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
             | _ -> false
 
-        and private matchLambda arguments =
+        and matchLambda arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.Lambda(_) as lambda), Expression.Lambda(lambdaArgs, LambdaBody(body)) -> 
-                match matchLambdaArguments lambdaArgs lambda with
-                | LambdaMatch.Match(bodyExpr, lambdaArguments, numberOfWildcards) -> 
-                    match removeAutoGeneratedMatchesFromLambda numberOfWildcards bodyExpr with
-                    | Some(bodyExpr) -> 
-                        { arguments.SubHint(AstNode.Expression(bodyExpr), body) with LambdaArguments = lambdaArguments } |> matchHintExpr
-                    | None -> false
+            | AstNode.Lambda(args, Ast.LambdaBody(body), _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
+                match matchLambdaArguments lambdaArgs args with
+                | LambdaMatch.Match(lambdaArguments) -> 
+                    matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
                 | LambdaMatch.NoMatch -> false
             | _ -> false
 
@@ -612,11 +589,12 @@ module HintMatcher =
                 if MatchExpression.doExpressionsMatch expressions hintExpressions arguments then
                     hintError hint visitorInfo range
             | _ -> ()
-        | AstNode.Lambda(args, body, range) -> 
+        | AstNode.Lambda(_, _, range) -> 
             match hint.Match with
-            | Expression.Lambda(args, body) -> 
-                // todo: match args and body
-                ()
+            | Expression.Lambda(_) -> 
+                let arguments = constructInitialArguments ()
+                if MatchExpression.matchLambda arguments then
+                    hintError hint visitorInfo range
             | _ -> ()
         | AstNode.If(_, _, _, range) -> 
             let arguments = constructInitialArguments ()
