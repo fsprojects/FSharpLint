@@ -217,8 +217,8 @@ module AstTemp =
         | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
             [ yield! bindings |> List.map Binding
               yield Expression expression ]
-        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [If(cond, body, None)]
-        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> [If(cond, body, Some(Else.Else(elseExpr)))]
+        | SynExpr.IfThenElse(cond, body, None, _, _, _, range) -> [If(cond, body, None, range)]
+        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, range) -> [If(cond, body, Some(Else.Else(elseExpr)), range)]
         | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
         | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
         | SynExpr.Lambda(_, _, _, _, range) as lambda -> 
@@ -296,8 +296,8 @@ module AstTemp =
         | LambdaBody(LambdaBody.LambdaBody(body)) -> [Expression(body)]
         | LambdaArg(LambdaArg.LambdaArg(arg)) -> [SimplePatterns(arg)]
 
-        | If(cond, body, Some(elseBody)) -> [Expression(cond); Expression(body); Else(elseBody)]
-        | If(cond, body, None) -> [Expression(cond); Expression(body)]
+        | If(cond, body, Some(elseBody), _) -> [Expression(cond); Expression(body); Else(elseBody)]
+        | If(cond, body, None, _) -> [Expression(cond); Expression(body)]
         | Else(Else.Else(x)) -> [Expression x]
 
         | ComponentInfo(_)

@@ -263,17 +263,18 @@ module HintMatcher =
             | Expression.LambdaBody(_) -> 
                 // todo: write lambda arg and body matches
                 false
+            | Expression.Else(_) -> false
 
         and doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions) ||> List.forall2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
 
-        and private matchIf arguments =
+        and matchIf arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)), Expression.If(hintCond, hintExpr, None) -> 
+            | AstNode.If(cond, expr, None, _), Expression.If(hintCond, hintExpr, None) -> 
                 arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)), Expression.If(hintCond, hintExpr, Some(hintElseExpr)) -> 
+            | AstNode.If(cond, expr, Some(Else.Else(elseExpr)), _), Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) -> 
                 arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
@@ -517,8 +518,9 @@ module HintMatcher =
         | Expression.If(cond, expr, None) ->
             "if " + hintToString cond + " then " + hintToString expr
         | Expression.If(cond, expr, Some(elseExpr)) ->
-            "if " + hintToString cond + " then " + hintToString expr +
-            " else " + hintToString elseExpr
+            "if " + hintToString cond + " then " + hintToString expr + " " + hintToString elseExpr
+        | Expression.Else(expr) ->
+            "else " + hintToString expr
         | Expression.Null -> "null"
     and lambdaArgumentsToString (arguments:LambdaArg list) = 
         arguments
@@ -616,7 +618,10 @@ module HintMatcher =
                 // todo: match args and body
                 ()
             | _ -> ()
-        | AstNode.If(cond, body, elseExpr) -> ()
+        | AstNode.If(_, _, _, range) -> 
+            let arguments = constructInitialArguments ()
+            if MatchExpression.matchIf arguments then
+                hintError hint visitorInfo range
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 
             let arguments = constructInitialArguments ()
