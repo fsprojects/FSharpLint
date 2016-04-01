@@ -60,11 +60,11 @@
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
     <None Include="app.config" />
-    <None Include="..\..\packages\FSharp.Compiler.Service.ProjectCracker\lib\net45\FSharp.Compiler.Service.ProjectCrackerTool.exe">
+    <None Include="..\..\packages\FSharp.Compiler.Service.ProjectCracker\utilities\net45\FSharp.Compiler.Service.ProjectCrackerTool.exe">
       <Link>FSharp.Compiler.Service.ProjectCrackerTool.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="..\..\packages\FSharp.Compiler.Service.ProjectCracker\lib\net45\FSharp.Compiler.Service.ProjectCrackerTool.exe.config">
+    <Content Include="..\..\packages\FSharp.Compiler.Service.ProjectCracker\utilities\net45\FSharp.Compiler.Service.ProjectCrackerTool.exe.config">
       <Link>FSharp.Compiler.Service.ProjectCrackerTool.exe.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
