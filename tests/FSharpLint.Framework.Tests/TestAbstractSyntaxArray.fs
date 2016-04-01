@@ -20,6 +20,7 @@ module TestAbstractSyntaxArray
 
 open System.IO
 open System.Diagnostics
+open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
 open Microsoft.FSharp.Compiler.Ast
@@ -47,6 +48,93 @@ type TestAst() =
         match parseResults.ParseTree with
         | Some(parseTree) -> parseTree
         | None -> failwith "Failed to parse file."
+
+    let astToExpr ast =
+        let (|Module|_|) x =
+            match x with
+            | SynModuleOrNamespace(_, _, SynModuleDecl.DoExpr(_, app, _)::_, _, _, _, _) ->
+                Some(app)
+            | _ -> None
+
+        match ast with
+        | ParsedInput.ImplFile(x) -> 
+            match x with 
+            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _) -> 
+                app 
+            | _ -> failwith "Expected at least one module or namespace."
+        | _ -> failwith "Expected an implementation file."
+
+    let astNodeName = string >> (fun x -> x.Substring(x.LastIndexOf("+") + 1))
+
+    [<Test>]
+    member __.``Flatten with right pipe adds lhs to end of function application.``() = 
+        let result =
+            generateAst "x |> List.map (fun x -> x)"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+
+        Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], result)
+
+    [<Test>]
+    member __.``Flatten with left pipe adds rhs to end of function application.``() = 
+        let result =
+            generateAst "List.map (fun x -> x) <| x"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+
+        Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], result)
+
+    [<Test>]
+    member __.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() = 
+        let result =
+            generateAst "x |> List.map (fun x -> x) 1"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+            
+        Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], result)
+
+    [<Test>]
+    member __.``Flatten with binary operator on lhs of right pipe.``() = 
+        let result =
+            generateAst "x::[] |> List.map (fun x -> x)"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+            
+        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+
+    [<Test>]
+    member __.``Flatten with function application on lhs of right pipe.``() = 
+        let result =
+            generateAst "(foo x) |> List.map (fun x -> x)"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+            
+        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+
+    [<Test>]
+    member __.``Flatten with multiple right pipes.``() = 
+        let result =
+            generateAst "x |> foo |> List.map (fun x -> x)"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+            
+        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+
+    [<Test>]
+    member __.``Flatten with multiple left pipes.``() = 
+        let result =
+            generateAst "List.map (fun x -> x) <| 1 <| x"
+            |> astToExpr
+            |> AstTemp.flattenFunctionApplication
+            |> List.map astNodeName
+            
+        Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], result)
 
     [<Category("Performance")>]
     [<Test>]
