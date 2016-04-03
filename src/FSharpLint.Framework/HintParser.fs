@@ -46,8 +46,6 @@ module HintParser =
 
     [<RequireQualifiedAccess>]
     type Expression =
-        | InfixOperator of string * Expression * Expression
-        | PrefixOperator of string * Expression
         | FunctionApplication of Expression list
         | Wildcard
         | Variable of char
@@ -142,9 +140,7 @@ module HintParser =
             static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = [] }
  
         let rec private getKey = function
-            | Expression.InfixOperator(_)
-            | Expression.FunctionApplication(_)
-            | Expression.PrefixOperator(_) -> SyntaxHintNode.FuncApp
+            | Expression.FunctionApplication(_) -> SyntaxHintNode.FuncApp
             | Expression.Parentheses(expr) -> getKey expr
             | Expression.Lambda(_) -> SyntaxHintNode.Lambda
             | Expression.LambdaArg(_) -> SyntaxHintNode.LambdaArg
@@ -179,8 +175,6 @@ module HintParser =
             | Expression.Variable(_) -> SyntaxHintNode.Variable
  
         let rec private getChildren = function
-            | Expression.InfixOperator(_, lhs, rhs) -> [lhs; rhs]
-            | Expression.PrefixOperator(_, expr) -> [expr]
             | Expression.Parentheses(expr) -> getChildren expr
             | Expression.Lambda(args, LambdaBody(body)) ->
                 [ for LambdaArg(arg) in args -> arg
@@ -838,13 +832,15 @@ module HintParser =
             let op = InfixOperator(prefix, remainingOpChars_ws,
                                    precedence, associativity, (),
                                    fun remOpChars expr1 expr2 ->
-                                        Expression.InfixOperator(prefix + remOpChars, expr1, expr2))
+                                        let opIdent = Expression.Identifier [prefix + remOpChars]
+                                        Expression.FunctionApplication([opIdent; expr1; expr2]))
             opp.AddOperator(op)
 
         let addPrefixOperator op precedence =
             opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
                                                 fun expr ->
-                                                    Expression.PrefixOperator(op, expr)))
+                                                    let opIdent = Expression.Identifier [op]
+                                                    Expression.FunctionApplication([opIdent; expr])))
 
         do
             addInfixOperator ":="  3 Associativity.Right

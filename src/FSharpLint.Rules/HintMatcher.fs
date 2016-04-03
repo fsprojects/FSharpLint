@@ -210,10 +210,6 @@ module HintMatcher =
             | Expression.Constant(_)
             | Expression.Identifier(_) ->
                 matchExpr expr = Some(arguments.Hint)
-            | Expression.InfixOperator(_) ->
-                matchInfixOperation arguments
-            | Expression.PrefixOperator(_) ->
-                matchPrefixOperation arguments
             | Expression.Parentheses(hint) -> 
                 arguments.SubHint(expr, hint) |> matchHintExpr
             | Expression.Tuple(_) ->
@@ -287,36 +283,6 @@ module HintMatcher =
                 arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
             | _ -> false
 
-        and private matchInfixOperation arguments =
-            match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple([leftExpr; rightExpr], _, _), _)), 
-                    Expression.InfixOperator(op, left, right) ->
-                arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr
-            | AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)), 
-                    Expression.InfixOperator(op, left, right) -> 
-
-                match removeParens (AstNode.Expression(infixExpr)) with
-                | AstNode.Expression(SynExpr.App(_, true, opExpr, leftExpr, _)) ->
-                    arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&
-                    arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr &&
-                    arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr &&
-                    notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr
-                | _ -> false
-            | _ -> false
-
-        and private matchPrefixOperation arguments =
-            match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)), 
-                    Expression.PrefixOperator(op, expr) -> 
-                arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier(["~" + op])) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr
-            | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), Expression.PrefixOperator(op, expr) 
-                    when op = "&" || op = "&&" ->
-                arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
-            | _ -> false
-
     module MatchPattern =
 
         let private matchPattern = function
@@ -344,13 +310,13 @@ module HintMatcher =
             | Expression.Null
             | Expression.Constant(_)
             | Expression.Identifier(_) ->
-                matchPattern pattern = Some(hint)
+                matchPattern pattern = Some(hint) (* todo:
             | Expression.InfixOperator("::", _, _) ->
                 matchConsPattern (pattern, hint)
             | Expression.InfixOperator("|", _, _) ->
                 matchOrPattern (pattern, hint)
             | Expression.InfixOperator("&", _, _) ->
-                matchAndPattern (pattern, hint)
+                matchAndPattern (pattern, hint) *)
             | Expression.Parentheses(hint) -> 
                 matchHintPattern (pattern, hint)
             | Expression.Tuple(_) ->
@@ -364,9 +330,7 @@ module HintMatcher =
             | Expression.LambdaArg(_)
             | Expression.LambdaBody(_)
             | Expression.If(_)
-            | Expression.Else(_)
-            | Expression.InfixOperator(_)
-            | Expression.PrefixOperator(_) ->
+            | Expression.Else(_) ->
                 false
 
         and private doPatternsMatch patterns hintExpressions =
@@ -390,7 +354,7 @@ module HintMatcher =
             | SynPat.Tuple(patterns, _), Expression.Tuple(hintExpressions) ->
                 doPatternsMatch patterns hintExpressions
             | _ -> false
-
+            (*
         and private matchConsPattern (pattern, hint) =
             match (pattern, hint) with
             | SynPat.LongIdent(
@@ -426,7 +390,7 @@ module HintMatcher =
             match pattern with
             | SynPat.Ands(patterns, _) -> 
                 matchAndPatterns (List.rev patterns, hint)
-            | _ -> false
+            | _ -> false*)
 
     let constantToString = function
         | Constant.Bool(x) -> if x then "true" else "false"
@@ -468,10 +432,6 @@ module HintMatcher =
             |> String.concat "."
         | Expression.FunctionApplication(expressions) ->
             expressions |> surroundExpressionsString hintToString "" "" " "
-        | Expression.InfixOperator(operator, leftHint, rightHint) ->
-            hintToString leftHint + operator + hintToString rightHint
-        | Expression.PrefixOperator(operator, hint) ->
-            operator + hintToString hint
         | Expression.Parentheses(hint) -> 
             "(" + hintToString hint + ")"
         | Expression.Lambda(arguments, LambdaBody(body)) -> 
