@@ -24,9 +24,9 @@ open System.Collections.Generic
 
 module FuzzyHintMatcher =
 
-    let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) = 
-        let skipI = skipArray.[i]
-        let skipJ = skipArray.[j]
+    let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+        let skipI = skipArray.[i].NumberOfChildren
+        let skipJ = skipArray.[j].NumberOfChildren
 
         if skipI = skipJ then
             Array.zip [|i..i + skipI|] [|j..j + skipJ|]
@@ -36,7 +36,7 @@ module FuzzyHintMatcher =
                 nodeArray.[i].Hashcode = nodeArray.[j].Hashcode)
         else false
 
-    let rec private checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (boundVariables:Dictionary<_, _>) notify =
+    let rec private checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (boundVariables:Dictionary<_, _>) notify =
         trie.MatchedHint |> List.iter notify
 
         if i < nodeArray.Length then
@@ -52,14 +52,14 @@ module FuzzyHintMatcher =
                 | Some(var) -> 
                     match boundVariables.TryGetValue var with 
                     | true, varI when isMatch varI i nodeArray skipArray  -> 
-                        checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                        checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
                     | false, _ -> 
                         boundVariables.Add(var, i)
-                        checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify
+                        checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
                     | true, _ -> ()
-                | None -> checkTrie (i + skipArray.[i] + 1) trie nodeArray skipArray boundVariables notify)
+                | None -> checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify)
 
-    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:int []) (hintTrie:Edges) notify = 
+    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
         assert (nodeArray.Length = skipArray.Length)
 
         let len = nodeArray.Length

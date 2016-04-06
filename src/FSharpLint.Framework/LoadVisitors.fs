@@ -57,7 +57,7 @@ module LoadVisitors =
     type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit
 
     // TODO: Support suppressed messages.
-    type SyntaxArrayVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> AbstractSyntaxArray.Node [] -> int [] -> unit
+    type SyntaxArrayVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> unit
 
     type VisitorType =
         | Ast of AstVisitor

@@ -459,6 +459,11 @@ module AbstractSyntaxArray =
     type private StackedNode(node: AstNode, depth: int) = 
         member __.Node = node
         member __.Depth = depth
+
+    [<Struct>]
+    type Skip(numberOfChildren: int, parentIndex: int) = 
+        member __.NumberOfChildren = numberOfChildren
+        member __.ParentIndex = parentIndex
         
     let astToArray hint =
         let astRoot =
@@ -477,7 +482,8 @@ module AbstractSyntaxArray =
                 let nodePosition = possibleSkips.Pop().SkipPosition
                 let numberOfChildren = nodes.Count - nodePosition - 1
                 if numberOfChildren > 0 then
-                    skips.Add(nodePosition, numberOfChildren)
+                    let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
+                    skips.Add(nodePosition, Skip(numberOfChildren, parentIndex))
 
         left.Push (StackedNode(astRoot, 0))
 
