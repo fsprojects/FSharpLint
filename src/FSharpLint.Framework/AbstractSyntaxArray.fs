@@ -475,14 +475,14 @@ module AbstractSyntaxArray =
         let nodes = List<_>()
         let left = Stack<_>()
         let possibleSkips = Stack<PossibleSkip>()
-        let skips = Dictionary<_, _>()
+        let skips = List<_>()
 
         let tryAddPossibleSkips depth =
             while possibleSkips.Count > 0 && possibleSkips.Peek().Depth >= depth do
                 let nodePosition = possibleSkips.Pop().SkipPosition
                 let numberOfChildren = nodes.Count - nodePosition - 1
                 let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
-                skips.Add(nodePosition, Skip(numberOfChildren, parentIndex))
+                skips.Add(Skip(numberOfChildren, parentIndex))
 
         left.Push (StackedNode(astRoot, 0))
 
@@ -509,11 +509,4 @@ module AbstractSyntaxArray =
         
         tryAddPossibleSkips 0
 
-        let nodes = nodes.ToArray()
-    
-        let skipArray = Array.zeroCreate nodes.Length
-    
-        for entry in skips do
-            skipArray.[entry.Key] <- entry.Value
-
-        (nodes, skipArray)
+        (nodes.ToArray(), skips.ToArray())
