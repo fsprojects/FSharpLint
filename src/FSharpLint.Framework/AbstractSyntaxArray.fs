@@ -412,18 +412,8 @@ module AbstractSyntaxArray =
         | AstNode.EnumCase(_)
         | AstNode.UnionCase(_) -> SyntaxNode.Other
 
-    type ActualNode = 
-        { Node: AstNode
-
-          /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
-          Breadcrumbs: AstNode list
-
-          /// Suppressed message attributes that have been applied to the block of code 
-          /// the current node is within.
-          SuppressedMessages: (SuppressedMessage * range) list }
-
     [<Struct>]
-    type Node(hashcode: int, actual: ActualNode) = 
+    type Node(hashcode: int, actual: AstNode) = 
         member __.Hashcode = hashcode
         member __.Actual = actual
 
@@ -501,11 +491,7 @@ module AbstractSyntaxArray =
             | syntaxNode -> 
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
-                let actualNode =
-                    { Node = astNode
-                      Breadcrumbs = []
-                      SuppressedMessages = [] }
-                nodes.Add (Node((syntaxNode, getHashCode astNode).GetHashCode(), actualNode))
+                nodes.Add (Node((syntaxNode, getHashCode astNode).GetHashCode(), astNode))
         
         tryAddPossibleSkips 0
 

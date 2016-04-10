@@ -69,7 +69,7 @@ module FuzzyHintMatcher =
             let node = nodeArray.[i]
             
             match hintTrie.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (Dictionary<_, _>()) (notify node)
+            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (Dictionary<_, _>()) (notify i)
             | false, _ -> ()
 
             i <- i + 1

@@ -129,8 +129,7 @@ module HintMatcher =
             { LambdaArguments: Map<char, string>
               Expression: AstNode
               Hint: Expression
-              FSharpCheckFileResults: FSharpCheckFileResults option
-              Breadcrumbs: AstNode list }
+              FSharpCheckFileResults: FSharpCheckFileResults option }
 
             with 
                 member this.SubHint(expr, hint) =
@@ -162,7 +161,7 @@ module HintMatcher =
             | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
                 PossiblyInMethod
             | _ -> NotInMethod
-
+            (*
         /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
         /// or a named parameter in a method call.
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
@@ -191,7 +190,7 @@ module HintMatcher =
                     | PossiblyInConstructor -> 
                         false
                     | _ -> true
-            | _ -> true
+            | _ -> true*)
 
         let rec matchHintExpr arguments =
             let expr = removeParens arguments.Expression
@@ -244,9 +243,9 @@ module HintMatcher =
                 arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr
             | AstNode.If(cond, expr, Some(Else.Else(elseExpr)), _), Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) -> 
-                arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
+                arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr 
+                && arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr 
+                && arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
             | _ -> false
 
         and matchLambda arguments =
@@ -526,15 +525,14 @@ module HintMatcher =
             not <| isParameterDelegateType 0 methodIdent
         | _ -> true
 
-    let confirmFuzzyMatch visitorInfo checkFile (node:AbstractSyntaxArray.Node) (hint:HintParser.Hint) =
+    let confirmFuzzyMatch visitorInfo checkFile (node:AbstractSyntaxArray.Node) breadcrumbs (hint:HintParser.Hint) =
         let constructInitialArguments () =
             { MatchExpression.LambdaArguments = Map.ofList []
-              MatchExpression.Expression = node.Actual.Node
+              MatchExpression.Expression = node.Actual
               MatchExpression.Hint = hint.Match
-              MatchExpression.FSharpCheckFileResults = checkFile
-              MatchExpression.Breadcrumbs = node.Actual.Breadcrumbs }
+              MatchExpression.FSharpCheckFileResults = checkFile }
 
-        match node.Actual.Node with
+        match node.Actual with
         | AstNode.FuncApp(_, range) -> 
             match hint.Match with
             | Expression.FunctionApplication(_) -> 
@@ -547,7 +545,7 @@ module HintMatcher =
             | Expression.Lambda(_) -> 
                 let arguments = constructInitialArguments ()
                 if MatchExpression.matchLambda arguments then
-                    if lambdaCanBeReplacedWithFunction checkFile node.Actual.Breadcrumbs range then
+                    if lambdaCanBeReplacedWithFunction checkFile breadcrumbs range then
                         hintError hint visitorInfo range
             | _ -> ()
         | AstNode.If(_, _, _, range) -> 
@@ -565,10 +563,25 @@ module HintMatcher =
                 hintError hint visitorInfo pattern.Range
         | _ -> ()
 
-    let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
+    let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
         let hintKeywordTree = getHints visitorInfo.Config
 
-        let confirmFuzzyMatch = confirmFuzzyMatch visitorInfo checkFile
+        let maxBreadcrumbs = 6
+
+        let getBreadcrumbs i =
+            let rec getBreadcrumbs breadcrumbs i =
+                if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                    let parenti = skipArray.[i].ParentIndex
+                    let node = syntaxArray.[parenti].Actual
+                    getBreadcrumbs (node::breadcrumbs) parenti
+                else
+                    breadcrumbs
+
+            getBreadcrumbs [] i |> List.rev
+
+        let confirmFuzzyMatch i =
+            let breadcrumbs = getBreadcrumbs i
+            confirmFuzzyMatch visitorInfo checkFile syntaxArray.[i] breadcrumbs
 
         FuzzyHintMatcher.possibleMatches syntaxArray skipArray hintKeywordTree confirmFuzzyMatch
 
