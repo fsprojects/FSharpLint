@@ -143,31 +143,12 @@ type TestAst() =
 
         let stopwatch = Stopwatch.StartNew()
 
-        let (array, _) = astToArray tree
+        astToArray tree |> ignore
 
         stopwatch.Stop()
 
         Assert.Less(stopwatch.ElapsedMilliseconds, 200)
         System.Console.WriteLine(sprintf "Built array in %d milliseconds." stopwatch.ElapsedMilliseconds)
-    
-        let stopwatch = Stopwatch.StartNew()
-
-        let length = Array.length array
-        let listFoldHashCode = (SyntaxNode.Identifier, "fold").GetHashCode()
-
-        let mutable foundListFoldIdent = false
-        let mutable i = 0
-        while i < length - 1 do
-            let node = array.[i]
-            if node.Hashcode = listFoldHashCode then
-                foundListFoldIdent <- true
-            i <- i + 1
-
-        stopwatch.Stop()
-
-        Assert.IsTrue(foundListFoldIdent)
-        Assert.Less(stopwatch.ElapsedMilliseconds, 5)
-        System.Console.WriteLine(sprintf "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds)
 
     [<Test>]
     member __.``Syntax array constructed from AST in valid order.``() = 

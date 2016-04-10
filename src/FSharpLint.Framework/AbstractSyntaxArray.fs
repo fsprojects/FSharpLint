@@ -481,9 +481,8 @@ module AbstractSyntaxArray =
             while possibleSkips.Count > 0 && possibleSkips.Peek().Depth >= depth do
                 let nodePosition = possibleSkips.Pop().SkipPosition
                 let numberOfChildren = nodes.Count - nodePosition - 1
-                if numberOfChildren > 0 then
-                    let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
-                    skips.Add(nodePosition, Skip(numberOfChildren, parentIndex))
+                let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
+                skips.Add(nodePosition, Skip(numberOfChildren, parentIndex))
 
         left.Push (StackedNode(astRoot, 0))
 
@@ -500,8 +499,7 @@ module AbstractSyntaxArray =
             match astNodeToSyntaxNode astNode with
             | SyntaxNode.Other -> ()
             | syntaxNode -> 
-                if not children.IsEmpty then
-                    possibleSkips.Push (PossibleSkip(nodes.Count, depth))
+                possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
                 let actualNode =
                     { Node = astNode
