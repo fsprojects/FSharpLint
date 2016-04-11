@@ -173,4 +173,15 @@ type TestAst() =
               (SyntaxNode.Identifier, "woofs").GetHashCode() ]
 
         Assert.AreEqual(expected, actual)
-        Assert.AreEqual([11;0;8;1;0;1;0;3;2;0;0;0], skipArray)
+        Assert.AreEqual([ AbstractSyntaxArray.Skip(11, 0)
+                          AbstractSyntaxArray.Skip(0, 0)
+                          AbstractSyntaxArray.Skip(8, 0)
+                          AbstractSyntaxArray.Skip(1, 2)
+                          AbstractSyntaxArray.Skip(0, 3)
+                          AbstractSyntaxArray.Skip(1, 2)
+                          AbstractSyntaxArray.Skip(0, 5)
+                          AbstractSyntaxArray.Skip(3, 2)
+                          AbstractSyntaxArray.Skip(2, 7)
+                          AbstractSyntaxArray.Skip(0, 8)
+                          AbstractSyntaxArray.Skip(0, 8)
+                          AbstractSyntaxArray.Skip(0, 0) ], skipArray)
