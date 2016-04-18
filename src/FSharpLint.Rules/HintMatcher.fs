@@ -570,9 +570,12 @@ module HintMatcher =
 
         let getBreadcrumbs i =
             let rec getBreadcrumbs breadcrumbs i =
-                if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                if i = 0 then
+                    let node = syntaxArray.[i].Actual
+                    node::breadcrumbs
+                else if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                    let node = syntaxArray.[i].Actual
                     let parenti = skipArray.[i].ParentIndex
-                    let node = syntaxArray.[parenti].Actual
                     getBreadcrumbs (node::breadcrumbs) parenti
                 else
                     breadcrumbs
