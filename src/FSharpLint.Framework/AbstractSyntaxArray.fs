@@ -454,6 +454,13 @@ module AbstractSyntaxArray =
     type Skip(numberOfChildren: int, parentIndex: int) = 
         member __.NumberOfChildren = numberOfChildren
         member __.ParentIndex = parentIndex
+
+    /// Keep index of position so skip array can be created in the correct order.
+    [<Struct>]
+    type private TempSkip(numberOfChildren: int, parentIndex: int, index: int) = 
+        member __.NumberOfChildren = numberOfChildren
+        member __.Index = index
+        member __.ParentIndex = parentIndex
         
     let astToArray hint =
         let astRoot =
@@ -472,7 +479,7 @@ module AbstractSyntaxArray =
                 let nodePosition = possibleSkips.Pop().SkipPosition
                 let numberOfChildren = nodes.Count - nodePosition - 1
                 let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
-                skips.Add(Skip(numberOfChildren, parentIndex))
+                skips.Add(TempSkip(numberOfChildren, parentIndex, nodePosition))
 
         left.Push (StackedNode(astRoot, 0))
 
@@ -495,4 +502,13 @@ module AbstractSyntaxArray =
         
         tryAddPossibleSkips 0
 
-        (nodes.ToArray(), skips.ToArray())
+        let skipArray = Array.zeroCreate skips.Count
+
+        let mutable i = 0
+        while i < skips.Count do
+            let skip = skips.[i]
+            skipArray.[skip.Index] <- Skip(skip.NumberOfChildren, skip.ParentIndex)
+
+            i <- i + 1
+
+        (nodes.ToArray(), skipArray)
