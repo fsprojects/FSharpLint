@@ -68,82 +68,63 @@ type TestAst() =
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application.``() = 
-        let result =
-            generateAst "x |> List.map (fun x -> x)"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-
-        Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], result)
+        match generateAst "x |> List.map (fun x -> x)" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with left pipe adds rhs to end of function application.``() = 
-        let result =
-            generateAst "List.map (fun x -> x) <| x"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-
-        Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], result)
+        match generateAst "List.map (fun x -> x) <| x" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() = 
-        let result =
-            generateAst "x |> List.map (fun x -> x) 1"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-            
-        Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], result)
+        match generateAst "x |> List.map (fun x -> x) 1" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with binary operator on lhs of right pipe.``() = 
-        let result =
-            generateAst "x::[] |> List.map (fun x -> x)"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-            
-        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+        match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with function application on lhs of right pipe.``() = 
-        let result =
-            generateAst "(foo x) |> List.map (fun x -> x)"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-            
-        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+        match generateAst "(foo x) |> List.map (fun x -> x)" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple right pipes.``() = 
-        let result =
-            generateAst "x |> foo |> List.map (fun x -> x)"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-            
-        Assert.AreEqual(["LongIdent"; "Lambda"; "App"], result)
+        match generateAst "x |> foo |> List.map (fun x -> x)" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple left pipes.``() = 
-        let result =
-            generateAst "List.map (fun x -> x) <| 1 <| x"
-            |> astToExpr
-            |> AstTemp.flattenFunctionApplication
-            |> List.map astNodeName
-            
-        Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], result)
+        match generateAst "List.map (fun x -> x) <| 1 <| x" |> astToExpr |> Expression with
+        | AstTemp.FuncApp(expressions) -> 
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
+        | _ -> Assert.Fail()
 
     [<Category("Performance")>]
     [<Test>]
     member __.``Check performance of walking tree for matching hints``() = 
         let tree = File.ReadAllText SourceFile |> generateAst
 
+        System.Threading.Thread.Sleep(2500);
+
         let stopwatch = Stopwatch.StartNew()
 
-        astToArray tree |> ignore
+        let tree = astToArray tree 
 
         stopwatch.Stop()
 
