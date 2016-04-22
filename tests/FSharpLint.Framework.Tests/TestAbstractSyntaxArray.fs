@@ -69,49 +69,49 @@ type TestAst() =
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application.``() = 
         match generateAst "x |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with left pipe adds rhs to end of function application.``() = 
         match generateAst "List.map (fun x -> x) <| x" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() = 
         match generateAst "x |> List.map (fun x -> x) 1" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with binary operator on lhs of right pipe.``() = 
         match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with function application on lhs of right pipe.``() = 
         match generateAst "(foo x) |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple right pipes.``() = 
         match generateAst "x |> foo |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple left pipes.``() = 
         match generateAst "List.map (fun x -> x) <| 1 <| x" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions) -> 
+        | AstTemp.FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
@@ -119,8 +119,6 @@ type TestAst() =
     [<Test>]
     member __.``Check performance of walking tree for matching hints``() = 
         let tree = File.ReadAllText SourceFile |> generateAst
-
-        System.Threading.Thread.Sleep(2500);
 
         let stopwatch = Stopwatch.StartNew()
 
@@ -140,18 +138,18 @@ type TestAst() =
         let actual = array |> Array.map (fun x -> x.Hashcode)
 
         let expected =
-            [ (SyntaxNode.FuncApp, 0).GetHashCode()
-              (SyntaxNode.Identifier, "map").GetHashCode()
-              (SyntaxNode.Lambda, 0).GetHashCode()
-              (SyntaxNode.LambdaArg, 0).GetHashCode()
-              (SyntaxNode.Identifier, "x").GetHashCode()
-              (SyntaxNode.LambdaArg, 0).GetHashCode()
-              (SyntaxNode.Identifier, "y").GetHashCode()
-              (SyntaxNode.LambdaBody, 0).GetHashCode()
-              (SyntaxNode.FuncApp, 0).GetHashCode()
-              (SyntaxNode.Identifier, "id").GetHashCode()
-              (SyntaxNode.Identifier, "x").GetHashCode()
-              (SyntaxNode.Identifier, "woofs").GetHashCode() ]
+            [ hash (SyntaxNode.FuncApp, 0)
+              hash (SyntaxNode.Identifier, "map")
+              hash (SyntaxNode.Lambda, 0)
+              hash (SyntaxNode.LambdaArg, 0)
+              hash (SyntaxNode.Identifier, "x")
+              hash (SyntaxNode.LambdaArg, 0)
+              hash (SyntaxNode.Identifier, "y")
+              hash (SyntaxNode.LambdaBody, 0)
+              hash (SyntaxNode.FuncApp, 0)
+              hash (SyntaxNode.Identifier, "id")
+              hash (SyntaxNode.Identifier, "x")
+              hash (SyntaxNode.Identifier, "woofs") ]
 
         Assert.AreEqual(expected, actual)
         Assert.AreEqual([ AbstractSyntaxArray.Skip(11, 0)

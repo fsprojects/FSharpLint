@@ -54,7 +54,7 @@ module HintMatcher =
         | Wildcard
         | NoMatch
 
-    let matchLambdaArgument (LambdaArg.LambdaArg(hintArg), Ast.LambdaArg(actualArg)) = 
+    let matchLambdaArgument (LambdaArg.LambdaArg(hintArg), actualArg) = 
         match extractSimplePatterns actualArg with
         | [] -> LambdaArgumentMatch.NoMatch
         | simplePattern::_ ->
@@ -73,7 +73,7 @@ module HintMatcher =
         | Match of Map<char, string>
         | NoMatch
 
-    let matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArgs:Ast.LambdaArg list) =
+    let matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArgs:SynSimplePats list) =
         if List.length hintArgs <> List.length actualArgs then
             LambdaMatch.NoMatch
         else
@@ -228,7 +228,7 @@ module HintMatcher =
 
         and matchFunctionApplication arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
+            | AstTemp.FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
                 let expressions = exprs |> List.map AstNode.Expression
                 doExpressionsMatch expressions hintExprs arguments
             | _ -> false
@@ -237,20 +237,20 @@ module HintMatcher =
             List.length expressions = List.length hintExpressions &&
                 (expressions, hintExpressions) ||> List.forall2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
 
-        and matchIf arguments =
+        and private matchIf arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.If(cond, expr, None, _), Expression.If(hintCond, hintExpr, None) -> 
-                arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr &&
-                arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr
-            | AstNode.If(cond, expr, Some(Else.Else(elseExpr)), _), Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) -> 
-                arguments.SubHint(AstNode.Expression(cond), hintCond) |> matchHintExpr 
-                && arguments.SubHint(AstNode.Expression(expr), hintExpr) |> matchHintExpr 
-                && arguments.SubHint(AstNode.Expression(elseExpr), hintElseExpr) |> matchHintExpr
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)), Expression.If(hintCond, hintExpr, None) -> 
+                arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&
+                arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)), Expression.If(hintCond, hintExpr, Some(hintElseExpr)) -> 
+                arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&
+                arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr &&
+                arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr
             | _ -> false
 
         and matchLambda arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Lambda(args, Ast.LambdaBody(body), _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
+            | AstTemp.Lambda({ AstTemp.Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
                 match matchLambdaArguments lambdaArgs args with
                 | LambdaMatch.Match(lambdaArguments) -> 
                     matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
@@ -533,14 +533,19 @@ module HintMatcher =
               MatchExpression.FSharpCheckFileResults = checkFile }
 
         match node.Actual with
-        | AstNode.FuncApp(_, range) -> 
+        | AstNode.Expression(SynExpr.Paren(_)) -> ()
+        | AstNode.Pattern(SynPat.Paren(_)) -> ()
+        | AstNode.Pattern(pattern) ->
+            if MatchPattern.matchHintPattern (pattern, hint.Match) then
+                hintError hint visitorInfo pattern.Range
+        | AstTemp.FuncApp(_, range) -> 
             match hint.Match with
             | Expression.FunctionApplication(_) -> 
                 let arguments = constructInitialArguments ()
                 if MatchExpression.matchFunctionApplication arguments then
                     hintError hint visitorInfo range
             | _ -> ()
-        | AstNode.Lambda(_, _, range) -> 
+        | AstTemp.Lambda(_, range) -> 
             match hint.Match with
             | Expression.Lambda(_) -> 
                 let arguments = constructInitialArguments ()
@@ -548,19 +553,10 @@ module HintMatcher =
                     if lambdaCanBeReplacedWithFunction checkFile breadcrumbs range then
                         hintError hint visitorInfo range
             | _ -> ()
-        | AstNode.If(_, _, _, range) -> 
-            let arguments = constructInitialArguments ()
-            if MatchExpression.matchIf arguments then
-                hintError hint visitorInfo range
-        | AstNode.Expression(SynExpr.Paren(_)) -> ()
         | AstNode.Expression(expr) -> 
             let arguments = constructInitialArguments ()
             if MatchExpression.matchHintExpr arguments then
                 hintError hint visitorInfo expr.Range
-        | AstNode.Pattern(SynPat.Paren(_)) -> ()
-        | AstNode.Pattern(pattern) ->
-            if MatchPattern.matchHintPattern (pattern, hint.Match) then
-                hintError hint visitorInfo pattern.Range
         | _ -> ()
 
     let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 

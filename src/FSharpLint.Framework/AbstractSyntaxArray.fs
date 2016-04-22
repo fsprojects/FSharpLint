@@ -20,43 +20,6 @@ namespace FSharpLint.Framework
 
 module AstTemp =
 
-    type SyntaxNode =
-        | Identifier = 1uy
-        | Null = 2uy
-        | Expression = 3uy
-        | FuncApp = 4uy
-        | Unit = 5uy
-        
-        | If = 10uy
-        | Else = 11uy
-
-        | Lambda = 20uy
-        | LambdaArg = 21uy
-        | LambdaBody = 22uy
-
-        | ArrayOrList = 30uy
-        | Tuple = 31uy
-            
-        | ConstantBool = 51uy
-        | ConstantByte = 52uy
-        | ConstantChar = 53uy
-        | ConstantDecimal = 54uy
-        | ConstantDouble = 55uy
-        | ConstantInt16 = 56uy
-        | ConstantInt32 = 57uy
-        | ConstantInt64 = 58uy
-        | ConstantIntPtr = 59uy
-        | ConstantSByte = 60uy
-        | ConstantSingle = 61uy
-        | ConstantString = 62uy
-        | ConstantUInt16 = 63uy
-        | ConstantUInt32 = 64uy
-        | ConstantUInt64 = 65uy
-        | ConstantUIntPtr = 66uy
-        | ConstantBytes = 67uy
-
-        | Other = 255uy
-
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework.Ast
 
@@ -85,8 +48,8 @@ module AstTemp =
             | expr -> expr::flattened
 
         match functionApplication with
-        | AstNode.Expression(SynExpr.App(_) as functionApplication) -> 
-            flatten [] functionApplication |> Some
+        | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 
+            Some(flatten [] functionApplication, range)
         | _ -> None
 
     type Lambda = { Arguments: SynSimplePats list; Body: SynExpr }
@@ -115,70 +78,44 @@ module AstTemp =
             | _ -> None
 
         match lambda with
-        | AstNode.Expression(lambda) -> getLambdaParametersAndExpression [] lambda
+        | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range) as lambda) -> 
+            getLambdaParametersAndExpression [] lambda |> Option.map (fun x -> (x, range))
         | _ -> None
 
+    type ExtraSyntaxInfo =
+        | LambdaArg = 1uy
+        | LambdaBody = 2uy
+        | Else = 3uy
+        | None = 255uy
+
     [<Struct>]
-    type Node(syntaxNode:SyntaxNode, astNode:Ast.AstNode) = 
-        member __.SyntaxNode = syntaxNode
+    type Node(extraInfo:ExtraSyntaxInfo, astNode:Ast.AstNode) = 
+        member __.ExtraSyntaxInfo = extraInfo
         member __.AstNode = astNode
 
-    let Expression x = 
-        let expr = Expression x
-        let syntaxNode =
-            match expr with
-            | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
-            | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
-            | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
-            | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
-            | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
-            | Expression(SynExpr.Const(SynConst.Bool(_), _)) -> SyntaxNode.ConstantBool
-            | Expression(SynExpr.Const(SynConst.Byte(_), _)) -> SyntaxNode.ConstantByte
-            | Expression(SynExpr.Const(SynConst.Bytes(_), _)) -> SyntaxNode.ConstantBytes
-            | Expression(SynExpr.Const(SynConst.Char(_), _)) -> SyntaxNode.ConstantChar
-            | Expression(SynExpr.Const(SynConst.Decimal(_), _)) -> SyntaxNode.ConstantDecimal
-            | Expression(SynExpr.Const(SynConst.Int16(_), _)) -> SyntaxNode.ConstantInt16
-            | Expression(SynExpr.Const(SynConst.Int32(_), _)) -> SyntaxNode.ConstantInt32
-            | Expression(SynExpr.Const(SynConst.Int64(_), _)) -> SyntaxNode.ConstantInt64
-            | Expression(SynExpr.Const(SynConst.IntPtr(_), _)) -> SyntaxNode.ConstantIntPtr
-            | Expression(SynExpr.Const(SynConst.SByte(_), _)) -> SyntaxNode.ConstantSByte
-            | Expression(SynExpr.Const(SynConst.Single(_), _)) -> SyntaxNode.ConstantSingle
-            | Expression(SynExpr.Const(SynConst.String(_), _)) -> SyntaxNode.ConstantString
-            | Expression(SynExpr.Const(SynConst.UInt16(_), _)) -> SyntaxNode.ConstantUInt16
-            | Expression(SynExpr.Const(SynConst.UInt32(_), _)) -> SyntaxNode.ConstantUInt32
-            | Expression(SynExpr.Const(SynConst.UInt64(_), _)) -> SyntaxNode.ConstantUInt64
-            | Expression(SynExpr.Const(SynConst.UIntPtr(_), _)) -> SyntaxNode.ConstantUIntPtr
-            | Identifier(_) -> SyntaxNode.Identifier
-            | Lambda(_) -> SyntaxNode.Lambda
-            | FuncApp(_) -> SyntaxNode.FuncApp
-            | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_) | SynExpr.App(_) | SynExpr.Lambda(_)) -> SyntaxNode.Other
-            | Expression(_) -> SyntaxNode.Expression
-            | _ -> SyntaxNode.Other
-
-        Node(syntaxNode, expr)
-    
-    let inline Pattern x = Node(SyntaxNode.Other, Pattern x)
-    let inline SimplePattern x = Node(SyntaxNode.Other, SimplePattern x)
-    let inline SimplePatterns x = Node(SyntaxNode.Other, SimplePatterns x)
-    let inline ModuleOrNamespace x = Node(SyntaxNode.Other, ModuleOrNamespace x)
-    let inline ModuleDeclaration x = Node(SyntaxNode.Other, ModuleDeclaration x)
-    let inline Binding x = Node(SyntaxNode.Other, Binding x)
-    let inline TypeDefinition x = Node(SyntaxNode.Other, TypeDefinition x)
-    let inline MemberDefinition x = Node(SyntaxNode.Other, MemberDefinition x)
-    let inline ComponentInfo x = Node(SyntaxNode.Other, ComponentInfo x)
-    let inline ExceptionDefinition x = Node(SyntaxNode.Other, ExceptionDefinition x)
-    let inline ExceptionRepresentation x = Node(SyntaxNode.Other, ExceptionRepresentation x)
-    let inline UnionCase x = Node(SyntaxNode.Other, UnionCase x)
-    let inline EnumCase x = Node(SyntaxNode.Other, EnumCase x)
-    let inline TypeRepresentation x = Node(SyntaxNode.Other, TypeRepresentation x)
-    let inline TypeSimpleRepresentation x = Node(SyntaxNode.Other, TypeSimpleRepresentation x)
-    let inline Type x = Node(SyntaxNode.Other, Type x)
-    let inline Field x = Node(SyntaxNode.Other, Field x)
-    let inline Match x = Node(SyntaxNode.Other, Match x)
-    let inline ConstructorArguments x = Node(SyntaxNode.Other, ConstructorArguments x)
-    let inline TypeParameter x = Node(SyntaxNode.Other, TypeParameter x)
-    let inline InterfaceImplementation x = Node(SyntaxNode.Other, InterfaceImplementation x)
-    let inline Identifier x = Node(SyntaxNode.Identifier, Identifier x)
+    let inline Expression x = Node(ExtraSyntaxInfo.None, Expression x)
+    let inline Pattern x = Node(ExtraSyntaxInfo.None, Pattern x)
+    let inline SimplePattern x = Node(ExtraSyntaxInfo.None, SimplePattern x)
+    let inline SimplePatterns x = Node(ExtraSyntaxInfo.None, SimplePatterns x)
+    let inline ModuleOrNamespace x = Node(ExtraSyntaxInfo.None, ModuleOrNamespace x)
+    let inline ModuleDeclaration x = Node(ExtraSyntaxInfo.None, ModuleDeclaration x)
+    let inline Binding x = Node(ExtraSyntaxInfo.None, Binding x)
+    let inline TypeDefinition x = Node(ExtraSyntaxInfo.None, TypeDefinition x)
+    let inline MemberDefinition x = Node(ExtraSyntaxInfo.None, MemberDefinition x)
+    let inline ComponentInfo x = Node(ExtraSyntaxInfo.None, ComponentInfo x)
+    let inline ExceptionDefinition x = Node(ExtraSyntaxInfo.None, ExceptionDefinition x)
+    let inline ExceptionRepresentation x = Node(ExtraSyntaxInfo.None, ExceptionRepresentation x)
+    let inline UnionCase x = Node(ExtraSyntaxInfo.None, UnionCase x)
+    let inline EnumCase x = Node(ExtraSyntaxInfo.None, EnumCase x)
+    let inline TypeRepresentation x = Node(ExtraSyntaxInfo.None, TypeRepresentation x)
+    let inline TypeSimpleRepresentation x = Node(ExtraSyntaxInfo.None, TypeSimpleRepresentation x)
+    let inline Type x = Node(ExtraSyntaxInfo.None, Type x)
+    let inline Field x = Node(ExtraSyntaxInfo.None, Field x)
+    let inline Match x = Node(ExtraSyntaxInfo.None, Match x)
+    let inline ConstructorArguments x = Node(ExtraSyntaxInfo.None, ConstructorArguments x)
+    let inline TypeParameter x = Node(ExtraSyntaxInfo.None, TypeParameter x)
+    let inline InterfaceImplementation x = Node(ExtraSyntaxInfo.None, InterfaceImplementation x)
+    let inline Identifier x = Node(ExtraSyntaxInfo.None, Identifier x)
 
     let inline private moduleDeclarationChildren node = 
         match node with
@@ -324,8 +261,10 @@ module AstTemp =
               yield Expression expression ]
         | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
         | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
+        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> 
+            [Expression cond; Expression body; Node(ExtraSyntaxInfo.Else, Ast.Expression elseExpr)]
+        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression cond; Expression body]
         | SynExpr.Lambda(_)
-        | SynExpr.IfThenElse(_)
         | SynExpr.App(_) -> []
 
     let inline private typeSimpleRepresentationChildren node =
@@ -392,8 +331,10 @@ module AstTemp =
         | InterfaceImplementation(InterfaceImpl(synType, bindings, _)) -> 
             Type synType::(bindings |> List.map Binding)
         | TypeRepresentation(x) -> typeRepresentationChildren x
-        | FuncApp(exprs) -> exprs |> List.map Expression
-        | Lambda({ Arguments = args; Body = body }) -> [yield! args |> List.map SimplePatterns; yield Expression(body)]
+        | FuncApp(exprs, _) -> exprs |> List.map Expression
+        | Lambda({ Arguments = args; Body = body }, _) -> 
+            [ yield! args |> List.map (fun arg -> Node(ExtraSyntaxInfo.LambdaArg, Ast.SimplePatterns arg))
+              yield Node(ExtraSyntaxInfo.LambdaBody, Ast.Expression(body)) ]
         | Expression(x) -> expressionChildren x
 
         | ComponentInfo(_)
@@ -408,6 +349,92 @@ module AbstractSyntaxArray =
     open Ast
     open Microsoft.FSharp.Compiler.Ast
 
+    type SyntaxNode =
+        | Identifier = 1uy
+        | Null = 2uy
+        | Expression = 3uy
+        | FuncApp = 4uy
+        | Unit = 5uy
+        
+        | If = 10uy
+        | Else = 11uy
+
+        | Lambda = 20uy
+        | LambdaArg = 21uy
+        | LambdaBody = 22uy
+
+        | ArrayOrList = 30uy
+        | Tuple = 31uy
+            
+        | ConstantBool = 51uy
+        | ConstantByte = 52uy
+        | ConstantChar = 53uy
+        | ConstantDecimal = 54uy
+        | ConstantDouble = 55uy
+        | ConstantInt16 = 56uy
+        | ConstantInt32 = 57uy
+        | ConstantInt64 = 58uy
+        | ConstantIntPtr = 59uy
+        | ConstantSByte = 60uy
+        | ConstantSingle = 61uy
+        | ConstantString = 62uy
+        | ConstantUInt16 = 63uy
+        | ConstantUInt32 = 64uy
+        | ConstantUInt64 = 65uy
+        | ConstantUIntPtr = 66uy
+        | ConstantBytes = 67uy
+
+        | Other = 255uy
+        
+    let private astNodeToSyntaxNode = function
+        | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
+        | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
+        | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
+        | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
+        | Expression(SynExpr.Const(SynConst.Bool(_), _)) -> SyntaxNode.ConstantBool
+        | Expression(SynExpr.Const(SynConst.Byte(_), _)) -> SyntaxNode.ConstantByte
+        | Expression(SynExpr.Const(SynConst.Bytes(_), _)) -> SyntaxNode.ConstantBytes
+        | Expression(SynExpr.Const(SynConst.Char(_), _)) -> SyntaxNode.ConstantChar
+        | Expression(SynExpr.Const(SynConst.Decimal(_), _)) -> SyntaxNode.ConstantDecimal
+        | Expression(SynExpr.Const(SynConst.Int16(_), _)) -> SyntaxNode.ConstantInt16
+        | Expression(SynExpr.Const(SynConst.Int32(_), _)) -> SyntaxNode.ConstantInt32
+        | Expression(SynExpr.Const(SynConst.Int64(_), _)) -> SyntaxNode.ConstantInt64
+        | Expression(SynExpr.Const(SynConst.IntPtr(_), _)) -> SyntaxNode.ConstantIntPtr
+        | Expression(SynExpr.Const(SynConst.SByte(_), _)) -> SyntaxNode.ConstantSByte
+        | Expression(SynExpr.Const(SynConst.Single(_), _)) -> SyntaxNode.ConstantSingle
+        | Expression(SynExpr.Const(SynConst.String(_), _)) -> SyntaxNode.ConstantString
+        | Expression(SynExpr.Const(SynConst.UInt16(_), _)) -> SyntaxNode.ConstantUInt16
+        | Expression(SynExpr.Const(SynConst.UInt32(_), _)) -> SyntaxNode.ConstantUInt32
+        | Expression(SynExpr.Const(SynConst.UInt64(_), _)) -> SyntaxNode.ConstantUInt64
+        | Expression(SynExpr.Const(SynConst.UIntPtr(_), _)) -> SyntaxNode.ConstantUIntPtr
+        | Identifier(_) -> SyntaxNode.Identifier
+        | Expression(SynExpr.App(_)) -> SyntaxNode.FuncApp
+        | Expression(SynExpr.Lambda(_)) -> SyntaxNode.Lambda
+        | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_)) -> SyntaxNode.Other
+        | Expression(_) -> SyntaxNode.Expression
+        | ModuleOrNamespace(_)
+        | ModuleDeclaration(_)
+        | AstNode.Binding(_)
+        | ExceptionDefinition(_)
+        | ExceptionRepresentation(_)
+        | TypeDefinition(_)
+        | TypeSimpleRepresentation(_)
+        | AstNode.Field(_)
+        | Type(_)
+        | Match(_)
+        | TypeParameter(_)
+        | MemberDefinition(_)
+        | Pattern(_)
+        | ConstructorArguments(_)
+        | SimplePattern(_)
+        | SimplePatterns(_)
+        | InterfaceImplementation(_)
+        | TypeRepresentation(_)
+        | AstNode.ComponentInfo(_)
+        | AstNode.EnumCase(_)
+        | AstNode.UnionCase(_) -> SyntaxNode.Other
+
     [<Struct>]
     type Node(hashcode: int, actual: AstNode) = 
         member __.Hashcode = hashcode
@@ -420,25 +447,25 @@ module AbstractSyntaxArray =
 
     let private getHashCode node = 
         match node with
-        | Identifier(x) when (List.isEmpty >> not) x -> (Seq.last x).GetHashCode() 
-        | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Char(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Decimal(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Double(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Int16(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Int32(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Int64(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.Single(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.String(x, _), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.UInt32(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> x.GetHashCode()
-        | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> x.GetHashCode()
+        | Identifier(x) when (List.isEmpty >> not) x -> x |> Seq.last |> hash
+        | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Char(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Decimal(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Double(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Int16(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Int32(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Int64(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.Single(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.String(x, _), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.UInt32(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> hash x
+        | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> hash x
         | _ -> 0
 
     [<Struct>]
@@ -477,7 +504,7 @@ module AbstractSyntaxArray =
                 let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
                 skips.Add(TempSkip(numberOfChildren, parentIndex, nodePosition))
 
-        left.Push (StackedNode(AstTemp.Node(AstTemp.SyntaxNode.Other, astRoot), 0))
+        left.Push (StackedNode(AstTemp.Node(AstTemp.ExtraSyntaxInfo.None, astRoot), 0))
 
         while left.Count > 0 do
             let stackedNode = left.Pop()
@@ -489,8 +516,20 @@ module AbstractSyntaxArray =
             let children = AstTemp.traverseNode astNode
             children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1)))
 
-            match stackedNode.Node.SyntaxNode with
-            | AstTemp.SyntaxNode.Other -> ()
+            if stackedNode.Node.ExtraSyntaxInfo <> AstTemp.ExtraSyntaxInfo.None then
+                possibleSkips.Push (PossibleSkip(nodes.Count, depth))
+
+                let syntaxNode =
+                    match stackedNode.Node.ExtraSyntaxInfo with
+                    | AstTemp.ExtraSyntaxInfo.LambdaArg -> SyntaxNode.LambdaArg
+                    | AstTemp.ExtraSyntaxInfo.LambdaBody -> SyntaxNode.LambdaBody
+                    | AstTemp.ExtraSyntaxInfo.Else -> SyntaxNode.Else
+                    | _ -> failwith ("Unknown extra syntax info: " + string stackedNode.Node.ExtraSyntaxInfo)
+
+                nodes.Add (Node(hash (syntaxNode, getHashCode astNode), astNode))
+
+            match astNodeToSyntaxNode stackedNode.Node.AstNode with
+            | SyntaxNode.Other -> ()
             | syntaxNode -> 
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
