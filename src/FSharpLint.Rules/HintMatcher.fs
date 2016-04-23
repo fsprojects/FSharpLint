@@ -129,7 +129,8 @@ module HintMatcher =
             { LambdaArguments: Map<char, string>
               Expression: AstNode
               Hint: Expression
-              FSharpCheckFileResults: FSharpCheckFileResults option }
+              FSharpCheckFileResults: FSharpCheckFileResults option
+              Breadcrumbs: AstNode list }
 
             with 
                 member this.SubHint(expr, hint) =
@@ -161,7 +162,7 @@ module HintMatcher =
             | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
                 PossiblyInMethod
             | _ -> NotInMethod
-            (*
+            
         /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
         /// or a named parameter in a method call.
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
@@ -187,10 +188,9 @@ module HintMatcher =
                     /// Check if in `new` expr or function application (either could be a constructor).
                     match arguments.Breadcrumbs with
                     | PossiblyInMethod 
-                    | PossiblyInConstructor -> 
-                        false
+                    | PossiblyInConstructor -> false
                     | _ -> true
-            | _ -> true*)
+            | _ -> true
 
         let rec matchHintExpr arguments =
             let expr = removeParens arguments.Expression
@@ -219,6 +219,10 @@ module HintMatcher =
                 matchArray arguments
             | Expression.If(_) ->
                 matchIf arguments
+            | Expression.PrefixOperator(_) ->
+                matchPrefixOperation arguments
+            | Expression.InfixOperator(_) ->
+                matchInfixOperation arguments
             | Expression.FunctionApplication(_) -> 
                 matchFunctionApplication arguments
             | Expression.Lambda(_) -> matchLambda arguments
@@ -282,6 +286,37 @@ module HintMatcher =
                 arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
             | _ -> false
 
+        and private matchInfixOperation arguments =
+            match (arguments.Expression, arguments.Hint) with
+            | AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple([leftExpr; rightExpr], _, _), _)), 
+                    Expression.InfixOperator(op, left, right) ->
+                arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&
+                arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr &&
+                arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr
+            | AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)), 
+                    Expression.InfixOperator(op, left, right) -> 
+
+                match removeParens <| AstNode.Expression(infixExpr) with
+                | AstNode.Expression(SynExpr.App(_, true, opExpr, leftExpr, _)) ->
+                    arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&
+                    arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr &&
+                    arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr &&
+                    notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr
+                | _ -> false
+            | _ -> false
+
+        and private matchPrefixOperation arguments =
+            match (arguments.Expression, arguments.Hint) with
+            | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)), 
+                    Expression.PrefixOperator(Expression.Identifier([op]), expr) -> 
+                arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier(["~" + op])) |> matchHintExpr &&
+                arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr
+            | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), 
+              Expression.PrefixOperator(Expression.Identifier([op]), expr) 
+                    when op = "&" || op = "&&" ->
+                arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
+            | _ -> false
+
     module MatchPattern =
 
         let private matchPattern = function
@@ -325,6 +360,8 @@ module HintMatcher =
             | Expression.Array(_) ->
                 matchArray (pattern, hint)
             | Expression.FunctionApplication(_)
+            | Expression.InfixOperator(_)
+            | Expression.PrefixOperator(_)
             | Expression.Lambda(_)
             | Expression.LambdaArg(_)
             | Expression.LambdaBody(_)
@@ -431,6 +468,10 @@ module HintMatcher =
             |> String.concat "."
         | Expression.FunctionApplication(expressions) ->
             expressions |> surroundExpressionsString hintToString "" "" " "
+        | Expression.InfixOperator(operator, leftHint, rightHint) ->
+            hintToString leftHint + hintToString operator + hintToString rightHint
+        | Expression.PrefixOperator(operator, hint) ->
+            hintToString operator + hintToString hint
         | Expression.Parentheses(hint) -> 
             "(" + hintToString hint + ")"
         | Expression.Lambda(arguments, LambdaBody(body)) -> 
@@ -530,7 +571,8 @@ module HintMatcher =
             { MatchExpression.LambdaArguments = Map.ofList []
               MatchExpression.Expression = node.Actual
               MatchExpression.Hint = hint.Match
-              MatchExpression.FSharpCheckFileResults = checkFile }
+              MatchExpression.FSharpCheckFileResults = checkFile
+              MatchExpression.Breadcrumbs = breadcrumbs }
 
         match node.Actual with
         | AstNode.Expression(SynExpr.Paren(_)) -> ()
@@ -538,21 +580,6 @@ module HintMatcher =
         | AstNode.Pattern(pattern) ->
             if MatchPattern.matchHintPattern (pattern, hint.Match) then
                 hintError hint visitorInfo pattern.Range
-        | AstTemp.FuncApp(_, range) -> 
-            match hint.Match with
-            | Expression.FunctionApplication(_) -> 
-                let arguments = constructInitialArguments ()
-                if MatchExpression.matchFunctionApplication arguments then
-                    hintError hint visitorInfo range
-            | _ -> ()
-        | AstTemp.Lambda(_, range) -> 
-            match hint.Match with
-            | Expression.Lambda(_) -> 
-                let arguments = constructInitialArguments ()
-                if MatchExpression.matchLambda arguments then
-                    if lambdaCanBeReplacedWithFunction checkFile breadcrumbs range then
-                        hintError hint visitorInfo range
-            | _ -> ()
         | AstNode.Expression(expr) -> 
             let arguments = constructInitialArguments ()
             if MatchExpression.matchHintExpr arguments then
