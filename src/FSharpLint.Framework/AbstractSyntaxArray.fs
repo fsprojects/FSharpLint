@@ -355,6 +355,7 @@ module AbstractSyntaxArray =
         | Expression = 3uy
         | FuncApp = 4uy
         | Unit = 5uy
+        | AddressOf = 6uy
         
         | If = 10uy
         | Else = 11uy
@@ -391,6 +392,7 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
         | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
         | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Expression(SynExpr.AddressOf(_)) -> SyntaxNode.AddressOf
         | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
         | Expression(SynExpr.Const(SynConst.Bool(_), _)) -> SyntaxNode.ConstantBool
         | Expression(SynExpr.Const(SynConst.Byte(_), _)) -> SyntaxNode.ConstantByte

@@ -219,6 +219,8 @@ module HintMatcher =
                 matchArray arguments
             | Expression.If(_) ->
                 matchIf arguments
+            | Expression.AddressOf(_) ->
+                matchAddressOf arguments
             | Expression.PrefixOperator(_) ->
                 matchPrefixOperation arguments
             | Expression.InfixOperator(_) ->
@@ -313,9 +315,11 @@ module HintMatcher =
                     Expression.PrefixOperator(Expression.Identifier([op]), expr) -> 
                 arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr
-            | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), 
-              Expression.PrefixOperator(Expression.Identifier([op]), expr) 
-                    when op = "~&" || op = "~&&" ->
+            | _ -> false
+
+        and private matchAddressOf arguments =
+            match (arguments.Expression, arguments.Hint) with
+            | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), Expression.AddressOf(expr) ->
                 arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
             | _ -> false
 
@@ -470,6 +474,8 @@ module HintMatcher =
             hintToString (HintPat leftHint) + "&" + hintToString (HintPat rightHint)
         | HintPat(Pattern.Or(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "|" + hintToString (HintPat rightHint)
+        | HintExpr(Expression.AddressOf(hint)) ->
+            "&" + hintToString (HintExpr hint)
         | HintExpr(Expression.PrefixOperator(Expression.Identifier([operator]), hint)) ->
             operator + hintToString (HintExpr hint)
         | HintExpr(Expression.Parentheses(hint)) -> "(" + hintToString (HintExpr hint) + ")"

@@ -64,6 +64,7 @@ module HintParser =
         | FunctionApplication of Expression list
         | InfixOperator of operatorIdentifier:Expression * Expression * Expression
         | PrefixOperator of operatorIdentifier:Expression * Expression
+        | AddressOf of Expression
         | Wildcard
         | Variable of char
         | Identifier of string list
@@ -106,6 +107,7 @@ module HintParser =
             | Expression = 3uy
             | FuncApp = 4uy
             | Unit = 5uy
+            | AddressOf = 6uy
             
             | If = 10uy
             | Else = 11uy
@@ -164,6 +166,7 @@ module HintParser =
             | Expression.FunctionApplication(_)
             | Expression.InfixOperator(_)
             | Expression.PrefixOperator(_) -> SyntaxHintNode.FuncApp
+            | Expression.AddressOf(_) -> SyntaxHintNode.AddressOf
             | Expression.Parentheses(expr) -> getExprKey expr
             | Expression.Lambda(_) -> SyntaxHintNode.Lambda
             | Expression.LambdaArg(_) -> SyntaxHintNode.LambdaArg
@@ -214,6 +217,7 @@ module HintParser =
                 [HintExpr ident; HintExpr lhs; HintExpr rhs]
             | HintExpr(Expression.PrefixOperator(ident, expr)) -> 
                 [HintExpr ident; HintExpr expr]
+            | HintExpr(Expression.AddressOf(expr)) -> [HintExpr expr]
             | HintExpr(Expression.FunctionApplication(exprs))
             | HintExpr(Expression.Tuple(exprs))
             | HintExpr(Expression.List(exprs))
@@ -909,9 +913,11 @@ module HintParser =
         let addPrefixOperator op precedence =
             opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
                                                 fun expr ->
-                                                    let opString = if op.StartsWith("!") then op else "~" + op
-                                                    let opIdent = Expression.Identifier [opString]
-                                                    Expression.PrefixOperator(opIdent, expr)))
+                                                    if op = "&" || op = "&&" then Expression.AddressOf(expr)
+                                                    else
+                                                        let opString = if op.StartsWith("!") then op else "~" + op
+                                                        let opIdent = Expression.Identifier [opString]
+                                                        Expression.PrefixOperator(opIdent, expr)))
 
         do
             addInfixOperator ":="  3 Associativity.Right
