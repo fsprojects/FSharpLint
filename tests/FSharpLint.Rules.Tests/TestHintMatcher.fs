@@ -315,7 +315,7 @@ module Goat
 
     [<Test>]
     member this.MatchListAppendItemInPattern() = 
-        let config = generateHintConfig ["x::[] ===> [x]"]
+        let config = generateHintConfig ["pattern: x::[] ===> [x]"]
 
         this.Parse("""
 module Goat
@@ -328,7 +328,7 @@ match [] with
 
     [<Test>]
     member this.MatchTupleInPattern() = 
-        let config = generateHintConfig ["(_, []) ===> []"]
+        let config = generateHintConfig ["pattern: (_, []) ===> []"]
 
         this.Parse("""
 module Goat
@@ -341,7 +341,7 @@ match ([], []) with
 
     [<Test>]
     member this.MatchIntegerConstantInPattern() = 
-        let config = generateHintConfig ["0 ===> 0"]
+        let config = generateHintConfig ["pattern: 0 ===> 0"]
 
         this.Parse("""
 module Goat
@@ -354,7 +354,7 @@ match 0 with
 
     [<Test>]
     member this.MatchListInPattern() = 
-        let config = generateHintConfig ["[0; 1; 2] ===> 0"]
+        let config = generateHintConfig ["pattern: [0; 1; 2] ===> 0"]
 
         this.Parse("""
 module Goat
@@ -367,7 +367,7 @@ match [] with
 
     [<Test>]
     member this.MatchArrayInPattern() = 
-        let config = generateHintConfig ["[|0; 1; 2|] ===> 0"]
+        let config = generateHintConfig ["pattern: [|0; 1; 2|] ===> 0"]
 
         this.Parse("""
 module Goat
@@ -391,7 +391,7 @@ Array.isEmpty [||]""", config)
 
     [<Test>]
     member this.MatchOrPattern() = 
-        let config = generateHintConfig ["[] | [0] ===> []"]
+        let config = generateHintConfig ["pattern: [] | [0] ===> []"]
 
         this.Parse("""
 module Goat
@@ -404,7 +404,7 @@ match [] with
         
     [<Test>]
     member this.MatchAndPattern() = 
-        let config = generateHintConfig ["[] & [0] ===> []"]
+        let config = generateHintConfig ["pattern: [] & [0] ===> []"]
 
         this.Parse("""
 module Goat
@@ -417,7 +417,7 @@ match [] with
 
     [<Test>]
     member this.MatchMultipleAndPatterns() = 
-        let config = generateHintConfig ["[] & [0] & [1] & [2] ===> []"]
+        let config = generateHintConfig ["pattern: [] & [0] & [1] & [2] ===> []"]
 
         this.Parse("""
 module Goat
@@ -430,7 +430,7 @@ match [] with
         
     [<Test>]
     member this.MatchAndPatternsInsideMultipleAndPatterns() = 
-        let config = generateHintConfig ["[0] & [1] ===> []"]
+        let config = generateHintConfig ["pattern: [0] & [1] ===> []"]
 
         this.Parse("""
 module Goat
@@ -443,7 +443,7 @@ match [] with
 
     [<Test>]
     member this.MatchAndPatternsAndOrPatterns() = 
-        let config = generateHintConfig ["[0] & [1] | [1] & [2] ===> []"]
+        let config = generateHintConfig ["pattern: [0] & [1] | [1] & [2] ===> []"]
 
         this.Parse("""
 module Goat
@@ -659,7 +659,7 @@ let foo x = if (x = true) then 0 else 1""", config)
     /// Parentheses around patterns matched by hints were causing duplicate warnings
     [<Test>]
     member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() = 
-        let config = generateHintConfig ["[0] & [1] ===> []"]
+        let config = generateHintConfig ["pattern: [0] & [1] ===> []"]
         
         this.Parse("""
 module Goat
