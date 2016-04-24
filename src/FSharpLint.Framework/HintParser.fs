@@ -200,7 +200,7 @@ module HintParser =
             | Expression.Wildcard
             | Expression.Variable(_) -> []
 
-        let private getHashCode node = 
+        let rec private getHashCode node = 
             match node with
             | Expression.Identifier(identifier) when (List.isEmpty >> not) identifier -> 
                 identifier
@@ -214,7 +214,7 @@ module HintParser =
             | Expression.Constant(Constant.Decimal(x)) -> hash x 
             | Expression.Constant(Constant.Double(x)) -> hash x 
             | Expression.Constant(Constant.Int16(x)) -> hash x 
-            | Expression.Constant(Constant.Int32(x)) -> hash x 
+            | Expression.Constant(Constant.Int32(x)) -> hash x
             | Expression.Constant(Constant.Int64(x)) -> hash x 
             | Expression.Constant(Constant.IntPtr(x)) -> hash x 
             | Expression.Constant(Constant.SByte(x)) -> hash x 
@@ -225,6 +225,7 @@ module HintParser =
             | Expression.Constant(Constant.UInt64(x)) -> hash x 
             | Expression.Constant(Constant.UIntPtr(x)) -> hash x 
             | Expression.Constant(Constant.UserNum(x, y)) -> hash (x, y) 
+            | Expression.Parentheses(expr) -> getHashCode expr
             | _ -> 0
  
         let private hintToList (hint:Hint) =
@@ -276,7 +277,7 @@ module HintParser =
                     | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest) 
                     | EndOfHint(_) -> None)
                 |> List.filter (isAnyMatch >> not)
-                |> Seq.groupBy (fun (key, expr, _, _) -> (key, getHashCode expr).GetHashCode())
+                |> Seq.groupBy (fun (key, expr, _, _) -> hash (key, getHashCode expr))
                 |> Seq.iter (fun (hashcode, items) -> map.Add(hashcode, mergeHints (getHints items)))
 
                 let anyMatches = 
