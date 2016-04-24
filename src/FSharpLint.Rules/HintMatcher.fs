@@ -605,7 +605,8 @@ module HintMatcher =
                 else
                     breadcrumbs
 
-            getBreadcrumbs [] i |> List.rev
+            if i = 0 then [] 
+            else getBreadcrumbs [] (i - 1) |> List.rev
 
         let confirmFuzzyMatch i =
             let breadcrumbs = getBreadcrumbs i
