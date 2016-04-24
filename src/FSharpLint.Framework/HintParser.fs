@@ -207,24 +207,24 @@ module HintParser =
                 |> Seq.last
                 |> ExpressionUtilities.identAsCompiledOpName
                 |> hash
-            | Expression.Constant(Constant.Bool(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Byte(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Bytes(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Char(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Decimal(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Double(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Int16(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Int32(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Int64(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.IntPtr(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.SByte(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.Single(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.String(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.UInt16(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.UInt32(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.UInt64(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.UIntPtr(x)) -> x.GetHashCode() 
-            | Expression.Constant(Constant.UserNum(x, y)) -> (x, y).GetHashCode() 
+            | Expression.Constant(Constant.Bool(x)) -> hash x 
+            | Expression.Constant(Constant.Byte(x)) -> hash x 
+            | Expression.Constant(Constant.Bytes(x)) -> hash x 
+            | Expression.Constant(Constant.Char(x)) -> hash x 
+            | Expression.Constant(Constant.Decimal(x)) -> hash x 
+            | Expression.Constant(Constant.Double(x)) -> hash x 
+            | Expression.Constant(Constant.Int16(x)) -> hash x 
+            | Expression.Constant(Constant.Int32(x)) -> hash x 
+            | Expression.Constant(Constant.Int64(x)) -> hash x 
+            | Expression.Constant(Constant.IntPtr(x)) -> hash x 
+            | Expression.Constant(Constant.SByte(x)) -> hash x 
+            | Expression.Constant(Constant.Single(x)) -> hash x 
+            | Expression.Constant(Constant.String(x)) -> hash x 
+            | Expression.Constant(Constant.UInt16(x)) -> hash x 
+            | Expression.Constant(Constant.UInt32(x)) -> hash x 
+            | Expression.Constant(Constant.UInt64(x)) -> hash x 
+            | Expression.Constant(Constant.UIntPtr(x)) -> hash x 
+            | Expression.Constant(Constant.UserNum(x, y)) -> hash (x, y) 
             | _ -> 0
  
         let private hintToList (hint:Hint) =
