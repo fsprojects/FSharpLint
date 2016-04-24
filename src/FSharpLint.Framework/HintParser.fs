@@ -45,6 +45,21 @@ module HintParser =
         | Bool of bool
 
     [<RequireQualifiedAccess>]
+    type Pattern =
+        | Cons of Pattern * Pattern
+        | And of Pattern * Pattern
+        | Or of Pattern * Pattern
+        | Wildcard
+        | Variable of char
+        | Identifier of string list
+        | Constant of Constant
+        | Parentheses of Pattern
+        | Tuple of Pattern list
+        | List of Pattern list
+        | Array of Pattern list
+        | Null
+
+    [<RequireQualifiedAccess>]
     type Expression =
         | FunctionApplication of Expression list
         | InfixOperator of operatorIdentifier:Expression * Expression * Expression
@@ -66,12 +81,16 @@ module HintParser =
     and LambdaArg = LambdaArg of Expression
     and LambdaBody = LambdaBody of Expression
 
+    type HintNode =
+        | HintPat of Pattern
+        | HintExpr of Expression
+
     type Suggestion =
         | Expr of Expression
         | Message of string
 
     type Hint =
-        { Match: Expression
+        { Match: HintNode
           Suggestion: Suggestion }
           
     /// Provides a way of creating a single list from any number of hint ASTs.
@@ -140,12 +159,12 @@ module HintParser =
             override this.GetHashCode() = hash (this.AnyMatch, hash this.Lookup)
 
             static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = [] }
- 
-        let rec private getKey = function
+
+        let rec private getExprKey = function
             | Expression.FunctionApplication(_)
             | Expression.InfixOperator(_)
             | Expression.PrefixOperator(_) -> SyntaxHintNode.FuncApp
-            | Expression.Parentheses(expr) -> getKey expr
+            | Expression.Parentheses(expr) -> getExprKey expr
             | Expression.Lambda(_) -> SyntaxHintNode.Lambda
             | Expression.LambdaArg(_) -> SyntaxHintNode.LambdaArg
             | Expression.LambdaBody(_) -> SyntaxHintNode.LambdaBody
@@ -178,54 +197,87 @@ module HintParser =
             | Expression.Wildcard -> SyntaxHintNode.Wildcard
             | Expression.Variable(_) -> SyntaxHintNode.Variable
  
+        let rec private getKey = function
+            | HintExpr(expr) -> getExprKey expr
+            | HintPat(pattern) -> failwith "not implemented"
+ 
         let rec private getChildren = function
-            | Expression.Parentheses(expr) -> getChildren expr
-            | Expression.Lambda(args, LambdaBody(body)) ->
-                [ for LambdaArg(arg) in args -> arg
-                  yield body ]
-            | Expression.LambdaArg(arg) -> [arg]
-            | Expression.LambdaBody(body) -> [body]
-            | Expression.InfixOperator(ident, lhs, rhs) -> [ident; lhs; rhs]
-            | Expression.PrefixOperator(ident, expr) -> [ident; expr]
-            | Expression.FunctionApplication(exprs)
-            | Expression.Tuple(exprs)
-            | Expression.List(exprs)
-            | Expression.Array(exprs) -> exprs
-            | Expression.If(ifCond, bodyExpr, Some(elseExpr)) -> [ifCond; bodyExpr; elseExpr]
-            | Expression.If(ifCond, bodyExpr, None) -> [ifCond; bodyExpr]
-            | Expression.Else(x) -> [x]
-            | Expression.Identifier(_)
-            | Expression.Constant(_)
-            | Expression.Null
-            | Expression.Wildcard
-            | Expression.Variable(_) -> []
+            | HintExpr(Expression.Parentheses(expr)) -> getChildren <| HintExpr expr
+            | HintExpr(Expression.Lambda(args, LambdaBody(body))) ->
+                [ for LambdaArg(arg) in args -> HintExpr arg
+                  yield HintExpr body ]
+            | HintExpr(Expression.LambdaArg(arg)) -> 
+                [HintExpr arg]
+            | HintExpr(Expression.LambdaBody(body)) -> 
+                [HintExpr body]
+            | HintExpr(Expression.InfixOperator(ident, lhs, rhs)) -> 
+                [HintExpr ident; HintExpr lhs; HintExpr rhs]
+            | HintExpr(Expression.PrefixOperator(ident, expr)) -> 
+                [HintExpr ident; HintExpr expr]
+            | HintExpr(Expression.FunctionApplication(exprs))
+            | HintExpr(Expression.Tuple(exprs))
+            | HintExpr(Expression.List(exprs))
+            | HintExpr(Expression.Array(exprs)) -> exprs |> List.map HintExpr
+            | HintExpr(Expression.If(ifCond, bodyExpr, Some(elseExpr))) -> 
+                [HintExpr ifCond; HintExpr bodyExpr; HintExpr elseExpr]
+            | HintExpr(Expression.If(ifCond, bodyExpr, None)) -> 
+                [HintExpr ifCond; HintExpr bodyExpr]
+            | HintExpr(Expression.Else(x)) -> [HintExpr x]
+            | HintExpr(Expression.Identifier(_))
+            | HintExpr(Expression.Constant(_))
+            | HintExpr(Expression.Null)
+            | HintExpr(Expression.Wildcard)
+            | HintExpr(Expression.Variable(_)) -> []
+            | HintPat(Pattern.Cons(lhs, rhs))
+            | HintPat(Pattern.And(lhs, rhs))
+            | HintPat(Pattern.Or(lhs, rhs)) -> [HintPat lhs; HintPat rhs]
+            | HintPat(Pattern.Array(patterns))
+            | HintPat(Pattern.List(patterns))
+            | HintPat(Pattern.Tuple(patterns)) -> patterns |> List.map HintPat
+            | HintPat(Pattern.Parentheses(pattern)) -> [HintPat pattern]
+            | HintPat(Pattern.Variable(_))
+            | HintPat(Pattern.Identifier(_))
+            | HintPat(Pattern.Constant(_))
+            | HintPat(Pattern.Wildcard)
+            | HintPat(Pattern.Null) -> []
 
-        let rec private getHashCode node = 
-            match node with
-            | Expression.Identifier(identifier) when (List.isEmpty >> not) identifier -> 
+        let private getConstantHashCode = function
+            | Constant.Bool(x) -> hash x 
+            | Constant.Byte(x) -> hash x 
+            | Constant.Bytes(x) -> hash x 
+            | Constant.Char(x) -> hash x 
+            | Constant.Decimal(x) -> hash x 
+            | Constant.Double(x) -> hash x 
+            | Constant.Int16(x) -> hash x 
+            | Constant.Int32(x) -> hash x
+            | Constant.Int64(x) -> hash x 
+            | Constant.IntPtr(x) -> hash x 
+            | Constant.SByte(x) -> hash x 
+            | Constant.Single(x) -> hash x 
+            | Constant.String(x) -> hash x 
+            | Constant.UInt16(x) -> hash x 
+            | Constant.UInt32(x) -> hash x 
+            | Constant.UInt64(x) -> hash x 
+            | Constant.UIntPtr(x) -> hash x 
+            | Constant.UserNum(x, y) -> hash (x, y) 
+            | _ -> 0
+
+        let private getIdentifierHashCode = function
+            | identifier when (List.isEmpty >> not) identifier ->
                 identifier
                 |> Seq.last
                 |> ExpressionUtilities.identAsCompiledOpName
                 |> hash
-            | Expression.Constant(Constant.Bool(x)) -> hash x 
-            | Expression.Constant(Constant.Byte(x)) -> hash x 
-            | Expression.Constant(Constant.Bytes(x)) -> hash x 
-            | Expression.Constant(Constant.Char(x)) -> hash x 
-            | Expression.Constant(Constant.Decimal(x)) -> hash x 
-            | Expression.Constant(Constant.Double(x)) -> hash x 
-            | Expression.Constant(Constant.Int16(x)) -> hash x 
-            | Expression.Constant(Constant.Int32(x)) -> hash x
-            | Expression.Constant(Constant.Int64(x)) -> hash x 
-            | Expression.Constant(Constant.IntPtr(x)) -> hash x 
-            | Expression.Constant(Constant.SByte(x)) -> hash x 
-            | Expression.Constant(Constant.Single(x)) -> hash x 
-            | Expression.Constant(Constant.String(x)) -> hash x 
-            | Expression.Constant(Constant.UInt16(x)) -> hash x 
-            | Expression.Constant(Constant.UInt32(x)) -> hash x 
-            | Expression.Constant(Constant.UInt64(x)) -> hash x 
-            | Expression.Constant(Constant.UIntPtr(x)) -> hash x 
-            | Expression.Constant(Constant.UserNum(x, y)) -> hash (x, y) 
-            | Expression.Parentheses(expr) -> getHashCode expr
+            | _ -> 0                
+
+        let rec private getHashCode node = 
+            match node with
+            | HintExpr(Expression.Identifier(identifier)) 
+            | HintPat(Pattern.Identifier(identifier)) -> getIdentifierHashCode identifier
+            | HintExpr(Expression.Constant(constant))
+            | HintPat(Pattern.Constant(constant)) -> getConstantHashCode constant
+            | HintExpr(Expression.Parentheses(expr)) -> getHashCode <| HintExpr expr
+            | HintPat(Pattern.Parentheses(expr)) -> getHashCode <| HintPat expr
             | _ -> 0
  
         let private hintToList (hint:Hint) =
@@ -243,10 +295,10 @@ module HintParser =
  
             (nodes |> Seq.toList, hint)
  
-        type private HintList = (Expression * int) list * Hint
+        type private HintList = (HintNode * int) list * Hint
  
         type private TransposedNode =
-            | HintNode of key:Expression * depth:int * rest:HintList
+            | HintNode of key:HintNode * depth:int * rest:HintList
             | EndOfHint of Hint
  
         /// Gets the head of each given list
@@ -286,8 +338,10 @@ module HintParser =
                         (function 
                         | HintNode(expr, depth, rest) ->
                             match getKey expr, expr with
-                            | (SyntaxHintNode.Wildcard as key), Expression.Wildcard
-                            | (SyntaxHintNode.Variable as key), Expression.Variable(_) -> 
+                            | (SyntaxHintNode.Wildcard as key), HintExpr(Expression.Wildcard)
+                            | (SyntaxHintNode.Wildcard as key), HintPat(Pattern.Wildcard)
+                            | (SyntaxHintNode.Variable as key), HintExpr(Expression.Variable(_))
+                            | (SyntaxHintNode.Variable as key), HintPat(Pattern.Variable(_)) -> 
                                 Some(key, expr, depth, rest)
                             | _ -> None
                         | EndOfHint(_) -> None)
@@ -295,8 +349,10 @@ module HintParser =
                     |> Seq.choose  
                         (fun (expr, items) -> 
                             match expr with
-                            | Expression.Wildcard -> Some(None, mergeHints (getHints items))
-                            | Expression.Variable(var) -> Some(Some(var), mergeHints (getHints items))
+                            | HintPat(Pattern.Wildcard)
+                            | HintExpr(Expression.Wildcard) -> Some(None, mergeHints (getHints items))
+                            | HintPat(Pattern.Variable(var))
+                            | HintExpr(Expression.Variable(var)) -> Some(Some(var), mergeHints (getHints items))
                             | _ -> None)
                     |> Seq.toList
 
@@ -927,5 +983,5 @@ module HintParser =
 
             let! s = psuggestion
 
-            return { Match = m; Suggestion = s }
+            return { Match = HintExpr m; Suggestion = s }
         }
