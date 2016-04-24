@@ -311,11 +311,11 @@ module HintMatcher =
             match (arguments.Expression, arguments.Hint) with
             | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)), 
                     Expression.PrefixOperator(Expression.Identifier([op]), expr) -> 
-                arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier(["~" + op])) |> matchHintExpr &&
+                arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&
                 arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr
             | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), 
               Expression.PrefixOperator(Expression.Identifier([op]), expr) 
-                    when op = "&" || op = "&&" ->
+                    when op = "~&" || op = "~&&" ->
                 arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
             | _ -> false
 

@@ -845,7 +845,8 @@ module HintParser =
         let addPrefixOperator op precedence =
             opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
                                                 fun expr ->
-                                                    let opIdent = Expression.Identifier [op]
+                                                    let opString = if op.StartsWith("!") then op else "~" + op
+                                                    let opIdent = Expression.Identifier [opString]
                                                     Expression.PrefixOperator(opIdent, expr)))
 
         do
