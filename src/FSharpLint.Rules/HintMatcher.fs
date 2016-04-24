@@ -243,10 +243,12 @@ module HintMatcher =
 
         and private matchIf arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)), Expression.If(hintCond, hintExpr, None) -> 
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)), 
+              Expression.If(hintCond, hintExpr, None) -> 
                 arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&
                 arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)), Expression.If(hintCond, hintExpr, Some(hintElseExpr)) -> 
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)), 
+              Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) -> 
                 arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&
                 arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr &&
                 arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr
@@ -468,10 +470,10 @@ module HintMatcher =
             |> String.concat "."
         | Expression.FunctionApplication(expressions) ->
             expressions |> surroundExpressionsString hintToString "" "" " "
-        | Expression.InfixOperator(operator, leftHint, rightHint) ->
-            hintToString leftHint + hintToString operator + hintToString rightHint
-        | Expression.PrefixOperator(operator, hint) ->
-            hintToString operator + hintToString hint
+        | Expression.InfixOperator(Expression.Identifier([operator]), leftHint, rightHint) ->
+            hintToString leftHint + operator + hintToString rightHint
+        | Expression.PrefixOperator(Expression.Identifier([operator]), hint) ->
+            operator + hintToString hint
         | Expression.Parentheses(hint) -> 
             "(" + hintToString hint + ")"
         | Expression.Lambda(arguments, LambdaBody(body)) -> 

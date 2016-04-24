@@ -411,6 +411,7 @@ module AbstractSyntaxArray =
         | Identifier(_) -> SyntaxNode.Identifier
         | Expression(SynExpr.App(_)) -> SyntaxNode.FuncApp
         | Expression(SynExpr.Lambda(_)) -> SyntaxNode.Lambda
+        | Expression(SynExpr.IfThenElse(_)) -> SyntaxNode.If
         | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_)) -> SyntaxNode.Other
         | Expression(_) -> SyntaxNode.Expression
         | ModuleOrNamespace(_)
