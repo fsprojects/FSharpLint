@@ -744,7 +744,7 @@ module HintParser =
             >>. ((spaces >>. skipString ")") <|> skipString ")")
             >>% Unit
 
-        let pconstant: Parser<Expression, unit> = 
+        let pconstant: Parser<Constant, unit> = 
             choice
                 [ attempt pbool
                   attempt punit
@@ -768,16 +768,41 @@ module HintParser =
                   attempt NumericLiterals.pbignum
                   attempt NumericLiterals.pdecimal
                   attempt NumericLiterals.pdouble
-                  NumericLiterals.pint32 ] |>> Expression.Constant
+                  NumericLiterals.pint32 ]
+
+    module CommonParsers =
+
+        let pvariable: Parser<char, unit> = 
+            satisfy isLetter 
+            .>> notFollowedBy (satisfy isLetter)
+
+        let ptuple (pparser:Parser<'a, unit>) : Parser<'a list, unit> = 
+            skipChar '(' 
+            >>. pparser
+            .>> skipChar ',' 
+            .>>. sepEndBy1 pparser (skipChar ',')
+            .>> skipChar ')' 
+            |>> fun (func, rest) -> (func::rest)
+
+        let plist (pparser:Parser<'a, unit>): Parser<'a list, unit> = 
+            skipChar '['
+            >>. spaces
+            >>. sepEndBy pparser (skipChar ';')
+            .>> spaces
+            .>> skipChar ']'
+
+        let parray (pparser:Parser<'a, unit>): Parser<'a list, unit> = 
+            skipString "[|"
+            >>. spaces
+            >>. sepEndBy pparser (skipChar ';')
+            .>> spaces
+            .>> skipString "|]"
 
     module Expressions =
 
         let pwildcard: Parser<Expression, unit> = skipString "_" >>% Expression.Wildcard
 
-        let pvariable: Parser<Expression, unit> = 
-            satisfy isLetter 
-            .>> notFollowedBy (satisfy isLetter)
-            |>> Expression.Variable
+        let pvariable: Parser<Expression, unit> = CommonParsers.pvariable |>> Expression.Variable
 
         let pargumentvariable: Parser<Expression, unit> = satisfy isLetter |>> Expression.Variable
 
@@ -796,30 +821,6 @@ module HintParser =
             .>>. pexpression
             .>>. opt (skipString "else" >>. pexpression)
             |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr |> Option.map Expression.Else)
-
-        let ptuple: Parser<Expression, unit> = 
-            skipChar '(' 
-            >>. pexpression
-            .>> skipChar ',' 
-            .>>. sepEndBy1 pexpression (skipChar ',')
-            .>> skipChar ')' 
-            |>> fun (func, rest) -> Expression.Tuple(func::rest)
-
-        let plist: Parser<Expression, unit> = 
-            skipChar '['
-            >>. spaces
-            >>. sepEndBy pexpression (skipChar ';')
-            .>> spaces
-            .>> skipChar ']'
-            |>> Expression.List
-
-        let parray: Parser<Expression, unit> = 
-            skipString "[|"
-            >>. spaces
-            >>. sepEndBy pexpression (skipChar ';')
-            .>> spaces
-            .>> skipString "|]"
-            |>> Expression.Array
 
         let plambda: Parser<Expression, unit> = 
             let plambdastart: Parser<Expression list, unit> = 
@@ -842,9 +843,15 @@ module HintParser =
                      LambdaBody(Expression.LambdaBody(body)))
             }
 
+        let ptuple = (CommonParsers.ptuple pexpression) |>> Expression.Tuple
+
+        let plist = (CommonParsers.plist pexpression) |>> Expression.List
+
+        let parray = (CommonParsers.parray pexpression) |>> Expression.Array
+
         let papplication =
             choice 
-                [ attempt Constants.pconstant
+                [ attempt Constants.pconstant |>> Expression.Constant
                   attempt pvariable
                   attempt pwildcard
                   attempt Identifiers.plongidentorop |>> Expression.Identifier
@@ -869,8 +876,8 @@ module HintParser =
             spaces >>.
             choice 
                 [ attempt pif
-                  attempt (pstring "null") |>> (fun _ -> Expression.Null)
-                  attempt Constants.pconstant
+                  attempt (skipString "null" >>% Expression.Null)
+                  attempt Constants.pconstant |>> Expression.Constant
                   attempt plambda
                   attempt pvariable
                   attempt pwildcard
@@ -959,6 +966,50 @@ module HintParser =
 
             pexpressionImpl := opp.ExpressionParser
 
+    module Patterns =
+
+        open CommonParsers
+
+        let ppattern, private ppatternImpl = createParserForwardedToRef()
+
+        let pwildcard: Parser<Pattern, unit> = skipString "_" >>% Pattern.Wildcard
+
+        let pparentheses: Parser<Pattern, unit> = skipChar '(' >>. ppattern .>> skipChar ')' |>> Pattern.Parentheses
+        
+        let opp = OperatorPrecedenceParser<Pattern, string, unit>()
+
+        opp.TermParser <- 
+            spaces >>.
+            choice 
+                [ (skipString "null" >>% Pattern.Null)
+                  Constants.pconstant |>> Pattern.Constant
+                  pvariable |>> Pattern.Variable
+                  pwildcard
+                  Identifiers.plongidentorop |>> Pattern.Identifier
+                  (ptuple ppattern) |>> Pattern.Tuple
+                  (plist ppattern) |>> Pattern.List
+                  (parray ppattern) |>> Pattern.Array
+                  pparentheses ] .>> spaces
+
+        // a helper function for adding infix operators to opp
+        let addInfixOperator operator precedence associativity =
+            let op = InfixOperator(operator, preturn "",
+                                   precedence, associativity, (),
+                                   fun _ patLhs patRhs ->
+                                        match operator with
+                                        | "|" -> Pattern.Or(patLhs, patRhs)
+                                        | "&" -> Pattern.And(patLhs, patRhs)
+                                        | "::" -> Pattern.Cons(patLhs, patRhs)
+                                        | _ -> failwith ("Unexpected operator " + operator + " in pattern."))
+            opp.AddOperator(op)
+
+        do
+            addInfixOperator "|"  1 Associativity.Left
+            addInfixOperator "::"  2 Associativity.Left
+            addInfixOperator "&"  3 Associativity.Left
+
+            ppatternImpl := opp.ExpressionParser
+
     let private psuggestion: Parser<Suggestion, Unit> =
         let pstring =
             choice 
@@ -970,12 +1021,12 @@ module HintParser =
             [ attempt (pchar 'm' >>. pstring |>> Suggestion.Message)
               Expressions.pexpression |>> Suggestion.Expr ]
 
-    let phint: Parser<Hint, unit> = 
-        let phintcenter: Parser<unit, unit> = 
-            spaces 
-            .>> skipString "===>"
-            .>> spaces
+    let private phintcenter: Parser<unit, unit> = 
+        spaces 
+        .>> skipString "===>"
+        .>> spaces
 
+    let pexpressionbasedhint =
         parse {
             let! m = Expressions.pexpression 
 
@@ -985,3 +1036,19 @@ module HintParser =
 
             return { Match = HintExpr m; Suggestion = s }
         }
+
+    let ppatternbasedhint =
+        parse {
+            let! m = Patterns.ppattern 
+
+            do! phintcenter
+
+            let! s = psuggestion
+
+            return { Match = HintPat m; Suggestion = s }
+        }
+
+    let phint: Parser<Hint, unit> = 
+        choice
+            [ spaces >>. (skipString "pattern:") >>. spaces >>. ppatternbasedhint
+              pexpressionbasedhint ]

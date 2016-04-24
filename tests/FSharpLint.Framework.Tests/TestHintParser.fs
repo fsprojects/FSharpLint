@@ -330,43 +330,43 @@ type TestConstantParser() =
     [<Test>]
     member __.Bool() = 
         match run Constants.pconstant "true" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Bool(true)), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Bool(true), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.Unit() = 
         match run Constants.pconstant "()" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Unit), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Unit, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.LiteralString() = 
         match run Constants.pconstant "\"dog\"" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(String("dog")), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(String("dog"), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.Int16() = 
         match run Constants.pconstant "14s" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Int16(14s)), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Int16(14s), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.Int32() = 
         match run Constants.pconstant "14" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Int32(14)), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Int32(14), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.Double() = 
         match run Constants.pconstant "14.1" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Double(14.1)), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Double(14.1), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
     member __.Decimal() = 
         match run Constants.pconstant "14.1m" with
-        | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Decimal(14.1m)), hint)
+        | Success(hint, _, _) -> Assert.AreEqual(Decimal(14.1m), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
@@ -734,11 +734,61 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses null into a null expression.``() = 
+    member __.``Parses null inside expression as expected.``() = 
         let expected = 
             { Match = Expression.Null |> HintExpr
               Suggestion = Suggestion.Message("Message") }
 
         match run phint "null ===> m\"\"\"Message\"\"\"" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.``Parses null inside pattern as expected.``() = 
+        let expected = 
+            { Match = Pattern.Null |> HintPat
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "pattern: null ===> m\"\"\"Message\"\"\"" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.``Parses boolean constant inside pattern as expected.``() = 
+        let expected = 
+            { Match = Pattern.Constant(Constant.Bool(true)) |> HintPat
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "pattern: true ===> m\"\"\"Message\"\"\"" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
+       
+    [<Test>]
+    member __.``Parses cons inside pattern as expected.``() = 
+        let expected = 
+            { Match = Pattern.Cons(Pattern.Constant(Constant.Bool(true)), Pattern.List([])) |> HintPat
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "pattern: true::[] ===> m\"\"\"Message\"\"\"" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
+         
+    [<Test>]
+    member __.``Parses or inside pattern as expected.``() = 
+        let expected = 
+            { Match = Pattern.Or(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "pattern: true | false ===> m\"\"\"Message\"\"\"" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.``Parses and inside pattern as expected.``() = 
+        let expected = 
+            { Match = Pattern.And(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
+              Suggestion = Suggestion.Message("Message") }
+
+        match run phint "pattern: true & false ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
