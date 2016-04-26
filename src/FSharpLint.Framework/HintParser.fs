@@ -64,7 +64,7 @@ module HintParser =
         | FunctionApplication of Expression list
         | InfixOperator of operatorIdentifier:Expression * Expression * Expression
         | PrefixOperator of operatorIdentifier:Expression * Expression
-        | AddressOf of Expression
+        | AddressOf of singleAmpersand:bool * Expression
         | Wildcard
         | Variable of char
         | Identifier of string list
@@ -140,6 +140,10 @@ module HintParser =
             | ConstantUIntPtr = 66uy
             | ConstantBytes = 67uy
             | ConstantUserNum = 68uy
+
+            | PatternCons = 100uy
+            | PatternOr = 101uy
+            | PatternAnd = 102uy
  
         type Node =
             { Edges: Edges
@@ -217,7 +221,7 @@ module HintParser =
                 [HintExpr ident; HintExpr lhs; HintExpr rhs]
             | HintExpr(Expression.PrefixOperator(ident, expr)) -> 
                 [HintExpr ident; HintExpr expr]
-            | HintExpr(Expression.AddressOf(expr)) -> [HintExpr expr]
+            | HintExpr(Expression.AddressOf(_, expr)) -> [HintExpr expr]
             | HintExpr(Expression.FunctionApplication(exprs))
             | HintExpr(Expression.Tuple(exprs))
             | HintExpr(Expression.List(exprs))
@@ -913,7 +917,8 @@ module HintParser =
         let addPrefixOperator op precedence =
             opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
                                                 fun expr ->
-                                                    if op = "&" || op = "&&" then Expression.AddressOf(expr)
+                                                    if op = "&" then Expression.AddressOf(true, expr)
+                                                    else if op = "&&" then Expression.AddressOf(false, expr)
                                                     else
                                                         let opString = if op.StartsWith("!") then op else "~" + op
                                                         let opIdent = Expression.Identifier [opString]

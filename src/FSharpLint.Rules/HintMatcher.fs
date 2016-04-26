@@ -319,7 +319,7 @@ module HintMatcher =
 
         and private matchAddressOf arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.AddressOf(_, addrExpr, _, _)), Expression.AddressOf(expr) ->
+            | AstNode.Expression(SynExpr.AddressOf(synSingleAmp, addrExpr, _, _)), Expression.AddressOf(singleAmp, expr) when synSingleAmp = singleAmp ->
                 arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
             | _ -> false
 
@@ -474,8 +474,8 @@ module HintMatcher =
             hintToString (HintPat leftHint) + "&" + hintToString (HintPat rightHint)
         | HintPat(Pattern.Or(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "|" + hintToString (HintPat rightHint)
-        | HintExpr(Expression.AddressOf(hint)) ->
-            "&" + hintToString (HintExpr hint)
+        | HintExpr(Expression.AddressOf(singleAmp, hint)) ->
+            (if singleAmp then "&" else "&&") + hintToString (HintExpr hint)
         | HintExpr(Expression.PrefixOperator(Expression.Identifier([operator]), hint)) ->
             operator + hintToString (HintExpr hint)
         | HintExpr(Expression.Parentheses(hint)) -> "(" + hintToString (HintExpr hint) + ")"

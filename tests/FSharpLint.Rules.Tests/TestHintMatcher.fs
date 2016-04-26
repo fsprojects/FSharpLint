@@ -135,15 +135,26 @@ module Goat
 4 + %4""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
-
+        
     [<Test>]
-    member this.MatchAddressOfPrefixExpression() = 
+    member this.``Match address of operator with a single ampersand in expression``() =  
         let config = generateHintConfig ["4 + &4 ===> 8"]
 
         this.Parse("""
 module Goat
 
 4 + &4""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.``Match address of operator with two ampersands in expression``() = 
+        let config = generateHintConfig ["4 + &&4 ===> 8"]
+
+        this.Parse("""
+module Goat
+
+4 + &&4""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
