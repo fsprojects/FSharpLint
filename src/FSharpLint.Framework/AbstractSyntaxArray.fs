@@ -366,6 +366,8 @@ module AbstractSyntaxArray =
 
         | ArrayOrList = 30uy
         | Tuple = 31uy
+
+        | Wildcard = 41uy
             
         | ConstantBool = 51uy
         | ConstantByte = 52uy
@@ -384,8 +386,36 @@ module AbstractSyntaxArray =
         | ConstantUInt64 = 65uy
         | ConstantUIntPtr = 66uy
         | ConstantBytes = 67uy
+        
+        | Cons = 101uy
+        | And = 102uy
+        | Or = 103uy
 
         | Other = 255uy
+
+    let private constToSyntaxNode = function
+        | SynConst.Unit(_) -> SyntaxNode.Unit
+        | SynConst.Bool(_) -> SyntaxNode.ConstantBool
+        | SynConst.Byte(_) -> SyntaxNode.ConstantByte
+        | SynConst.Bytes(_) -> SyntaxNode.ConstantBytes
+        | SynConst.Char(_) -> SyntaxNode.ConstantChar
+        | SynConst.Decimal(_) -> SyntaxNode.ConstantDecimal
+        | SynConst.Double(_) -> SyntaxNode.ConstantDouble
+        | SynConst.Int16(_) -> SyntaxNode.ConstantInt16
+        | SynConst.Int32(_) -> SyntaxNode.ConstantInt32
+        | SynConst.Int64(_) -> SyntaxNode.ConstantInt64
+        | SynConst.IntPtr(_) -> SyntaxNode.ConstantIntPtr
+        | SynConst.SByte(_) -> SyntaxNode.ConstantSByte
+        | SynConst.Single(_) -> SyntaxNode.ConstantSingle
+        | SynConst.String(_) -> SyntaxNode.ConstantString
+        | SynConst.UInt16(_) -> SyntaxNode.ConstantUInt16
+        | SynConst.UInt32(_) -> SyntaxNode.ConstantUInt32
+        | SynConst.UInt64(_) -> SyntaxNode.ConstantUInt64
+        | SynConst.UIntPtr(_) -> SyntaxNode.ConstantUIntPtr
+        | SynConst.UInt16s(_)
+        | SynConst.UserNum(_)
+        | SynConst.Measure(_) -> SyntaxNode.Other
+        
         
     let private astNodeToSyntaxNode = function
         | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
@@ -393,27 +423,11 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
         | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
         | Expression(SynExpr.AddressOf(_)) -> SyntaxNode.AddressOf
-        | Expression(SynExpr.Const(SynConst.Unit(_), _)) -> SyntaxNode.Unit
-        | Expression(SynExpr.Const(SynConst.Bool(_), _)) -> SyntaxNode.ConstantBool
-        | Expression(SynExpr.Const(SynConst.Byte(_), _)) -> SyntaxNode.ConstantByte
-        | Expression(SynExpr.Const(SynConst.Bytes(_), _)) -> SyntaxNode.ConstantBytes
-        | Expression(SynExpr.Const(SynConst.Char(_), _)) -> SyntaxNode.ConstantChar
-        | Expression(SynExpr.Const(SynConst.Decimal(_), _)) -> SyntaxNode.ConstantDecimal
-        | Expression(SynExpr.Const(SynConst.Int16(_), _)) -> SyntaxNode.ConstantInt16
-        | Expression(SynExpr.Const(SynConst.Int32(_), _)) -> SyntaxNode.ConstantInt32
-        | Expression(SynExpr.Const(SynConst.Int64(_), _)) -> SyntaxNode.ConstantInt64
-        | Expression(SynExpr.Const(SynConst.IntPtr(_), _)) -> SyntaxNode.ConstantIntPtr
-        | Expression(SynExpr.Const(SynConst.SByte(_), _)) -> SyntaxNode.ConstantSByte
-        | Expression(SynExpr.Const(SynConst.Single(_), _)) -> SyntaxNode.ConstantSingle
-        | Expression(SynExpr.Const(SynConst.String(_), _)) -> SyntaxNode.ConstantString
-        | Expression(SynExpr.Const(SynConst.UInt16(_), _)) -> SyntaxNode.ConstantUInt16
-        | Expression(SynExpr.Const(SynConst.UInt32(_), _)) -> SyntaxNode.ConstantUInt32
-        | Expression(SynExpr.Const(SynConst.UInt64(_), _)) -> SyntaxNode.ConstantUInt64
-        | Expression(SynExpr.Const(SynConst.UIntPtr(_), _)) -> SyntaxNode.ConstantUIntPtr
         | Identifier(_) -> SyntaxNode.Identifier
         | Expression(SynExpr.App(_)) -> SyntaxNode.FuncApp
         | Expression(SynExpr.Lambda(_)) -> SyntaxNode.Lambda
         | Expression(SynExpr.IfThenElse(_)) -> SyntaxNode.If
+        | Expression(SynExpr.Const(constant, _)) -> constToSyntaxNode constant
         | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_)) -> SyntaxNode.Other
         | Expression(_) -> SyntaxNode.Expression
         | ModuleOrNamespace(_)
@@ -428,6 +442,12 @@ module AbstractSyntaxArray =
         | Match(_)
         | TypeParameter(_)
         | MemberDefinition(_)
+        | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
+        | Pattern(SynPat.Or(_)) -> SyntaxNode.Or
+        | Pattern(SynPat.Wild(_)) -> SyntaxNode.Wildcard
+        | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
+        | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Pattern(SynPat.Tuple(_)) -> SyntaxNode.Tuple
         | Pattern(_)
         | ConstructorArguments(_)
         | SimplePattern(_)

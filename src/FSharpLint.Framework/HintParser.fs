@@ -140,10 +140,10 @@ module HintParser =
             | ConstantUIntPtr = 66uy
             | ConstantBytes = 67uy
             | ConstantUserNum = 68uy
-
-            | PatternCons = 100uy
-            | PatternOr = 101uy
-            | PatternAnd = 102uy
+            
+            | Cons = 101uy
+            | And = 102uy
+            | Or = 103uy
  
         type Node =
             { Edges: Edges
@@ -166,6 +166,27 @@ module HintParser =
 
             static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = [] }
 
+        let private getConstKey = function
+            | Constant.Unit -> SyntaxHintNode.Unit
+            | Constant.Bool(_) -> SyntaxHintNode.ConstantBool
+            | Constant.Byte(_) -> SyntaxHintNode.ConstantByte
+            | Constant.Bytes(_) -> SyntaxHintNode.ConstantBytes
+            | Constant.Char(_) -> SyntaxHintNode.ConstantChar
+            | Constant.Decimal(_) -> SyntaxHintNode.ConstantDecimal
+            | Constant.Double(_) -> SyntaxHintNode.ConstantDouble
+            | Constant.Int16(_) -> SyntaxHintNode.ConstantInt16
+            | Constant.Int32(_) -> SyntaxHintNode.ConstantInt32
+            | Constant.Int64(_) -> SyntaxHintNode.ConstantInt64
+            | Constant.IntPtr(_) -> SyntaxHintNode.ConstantIntPtr
+            | Constant.SByte(_) -> SyntaxHintNode.ConstantSByte
+            | Constant.Single(_) -> SyntaxHintNode.ConstantSingle
+            | Constant.String(_) -> SyntaxHintNode.ConstantString
+            | Constant.UInt16(_) -> SyntaxHintNode.ConstantUInt16
+            | Constant.UInt32(_) -> SyntaxHintNode.ConstantUInt32
+            | Constant.UInt64(_) -> SyntaxHintNode.ConstantUInt64
+            | Constant.UIntPtr(_) -> SyntaxHintNode.ConstantUIntPtr
+            | Constant.UserNum(_) -> SyntaxHintNode.ConstantUserNum
+            
         let rec private getExprKey = function
             | Expression.FunctionApplication(_)
             | Expression.InfixOperator(_)
@@ -176,37 +197,33 @@ module HintParser =
             | Expression.LambdaArg(_) -> SyntaxHintNode.LambdaArg
             | Expression.LambdaBody(_) -> SyntaxHintNode.LambdaBody
             | Expression.Tuple(_) -> SyntaxHintNode.Tuple
+            | Expression.Constant(constant) -> getConstKey constant
             | Expression.List(_)
             | Expression.Array(_) -> SyntaxHintNode.ArrayOrList
             | Expression.If(_) -> SyntaxHintNode.If
             | Expression.Else(_) -> SyntaxHintNode.Else
             | Expression.Identifier(_) -> SyntaxHintNode.Identifier
-            | Expression.Constant(Constant.Unit) -> SyntaxHintNode.Unit
-            | Expression.Constant(Constant.Bool(_)) -> SyntaxHintNode.ConstantBool
-            | Expression.Constant(Constant.Byte(_)) -> SyntaxHintNode.ConstantByte
-            | Expression.Constant(Constant.Bytes(_)) -> SyntaxHintNode.ConstantBytes
-            | Expression.Constant(Constant.Char(_)) -> SyntaxHintNode.ConstantChar
-            | Expression.Constant(Constant.Decimal(_)) -> SyntaxHintNode.ConstantDecimal
-            | Expression.Constant(Constant.Double(_)) -> SyntaxHintNode.ConstantDouble
-            | Expression.Constant(Constant.Int16(_)) -> SyntaxHintNode.ConstantInt16
-            | Expression.Constant(Constant.Int32(_)) -> SyntaxHintNode.ConstantInt32
-            | Expression.Constant(Constant.Int64(_)) -> SyntaxHintNode.ConstantInt64
-            | Expression.Constant(Constant.IntPtr(_)) -> SyntaxHintNode.ConstantIntPtr
-            | Expression.Constant(Constant.SByte(_)) -> SyntaxHintNode.ConstantSByte
-            | Expression.Constant(Constant.Single(_)) -> SyntaxHintNode.ConstantSingle
-            | Expression.Constant(Constant.String(_)) -> SyntaxHintNode.ConstantString
-            | Expression.Constant(Constant.UInt16(_)) -> SyntaxHintNode.ConstantUInt16
-            | Expression.Constant(Constant.UInt32(_)) -> SyntaxHintNode.ConstantUInt32
-            | Expression.Constant(Constant.UInt64(_)) -> SyntaxHintNode.ConstantUInt64
-            | Expression.Constant(Constant.UIntPtr(_)) -> SyntaxHintNode.ConstantUIntPtr
-            | Expression.Constant(Constant.UserNum(_)) -> SyntaxHintNode.ConstantUserNum
             | Expression.Null -> SyntaxHintNode.Null
             | Expression.Wildcard -> SyntaxHintNode.Wildcard
             | Expression.Variable(_) -> SyntaxHintNode.Variable
+            
+        let rec private getPatternKey = function
+            | Pattern.Cons(_) -> SyntaxHintNode.Cons
+            | Pattern.And(_) -> SyntaxHintNode.And
+            | Pattern.Or(_) -> SyntaxHintNode.Or
+            | Pattern.Wildcard -> SyntaxHintNode.Wildcard
+            | Pattern.Variable(_) -> SyntaxHintNode.Variable
+            | Pattern.Identifier(_) -> SyntaxHintNode.Identifier
+            | Pattern.Constant(constant) -> getConstKey constant
+            | Pattern.Parentheses(pattern) -> getPatternKey pattern
+            | Pattern.Tuple(_) -> SyntaxHintNode.Tuple
+            | Pattern.List(_)
+            | Pattern.Array(_) -> SyntaxHintNode.ArrayOrList
+            | Pattern.Null -> SyntaxHintNode.Null
  
         let rec private getKey = function
             | HintExpr(expr) -> getExprKey expr
-            | HintPat(pattern) -> failwith "not implemented"
+            | HintPat(pattern) -> getPatternKey pattern
  
         let rec private getChildren = function
             | HintExpr(Expression.Parentheses(expr)) -> getChildren <| HintExpr expr
