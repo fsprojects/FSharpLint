@@ -36,14 +36,14 @@ module AstTemp =
             | SynExpr.App(_, _, x, y, _) -> 
                 match removeParens x with
                 | SynExpr.App(_, true, SynExpr.Ident(op), rhs, _) as app ->
-                    let lhs = y
+                    let lhs = removeParens y
 
                     match op.idText with
                     | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> flatten [rhs] lhs
                     | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> flatten (removeParens lhs::flattened) rhs
                     | _ -> flatten (removeParens lhs::flattened) app
                 | x -> 
-                    let leftExpr, rightExpr = (x, y)
+                    let leftExpr, rightExpr = (x, removeParens y)
                     flatten (removeParens rightExpr::flattened) leftExpr
             | expr -> expr::flattened
 
@@ -430,6 +430,12 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Const(constant, _)) -> constToSyntaxNode constant
         | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_)) -> SyntaxNode.Other
         | Expression(_) -> SyntaxNode.Expression
+        | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
+        | Pattern(SynPat.Or(_)) -> SyntaxNode.Or
+        | Pattern(SynPat.Wild(_)) -> SyntaxNode.Wildcard
+        | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
+        | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
+        | Pattern(SynPat.Tuple(_)) -> SyntaxNode.Tuple
         | ModuleOrNamespace(_)
         | ModuleDeclaration(_)
         | AstNode.Binding(_)
@@ -442,12 +448,6 @@ module AbstractSyntaxArray =
         | Match(_)
         | TypeParameter(_)
         | MemberDefinition(_)
-        | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
-        | Pattern(SynPat.Or(_)) -> SyntaxNode.Or
-        | Pattern(SynPat.Wild(_)) -> SyntaxNode.Wildcard
-        | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
-        | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
-        | Pattern(SynPat.Tuple(_)) -> SyntaxNode.Tuple
         | Pattern(_)
         | ConstructorArguments(_)
         | SimplePattern(_)
@@ -471,23 +471,41 @@ module AbstractSyntaxArray =
     let private getHashCode node = 
         match node with
         | Identifier(x) when (List.isEmpty >> not) x -> x |> Seq.last |> hash
+        | Pattern(SynPat.Const(SynConst.Bool(x), _))
         | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Byte(x), _))
         | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Bytes(x, _), _))
         | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Char(x), _))
         | Expression(SynExpr.Const(SynConst.Char(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Decimal(x), _))
         | Expression(SynExpr.Const(SynConst.Decimal(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Double(x), _))
         | Expression(SynExpr.Const(SynConst.Double(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Int16(x), _))
         | Expression(SynExpr.Const(SynConst.Int16(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Int32(x), _))
         | Expression(SynExpr.Const(SynConst.Int32(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Int64(x), _))
         | Expression(SynExpr.Const(SynConst.Int64(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.IntPtr(x), _))
         | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.SByte(x), _))
         | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Single(x), _))
         | Expression(SynExpr.Const(SynConst.Single(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.String(x, _), _))
         | Expression(SynExpr.Const(SynConst.String(x, _), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.UInt16(x), _))
         | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.UInt16s(x), _))
         | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.UInt32(x), _))
         | Expression(SynExpr.Const(SynConst.UInt32(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.UInt64(x), _))
         | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.UIntPtr(x), _))
         | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> hash x
         | _ -> 0
 

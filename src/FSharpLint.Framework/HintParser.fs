@@ -234,6 +234,8 @@ module HintParser =
                 [HintExpr arg]
             | HintExpr(Expression.LambdaBody(body)) -> 
                 [HintExpr body]
+            | HintExpr(Expression.InfixOperator(Expression.Identifier(["::"]) as ident, lhs, rhs)) -> 
+                [HintExpr ident; HintExpr (Expression.Tuple([lhs; rhs]))]
             | HintExpr(Expression.InfixOperator(ident, lhs, rhs)) -> 
                 [HintExpr ident; HintExpr lhs; HintExpr rhs]
             | HintExpr(Expression.PrefixOperator(ident, expr)) -> 
@@ -1015,13 +1017,19 @@ module HintParser =
                   pwildcard
                   Identifiers.plongidentorop |>> Pattern.Identifier
                   (ptuple ppattern) |>> Pattern.Tuple
-                  (plist ppattern) |>> Pattern.List
                   (parray ppattern) |>> Pattern.Array
+                  (plist ppattern) |>> Pattern.List
                   pparentheses ] .>> spaces
 
         // a helper function for adding infix operators to opp
         let addInfixOperator operator precedence associativity =
-            let op = InfixOperator(operator, preturn "",
+            let remainingOpChars_ws = 
+                if operator = "|" then
+                    notFollowedBy (pstring "]") |>> fun _ -> ""
+                else
+                    manySatisfy (isAnyOf Operators.opchars)
+
+            let op = InfixOperator(operator, remainingOpChars_ws,
                                    precedence, associativity, (),
                                    fun _ patLhs patRhs ->
                                         match operator with

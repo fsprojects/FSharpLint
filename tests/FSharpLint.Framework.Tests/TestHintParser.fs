@@ -460,9 +460,9 @@ type TestHintParser() =
 
     [<Test>]
     member __.ExpressionPrefixOperator() = 
-        let expected = Expression.PrefixOperator(Expression.Identifier(["~&"]), Expression.Constant(Constant.Int32(4)))
+        let expected = Expression.PrefixOperator(Expression.Identifier(["~~"]), Expression.Constant(Constant.Int32(4)))
 
-        match run Expressions.pexpression "&4" with
+        match run Expressions.pexpression "~4" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
