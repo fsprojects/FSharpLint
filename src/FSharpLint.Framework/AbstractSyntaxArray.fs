@@ -39,13 +39,13 @@ module AstTemp =
                     let lhs = removeParens y
 
                     match op.idText with
-                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> flatten [rhs] lhs
-                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> flatten (removeParens lhs::flattened) rhs
+                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> flatten [removeParens rhs] lhs
+                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> flatten (removeParens lhs::flattened) (removeParens rhs)
                     | _ -> flatten (removeParens lhs::flattened) app
                 | x -> 
                     let leftExpr, rightExpr = (x, removeParens y)
                     flatten (removeParens rightExpr::flattened) leftExpr
-            | expr -> expr::flattened
+            | expr -> (removeParens expr)::flattened
 
         match functionApplication with
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 

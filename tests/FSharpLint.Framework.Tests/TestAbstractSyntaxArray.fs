@@ -138,18 +138,18 @@ type TestAst() =
         let actual = array |> Array.map (fun x -> x.Hashcode)
 
         let expected =
-            [ hash (SyntaxNode.FuncApp, 0)
-              hash (SyntaxNode.Identifier, "map")
-              hash (SyntaxNode.Lambda, 0)
-              hash (SyntaxNode.LambdaArg, 0)
-              hash (SyntaxNode.Identifier, "x")
-              hash (SyntaxNode.LambdaArg, 0)
-              hash (SyntaxNode.Identifier, "y")
-              hash (SyntaxNode.LambdaBody, 0)
-              hash (SyntaxNode.FuncApp, 0)
-              hash (SyntaxNode.Identifier, "id")
-              hash (SyntaxNode.Identifier, "x")
-              hash (SyntaxNode.Identifier, "woofs") ]
+            [ Utilities.hash2 SyntaxNode.FuncApp 0
+              Utilities.hash2 SyntaxNode.Identifier "map"
+              Utilities.hash2 SyntaxNode.Lambda 0
+              Utilities.hash2 SyntaxNode.LambdaArg 0
+              Utilities.hash2 SyntaxNode.Identifier "x"
+              Utilities.hash2 SyntaxNode.LambdaArg 0
+              Utilities.hash2 SyntaxNode.Identifier "y"
+              Utilities.hash2 SyntaxNode.LambdaBody 0
+              Utilities.hash2 SyntaxNode.FuncApp 0
+              Utilities.hash2 SyntaxNode.Identifier "id"
+              Utilities.hash2 SyntaxNode.Identifier "x"
+              Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
         Assert.AreEqual([ AbstractSyntaxArray.Skip(11, 0)

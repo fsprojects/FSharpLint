@@ -51,7 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition=" Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
-    <Compile Include="ExpressionUtilities.fs" />
+    <Compile Include="Utilities.fs" />
     <Compile Include="HintParser.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Ast.fs" />

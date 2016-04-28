@@ -19,6 +19,7 @@
 module TestHintParser
 
 open NUnit.Framework
+open FSharpLint.Framework
 open FSharpLint.Framework.HintParser
 open FParsec
 open MergeSyntaxTrees
@@ -38,13 +39,13 @@ type TestMergeSyntaxTrees() =
             | Success(hint, _, _), Success(hint2, _, _) -> 
                 let expectedEdges =
                     { Lookup = 
-                        [ ((SyntaxHintNode.Identifier, "map".GetHashCode()).GetHashCode(), 
+                        [ (Utilities.hash2 SyntaxHintNode.Identifier "map", 
                            { Edges = 
                                { Lookup = 
-                                   [ ((SyntaxHintNode.Identifier, "woof".GetHashCode()).GetHashCode(), 
+                                   [ (Utilities.hash2 SyntaxHintNode.Identifier "woof", 
                                       { Edges = Edges.Empty
                                         MatchedHint = [hint2] })
-                                     ((SyntaxHintNode.Identifier, "id".GetHashCode()).GetHashCode(), 
+                                     (Utilities.hash2 SyntaxHintNode.Identifier "id", 
                                       { Edges = Edges.Empty
                                         MatchedHint = [hint] }) ] |> toDictionary
                                  AnyMatch = [] }
@@ -53,7 +54,7 @@ type TestMergeSyntaxTrees() =
 
                 let expectedRoot = 
                     { Lookup = 
-                        [((SyntaxHintNode.FuncApp, 0).GetHashCode(), 
+                        [(Utilities.hash2 SyntaxHintNode.FuncApp 0, 
                           { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
                       AnyMatch = [] }
                       
