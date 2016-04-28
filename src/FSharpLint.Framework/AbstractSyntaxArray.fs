@@ -82,6 +82,12 @@ module AstTemp =
             getLambdaParametersAndExpression [] lambda |> Option.map (fun x -> (x, range))
         | _ -> None
 
+    let (|Cons|_|) pattern =
+        match pattern with
+        | SynPat.LongIdent(LongIdentWithDots([identifier], _), _, _, Pats([SynPat.Tuple([lhs; rhs], _)]), _, _) when identifier.idText = "op_ColonColon" ->
+            Some(lhs, rhs)
+        | _ -> None
+
     type ExtraSyntaxInfo =
         | LambdaArg = 1uy
         | LambdaBody = 2uy
@@ -180,7 +186,6 @@ module AstTemp =
         | SynPat.ArrayOrList(_, patterns, _)
         | SynPat.Tuple(patterns, _)
         | SynPat.Ands(patterns, _) -> patterns |> List.map Pattern
-        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> [ConstructorArguments constructorArguments]
         | SynPat.Attrib(pattern, _, _)
         | SynPat.Named(pattern, _, _, _, _)
         | SynPat.Paren(pattern, _) -> [Pattern pattern]
@@ -192,6 +197,9 @@ module AstTemp =
         | SynPat.DeprecatedCharRange(_)
         | SynPat.Null(_)
         | SynPat.OptionalVal(_) -> []
+        | Cons(lhs, rhs) -> 
+            [Pattern lhs; Pattern rhs]
+        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> [ConstructorArguments constructorArguments]
 
     let inline private expressionChildren node =
         match node with 
@@ -416,7 +424,6 @@ module AbstractSyntaxArray =
         | SynConst.UserNum(_)
         | SynConst.Measure(_) -> SyntaxNode.Other
         
-        
     let private astNodeToSyntaxNode = function
         | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
         | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
@@ -432,6 +439,8 @@ module AbstractSyntaxArray =
         | Expression(_) -> SyntaxNode.Expression
         | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
         | Pattern(SynPat.Or(_)) -> SyntaxNode.Or
+        | Pattern(AstTemp.Cons(_)) -> 
+            SyntaxNode.Cons
         | Pattern(SynPat.Wild(_)) -> SyntaxNode.Wildcard
         | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
         | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
