@@ -155,11 +155,14 @@ module HintMatcher =
                 | _ -> None
 
             match breadcrumbs with
-            | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(SynExpr.New(_))::_
-            | _::AstNode.Expression(SynExpr.New(_))::_ ->
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(SynExpr.Paren(_))::AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(SynExpr.Paren(_))::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.Expression(SynExpr.Paren(_))::AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.Expression(SynExpr.Paren(_))::AstNode.Expression(SynExpr.New(_))::_ ->
                 PossiblyInConstructor
-            | _::AstNode.Expression(PossiblyMethodCallOrConstructor)::_
-            | AstNode.Expression(SynExpr.Tuple(_))::_::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
+            | AstNode.Expression(PossiblyMethodCallOrConstructor)::_
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(PossiblyMethodCallOrConstructor)::_
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.TypeParameter(_)::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
                 PossiblyInMethod
             | _ -> NotInMethod
             
@@ -567,15 +570,15 @@ module HintMatcher =
                 true
 
         match breadcrumbs with
-        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
-        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::_::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
+        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
+        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
             let index = exprs |> List.tryFindIndex (fun x -> x.Range = range)
 
             match index with
             | Some(index) -> not <| isParameterDelegateType index methodIdent
             | None -> false
-        | AstNode.Expression(lambdaExpr)::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_
-        | AstNode.Expression(lambdaExpr)::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), arg, _))::_ when arg.Range = lambdaExpr.Range -> 
+        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_
+        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), arg, _))::_ -> 
             not <| isParameterDelegateType 0 methodIdent
         | _ -> true
 
@@ -595,7 +598,12 @@ module HintMatcher =
                   MatchExpression.Breadcrumbs = breadcrumbs }
 
             if MatchExpression.matchHintExpr arguments then
-                hintError hint visitorInfo expr.Range
+                match hint.Match, hint.Suggestion with
+                | HintExpr(Expression.Lambda(_)), Suggestion.Expr(Expression.Identifier(_)) -> 
+                    if lambdaCanBeReplacedWithFunction checkFile breadcrumbs expr.Range then
+                        hintError hint visitorInfo expr.Range
+                | _ ->
+                    hintError hint visitorInfo expr.Range
         | _ -> ()
 
     let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
@@ -616,7 +624,7 @@ module HintMatcher =
                     breadcrumbs
 
             if i = 0 then [] 
-            else getBreadcrumbs [] (i - 1) |> List.rev
+            else getBreadcrumbs [] (skipArray.[i].ParentIndex) |> List.rev
 
         let confirmFuzzyMatch i =
             let breadcrumbs = getBreadcrumbs i
