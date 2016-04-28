@@ -576,14 +576,14 @@ module AbstractSyntaxArray =
                     | AstTemp.ExtraSyntaxInfo.Else -> SyntaxNode.Else
                     | _ -> failwith ("Unknown extra syntax info: " + string stackedNode.Node.ExtraSyntaxInfo)
 
-                nodes.Add (Node(hash (syntaxNode, 0), astNode))
+                nodes.Add (Node(Utilities.hash2 syntaxNode 0, astNode))
 
             match astNodeToSyntaxNode stackedNode.Node.AstNode with
             | SyntaxNode.Other -> ()
             | syntaxNode -> 
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
-                nodes.Add (Node(hash (syntaxNode, getHashCode astNode), astNode))
+                nodes.Add (Node(Utilities.hash2 syntaxNode (getHashCode astNode), astNode))
         
         tryAddPossibleSkips 0
 
