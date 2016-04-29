@@ -39,8 +39,10 @@ module AstTemp =
                     let lhs = removeParens y
 
                     match op.idText with
-                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> flatten [removeParens rhs] lhs
-                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> flatten (removeParens lhs::flattened) (removeParens rhs)
+                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> 
+                        flatten [removeParens rhs] lhs
+                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> 
+                        flatten (removeParens lhs::flattened) (removeParens rhs)
                     | _ -> flatten (removeParens lhs::flattened) app
                 | x -> 
                     let leftExpr, rightExpr = (x, removeParens y)
@@ -65,7 +67,8 @@ module AstTemp =
             | x -> x
 
         let (|IsCurriedLambda|_|) = function
-            | SynExpr.Lambda(_, _, parameter, (SynExpr.Lambda(_) as inner), _) as outer when outer.Range = inner.Range ->
+            | SynExpr.Lambda(_, _, parameter, (SynExpr.Lambda(_) as inner), _) as outer 
+                    when outer.Range = inner.Range ->
                 Some(parameter, inner)
             | _ -> None
 
@@ -79,12 +82,16 @@ module AstTemp =
 
         match lambda with
         | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range) as lambda) -> 
-            getLambdaParametersAndExpression [] lambda |> Option.map (fun x -> (x, range))
+            getLambdaParametersAndExpression [] lambda 
+            |> Option.map (fun x -> (x, range))
         | _ -> None
 
     let (|Cons|_|) pattern =
         match pattern with
-        | SynPat.LongIdent(LongIdentWithDots([identifier], _), _, _, Pats([SynPat.Tuple([lhs; rhs], _)]), _, _) when identifier.idText = "op_ColonColon" ->
+        | SynPat.LongIdent(LongIdentWithDots([identifier], _), 
+                           _, _,
+                           Pats([SynPat.Tuple([lhs; rhs], _)]), _, _) 
+                when identifier.idText = "op_ColonColon" ->
             Some(lhs, rhs)
         | _ -> None
 
@@ -175,7 +182,8 @@ module AstTemp =
         | SynMemberDefn.NestedType(typeDefinition, _, _) -> [TypeDefinition typeDefinition]
         | SynMemberDefn.AutoProperty(_, _, _, Some(synType), _, _, _, _, expression, _, _) -> 
             [Type synType; Expression expression]
-        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, expression, _, _) -> [Expression expression]
+        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, expression, _, _) -> 
+            [Expression expression]
 
     let inline private patternChildren node =
         match node with 
@@ -199,7 +207,8 @@ module AstTemp =
         | SynPat.OptionalVal(_) -> []
         | Cons(lhs, rhs) -> 
             [Pattern lhs; Pattern rhs]
-        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> [ConstructorArguments constructorArguments]
+        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> 
+            [ConstructorArguments constructorArguments]
 
     let inline private expressionChildren node =
         match node with 
@@ -268,7 +277,8 @@ module AstTemp =
             [ yield! bindings |> List.map Binding
               yield Expression expression ]
         | SynExpr.Ident(ident) -> [Identifier([ident.idText])]
-        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> [Identifier(ident |> List.map (fun x -> x.idText))]
+        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> 
+            [Identifier(ident |> List.map (fun x -> x.idText))]
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> 
             [Expression cond; Expression body; Node(ExtraSyntaxInfo.Else, Ast.Expression elseExpr)]
         | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression cond; Expression body]
@@ -287,7 +297,8 @@ module AstTemp =
 
     let inline private simplePatternsChildren node =
         match node with 
-        | SynSimplePats.SimplePats(simplePatterns, _) -> simplePatterns |> List.map SimplePattern
+        | SynSimplePats.SimplePats(simplePatterns, _) -> 
+            simplePatterns |> List.map SimplePattern
         | SynSimplePats.Typed(simplePatterns, synType, _) -> 
             [SimplePatterns simplePatterns; Type synType]
 
@@ -307,13 +318,17 @@ module AstTemp =
 
     let inline private constructorArgumentsChildren node =
         match node with 
-        | SynConstructorArgs.Pats(patterns) -> patterns |> List.map Pattern
-        | SynConstructorArgs.NamePatPairs(namePatterns, _) -> namePatterns |> List.map (snd >> Pattern)
+        | SynConstructorArgs.Pats(patterns) -> 
+            patterns |> List.map Pattern
+        | SynConstructorArgs.NamePatPairs(namePatterns, _) -> 
+            namePatterns |> List.map (snd >> Pattern)
 
     let inline private typeRepresentationChildren node =
         match node with 
-        | SynTypeDefnRepr.ObjectModel(_, members, _) -> members |> List.map MemberDefinition
-        | SynTypeDefnRepr.Simple(typeSimpleRepresentation, _) -> [TypeSimpleRepresentation typeSimpleRepresentation]
+        | SynTypeDefnRepr.ObjectModel(_, members, _) -> 
+            members |> List.map MemberDefinition
+        | SynTypeDefnRepr.Simple(typeSimpleRepresentation, _) -> 
+            [TypeSimpleRepresentation typeSimpleRepresentation]
 
     let traverseNode node =
         match node with
@@ -326,7 +341,9 @@ module AstTemp =
             ExceptionRepresentation exceptionRepresentation::(members |> List.map MemberDefinition)
         | ExceptionRepresentation(ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> [UnionCase unionCase]
         | TypeDefinition(TypeDefn(componentInfo, typeRepresentation, members, _)) -> 
-            ComponentInfo componentInfo::TypeRepresentation typeRepresentation::(members |> List.map MemberDefinition)
+            ComponentInfo componentInfo::
+                TypeRepresentation typeRepresentation::
+                (members |> List.map MemberDefinition)
         | TypeSimpleRepresentation(x) -> typeSimpleRepresentationChildren x
         | Type(x) -> typeChildren x
         | Match(x) -> matchChildren x
