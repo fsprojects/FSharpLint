@@ -51,7 +51,7 @@ module LoadVisitors =
                 this.SuppressedMessages |> List.exists isAnalyserSuppressed
 
     /// Visitor that visits the nodes in the abstract syntax trees of the F# files in a project.
-    type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> Ast.Visitor
+    type AstVisitor = Ast.VisitorInfo -> FSharpCheckFileResults option -> AbstractSyntaxArray.Visitor
 
     /// Visitor that visists the plain text of the F# files in a project.
     type PlainTextVisitor = Ast.VisitorInfo -> PlainTextVisitorInfo -> unit

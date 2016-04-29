@@ -55,10 +55,10 @@ module ParseFile =
         | Some(parseTree) -> 
             match typeCheckFile() with
             | Success(typeCheckResults) ->
-                { Ast.PlainText = source
-                  Ast.Ast = parseTree
-                  Ast.TypeCheckResults = typeCheckResults
-                  Ast.File = file } |> Success
+                { AbstractSyntaxArray.PlainText = source
+                  AbstractSyntaxArray.Ast = parseTree
+                  AbstractSyntaxArray.TypeCheckResults = typeCheckResults
+                  AbstractSyntaxArray.File = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
