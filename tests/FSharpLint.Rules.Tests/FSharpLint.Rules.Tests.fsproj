@@ -59,7 +59,6 @@
     <Compile Include="TestNestedStatementsRules.fs" />
     <Compile Include="TestTypographyRules.fs" />
     <Compile Include="TestFunctionReimplementationRules.fs" />
-    <Compile Include="TestCyclomaticComplexity.fs" />
     <Compile Include="TestHintMatcher.fs" />
     <Compile Include="TestRaiseWithTooManyArgumentsRules.fs" />
     <None Include="App.config" />
