@@ -57,7 +57,6 @@
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
     <Compile Include="AbstractSyntaxArray.fs" />
-    <Compile Include="LoadVisitors.fs" />
     <Compile Include="Resources.fs" />
     <Compile Include="ParseFile.fs" />
     <Compile Include="FuzzyHintMatcher.fs" />

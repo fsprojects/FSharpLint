@@ -28,7 +28,6 @@ module HintMatcher =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.HintParser
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
     open FSharpLint.Framework.ExpressionUtilities
 
     [<Literal>]
@@ -237,7 +236,7 @@ module HintMatcher =
 
         and matchFunctionApplication arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstTemp.FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
+            | FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
                 let expressions = exprs |> List.map AstNode.Expression
                 doExpressionsMatch expressions hintExprs arguments
             | _ -> false
@@ -261,7 +260,7 @@ module HintMatcher =
 
         and matchLambda arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstTemp.Lambda({ AstTemp.Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
+            | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
                 match matchLambdaArguments lambdaArgs args with
                 | LambdaMatch.Match(lambdaArguments) -> 
                     matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
@@ -611,23 +610,8 @@ module HintMatcher =
 
         let maxBreadcrumbs = 6
 
-        let getBreadcrumbs i =
-            let rec getBreadcrumbs breadcrumbs i =
-                if i = 0 then
-                    let node = syntaxArray.[i].Actual
-                    node::breadcrumbs
-                else if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
-                    let node = syntaxArray.[i].Actual
-                    let parenti = skipArray.[i].ParentIndex
-                    getBreadcrumbs (node::breadcrumbs) parenti
-                else
-                    breadcrumbs
-
-            if i = 0 then [] 
-            else getBreadcrumbs [] (skipArray.[i].ParentIndex) |> List.rev
-
         let confirmFuzzyMatch i =
-            let breadcrumbs = getBreadcrumbs i
+            let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs maxBreadcrumbs syntaxArray skipArray i
             confirmFuzzyMatch visitorInfo checkFile syntaxArray.[i] breadcrumbs
 
         FuzzyHintMatcher.possibleMatches syntaxArray skipArray hintKeywordTree confirmFuzzyMatch
@@ -642,11 +626,3 @@ module HintMatcher =
         | _ ->
             Debug.Assert(false, "Hints analyser was not in the configuration.")
             MergeSyntaxTrees.Edges.Empty
-
-    type RegisterHintVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = SyntaxArray(visitor getHintsFromConfig) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin

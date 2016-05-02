@@ -27,11 +27,10 @@ module SourceLength =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "SourceLength"
-
+    (*
     let configLines config ruleName =
         match isRuleEnabled config AnalyserName ruleName with
         | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
@@ -47,63 +46,53 @@ module SourceLength =
 
     let inline length (range:range) = range.EndLine - range.StartLine
 
-    let expectMaxLines visitorInfo (astNode:CurrentNode) range configRuleName errorName =
+    let expectMaxLines visitorInfo range configRuleName errorName =
         let actualLines = length range
 
         match configLines visitorInfo.Config configRuleName with
-        | Some(expectedMaxLines) when actualLines > expectedMaxLines && astNode.IsSuppressed(AnalyserName, configRuleName) |> not ->
+        | Some(expectedMaxLines) when actualLines > expectedMaxLines ->
             visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
         | _ -> ()
-    
-    let rec visitor visitorInfo _ astNode = 
-        match astNode.Node with
-        | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) when (isLambdaALambdaArgument >> not) astNode.Node -> 
-            expectMaxLines visitorInfo astNode range "MaxLinesInLambdaFunction" "Lambda function"
-            Continue
-        | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
-            expectMaxLines visitorInfo astNode range "MaxLinesInMatchLambdaFunction" "Match lambda function"
-            Continue
-        | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, valData, _, _, _, _, _) as binding) ->
-            let expectMaxLines = expectMaxLines visitorInfo astNode binding.RangeOfBindingAndRhs
 
-            match identifierTypeFromValData valData with
-            | Value -> 
-                expectMaxLines "MaxLinesInValue" "Value" 
-            | Function -> 
-                expectMaxLines "MaxLinesInFunction" "Function" 
-            | Member -> 
-                expectMaxLines "MaxLinesInMember" "Member" 
-            | Constructor -> 
-                expectMaxLines "MaxLinesInConstructor" "Constructor" 
-            | Property -> 
-                expectMaxLines "MaxLinesInProperty" "Property"
-            | Other -> ()
+    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+        let mutable i = 0
+        while i < syntaxArray.Length do
+            match syntaxArray.[i].Actual with
+            | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) as node when (isLambdaALambdaArgument >> not) node -> 
+                expectMaxLines visitorInfo range "MaxLinesInLambdaFunction" "Lambda function"
+            | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
+                expectMaxLines visitorInfo range "MaxLinesInMatchLambdaFunction" "Match lambda function"
+            | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, valData, _, _, _, _, _) as binding) ->
+                let expectMaxLines = expectMaxLines visitorInfo binding.RangeOfBindingAndRhs
 
-            Continue
-        | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, isModule, _, _, _, _, range)) when isModule -> 
-            expectMaxLines visitorInfo astNode range "MaxLinesInModule" "Module"
-            Continue
-        | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
-            match repr with
-            | SynTypeDefnRepr.Simple(simpleRepr, _) ->
-                match simpleRepr with
-                | SynTypeDefnSimpleRepr.Record(_) -> 
-                    expectMaxLines visitorInfo astNode range "MaxLinesInRecord" "Record"
-                | SynTypeDefnSimpleRepr.Enum(_) -> 
-                    expectMaxLines visitorInfo astNode range "MaxLinesInEnum" "Enum"
-                | SynTypeDefnSimpleRepr.Union(_) -> 
-                    expectMaxLines visitorInfo astNode range "MaxLinesInUnion" "Union"
-                | _ -> ()
-            | SynTypeDefnRepr.ObjectModel(_) -> 
-                expectMaxLines visitorInfo astNode range "MaxLinesInClass" "Classes and interface"
+                match identifierTypeFromValData valData with
+                | Value -> 
+                    expectMaxLines "MaxLinesInValue" "Value" 
+                | Function -> 
+                    expectMaxLines "MaxLinesInFunction" "Function" 
+                | Member -> 
+                    expectMaxLines "MaxLinesInMember" "Member" 
+                | Constructor -> 
+                    expectMaxLines "MaxLinesInConstructor" "Constructor" 
+                | Property -> 
+                    expectMaxLines "MaxLinesInProperty" "Property"
+                | Other -> ()
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, isModule, _, _, _, _, range)) when isModule -> 
+                expectMaxLines visitorInfo range "MaxLinesInModule" "Module"
+            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
+                match repr with
+                | SynTypeDefnRepr.Simple(simpleRepr, _) ->
+                    match simpleRepr with
+                    | SynTypeDefnSimpleRepr.Record(_) -> 
+                        expectMaxLines visitorInfo range "MaxLinesInRecord" "Record"
+                    | SynTypeDefnSimpleRepr.Enum(_) -> 
+                        expectMaxLines visitorInfo range "MaxLinesInEnum" "Enum"
+                    | SynTypeDefnSimpleRepr.Union(_) -> 
+                        expectMaxLines visitorInfo range "MaxLinesInUnion" "Union"
+                    | _ -> ()
+                | SynTypeDefnRepr.ObjectModel(_) -> 
+                    expectMaxLines visitorInfo range "MaxLinesInClass" "Classes and interface"
+            | _ -> ()
 
-            Continue
-        | _ -> Continue
-
-    type RegisterSourceLengthVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+            i <- i + 1*)
+    ()

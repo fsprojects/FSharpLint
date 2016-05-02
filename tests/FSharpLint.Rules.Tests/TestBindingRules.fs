@@ -21,7 +21,6 @@ module TestBindingRules
 open NUnit.Framework
 open FSharpLint.Rules.Binding
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let config = 
     let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
@@ -34,7 +33,7 @@ let config =
                   ("WildcardNamedWithAsPattern", ruleEnabled) 
                   ("TupleOfWildcards", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-
+              (*
 [<TestFixture>]
 type TestBindingRules() =
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
@@ -241,3 +240,4 @@ let x =
         member __.Two(_, _) = false }"""
 
         Assert.IsFalse(this.ErrorsExist)
+        *)

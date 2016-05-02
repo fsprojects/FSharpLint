@@ -26,11 +26,10 @@ module NestedStatements =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "NestedStatements"
-
+    (*
     let configDepth config =
         match isAnalyserEnabled config AnalyserName with
         | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
@@ -60,49 +59,44 @@ module NestedStatements =
             | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
                 Some(visitor depth visitorInfo checkFile)
             | _ -> Some(visitor (depth + 1) visitorInfo checkFile))
-    
-    let rec visitor depth (visitorInfo:VisitorInfo) checkFile astNode = 
-        match astNode.Node with
-        | AstNode.Binding(SynBinding.Binding(_))
-        | AstNode.Expression(SynExpr.Lambda(_))
-        | AstNode.Expression(SynExpr.MatchLambda(_))
-        | AstNode.Expression(SynExpr.IfThenElse(_))
-        | AstNode.Expression(SynExpr.Lazy(_))
-        | AstNode.Expression(SynExpr.Match(_))
-        | AstNode.Expression(SynExpr.Record(_))
-        | AstNode.Expression(SynExpr.ObjExpr(_))
-        | AstNode.Expression(SynExpr.TryFinally(_))
-        | AstNode.Expression(SynExpr.TryWith(_))
-        | AstNode.Expression(SynExpr.Tuple(_))
-        | AstNode.Expression(SynExpr.Quote(_))
-        | AstNode.Expression(SynExpr.While(_))
-        | AstNode.Expression(SynExpr.For(_))
-        | AstNode.Expression(SynExpr.ForEach(_)) as node 
-                when astNode.IsSuppressed(AnalyserName) |> not && 
-                        not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
 
-            let range () =
-                match node with 
-                | AstNode.Expression(node) -> node.Range
-                | AstNode.Binding(node) -> node.RangeOfBindingAndRhs
-                | _ -> raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
+    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+        let mutable i = 0
+        while i < syntaxArray.Length do
+            match syntaxArray.[i].Actual with
+            | AstNode.Binding(SynBinding.Binding(_))
+            | AstNode.Expression(SynExpr.Lambda(_))
+            | AstNode.Expression(SynExpr.MatchLambda(_))
+            | AstNode.Expression(SynExpr.IfThenElse(_))
+            | AstNode.Expression(SynExpr.Lazy(_))
+            | AstNode.Expression(SynExpr.Match(_))
+            | AstNode.Expression(SynExpr.Record(_))
+            | AstNode.Expression(SynExpr.ObjExpr(_))
+            | AstNode.Expression(SynExpr.TryFinally(_))
+            | AstNode.Expression(SynExpr.TryWith(_))
+            | AstNode.Expression(SynExpr.Tuple(_))
+            | AstNode.Expression(SynExpr.Quote(_))
+            | AstNode.Expression(SynExpr.While(_))
+            | AstNode.Expression(SynExpr.For(_))
+            | AstNode.Expression(SynExpr.ForEach(_)) as node 
+                    when not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
 
-            match configDepth visitorInfo.Config with
-            | Some(errorDepth) when depth >= errorDepth ->
-                visitorInfo.PostError (range()) (error errorDepth)
-                Stop
-            | Some(_) ->
-                match astNode.Node with
-                | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-                    elseIfVisitor visitor depth visitorInfo checkFile
-                | _ -> ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
-            | None -> Stop
-        | _ -> Continue
+                let range () =
+                    match node with 
+                    | AstNode.Expression(node) -> node.Range
+                    | AstNode.Binding(node) -> node.RangeOfBindingAndRhs
+                    | _ -> raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
 
-    type RegisterNestedStatementsVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor 0) }
+                match configDepth visitorInfo.Config with
+                | Some(errorDepth) when depth >= errorDepth ->
+                    visitorInfo.PostError (range()) (error errorDepth)
+                | Some(_) ->
+                    match node with
+                    | AstNode.Expression(SynExpr.IfThenElse(_)) ->
+                        elseIfVisitor visitor depth visitorInfo checkFile
+                    | _ -> ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
+                | None -> ()
+            | _ -> ()
 
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+            i <- i + 1*)
+    ()

@@ -29,11 +29,10 @@ module FunctionReimplementation =
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.ExpressionUtilities
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "FunctionReimplementation"
-
+    (*
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome 
 
@@ -82,7 +81,7 @@ module FunctionReimplementation =
             | Pattern(SynPat.Named(_, ident, _, _, _) | SynPat.OptionalVal(ident, _)) when ident.idText = identifier.idText -> true
             | node -> 
                 if not found then
-                    traverseNode node |> List.fold patternShadowsIdentifier false
+                    traverseNode node |> List.map (fun x -> x.AstNode) |> List.fold patternShadowsIdentifier false
                 else 
                     found
 
@@ -123,7 +122,7 @@ module FunctionReimplementation =
             | NotFound, Match(SynMatchClause.Clause(pattern, _, _, _, _)) when patternShadowsIdentifier ident (Pattern(pattern)) -> 
                 NotFound
             | NotFound, expr ->
-                match expr |> traverseNode |> List.fold expressionReferencesIdentifier NotFound with
+                match expr |> traverseNode |> List.map (fun x -> x.AstNode) |> List.fold expressionReferencesIdentifier NotFound with
                 | Shadowed -> NotFound
                 | isFound -> isFound
             | (isFound, _) -> isFound
@@ -132,7 +131,7 @@ module FunctionReimplementation =
         | Found -> true
         | NotFound | Shadowed -> false
 
-    let validateLambdaCannotBeReplacedWithComposition parameters expression range visitorInfo =
+    let validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo =
         let canBeReplacedWithFunctionComposition expression = 
             let removeLastElement = List.rev >> List.tail >> List.rev
 
@@ -161,15 +160,16 @@ module FunctionReimplementation =
                     | _ -> false
                 | _ -> false
 
-            match parameters with
+            match lambda.Arguments with
             | [singleParameter] -> 
-                lambdaArgumentIsLastApplicationInFunctionCalls expression singleParameter 1
+                let paramIdent = getLambdaParamIdent singleParameter
+                lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1
             | _ -> false
             
-        if canBeReplacedWithFunctionComposition expression then
+        if canBeReplacedWithFunctionComposition lambda.Body then
             Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
 
-    let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) parameters expression range visitorInfo =
+    let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range visitorInfo =
         let isConstructor expr =
             let symbol = getSymbolFromIdent checkFile expr
 
@@ -198,43 +198,34 @@ module FunctionReimplementation =
                         None
                 | _ -> None
 
-        isFunctionPointless expression parameters 
-            |> Option.iter (fun identifier ->
-                let identifier = 
-                    identifier 
-                        |> List.map (fun x -> DemangleOperatorName x.idText)
-                        |> String.concat "."
+        let generateError (identifier:LongIdent) =
+            let identifier = 
+                identifier 
+                    |> List.map (fun x -> DemangleOperatorName x.idText)
+                    |> String.concat "."
 
-                let errorFormatString = Resources.GetString("RulesReimplementsFunction")
-                let error = System.String.Format(errorFormatString, identifier)
-                visitorInfo.PostError range error)
-    
-    let visitor visitorInfo checkFile astNode = 
-        match astNode.Node with
-        | AstNode.Expression(SynExpr.Lambda(_) as lambda) ->
-            match astNode.Breadcrumbs with
-            | AstNode.Expression(SynExpr.Lambda(_))::_ -> 
-                // We're currently inside a curried function
-                ()
-            | _ ->
-                let (parameters, expression) = getLambdaParametersAndExpression lambda
+            let errorFormatString = Resources.GetString("RulesReimplementsFunction")
+            let error = System.String.Format(errorFormatString, identifier)
+            visitorInfo.PostError range error
 
-                if (not << List.isEmpty) parameters then
-                    if isRuleEnabled visitorInfo.Config "ReimplementsFunction" 
-                        && astNode.IsSuppressed(AnalyserName, "ReimplementsFunction") |> not then
-                        validateLambdaIsNotPointless checkFile parameters expression lambda.Range visitorInfo
+        isFunctionPointless lambda.Body (lambda.Arguments |> List.map getLambdaParamIdent)
+        |> Option.iter generateError
+
+    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+        let mutable i = 0
+        while i < syntaxArray.Length do
+            match syntaxArray.[i].Actual with
+            | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
+                match lambda with
+                | Lambda(lambda, range) -> 
+                    if (not << List.isEmpty) lambda.Arguments then
+                        if isRuleEnabled visitorInfo.Config "ReimplementsFunction" then
+                            validateLambdaIsNotPointless checkFile lambda range visitorInfo
                     
-                    if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" 
-                            && astNode.IsSuppressed(AnalyserName, "CanBeReplacedWithComposition") |> not then
-                        validateLambdaCannotBeReplacedWithComposition parameters expression lambda.Range visitorInfo
-        | _ -> ()
+                        if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" then
+                            validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo
+                | _ -> ()
+            | _ -> ()
 
-        Continue
-
-    type RegisterFunctionReimplementationVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+            i <- i + 1*)
+    ()

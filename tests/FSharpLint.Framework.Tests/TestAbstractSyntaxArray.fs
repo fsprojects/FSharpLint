@@ -69,49 +69,49 @@ type TestAst() =
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application.``() = 
         match generateAst "x |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with left pipe adds rhs to end of function application.``() = 
         match generateAst "List.map (fun x -> x) <| x" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() = 
         match generateAst "x |> List.map (fun x -> x) 1" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with binary operator on lhs of right pipe.``() = 
         match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with function application on lhs of right pipe.``() = 
         match generateAst "(foo x) |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple right pipes.``() = 
         match generateAst "x |> foo |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Flatten with multiple left pipes.``() = 
         match generateAst "List.map (fun x -> x) <| 1 <| x" |> astToExpr |> Expression with
-        | AstTemp.FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 

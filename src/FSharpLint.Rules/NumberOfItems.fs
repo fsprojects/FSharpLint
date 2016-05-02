@@ -26,11 +26,10 @@ module NumberOfItems =
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "NumberOfItems"
-
+    (*
     let maxItemsForRule config (astNode:CurrentNode) ruleName =
         match isRuleEnabled config AnalyserName ruleName with
         | Some(_, ruleSettings) 
@@ -146,13 +145,5 @@ module NumberOfItems =
         | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
             validateType members typeRepresentation visitorInfo astNode
         | _ -> ()
-
-        Continue
-
-    type RegisterNumberOfItemsVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+        *)
+    ()

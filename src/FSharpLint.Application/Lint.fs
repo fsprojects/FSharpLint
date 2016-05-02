@@ -115,6 +115,7 @@ module Lint =
     open Microsoft.Build.Exceptions
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
+    open FSharpLint.Framework.AbstractSyntaxArray
     
     /// Reason for the linter failing.
     type LintFailure =

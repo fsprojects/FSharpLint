@@ -20,16 +20,15 @@ namespace FSharpLint.Rules
 
 /// Rules to enforce the use of XML documentation in various places.
 module XmlDocumentation =
-
+    
     open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "XmlDocumentation"
-
+    (*
     let isAccessEnabled setting access =
         match setting, access with
         | Access(Access.Public),     SynAccess.Public
@@ -155,14 +154,5 @@ module XmlDocumentation =
                 | Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
                     fields |> List.iter evalField
                 | _ -> ()
-        | _ -> ()
-
-        Continue
-
-    type RegisterXmlDocumentationVisitor() =
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+        | _ -> ()*)
+    ()

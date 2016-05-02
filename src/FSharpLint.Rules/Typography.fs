@@ -22,13 +22,12 @@ module Typography =
 
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework.Ast
 
     [<Literal>]
     let AnalyserName = "Typography"
-
+    (*
     let isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
 
@@ -184,12 +183,4 @@ module Typography =
             lines |> Array.iteri (analyseLine visitorInfo mkRange plaintextVisitorInfo)
 
             TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo plaintextVisitorInfo.Input lines
-            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines
-
-    type RegisterTypographyVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = PlainText(visitor) }
-
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines*)

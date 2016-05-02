@@ -23,7 +23,6 @@ open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 open FSharpLint.Framework.ParseFile
 
 let emptyConfig =
@@ -35,7 +34,7 @@ let emptyConfig =
                        Settings = Map.ofList [] }) ] }
 
 [<AbstractClass>]
-type TestRuleBase(analyser:VisitorType, ?analysers) =
+type TestRuleBase(analyser, ?analysers) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
@@ -49,7 +48,7 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
               Analysers = analysers }
         | None -> emptyConfig
 
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion) = 
+    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion): unit = 
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
@@ -66,21 +65,10 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
         let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version }
         
-        match parseSource input config (FSharpChecker.Create()), analyser with
-        | Success(parseInfo), Ast(visitor) ->
-            lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
-        | Success(parseInfo), SyntaxArray(visitor) ->
+        match parseSource input config (FSharpChecker.Create()) with
+        | Success(parseInfo) ->
             let (syntaxArray, skipArray) = FSharpLint.Framework.AbstractSyntaxArray.astToArray parseInfo.Ast
-            visitor visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
-        | Success(parseInfo), PlainText(visitor) -> 
-            let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
-            let stringLiterals = getStringLiteralsFromAst parseInfo.Ast
-            visitor
-                visitorInfo
-                { File = ""
-                  Input = input
-                  SuppressedMessages = suppressedMessages
-                  StringLiterals = stringLiterals }
+            analyser visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =

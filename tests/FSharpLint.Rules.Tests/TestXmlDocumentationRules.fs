@@ -21,7 +21,6 @@ module TestXmlDocumentationRules
 open NUnit.Framework
 open FSharpLint.Rules.XmlDocumentation
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 open FSharpLint.Framework
 
 /// set all XmlDocumentation rules to None, except the rule under test
@@ -51,7 +50,7 @@ let config name access =
                     Settings = Map.ofList []
                 })
             ]
-
+             (*
 [<TestFixture>]
 type TestNameConventionRulesModule() =
     inherit TestRuleBase.TestRuleBase(Ast(visitor), config "ModuleDefinitionHeader" Access.All)
@@ -977,4 +976,4 @@ type internal IsAType =
     member this.Test = true
         """
 
-        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)
+        Assert.IsTrue(this.NoErrorsExist, this.ErrorMsg)*)

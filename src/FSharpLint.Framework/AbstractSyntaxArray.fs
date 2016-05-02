@@ -246,7 +246,7 @@ module AbstractSyntaxArray =
             /// Enables state to be passed down to certain children.
             | ContinueWithVisitorsForChildren of GetVisitorForChild
         
-    let astToArray ast visitor =
+    let astToArray ast =
         let astRoot =
             match ast with
             | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_)) -> 
@@ -308,6 +308,36 @@ module AbstractSyntaxArray =
             i <- i + 1
 
         (nodes.ToArray(), skipArray)
+
+    let getBreadcrumbs maxBreadcrumbs (syntaxArray: Node []) (skipArray: Skip []) i =
+        let rec getBreadcrumbs breadcrumbs i =
+            if i = 0 then
+                let node = syntaxArray.[i].Actual
+                node::breadcrumbs
+            else if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                let node = syntaxArray.[i].Actual
+                let parenti = skipArray.[i].ParentIndex
+                getBreadcrumbs (node::breadcrumbs) parenti
+            else
+                breadcrumbs
+
+        if i = 0 then [] 
+        else getBreadcrumbs [] (skipArray.[i].ParentIndex) |> List.rev
+
+    let getSuppressMessageAttributes (syntaxArray: Node []) (skipArray: Skip []) i =
+        let rec getSuppressMessageAttributes breadcrumbs i =
+            if i = 0 then
+                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
+                node::breadcrumbs
+            else if i < skipArray.Length then
+                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
+                let parenti = skipArray.[i].ParentIndex
+                getSuppressMessageAttributes (node::breadcrumbs) parenti
+            else
+                breadcrumbs
+
+        if i = 0 then [] 
+        else getSuppressMessageAttributes [] (skipArray.[i].ParentIndex)
 
     /// Information for a file to be linted that is given to the visitors for them to analyse.
     type FileParseInfo =
