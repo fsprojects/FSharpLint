@@ -328,16 +328,20 @@ module AbstractSyntaxArray =
         let rec getSuppressMessageAttributes breadcrumbs i =
             if i = 0 then
                 let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
-                node::breadcrumbs
+                if List.isEmpty node then breadcrumbs
+                else node::breadcrumbs
             else if i < skipArray.Length then
                 let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
                 let parenti = skipArray.[i].ParentIndex
-                getSuppressMessageAttributes (node::breadcrumbs) parenti
+                if List.isEmpty node then
+                    getSuppressMessageAttributes breadcrumbs parenti
+                else
+                    getSuppressMessageAttributes (node::breadcrumbs) parenti
             else
                 breadcrumbs
 
         if i = 0 then [] 
-        else getSuppressMessageAttributes [] (skipArray.[i].ParentIndex)
+        else getSuppressMessageAttributes [] i
 
     /// Information for a file to be linted that is given to the visitors for them to analyse.
     type FileParseInfo =

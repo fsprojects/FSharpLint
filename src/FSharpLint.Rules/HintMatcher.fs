@@ -612,7 +612,13 @@ module HintMatcher =
 
         let confirmFuzzyMatch i =
             let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs maxBreadcrumbs syntaxArray skipArray i
-            confirmFuzzyMatch visitorInfo checkFile syntaxArray.[i] breadcrumbs
+            let isSuppressed =
+                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+                |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName))
+            if not isSuppressed then
+                confirmFuzzyMatch visitorInfo checkFile syntaxArray.[i] breadcrumbs
+            else
+                ignore
 
         FuzzyHintMatcher.possibleMatches syntaxArray skipArray hintKeywordTree confirmFuzzyMatch
 
