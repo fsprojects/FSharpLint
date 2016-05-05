@@ -42,10 +42,10 @@ let config =
                   ("PublicValuesPascalOrCamelCase", ruleEnabled) 
                   ("NonPublicValuesCamelCase", ruleEnabled) ] 
               Settings = Map.ofList [] }) ]
-              (*
+              
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member __.IsPascalCase() = 
@@ -1152,4 +1152,4 @@ type Cat() =
 
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
-        Assert.AreEqual(2, numberOfErrors)*)
+        Assert.AreEqual(2, numberOfErrors)

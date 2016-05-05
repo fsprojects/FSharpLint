@@ -65,6 +65,18 @@ module AbstractSyntaxArray =
         | ConstantUIntPtr = 66uy
         | ConstantBytes = 67uy
         
+        | ModuleOrNamespace = 70uy
+        | ModuleDeclaration = 71uy
+        | Binding = 72uy
+        | ExceptionDefinition = 73uy
+        | TypeDefinition = 74uy
+        | Field = 75uy
+        | Type = 76uy
+        | Match = 77uy
+        | EnumCase = 78uy
+        | UnionCase = 79uy
+        | MemberDefinition = 80uy
+        
         | Cons = 101uy
         | And = 102uy
         | Or = 103uy
@@ -115,27 +127,27 @@ module AbstractSyntaxArray =
         | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
         | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
         | Pattern(SynPat.Tuple(_)) -> SyntaxNode.Tuple
-        | ModuleOrNamespace(_)
-        | ModuleDeclaration(_)
-        | AstNode.Binding(_)
-        | ExceptionDefinition(_)
-        | ExceptionRepresentation(_)
-        | TypeDefinition(_)
-        | TypeSimpleRepresentation(_)
-        | AstNode.Field(_)
-        | Type(_)
-        | Match(_)
+        | ModuleOrNamespace(_) -> SyntaxNode.ModuleOrNamespace
+        | ModuleDeclaration(_) -> SyntaxNode.ModuleDeclaration
+        | AstNode.Binding(_) -> SyntaxNode.Binding
+        | ExceptionDefinition(_) -> SyntaxNode.ExceptionDefinition
+        | TypeDefinition(_) -> SyntaxNode.TypeDefinition
+        | AstNode.Field(_) -> SyntaxNode.Field
+        | Type(_) -> SyntaxNode.Type
+        | Match(_) -> SyntaxNode.Match
+        | MemberDefinition(_) -> SyntaxNode.MemberDefinition
         | TypeParameter(_)
-        | MemberDefinition(_)
+        | ExceptionRepresentation(_)
+        | TypeSimpleRepresentation(_)
         | Pattern(_)
         | ConstructorArguments(_)
         | SimplePattern(_)
         | SimplePatterns(_)
         | InterfaceImplementation(_)
         | TypeRepresentation(_)
-        | AstNode.ComponentInfo(_)
-        | AstNode.EnumCase(_)
-        | AstNode.UnionCase(_) -> SyntaxNode.Other
+        | AstNode.ComponentInfo(_) -> SyntaxNode.Other
+        | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
+        | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
 
     [<Struct>]
     type Node(hashcode: int, actual: AstNode) = 
