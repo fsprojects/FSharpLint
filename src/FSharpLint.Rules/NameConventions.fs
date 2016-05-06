@@ -365,11 +365,9 @@ module NameConventions =
                 | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
                     CheckIdentifiers.checkParameter visitorInfo identifier
                 | _ -> ()
-            | AstNode.SimplePattern(pattern) ->
-                match pattern with
-                | SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _) when not isCompilerGenerated ->
+            | AstNode.SimplePattern(SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _)) ->
+                if not isCompilerGenerated then
                     CheckIdentifiers.checkParameter visitorInfo identifier
-                | _ -> ()
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
                 if isLiteral attributes checkFile then
                     let rec checkLiteral = function
@@ -380,44 +378,35 @@ module NameConventions =
 
                     checkLiteral pattern
                 else
-                    (*
-                    | AstNode.Pattern(pattern) ->
-                        match pattern with
-                        | SynPat.LongIdent(longIdentifier, _, _, _, _, _) -> 
-                            let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
+                    match pattern with
+                    | SynPat.LongIdent(longIdentifier, _, _, _, _, _) -> 
+                        let lastIdent = longIdentifier.Lid.[(longIdentifier.Lid.Length - 1)]
 
-                            match identifierTypeFromValData valData with
-                            | Value | Function when isActivePattern lastIdent ->
-                                CheckIdentifiers.checkActivePattern visitorInfo astNode lastIdent
-                            | Value | Function when (astNode.Node :: astNode.Breadcrumbs) |> isPublic -> 
-                                CheckIdentifiers.checkPublicValue visitorInfo astNode lastIdent
-                                ContinueWithVisitor(visitor visitorInfo checkFile)
-                            | Value | Function ->
-                                CheckIdentifiers.checkNonPublicValue visitorInfo astNode lastIdent
-                            | Member | Property -> 
-                                CheckIdentifiers.checkMember visitorInfo astNode lastIdent
-                            | _ -> ()
-                        | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
-                            if isActivePattern identifier then
-                                CheckIdentifiers.checkActivePattern visitorInfo astNode identifier
+                        match identifierTypeFromValData valData with
+                        | Value | Function when isActivePattern lastIdent ->
+                            CheckIdentifiers.checkActivePattern visitorInfo lastIdent
+                        | Value | Function (*when (astNode.Node :: astNode.Breadcrumbs) |> isPublic*) -> 
+                            CheckIdentifiers.checkPublicValue visitorInfo lastIdent
+                        | Value | Function ->
+                            CheckIdentifiers.checkNonPublicValue visitorInfo lastIdent
+                        | Member | Property -> 
+                            CheckIdentifiers.checkMember visitorInfo lastIdent
                         | _ -> ()
+                    | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
+                        if isActivePattern identifier then
+                            CheckIdentifiers.checkActivePattern visitorInfo identifier
                     | _ -> ()
-                    *)
-                    ()
-            | AstNode.Match(SynMatchClause.Clause(_)) -> 
-                (*  
-                
-                | AstNode.Pattern(SynPat.Named(_, identifier, isThis, _, _)) when not isThis -> 
-                    CheckIdentifiers.checkNonPublicValue visitorInfo astNode identifier
-                | AstNode.Pattern(SynPat.LongIdent(longIdentifier, _, _, _, _, _)) ->
+            | AstNode.Match(SynMatchClause.Clause(pattern, _, _, _, _)) -> 
+                match pattern with
+                | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
+                    CheckIdentifiers.checkNonPublicValue visitorInfo identifier
+                | SynPat.LongIdent(longIdentifier, _, _, _, _, _) ->
                     // Don't bother checking for camelCase as F# will warn for PascalCase
                     // in patterns outside of bindings
                     let identifier = longIdentifier.Lid.Head
                     if not <| isOperator identifier.idText then
                         expectNoUnderscoreInPattern visitorInfo.PostError identifier
                 | _ -> ()
-                        *)
-                ()
             | _ -> ()
 
             i <- i + 1
