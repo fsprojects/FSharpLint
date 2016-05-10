@@ -81,6 +81,7 @@ module AbstractSyntaxArray =
         | Cons = 101uy
         | And = 102uy
         | Or = 103uy
+        | Pattern = 104uy
 
         | Other = 255uy
 
@@ -128,6 +129,7 @@ module AbstractSyntaxArray =
         | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
         | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
         | Pattern(SynPat.Tuple(_)) -> SyntaxNode.Tuple
+        | Pattern(_) -> SyntaxNode.Pattern
         | ModuleOrNamespace(_) -> SyntaxNode.ModuleOrNamespace
         | ModuleDeclaration(_) -> SyntaxNode.ModuleDeclaration
         | AstNode.Binding(_) -> SyntaxNode.Binding
@@ -140,7 +142,6 @@ module AbstractSyntaxArray =
         | ExceptionRepresentation(_) -> SyntaxNode.ExceptionRepresentation
         | TypeParameter(_)
         | TypeSimpleRepresentation(_)
-        | Pattern(_)
         | ConstructorArguments(_)
         | SimplePattern(_)
         | SimplePatterns(_)
@@ -238,26 +239,6 @@ module AbstractSyntaxArray =
                     (Option.exists ((=) analyser.Rule) rulename || analyser.Rule = "*")
 
                 this.SuppressedMessages |> List.exists isAnalyserSuppressed
-
-    /// Defines a function that visits a node on the AST.
-    type Visitor = CurrentNode -> VisitorResult
-    and 
-        /// Defines a function that a visitor will return when it wants to supply 
-        /// specific visitors for the node its visiting's children
-        GetVisitorForChild = int -> AstNode -> Visitor option
-    and 
-        /// The return value of a visitor that lets the it specify how other nodes should be visited.
-        /// Using partial application you can apply state to each visitor returned, 
-        /// allowing for things such as summing the number of if statements in a function to be done purely.
-        VisitorResult =
-            /// Visit children with the current visitor.
-            | Continue
-            /// Do not visit any children.
-            | Stop
-            /// Enables state to be passed down to children.
-            | ContinueWithVisitor of Visitor
-            /// Enables state to be passed down to certain children.
-            | ContinueWithVisitorsForChildren of GetVisitorForChild
         
     let astToArray ast =
         let astRoot =
