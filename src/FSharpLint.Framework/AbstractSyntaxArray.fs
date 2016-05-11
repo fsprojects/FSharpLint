@@ -77,6 +77,7 @@ module AbstractSyntaxArray =
         | UnionCase = 79uy
         | MemberDefinition = 80uy
         | ExceptionRepresentation = 81uy
+        | TypeSimpleRepresentation = 82uy
         
         | Cons = 101uy
         | And = 102uy
@@ -140,8 +141,8 @@ module AbstractSyntaxArray =
         | Match(_) -> SyntaxNode.Match
         | MemberDefinition(_) -> SyntaxNode.MemberDefinition
         | ExceptionRepresentation(_) -> SyntaxNode.ExceptionRepresentation
+        | TypeSimpleRepresentation(_) -> SyntaxNode.TypeSimpleRepresentation
         | TypeParameter(_)
-        | TypeSimpleRepresentation(_)
         | ConstructorArguments(_)
         | SimplePattern(_)
         | SimplePatterns(_)
