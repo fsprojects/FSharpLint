@@ -22,51 +22,6 @@ module AstInfo =
 
     open Microsoft.FSharp.Compiler.Ast
     open Ast
-    
-    let isPublic path =
-        let isSynAccessPublic = function
-            | Some(SynAccess.Public) | None -> true
-            | _ -> false
-
-        let rec isPublic publicSoFar isBinding = function
-            | node :: path when publicSoFar ->
-                match node with
-                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
-                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
-                | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
-                | Field(SynField.Field(_, _, _, _, _, _, access, _))
-                | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
-                | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _))
-                | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _))
-                | MemberDefinition(SynMemberDefn.NestedType(_, access, _))
-                | MemberDefinition(SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _))
-                | MemberDefinition(SynMemberDefn.ImplicitCtor(access, _, _, _, _))
-                | MemberDefinition(SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _))
-                | Pattern(SynPat.Named(_, _, _, access, _))
-                | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                    isPublic (isSynAccessPublic access) isBinding path
-                | TypeSimpleRepresentation(_)
-                | Pattern(_) -> true
-                | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
-                    isPublic (isSynAccessPublic access) true path
-                | MemberDefinition(_) -> isPublic publicSoFar isBinding path
-                | ExceptionDefinition(_)
-                | EnumCase(_)
-                | TypeRepresentation(_)
-                | Type(_)
-                | Match(_)
-                | ConstructorArguments(_)
-                | TypeParameter(_)
-                | InterfaceImplementation(_)
-                | ModuleDeclaration(_)
-                | SimplePattern(_)
-                | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
-                | TypeDefinition(_)
-                | Expression(_) -> not isBinding && isPublic publicSoFar isBinding path
-            | [] -> publicSoFar
-            | _ -> false
-
-        isPublic true false path
 
     type IdentifierType =
         | Member

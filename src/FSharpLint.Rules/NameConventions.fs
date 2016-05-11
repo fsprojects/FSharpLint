@@ -29,7 +29,6 @@ module NameConventions =
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
-    open FSharpLint.Framework.Configuration
 
     [<Literal>]
     let AnalyserName = "NameConventions"
@@ -380,7 +379,7 @@ module NameConventions =
                         match identifierTypeFromValData valData with
                         | Value | Function when isActivePattern lastIdent ->
                             CheckIdentifiers.checkActivePattern isEnabled visitorInfo lastIdent
-                        | Value | Function (*when (astNode.Node :: astNode.Breadcrumbs) |> isPublic*) -> 
+                        | Value | Function when AbstractSyntaxArray.isPublic syntaxArray skipArray i -> 
                             CheckIdentifiers.checkPublicValue isEnabled visitorInfo lastIdent
                         | Value | Function ->
                             CheckIdentifiers.checkNonPublicValue isEnabled visitorInfo lastIdent
