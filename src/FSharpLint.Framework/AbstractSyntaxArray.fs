@@ -334,8 +334,7 @@ module AbstractSyntaxArray =
             else
                 breadcrumbs
 
-        if i = 0 then [] 
-        else getSuppressMessageAttributes [] i
+        getSuppressMessageAttributes [] i
 
     /// Information for a file to be linted that is given to the visitors for them to analyse.
     type FileParseInfo =
