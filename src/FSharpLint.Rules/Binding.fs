@@ -28,7 +28,7 @@ module Binding =
 
     [<Literal>]
     let AnalyserName = "Binding"
-    (*
+
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
@@ -37,9 +37,10 @@ module Binding =
           CheckFile: FSharpCheckFileResults option }
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
-    let checkForBindingToAWildcard visitorParameters pattern range =
-        let isEnabled =
-            "FavourIgnoreOverLetWild" |> isRuleEnabled visitorParameters.VisitorInfo.Config
+    let checkForBindingToAWildcard visitorParameters pattern range isSuppressed =
+        let ruleName = "FavourIgnoreOverLetWild"
+
+        let isEnabled = isRuleEnabled visitorParameters.VisitorInfo.Config ruleName
 
         if isEnabled then
             let rec findWildAndIgnoreParens = function
@@ -47,26 +48,29 @@ module Binding =
                 | SynPat.Wild(_) -> true
                 | _ -> false
                 
-            if findWildAndIgnoreParens pattern then
+            if findWildAndIgnoreParens pattern && isSuppressed ruleName |> not then
                 visitorParameters.VisitorInfo.PostError 
                     range 
                     (Resources.GetString("RulesFavourIgnoreOverLetWildError"))
 
-    let checkForWildcardNamedWithAsPattern visitorParameters pattern =
-        let isEnabled =
-            "WildcardNamedWithAsPattern" |> isRuleEnabled visitorParameters.VisitorInfo.Config
+    let checkForWildcardNamedWithAsPattern visitorParameters pattern isSuppressed =
+        let ruleName = "WildcardNamedWithAsPattern"
+
+        let isEnabled = isRuleEnabled visitorParameters.VisitorInfo.Config ruleName
 
         if isEnabled then
             match pattern with
             | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
-                visitorParameters.VisitorInfo.PostError 
-                    range 
-                    (Resources.GetString("RulesWildcardNamedWithAsPattern"))
+                if isSuppressed ruleName |> not then
+                    visitorParameters.VisitorInfo.PostError 
+                        range 
+                        (Resources.GetString("RulesWildcardNamedWithAsPattern"))
             | _ -> ()
 
-    let checkForUselessBinding visitorParameters pattern expr range =
-        let isEnabled =
-            "UselessBinding" |> isRuleEnabled visitorParameters.VisitorInfo.Config
+    let checkForUselessBinding visitorParameters pattern expr range isSuppressed =
+        let ruleName = "UselessBinding"
+
+        let isEnabled = isRuleEnabled visitorParameters.VisitorInfo.Config ruleName
             
         match visitorParameters.CheckFile with
         | Some(checkFile) when isEnabled ->
@@ -95,15 +99,16 @@ module Binding =
                 | _ -> false
 
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
-                if exprIdentMatchesBindingIdent bindingIdent expr then
+                if exprIdentMatchesBindingIdent bindingIdent expr && isSuppressed ruleName |> not then
                     visitorParameters.VisitorInfo.PostError 
                         range 
                         (Resources.GetString("RulesUselessBindingError")))
             | _ -> ()
 
-    let checkTupleOfWildcards visitorParameters pattern identifier =
-        let isEnabled =
-            "TupleOfWildcards" |> isRuleEnabled visitorParameters.VisitorInfo.Config
+    let checkTupleOfWildcards visitorParameters pattern identifier isSuppressed =
+        let ruleName = "TupleOfWildcards"
+
+        let isEnabled = isRuleEnabled visitorParameters.VisitorInfo.Config ruleName
 
         if isEnabled then
             let rec isWildcard = function
@@ -118,17 +123,20 @@ module Binding =
 
             match pattern with
             | SynPat.Tuple(patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
-                let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
-                let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
-                let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                visitorParameters.VisitorInfo.PostError range error
+                if isSuppressed ruleName |> not then
+                    let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
+                    let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
+                    let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
+                    visitorParameters.VisitorInfo.PostError range error
             | _ -> ()
 
-    let (|IsLetBinding|_|) breadcrumbs =
-        match breadcrumbs with 
-        | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))::_ 
-        | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _))::_ -> Some()
-        | _ -> None
+    let private isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =
+        if i > 0 then
+            match syntaxArray.[skipArray.[i].ParentIndex].Actual with 
+            | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))
+            | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _)) -> true
+            | _ -> false
+        else false
 
     let isTupleMemberArgs breadcrumbs tupleRange =
         let (|MemberBindingArgs|_|) bindingPattern =
@@ -145,22 +153,30 @@ module Binding =
             tupleRange = range
         | _ -> false
 
-    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
+        let visitorParameters =
+            { VisitorInfo = visitorInfo
+              CheckFile = checkFile }
+
+        let isSuppressed i ruleName =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+
         let mutable i = 0
         while i < syntaxArray.Length do
             match syntaxArray.[i].Actual with
-            | IsLetBinding, AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) ->
-                checkForBindingToAWildcard visitorParameters pattern range
+            | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) 
+                    when isLetBinding i syntaxArray skipArray ->
+                checkForBindingToAWildcard visitorParameters pattern range (isSuppressed i)
                 if not isMutable then
-                    checkForUselessBinding visitorParameters pattern expr range
-            | _, AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
-                checkForWildcardNamedWithAsPattern visitorParameters pattern
-            | _, AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, range) as pattern, _)]), _, _)) ->
-                if (not << isTupleMemberArgs astNode.Breadcrumbs) range then
+                    checkForUselessBinding visitorParameters pattern expr range (isSuppressed i)
+            | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
+                checkForWildcardNamedWithAsPattern visitorParameters pattern (isSuppressed i)
+            | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, range) as pattern, _)]), _, _)) ->
+                let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs 2 syntaxArray skipArray i
+                if (not << isTupleMemberArgs breadcrumbs) range then
                     let identifier = identifier.Lid |> List.map (fun x -> x.idText)
-                    checkTupleOfWildcards visitorParameters pattern identifier
+                    checkTupleOfWildcards visitorParameters pattern identifier (isSuppressed i)
             | _ -> ()
 
             i <- i + 1
-            *)
-    ()

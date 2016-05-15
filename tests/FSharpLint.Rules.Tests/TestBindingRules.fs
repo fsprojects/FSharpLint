@@ -33,10 +33,10 @@ let config =
                   ("WildcardNamedWithAsPattern", ruleEnabled) 
                   ("TupleOfWildcards", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-              (*
+              
 [<TestFixture>]
 type TestBindingRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.LetWildcardUnitValue() = 
@@ -240,4 +240,3 @@ let x =
         member __.Two(_, _) = false }"""
 
         Assert.IsFalse(this.ErrorsExist)
-        *)
