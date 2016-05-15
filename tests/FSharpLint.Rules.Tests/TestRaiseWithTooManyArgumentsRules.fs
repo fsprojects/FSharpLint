@@ -35,10 +35,10 @@ let config =
                   ("InvalidArgWithTwoArguments", ruleEnabled) 
                   ("FailwithfWithArgumentsMatchingFormatString", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-               (*
+               
 [<TestFixture>]
 type TestRaiseWithTooManyArgumentsRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.FailwithWithCorrectNumberOfArguments() = 
@@ -233,4 +233,4 @@ module Program
 
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))*)
+        Assert.IsFalse(this.ErrorExistsOnLine(5))

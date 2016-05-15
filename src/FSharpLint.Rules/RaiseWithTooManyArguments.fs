@@ -28,10 +28,6 @@ module RaiseWithTooManyArguments =
 
     [<Literal>]
     let AnalyserName = "RaiseWithTooManyArguments"
-    (*
-    let isRuleEnabled config ruleName =
-        isRuleEnabled config AnalyserName ruleName
-        |> Option.isSome
 
     let (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
         | SynExpr.Ident(ident)::arguments when List.length arguments > maxArgs && ident.idText = identifier ->
@@ -49,15 +45,15 @@ module RaiseWithTooManyArguments =
           ResourceStringName: string
           Range: range }
 
-    let private checkFunction visitorInfo checkFunctionInfo hasTooManyArguments =
-        let ruleIsEnabled = checkFunctionInfo.RuleName |> isRuleEnabled visitorInfo.Config
+    let private checkFunction visitorInfo checkFunctionInfo hasTooManyArguments isEnabled =
+        let ruleIsEnabled = isEnabled checkFunctionInfo.RuleName
 
         if ruleIsEnabled && hasTooManyArguments() then
             let error = Resources.GetString checkFunctionInfo.ResourceStringName
 
             visitorInfo.PostError checkFunctionInfo.Range error
 
-    let checkFailwith visitorInfo flattenedExpression range =
+    let checkFailwith visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithTooManyArgs "failwith" 1 -> true
@@ -66,9 +62,9 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "FailwithWithSingleArgument"
               ResourceStringName = "RulesFailwithWithSingleArgument"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let checkRange visitorInfo flattenedExpression range =
+    let checkRange visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithTooManyArgs "raise" 1 -> true
@@ -77,9 +73,9 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "RaiseWithSingleArgument"
               ResourceStringName = "RulesRaiseWithSingleArgument"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let checkNullArg visitorInfo flattenedExpression range =
+    let checkNullArg visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithTooManyArgs "nullArg" 1 -> true
@@ -88,9 +84,9 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "NullArgWithSingleArgument"
               ResourceStringName = "RulesNullArgWithSingleArgument"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let checkInvalidOp visitorInfo flattenedExpression range =
+    let checkInvalidOp visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithTooManyArgs "invalidOp" 1 -> true
@@ -99,9 +95,9 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "InvalidOpWithSingleArgument"
               ResourceStringName = "RulesInvalidOpWithSingleArgument"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let checkInvalidArg visitorInfo flattenedExpression range =
+    let checkInvalidArg visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithTooManyArgs "invalidArg" 2 -> true
@@ -110,9 +106,9 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "InvalidArgWithTwoArguments"
               ResourceStringName = "RulesInvalidArgWithTwoArguments"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let checkFailwithf visitorInfo flattenedExpression range =
+    let checkFailwithf visitorInfo flattenedExpression range isEnabled =
         let hasTooManyArguments () =
             match flattenedExpression with
             | RaiseWithFormatStringTooManyArgs "failwithf" -> true
@@ -121,23 +117,31 @@ module RaiseWithTooManyArguments =
         checkFunction visitorInfo
             { RuleName = "FailwithfWithArgumentsMatchingFormatString"
               ResourceStringName = "RulesFailwithfWithArgumentsMatchingFormatString"
-              Range = range } hasTooManyArguments
+              Range = range } hasTooManyArguments isEnabled
 
-    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+    let visitor visitorInfo _ syntaxArray skipArray = 
+        let isEnabled i ruleName =
+            match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
+            | Some(_) -> 
+                let isSuppressed =
+                    AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+                    |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+                not isSuppressed
+            | None -> false
+
         let mutable i = 0
         while i < syntaxArray.Length do
             match syntaxArray.[i].Actual with
             | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr -> 
                 match expr with
                 | FuncApp(flattenedExpression, range) -> 
-                    checkFailwith visitorInfo flattenedExpression range
-                    checkRange visitorInfo flattenedExpression range
-                    checkNullArg visitorInfo flattenedExpression range
-                    checkInvalidOp visitorInfo flattenedExpression range
-                    checkInvalidArg visitorInfo flattenedExpression range
-                    checkFailwithf visitorInfo flattenedExpression range
+                    checkFailwith visitorInfo flattenedExpression range (isEnabled i)
+                    checkRange visitorInfo flattenedExpression range (isEnabled i)
+                    checkNullArg visitorInfo flattenedExpression range (isEnabled i)
+                    checkInvalidOp visitorInfo flattenedExpression range (isEnabled i)
+                    checkInvalidArg visitorInfo flattenedExpression range (isEnabled i)
+                    checkFailwithf visitorInfo flattenedExpression range (isEnabled i)
                 | _ -> ()
             | _ -> ()
 
-            i <- i + 1*)
-    ()
+            i <- i + 1
