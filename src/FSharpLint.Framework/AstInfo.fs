@@ -151,11 +151,3 @@ module AstInfo =
                 isSequenceOfOperators identifier
             else
                 false
-
-    /// Lambda arguments (after the first argument) are curried and represented as such internally.
-    /// e.g. fun x y -> () will be represented in the AST as fun x -> fun y -> ().
-    /// This function returns true if the given lambda is an argument.
-    let isLambdaALambdaArgument = function
-        | AstNode.Expression(SynExpr.Lambda(_, _, _, SynExpr.Lambda(_, _, _, _, nestedRange), range)) -> 
-            range.StartLine = nestedRange.StartLine && range.StartColumn = nestedRange.StartColumn
-        | _ -> false

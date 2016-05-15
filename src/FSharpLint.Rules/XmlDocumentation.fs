@@ -23,12 +23,13 @@ module XmlDocumentation =
     
     open System
     open Microsoft.FSharp.Compiler.Ast
+    open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
 
     [<Literal>]
     let AnalyserName = "XmlDocumentation"
-    (*
+    
     let isAccessEnabled setting access =
         match setting, access with
         | Access(Access.Public),     SynAccess.Public
@@ -86,73 +87,79 @@ module XmlDocumentation =
             let atLeastOneThatHasText ars = ars |> Array.exists (String.IsNullOrWhiteSpace >> not) |> not
             xs |> atLeastOneThatHasText
 
-    let getString str = FSharpLint.Framework.Resources.GetString(str)
-
-    let ruleAccessEnabled visitorInfo (astNode:CurrentNode) access ruleName =
-        configAccessExceptionHeader visitorInfo.Config access ruleName &&
-            astNode.IsSuppressed(AnalyserName, ruleName) |> not
-
-    let ruleEnabled visitorInfo (astNode:CurrentNode) ruleName =
-        configExceptionHeader visitorInfo.Config ruleName &&
-            astNode.IsSuppressed(AnalyserName, ruleName) |> not
+    let getString = Resources.GetString
 
     let getIdText (id:Ident option) =
         match id with
         | None -> ""
         | Some i -> " " + i.idText
+        
+    let visitor visitorInfo _ syntaxArray skipArray = 
+        let isNotSuppressed ruleName i =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+            |> not
 
-    let visitor visitorInfo _ astNode =
-        match astNode.Node with
-        | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, xmlDoc, _, access, range)) ->
-            if ruleAccessEnabled visitorInfo astNode access "ModuleDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (getString "RulesXmlDocumentationModuleError")
+        let ruleAccessEnabled visitorInfo i access ruleName =
+            configAccessExceptionHeader visitorInfo.Config access ruleName && isNotSuppressed ruleName i
 
-        | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, xmlDoc, access, range)) ->
-            if ruleAccessEnabled visitorInfo astNode access "ExceptionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (getString "RulesXmlDocumentationExceptionError")
+        let ruleEnabled visitorInfo i ruleName =
+            configExceptionHeader visitorInfo.Config ruleName && isNotSuppressed ruleName i
 
-        | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
-            if ruleEnabled visitorInfo astNode "EnumDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationEnumError", id.idText))
+        let mutable i = 0
+        while i < syntaxArray.Length do
+            match syntaxArray.[i].Actual with
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, xmlDoc, _, access, range)) ->
+                if ruleAccessEnabled visitorInfo i access "ModuleDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (getString "RulesXmlDocumentationModuleError")
 
-        | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, access, range)) ->
-            if ruleAccessEnabled visitorInfo astNode access "UnionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationUnionError", id.idText))
+            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, xmlDoc, access, range)) ->
+                if ruleAccessEnabled visitorInfo i access "ExceptionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (getString "RulesXmlDocumentationExceptionError")
 
-        | AstNode.MemberDefinition(SynMemberDefn.AutoProperty(_, _, id, _, _, _, xmlDoc, access, _, _, range)) ->
-            if ruleAccessEnabled visitorInfo astNode access "AutoPropertyDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
-                visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationAutoPropertyError", id.idText))
+            | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
+                if ruleEnabled visitorInfo i "EnumDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationEnumError", id.idText))
 
-        | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, _)) ->
-            if ruleEnabled visitorInfo astNode "MemberDefinitionHeader" then
-                let (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
-                let setting = getAccessSetting visitorInfo.Config "MemberDefinitionHeader"
-                if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
-                    visitorInfo.PostError range (getString "RulesXmlDocumentationMemberError")
+            | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, access, range)) ->
+                if ruleAccessEnabled visitorInfo i access "UnionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationUnionError", id.idText))
 
-        | AstNode.MemberDefinition(SynMemberDefn.LetBindings(synBindings, _, _, _)) ->
-            if ruleEnabled visitorInfo astNode "LetDefinitionHeader" then
-                let setting = getAccessSetting visitorInfo.Config "LetDefinitionHeader"
-                let evalBinding (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) =
+            | AstNode.MemberDefinition(SynMemberDefn.AutoProperty(_, _, id, _, _, _, xmlDoc, access, _, _, range)) ->
+                if ruleAccessEnabled visitorInfo i access "AutoPropertyDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
+                    visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationAutoPropertyError", id.idText))
+
+            | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, _)) ->
+                if ruleEnabled visitorInfo i "MemberDefinitionHeader" then
+                    let (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
+                    let setting = getAccessSetting visitorInfo.Config "MemberDefinitionHeader"
                     if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (getString "RulesXmlDocumentationLetError")
-                synBindings |> List.iter evalBinding
+                        visitorInfo.PostError range (getString "RulesXmlDocumentationMemberError")
 
-        | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, _)) ->
-            if ruleEnabled visitorInfo astNode "TypeDefinitionHeader" then
-                let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, access, range)) = coreInfo
-                let setting = getAccessSetting visitorInfo.Config "TypeDefinitionHeader"
-                if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
-                    visitorInfo.PostError range (getString "RulesXmlDocumentationTypeError")
+            | AstNode.MemberDefinition(SynMemberDefn.LetBindings(synBindings, _, _, _)) ->
+                if ruleEnabled visitorInfo i "LetDefinitionHeader" then
+                    let setting = getAccessSetting visitorInfo.Config "LetDefinitionHeader"
+                    let evalBinding (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) =
+                        if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
+                            visitorInfo.PostError range (getString "RulesXmlDocumentationLetError")
+                    synBindings |> List.iter evalBinding
 
-            if ruleEnabled visitorInfo astNode "RecordDefinitionHeader" then
-                let setting = getAccessSetting visitorInfo.Config "RecordDefinitionHeader"
-                let evalField (SynField.Field(_, _, id, _, _, xmlDoc, access, range)) =
+            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, _)) ->
+                if ruleEnabled visitorInfo i "TypeDefinitionHeader" then
+                    let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, access, range)) = coreInfo
+                    let setting = getAccessSetting visitorInfo.Config "TypeDefinitionHeader"
                     if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
-                        visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
-                match typeDefnRep with
-                | Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
-                    fields |> List.iter evalField
-                | _ -> ()
-        | _ -> ()*)
-    ()
+                        visitorInfo.PostError range (getString "RulesXmlDocumentationTypeError")
+
+                if ruleEnabled visitorInfo i "RecordDefinitionHeader" then
+                    let setting = getAccessSetting visitorInfo.Config "RecordDefinitionHeader"
+                    let evalField (SynField.Field(_, _, id, _, _, xmlDoc, access, range)) =
+                        if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
+                            visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
+                    match typeDefnRep with
+                    | Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
+                        fields |> List.iter evalField
+                    | _ -> ()
+            | _ -> ()
+
+            i <- i + 1
