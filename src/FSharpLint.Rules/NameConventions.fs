@@ -270,7 +270,7 @@ module NameConventions =
         | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> true
         | Some(_) | None -> false
 
-    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+    let visitor visitorInfo checkFile syntaxArray skipArray = 
         let isEnabled i config analyserName ruleName = 
             match Configuration.isRuleEnabled config analyserName ruleName with
             | Some(_) -> 

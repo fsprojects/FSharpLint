@@ -30,69 +30,64 @@ module SourceLength =
 
     [<Literal>]
     let AnalyserName = "SourceLength"
-    (*
-    let configLines config ruleName =
-        match isRuleEnabled config AnalyserName ruleName with
-        | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
-            match ruleSettings.["Lines"] with
-            | Lines(l) -> Some(l)
-            | _ -> None
-        | Some(_)
-        | None -> None
 
-    let error name i actual = 
+    let private error name i actual = 
         let errorFormatString = Resources.GetString("RulesSourceLengthError")
         String.Format(errorFormatString, name, i, actual)
 
-    let inline length (range:range) = range.EndLine - range.StartLine
+    let private length (range:range) = range.EndLine - range.StartLine
 
-    let expectMaxLines visitorInfo range configRuleName errorName =
-        let actualLines = length range
+    let visitor visitorInfo _ syntaxArray skipArray = 
+        let checkRuleBroken i range ruleName errorName =
+            match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
+            | Some(_, ruleSettings) -> 
+                let actualLines = length range
+                match Map.tryFind "Lines" ruleSettings with
+                | Some(Lines(maxExpectedLines)) when actualLines > maxExpectedLines -> 
+                    let isSuppressed =
+                        AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+                        |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+                
+                    if not isSuppressed then 
+                        visitorInfo.PostError range (error errorName maxExpectedLines actualLines) 
+                | Some(_) | None -> ()
+            | None -> ()
 
-        match configLines visitorInfo.Config configRuleName with
-        | Some(expectedMaxLines) when actualLines > expectedMaxLines ->
-            visitorInfo.PostError range (error errorName expectedMaxLines actualLines)
-        | _ -> ()
-
-    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) _ = 
         let mutable i = 0
         while i < syntaxArray.Length do
             match syntaxArray.[i].Actual with
-            | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) as node when (isLambdaALambdaArgument >> not) node -> 
-                expectMaxLines visitorInfo range "MaxLinesInLambdaFunction" "Lambda function"
+            | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
+                checkRuleBroken i range "MaxLinesInLambdaFunction" "Lambda function"
             | AstNode.Expression(SynExpr.MatchLambda(_, _, _, _, range)) -> 
-                expectMaxLines visitorInfo range "MaxLinesInMatchLambdaFunction" "Match lambda function"
+                checkRuleBroken i range "MaxLinesInMatchLambdaFunction" "Match lambda function"
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, valData, _, _, _, _, _) as binding) ->
-                let expectMaxLines = expectMaxLines visitorInfo binding.RangeOfBindingAndRhs
-
                 match identifierTypeFromValData valData with
                 | Value -> 
-                    expectMaxLines "MaxLinesInValue" "Value" 
+                    checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInValue" "Value"
                 | Function -> 
-                    expectMaxLines "MaxLinesInFunction" "Function" 
+                    checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInFunction" "Function" 
                 | Member -> 
-                    expectMaxLines "MaxLinesInMember" "Member" 
+                    checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInMember" "Member" 
                 | Constructor -> 
-                    expectMaxLines "MaxLinesInConstructor" "Constructor" 
+                    checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInConstructor" "Constructor" 
                 | Property -> 
-                    expectMaxLines "MaxLinesInProperty" "Property"
+                    checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInProperty" "Property"
                 | Other -> ()
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, isModule, _, _, _, _, range)) when isModule -> 
-                expectMaxLines visitorInfo range "MaxLinesInModule" "Module"
+                checkRuleBroken i range "MaxLinesInModule" "Module"
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
                 match repr with
                 | SynTypeDefnRepr.Simple(simpleRepr, _) ->
                     match simpleRepr with
                     | SynTypeDefnSimpleRepr.Record(_) -> 
-                        expectMaxLines visitorInfo range "MaxLinesInRecord" "Record"
+                        checkRuleBroken i range "MaxLinesInRecord" "Record"
                     | SynTypeDefnSimpleRepr.Enum(_) -> 
-                        expectMaxLines visitorInfo range "MaxLinesInEnum" "Enum"
+                        checkRuleBroken i range "MaxLinesInEnum" "Enum"
                     | SynTypeDefnSimpleRepr.Union(_) -> 
-                        expectMaxLines visitorInfo range "MaxLinesInUnion" "Union"
+                        checkRuleBroken i range "MaxLinesInUnion" "Union"
                     | _ -> ()
                 | SynTypeDefnRepr.ObjectModel(_) -> 
-                    expectMaxLines visitorInfo range "MaxLinesInClass" "Classes and interface"
+                    checkRuleBroken i range "MaxLinesInClass" "Classes and interface"
             | _ -> ()
 
-            i <- i + 1*)
-    ()
+            i <- i + 1

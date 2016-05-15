@@ -112,10 +112,10 @@ let config =
                     Settings = Map.ofList [] }) ]
 
 let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.concat ""
- (*
+ 
 [<TestFixture>]
 type TestSourceLengthRules() = 
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
     
     [<Test>]
     member this.ModuleTooManyLines() = 
@@ -448,4 +448,4 @@ module Program
     member this.Property1 with get() = 
         value"""
         Assert.IsFalse(this.ErrorExistsAt(5, 31))
-        *)
+        
