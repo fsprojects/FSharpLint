@@ -31,10 +31,10 @@ let config =
                 [ ("CanBeReplacedWithComposition", ruleEnabled) 
                   ("ReimplementsFunction", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
- (*
+ 
 [<TestFixture>]
 type TestFunctionReimplementationRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.LambdaReimplementingMultiplcationIssuesError() = 
@@ -486,4 +486,4 @@ let x = 6
 let f = fun s1 s2 -> concat s1 s2 |> parse
 """
 
-        this.AssertNoWarnings()*)
+        this.AssertNoWarnings()

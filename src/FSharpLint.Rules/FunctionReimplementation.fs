@@ -32,7 +32,7 @@ module FunctionReimplementation =
 
     [<Literal>]
     let AnalyserName = "FunctionReimplementation"
-    (*
+    
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome 
 
@@ -227,5 +227,4 @@ module FunctionReimplementation =
                 | _ -> ()
             | _ -> ()
 
-            i <- i + 1*)
-    ()
+            i <- i + 1
