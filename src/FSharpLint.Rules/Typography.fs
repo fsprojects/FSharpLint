@@ -22,12 +22,13 @@ module Typography =
 
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
+    open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework.Ast
 
     [<Literal>]
     let AnalyserName = "Typography"
-    (*
+    
     let isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
 
@@ -43,11 +44,11 @@ module Typography =
                 | _ -> None
             | _ -> None
 
-        let checkMaxCharactersOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber (plainTextVisitorInfo:PlainTextVisitorInfo) =
+        let checkMaxCharactersOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed =
             let checkMaxCharactersOnLine maxCharacters =
                 if line.Length > maxCharacters then
                     let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber line.Length)
-                    if plainTextVisitorInfo.IsSuppressed(range, AnalyserName, "MaxCharactersOnLine") |> not then
+                    if isSuppressed range "MaxCharactersOnLine" |> not then
                         let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
                         let error = System.String.Format(errorFormatString, (maxCharacters + 1))
                         visitorInfo.PostError range error
@@ -103,7 +104,7 @@ module Typography =
         let private lengthOfWhitespaceOnEnd (str:string) =
             str.Length - str.TrimEnd().Length
 
-        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber (plainTextVisitorInfo:PlainTextVisitorInfo) =
+        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed =
             let enabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
 
             if enabled then
@@ -117,7 +118,7 @@ module Typography =
                 if stringEndsWithWhitespace then
                     let whitespaceLength = lengthOfWhitespaceOnEnd line
                     let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
-                    if plainTextVisitorInfo.IsSuppressed(range, AnalyserName, "TrailingWhitespaceOnLine") |> not then
+                    if isSuppressed range "TrailingWhitespaceOnLine" |> not then
                         visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingWhitespaceError"))
                 
     module MaxLinesInFile =
@@ -148,39 +149,64 @@ module Typography =
                 visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingLineError"))
 
     module NoTabCharacters =
-        let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber (plaintextVisitorInfo:PlainTextVisitorInfo) =
+        let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed isInLiteralString =
             if isEnabled "NoTabCharacters" visitorInfo.Config then
                 let indexOfTab = line.IndexOf('\t')
 
                 if indexOfTab >= 0 then
                     let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                    let isSuppressed range =
-                        plaintextVisitorInfo.IsSuppressed(range, AnalyserName, "NoTabCharacters")
                     let rangeContainsOtherRange (containingRange:range) (range:range) =
                         posGeq range.Start containingRange.Start &&
                         posGeq containingRange.End range.End
-                    let isInStringLiteral range =
-                        plaintextVisitorInfo.StringLiterals
-                        |> Seq.exists (fun (_, literalRange) -> rangeContainsOtherRange literalRange range)
-                    if (isSuppressed range || isInStringLiteral range) |> not then
+                    if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
                         visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
 
-    let analyseLine (visitorInfo:VisitorInfo) mkRange suppressMessageAttributes lineNumber (line:string) = 
+    let analyseLine (visitorInfo:VisitorInfo) mkRange isSuppressed isInLiteralString lineNumber (line:string) = 
         let lineNumber = lineNumber + 1
 
-        MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber suppressMessageAttributes
-        TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber suppressMessageAttributes
-        NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber suppressMessageAttributes
+        MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber isSuppressed
+        TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber isSuppressed
+        NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
 
-    let visitor (visitorInfo:VisitorInfo) (plaintextVisitorInfo:PlainTextVisitorInfo) = 
+    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node[]) _ = 
         if isAnalyserEnabled visitorInfo.Config then
-            let mkRange = mkRange plaintextVisitorInfo.File
+            let mutable i = 0
+            let suppressMessageAttributes = ResizeArray()
+            let literalStrings = ResizeArray()
+            while i < syntaxArray.Length do
+                let node = syntaxArray.[i].Actual
+
+                getSuppressMessageAttributes node
+                |> List.iter suppressMessageAttributes.Add
+
+                match node with
+                | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
+                    literalStrings.Add(value, range)
+                | _ -> ()
+
+                i <- i + 1
+
+            let rangeContainsOtherRange (containingRange:range) (range:range) =
+                range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
+
+            let isInLiteralString range = 
+                literalStrings |> Seq.exists (fun (_, literalRange) -> rangeContainsOtherRange literalRange range)
+
+            let isSuppressed range rulename =
+                let isAnalyserSuppressed (suppressedMessage:Ast.SuppressedMessage, suppressedMessageRange:range) =
+                    suppressedMessage.Category = AnalyserName && 
+                    (suppressedMessage.Rule = rulename || suppressedMessage.Rule = "*") &&
+                    rangeContainsOtherRange suppressedMessageRange range
+
+                suppressMessageAttributes |> Seq.exists isAnalyserSuppressed
+
+            let mkRange = mkRange System.String.Empty
 
             let lines = 
-                plaintextVisitorInfo.Input.Split([|"\n"|], System.StringSplitOptions.None)
+                visitorInfo.Text.Split([|"\n"|], System.StringSplitOptions.None)
                 |> Array.map (fun line -> line.TrimEnd('\r'))
 
-            lines |> Array.iteri (analyseLine visitorInfo mkRange plaintextVisitorInfo)
+            lines |> Array.iteri (analyseLine visitorInfo mkRange isSuppressed isInLiteralString)
 
-            TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo plaintextVisitorInfo.Input lines
-            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines*)
+            TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text lines
+            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines

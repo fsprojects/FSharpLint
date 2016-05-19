@@ -81,10 +81,10 @@ let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlank
             ]
 
 let config = setupConfig 0 false false
- (*
+ 
 [<TestFixture>]
-type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(PlainText(visitor), config)
+type TestTypography() =
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.TooManyCharactersOnLine() = 
@@ -220,4 +220,4 @@ type TestNestedStatements() =
     member this.NewLineOnEndOfFile() =
         this.Parse ("let dog = 9" + System.Environment.NewLine)
 
-        Assert.IsTrue(this.ErrorExistsAt(2, 0))*)
+        Assert.IsTrue(this.ErrorExistsAt(2, 0))

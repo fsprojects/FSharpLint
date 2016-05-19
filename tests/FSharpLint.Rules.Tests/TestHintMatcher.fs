@@ -67,7 +67,8 @@ type TestHintMatcher() =
     [<Category("Performance")>]
     [<Test>]
     member __.``Check performance of fuzzy matching hints``() = 
-        let tree = File.ReadAllText SourceFile |> generateAst
+        let text = File.ReadAllText SourceFile
+        let tree = text |> generateAst
 
         let stopwatch = Stopwatch.StartNew()
 
@@ -85,7 +86,7 @@ type TestHintMatcher() =
 
         visitor 
             (fun _ -> MergeSyntaxTrees.Edges.Empty)  
-            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()) }
+            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
             None
             array
             skipArray

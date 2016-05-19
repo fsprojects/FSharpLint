@@ -63,7 +63,7 @@ type TestRuleBase(analyser, ?analysers) =
 
         let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
 
-        let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version }
+        let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version; Text = input }
         
         match parseSource input config (FSharpChecker.Create()) with
         | Success(parseInfo) ->

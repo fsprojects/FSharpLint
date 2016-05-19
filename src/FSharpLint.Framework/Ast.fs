@@ -45,7 +45,9 @@ module Ast =
           Config: Configuration.Configuration
 
           /// Used by visitors to report errors.
-          PostError: range -> string -> unit }
+          PostError: range -> string -> unit
+          
+          Text: string }
 
         member this.UseTypeChecker = 
             match this.Config.UseTypeChecker with
