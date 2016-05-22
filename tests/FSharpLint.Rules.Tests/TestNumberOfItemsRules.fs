@@ -43,10 +43,10 @@ let config =
                             [ ("Enabled", Enabled(true)) 
                               ("MaxItems", MaxItems(4)) ] }) ]
                   Settings = Map.empty }) ]
-                   (*
+                   
 [<TestFixture>]
 type TestNumberOfItemsRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.SixParameters() = 
@@ -301,4 +301,4 @@ module Program
 if not true && (false && false) || true (&&) (false) then
     ()"""
     
-        this.AssertNoWarnings()*)
+        this.AssertNoWarnings()

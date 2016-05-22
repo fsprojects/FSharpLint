@@ -35,10 +35,10 @@ let config =
                         ]
                 })
             ]
- (*
+ 
 [<TestFixture>]
 type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor 0), config)
+    inherit TestRuleBase.TestRuleBase(visitor, config)
 
     [<Test>]
     member this.NestedTooDeep() = 
@@ -129,4 +129,4 @@ module Program
 
 let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 47))*)
+        Assert.IsTrue(this.ErrorExistsAt(4, 47))

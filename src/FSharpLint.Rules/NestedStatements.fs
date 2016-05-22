@@ -24,79 +24,99 @@ module NestedStatements =
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
 
     [<Literal>]
     let AnalyserName = "NestedStatements"
-    (*
-    let configDepth config =
+    
+    let private configDepth config =
         match isAnalyserEnabled config AnalyserName with
-        | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
-            match analyserSettings.["Depth"] with
-            | Depth(l) -> Some(l)
-            | _ -> None
+        | Some(analyserSettings) ->
+            match Map.tryFind "Depth" analyserSettings with
+            | Some(Depth(l)) -> Some(l)
+            | Some(_) | None -> None
         | Some(_) | None -> None
 
-    let error (depth:int) =
+    let private error (depth:int) =
         let errorFormatString = Resources.GetString("RulesNestedStatementsError")
         String.Format(errorFormatString, depth)
-
-    exception UnexpectedNodeTypeException of string
 
     /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
     /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
     /// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
-    let isCompilerGeneratedMatch = function
-        | AstNode.Expression(SynExpr.Match(_, SynExpr.Ident(ident), _, _, _)) 
-                when ident.idText.StartsWith("_arg") ->
-            true
+    let private isCompilerGeneratedMatch = function
+        | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
         | _ -> false
 
-    let elseIfVisitor visitor depth visitorInfo checkFile =
-        ContinueWithVisitorsForChildren (fun childi childNode ->
-            match (childi, childNode) with
-            | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
-                Some(visitor depth visitorInfo checkFile)
-            | _ -> Some(visitor (depth + 1) visitorInfo checkFile))
+    let private areChildrenNested = function
+        | AstNode.Binding(SynBinding.Binding(_))
+        | AstNode.Expression(SynExpr.Lambda(_))
+        | AstNode.Expression(SynExpr.MatchLambda(_))
+        | AstNode.Expression(SynExpr.IfThenElse(_))
+        | AstNode.Expression(SynExpr.Lazy(_))
+        | AstNode.Expression(SynExpr.Record(_))
+        | AstNode.Expression(SynExpr.ObjExpr(_))
+        | AstNode.Expression(SynExpr.TryFinally(_))
+        | AstNode.Expression(SynExpr.TryWith(_))
+        | AstNode.Expression(SynExpr.Tuple(_))
+        | AstNode.Expression(SynExpr.Quote(_))
+        | AstNode.Expression(SynExpr.While(_))
+        | AstNode.Expression(SynExpr.For(_))
+        | AstNode.Expression(SynExpr.ForEach(_)) -> true
+        | AstNode.Expression(SynExpr.Match(_) as matchExpr) when not (isCompilerGeneratedMatch matchExpr) -> true
+        | _ -> false
 
-    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) _ = 
-        let mutable i = 0
-        while i < syntaxArray.Length do
-            match syntaxArray.[i].Actual with
-            | AstNode.Binding(SynBinding.Binding(_))
-            | AstNode.Expression(SynExpr.Lambda(_))
-            | AstNode.Expression(SynExpr.MatchLambda(_))
-            | AstNode.Expression(SynExpr.IfThenElse(_))
-            | AstNode.Expression(SynExpr.Lazy(_))
-            | AstNode.Expression(SynExpr.Match(_))
-            | AstNode.Expression(SynExpr.Record(_))
-            | AstNode.Expression(SynExpr.ObjExpr(_))
-            | AstNode.Expression(SynExpr.TryFinally(_))
-            | AstNode.Expression(SynExpr.TryWith(_))
-            | AstNode.Expression(SynExpr.Tuple(_))
-            | AstNode.Expression(SynExpr.Quote(_))
-            | AstNode.Expression(SynExpr.While(_))
-            | AstNode.Expression(SynExpr.For(_))
-            | AstNode.Expression(SynExpr.ForEach(_)) as node 
-                    when not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
+    let private getRange = function 
+        | AstNode.Expression(node) -> Some node.Range
+        | AstNode.Binding(node) -> Some node.RangeOfBindingAndRhs
+        | _ -> None
 
-                let range () =
-                    match node with 
-                    | AstNode.Expression(node) -> node.Range
-                    | AstNode.Binding(node) -> node.RangeOfBindingAndRhs
-                    | _ -> raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
+    let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i j =
+        let mutable i = i
+        let mutable j = j
+        let mutable distance = 0
 
-                match configDepth visitorInfo.Config with
-                | Some(errorDepth) when depth >= errorDepth ->
-                    visitorInfo.PostError (range()) (error errorDepth)
-                | Some(_) ->
-                    match node with
-                    | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-                        elseIfVisitor visitor depth visitorInfo checkFile
-                    | _ -> ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
-                | None -> ()
-            | _ -> ()
+        while i <> j do
+            if i > j then
+                if areChildrenNested syntaxArray.[i].Actual then
+                    distance <- distance + 1
 
-            i <- i + 1*)
-    ()
+                i <- skipArray.[i].ParentIndex
+            else
+                j <- skipArray.[j].ParentIndex
+
+        distance
+
+    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+        let isSuppressed i =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName AbstractSyntaxArray.SuppressRuleWildcard
+
+        match configDepth visitorInfo.Config with
+        | Some(errorDepth) ->
+            let error = error errorDepth
+
+            let mutable depth = 0
+            let mutable i = 0
+            while i < syntaxArray.Length do
+                if i + 1 < syntaxArray.Length then
+                    // If next node in array is not a sibling or child of the current node.
+                    let parent = skipArray.[i + 1].ParentIndex
+                    if parent <> i && parent <> skipArray.[i].ParentIndex then
+                        // Decrement depth until we reach a common parent.
+                        depth <- depth - (distanceToCommonParent syntaxArray skipArray i (i + 1))
+
+                let node = syntaxArray.[i].Actual
+
+                if areChildrenNested node then
+                    if depth >= errorDepth then
+                        if not (isSuppressed i) then
+                            getRange node |> Option.iter (fun range -> visitorInfo.PostError range error)
+                    
+                        // Skip children as we've had an error containing them.
+                        i <- i + skipArray.[i].NumberOfChildren
+                    else
+                        depth <- depth + 1
+
+                i <- i + 1
+        | None -> ()
