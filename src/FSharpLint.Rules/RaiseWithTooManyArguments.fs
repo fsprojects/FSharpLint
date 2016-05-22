@@ -125,7 +125,7 @@ module RaiseWithTooManyArguments =
             | Some(_) -> 
                 let isSuppressed =
                     AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-                    |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+                    |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
                 not isSuppressed
             | None -> false
 

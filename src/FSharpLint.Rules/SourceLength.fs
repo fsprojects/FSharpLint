@@ -46,7 +46,7 @@ module SourceLength =
                 | Some(Lines(maxExpectedLines)) when actualLines > maxExpectedLines -> 
                     let isSuppressed =
                         AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-                        |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+                        |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
                 
                     if not isSuppressed then 
                         visitorInfo.PostError range (error errorName maxExpectedLines actualLines) 

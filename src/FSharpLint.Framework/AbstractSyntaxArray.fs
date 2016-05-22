@@ -336,6 +336,15 @@ module AbstractSyntaxArray =
                 breadcrumbs
 
         getSuppressMessageAttributes [] i
+
+    [<Literal>]
+    let SuppressRuleWildcard = "*"
+
+    let isRuleSuppressed analyserName ruleName suppressedRuleAttributes =
+        let isSuppressed (l, _) = l.Category = analyserName && (l.Rule = SuppressRuleWildcard || l.Rule = ruleName)
+
+        suppressedRuleAttributes
+        |> List.exists (List.exists isSuppressed)
     
     let isPublic (syntaxArray:Node []) (skipArray:Skip []) i =
         let isSynAccessPublic = function

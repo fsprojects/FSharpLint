@@ -43,14 +43,15 @@ module FunctionReimplementation =
             simplePatternsLength simplePatterns
 
     let rec private getLambdaParamIdent = function
-        | SynSimplePats.SimplePats(patterns, _) -> 
+        | SynSimplePats.SimplePats(pattern::_, _) -> 
             let rec getIdent = function
                 | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
                 | SynSimplePat.Typed(simplePattern, _, _)
                 | SynSimplePat.Attrib(simplePattern, _, _) ->
                     getIdent simplePattern
 
-            getIdent patterns.Head
+            getIdent pattern |> Some
+        | SynSimplePats.SimplePats(_) -> None
         | SynSimplePats.Typed(simplePatterns, _, _) -> 
             getLambdaParamIdent simplePatterns
 
@@ -73,7 +74,7 @@ module FunctionReimplementation =
     let lambdaArgumentsShadowIdent (ident:Ident) = function
         | SynExpr.Lambda(_) as lambda -> 
             let arguments, _ = getLambdaParametersAndExpression lambda
-            arguments |> List.exists (fun argumentIdent -> argumentIdent.idText = ident.idText)
+            arguments |> List.exists (Option.exists (fun x -> x.idText = ident.idText))
         | _ -> false
 
     let patternShadowsIdentifier (identifier:Ident) =
@@ -147,8 +148,8 @@ module FunctionReimplementation =
 
                 match expression with
                 | SynExpr.App(_, false, _, _, _) as nonInfixApp ->
-                    match ExpressionUtilities.flattenFunctionApplication nonInfixApp with
-                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues 
+                    match AstNode.Expression nonInfixApp with
+                    | FuncApp((SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues, _)
                             when appliedValuesDoNotReferenceLambdaArgument appliedValues -> 
 
                         match getLastElement appliedValues with
@@ -162,8 +163,8 @@ module FunctionReimplementation =
 
             match lambda.Arguments with
             | [singleParameter] -> 
-                let paramIdent = getLambdaParamIdent singleParameter
-                lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1
+                getLambdaParamIdent singleParameter
+                |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
             | _ -> false
             
         if canBeReplacedWithFunctionComposition lambda.Body then
@@ -182,12 +183,13 @@ module FunctionReimplementation =
             | Some(_) | None -> false
         
         let rec isFunctionPointless expression = function
-            | (parameter:Ident) :: parameters ->
+            | Some(parameter:Ident) :: parameters ->
                 match expression with
                 | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
                     when identifier.idText = parameter.idText ->
                         isFunctionPointless expression parameters
                 | _ -> None
+            | None :: _ -> None
             | [] -> 
                 match expression with
                 | Identifier(ident, _) -> 
@@ -208,10 +210,18 @@ module FunctionReimplementation =
             let error = System.String.Format(errorFormatString, identifier)
             visitorInfo.PostError range error
 
-        isFunctionPointless lambda.Body (lambda.Arguments |> List.map getLambdaParamIdent)
+        let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
+
+        isFunctionPointless lambda.Body argumentsAsIdentifiers
         |> Option.iter generateError
 
-    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) _ = 
+    let visitor visitorInfo checkFile syntaxArray skipArray = 
+        let isSuppressed i ruleName = 
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
+
+        let isEnabled i ruleName = isRuleEnabled visitorInfo.Config ruleName && not (isSuppressed i ruleName)
+
         let mutable i = 0
         while i < syntaxArray.Length do
             match syntaxArray.[i].Actual with
@@ -219,10 +229,10 @@ module FunctionReimplementation =
                 match lambda with
                 | Lambda(lambda, range) -> 
                     if (not << List.isEmpty) lambda.Arguments then
-                        if isRuleEnabled visitorInfo.Config "ReimplementsFunction" then
+                        if isEnabled i "ReimplementsFunction" then
                             validateLambdaIsNotPointless checkFile lambda range visitorInfo
                     
-                        if isRuleEnabled visitorInfo.Config "CanBeReplacedWithComposition" then
+                        if isEnabled i "CanBeReplacedWithComposition" then
                             validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo
                 | _ -> ()
             | _ -> ()

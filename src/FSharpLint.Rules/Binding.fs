@@ -160,7 +160,7 @@ module Binding =
 
         let isSuppressed i ruleName =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-            |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName && l.Rule = ruleName))
+            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
 
         let mutable i = 0
         while i < syntaxArray.Length do
