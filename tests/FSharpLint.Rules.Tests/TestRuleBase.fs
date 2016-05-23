@@ -68,11 +68,13 @@ type TestRuleBase(analyser, ?analysers) =
               Analysers = analysers }
         | None -> emptyConfig
 
-    member __.TimeAnalyser(iterations) =
+    member __.TimeAnalyser(iterations, ?overrideConfig) =
         let text = System.IO.File.ReadAllText SourceFile
         let tree = text |> generateAst
 
         let (array, skipArray) = AbstractSyntaxArray.astToArray tree
+
+        let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
 
         let visitorInfo =
             { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
@@ -93,7 +95,11 @@ type TestRuleBase(analyser, ?analysers) =
 
             times.Add stopwatch.ElapsedMilliseconds
 
-        times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
+        let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
+
+        System.Console.WriteLine(sprintf "Average runtime of analyser: %d (milliseconds)."  result)
+
+        result
 
     member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion): unit = 
         let config =

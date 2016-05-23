@@ -40,6 +40,11 @@ let config =
 type TestRaiseWithTooManyArgumentsRules() =
     inherit TestRuleBase.TestRuleBase(visitor, config)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of raise with too many args analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
     [<Test>]
     member this.FailwithWithCorrectNumberOfArguments() = 
         this.Parse """

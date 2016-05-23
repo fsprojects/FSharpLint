@@ -48,30 +48,8 @@ type TestHintMatcher() =
 
     [<Category("Performance")>]
     [<Test>]
-    member __.``Check performance of fuzzy matching hints``() = 
-        let text = File.ReadAllText TestRuleBase.SourceFile
-        let tree = text |> TestRuleBase.generateAst
-
-        let stopwatch = Stopwatch.StartNew()
-
-        let (array, skipArray) = astToArray tree
-
-        stopwatch.Stop()
-
-        Assert.Less(stopwatch.ElapsedMilliseconds, 200)
-        System.Console.WriteLine(sprintf "Built array in %d milliseconds." stopwatch.ElapsedMilliseconds)
-
-        let config = 
-            { UseTypeChecker = None
-              IgnoreFiles = None
-              Analysers = generateHintConfig [] }
-
-        visitor 
-            (fun _ -> MergeSyntaxTrees.Edges.Empty)  
-            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
-            None
-            array
-            skipArray
+    member this.``Performance of hint matcher analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 50)
 
     [<Test>]
     member this.MatchNotEqualHint() = 

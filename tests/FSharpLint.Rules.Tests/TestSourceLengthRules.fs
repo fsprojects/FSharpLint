@@ -116,6 +116,11 @@ let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.conca
 [<TestFixture>]
 type TestSourceLengthRules() = 
     inherit TestRuleBase.TestRuleBase(visitor, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of source length analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
     
     [<Test>]
     member this.ModuleTooManyLines() = 

@@ -47,6 +47,11 @@ let config =
 type TestNameConventionRules() =
     inherit TestRuleBase.TestRuleBase(visitor, config)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of naming analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
     [<Test>]
     member __.IsPascalCase() = 
         Assert.IsTrue(isPascalCase "DogInBin")

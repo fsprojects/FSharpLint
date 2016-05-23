@@ -117,7 +117,7 @@ type TestAst() =
 
     [<Category("Performance")>]
     [<Test>]
-    member __.``Check performance of walking tree for matching hints``() = 
+    member __.``Performance of building syntax array``() = 
         let tree = File.ReadAllText SourceFile |> generateAst
 
         let stopwatch = Stopwatch.StartNew()

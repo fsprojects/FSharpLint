@@ -36,6 +36,11 @@ let config =
 type TestFunctionReimplementationRules() =
     inherit TestRuleBase.TestRuleBase(visitor, config)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of function reimplementation analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
     [<Test>]
     member this.LambdaReimplementingMultiplcationIssuesError() = 
         this.Parse """

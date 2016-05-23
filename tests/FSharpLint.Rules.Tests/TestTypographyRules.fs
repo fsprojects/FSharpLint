@@ -86,6 +86,11 @@ let config = setupConfig 0 false false
 type TestTypography() =
     inherit TestRuleBase.TestRuleBase(visitor, config)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of typography analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
     [<Test>]
     member this.TooManyCharactersOnLine() = 
         this.Parse "let line = 55 + 77 + 77"

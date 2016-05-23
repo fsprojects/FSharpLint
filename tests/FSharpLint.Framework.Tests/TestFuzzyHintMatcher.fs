@@ -55,7 +55,7 @@ type TestAst() =
 
     [<Category("Performance")>]
     [<Test>]
-    member __.``Check performance of matching fuzzy matching hints``() = 
+    member __.``Performance of matching fuzzy matching hints``() = 
         let fileContent = File.ReadAllText SourceFile
         
         let tree = generateAst fileContent
@@ -147,6 +147,7 @@ type TestAst() =
                 toHint @"List.empty ===> []"
                 toHint @"Array.empty ===> [||]"
                 toHint @"x::[] ===> [x]"
+                toHint @"pattern: x::[] ===> [x]"
                 toHint @"x @ [] ===> x"
                 toHint @"List.isEmpty [] ===> true"
                 toHint @"Array.isEmpty [||] ===> true"

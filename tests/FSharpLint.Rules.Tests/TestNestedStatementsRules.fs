@@ -43,7 +43,7 @@ type TestNestedStatements() =
     [<Category("Performance")>]
     [<Test>]
     member this.``Performance of nested statements analyser``() = 
-        Assert.Greater(20, this.TimeAnalyser(100))
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
     member this.NestedTooDeep() = 

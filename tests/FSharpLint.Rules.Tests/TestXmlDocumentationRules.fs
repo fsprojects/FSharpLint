@@ -55,6 +55,11 @@ let config name access =
 type TestNameConventionRulesModule() =
     inherit TestRuleBase.TestRuleBase(visitor, config "ModuleDefinitionHeader" Access.All)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of xml doc analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
     [<Test>]
     member this.ModuleWithDoubleDashComment() =
         this.Parse """
