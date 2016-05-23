@@ -40,6 +40,11 @@ let config =
 type TestNestedStatements() =
     inherit TestRuleBase.TestRuleBase(visitor, config)
 
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of nested statements analyser``() = 
+        Assert.Greater(20, this.TimeAnalyser(100))
+
     [<Test>]
     member this.NestedTooDeep() = 
         this.Parse """

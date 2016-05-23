@@ -18,9 +18,11 @@
 
 module TestRuleBase
 
+open System.Diagnostics
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
@@ -32,6 +34,24 @@ let emptyConfig =
           Map.ofList
               [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
                        Settings = Map.ofList [] }) ] }
+
+[<Literal>]
+let SourceFile = "../../../FSharpLint.Framework.Tests/TypeChecker.fs"
+
+let generateAst source =
+    let checker = FSharpChecker.Create()
+
+    let options = 
+        checker.GetProjectOptionsFromScript(SourceFile, source) 
+        |> Async.RunSynchronously
+
+    let parseResults =
+        checker.ParseFileInProject(SourceFile, source, options)
+        |> Async.RunSynchronously
+        
+    match parseResults.ParseTree with
+    | Some(parseTree) -> parseTree
+    | None -> failwith "Failed to parse file."
 
 [<AbstractClass>]
 type TestRuleBase(analyser, ?analysers) =
@@ -47,6 +67,33 @@ type TestRuleBase(analyser, ?analysers) =
               IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
               Analysers = analysers }
         | None -> emptyConfig
+
+    member __.TimeAnalyser(iterations) =
+        let text = System.IO.File.ReadAllText SourceFile
+        let tree = text |> generateAst
+
+        let (array, skipArray) = AbstractSyntaxArray.astToArray tree
+
+        let visitorInfo =
+            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
+
+        let stopwatch = Stopwatch.StartNew()
+        let times = ResizeArray()
+
+        for _ in 0..iterations do
+            stopwatch.Restart()
+
+            analyser 
+                visitorInfo
+                None
+                array
+                skipArray
+
+            stopwatch.Stop()
+
+            times.Add stopwatch.ElapsedMilliseconds
+
+        times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
 
     member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion): unit = 
         let config =
@@ -67,7 +114,7 @@ type TestRuleBase(analyser, ?analysers) =
         
         match parseSource input config (FSharpChecker.Create()) with
         | Success(parseInfo) ->
-            let (syntaxArray, skipArray) = FSharpLint.Framework.AbstractSyntaxArray.astToArray parseInfo.Ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             analyser visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
         | _ -> failwith "Failed to parse input."
 

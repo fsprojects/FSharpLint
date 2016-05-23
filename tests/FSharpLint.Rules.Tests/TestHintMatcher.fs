@@ -46,29 +46,11 @@ let generateHintConfig hints =
 type TestHintMatcher() =
     inherit TestRuleBase.TestRuleBase(visitor getHintsFromConfig)
 
-    [<Literal>]
-    let SourceFile = "../../../FSharpLint.Framework.Tests/TypeChecker.fs"
-
-    let generateAst source =
-        let checker = FSharpChecker.Create()
-
-        let options = 
-            checker.GetProjectOptionsFromScript(SourceFile, source) 
-            |> Async.RunSynchronously
-
-        let parseResults =
-            checker.ParseFileInProject(SourceFile, source, options)
-            |> Async.RunSynchronously
-        
-        match parseResults.ParseTree with
-        | Some(parseTree) -> parseTree
-        | None -> failwith "Failed to parse file."
-
     [<Category("Performance")>]
     [<Test>]
     member __.``Check performance of fuzzy matching hints``() = 
-        let text = File.ReadAllText SourceFile
-        let tree = text |> generateAst
+        let text = File.ReadAllText TestRuleBase.SourceFile
+        let tree = text |> TestRuleBase.generateAst
 
         let stopwatch = Stopwatch.StartNew()
 
