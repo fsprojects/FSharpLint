@@ -100,7 +100,7 @@ module AstInfo =
           "op_Dynamic"
           "op_DynamicAssignment"
           "op_ArrayLookup"
-          "op_ArrayAssign" ]
+          "op_ArrayAssign" ] |> Set.ofList
 
     /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
     let operators = 
@@ -142,7 +142,7 @@ module AstInfo =
 
     /// Is an identifier an operator overload?
     let isOperator (identifier:string) =
-        if operatorIdentifiers |> List.exists (fun x -> x = identifier) then
+        if operatorIdentifiers |> Set.contains identifier then
             true
         else
             if identifier.StartsWith("op_") && identifier.Length > 3 then

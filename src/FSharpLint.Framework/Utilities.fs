@@ -60,21 +60,3 @@ module ExpressionUtilities =
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x
         | x -> x
-        
-    let flattenFunctionApplication expr =
-        let rec flatten exprs = function
-            | SynExpr.App(_, _, x, y, _) -> 
-                match removeParens x with
-                | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) as infixApp ->
-                    match identAsDecompiledOpName op with
-                    | "|>" | "||>" | "|||>" ->
-                        let flattened = flatten [] y
-                        flattened@[rightExpr]
-                    | "<|" | "<||" | "<|||" ->
-                        let flattened = flatten [] rightExpr
-                        flattened@[y]
-                    | _ -> [infixApp]
-                | x -> flatten (removeParens y::exprs) x
-            | x -> x::exprs
-
-        flatten [] expr

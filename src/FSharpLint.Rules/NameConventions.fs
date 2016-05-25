@@ -33,13 +33,13 @@ module NameConventions =
     [<Literal>]
     let AnalyserName = "NameConventions"
 
-    let private pascalCaseRegex = Regex(@"^[A-Z]([a-z]|[A-Z]|\d)*")
+    let private pascalCaseRegex = Regex(@"^[A-Z]([a-z]|[A-Z]|\d)*", RegexOptions.Compiled)
 
-    let isPascalCase (identifier:string) = pascalCaseRegex.Match(identifier).Success
+    let isPascalCase (identifier:string) = pascalCaseRegex.IsMatch(identifier)
 
-    let private camelCaseRegex = Regex(@"^_*[a-z]([a-z]|[A-Z]|\d)*")
+    let private camelCaseRegex = Regex(@"^_*[a-z]([a-z]|[A-Z]|\d)*", RegexOptions.Compiled)
 
-    let isCamelCase (identifier:string) = camelCaseRegex.Match(identifier).Success
+    let isCamelCase (identifier:string) = camelCaseRegex.IsMatch(identifier)
 
     let containsUnderscore (identifier:string) = identifier.Contains("_")
 
