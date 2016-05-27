@@ -50,9 +50,9 @@ module RaiseWithTooManyArguments =
                 not isSuppressed
             | None -> false
             
-        let postError ruleName range isEnabled =
+        let postError ruleName errorName range isEnabled =
             if isEnabled ruleName then
-                Resources.GetString ruleName
+                Resources.GetString errorName
                 |> visitorInfo.PostError range
 
         let mutable i = 0
@@ -63,17 +63,17 @@ module RaiseWithTooManyArguments =
                 | FuncApp(expressions, range) -> 
                     match expressions with
                     | RaiseWithTooManyArgs "failwith" 1 ->
-                        postError "FailwithWithSingleArgument" range (isEnabled i)
+                        postError "FailwithWithSingleArgument" "FailwithWithSingleArgument" range (isEnabled i)
                     | RaiseWithTooManyArgs "raise" 1 -> 
-                        postError "RulesRaiseWithSingleArgument" range (isEnabled i)
+                        postError "RaiseWithSingleArgument" "RulesRaiseWithSingleArgument" range (isEnabled i)
                     | RaiseWithTooManyArgs "nullArg" 1 -> 
-                        postError "RulesNullArgWithSingleArgument" range (isEnabled i)
+                        postError "NullArgWithSingleArgument" "RulesNullArgWithSingleArgument" range (isEnabled i)
                     | RaiseWithTooManyArgs "invalidOp" 1 -> 
-                        postError "RulesInvalidOpWithSingleArgument" range (isEnabled i)
+                        postError "InvalidOpWithSingleArgument" "RulesInvalidOpWithSingleArgument" range (isEnabled i)
                     | RaiseWithTooManyArgs "invalidArg" 2 -> 
-                        postError "InvalidArgWithTwoArguments" range (isEnabled i)
+                        postError "InvalidArgWithTwoArguments" "InvalidArgWithTwoArguments" range (isEnabled i)
                     | RaiseWithFormatStringTooManyArgs "failwithf" -> 
-                        postError "FailwithfWithArgumentsMatchingFormatString" range (isEnabled i)
+                        postError "FailwithfWithArgumentsMatchingFormatString" "FailwithfWithArgumentsMatchingFormatString" range (isEnabled i)
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
