@@ -20,6 +20,7 @@ namespace FSharpLint.Rules
 
 module Typography =
 
+    open System.IO
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open Microsoft.FSharp.Compiler.Ast
@@ -130,22 +131,22 @@ module Typography =
                 | _ -> None
             | _ -> None
 
-        let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) (lines:string []) maxLines =
-            if lines.Length > maxLines then
-                let range = mkRange (mkPos (maxLines + 1) 0) (mkPos lines.Length lines.[lines.Length - 1].Length)
+        let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines line maxLines =
+            if numberOfLines > maxLines then
+                let range = mkRange (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
                 let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
                 let error = System.String.Format(errorFormatString, (maxLines + 1))
                 visitorInfo.PostError range error
 
-        let checkMaxLinesInFile mkRange (visitorInfo:VisitorInfo) lines =
-            let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange visitorInfo lines
+        let checkMaxLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines lastLine =
+            let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange visitorInfo numberOfLines lastLine
 
             maxLinesInFile visitorInfo.Config |> Option.iter checkNumberOfLinesInFile
 
     module TrailingNewLineInFile =
-        let checkTrailingNewLineInFile mkRange (visitorInfo:VisitorInfo) (file:string) (lines:string []) =
+        let checkTrailingNewLineInFile mkRange (visitorInfo:VisitorInfo) (file:string) numberOfLines =
             if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
-                let range = mkRange (mkPos lines.Length 0) (mkPos lines.Length 0)
+                let range = mkRange (mkPos numberOfLines 0) (mkPos numberOfLines 0)
                 visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingLineError"))
 
     module NoTabCharacters =
@@ -155,9 +156,6 @@ module Typography =
 
                 if indexOfTab >= 0 then
                     let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                    let rangeContainsOtherRange (containingRange:range) (range:range) =
-                        posGeq range.Start containingRange.Start &&
-                        posGeq containingRange.End range.End
                     if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
                         visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
 
@@ -167,6 +165,28 @@ module Typography =
         MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber isSuppressed
         TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber isSuppressed
         NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
+
+    module private String =
+        let iterLine f input =
+            use reader = new StringReader(input)
+
+            let readLine () = 
+                match reader.ReadLine() with
+                | null -> None
+                | line -> Some line
+
+            let rec iterateLines currentLine i = 
+                match currentLine with
+                | Some line ->
+                    let nextLine = readLine ()
+                    let isLastLine = Option.isNone nextLine
+
+                    f line i isLastLine
+
+                    iterateLines nextLine (i + 1)
+                | None -> ()
+
+            iterateLines (readLine ()) 0
 
     let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node[]) _ = 
         if isAnalyserEnabled visitorInfo.Config then
@@ -202,11 +222,10 @@ module Typography =
 
             let mkRange = mkRange System.String.Empty
 
-            let lines = 
-                visitorInfo.Text.Split([|"\n"|], System.StringSplitOptions.None)
-                |> Array.map (fun line -> line.TrimEnd('\r'))
-
-            lines |> Array.iteri (analyseLine visitorInfo mkRange isSuppressed isInLiteralString)
-
-            TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text lines
-            MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lines
+            visitorInfo.Text
+            |> String.iterLine (fun line i atEnd -> 
+                analyseLine visitorInfo mkRange isSuppressed isInLiteralString i line
+                if atEnd then
+                    let totalLines = i + 1
+                    TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text totalLines
+                    MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo totalLines line)
