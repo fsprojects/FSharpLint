@@ -37,47 +37,45 @@ module Typography =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
     module MaxCharactersOnLine =
-        let private maxCharactersOnLine config =
+        let maxCharactersOnLine config =
             match isRuleEnabled config AnalyserName "MaxCharactersOnLine" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Length" -> 
-                match ruleSettings.["Length"] with
-                | Length(length) -> Some(length)
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "Length" ruleSettings with
+                | Some(Length(length)) -> Some(length)
                 | _ -> None
             | _ -> None
 
-        let checkMaxCharactersOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed =
-            let checkMaxCharactersOnLine maxCharacters =
-                if line.Length > maxCharacters then
-                    let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber line.Length)
-                    if isSuppressed range "MaxCharactersOnLine" |> not then
-                        let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
-                        let error = System.String.Format(errorFormatString, (maxCharacters + 1))
-                        visitorInfo.PostError range error
-            
-            maxCharactersOnLine visitorInfo.Config |> Option.iter checkMaxCharactersOnLine
+        let checkMaxCharactersOnLine mkRange (visitorInfo:VisitorInfo) line lineNumber isSuppressed maxCharacters =
+            let lineLength = String.length line
+            if lineLength > maxCharacters then
+                let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber lineLength)
+                if isSuppressed range "MaxCharactersOnLine" |> not then
+                    let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
+                    let error = System.String.Format(errorFormatString, (maxCharacters + 1))
+                    visitorInfo.PostError range error
 
     module TrailingWhitespaceOnLine =
-        let private numberOfSpacesAllowed config =
+        let numberOfSpacesAllowed config =
             match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "NumberOfSpacesAllowed" -> 
-                match ruleSettings.["NumberOfSpacesAllowed"] with
-                | NumberOfSpacesAllowed(n) -> Some(n)
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "NumberOfSpacesAllowed" ruleSettings with
+                | Some(NumberOfSpacesAllowed(n)) -> Some(n)
                 | _ -> None
             | _ -> None
 
-        let private isOneSpaceAllowedAfterOperator config =
+        let isOneSpaceAllowedAfterOperator config =
             match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "OneSpaceAllowedAfterOperator" -> 
-                match ruleSettings.["OneSpaceAllowedAfterOperator"] with
-                | OneSpaceAllowedAfterOperator(b) -> Some(b)
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "OneSpaceAllowedAfterOperator" ruleSettings with
+                | Some(OneSpaceAllowedAfterOperator(b)) -> Some(b)
                 | _ -> None
             | _ -> None
 
-        let private isIgnoringBlankLines config =
+        let isIgnoringBlankLines config =
             match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "IgnoreBlankLines" -> 
-                match ruleSettings.["IgnoreBlankLines"] with
-                | IgnoreBlankLines(b) -> b
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "IgnoreBlankLines" ruleSettings with
+                | Some(IgnoreBlankLines(b)) -> b
                 | _ -> false
             | _ -> false
 
@@ -105,22 +103,19 @@ module Typography =
         let private lengthOfWhitespaceOnEnd (str:string) =
             str.Length - str.TrimEnd().Length
 
-        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed =
-            let enabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
-
-            if enabled then
-                let ignoringBlankLinesAndIsBlankLine =
-                    isIgnoringBlankLines visitorInfo.Config && System.String.IsNullOrWhiteSpace(line)
+        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed  =
+            let ignoringBlankLinesAndIsBlankLine =
+                isIgnoringBlankLines visitorInfo.Config && System.String.IsNullOrWhiteSpace(line)
                 
-                let stringEndsWithWhitespace =
-                    not ignoringBlankLinesAndIsBlankLine &&
-                    not <| doesStringNotEndWithWhitespace visitorInfo.Config line
+            let stringEndsWithWhitespace =
+                not ignoringBlankLinesAndIsBlankLine &&
+                not <| doesStringNotEndWithWhitespace visitorInfo.Config line
 
-                if stringEndsWithWhitespace then
-                    let whitespaceLength = lengthOfWhitespaceOnEnd line
-                    let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
-                    if isSuppressed range "TrailingWhitespaceOnLine" |> not then
-                        visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingWhitespaceError"))
+            if stringEndsWithWhitespace then
+                let whitespaceLength = lengthOfWhitespaceOnEnd line
+                let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
+                if isSuppressed range "TrailingWhitespaceOnLine" |> not then
+                    visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingWhitespaceError"))
                 
     module MaxLinesInFile =
         let private maxLinesInFile config =
@@ -151,20 +146,12 @@ module Typography =
 
     module NoTabCharacters =
         let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed isInLiteralString =
-            if isEnabled "NoTabCharacters" visitorInfo.Config then
-                let indexOfTab = line.IndexOf('\t')
+            let indexOfTab = line.IndexOf('\t')
 
-                if indexOfTab >= 0 then
-                    let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
-                    if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
-                        visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
-
-    let analyseLine (visitorInfo:VisitorInfo) mkRange isSuppressed isInLiteralString lineNumber (line:string) = 
-        let lineNumber = lineNumber + 1
-
-        MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber isSuppressed
-        TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber isSuppressed
-        NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
+            if indexOfTab >= 0 then
+                let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
+                if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
+                    visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
 
     module private String =
         let iterLine f input =
@@ -222,10 +209,24 @@ module Typography =
 
             let mkRange = mkRange System.String.Empty
 
+            let maxCharacterOnLine = MaxCharactersOnLine.maxCharactersOnLine visitorInfo.Config 
+            let noTabRuleEnabled = isEnabled "NoTabCharacters" visitorInfo.Config
+            let trailingWhitespaceEnabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
+
             visitorInfo.Text
             |> String.iterLine (fun line i atEnd -> 
-                analyseLine visitorInfo mkRange isSuppressed isInLiteralString i line
+                let lineNumber = i + 1
+
+                maxCharacterOnLine
+                |> Option.iter (MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber isSuppressed)
+                
+                if trailingWhitespaceEnabled then
+                    TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber isSuppressed
+                    
+                if noTabRuleEnabled then
+                    NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
+
                 if atEnd then
-                    let totalLines = i + 1
+                    let totalLines = lineNumber
                     TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text totalLines
                     MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo totalLines line)
