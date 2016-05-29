@@ -138,7 +138,9 @@ type TestAst() =
         let actual = array |> Array.map (fun x -> x.Hashcode)
 
         let expected =
-            [ Utilities.hash2 SyntaxNode.FuncApp 0
+            [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
+              Utilities.hash2 SyntaxNode.ModuleDeclaration 0
+              Utilities.hash2 SyntaxNode.FuncApp 0
               Utilities.hash2 SyntaxNode.Identifier "map"
               Utilities.hash2 SyntaxNode.Lambda 0
               Utilities.hash2 SyntaxNode.LambdaArg 0
@@ -152,15 +154,17 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
-        Assert.AreEqual([ AbstractSyntaxArray.Skip(11, 0)
-                          AbstractSyntaxArray.Skip(0, 0)
-                          AbstractSyntaxArray.Skip(8, 0)
-                          AbstractSyntaxArray.Skip(1, 2)
-                          AbstractSyntaxArray.Skip(0, 3)
-                          AbstractSyntaxArray.Skip(1, 2)
+        Assert.AreEqual([ AbstractSyntaxArray.Skip(13, 0)
+                          AbstractSyntaxArray.Skip(12, 0)
+                          AbstractSyntaxArray.Skip(11, 1)
+                          AbstractSyntaxArray.Skip(0, 2)
+                          AbstractSyntaxArray.Skip(8, 2)
+                          AbstractSyntaxArray.Skip(1, 4)
                           AbstractSyntaxArray.Skip(0, 5)
-                          AbstractSyntaxArray.Skip(3, 2)
-                          AbstractSyntaxArray.Skip(2, 7)
-                          AbstractSyntaxArray.Skip(0, 8)
-                          AbstractSyntaxArray.Skip(0, 8)
-                          AbstractSyntaxArray.Skip(0, 0) ], skipArray)
+                          AbstractSyntaxArray.Skip(1, 4)
+                          AbstractSyntaxArray.Skip(0, 7)
+                          AbstractSyntaxArray.Skip(3, 4)
+                          AbstractSyntaxArray.Skip(2, 9)
+                          AbstractSyntaxArray.Skip(0, 10)
+                          AbstractSyntaxArray.Skip(0, 10)
+                          AbstractSyntaxArray.Skip(0, 2) ], skipArray)
