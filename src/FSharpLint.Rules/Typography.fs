@@ -141,7 +141,9 @@ module Typography =
     module TrailingNewLineInFile =
         let checkTrailingNewLineInFile mkRange (visitorInfo:VisitorInfo) (file:string) numberOfLines =
             if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
-                let range = mkRange (mkPos numberOfLines 0) (mkPos numberOfLines 0)
+                let numberOfLinesIncludingTrailingNewLine = numberOfLines + 1
+                let pos = mkPos numberOfLinesIncludingTrailingNewLine 0
+                let range = mkRange pos pos
                 visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingLineError"))
 
     module NoTabCharacters =
@@ -213,8 +215,7 @@ module Typography =
             let noTabRuleEnabled = isEnabled "NoTabCharacters" visitorInfo.Config
             let trailingWhitespaceEnabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
 
-            visitorInfo.Text
-            |> String.iterLine (fun line i atEnd -> 
+            let analyseLine line i isLastLineInFile =
                 let lineNumber = i + 1
 
                 maxCharacterOnLine
@@ -226,7 +227,8 @@ module Typography =
                 if noTabRuleEnabled then
                     NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
 
-                if atEnd then
-                    let totalLines = lineNumber
-                    TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text totalLines
-                    MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo totalLines line)
+                if isLastLineInFile then
+                    TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text lineNumber
+                    MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lineNumber line
+
+            visitorInfo.Text |> String.iterLine analyseLine
