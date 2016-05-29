@@ -132,7 +132,7 @@ module NumberOfItems =
         maxItemsForRule visitorInfo.Config ruleName
         |> Option.iter checkNumberOfBooleanOperatorsInCondition
     
-    let visitor visitorInfo _ syntaxArray skipArray = 
+    let analyser visitorInfo _ syntaxArray skipArray = 
         let isSuppressed i ruleName = 
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName

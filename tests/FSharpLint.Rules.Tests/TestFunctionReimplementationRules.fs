@@ -34,7 +34,7 @@ let config =
  
 [<TestFixture>]
 type TestFunctionReimplementationRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Category("Performance")>]
     [<Test>]

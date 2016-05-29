@@ -215,7 +215,7 @@ module FunctionReimplementation =
         isFunctionPointless lambda.Body argumentsAsIdentifiers
         |> Option.iter generateError
 
-    let visitor visitorInfo checkFile syntaxArray skipArray = 
+    let analyser visitorInfo checkFile syntaxArray skipArray = 
         let isSuppressed i ruleName = 
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName

@@ -46,7 +46,7 @@ let config =
                    
 [<TestFixture>]
 type TestNumberOfItemsRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]
     member this.SixParameters() = 

@@ -23,7 +23,6 @@ module AbstractSyntaxArray =
     open System.Collections.Generic
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
 
     open Ast
 
@@ -391,29 +390,3 @@ module AbstractSyntaxArray =
             else false
 
         isPublic true false i
-
-    /// Information for a file to be linted that is given to the visitors for them to analyse.
-    type FileParseInfo =
-        { /// Contents of the file.
-          PlainText: string
-
-          /// File represented as an AST.
-          Ast: ParsedInput
-
-          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharpCheckFileResults option
-
-          /// Path to the file.
-          File: string }
-
-    /// Lint a file.
-    let lintFile finishEarly fileInfo visitors =
-        let visitorsWithTypeCheck = visitors |> List.map (fun visitor -> visitor fileInfo.TypeCheckResults)
-
-        match fileInfo.Ast with
-        | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_))-> 
-            for moduleOrNamespace in moduleOrNamespaces do
-                for visitor in visitorsWithTypeCheck do
-                    ()
-                    // TODO: walk finishEarly (ModuleOrNamespace(moduleOrNamespace)) visitor
-        | ParsedInput.SigFile _ -> ()

@@ -84,7 +84,7 @@ let config = setupConfig 0 false false
  
 [<TestFixture>]
 type TestTypography() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Category("Performance")>]
     [<Test>]

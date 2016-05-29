@@ -114,6 +114,7 @@ module Lint =
     open System.IO
     open Microsoft.Build.Exceptions
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharpLint
     open FSharpLint.Framework
     open FSharpLint.Framework.AbstractSyntaxArray
     
@@ -158,83 +159,51 @@ module Lint =
             | Starting(f) 
             | ReachedEnd(f)
             | Failed(f, _) -> f
-                    
-    module LoadPlugins =
-
-        /// Loaded visitors implementing lint rules.
-        let plugins =
-            typeof<FSharpLint.Rules.Binding.RegisterBindingVisitor>.Assembly
-            |> LoadVisitors.loadPlugins
-
-        /// Extracts a list of ast visitors from a general list of visitors.
-        let astVisitors (plugins:LoadVisitors.VisitorPlugin list) visitorInfo =
-            [ for plugin in plugins do
-                match plugin.Visitor with
-                | LoadVisitors.Ast(visitor) -> 
-                    yield visitor visitorInfo
-                | LoadVisitors.PlainText(_) -> ()
-                | LoadVisitors.SyntaxArray(_) -> () ]
-        
-        /// Extracts a list of plain text visitors from a general list of visitors.
-        let plainTextVisitors (plugins:LoadVisitors.VisitorPlugin list) visitorInfo =
-            [ for plugin in plugins do
-                match plugin.Visitor with
-                | LoadVisitors.Ast(_) -> ()
-                | LoadVisitors.SyntaxArray(_) -> ()
-                | LoadVisitors.PlainText(visitor) -> 
-                    yield visitor visitorInfo ]
 
     type LintInfo =
         { FinishEarly: unit -> bool
           ErrorReceived: LintWarning.Warning -> unit
           ReportLinterProgress: ProjectProgress -> unit
-          RulePlugins: LoadVisitors.VisitorPlugin list
           Configuration: Configuration.Configuration
           FSharpVersion: Version }
 
-    let lint lintInfo (parsedFileInfo:Ast.FileParseInfo) =
+    let private analysers = 
+        [ Rules.Binding.analyser
+          Rules.FunctionReimplementation.analyser
+          Rules.NameConventions.analyser
+          Rules.NestedStatements.analyser
+          Rules.NumberOfItems.analyser
+          Rules.RaiseWithTooManyArguments.analyser
+          Rules.SourceLength.analyser
+          Rules.Typography.analyser
+          Rules.XmlDocumentation.analyser ]
+
+    let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
             let postError range error =
                 { LintWarning.Info = error
                   LintWarning.Range = range
-                  LintWarning.Input = parsedFileInfo.PlainText } |> lintInfo.ErrorReceived
+                  LintWarning.Input = fileInfo.Text } |> lintInfo.ErrorReceived
 
             let visitorInfo = 
-                { Ast.FSharpVersion = lintInfo.FSharpVersion
+                { Ast.Text = fileInfo.Text
+                  Ast.FSharpVersion = lintInfo.FSharpVersion
                   Ast.Config = lintInfo.Configuration
                   Ast.PostError = postError }
 
-            let visitPlainText = async {
-                    let suppressMessageAttributes =
-                        if parsedFileInfo.PlainText.Contains("SuppressMessage") then
-                            Ast.getSuppressMessageAttributesFromAst parsedFileInfo.Ast
-                        else []
-                    let stringLiterals = Ast.getStringLiteralsFromAst parsedFileInfo.Ast
+            let analysers = analysers |> List.map (fun analyser -> analyser visitorInfo)
 
-                    for visitor in LoadPlugins.plainTextVisitors lintInfo.RulePlugins visitorInfo do
-                        visitor 
-                            { Input = parsedFileInfo.PlainText
-                              File = parsedFileInfo.File
-                              SuppressedMessages = suppressMessageAttributes
-                              StringLiterals = stringLiterals }
-                }
+            Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
-            let visitAst = async {
-                    try
-                        LoadPlugins.astVisitors lintInfo.RulePlugins visitorInfo
-                        |> Ast.lintFile lintInfo.FinishEarly parsedFileInfo
-                    with 
-                    | e -> Failed(parsedFileInfo.File, e) |> lintInfo.ReportLinterProgress
-                }
+            try 
+                let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
-            Starting(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
+                for analyser in analysers do 
+                    analyser fileInfo.TypeCheckResults array skipArray
+            with 
+            | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 
-            [visitAst; visitPlainText]
-            |> Async.Parallel
-            |> Async.RunSynchronously
-            |> ignore
-
-            ReachedEnd(parsedFileInfo.File) |> lintInfo.ReportLinterProgress
+            ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getProjectFileInfo projectFilePath =
         // TODO: Find how to extract exceptions from ProjectCracker API rather than parsing them.
@@ -334,7 +303,6 @@ module Lint =
         let parseFilesInProject config files projectOptions =
             let lintInformation =
                 { Configuration = config
-                  RulePlugins = LoadPlugins.plugins
                   FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
                   ErrorReceived = warningReceived
                   ReportLinterProgress = projectProgress
@@ -401,17 +369,16 @@ module Lint =
 
         let lintInformation =
             { Configuration = config
-              RulePlugins = LoadPlugins.plugins
               FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
               ErrorReceived = warningReceived
               ReportLinterProgress = ignore
               FSharpVersion = parsedFileInfo.FSharpVersion }
 
         let parsedFileInfo =
-            { Ast.PlainText = parsedFileInfo.Source
-              Ast.Ast = parsedFileInfo.Ast
-              Ast.TypeCheckResults = parsedFileInfo.TypeCheckResults
-              Ast.File = "/home/user/Dog.Test.fsx" }
+            { ParseFile.Text = parsedFileInfo.Source
+              ParseFile.Ast = parsedFileInfo.Ast
+              ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
+              ParseFile.File = "/home/user/Dog.Test.fsx" }
 
         lint lintInformation parsedFileInfo
 
@@ -429,7 +396,7 @@ module Lint =
         match ParseFile.parseSource source config checker with
         | ParseFile.Success(parseFileInformation) -> 
             let parsedFileInfo =
-                { Source = parseFileInformation.PlainText
+                { Source = parseFileInformation.Text
                   Ast = parseFileInformation.Ast
                   TypeCheckResults = parseFileInformation.TypeCheckResults
                   FSharpVersion = fsharpVersion }
@@ -454,17 +421,16 @@ module Lint =
         
         let lintInformation =
             { Configuration = config
-              RulePlugins = LoadPlugins.plugins
               FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
               ErrorReceived = warningReceived
               ReportLinterProgress = ignore
               FSharpVersion = parsedFileInfo.FSharpVersion }
 
         let parsedFileInfo =
-            { Ast.PlainText = parsedFileInfo.Source
-              Ast.Ast = parsedFileInfo.Ast
-              Ast.TypeCheckResults = parsedFileInfo.TypeCheckResults
-              Ast.File = filepath }
+            { ParseFile.Text = parsedFileInfo.Source
+              ParseFile.Ast = parsedFileInfo.Ast
+              ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
+              ParseFile.File = filepath }
 
         lint lintInformation parsedFileInfo
 
@@ -482,7 +448,7 @@ module Lint =
         match ParseFile.parseFile filepath config checker None with
         | ParseFile.Success(astFileParseInfo) -> 
             let parsedFileInfo = 
-                { Source = astFileParseInfo.PlainText
+                { Source = astFileParseInfo.Text
                   Ast = astFileParseInfo.Ast
                   TypeCheckResults = astFileParseInfo.TypeCheckResults
                   FSharpVersion = fsharpVersion }

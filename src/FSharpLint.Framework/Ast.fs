@@ -37,6 +37,8 @@ module Ast =
           Rule: string }
     
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
+    [<NoEquality>]
+    [<NoComparison>]
     type VisitorInfo =
         {  /// Version of F# the source that's being analysed was written in.
           FSharpVersion: Version
@@ -238,8 +240,6 @@ module Ast =
     let inline private Field x = Node(ExtraSyntaxInfo.None, Field x)
     let inline private Match x = Node(ExtraSyntaxInfo.None, Match x)
     let inline private ConstructorArguments x = Node(ExtraSyntaxInfo.None, ConstructorArguments x)
-    let inline private TypeParameter x = Node(ExtraSyntaxInfo.None, TypeParameter x)
-    let inline private InterfaceImplementation x = Node(ExtraSyntaxInfo.None, InterfaceImplementation x)
     let inline private Identifier x = Node(ExtraSyntaxInfo.None, Identifier x)
 
     /// Gets a string literal from the AST.

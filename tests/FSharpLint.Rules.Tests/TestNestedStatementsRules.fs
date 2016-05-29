@@ -38,7 +38,7 @@ let config =
  
 [<TestFixture>]
 type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Category("Performance")>]
     [<Test>]

@@ -37,7 +37,7 @@ module SourceLength =
 
     let private length (range:range) = range.EndLine - range.StartLine
 
-    let visitor visitorInfo _ syntaxArray skipArray = 
+    let analyser visitorInfo _ syntaxArray skipArray = 
         let checkRuleBroken i range ruleName errorName =
             match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
             | Some(_, ruleSettings) -> 

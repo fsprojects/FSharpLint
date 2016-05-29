@@ -36,7 +36,7 @@ let config =
               
 [<TestFixture>]
 type TestBindingRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]
     member this.LetWildcardUnitValue() = 

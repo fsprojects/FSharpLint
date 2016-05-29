@@ -45,7 +45,7 @@ let config =
               
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(visitor, config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Category("Performance")>]
     [<Test>]

@@ -40,7 +40,7 @@ module RaiseWithTooManyArguments =
                 Some()
         | _ -> None
             
-    let visitor visitorInfo _ syntaxArray skipArray = 
+    let analyser visitorInfo _ syntaxArray skipArray = 
         let isEnabled i ruleName =
             match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
             | Some(_) -> 

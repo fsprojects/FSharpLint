@@ -177,7 +177,7 @@ module Typography =
 
             iterateLines (readLine ()) 0
 
-    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node[]) _ = 
+    let analyser visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node[]) _ = 
         if isAnalyserEnabled visitorInfo.Config then
             let mutable i = 0
             let suppressMessageAttributes = ResizeArray()

@@ -250,7 +250,32 @@ module NameConventions =
             members |> List.forall canBeInInterface
         | _ -> false
 
-    let visitor visitorInfo checkFile syntaxArray skipArray = 
+    let checkLongIdent checkRule valData isPublic = function
+        | SynPat.LongIdent(longIdentifier, _, _, args, access, _) -> 
+            let isPublic = function 
+                | Some(access) -> access = SynAccess.Public && isPublic ()
+                | None -> isPublic ()
+
+            match args with
+            | SynConstructorArgs.NamePatPairs(_) -> ()
+            | SynConstructorArgs.Pats(_) -> ()
+
+            match longIdentifier.Lid |> List.rev with
+            | lastIdent::_ ->
+                match identifierTypeFromValData valData with
+                | Value | Function when isActivePattern lastIdent ->
+                    CheckIdentifiers.checkActivePattern checkRule lastIdent
+                | Value | Function when isPublic access -> 
+                    CheckIdentifiers.checkPublicValue checkRule lastIdent
+                | Value | Function ->
+                    CheckIdentifiers.checkNonPublicValue checkRule lastIdent
+                | Member | Property -> 
+                    CheckIdentifiers.checkMember checkRule lastIdent
+                | _ -> ()
+            | _ -> ()
+        | _ -> ()
+        
+    let analyser visitorInfo checkFile syntaxArray skipArray = 
         let isNotSuppressed i ruleName =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
@@ -296,10 +321,18 @@ module NameConventions =
                     CheckIdentifiers.checkException checkRule identifier
             | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
                 CheckIdentifiers.checkNonPublicValue checkRule identifier
+            | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
+                ignore ()
+                ignore ()
+                // todo: check pattern
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                 | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
                     CheckIdentifiers.checkMember checkRule identifier
+                | SynMemberDefn.ImplicitCtor(_, _, args, _, _) -> 
+                    ignore ()
+                    ignore ()
+                    // todo: check pattern
                 | _ -> ()
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) -> 
                 let isTypeExtensions =
@@ -319,25 +352,6 @@ module NameConventions =
                             else
                                 identifier |> List.iter (CheckIdentifiers.checkTypeName checkRule)
                         | _ -> ()
-            | AstNode.Pattern(pattern) ->
-                match pattern with
-                | SynPat.LongIdent(longIdentifier, _, _, (Pats([]) | NamePatPairs([], _)), _, _) 
-                        when longIdentifier.Lid.Length = 1 -> 
-                    match longIdentifier.Lid with
-                    | [ident] ->
-                        match checkFile with
-                        | Some(checkFile:FSharpCheckFileResults) when visitorInfo.UseTypeChecker ->
-                            if not (isUnionCase checkFile ident) then
-                                CheckIdentifiers.checkNonPublicValue checkRule ident
-                        | _ -> 
-                            CheckIdentifiers.checkNonPublicValue checkRule ident
-                    | _ -> ()
-                | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
-                    CheckIdentifiers.checkParameter checkRule identifier
-                | _ -> ()
-            | AstNode.SimplePattern(SynSimplePat.Id(identifier, _, isCompilerGenerated, _, _, _)) ->
-                if not isCompilerGenerated then
-                    CheckIdentifiers.checkParameter checkRule identifier
             | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
                 if isLiteral attributes checkFile then
                     let rec checkLiteral = function
@@ -349,21 +363,10 @@ module NameConventions =
                     checkLiteral pattern
                 else
                     match pattern with
-                    | SynPat.LongIdent(longIdentifier, _, _, _, _, _) -> 
-                        match longIdentifier.Lid |> List.rev with
-                        | lastIdent::_ ->
-                            match identifierTypeFromValData valData with
-                            | Value | Function when isActivePattern lastIdent ->
-                                CheckIdentifiers.checkActivePattern checkRule lastIdent
-                            | Value | Function when AbstractSyntaxArray.isPublic syntaxArray skipArray i -> 
-                                CheckIdentifiers.checkPublicValue checkRule lastIdent
-                            | Value | Function ->
-                                CheckIdentifiers.checkNonPublicValue checkRule lastIdent
-                            | Member | Property -> 
-                                CheckIdentifiers.checkMember checkRule lastIdent
-                            | _ -> ()
-                        | _ -> ()
-                    | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 
+                    | SynPat.LongIdent(_) -> 
+                        let isPublic () = AbstractSyntaxArray.isPublic syntaxArray skipArray i
+                        checkLongIdent checkRule valData isPublic pattern
+                    | SynPat.Named(pattern, identifier, isThis, access, _) when not isThis -> 
                         if isActivePattern identifier then
                             CheckIdentifiers.checkActivePattern checkRule identifier
                     | _ -> ()

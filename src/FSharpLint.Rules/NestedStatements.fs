@@ -87,7 +87,7 @@ module NestedStatements =
 
         distance
 
-    let visitor visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+    let analyser visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
         let isSuppressed i =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName AbstractSyntaxArray.SuppressRuleWildcard

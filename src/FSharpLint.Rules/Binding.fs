@@ -153,7 +153,7 @@ module Binding =
             tupleRange = range
         | _ -> false
 
-    let visitor visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
+    let analyser visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) skipArray = 
         let visitorParameters =
             { VisitorInfo = visitorInfo
               CheckFile = checkFile }

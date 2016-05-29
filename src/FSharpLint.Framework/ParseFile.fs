@@ -24,7 +24,22 @@ module ParseFile =
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open Microsoft.FSharp.Compiler
+    open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
+
+    /// Information for a file to be linted that is given to the visitors for them to analyse.
+    type FileParseInfo =
+        { /// Contents of the file.
+          Text: string
+
+          /// File represented as an AST.
+          Ast: ParsedInput
+
+          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+          TypeCheckResults: FSharpCheckFileResults option
+
+          /// Path to the file.
+          File: string }
 
     type ParseFileFailure =
         | FailedToParseFile of FSharpErrorInfo []
@@ -55,10 +70,10 @@ module ParseFile =
         | Some(parseTree) -> 
             match typeCheckFile() with
             | Success(typeCheckResults) ->
-                { AbstractSyntaxArray.PlainText = source
-                  AbstractSyntaxArray.Ast = parseTree
-                  AbstractSyntaxArray.TypeCheckResults = typeCheckResults
-                  AbstractSyntaxArray.File = file } |> Success
+                { Text = source
+                  Ast = parseTree
+                  TypeCheckResults = typeCheckResults
+                  File = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
