@@ -25,7 +25,7 @@ open FParsec
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintMatcher
+open FSharpLint.Rules.HintMatcher
 open Microsoft.FSharp.Compiler.SourceCodeServices
 
 let generateHintConfig hints =
@@ -44,7 +44,7 @@ let generateHintConfig hints =
     
 [<TestFixture>]
 type TestHintMatcher() =
-    inherit TestRuleBase.TestRuleBase(visitor getHintsFromConfig)
+    inherit TestRuleBase.TestRuleBase(analyser getHintsFromConfig)
 
     [<Category("Performance")>]
     [<Test>]

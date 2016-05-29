@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-namespace FSharpLint.Framework
+namespace FSharpLint.Rules
 
 module HintMatcher =
 
@@ -605,7 +605,7 @@ module HintMatcher =
                     hintError hint visitorInfo expr.Range
         | _ -> ()
 
-    let visitor getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+    let analyser getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
         let hintKeywordTree = getHints visitorInfo.Config
 
         let maxBreadcrumbs = 6

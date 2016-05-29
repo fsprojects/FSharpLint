@@ -176,7 +176,8 @@ module Lint =
           Rules.RaiseWithTooManyArguments.analyser
           Rules.SourceLength.analyser
           Rules.Typography.analyser
-          Rules.XmlDocumentation.analyser ]
+          Rules.XmlDocumentation.analyser
+          Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig ]
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
