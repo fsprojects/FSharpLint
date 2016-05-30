@@ -122,7 +122,7 @@ type TestAst() =
 
         let stopwatch = Stopwatch.StartNew()
 
-        let tree = astToArray tree 
+        astToArray tree |> ignore
 
         stopwatch.Stop()
 
@@ -168,3 +168,30 @@ type TestAst() =
                           AbstractSyntaxArray.Skip(0, 10)
                           AbstractSyntaxArray.Skip(0, 10)
                           AbstractSyntaxArray.Skip(0, 2) ], skipArray)
+
+    /// e.g. a lambda arg shouldn't have the body of the lambda in its child nodes (that should be a sibling).
+    [<Test>]
+    member __.``Syntax array's extra info nodes do not contain children of node they're generated from.``() = 
+        let tree = generateAst "fun x -> x"
+
+        let (array, skipArray) = astToArray tree
+
+        let actual = array |> Array.map (fun x -> x.Hashcode)
+
+        let expected =
+            [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
+              Utilities.hash2 SyntaxNode.ModuleDeclaration 0
+              Utilities.hash2 SyntaxNode.Lambda 0
+              Utilities.hash2 SyntaxNode.LambdaArg 0
+              Utilities.hash2 SyntaxNode.Identifier "x"
+              Utilities.hash2 SyntaxNode.LambdaBody 0
+              Utilities.hash2 SyntaxNode.Identifier "x" ]
+
+        Assert.AreEqual(expected, actual)
+        Assert.AreEqual([ AbstractSyntaxArray.Skip(6, 0)
+                          AbstractSyntaxArray.Skip(5, 0)
+                          AbstractSyntaxArray.Skip(4, 1)
+                          AbstractSyntaxArray.Skip(1, 2)
+                          AbstractSyntaxArray.Skip(0, 3)
+                          AbstractSyntaxArray.Skip(1, 2)
+                          AbstractSyntaxArray.Skip(0, 5) ], skipArray)
