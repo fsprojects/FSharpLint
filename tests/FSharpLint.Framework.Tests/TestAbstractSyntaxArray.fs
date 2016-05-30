@@ -32,7 +32,7 @@ open NUnit.Framework
 type TestAst() =
 
     [<Literal>]
-    let SourceFile = "../../TypeChecker.fs"
+    let SourceFile = "../../../TypeChecker.fs"
 
     let generateAst source =
         let checker = FSharpChecker.Create()

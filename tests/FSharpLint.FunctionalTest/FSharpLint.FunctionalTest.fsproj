@@ -55,12 +55,16 @@
     <Compile Include="TestPackageHelpers.fs" />
     <Compile Include="TestFakeTask.fs" />
     <Compile Include="TestMSBuildTask.fs" />
+    <Compile Include="TestApi.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
       <HintPath>..\..\packages\FAKE.Lib.3.33.0\lib\net451\FakeLib.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="FSharp.Compiler.Service">
+      <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
@@ -74,6 +78,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Application\FSharpLint.Application.fsproj">
+      <Name>FSharpLint.Application</Name>
+      <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj">
       <Name>FSharpLint.FunctionalTest.TestedProject</Name>
       <Project>{3c435732-06b5-4406-ad79-bdd1f5124b12}</Project>

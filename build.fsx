@@ -104,6 +104,7 @@ Target "RunFunctionalTests" (fun _ ->
         { p with
             DisableShadowCopy = true
             TimeOut = TimeSpan.FromMinutes 20.
+            ExcludeCategory = "Performance"
             OutputFile = "TestResults.xml" })
 )
 

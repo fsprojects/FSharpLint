@@ -36,7 +36,7 @@ let emptyConfig =
                        Settings = Map.ofList [] }) ] }
 
 [<Literal>]
-let SourceFile = "../../../FSharpLint.Framework.Tests/TypeChecker.fs"
+let SourceFile = "../../../TypeChecker.fs"
 
 let generateAst source =
     let checker = FSharpChecker.Create()
