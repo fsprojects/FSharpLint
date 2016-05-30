@@ -468,8 +468,8 @@ module HintMatcher =
             |> String.concat "."
         | HintExpr(Expression.FunctionApplication(expressions)) ->
             expressions |> surroundExpressionsString (HintExpr >> hintToString) "" "" " "
-        | HintExpr(Expression.InfixOperator(Expression.Identifier([operator]), leftHint, rightHint)) ->
-            hintToString (HintExpr leftHint) + operator + hintToString (HintExpr rightHint)
+        | HintExpr(Expression.InfixOperator(Expression.Identifier(opIdent), leftHint, rightHint)) ->
+            hintToString (HintExpr leftHint) + (String.concat "." opIdent) + hintToString (HintExpr rightHint)
         | HintPat(Pattern.Cons(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "::" + hintToString (HintPat rightHint)
         | HintPat(Pattern.And(leftHint, rightHint)) ->
