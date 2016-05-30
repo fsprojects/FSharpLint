@@ -120,14 +120,24 @@ type TestAst() =
     member __.``Performance of building syntax array``() = 
         let tree = File.ReadAllText SourceFile |> generateAst
 
+        let iterations = 100
+
         let stopwatch = Stopwatch.StartNew()
+        let times = ResizeArray()
 
-        astToArray tree |> ignore
+        for _ in 0..iterations do
+            stopwatch.Restart()
+            
+            astToArray tree |> ignore
 
-        stopwatch.Stop()
+            stopwatch.Stop()
 
-        Assert.Less(stopwatch.ElapsedMilliseconds, 200)
-        System.Console.WriteLine(sprintf "Built array in %d milliseconds." stopwatch.ElapsedMilliseconds)
+            times.Add stopwatch.ElapsedMilliseconds
+
+        let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
+
+        Assert.Less(result, 200)
+        System.Console.WriteLine(sprintf "Built array in an average of %d milliseconds." result)
 
     [<Test>]
     member __.``Syntax array constructed from AST in valid order.``() = 
