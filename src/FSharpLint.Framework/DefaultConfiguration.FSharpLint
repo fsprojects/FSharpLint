@@ -240,13 +240,13 @@
           <Lines>1000</Lines>
         </MaxLinesInModule>
       </Rules>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
     </SourceLength>
 
     <Typography>
       <Rules>
         <MaxLinesInFile>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
           <Lines>1000</Lines>
         </MaxLinesInFile>
 
@@ -274,7 +274,7 @@
     </Typography>
 
     <NestedStatements>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
       <Depth>8</Depth>
     </NestedStatements>
 
@@ -300,7 +300,7 @@
           <MaxItems>4</MaxItems>
         </MaxNumberOfBooleanOperatorsInCondition>
       </Rules>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
     </NumberOfItems>
 
     <RaiseWithTooManyArguments>
@@ -409,7 +409,7 @@
     </XmlDocumentation>
 
     <CyclomaticComplexity>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
       <MaxCyclomaticComplexity>10</MaxCyclomaticComplexity>
       <IncludeMatchStatements>false</IncludeMatchStatements>
     </CyclomaticComplexity>
