@@ -278,22 +278,72 @@ module NameConventions =
     let private checkIfPublic isCurrentlyPublic = function 
         | Some(access) -> isCurrentlyPublic && access = SynAccess.Public
         | None -> false
+
+    let checkValueOrFunction checkRule typeChecker isPublic pattern = 
+        let isUnionCase ident =
+            match typeChecker with
+            | Some(typeChecker) -> isUnionCase typeChecker ident
+            | None -> false
+
+        match pattern with
+        | SynPat.LongIdent(longIdent, _, _, _, _, _) -> 
+            if not longIdent.Lid.IsEmpty then
+                let ident = longIdent.Lid.Last()
+
+                if isActivePattern ident then
+                    CheckIdentifiers.checkActivePattern checkRule ident
+                else if not <| isUnionCase ident then
+                    if isPublic then
+                        CheckIdentifiers.checkPublicValue checkRule ident
+                    else
+                        CheckIdentifiers.checkNonPublicValue checkRule ident
+        | SynPat.Named(_, ident, _, _, _)
+        | SynPat.OptionalVal(ident, _) -> 
+            if isActivePattern ident then
+                CheckIdentifiers.checkActivePattern checkRule ident
+            else if not <| isUnionCase ident then
+                CheckIdentifiers.checkParameter checkRule ident
+        | _ -> ()
+
+    let checkMember checkRule _ = function
+        | SynPat.LongIdent(longIdent, _, _, _, _, _) -> 
+            if not longIdent.Lid.IsEmpty then
+                let ident = longIdent.Lid.Last()
+                CheckIdentifiers.checkMember checkRule ident
+        | SynPat.Named(_, ident, _, _, _)
+        | SynPat.OptionalVal(ident, _) -> 
+            CheckIdentifiers.checkParameter checkRule ident
+        | _ -> ()
         
-    let rec checkPattern isPublic = function
-        | SynPat.OptionalVal(ident, _) -> () 
-        | SynPat.LongIdent(ident, _, _, args, access, _) -> 
+    let rec checkPattern isPublic checker pattern = 
+        match pattern with
+        | SynPat.OptionalVal(_) -> () 
+        | SynPat.LongIdent(_, _, _, args, access, _) -> 
             let isPublic = checkIfPublic isPublic access
-            ()
-        | SynPat.Named(pattern, ident, isThis, access, _) -> 
+            checker isPublic pattern
+
+            match args with
+            | SynConstructorArgs.NamePatPairs(pats, _) -> 
+                for (ident, pat) in pats do
+                    checkPattern false checker pat
+            | SynConstructorArgs.Pats(pats) -> 
+                pats |> List.iter (checkPattern false checker)
+        | SynPat.Named(p, _, _, access, _) -> 
             let isPublic = checkIfPublic isPublic access
-            checkPattern isPublic pattern
-        | SynPat.Or(lhs, rhs, _) ->
-            checkPattern isPublic lhs
-            checkPattern isPublic rhs
-        | SynPat.Paren(pat, _) -> checkPattern isPublic pat
+            checker isPublic pattern
+            checkPattern isPublic checker p
+        | SynPat.Or(p1, p2, _) ->
+            checker isPublic pattern
+            checkPattern isPublic checker p1
+            checkPattern isPublic checker p2
+        | SynPat.Paren(pat, _) -> 
+            checker isPublic pattern
+            checkPattern isPublic checker pat
         | SynPat.Ands(pats, _)
         | SynPat.Tuple(pats, _)
-        | SynPat.ArrayOrList(_, pats, _) -> pats |> List.iter (checkPattern isPublic)
+        | SynPat.ArrayOrList(_, pats, _) -> 
+            checker isPublic pattern
+            pats |> List.iter (checkPattern isPublic checker)
         | SynPat.Record(pats, _) -> () 
         | SynPat.IsInst(_) 
         | SynPat.QuoteExpr(_) 
@@ -327,6 +377,8 @@ module NameConventions =
                 |> Option.map formatError
                 |> Option.iter postError
 
+        let checkFile = if visitorInfo.UseTypeChecker then checkFile else None
+
         let mutable i = 0
         while i < syntaxArray.Length do
             let checkRule = checkNamingRule i
@@ -351,9 +403,7 @@ module NameConventions =
             | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
                 CheckIdentifiers.checkNonPublicValue checkRule identifier
             | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-                ignore ()
-                ignore ()
-                // todo: check pattern
+                checkPattern false (checkValueOrFunction checkRule checkFile) pattern
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                 | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
@@ -393,8 +443,12 @@ module NameConventions =
                 else
                     let isPublic () = AbstractSyntaxArray.isPublic syntaxArray skipArray i
 
-                    // todo check pattern
-                    ()
+                    match identifierTypeFromValData valData with
+                    | Value | Function -> 
+                        checkPattern (isPublic()) (checkValueOrFunction checkRule checkFile) pattern
+                    | Member | Property -> 
+                        checkPattern false (checkMember checkRule) pattern
+                    | _ -> ()
             | AstNode.Match(SynMatchClause.Clause(pattern, _, _, _, _)) -> 
                 match pattern with
                 | SynPat.Named(_, identifier, isThis, _, _) when not isThis -> 

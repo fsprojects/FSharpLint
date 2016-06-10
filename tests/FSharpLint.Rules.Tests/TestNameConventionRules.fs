@@ -1049,13 +1049,13 @@ type Cat() =
                 
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
-        this.Parse """
+        this.Parse ("""
 module program
 
 type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
-let Dog = 6"""
+let Dog = 6""", checkInput = true)
 
         Assert.IsFalse(this.ErrorExistsAt(7, 4))
                 
