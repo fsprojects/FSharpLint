@@ -398,6 +398,11 @@ module NameConventions =
         | SynPat.Const(_) 
         | SynPat.Wild(_) 
         | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> () 
+
+    let rec private identFromSimplePat = function
+        | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
+        | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
+        | SynSimplePat.Attrib(_) -> None
         
     let analyser visitorInfo checkFile syntaxArray skipArray = 
         let isNotSuppressed i ruleName =
@@ -454,9 +459,9 @@ module NameConventions =
                 | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
                     CheckIdentifiers.checkMember checkRule identifier
                 | SynMemberDefn.ImplicitCtor(_, _, args, _, _) -> 
-                    ignore ()
-                    ignore ()
-                    // todo: check pattern
+                    for arg in args do
+                        identFromSimplePat arg
+                        |> Option.iter (CheckIdentifiers.checkParameter checkRule)
                 | _ -> ()
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) -> 
                 let isTypeExtensions =
