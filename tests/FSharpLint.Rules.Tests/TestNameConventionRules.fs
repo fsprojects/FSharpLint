@@ -425,10 +425,21 @@ module program
     member this.PublicTupleIsPascalCase() = 
         this.Parse """
 module program
-  let main = 
+
     let (Cat, _) = 1, 0"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 9))
+
+    /// A tuple inside a binding should be treated as private.
+    [<Test>]
+    member this.TupleInsideBindingExprIsPascalCase() = 
+        this.Parse """
+module program
+
+  let main =
+    let (Cat, _) = 1, 0"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 9))
 
     [<Test>]
     member this.PrivateTupleIsPascalCase() = 

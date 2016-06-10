@@ -32,6 +32,51 @@ module NameConventions =
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
+    
+    let private isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i =
+        let isSynAccessPublic = function
+            | Some(SynAccess.Public) | None -> true
+            | _ -> false
+
+        let rec isPublic publicSoFar isPrivateWhenReachedBinding i =
+            if i = 0 then publicSoFar
+            else if publicSoFar then
+                match syntaxArray.[i].Actual with
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
+                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
+                | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
+                | Field(SynField.Field(_, _, _, _, _, _, access, _))
+                | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
+                | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _))
+                | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _))
+                | Pattern(SynPat.Named(_, _, _, access, _))
+                | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
+                    isPublic (isSynAccessPublic access) isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+                | TypeSimpleRepresentation(_)
+                | Pattern(_) -> true
+                | MemberDefinition(_) -> 
+                    if isPrivateWhenReachedBinding then false
+                    else isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+                | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
+                    if isPrivateWhenReachedBinding then false
+                    else isPublic (isSynAccessPublic access) true skipArray.[i].ParentIndex
+                | ExceptionDefinition(_)
+                | EnumCase(_)
+                | TypeRepresentation(_)
+                | Type(_)
+                | Match(_)
+                | ConstructorArguments(_)
+                | TypeParameter(_)
+                | InterfaceImplementation(_)
+                | ModuleDeclaration(_)
+                | Identifier(_)
+                | SimplePattern(_)
+                | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+                | TypeDefinition(_)
+                | Expression(_) -> isPublic publicSoFar true skipArray.[i].ParentIndex
+            else false
+
+        isPublic true false i
 
     [<Literal>]
     let AnalyserName = "NameConventions"
@@ -277,7 +322,7 @@ module NameConventions =
 
     let private checkIfPublic isCurrentlyPublic = function 
         | Some(access) -> isCurrentlyPublic && access = SynAccess.Public
-        | None -> false
+        | None -> isCurrentlyPublic
 
     let checkValueOrFunction checkRule typeChecker isPublic pattern = 
         let isUnionCase ident =
@@ -441,7 +486,7 @@ module NameConventions =
 
                     checkLiteral pattern
                 else
-                    let isPublic () = AbstractSyntaxArray.isPublic syntaxArray skipArray i
+                    let isPublic () = isPublic syntaxArray skipArray i
 
                     match identifierTypeFromValData valData with
                     | Value | Function -> 
