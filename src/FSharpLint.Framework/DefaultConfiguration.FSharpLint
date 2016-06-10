@@ -54,6 +54,10 @@
           (List.length x) > 0 ===> not (List.isEmpty x)
           (Array.length x) <> 0 ===> not (Array.isEmpty x)
           (Seq.length x) <> 0 ===> not (Seq.isEmpty x)
+          
+          List.concat (List.map f x) ===> List.collect f x
+          Array.concat (Array.map f x) ===> Array.collect f x
+          Seq.concat (Seq.map f x) ===> Seq.collect f x
 
           List.isEmpty (List.filter f x) ===> not (List.exists f x)
           Array.isEmpty (Array.filter f x) ===> not (Array.exists f x)
