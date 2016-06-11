@@ -895,6 +895,8 @@ module HintParser =
 
         let prefixoperatorterm: Parser<Expression, unit> = 
             followedBy (pischar ['+';'-';'%';'&';'!';'~']) >>. opp.ExpressionParser
+            
+        let validBangPrefixedOperatorChars = ['!'; '%'; '&'; '*'; '+'; '.'; '/'; '<'; '='; '>'; '@'; '^'; '|'; '~'; '?']
 
         opp.TermParser <- 
             spaces >>.
@@ -930,14 +932,24 @@ module HintParser =
                                         Expression.InfixOperator(opIdent, expr1, expr2))
             opp.AddOperator(op)
 
-        let addPrefixOperator op precedence =
-            opp.AddOperator(PrefixOperator(op, spaces >>. preturn "", precedence, true, 
-                                                fun expr ->
-                                                    if op = "&" then Expression.AddressOf(true, expr)
-                                                    else if op = "&&" then Expression.AddressOf(false, expr)
+        let addPrefixOperator prefix precedence =
+            let remainingOpChars_ws = 
+                if prefix = "!" then
+                    manySatisfy (isAnyOf validBangPrefixedOperatorChars)
+                else if prefix = "~" then
+                    manySatisfy ((=) '~')
+                else
+                    preturn ""
+
+            opp.AddOperator(PrefixOperator(prefix, remainingOpChars_ws, precedence, true, (),
+                                                fun remOpChars expr ->
+                                                    if prefix = "&" then Expression.AddressOf(true, expr)
+                                                    else if prefix = "&&" then Expression.AddressOf(false, expr)
+                                                    else if prefix = "!" || prefix = "~" then
+                                                        let opIdent = Expression.Identifier [prefix + remOpChars]
+                                                        Expression.PrefixOperator(opIdent, expr)
                                                     else
-                                                        let opString = if op.StartsWith("!") then op else "~" + op
-                                                        let opIdent = Expression.Identifier [opString]
+                                                        let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
                                                         Expression.PrefixOperator(opIdent, expr)))
 
         do
@@ -981,15 +993,18 @@ module HintParser =
             addInfixOperator "%"  13 Associativity.Left
 
             addInfixOperator "**" 14 Associativity.Right
-            
+
+            addPrefixOperator "~" 15
             addPrefixOperator "+" 15
+            addPrefixOperator "+." 15
             addPrefixOperator "-" 15
+            addPrefixOperator "-." 15
             addPrefixOperator "%" 15
             addPrefixOperator "%%" 15
             addPrefixOperator "&" 15
             addPrefixOperator "&&" 15
+
             addPrefixOperator "!" 15
-            addPrefixOperator "~" 15
 
             pexpressionImpl := opp.ExpressionParser
 
