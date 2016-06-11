@@ -783,13 +783,3 @@ type TestHintParser() =
         match run phint "pattern: true | false ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
-
-    [<Test>]
-    member __.``Parses and inside pattern as expected.``() = 
-        let expected = 
-            { Match = Pattern.And(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
-              Suggestion = Suggestion.Message("Message") }
-
-        match run phint "pattern: true & false ===> m\"\"\"Message\"\"\"" with
-        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
-        | Failure(message, _, _) -> Assert.Fail(message)

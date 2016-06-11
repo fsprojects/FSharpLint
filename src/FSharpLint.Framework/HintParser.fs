@@ -47,7 +47,6 @@ module HintParser =
     [<RequireQualifiedAccess>]
     type Pattern =
         | Cons of Pattern * Pattern
-        | And of Pattern * Pattern
         | Or of Pattern * Pattern
         | Wildcard
         | Variable of char
@@ -209,7 +208,6 @@ module HintParser =
             
         let rec private getPatternKey = function
             | Pattern.Cons(_) -> SyntaxHintNode.Cons
-            | Pattern.And(_) -> SyntaxHintNode.And
             | Pattern.Or(_) -> SyntaxHintNode.Or
             | Pattern.Wildcard -> SyntaxHintNode.Wildcard
             | Pattern.Variable(_) -> SyntaxHintNode.Variable
@@ -256,7 +254,6 @@ module HintParser =
             | HintExpr(Expression.Wildcard)
             | HintExpr(Expression.Variable(_)) -> []
             | HintPat(Pattern.Cons(lhs, rhs))
-            | HintPat(Pattern.And(lhs, rhs))
             | HintPat(Pattern.Or(lhs, rhs)) -> [HintPat lhs; HintPat rhs]
             | HintPat(Pattern.Array(patterns))
             | HintPat(Pattern.List(patterns))
@@ -1034,7 +1031,6 @@ module HintParser =
                                    fun _ patLhs patRhs ->
                                         match operator with
                                         | "|" -> Pattern.Or(patLhs, patRhs)
-                                        | "&" -> Pattern.And(patLhs, patRhs)
                                         | "::" -> Pattern.Cons(patLhs, patRhs)
                                         | _ -> failwith ("Unexpected operator " + operator + " in pattern."))
             opp.AddOperator(op)
@@ -1042,7 +1038,7 @@ module HintParser =
         do
             addInfixOperator "|"  1 Associativity.Left
             addInfixOperator "::"  2 Associativity.Left
-            addInfixOperator "&"  3 Associativity.Left
+            // TODO: addInfixOperator "&"  3 Associativity.Left
 
             ppatternImpl := opp.ExpressionParser
 

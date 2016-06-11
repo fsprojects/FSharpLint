@@ -372,58 +372,6 @@ match [] with
 | _ -> ()""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
-        
-    [<Test>]
-    member this.MatchAndPattern() = 
-        let config = generateHintConfig ["pattern: [] & [0] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-
-    [<Test>]
-    member this.MatchMultipleAndPatterns() = 
-        let config = generateHintConfig ["pattern: [] & [0] & [1] & [2] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] & [1] & [2] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-        
-    [<Test>]
-    member this.MatchAndPatternsInsideMultipleAndPatterns() = 
-        let config = generateHintConfig ["pattern: [0] & [1] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] & [1] & [2] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-
-    [<Test>]
-    member this.MatchAndPatternsAndOrPatterns() = 
-        let config = generateHintConfig ["pattern: [0] & [1] | [1] & [2] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [0] & [1] | [1] & [2] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
 
     [<Test>]
     member this.MatchIfStatement() = 
@@ -630,13 +578,13 @@ let foo x = if (x = true) then 0 else 1""", config)
     /// Parentheses around patterns matched by hints were causing duplicate warnings
     [<Test>]
     member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() = 
-        let config = generateHintConfig ["pattern: [0] & [1] ===> []"]
+        let config = generateHintConfig ["pattern: [0] | [1] ===> []"]
         
         this.Parse("""
 module Goat
 
 match [] with
-| ([0] & [1]) -> ()
+| ([0] | [1]) -> ()
 | _ -> ()""", config)
 
         Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))

@@ -357,8 +357,6 @@ module HintMatcher =
                 matchConsPattern (pattern, hint)
             | Pattern.Or(_) ->
                 matchOrPattern (pattern, hint)
-            | Pattern.And(_) ->
-                matchAndPattern (pattern, hint)
             | Pattern.Parentheses(hint) -> 
                 matchHintPattern (pattern, hint)
             | Pattern.Tuple(_) ->
@@ -409,21 +407,6 @@ module HintMatcher =
                 matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
             | _ -> false
 
-        and private matchAndPattern (pattern, hint) =
-            let rec matchAndPatterns = function 
-                | rightPattern::patterns, Pattern.And((Pattern.And(_) as left), right) -> 
-                    matchHintPattern (rightPattern, right) && matchAndPatterns (patterns, left)
-                | rightPattern::leftPattern::_ & _::patterns, Pattern.And(left, right) -> 
-                    let isMatch = matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
-
-                    isMatch || matchAndPatterns (patterns, hint)
-                | _ -> false
-
-            match pattern with
-            | SynPat.Ands(patterns, _) -> 
-                matchAndPatterns (List.rev patterns, hint)
-            | _ -> false
-
     let constantToString = function
         | Constant.Bool(x) -> if x then "true" else "false"
         | Constant.Int16(x) -> x.ToString() + "s"
@@ -472,8 +455,6 @@ module HintMatcher =
             hintToString (HintExpr leftHint) + (String.concat "." opIdent) + hintToString (HintExpr rightHint)
         | HintPat(Pattern.Cons(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "::" + hintToString (HintPat rightHint)
-        | HintPat(Pattern.And(leftHint, rightHint)) ->
-            hintToString (HintPat leftHint) + "&" + hintToString (HintPat rightHint)
         | HintPat(Pattern.Or(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "|" + hintToString (HintPat rightHint)
         | HintExpr(Expression.AddressOf(singleAmp, hint)) ->
