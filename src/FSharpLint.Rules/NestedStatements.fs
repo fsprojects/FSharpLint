@@ -31,8 +31,8 @@ module NestedStatements =
     
     let private configDepth config =
         match isAnalyserEnabled config AnalyserName with
-        | Some(analyserSettings) ->
-            match Map.tryFind "Depth" analyserSettings with
+        | Some(analyser) ->
+            match Map.tryFind "Depth" analyser.Settings with
             | Some(Depth(l)) -> Some(l)
             | Some(_) | None -> None
         | Some(_) | None -> None
