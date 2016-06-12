@@ -110,62 +110,14 @@ Target "RunFunctionalTests" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Create nuget package
 
-Target "CreatePackage" (fun _ ->
-    NuGet (fun p -> 
-        {p with
-            Authors = authors
-            Project = project
-            Description = summary                               
-            OutputPath = packagingRoot
-            Summary = summary
-            WorkingDir = toolPackagingDir
-            Version = version
-            Publish = false
-            Files = 
-                [
-                    (System.String.Format("build{0}*", System.IO.Path.DirectorySeparatorChar), Some "build", None)
-                    (System.String.Format("..{0}..{0}src{0}FSharpLint.MSBuildIntegration{0}bin{0}Release{0}FSharpLint.MSBuildIntegration.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}src{0}FSharpLint.FAKE{0}bin{0}Release{0}FSharpLint.FAKE.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-
-                    (System.String.Format("..{0}..{0}bin{0}FSharp.Core.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Rules.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Framework.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharpLint.Application.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCracker.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCrackerTool.exe", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FSharp.Compiler.Service.ProjectCrackerTool.exe.config", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FParsecCS.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                    (System.String.Format("..{0}..{0}bin{0}FParsec.dll", System.IO.Path.DirectorySeparatorChar), None, None)
-                ]
-         })
-        "FSharpLint.nuspec"
-)
-
-Target "CreateApiPackage" (fun _ ->
-    let libDir = apiPackagingDir @@ "lib"
-    CleanDirs [libDir]
-
-    CopyFile libDir "./bin/FSharpLint.Rules.dll"
-    CopyFile libDir "./bin/FSharpLint.Framework.dll"
-    CopyFile libDir "./bin/FSharpLint.Application.dll"
-    CopyFile libDir "./bin/FParsecCS.dll"
-    CopyFile libDir "./bin/FParsec.dll"
-
-    NuGet (fun p -> 
-        { p with
-            Authors = authors
-            Project = projectApi
-            Description = summaryApi
-            OutputPath = packagingRoot
-            Summary = summaryApi
-            WorkingDir = apiPackagingDir
-            Version = version
-            Publish = false
-            Dependencies = [("FSharp.Compiler.Service", "3.0.0.0")]
-         })
-        "FSharpLint.Core.nuspec"
-)
+Target "CreateNugetPackages" (fun _ ->    
+    Paket.Pack (fun p -> 
+        { p with 
+            ToolPath = ".paket/paket.exe" 
+            Version = release.NugetVersion
+            ReleaseNotes = toLines release.Notes
+            IncludeReferencedProjects = true
+            OutputPath = "packaging" }))
 
 #I @"packages/tools/FSharpLint/"
 #r @"packages/tools/FSharpLint/FSharpLint.FAKE.dll"
@@ -195,6 +147,6 @@ Target "All" DoNothing
     "RunTests" ==> 
     "Lint" ==> 
     "GenerateDocs" ==> 
-    "CreatePackage" ==> "All"
+    "CreateNugetPackages" ==> "All"
 
 RunTargetOrDefault "All"
