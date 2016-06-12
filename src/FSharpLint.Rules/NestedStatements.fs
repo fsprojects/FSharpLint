@@ -96,6 +96,25 @@ module NestedStatements =
         | Some(errorDepth) ->
             let error = error errorDepth
 
+            /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo 
+            /// e.g. lambda arg being a duplicate of the lamdba.
+            let isMetaData node i =
+                let parentIndex = skipArray.[i].ParentIndex
+                if parentIndex = i then false
+                else
+                    Object.ReferenceEquals(node, syntaxArray.[parentIndex].Actual)
+
+            let isElseIf node i =
+                match node with
+                | AstNode.Expression(SynExpr.IfThenElse(_)) ->
+                    let parentIndex = skipArray.[i].ParentIndex
+                    if parentIndex = i then false
+                    else
+                        match syntaxArray.[parentIndex].Actual with
+                        | AstNode.Expression(SynExpr.IfThenElse(_, _, Some(_), _, _, _, _)) -> true
+                        | _ -> false
+                | _ -> false
+
             let mutable depth = 0
             let mutable i = 0
             while i < syntaxArray.Length do
@@ -108,7 +127,7 @@ module NestedStatements =
 
                 let node = syntaxArray.[i].Actual
 
-                if areChildrenNested node then
+                if areChildrenNested node && not <| isMetaData node i && not <| isElseIf node i then
                     if depth >= errorDepth then
                         if not (isSuppressed i) then
                             getRange node |> Option.iter (fun range -> visitorInfo.PostError range error)
