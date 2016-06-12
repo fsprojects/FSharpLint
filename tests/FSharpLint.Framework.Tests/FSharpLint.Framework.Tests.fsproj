@@ -59,8 +59,8 @@
     <Compile Include="TestHintParser.fs" />
     <Compile Include="TestAst.fs" />
     <Compile Include="TestFuzzyHintMatcher.fs" />
-    <None Include="App.config" />
     <Compile Include="TestAbstractSyntaxArray.fs" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FParsec">
