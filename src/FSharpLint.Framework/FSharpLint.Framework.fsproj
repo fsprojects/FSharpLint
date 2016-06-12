@@ -51,14 +51,15 @@
   <Import Project="$(FSharpTargetsPath)" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition=" Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <ItemGroup>
+    <Compile Include="Utilities.fs" />
     <Compile Include="HintParser.fs" />
     <Compile Include="Configuration.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="AstInfo.fs" />
-    <Compile Include="LoadVisitors.fs" />
+    <Compile Include="AbstractSyntaxArray.fs" />
     <Compile Include="Resources.fs" />
-    <Compile Include="ExpressionUtilities.fs" />
     <Compile Include="ParseFile.fs" />
+    <Compile Include="FuzzyHintMatcher.fs" />
     <None Include="README.md" />
     <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
     <EmbeddedResource Include="Text.resx">
@@ -78,6 +79,7 @@
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
     </Reference>
+    <Reference Include="FSharp.Data.TypeProviders" />
     <Reference Include="Microsoft.Build, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.dll</HintPath>
       <SpecificVersion>True</SpecificVersion>
@@ -96,6 +98,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />

@@ -22,51 +22,6 @@ module AstInfo =
 
     open Microsoft.FSharp.Compiler.Ast
     open Ast
-    
-    let isPublic path =
-        let isSynAccessPublic = function
-            | Some(SynAccess.Public) | None -> true
-            | _ -> false
-
-        let rec isPublic publicSoFar isBinding = function
-            | node :: path when publicSoFar ->
-                match node with
-                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
-                | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
-                | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
-                | Field(SynField.Field(_, _, _, _, _, _, access, _))
-                | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
-                | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _))
-                | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _))
-                | MemberDefinition(SynMemberDefn.NestedType(_, access, _))
-                | MemberDefinition(SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _))
-                | MemberDefinition(SynMemberDefn.ImplicitCtor(access, _, _, _, _))
-                | MemberDefinition(SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, _, _, _, _, _, _, _, access, _, _), _, _))
-                | Pattern(SynPat.Named(_, _, _, access, _))
-                | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                    isPublic (isSynAccessPublic access) isBinding path
-                | TypeSimpleRepresentation(_)
-                | Pattern(_) -> true
-                | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
-                    isPublic (isSynAccessPublic access) true path
-                | MemberDefinition(_) -> isPublic publicSoFar isBinding path
-                | ExceptionDefinition(_)
-                | EnumCase(_)
-                | TypeRepresentation(_)
-                | Type(_)
-                | Match(_)
-                | ConstructorArguments(_)
-                | TypeParameter(_)
-                | InterfaceImplementation(_)
-                | ModuleDeclaration(_)
-                | SimplePattern(_)
-                | SimplePatterns(_) -> isPublic publicSoFar isBinding  path
-                | TypeDefinition(_)
-                | Expression(_) -> not isBinding && isPublic publicSoFar isBinding path
-            | [] -> publicSoFar
-            | _ -> false
-
-        isPublic true false path
 
     type IdentifierType =
         | Member
@@ -145,7 +100,7 @@ module AstInfo =
           "op_Dynamic"
           "op_DynamicAssignment"
           "op_ArrayLookup"
-          "op_ArrayAssign" ]
+          "op_ArrayAssign" ] |> Set.ofList
 
     /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
     let operators = 
@@ -187,7 +142,7 @@ module AstInfo =
 
     /// Is an identifier an operator overload?
     let isOperator (identifier:string) =
-        if operatorIdentifiers |> List.exists (fun x -> x = identifier) then
+        if operatorIdentifiers |> Set.contains identifier then
             true
         else
             if identifier.StartsWith("op_") && identifier.Length > 3 then
@@ -196,11 +151,3 @@ module AstInfo =
                 isSequenceOfOperators identifier
             else
                 false
-
-    /// Lambda arguments (after the first argument) are curried and represented as such internally.
-    /// e.g. fun x y -> () will be represented in the AST as fun x -> fun y -> ().
-    /// This function returns true if the given lambda is an argument.
-    let isLambdaALambdaArgument = function
-        | AstNode.Expression(SynExpr.Lambda(_, _, _, SynExpr.Lambda(_, _, _, _, nestedRange), range)) -> 
-            range.StartLine = nestedRange.StartLine && range.StartColumn = nestedRange.StartColumn
-        | _ -> false

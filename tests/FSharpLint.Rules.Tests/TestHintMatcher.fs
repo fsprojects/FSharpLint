@@ -18,12 +18,15 @@
 
 module TestHintMatcher
 
+open System.Diagnostics
+open System.IO
 open NUnit.Framework
 open FParsec
+open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintMatcher
-open FSharpLint.Framework.LoadVisitors
+open FSharpLint.Rules.HintMatcher
+open Microsoft.FSharp.Compiler.SourceCodeServices
 
 let generateHintConfig hints =
     let parseHints hints =
@@ -41,7 +44,12 @@ let generateHintConfig hints =
     
 [<TestFixture>]
 type TestHintMatcher() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor getHintsFromConfig))
+    inherit TestRuleBase.TestRuleBase(analyser getHintsFromConfig)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of hint matcher analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 50)
 
     [<Test>]
     member this.MatchNotEqualHint() = 
@@ -87,15 +95,26 @@ module Goat
 4 + %4""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
-
+        
     [<Test>]
-    member this.MatchAddressOfPrefixExpression() = 
+    member this.``Match address of operator with a single ampersand in expression``() =  
         let config = generateHintConfig ["4 + &4 ===> 8"]
 
         this.Parse("""
 module Goat
 
 4 + &4""", config)
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+
+    [<Test>]
+    member this.``Match address of operator with two ampersands in expression``() = 
+        let config = generateHintConfig ["4 + &&4 ===> 8"]
+
+        this.Parse("""
+module Goat
+
+4 + &&4""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -267,7 +286,7 @@ module Goat
 
     [<Test>]
     member this.MatchListAppendItemInPattern() = 
-        let config = generateHintConfig ["x::[] ===> [x]"]
+        let config = generateHintConfig ["pattern: x::[] ===> [x]"]
 
         this.Parse("""
 module Goat
@@ -280,7 +299,7 @@ match [] with
 
     [<Test>]
     member this.MatchTupleInPattern() = 
-        let config = generateHintConfig ["(_, []) ===> []"]
+        let config = generateHintConfig ["pattern: (_, []) ===> []"]
 
         this.Parse("""
 module Goat
@@ -293,7 +312,7 @@ match ([], []) with
 
     [<Test>]
     member this.MatchIntegerConstantInPattern() = 
-        let config = generateHintConfig ["0 ===> 0"]
+        let config = generateHintConfig ["pattern: 0 ===> 0"]
 
         this.Parse("""
 module Goat
@@ -306,7 +325,7 @@ match 0 with
 
     [<Test>]
     member this.MatchListInPattern() = 
-        let config = generateHintConfig ["[0; 1; 2] ===> 0"]
+        let config = generateHintConfig ["pattern: [0; 1; 2] ===> 0"]
 
         this.Parse("""
 module Goat
@@ -319,7 +338,7 @@ match [] with
 
     [<Test>]
     member this.MatchArrayInPattern() = 
-        let config = generateHintConfig ["[|0; 1; 2|] ===> 0"]
+        let config = generateHintConfig ["pattern: [|0; 1; 2|] ===> 0"]
 
         this.Parse("""
 module Goat
@@ -343,65 +362,13 @@ Array.isEmpty [||]""", config)
 
     [<Test>]
     member this.MatchOrPattern() = 
-        let config = generateHintConfig ["[] | [0] ===> []"]
+        let config = generateHintConfig ["pattern: [] | [0] ===> []"]
 
         this.Parse("""
 module Goat
 
 match [] with
 | [] | [0] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-        
-    [<Test>]
-    member this.MatchAndPattern() = 
-        let config = generateHintConfig ["[] & [0] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-
-    [<Test>]
-    member this.MatchMultipleAndPatterns() = 
-        let config = generateHintConfig ["[] & [0] & [1] & [2] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] & [1] & [2] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-        
-    [<Test>]
-    member this.MatchAndPatternsInsideMultipleAndPatterns() = 
-        let config = generateHintConfig ["[0] & [1] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [] & [0] & [1] & [2] -> ()
-| _ -> ()""", config)
-
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
-
-    [<Test>]
-    member this.MatchAndPatternsAndOrPatterns() = 
-        let config = generateHintConfig ["[0] & [1] | [1] & [2] ===> []"]
-
-        this.Parse("""
-module Goat
-
-match [] with
-| [0] & [1] | [1] & [2] -> ()
 | _ -> ()""", config)
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
@@ -611,13 +578,13 @@ let foo x = if (x = true) then 0 else 1""", config)
     /// Parentheses around patterns matched by hints were causing duplicate warnings
     [<Test>]
     member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() = 
-        let config = generateHintConfig ["[0] & [1] ===> []"]
+        let config = generateHintConfig ["pattern: [0] | [1] ===> []"]
         
         this.Parse("""
 module Goat
 
 match [] with
-| ([0] & [1]) -> ()
+| ([0] | [1]) -> ()
 | _ -> ()""", config)
 
         Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
@@ -669,7 +636,7 @@ TakesDelegate().Foo("", fun _ -> ())""", config, checkInput = true)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
-    member this.``Lambdas should be suggested to be functions if in obj method call that takes function type (multiple args).``() = 
+    member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type (multiple args).``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
         this.Parse("""
@@ -685,7 +652,7 @@ object.Foo("", fun _ -> ())""", config, checkInput = true)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
-    member this.``Lambdas should be suggested to be functions if in obj method call that takes function type.``() = 
+    member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type.``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
         this.Parse("""

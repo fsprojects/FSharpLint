@@ -21,7 +21,6 @@ module TestNumberOfItemsRules
 open NUnit.Framework
 open FSharpLint.Rules.NumberOfItems
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 
@@ -44,10 +43,10 @@ let config =
                             [ ("Enabled", Enabled(true)) 
                               ("MaxItems", MaxItems(4)) ] }) ]
                   Settings = Map.empty }) ]
-
+                   
 [<TestFixture>]
 type TestNumberOfItemsRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]
     member this.SixParameters() = 

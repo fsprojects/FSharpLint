@@ -24,51 +24,36 @@ module NestedStatements =
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Framework.LoadVisitors
 
     [<Literal>]
     let AnalyserName = "NestedStatements"
-
-    let configDepth config =
+    
+    let private configDepth config =
         match isAnalyserEnabled config AnalyserName with
-        | Some(analyserSettings) when analyserSettings.ContainsKey "Depth" ->
-            match analyserSettings.["Depth"] with
-            | Depth(l) -> Some(l)
-            | _ -> None
+        | Some(analyser) ->
+            match Map.tryFind "Depth" analyser.Settings with
+            | Some(Depth(l)) -> Some(l)
+            | Some(_) | None -> None
         | Some(_) | None -> None
 
-    let error (depth:int) =
+    let private error (depth:int) =
         let errorFormatString = Resources.GetString("RulesNestedStatementsError")
         String.Format(errorFormatString, depth)
-
-    exception UnexpectedNodeTypeException of string
 
     /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
     /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
     /// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
-    let isCompilerGeneratedMatch = function
-        | AstNode.Expression(SynExpr.Match(_, SynExpr.Ident(ident), _, _, _)) 
-                when ident.idText.StartsWith("_arg") ->
-            true
+    let private isCompilerGeneratedMatch = function
+        | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
         | _ -> false
 
-    let elseIfVisitor visitor depth visitorInfo checkFile =
-        ContinueWithVisitorsForChildren (fun childi childNode ->
-            match (childi, childNode) with
-            | (2, AstNode.Expression(SynExpr.IfThenElse(_))) ->
-                Some(visitor depth visitorInfo checkFile)
-            | _ -> Some(visitor (depth + 1) visitorInfo checkFile))
-    
-    let rec visitor depth (visitorInfo:VisitorInfo) checkFile astNode = 
-        match astNode.Node with
+    let private areChildrenNested = function
         | AstNode.Binding(SynBinding.Binding(_))
         | AstNode.Expression(SynExpr.Lambda(_))
         | AstNode.Expression(SynExpr.MatchLambda(_))
         | AstNode.Expression(SynExpr.IfThenElse(_))
         | AstNode.Expression(SynExpr.Lazy(_))
-        | AstNode.Expression(SynExpr.Match(_))
         | AstNode.Expression(SynExpr.Record(_))
         | AstNode.Expression(SynExpr.ObjExpr(_))
         | AstNode.Expression(SynExpr.TryFinally(_))
@@ -77,32 +62,80 @@ module NestedStatements =
         | AstNode.Expression(SynExpr.Quote(_))
         | AstNode.Expression(SynExpr.While(_))
         | AstNode.Expression(SynExpr.For(_))
-        | AstNode.Expression(SynExpr.ForEach(_)) as node 
-                when astNode.IsSuppressed(AnalyserName) |> not && 
-                        not (isLambdaALambdaArgument node || isCompilerGeneratedMatch node) -> 
+        | AstNode.Expression(SynExpr.ForEach(_)) -> true
+        | AstNode.Expression(SynExpr.Match(_) as matchExpr) when not (isCompilerGeneratedMatch matchExpr) -> true
+        | _ -> false
 
-            let range () =
-                match node with 
-                | AstNode.Expression(node) -> node.Range
-                | AstNode.Binding(node) -> node.RangeOfBindingAndRhs
-                | _ -> raise <| UnexpectedNodeTypeException("Expected an Expression or Binding node")
+    let private getRange = function 
+        | AstNode.Expression(node) -> Some node.Range
+        | AstNode.Binding(node) -> Some node.RangeOfBindingAndRhs
+        | _ -> None
 
-            match configDepth visitorInfo.Config with
-            | Some(errorDepth) when depth >= errorDepth ->
-                visitorInfo.PostError (range()) (error errorDepth)
-                Stop
-            | Some(_) ->
-                match astNode.Node with
+    let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i j =
+        let mutable i = i
+        let mutable j = j
+        let mutable distance = 0
+
+        while i <> j do
+            if i > j then
+                if areChildrenNested syntaxArray.[i].Actual then
+                    distance <- distance + 1
+
+                i <- skipArray.[i].ParentIndex
+            else
+                j <- skipArray.[j].ParentIndex
+
+        distance
+
+    let analyser visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+        let isSuppressed i =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName AbstractSyntaxArray.SuppressRuleWildcard
+
+        match configDepth visitorInfo.Config with
+        | Some(errorDepth) ->
+            let error = error errorDepth
+
+            /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo 
+            /// e.g. lambda arg being a duplicate of the lamdba.
+            let isMetaData node i =
+                let parentIndex = skipArray.[i].ParentIndex
+                if parentIndex = i then false
+                else
+                    Object.ReferenceEquals(node, syntaxArray.[parentIndex].Actual)
+
+            let isElseIf node i =
+                match node with
                 | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-                    elseIfVisitor visitor depth visitorInfo checkFile
-                | _ -> ContinueWithVisitor(visitor (depth + 1) visitorInfo checkFile)
-            | None -> Stop
-        | _ -> Continue
+                    let parentIndex = skipArray.[i].ParentIndex
+                    if parentIndex = i then false
+                    else
+                        match syntaxArray.[parentIndex].Actual with
+                        | AstNode.Expression(SynExpr.IfThenElse(_, _, Some(_), _, _, _, _)) -> true
+                        | _ -> false
+                | _ -> false
 
-    type RegisterNestedStatementsVisitor() = 
-        let plugin =
-            { Name = AnalyserName
-              Visitor = Ast(visitor 0) }
+            let mutable depth = 0
+            let mutable i = 0
+            while i < syntaxArray.Length do
+                if i + 1 < syntaxArray.Length then
+                    // If next node in array is not a sibling or child of the current node.
+                    let parent = skipArray.[i + 1].ParentIndex
+                    if parent <> i && parent <> skipArray.[i].ParentIndex then
+                        // Decrement depth until we reach a common parent.
+                        depth <- depth - (distanceToCommonParent syntaxArray skipArray i (i + 1))
 
-        interface IRegisterPlugin with
-            member __.RegisterPlugin = plugin
+                let node = syntaxArray.[i].Actual
+
+                if areChildrenNested node && not <| isMetaData node i && not <| isElseIf node i then
+                    if depth >= errorDepth then
+                        if not (isSuppressed i) then
+                            getRange node |> Option.iter (fun range -> visitorInfo.PostError range error)
+                    
+                        // Skip children as we've had an error containing them.
+                        i <- i + skipArray.[i].NumberOfChildren
+                    else
+                        depth <- depth + 1
+
+                i <- i + 1
+        | None -> ()

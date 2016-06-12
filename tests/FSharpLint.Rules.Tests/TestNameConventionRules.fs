@@ -21,7 +21,6 @@ module TestNameConventionRules
 open NUnit.Framework
 open FSharpLint.Rules.NameConventions
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let config = 
     let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
@@ -43,10 +42,15 @@ let config =
                   ("PublicValuesPascalOrCamelCase", ruleEnabled) 
                   ("NonPublicValuesCamelCase", ruleEnabled) ] 
               Settings = Map.ofList [] }) ]
-
+              
 [<TestFixture>]
 type TestNameConventionRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of naming analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
     member __.IsPascalCase() = 
@@ -421,10 +425,21 @@ module program
     member this.PublicTupleIsPascalCase() = 
         this.Parse """
 module program
-  let main = 
+
     let (Cat, _) = 1, 0"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 9))
+
+    /// A tuple inside a binding should be treated as private.
+    [<Test>]
+    member this.TupleInsideBindingExprIsPascalCase() = 
+        this.Parse """
+module program
+
+  let main =
+    let (Cat, _) = 1, 0"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 9))
 
     [<Test>]
     member this.PrivateTupleIsPascalCase() = 
@@ -1045,13 +1060,13 @@ type Cat() =
                 
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
-        this.Parse """
+        this.Parse ("""
 module program
 
 type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
-let Dog = 6"""
+let Dog = 6""", checkInput = true)
 
         Assert.IsFalse(this.ErrorExistsAt(7, 4))
                 

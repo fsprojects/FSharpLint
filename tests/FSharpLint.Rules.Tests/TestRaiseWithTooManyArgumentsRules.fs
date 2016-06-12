@@ -21,7 +21,6 @@ module TestRaiseWithTooManyArgumentsRules
 open NUnit.Framework
 open FSharpLint.Rules.RaiseWithTooManyArguments
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let config = 
     let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
@@ -36,10 +35,15 @@ let config =
                   ("InvalidArgWithTwoArguments", ruleEnabled) 
                   ("FailwithfWithArgumentsMatchingFormatString", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-
+               
 [<TestFixture>]
 type TestRaiseWithTooManyArgumentsRules() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of raise with too many args analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
     member this.FailwithWithCorrectNumberOfArguments() = 

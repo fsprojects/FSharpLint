@@ -39,10 +39,10 @@
           List.map f (List.replicate n x) ===> List.replicate n (f x)
           List.rev (List.rev x) ===> x
           Array.rev (Array.rev x) ===> x
-          List.fold (@) [] ===> List.concat
-          List.map id ===> id
-          Array.map id ===> id
-          Seq.map id ===> id
+          List.fold (@) [] x ===> List.concat x
+          List.map id x ===> id x
+          Array.map id x ===> id x
+          Seq.map id x ===> id x
           (List.length x) = 0 ===> List.isEmpty x
           (Array.length x) = 0 ===> Array.isEmpty x
           (Seq.length x) = 0 ===> Seq.isEmpty x
@@ -54,6 +54,10 @@
           (List.length x) > 0 ===> not (List.isEmpty x)
           (Array.length x) <> 0 ===> not (Array.isEmpty x)
           (Seq.length x) <> 0 ===> not (Seq.isEmpty x)
+          
+          List.concat (List.map f x) ===> List.collect f x
+          Array.concat (Array.map f x) ===> Array.collect f x
+          Seq.concat (Seq.map f x) ===> Seq.collect f x
 
           List.isEmpty (List.filter f x) ===> not (List.exists f x)
           Array.isEmpty (Array.filter f x) ===> not (Array.exists f x)
@@ -96,14 +100,15 @@
           x * 1 ===> x
           x / 1 ===> x
 
-          List.fold (+) 0 ===> List.sum
-          Array.fold (+) 0 ===> Array.sum
-          Seq.fold (+) 0 ===> Seq.sum
+          List.fold (+) 0 x ===> List.sum x
+          Array.fold (+) 0 x ===> Array.sum x
+          Seq.fold (+) 0 x ===> Seq.sum x
 
           List.empty ===> []
           Array.empty ===> [||]
 
           x::[] ===> [x]
+          pattern: x::[] ===> [x]
 
           x @ [] ===> x
 

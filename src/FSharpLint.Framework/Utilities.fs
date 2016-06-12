@@ -18,6 +18,13 @@
 
 namespace FSharpLint.Framework
 
+module Utilities =
+    
+    let hash2 one two =
+        let mutable current = 23
+        current <- current * 31 + hash one
+        current * 31 + hash two
+
 module ExpressionUtilities =
 
     open Microsoft.FSharp.Compiler
@@ -47,25 +54,9 @@ module ExpressionUtilities =
             PrettyNaming.DecompileOpName ident.idText
         else ident.idText
 
+    let identAsCompiledOpName = PrettyNaming.CompileOpName 
+
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x
         | x -> x
-        
-    let flattenFunctionApplication expr =
-        let rec flatten exprs = function
-            | SynExpr.App(_, _, x, y, _) -> 
-                match removeParens x with
-                | SynExpr.App(_, true, SynExpr.Ident(op), rightExpr, _) as infixApp ->
-                    match identAsDecompiledOpName op with
-                    | "|>" | "||>" | "|||>" ->
-                        let flattened = flatten [] y
-                        flattened@[rightExpr]
-                    | "<|" | "<||" | "<|||" ->
-                        let flattened = flatten [] rightExpr
-                        flattened@[y]
-                    | _ -> [infixApp]
-                | x -> flatten (removeParens y::exprs) x
-            | x -> x::exprs
-
-        flatten [] expr

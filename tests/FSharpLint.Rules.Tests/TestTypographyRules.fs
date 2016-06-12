@@ -21,7 +21,6 @@ module TestTypographyRules
 open NUnit.Framework
 open FSharpLint.Rules.Typography
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlankLines = 
     Map.ofList 
@@ -82,10 +81,15 @@ let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlank
             ]
 
 let config = setupConfig 0 false false
-
+ 
 [<TestFixture>]
-type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(PlainText(visitor), config)
+type TestTypography() =
+    inherit TestRuleBase.TestRuleBase(analyser, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of typography analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
     member this.TooManyCharactersOnLine() = 

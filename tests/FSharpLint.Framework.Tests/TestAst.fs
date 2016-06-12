@@ -62,14 +62,6 @@ let stubPropertyInitialiser propertyName value =
                 stubConstString value, 
                 range())
 
-let stubCurrentNodeInfo suppressedMessages =
-    {
-        Node = Type(SynType.Anon(range()))
-        ChildNodes = []
-        Breadcrumbs = []
-        SuppressedMessages = List.map (fun x -> (x, range())) suppressedMessages
-    }
-
 [<TestFixture>]
 type TestAst() =
 
@@ -152,7 +144,7 @@ type TestAst() =
         let attrs = getSuppressMessageAttributes binding
 
         Assert.AreEqual({ Category = "Analyser"; Rule = "*" }, attrs |> List.head |> fst)
-
+        (*
     [<Test>]
     member __.IsAnalyserSuppressedWithAllAnalyserRulesSuppressed() = 
         let currentNodeInfo = stubCurrentNodeInfo [{ Category = "Analyser"; Rule = "*" }]
@@ -215,28 +207,6 @@ let dog = ()"""
                 Assert.AreEqual(4, getSuppressMessageAttributesFromAst result.Ast |> List.length)
             | _ -> failwith "Failed to parse input."
 
-    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/125
-    [<Test>]
-    member __.``Deep AST should not cause a stack overflow.``() =
-        let input = @"let x = [" + (String.concat "" [for _ in 0..5000 -> "0;"]) + "]"
-
-        let stubConfig =
-            { UseTypeChecker = Some(false)
-              IgnoreFiles =
-                { IgnoreFiles.IgnoreFilesConfig.Update = IgnoreFiles.Overwrite
-                  IgnoreFiles.IgnoreFilesConfig.Files = []
-                  IgnoreFiles.IgnoreFilesConfig.Content = "" } |> Some
-              Analysers = Map.ofList [] }
-
-        match parseSource input stubConfig (FSharpChecker.Create()) with
-        | ParseFileResult.Success(result) -> 
-            let visitWholeTree = fun _ _ -> 
-                Assert.Less(System.Diagnostics.StackTrace().FrameCount, 1000)
-                Continue
-
-            lintFile (fun _ -> false) result [visitWholeTree]
-        | _ -> failwith "Failed to parse input."
-
     [<Test>]
     member __.GetStringLiteralsFromAst() =
         let input =
@@ -261,3 +231,4 @@ let escaped = @"test" """
             | ParseFileResult.Success(result) ->
                 Assert.AreEqual(3, getStringLiteralsFromAst result.Ast |> List.length)
             | _ -> failwith "Failed to parse input."
+            *)

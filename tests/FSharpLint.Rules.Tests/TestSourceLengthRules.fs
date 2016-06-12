@@ -21,7 +21,6 @@ module TestSourceLengthRules
 open NUnit.Framework
 open FSharpLint.Rules.SourceLength
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 [<Literal>]
 let FunctionLength = 70
@@ -113,10 +112,15 @@ let config =
                     Settings = Map.ofList [] }) ]
 
 let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.concat ""
-
+ 
 [<TestFixture>]
 type TestSourceLengthRules() = 
-    inherit TestRuleBase.TestRuleBase(Ast(visitor), config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of source length analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
     
     [<Test>]
     member this.ModuleTooManyLines() = 
@@ -449,3 +453,4 @@ module Program
     member this.Property1 with get() = 
         value"""
         Assert.IsFalse(this.ErrorExistsAt(5, 31))
+        

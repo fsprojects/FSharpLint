@@ -21,7 +21,6 @@ module TestNestedStatements
 open NUnit.Framework
 open FSharpLint.Rules.NestedStatements
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 
 let config = 
     Map.ofList 
@@ -36,10 +35,15 @@ let config =
                         ]
                 })
             ]
-
+ 
 [<TestFixture>]
 type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(Ast(visitor 0), config)
+    inherit TestRuleBase.TestRuleBase(analyser, config)
+
+    [<Category("Performance")>]
+    [<Test>]
+    member this.``Performance of nested statements analyser``() = 
+        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
     member this.NestedTooDeep() = 

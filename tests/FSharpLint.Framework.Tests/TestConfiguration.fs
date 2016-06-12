@@ -219,7 +219,7 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Config specifying hints writes correct XML document``() = 
-        let parsedHint = { Match = Expression.Wildcard; Suggestion = Suggestion.Expr(Expression.Wildcard) }
+        let parsedHint = { Match = HintExpr Expression.Wildcard; Suggestion = Suggestion.Expr(Expression.Wildcard) }
 
         let hints =
             [ { Hint = "not (a =  b) ===> a <> b"; ParsedHint = parsedHint }

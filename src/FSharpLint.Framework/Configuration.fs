@@ -450,39 +450,36 @@ module Configuration =
     /// Checks if a analyser in the configuration is enabled.
     /// Returns the analyser settings if the analyser was enabled; None otherwise.
     let isAnalyserEnabled config analyserName =
-        if not <| config.Analysers.ContainsKey analyserName then
+        match Map.tryFind analyserName config.Analysers with
+        | Some(analyser) ->
+            let analyserSettings = analyser.Settings
+
+            match Map.tryFind "Enabled" analyserSettings with
+            | Some(Enabled(false)) -> None
+            | _ -> Some(analyser)
+        | None ->
             sprintf "Expected %s analyser in config." analyserName
             |> ConfigurationException
             |> raise
-
-        let analyserSettings = config.Analysers.[analyserName].Settings
-
-        if analyserSettings.ContainsKey "Enabled" then
-            match analyserSettings.["Enabled"] with 
-            | Enabled(true) -> Some(analyserSettings)
-            | _ -> None
-        else Some(analyserSettings)
 
     /// Checks if a rule in the configuration is enabled and the analyser it's within is also enabled.
     /// Returns the analyser settings and rule settings if the rule was enabled; None otherwise.
     let isRuleEnabled config analyserName ruleName =
         match isAnalyserEnabled config analyserName with
-        | Some(analyserSettings) ->
-            let rules = config.Analysers.[analyserName].Rules
+        | Some(analyser) ->
+            let rules = analyser.Rules
 
-            if not <| rules.ContainsKey ruleName then 
+            match Map.tryFind ruleName rules with 
+            | Some(rule) ->
+                let ruleSettings = rule.Settings
+
+                match Map.tryFind "Enabled" ruleSettings with
+                | Some(Enabled(true)) -> Some(analyser.Settings, ruleSettings)
+                | _ -> None
+            | None ->
                 sprintf "Expected rule %s for %s analyser in config." ruleName analyserName
                 |> ConfigurationException
                 |> raise
-
-            let ruleSettings = rules.[ruleName].Settings
-
-            if ruleSettings.ContainsKey "Enabled" then
-                match ruleSettings.["Enabled"] with 
-                | Enabled(true) -> Some(analyserSettings, ruleSettings)
-                | _ -> None
-            else
-                None
         | None -> None
 
     /// Module to manage the loading and updating of configuration files.

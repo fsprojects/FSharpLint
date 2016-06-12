@@ -18,12 +18,13 @@
 
 module TestRuleBase
 
+open System.Diagnostics
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.LoadVisitors
 open FSharpLint.Framework.ParseFile
 
 let emptyConfig =
@@ -34,8 +35,26 @@ let emptyConfig =
               [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
                        Settings = Map.ofList [] }) ] }
 
+[<Literal>]
+let SourceFile = "../../../TypeChecker.fs"
+
+let generateAst source =
+    let checker = FSharpChecker.Create()
+
+    let options = 
+        checker.GetProjectOptionsFromScript(SourceFile, source) 
+        |> Async.RunSynchronously
+
+    let parseResults =
+        checker.ParseFileInProject(SourceFile, source, options)
+        |> Async.RunSynchronously
+        
+    match parseResults.ParseTree with
+    | Some(parseTree) -> parseTree
+    | None -> failwith "Failed to parse file."
+
 [<AbstractClass>]
-type TestRuleBase(analyser:VisitorType, ?analysers) =
+type TestRuleBase(analyser, ?analysers) =
     let errorRanges = System.Collections.Generic.List<range * string>()
 
     let postError (range:range) error =
@@ -49,7 +68,40 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
               Analysers = analysers }
         | None -> emptyConfig
 
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion) = 
+    member __.TimeAnalyser(iterations, ?overrideConfig) =
+        let text = System.IO.File.ReadAllText SourceFile
+        let tree = text |> generateAst
+
+        let (array, skipArray) = AbstractSyntaxArray.astToArray tree
+
+        let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
+
+        let visitorInfo =
+            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
+
+        let stopwatch = Stopwatch.StartNew()
+        let times = ResizeArray()
+
+        for _ in 0..iterations do
+            stopwatch.Restart()
+
+            analyser 
+                visitorInfo
+                None
+                array
+                skipArray
+
+            stopwatch.Stop()
+
+            times.Add stopwatch.ElapsedMilliseconds
+
+        let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
+
+        System.Console.WriteLine(sprintf "Average runtime of analyser: %d (milliseconds)."  result)
+
+        result
+
+    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion): unit = 
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
@@ -64,20 +116,12 @@ type TestRuleBase(analyser:VisitorType, ?analysers) =
 
         let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
 
-        let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version }
+        let visitorInfo = { Config = config; PostError = postError; FSharpVersion = version; Text = input }
         
-        match parseSource input config (FSharpChecker.Create()), analyser with
-        | Success(parseInfo), Ast(visitor) ->
-            lintFile (fun _ -> false) parseInfo [visitor visitorInfo]
-        | Success(parseInfo), PlainText(visitor) -> 
-            let suppressedMessages = getSuppressMessageAttributesFromAst parseInfo.Ast
-            let stringLiterals = getStringLiteralsFromAst parseInfo.Ast
-            visitor
-                visitorInfo
-                { File = ""
-                  Input = input
-                  SuppressedMessages = suppressedMessages
-                  StringLiterals = stringLiterals }
+        match parseSource input config (FSharpChecker.Create()) with
+        | Success(parseInfo) ->
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
+            analyser visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =
