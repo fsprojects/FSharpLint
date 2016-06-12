@@ -4,3 +4,9 @@ branches:
 build_script:
   - cmd: .\build.cmd
 test: off
+artifacts:
+  - path: bin
+    name: Console Application Artifacts
+
+  - path: packaging\*.nupkg
+    name: NuGet packages
