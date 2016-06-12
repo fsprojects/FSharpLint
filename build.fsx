@@ -28,8 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.2.7"
-let apiVersion = "0.0.15-beta"
+let version = "1.0.0-beta"
 
 let packagingRoot = "./packaging/"
 let toolPackagingDir = packagingRoot @@ "tool"
@@ -161,9 +160,9 @@ Target "CreateApiPackage" (fun _ ->
             OutputPath = packagingRoot
             Summary = summaryApi
             WorkingDir = apiPackagingDir
-            Version = apiVersion
+            Version = version
             Publish = false
-            Dependencies = [("FSharp.Compiler.Service", "2.0.0.3")]
+            Dependencies = [("FSharp.Compiler.Service", "3.0.0.0")]
          })
         "FSharpLint.Core.nuspec"
 )

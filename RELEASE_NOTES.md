@@ -1,3 +1,8 @@
+##### 1.0.0-beta - June 12 2016
+
+* Improved overall performance of linter.
+* Updated default configuration to have opinionated rules off by default.
+
 ##### 0.2.7 - September 27 2015
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/126
