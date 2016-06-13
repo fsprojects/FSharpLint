@@ -434,6 +434,10 @@ module HintMatcher =
 
         left + inside + right
 
+    let private opToString = function
+        | Expression.Identifier(identifier) -> String.concat "." identifier
+        | x -> Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString()); ""
+
     let rec hintToString = function
         | HintExpr(Expression.Variable(x))
         | HintPat(Pattern.Variable(x)) -> x.ToString()
@@ -449,16 +453,16 @@ module HintMatcher =
             |> String.concat "."
         | HintExpr(Expression.FunctionApplication(expressions)) ->
             expressions |> surroundExpressionsString (HintExpr >> hintToString) "" "" " "
-        | HintExpr(Expression.InfixOperator(Expression.Identifier(opIdent), leftHint, rightHint)) ->
-            hintToString (HintExpr leftHint) + (String.concat "." opIdent) + hintToString (HintExpr rightHint)
+        | HintExpr(Expression.InfixOperator(operator, leftHint, rightHint)) ->
+            hintToString (HintExpr leftHint) + opToString operator + hintToString (HintExpr rightHint)
         | HintPat(Pattern.Cons(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "::" + hintToString (HintPat rightHint)
         | HintPat(Pattern.Or(leftHint, rightHint)) ->
             hintToString (HintPat leftHint) + "|" + hintToString (HintPat rightHint)
         | HintExpr(Expression.AddressOf(singleAmp, hint)) ->
             (if singleAmp then "&" else "&&") + hintToString (HintExpr hint)
-        | HintExpr(Expression.PrefixOperator(Expression.Identifier([operator]), hint)) ->
-            operator + hintToString (HintExpr hint)
+        | HintExpr(Expression.PrefixOperator(operator, hint)) ->
+            opToString operator + hintToString (HintExpr hint)
         | HintExpr(Expression.Parentheses(hint)) -> "(" + hintToString (HintExpr hint) + ")"
         | HintPat(Pattern.Parentheses(hint)) -> "(" + hintToString (HintPat hint) + ")"
         | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) -> 
