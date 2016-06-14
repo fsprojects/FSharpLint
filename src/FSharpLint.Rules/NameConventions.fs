@@ -69,6 +69,7 @@ module NameConventions =
                 | ModuleDeclaration(_)
                 | Identifier(_)
                 | SimplePattern(_)
+                | File(_)
                 | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
                 | TypeDefinition(_)
                 | Expression(_) -> isPublic publicSoFar true skipArray.[i].ParentIndex

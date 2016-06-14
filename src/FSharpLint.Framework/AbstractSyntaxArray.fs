@@ -145,6 +145,7 @@ module AbstractSyntaxArray =
         | SimplePatterns(_)
         | InterfaceImplementation(_)
         | TypeRepresentation(_)
+        | File(_)
         | AstNode.ComponentInfo(_) -> SyntaxNode.Other
         | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
         | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
@@ -239,11 +240,7 @@ module AbstractSyntaxArray =
                 this.SuppressedMessages |> List.exists isAnalyserSuppressed
         
     let astToArray ast =
-        let astRoot =
-            match ast with
-            | ParsedInput.ImplFile(ParsedImplFileInput(_,_,_,_,_,moduleOrNamespaces,_)) -> 
-                ModuleOrNamespace moduleOrNamespaces.[0]
-            | ParsedInput.SigFile _ -> failwith "Expected implementation file."
+        let astRoot = File ast
     
         let nodes = List<_>()
         let left = Stack<_>()

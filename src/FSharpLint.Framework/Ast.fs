@@ -79,6 +79,7 @@ module Ast =
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
         | Identifier of string list
+        | File of ParsedInput
 
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
     let getSuppressMessageAttributes node =
@@ -478,7 +479,10 @@ module Ast =
             [ yield! args |> List.map (fun arg -> Node(ExtraSyntaxInfo.LambdaArg, AstNode.SimplePatterns arg))
               yield Node(ExtraSyntaxInfo.LambdaBody, AstNode.Expression(body)) ]
         | Expression(x) -> expressionChildren x
+        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _))) -> 
+            moduleOrNamespaces |> List.map ModuleOrNamespace
 
+        | File(ParsedInput.SigFile(_))
         | ComponentInfo(_)
         | EnumCase(_)
         | UnionCase(_)
