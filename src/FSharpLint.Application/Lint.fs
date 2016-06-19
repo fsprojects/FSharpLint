@@ -110,19 +110,20 @@ module Lint =
     open System
     open System.Collections.Generic
     open System.IO
-    open Microsoft.Build.Exceptions
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint
     open FSharpLint.Framework
     open FSharpLint.Framework.AbstractSyntaxArray
-    
+          
+    type BuildFailure = | InvalidProjectFileMessage of string
+
     /// Reason for the linter failing.
     type LintFailure =
         /// Project file path did not exist on the local filesystem.
         | ProjectFileCouldNotBeFound of string
 
         /// Received exception when trying to get the list of F# file from the project file.
-        | MSBuildFailedToLoadProjectFile of string * InvalidProjectFileException
+        | MSBuildFailedToLoadProjectFile of string * BuildFailure
 
         /// Failed to load a FSharpLint configuration file.
         | FailedToLoadConfig of string
@@ -214,9 +215,9 @@ module Lint =
         let parseExceptionMessage str =
             let message = Text.RegularExpressions.Regex.Match(str, @"^.+Exception: (.*) Line \d")
             if message.Success && message.Groups.Count = 2 then
-                InvalidProjectFileException message.Groups.[1].Value
+                InvalidProjectFileMessage message.Groups.[1].Value
             else
-                InvalidProjectFileException str
+                InvalidProjectFileMessage str
 
         // Setting `FSharpLintEnabled` to `false` is very important as `ProjectCracker` can build the project file,
         // so if run as an msbuild task without this property we'd end up with an infinite loop of builds (taking out the machine).

@@ -95,9 +95,9 @@ module Program =
         | ProjectFileCouldNotBeFound(projectPath) ->
             let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
             Console.WriteLine(String.Format(formatString, projectPath))
-        | MSBuildFailedToLoadProjectFile(projectPath, e) ->
+        | MSBuildFailedToLoadProjectFile(projectPath, InvalidProjectFileMessage(message)) ->
             let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
-            Console.WriteLine(String.Format(formatString, projectPath, e.Message))
+            Console.WriteLine(String.Format(formatString, projectPath, message))
         | FailedToLoadConfig(message) ->
             let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
             Console.WriteLine(String.Format(formatString, message))

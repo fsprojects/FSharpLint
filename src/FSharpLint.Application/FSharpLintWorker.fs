@@ -42,8 +42,8 @@ module FSharpLintWorker =
             match lintProject options projectFile progress with
             | LintResult.Failure(ProjectFileCouldNotBeFound(projectPath)) -> 
                 failed "ConsoleProjectFileCouldNotBeFound" [|projectPath|]
-            | LintResult.Failure(MSBuildFailedToLoadProjectFile(projectPath, e)) -> 
-                failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; e.Message|]
+            | LintResult.Failure(MSBuildFailedToLoadProjectFile(projectPath, InvalidProjectFileMessage(message))) -> 
+                failed "ConsoleMSBuildFailedToLoadProjectFile" [|projectPath; message|]
             | LintResult.Failure(FailedToLoadConfig(message)) -> 
                 failed "ConsoleFailedToLoadConfig" [|message|]
             | LintResult.Failure(RunTimeConfigError) -> 

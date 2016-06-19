@@ -105,6 +105,8 @@ module Lint =
 
           /// Version of F# the source code of the file was written in.
           FSharpVersion: System.Version }
+          
+    type BuildFailure = | InvalidProjectFileMessage of string
 
     /// Reason for the linter failing.
     type LintFailure =
@@ -112,7 +114,7 @@ module Lint =
         | ProjectFileCouldNotBeFound of string
 
         /// Received exception when trying to get the list of F# file from the project file.
-        | MSBuildFailedToLoadProjectFile of string * Microsoft.Build.Exceptions.InvalidProjectFileException
+        | MSBuildFailedToLoadProjectFile of string * BuildFailure
 
         /// Failed to load a FSharpLint configuration file.
         | FailedToLoadConfig of string
