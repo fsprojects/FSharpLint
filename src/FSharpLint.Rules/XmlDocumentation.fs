@@ -1,5 +1,5 @@
 ﻿// FSharpLint, a linter for F#.
-// Copyright (C) 2016 Matthew Mcveigh
+// Copyright (C) 2016 Matthew Mcveigh, Jon Hamm
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
