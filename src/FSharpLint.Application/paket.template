@@ -6,5 +6,3 @@ summary
     API to programmatically run FSharpLint.
 tags
     F#, fsharp, lint, FSharpLint, fslint, api
-files
-    ../../lib/FParsec ==> lib/net45
