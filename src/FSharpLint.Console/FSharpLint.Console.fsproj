@@ -32,7 +32,7 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>$(SolutionDir)\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\MattMcveigh.FSharpLint.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>

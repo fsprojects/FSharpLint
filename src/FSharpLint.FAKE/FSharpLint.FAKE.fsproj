@@ -32,7 +32,7 @@
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <DocumentationFile>bin\Release\FSharpLint.FAKE.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
