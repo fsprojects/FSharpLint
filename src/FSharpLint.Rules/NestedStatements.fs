@@ -76,10 +76,10 @@ module NestedStatements =
 
         while i <> j do
             if i > j then
-                if areChildrenNested syntaxArray.[i].Actual then
-                    distance <- distance + 1
-
                 i <- skipArray.[i].ParentIndex
+
+                if i <> j && areChildrenNested syntaxArray.[i].Actual then
+                    distance <- distance + 1
             else
                 j <- skipArray.[j].ParentIndex
 
@@ -114,14 +114,18 @@ module NestedStatements =
                 | _ -> false
 
             let mutable depth = 0
-            let mutable i = 0
-            while i < syntaxArray.Length do
-                if i + 1 < syntaxArray.Length then
+
+            let decrementDepthToCommonParent i j =
+                if j < syntaxArray.Length then
                     // If next node in array is not a sibling or child of the current node.
-                    let parent = skipArray.[i + 1].ParentIndex
+                    let parent = skipArray.[j].ParentIndex
                     if parent <> i && parent <> skipArray.[i].ParentIndex then
                         // Decrement depth until we reach a common parent.
-                        depth <- depth - (distanceToCommonParent syntaxArray skipArray i (i + 1))
+                        depth <- depth - (distanceToCommonParent syntaxArray skipArray i j)
+                        
+            let mutable i = 0
+            while i < syntaxArray.Length do
+                decrementDepthToCommonParent i (i + 1)
 
                 let node = syntaxArray.[i].Actual
 
@@ -129,11 +133,14 @@ module NestedStatements =
                     if depth >= errorDepth then
                         if not (isSuppressed i) then
                             getRange node |> Option.iter (fun range -> visitorInfo.PostError range error)
-                    
+
                         // Skip children as we've had an error containing them.
-                        i <- i + skipArray.[i].NumberOfChildren
+                        let skipChildren = i + skipArray.[i].NumberOfChildren + 1
+                        decrementDepthToCommonParent i skipChildren
+                        i <- skipChildren
                     else
                         depth <- depth + 1
-
-                i <- i + 1
+                        i <- i + 1
+                else
+                    i <- i + 1
         | None -> ()
