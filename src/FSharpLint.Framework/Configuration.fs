@@ -491,12 +491,12 @@ module Configuration =
 
         type Path = string list
         
-        [<NoEquality; NoComparison>]
+        [<NoComparison>]
         type GlobalConfig = { Path: Path; Name: string; Configuration: Configuration option }
 
         /// Keeps configuration files loaded for a list of paths so that
         /// they can be quickly retrieved and updated
-        [<NoEquality; NoComparison>]
+        [<NoComparison>]
         type LoadedConfigs =
             { /// Cached configurations for each path.
               LoadedConfigs: Map<Path, Configuration option>
