@@ -61,6 +61,31 @@ let dog =
         Assert.IsTrue(this.ErrorExistsAt(9, 20)) 
 
     [<Test>]
+    member this.``Repeated nested too deep complains for correct ranges``() = 
+        this.Parse """
+module Program
+
+let dog =
+    if true then
+        if true then
+            if true then
+                if true then
+                    if true then
+                        if true then
+                            ()
+    if true then
+        if true then
+            if true then
+                if true then
+                    if true then
+                        if true then
+                            ()
+    ()"""
+    
+        Assert.IsTrue(this.ErrorExistsAt(9, 20)) 
+        Assert.IsTrue(this.ErrorExistsAt(16, 20)) 
+
+    [<Test>]
     member this.NestedTooDeepSuppressed() = 
         this.Parse """
 module Program
