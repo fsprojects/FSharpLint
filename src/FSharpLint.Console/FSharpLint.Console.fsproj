@@ -68,14 +68,6 @@
       <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.dll</HintPath>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="Microsoft.Build.Engine, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.Engine.dll</HintPath>
-      <SpecificVersion>True</SpecificVersion>
-    </Reference>
-    <Reference Include="Microsoft.Build.Framework, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>C:\Program Files (x86)\MSBuild\12.0\Bin\Microsoft.Build.Framework.dll</HintPath>
-      <SpecificVersion>True</SpecificVersion>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>

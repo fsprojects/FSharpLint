@@ -16,19 +16,20 @@
 
 namespace FSharpLint.MSBuildIntegration
 
+open Microsoft.Build.Framework
+open Microsoft.Build.Utilities
 open FSharpLint.Application
 open FSharpLint.Application.FSharpLintWorker
 
 type FSharpLintTask() = 
-    inherit Microsoft.Build.Utilities.Task()
+    inherit Task()
 
-    [<Microsoft.Build.Framework.Required>]
+    [<Required>]
     member val Project = "" with get, set
 
     member val TreatWarningsAsErrors = false with get, set
 
-    override this.Execute() =         
-        // Cannot close over `this` in the function passed to `RunLint` or it'll try to serialize `this` (which will throw an exception).
+    override this.Execute() = 
         let treatWarningsAsErrors = this.TreatWarningsAsErrors
         let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
         let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
