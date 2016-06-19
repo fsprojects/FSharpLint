@@ -26,6 +26,7 @@ module ParseFile =
     open Microsoft.FSharp.Compiler.SourceCodeServices
 
     /// Information for a file to be linted that is given to the visitors for them to analyse.
+    [<NoEquality; NoComparison>]
     type FileParseInfo =
         { /// Contents of the file.
           Text: string
@@ -38,11 +39,13 @@ module ParseFile =
 
           /// Path to the file.
           File: string }
-
+          
+    [<NoComparison>]
     type ParseFileFailure =
         | FailedToParseFile of FSharpErrorInfo []
         | AbortedTypeCheck
-
+        
+    [<NoComparison>]
     type ParseFileResult<'t> =
         | Failed of ParseFileFailure
         | Success of 't

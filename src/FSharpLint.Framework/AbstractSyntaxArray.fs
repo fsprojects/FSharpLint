@@ -150,7 +150,7 @@ module AbstractSyntaxArray =
         | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
         | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
 
-    [<Struct>]
+    [<Struct; NoEquality; NoComparison>]
     type Node(hashcode: int, actual: AstNode) = 
         member __.Hashcode = hashcode
         member __.Actual = actual
@@ -201,7 +201,7 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> hash x
         | _ -> 0
 
-    [<Struct>]
+    [<Struct; NoEquality; NoComparison>]
     type private StackedNode(node: Ast.Node, depth: int) = 
         member __.Node = node
         member __.Depth = depth
@@ -219,6 +219,7 @@ module AbstractSyntaxArray =
         member __.ParentIndex = parentIndex
 
     /// Contains information on the current node being visited.
+    [<NoEquality; NoComparison>]
     type CurrentNode =
         { Node: AstNode
           ChildNodes: AstNode list

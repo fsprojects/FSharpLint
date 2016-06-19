@@ -142,6 +142,7 @@ module HintParser =
             | And = 102uy
             | Or = 103uy
  
+        [<NoComparison>]
         type Node =
             { Edges: Edges
               MatchedHint: Hint list }

@@ -101,7 +101,8 @@ module Configuration =
         open System.Text.RegularExpressions
 
         type IsDirectory = | IsDirectory of bool
-
+        
+        [<NoComparison>]
         type Ignore =
             | Ignore of Regex list * IsDirectory
             | Negate of Regex list * IsDirectory
@@ -165,7 +166,8 @@ module Configuration =
         type IgnoreFilesUpdate = 
             | Add
             | Overwrite
-
+            
+        [<NoComparison>]
         type IgnoreFilesConfig =
             { Update: IgnoreFilesUpdate
               Files: Ignore list
@@ -209,7 +211,8 @@ module Configuration =
                    yield! settingsToXml this.Settings |]
 
             XElement(getName name, content) :> obj
-
+            
+    [<NoComparison>]
     type Configuration =
         { UseTypeChecker: bool option
           IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
@@ -487,11 +490,13 @@ module Configuration =
         open System.IO
 
         type Path = string list
-
+        
+        [<NoEquality; NoComparison>]
         type GlobalConfig = { Path: Path; Name: string; Configuration: Configuration option }
 
         /// Keeps configuration files loaded for a list of paths so that
-        /// they can be quickly retrieved and updated.
+        /// they can be quickly retrieved and updated
+        [<NoEquality; NoComparison>]
         type LoadedConfigs =
             { /// Cached configurations for each path.
               LoadedConfigs: Map<Path, Configuration option>

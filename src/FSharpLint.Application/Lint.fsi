@@ -30,7 +30,7 @@ module ConfigurationManagement =
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
         | RunTimeConfigError
         
-    [<RequireQualifiedAccess>]
+    [<RequireQualifiedAccess; NoComparison>]
     type ConfigurationResult = 
         | Success of Configuration
         | Failure of ConfigFailure
@@ -62,6 +62,7 @@ module Lint =
     open FSharpLint.Framework
 
     /// Provides information on what the linter is currently doing.
+    [<NoComparison>]
     type ProjectProgress =
         /// Started parsing a file (file path).
         | Starting of string
@@ -76,6 +77,7 @@ module Lint =
         member FilePath : unit -> string
 
     /// Optional parameters that can be provided to the linter.
+    [<NoEquality; NoComparison>]
     type OptionalLintParameters =
         { /// This function will be called as the linter progresses through the AST of each file.
           /// The linter will stop linting if this function returns true.
@@ -93,6 +95,7 @@ module Lint =
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
     /// you want to lint then this can be used to provide the parsed information to prevent the 
     /// linter from parsing the file again.
+    [<NoEquality; NoComparison>]
     type ParsedFileInformation =
         { /// File represented as an AST.
           Ast: Microsoft.FSharp.Compiler.Ast.ParsedInput
@@ -109,6 +112,7 @@ module Lint =
     type BuildFailure = | InvalidProjectFileMessage of string
 
     /// Reason for the linter failing.
+    [<NoComparison>]
     type LintFailure =
         /// Project file path did not exist on the local filesystem.
         | ProjectFileCouldNotBeFound of string
@@ -129,7 +133,7 @@ module Lint =
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
         
     /// Result of running the linter.
-    [<RequireQualifiedAccess>]
+    [<NoComparison; RequireQualifiedAccess>]
     type LintResult = 
         | Success of LintWarning.Warning list
         | Failure of LintFailure

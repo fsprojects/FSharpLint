@@ -30,6 +30,7 @@ module Binding =
     let isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
+    [<NoEquality; NoComparison>]
     type VisitorParameters =
         { VisitorInfo: VisitorInfo
           CheckFile: FSharpCheckFileResults option }

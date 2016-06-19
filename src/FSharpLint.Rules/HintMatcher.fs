@@ -121,7 +121,8 @@ module HintMatcher =
         let rec removeParens = function
             | AstNode.Expression(SynExpr.Paren(x, _, _, _)) -> x |> AstNode.Expression |> removeParens
             | x -> x
-
+            
+        [<NoEquality; NoComparison>]
         type Arguments =
             { LambdaArguments: Map<char, string>
               Expression: AstNode

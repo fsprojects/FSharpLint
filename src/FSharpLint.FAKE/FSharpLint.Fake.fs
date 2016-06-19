@@ -40,7 +40,8 @@ let private defaultErrorReceived (error:LintWarning.Warning) =
     let formattedError = LintWarning.getWarningWithLocation error.Range error.Input
     error.Info + System.Environment.NewLine + formattedError
     |> Console.WriteLine
-
+    
+[<NoEquality; NoComparison>]
 type LintOptions =
     { Progress: ProjectProgress -> unit
       ErrorReceived: LintWarning.Warning -> unit

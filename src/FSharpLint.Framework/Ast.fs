@@ -35,8 +35,7 @@ module Ast =
           Rule: string }
     
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
-    [<NoEquality>]
-    [<NoComparison>]
+    [<NoEquality; NoComparison>]
     type VisitorInfo =
         {  /// Version of F# the source that's being analysed was written in.
           FSharpVersion: Version
@@ -55,6 +54,7 @@ module Ast =
             | Some(_) | None -> false
 
     /// Nodes in the AST to be visited.
+    [<NoEquality; NoComparison>]
     type AstNode =
         | Expression of SynExpr
         | Pattern of SynPat
@@ -166,7 +166,8 @@ module Ast =
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 
             Some(flatten [] functionApplication, range)
         | _ -> None
-
+        
+    [<NoEquality; NoComparison>]
     type Lambda = { Arguments: SynSimplePats list; Body: SynExpr }
 
     let (|Lambda|_|) lambda = 
@@ -214,7 +215,7 @@ module Ast =
         | Else = 3uy
         | None = 255uy
 
-    [<Struct>]
+    [<Struct; NoEquality; NoComparison>]
     type Node(extraInfo:ExtraSyntaxInfo, astNode:AstNode) = 
         member __.ExtraSyntaxInfo = extraInfo
         member __.AstNode = astNode
