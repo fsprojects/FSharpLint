@@ -1,4 +1,4 @@
-##### 1.0.0-beta - June 12 2016
+##### 0.3.0-beta - June 19 2016
 
 * Improved overall performance of linter.
 * Updated default configuration to have opinionated rules off by default.
