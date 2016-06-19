@@ -315,10 +315,9 @@ module Configuration =
 
     let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
         [ for keyValuePair in oldMap do
-            if newMap |> Map.containsKey keyValuePair.Key then
-                yield (keyValuePair.Key, overwriteValue keyValuePair.Value newMap.[keyValuePair.Key])
-            else
-                yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList
+            match Map.tryFind keyValuePair.Key newMap with
+            | Some(value) -> yield (keyValuePair.Key, overwriteValue keyValuePair.Value value)
+            | None -> yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList                
 
     let private overrideRuleSettings _ newProperty = newProperty
 

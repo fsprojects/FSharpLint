@@ -118,11 +118,11 @@ module Typography =
     module MaxLinesInFile =
         let private maxLinesInFile config =
             match isRuleEnabled config AnalyserName "MaxLinesInFile" with
-            | Some(_, ruleSettings) when ruleSettings.ContainsKey "Lines" -> 
-                match ruleSettings.["Lines"] with
-                | Lines(lines) -> Some(lines)
-                | _ -> None
-            | _ -> None
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "Lines" ruleSettings with
+                | Some(Lines(lines)) -> Some(lines)
+                | Some(_) | None -> None
+            | None -> None
 
         let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines line maxLines =
             if numberOfLines > maxLines then
