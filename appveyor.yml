@@ -1,9 +1,18 @@
+os: Visual Studio 2015
+
+init:
+  - git config --global core.autocrlf input
+
 branches:
   only:
     - master
+
 build_script:
+  - ps: dotnet --info
   - cmd: .\build.cmd
+
 test: off
+
 artifacts:
   - path: bin
     name: Console Application Artifacts

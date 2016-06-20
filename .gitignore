@@ -6,6 +6,10 @@
 *.user
 *.sln.docstates
 
+#dotnetcore
+
+project.lock.json
+
 # Build results
 
 [Dd]ebug/
