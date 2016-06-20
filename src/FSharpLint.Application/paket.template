@@ -1,5 +1,6 @@
 type project
 id FSharpLint.Core
+title FSharpLint.Core
 licenseUrl https://github.com/fsprojects/FSharpLint/blob/master/LICENSE
 projecturl http://fsprojects.github.com/FSharpLint
 authors Matthew Mcveigh
