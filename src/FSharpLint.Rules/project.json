@@ -23,7 +23,7 @@
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
     "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-00001",
     "FParsec": "1.0.2",
-    "NETStandard.Library": "1.5.0-rc2-24027",
+    "NETStandard.Library": "1.5.0-rc2-*",
     "FSharpLint.Framework":{
       "version":"1.0.0",
       "target":"project"
