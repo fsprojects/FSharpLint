@@ -15,7 +15,7 @@
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
       "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.0.0-rc2-*"
+          "version": "1.0.0-rc2-3002702"
       },
     "FSharpLint.Framework":{
       "version":"1.0.0",
