@@ -1,6 +1,7 @@
 {
   "name": "FSharpLint.Framework.Tests",
   "version": "1.0.0-*",
+  "testRunner": "nunit",
 
   "buildOptions": {
     "compilerName": "fsc",
