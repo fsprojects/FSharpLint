@@ -22,6 +22,7 @@ namespace FSharpLint.Framework
 /// so properties in the original configuration file not in the new configuration file will remain.
 module Configuration =
 
+    open System.Reflection
     open System.Xml.Linq
 
     [<Literal>]
@@ -439,7 +440,7 @@ module Configuration =
     /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
     /// This function loads and returns this default configuration.
     let defaultConfiguration =
-        let assembly = typeof<Configuration>.Assembly
+        let assembly = typeof<Configuration>.GetTypeInfo().Assembly
         let resourceName = "DefaultConfiguration.FSharpLint"
 
         use stream = assembly.GetManifestResourceStream(resourceName)

@@ -617,13 +617,13 @@ module HintParser =
             skipChar '"' 
             >>. many pstringchar 
             .>> skipString "\"B"
-            |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
+            |>> (charListToString >> System.Text.Encoding.UTF8.GetBytes >> Bytes)
 
         let pverbatimbytearray: Parser<Constant, unit> = 
             skipString "@\"" 
             >>. many pverbatimstringchar 
             .>> skipString "\"B"
-            |>> (charListToString >> System.Text.Encoding.Default.GetBytes >> Bytes)
+            |>> (charListToString >> System.Text.Encoding.UTF8.GetBytes >> Bytes)
 
         let ptriplequotedstring: Parser<string, unit> =
             skipString "\"\"\"" 
