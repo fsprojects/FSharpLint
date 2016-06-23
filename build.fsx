@@ -127,31 +127,27 @@ Target "Lint" (fun _ ->
 // .NET CLI and .NET Core
 
 let assertExitCodeZero x = if x = 0 then () else failwithf "Command failed with exit code %i" x
-let netcoreFW = "netstandard1.5"
 
 Target "DotnetCliBuild" (fun _ ->
     Shell.Exec("dotnet", "restore") |> assertExitCodeZero
-    Shell.Exec("dotnet", sprintf "--verbose build --framework %s --configuration Release" netcoreFW, "src/FSharpLint.Application") |> assertExitCodeZero
+    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Application") |> assertExitCodeZero
 )
 
 Target "DotnetCliRunTests" (fun _ ->
     // Run tests (FSharpLint.Framework.Tests)
-    Shell.Exec("dotnet", sprintf "--verbose run --framework %s --configuration Release" netcoreFW, "tests/FSharpLint.Framework.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", "--verbose test --configuration Release", "tests/FSharpLint.Framework.Tests") |> assertExitCodeZero
 
     // Run tests (FSharpLint.Rules.Tests) 
-    Shell.Exec("dotnet", sprintf "--verbose run --framework %s --configuration Release" netcoreFW, "tests/FSharpLint.Rules.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", "--verbose test --configuration Release", "tests/FSharpLint.Rules.Tests") |> assertExitCodeZero
 )
 
-let isDotnetCLIInstalled = Shell.Exec("dotnet", "--version") = 0
+let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
 
 Target "AddNetcoreToNupkg" (fun _ ->
     let nupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
-
-    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Application") |> assertExitCodeZero
-
     let netcoreNupkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
 
-    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework "%s" """ nupkg netcoreNupkg netcoreFW, "src/FSharpLint.Application/") |> assertExitCodeZero
+    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Application/") |> assertExitCodeZero
 )
 
 // --------------------------------------------------------------------------------------
