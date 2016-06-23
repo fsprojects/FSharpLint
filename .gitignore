@@ -181,6 +181,7 @@ nuget/*.nupkg
 tools/
 !docs/tools
 *.nupkg
+.fake/
 
 packaging/api/lib
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/
