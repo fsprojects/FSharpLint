@@ -18,7 +18,6 @@
     }
   },
 
-  // Supposedly deprecated and replaced by embed but no clear way to specify a named resource shown in any documentation
   "resource": [
     "DefaultConfiguration.FSharpLint",
     "Text.resx"
