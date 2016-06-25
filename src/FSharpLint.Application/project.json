@@ -21,11 +21,13 @@
     "NETStandard.Library": "1.5.0-rc2-*",
     "FSharpLint.Framework":{
       "version":"1.0.0",
-      "target":"project"
+      "target":"project",
+      "type": "build"
     },
     "FSharpLint.Rules":{
       "version":"1.0.0",
-      "target":"project"
+      "target":"project",
+      "type": "build"
     }
   },
   "tools": {
