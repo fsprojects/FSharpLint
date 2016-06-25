@@ -79,9 +79,6 @@ type Duck(info:string) =
     do ()
 
 let f = List.map (fun x -> Duck x) ["1";"2"]
-
-open System
-let f = List.map (fun x -> Uri x) ["1";"2"]
 """, checkInput = true, fsharpVersion = System.Version(3, 1))
 
         this.AssertNoWarnings()
@@ -92,7 +89,11 @@ let f = List.map (fun x -> Uri x) ["1";"2"]
         this.Parse("""
 module Program
 
-let f = List.map (fun x -> System.Uri x) ["1";"2"]
+module Foo =
+    type Duck(info:string) =
+        do ()
+
+let f = List.map (fun x -> Foo.Duck x) ["1";"2"]
 """, checkInput = true, fsharpVersion = System.Version(3, 1))
 
         this.AssertNoWarnings()
