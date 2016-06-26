@@ -16,15 +16,7 @@
           "type": "platform",
           "version": "1.0.0-rc2-3002702"
       },
-    "FSharpLint.Framework.netcore":{
-      "target":"project",
-      "type": "build"
-    },
-    "FSharpLint.Rules.netcore":{
-      "target": "project",
-      "type": "build"
-    },
-    "FSharpLint.Application.netcore":{
+    "FSharpLint.Core.netcore":{
       "target":"project",
       "type": "build"
     }

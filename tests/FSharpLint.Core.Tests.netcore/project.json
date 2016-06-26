@@ -6,17 +6,24 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "../FSharpLint.Rules.Tests/TestRuleBase.fs",
-        "../FSharpLint.Rules.Tests/TestNameConventionRules.fs",
-        "../FSharpLint.Rules.Tests/TestBindingRules.fs",
-        "../FSharpLint.Rules.Tests/TestNumberOfItemsRules.fs",
-        "../FSharpLint.Rules.Tests/TestXmlDocumentationRules.fs",
-        "../FSharpLint.Rules.Tests/TestSourceLengthRules.fs",
-        "../FSharpLint.Rules.Tests/TestNestedStatementsRules.fs",
-        "../FSharpLint.Rules.Tests/TestTypographyRules.fs",
-        "../FSharpLint.Rules.Tests/TestFunctionReimplementationRules.fs",
-        "../FSharpLint.Rules.Tests/TestHintMatcher.fs",
-        "../FSharpLint.Rules.Tests/TestRaiseWithTooManyArgumentsRules.fs"
+        "../FSharpLint.Core.Tests/Framework/TestConfiguration.fs",
+        "../FSharpLint.Core.Tests/Framework/TestAstInfo.fs",
+        "../FSharpLint.Core.Tests/Framework/TestHintParser.fs",
+        "../FSharpLint.Core.Tests/Framework/TestAst.fs",
+        "../FSharpLint.Core.Tests/Framework/TestFuzzyHintMatcher.fs",
+        "../FSharpLint.Core.Tests/Framework/TestAbstractSyntaxArray.fs",
+
+        "../FSharpLint.Core.Tests/Rules/TestRuleBase.fs",
+        "../FSharpLint.Core.Tests/Rules/TestNameConventionRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestBindingRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestNumberOfItemsRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestXmlDocumentationRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestSourceLengthRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestNestedStatementsRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestTypographyRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestFunctionReimplementationRules.fs",
+        "../FSharpLint.Core.Tests/Rules/TestHintMatcher.fs",
+        "../FSharpLint.Core.Tests/Rules/TestRaiseWithTooManyArgumentsRules.fs"
       ]
     }
   },
@@ -28,13 +35,7 @@
     },
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
     "FParsec": "1.0.2",
-    "FSharpLint.Framework.netcore": {
-      "version": "*",
-      "target": "project",
-      "type": "build"
-    },
-    "FSharpLint.Rules.netcore": {
-      "version": "*",
+    "FSharpLint.Core.netcore": {
       "target": "project",
       "type": "build"
     },

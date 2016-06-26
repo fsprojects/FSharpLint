@@ -3,12 +3,33 @@
   "buildOptions": {
     "compilerName": "fsc",
     "compile": {
-      "includeFiles": [
-        "../FSharpLint.Application/LintWarning.fsi",
-        "../FSharpLint.Application/LintWarning.fs",
-        "../FSharpLint.Application/Lint.fsi",
-        "../FSharpLint.Application/Lint.fs",
-        "../FSharpLint.Application/FSharpLintWorker.fs"
+      "includeFiles": [      
+        "../FSharpLint.Core/Framework/Utilities.fs",
+        "../FSharpLint.Core/Framework/HintParser.fs",
+        "../FSharpLint.Core/Framework/Configuration.fs",
+        "../FSharpLint.Core/Framework/Ast.fs",
+        "../FSharpLint.Core/Framework/AstInfo.fs",
+        "../FSharpLint.Core/Framework/AbstractSyntaxArray.fs",
+        "../FSharpLint.Core/Framework/Resources.fs",
+        "../FSharpLint.Core/Framework/ParseFile.fs",
+        "../FSharpLint.Core/Framework/FuzzyHintMatcher.fs",
+                
+        "../FSharpLint.Core/Rules/NameConventions.fs",
+        "../FSharpLint.Core/Rules/NumberOfItems.fs",
+        "../FSharpLint.Core/Rules/Binding.fs",
+        "../FSharpLint.Core/Rules/XmlDocumentation.fs",
+        "../FSharpLint.Core/Rules/SourceLength.fs",
+        "../FSharpLint.Core/Rules/NestedStatements.fs",
+        "../FSharpLint.Core/Rules/Typography.fs",
+        "../FSharpLint.Core/Rules/FunctionReimplementation.fs",
+        "../FSharpLint.Core/Rules/HintMatcher.fs",
+        "../FSharpLint.Core/Rules/RaiseWithTooManyArguments.fs",
+
+        "../FSharpLint.Core/Application/LintWarning.fsi",
+        "../FSharpLint.Core/Application/LintWarning.fs",
+        "../FSharpLint.Core/Application/Lint.fsi",
+        "../FSharpLint.Core/Application/Lint.fs",
+        "../FSharpLint.Core/Application/FSharpLintWorker.fs"
       ]
     }
   },
@@ -17,15 +38,7 @@
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
     "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-00001",
     "FParsec": "1.0.2",
-    "NETStandard.Library": "1.5.0-rc2-*",
-    "FSharpLint.Framework.netcore":{
-      "target":"project",
-      "type": "build"
-    },
-    "FSharpLint.Rules.netcore":{
-      "target":"project",
-      "type": "build"
-    }
+    "NETStandard.Library": "1.5.0-rc2-*"
   },
   "tools": {
     "dotnet-compile-fsc": {
