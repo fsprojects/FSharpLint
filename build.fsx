@@ -130,15 +130,15 @@ let assertExitCodeZero x = if x = 0 then () else failwithf "Command failed with 
 
 Target "DotnetCliBuild" (fun _ ->
     Shell.Exec("dotnet", "restore") |> assertExitCodeZero
-    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Application") |> assertExitCodeZero
+    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Application.netcore") |> assertExitCodeZero
 )
 
 Target "DotnetCliRunTests" (fun _ ->
     // Run tests (FSharpLint.Framework.Tests)
-    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Framework.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Framework.Tests.netcore") |> assertExitCodeZero
 
     // Run tests (FSharpLint.Rules.Tests) 
-    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Rules.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Rules.Tests.netcore") |> assertExitCodeZero
 )
 
 let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
@@ -147,7 +147,7 @@ Target "AddNetcoreToNupkg" (fun _ ->
     let nupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
     let netcoreNupkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
 
-    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Application/") |> assertExitCodeZero
+    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Application.netcore") |> assertExitCodeZero
 )
 
 // --------------------------------------------------------------------------------------

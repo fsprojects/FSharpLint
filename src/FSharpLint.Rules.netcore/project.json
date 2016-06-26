@@ -1,15 +1,19 @@
 {
-  "name": "FSharpLint.Application",
   "version": "1.0.0-*",
   "buildOptions": {
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "LintWarning.fsi",
-        "LintWarning.fs",
-        "Lint.fsi",
-        "Lint.fs",
-        "FSharpLintWorker.fs"
+        "../FSharpLint.Rules/NameConventions.fs",
+        "../FSharpLint.Rules/NumberOfItems.fs",
+        "../FSharpLint.Rules/Binding.fs",
+        "../FSharpLint.Rules/XmlDocumentation.fs",
+        "../FSharpLint.Rules/SourceLength.fs",
+        "../FSharpLint.Rules/NestedStatements.fs",
+        "../FSharpLint.Rules/Typography.fs",
+        "../FSharpLint.Rules/FunctionReimplementation.fs",
+        "../FSharpLint.Rules/HintMatcher.fs",
+        "../FSharpLint.Rules/RaiseWithTooManyArguments.fs"
       ]
     }
   },
@@ -19,13 +23,7 @@
     "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-00001",
     "FParsec": "1.0.2",
     "NETStandard.Library": "1.5.0-rc2-*",
-    "FSharpLint.Framework":{
-      "version":"1.0.0",
-      "target":"project",
-      "type": "build"
-    },
-    "FSharpLint.Rules":{
-      "version":"1.0.0",
+    "FSharpLint.Framework.netcore":{
       "target":"project",
       "type": "build"
     }

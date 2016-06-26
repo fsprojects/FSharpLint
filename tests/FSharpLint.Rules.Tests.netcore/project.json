@@ -1,0 +1,64 @@
+{
+  "version": "1.0.0-*",
+  "testRunner": "nunit",
+
+  "buildOptions": {
+    "compilerName": "fsc",
+    "compile": {
+      "includeFiles": [
+        "../FSharpLint.Rules.Tests/TestRuleBase.fs",
+        "../FSharpLint.Rules.Tests/TestNameConventionRules.fs",
+        "../FSharpLint.Rules.Tests/TestBindingRules.fs",
+        "../FSharpLint.Rules.Tests/TestNumberOfItemsRules.fs",
+        "../FSharpLint.Rules.Tests/TestXmlDocumentationRules.fs",
+        "../FSharpLint.Rules.Tests/TestSourceLengthRules.fs",
+        "../FSharpLint.Rules.Tests/TestNestedStatementsRules.fs",
+        "../FSharpLint.Rules.Tests/TestTypographyRules.fs",
+        "../FSharpLint.Rules.Tests/TestFunctionReimplementationRules.fs",
+        "../FSharpLint.Rules.Tests/TestHintMatcher.fs",
+        "../FSharpLint.Rules.Tests/TestRaiseWithTooManyArgumentsRules.fs"
+      ]
+    }
+  },
+
+  "dependencies": {
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.0-rc2-3002702"
+    },
+    "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
+    "FParsec": "1.0.2",
+    "FSharpLint.Framework.netcore": {
+      "version": "*",
+      "target": "project",
+      "type": "build"
+    },
+    "FSharpLint.Rules.netcore": {
+      "version": "*",
+      "target": "project",
+      "type": "build"
+    },
+    "NUnit": "3.2.1",
+    "dotnet-test-nunit": "3.4.0-alpha-*"
+  },
+
+  "tools": {
+    "dotnet-compile-fsc": {
+      "version": "1.0.0-preview1-*",
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win81",
+        "netstandard1.3"
+      ]
+    }
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "portable-net45+win8",
+        "dnxcore50"
+      ]
+    }
+  }
+}

@@ -1,12 +1,11 @@
 {
-  "name": "FSharpLint.Console",
   "version": "1.0.0-*",
   "buildOptions": {
     "compilerName": "fsc",
     "emitEntryPoint": true,
     "compile": {
       "includeFiles": [
-        "Program.fs"
+        "../FSharpLint.Console/Program.fs"
       ]
     }
   },
@@ -17,15 +16,15 @@
           "type": "platform",
           "version": "1.0.0-rc2-3002702"
       },
-    "FSharpLint.Framework":{
+    "FSharpLint.Framework.netcore":{
       "version":"1.0.0",
       "target":"project"
     },
-    "FSharpLint.Rules":{
+    "FSharpLint.Rules.netcore":{
       "version":"1.0.0",
       "target":"project"
     },
-    "FSharpLint.Application":{
+    "FSharpLint.Application.netcore":{
       "version":"1.0.0",
       "target":"project"
     }

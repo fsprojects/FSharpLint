@@ -1,5 +1,4 @@
 {
-  "name": "FSharpLint.Rules.Tests",
   "version": "1.0.0-*",
   "testRunner": "nunit",
 
@@ -7,17 +6,12 @@
     "compilerName": "fsc",
     "compile": {
       "includeFiles": [
-        "TestRuleBase.fs",
-        "TestNameConventionRules.fs",
-        "TestBindingRules.fs",
-        "TestNumberOfItemsRules.fs",
-        "TestXmlDocumentationRules.fs",
-        "TestSourceLengthRules.fs",
-        "TestNestedStatementsRules.fs",
-        "TestTypographyRules.fs",
-        "TestFunctionReimplementationRules.fs",
-        "TestHintMatcher.fs",
-        "TestRaiseWithTooManyArgumentsRules.fs"
+        "../FSharpLint.Framework.Tests/TestConfiguration.fs",
+        "../FSharpLint.Framework.Tests/TestAstInfo.fs",
+        "../FSharpLint.Framework.Tests/TestHintParser.fs",
+        "../FSharpLint.Framework.Tests/TestAst.fs",
+        "../FSharpLint.Framework.Tests/TestFuzzyHintMatcher.fs",
+        "../FSharpLint.Framework.Tests/TestAbstractSyntaxArray.fs"
       ]
     }
   },
@@ -29,12 +23,7 @@
     },
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
     "FParsec": "1.0.2",
-    "FSharpLint.Framework": {
-      "version": "*",
-      "target": "project",
-      "type": "build"
-    },
-    "FSharpLint.Rules": {
+    "FSharpLint.Framework.netcore": {
       "version": "*",
       "target": "project",
       "type": "build"
