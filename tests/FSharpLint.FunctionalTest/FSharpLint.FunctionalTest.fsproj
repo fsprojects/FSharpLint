@@ -78,14 +78,9 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FSharpLint.Application\FSharpLint.Application.fsproj">
-      <Name>FSharpLint.Application</Name>
+    <ProjectReference Include="..\..\src\FSharpLint.Core\FSharpLint.Core.fsproj">
+      <Name>FSharpLint.Core</Name>
       <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj">
-      <Name>FSharpLint.FunctionalTest.TestedProject</Name>
-      <Project>{3c435732-06b5-4406-ad79-bdd1f5124b12}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>

@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25402.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework.Tests", "tests\FSharpLint.Framework.Tests\FSharpLint.Framework.Tests.fsproj", "{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Core.Tests", "tests\FSharpLint.Core.Tests\FSharpLint.Core.Tests.fsproj", "{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29468D96-1CC1-463E-9B81-7BD9D466D57D}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,12 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		RELEASE_NOTES.md = RELEASE_NOTES.md
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Rules", "src\FSharpLint.Rules\FSharpLint.Rules.fsproj", "{FAA41613-E697-4012-94CD-6E6890A6E7C7}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Framework", "src\FSharpLint.Framework\FSharpLint.Framework.fsproj", "{94220BA0-E632-4F4F-8F6D-A11A5AA52636}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Rules.Tests", "tests\FSharpLint.Rules.Tests\FSharpLint.Rules.Tests.fsproj", "{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41975DF6-F469-4A42-80F6-521C9061659D}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -32,11 +26,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{41975D
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Application", "src\FSharpLint.Application\FSharpLint.Application.fsproj", "{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Core", "src\FSharpLint.Core\FSharpLint.Core.fsproj", "{1173CA4A-B636-4945-96C8-6F7E92F6A3F6}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest", "tests\FSharpLint.FunctionalTest\FSharpLint.FunctionalTest.fsproj", "{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject", "tests\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj", "{3C435732-06B5-4406-AD79-BDD1F5124B12}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.MSBuildIntegration", "src\FSharpLint.MSBuildIntegration\FSharpLint.MSBuildIntegration.fsproj", "{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}"
 EndProject
@@ -52,18 +44,6 @@ Global
 		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0103C74-6538-4C6E-A684-DFC8F1DD41C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FAA41613-E697-4012-94CD-6E6890A6E7C7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94220BA0-E632-4F4F-8F6D-A11A5AA52636}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1B8837-3894-4AF7-87D7-A1E29A8FD126}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,10 +56,6 @@ Global
 		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C435732-06B5-4406-AD79-BDD1F5124B12}.Release|Any CPU.Build.0 = Release|Any CPU
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
