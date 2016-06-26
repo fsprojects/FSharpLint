@@ -135,10 +135,10 @@ Target "DotnetCliBuild" (fun _ ->
 
 Target "DotnetCliRunTests" (fun _ ->
     // Run tests (FSharpLint.Framework.Tests)
-    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != performance" """, "tests/FSharpLint.Framework.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Framework.Tests") |> assertExitCodeZero
 
     // Run tests (FSharpLint.Rules.Tests) 
-    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != performance" """, "tests/FSharpLint.Rules.Tests") |> assertExitCodeZero
+    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Rules.Tests") |> assertExitCodeZero
 )
 
 let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
