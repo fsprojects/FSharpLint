@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0-*",
+  "version": "0.4.0",
   "buildOptions": {
     "compilerName": "fsc",
     "compile": {
-      "includeFiles": [      
+      "includeFiles": [
         "../FSharpLint.Core/Framework/Utilities.fs",
         "../FSharpLint.Core/Framework/HintParser.fs",
         "../FSharpLint.Core/Framework/Configuration.fs",
@@ -13,7 +13,7 @@
         "../FSharpLint.Core/Framework/Resources.fs",
         "../FSharpLint.Core/Framework/ParseFile.fs",
         "../FSharpLint.Core/Framework/FuzzyHintMatcher.fs",
-                
+
         "../FSharpLint.Core/Rules/NameConventions.fs",
         "../FSharpLint.Core/Rules/NumberOfItems.fs",
         "../FSharpLint.Core/Rules/Binding.fs",
@@ -32,6 +32,14 @@
         "../FSharpLint.Core/Application/FSharpLintWorker.fs"
       ]
     }
+  },
+  "resource": [
+    "../FSharpLint.Core/DefaultConfiguration.FSharpLint",
+    "../FSharpLint.Core/Text.resx"
+  ],
+  "namedResource": {
+    "Text": "../FSharpLint.Core/Text.resx",
+    "DefaultConfiguration.FSharpLint": "../FSharpLint.Core/DefaultConfiguration.FSharpLint"
   },
   "dependencies": {
     "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160509",

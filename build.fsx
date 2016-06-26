@@ -28,7 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.3.0-beta"
+let version = "0.4.0-beta"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -140,8 +140,8 @@ Target "DotnetCliRunTests" (fun _ ->
 let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
 
 Target "AddNetcoreToNupkg" (fun _ ->
-    let nupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
-    let netcoreNupkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" (release.AssemblyVersion)
+    let nupkg = sprintf "../../packaging/FSharpLint.Core.%s.nupkg" version
+    let netcoreNupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.netcore.%s.nupkg" release.AssemblyVersion
 
     Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Core.netcore") |> assertExitCodeZero
 )
