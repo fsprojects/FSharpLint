@@ -173,6 +173,7 @@ temp/
 
 # Test results produced by build
 TestResults.xml
+TestResult.xml
 
 # Nuget outputs
 nuget/*.nupkg
@@ -180,6 +181,7 @@ nuget/*.nupkg
 tools/
 !docs/tools
 *.nupkg
+.fake/
 
 packaging/api/lib
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/

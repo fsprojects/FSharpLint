@@ -22,25 +22,7 @@ module ConfigurationManager =
 
     open System.IO
     open FSharpLint.Application.ConfigurationManagement
-    open FSharpLint.Framework.LoadVisitors
     open FSharpLint.Framework.Configuration
-
-    /// Gets config checkers with a memoized approach 
-    /// (only retrieved from the assembly once).
-    let private configCheckers = 
-        let configCheckers = ref None
-
-        fun () ->
-            match !configCheckers with
-            | None ->
-                let checkers =
-                    FSharpLint.Framework.LoadVisitors.rulesAssembly
-                        |> FSharpLint.Framework.LoadVisitors.loadConfigCheckers
-
-                configCheckers := Some(checkers)
-
-                checkers
-            | Some(checkers) -> checkers
 
     /// Check a config using checkers implemented by visitors.
     /// These are used to verify hints are valid etc.

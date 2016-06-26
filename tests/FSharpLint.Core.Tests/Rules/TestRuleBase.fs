@@ -75,7 +75,7 @@ type TestRuleBase(analyser, ?analysers) =
         let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
 
         let visitorInfo =
-            { FSharpVersion = System.Version(); Config = config; PostError = (fun _ _ -> ()); Text = text }
+            { FSharpVersion = System.Version(3, 1); Config = config; PostError = (fun _ _ -> ()); Text = text }
 
         let stopwatch = Stopwatch.StartNew()
         let times = ResizeArray()

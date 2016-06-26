@@ -28,11 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.3.0-beta"
-
-let packagingRoot = "./packaging/"
-let toolPackagingDir = packagingRoot @@ "tool"
-let apiPackagingDir = packagingRoot @@ "api"
+let version = "0.4.0-beta"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)
@@ -128,6 +124,29 @@ Target "Lint" (fun _ ->
         |> Seq.iter (FSharpLint id))
 
 // --------------------------------------------------------------------------------------
+// .NET CLI and .NET Core
+
+let assertExitCodeZero x = if x = 0 then () else failwithf "Command failed with exit code %i" x
+
+Target "DotnetCliBuild" (fun _ ->
+    Shell.Exec("dotnet", "restore") |> assertExitCodeZero
+    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Core.netcore") |> assertExitCodeZero
+)
+
+Target "DotnetCliRunTests" (fun _ ->
+    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Core.Tests.netcore") |> assertExitCodeZero
+)
+
+let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
+
+Target "AddNetcoreToNupkg" (fun _ ->
+    let nupkg = sprintf "../../packaging/FSharpLint.Core.%s.nupkg" version
+    let netcoreNupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.netcore.%s.nupkg" release.AssemblyVersion
+
+    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Core.netcore") |> assertExitCodeZero
+)
+
+// --------------------------------------------------------------------------------------
 // Generate the documentation web pages
 
 Target "GenerateDocs" (fun _ ->
@@ -139,14 +158,18 @@ Target "GenerateDocs" (fun _ ->
 
 Target "All" DoNothing
 
-"Clean" ==> 
-    "RestorePackages" ==> 
-    "AssemblyInfo" ==> 
-    "Build" ==> 
-    "RunFunctionalTests" ==> 
-    "RunTests" ==> 
-    "Lint" ==> 
-    "GenerateDocs" ==> 
-    "CreateNugetPackages" ==> "All"
+"Clean" 
+    ==> "RestorePackages"
+    ==> "AssemblyInfo" 
+    ==> "Build" 
+    =?> ("DotnetCliBuild", isDotnetCLIInstalled)
+    ==> "RunFunctionalTests" 
+    ==> "RunTests"
+    =?> ("DotnetCliRunTests", isDotnetCLIInstalled)
+    ==> "Lint" 
+    ==> "GenerateDocs" 
+    ==> "CreateNugetPackages" 
+    =?> ("AddNetcoreToNupkg", isDotnetCLIInstalled)
+    ==> "All"
 
 RunTargetOrDefault "All"

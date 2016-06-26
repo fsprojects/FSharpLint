@@ -1,3 +1,7 @@
+##### 0.4.0-beta - June 26 2016
+
+* Added initial dotnet core support.
+
 ##### 0.3.0-beta - June 19 2016
 
 * Improved overall performance of linter.
