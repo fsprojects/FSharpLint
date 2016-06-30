@@ -31,7 +31,7 @@
   "dependencies": {
     "Microsoft.NETCore.App": {
       "type": "platform",
-      "version": "1.0.0-rc2-3002702"
+      "version": "1.0.0"
     },
     "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
     "FParsec": "1.0.2",
