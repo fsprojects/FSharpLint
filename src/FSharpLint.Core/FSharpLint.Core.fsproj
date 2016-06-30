@@ -95,6 +95,7 @@
     <EmbeddedResource Include="Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <Compile Include="Application\ConfigurationManager.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
