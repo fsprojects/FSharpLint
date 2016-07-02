@@ -16,7 +16,7 @@
 
 namespace FSharpLint.Framework
 
-/// Provides functionality to parse F# files using `FSharp.Compiler.Services`.
+/// Provides functionality to parse F# files using `FSharp.Compiler.Service`.
 module ParseFile = 
 
     open FSharpLint.Framework
@@ -25,7 +25,7 @@ module ParseFile =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
 
-    /// Information for a file to be linted that is given to the visitors for them to analyse.
+    /// Information for a file to be linted that is given to the analysers.
     [<NoEquality; NoComparison>]
     type FileParseInfo =
         { /// Contents of the file.
@@ -78,7 +78,7 @@ module ParseFile =
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
-    /// Parses a file using `FSharp.Compiler.Services`.
+    /// Parses a file using `FSharp.Compiler.Service`.
     let parseFile file configuration (checker:FSharpChecker) options =
         let source = System.IO.File.ReadAllText(file)
 
@@ -91,7 +91,7 @@ module ParseFile =
         
         parse configuration file source (checker, options)
         
-    /// Parses source code using `FSharp.Compiler.Services`.
+    /// Parses source code using `FSharp.Compiler.Service`.
     let parseSource source configuration (checker:FSharpChecker) =
         let file = "/home/user/Dog.Test.fsx"
         

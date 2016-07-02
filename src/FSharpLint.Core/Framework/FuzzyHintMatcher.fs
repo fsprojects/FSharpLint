@@ -73,7 +73,7 @@ module FuzzyHintMatcher =
                 | None -> checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify)
 
     /// Searches the abstract syntax array for possible hint matches using the hint trie.
-    /// Any possible matches that are found will be given to the callback function notify,
+    /// Any possible matches that are found will be given to the callback function `notify`,
     /// any matches found are not guaranteed and it's expected that the caller verify the match.
     let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
         assert (nodeArray.Length = skipArray.Length)
