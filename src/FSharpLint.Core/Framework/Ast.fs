@@ -66,8 +66,7 @@ module Ast =
         | TypeDefinition of SynTypeDefn
         | MemberDefinition of SynMemberDefn
         | ComponentInfo of SynComponentInfo
-        | ExceptionDefinition of SynExceptionDefn
-        | ExceptionRepresentation of SynExceptionRepr
+        | ExceptionRepresentation of SynExceptionDefnRepr
         | UnionCase of SynUnionCase
         | EnumCase of SynEnumCase
         | TypeRepresentation of SynTypeDefnRepr
@@ -126,10 +125,10 @@ module Ast =
             else None
 
         match node with
-        | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, attributes, _, range))
+        | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, attributes, _, range))
         | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, range, _))
-        | ExceptionDefinition(SynExceptionDefn.ExceptionDefn(SynExceptionRepr.ExceptionDefnRepr(attributes, _, _, _, _, _), _, range))
-        | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range))
+        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(attributes, _, _, _, _, range))
+        | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, range))
         | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) -> 
             attributes
             |> List.choose tryGetSuppressMessageAttribute
@@ -230,7 +229,6 @@ module Ast =
     let inline private TypeDefinition x = Node(ExtraSyntaxInfo.None, TypeDefinition x)
     let inline private MemberDefinition x = Node(ExtraSyntaxInfo.None, MemberDefinition x)
     let inline private ComponentInfo x = Node(ExtraSyntaxInfo.None, ComponentInfo x)
-    let inline private ExceptionDefinition x = Node(ExtraSyntaxInfo.None, ExceptionDefinition x)
     let inline private ExceptionRepresentation x = Node(ExtraSyntaxInfo.None, ExceptionRepresentation x)
     let inline private UnionCase x = Node(ExtraSyntaxInfo.None, UnionCase x)
     let inline private EnumCase x = Node(ExtraSyntaxInfo.None, EnumCase x)
@@ -250,12 +248,13 @@ module Ast =
 
     let inline private moduleDeclarationChildren node = 
         match node with
-        | SynModuleDecl.NestedModule(componentInfo, moduleDeclarations, _, _) -> 
+        | SynModuleDecl.NestedModule(componentInfo, _, moduleDeclarations, _, _) -> 
             ComponentInfo componentInfo::(moduleDeclarations |> List.map ModuleDeclaration)
         | SynModuleDecl.Let(_, bindings, _) -> bindings |> List.map Binding
         | SynModuleDecl.DoExpr(_, expression, _) -> [Expression expression]
         | SynModuleDecl.Types(typeDefinitions, _) -> typeDefinitions |> List.map TypeDefinition
-        | SynModuleDecl.Exception(exceptionDefinition, _) -> [ExceptionDefinition exceptionDefinition]
+        | SynModuleDecl.Exception(SynExceptionDefn.SynExceptionDefn(repr, members, _), _) -> 
+            ExceptionRepresentation repr::(members |> List.map MemberDefinition)
         | SynModuleDecl.NamespaceFragment(moduleOrNamespace) -> [ModuleOrNamespace moduleOrNamespace]
         | SynModuleDecl.Open(_)
         | SynModuleDecl.Attributes(_)
@@ -401,7 +400,8 @@ module Ast =
             [Expression cond; Expression body; Node(ExtraSyntaxInfo.Else, AstNode.Expression elseExpr)]
         | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> [Expression cond; Expression body]
         | SynExpr.Lambda(_)
-        | SynExpr.App(_) -> []
+        | SynExpr.App(_)
+        | SynExpr.Fixed(_) -> []
 
     let inline private typeSimpleRepresentationChildren node =
         match node with 
@@ -409,6 +409,7 @@ module Ast =
         | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> enumCases |> List.map EnumCase
         | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.map Field
         | SynTypeDefnSimpleRepr.TypeAbbrev(_, synType, _) -> [Type synType]
+        | SynTypeDefnSimpleRepr.Exception(exceptionRepr) -> [ExceptionRepresentation exceptionRepr]
         | SynTypeDefnSimpleRepr.General(_)
         | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly(_)
         | SynTypeDefnSimpleRepr.None(_) -> []
@@ -447,18 +448,19 @@ module Ast =
             members |> List.map MemberDefinition
         | SynTypeDefnRepr.Simple(typeSimpleRepresentation, _) -> 
             [TypeSimpleRepresentation typeSimpleRepresentation]
+        | SynTypeDefnRepr.Exception(exceptionRepr) -> 
+            [ExceptionRepresentation exceptionRepr]
             
     /// Extracts the child nodes to be visited from a given node.
     let traverseNode node =
         match node with
         | ModuleDeclaration(x) -> moduleDeclarationChildren x
-        | ModuleOrNamespace(SynModuleOrNamespace(_, _, moduleDeclarations, _, _, _, _)) -> 
+        | ModuleOrNamespace(SynModuleOrNamespace(_, _, _, moduleDeclarations, _, _, _, _)) -> 
             moduleDeclarations |> List.map ModuleDeclaration
         | Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)) -> 
             [Pattern pattern; Expression expression]
-        | ExceptionDefinition(ExceptionDefn(exceptionRepresentation, members, _)) -> 
-            ExceptionRepresentation exceptionRepresentation::(members |> List.map MemberDefinition)
-        | ExceptionRepresentation(ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> [UnionCase unionCase]
+        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
+            [UnionCase unionCase]
         | TypeDefinition(TypeDefn(componentInfo, typeRepresentation, members, _)) -> 
             ComponentInfo componentInfo::
                 TypeRepresentation typeRepresentation::

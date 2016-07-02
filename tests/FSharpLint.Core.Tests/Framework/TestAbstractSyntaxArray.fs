@@ -50,7 +50,7 @@ type TestAst() =
     let astToExpr ast =
         let (|Module|_|) x =
             match x with
-            | SynModuleOrNamespace(_, _, SynModuleDecl.DoExpr(_, app, _)::_, _, _, _, _) ->
+            | SynModuleOrNamespace(_, _, _, SynModuleDecl.DoExpr(_, app, _)::_, _, _, _, _) ->
                 Some(app)
             | _ -> None
 

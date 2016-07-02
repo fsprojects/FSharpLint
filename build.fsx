@@ -143,7 +143,7 @@ Target "AddNetcoreToNupkg" (fun _ ->
     let nupkg = sprintf "../../packaging/FSharpLint.Core.%s.nupkg" version
     let netcoreNupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.netcore.%s.nupkg" release.AssemblyVersion
 
-    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Core.netcore") |> assertExitCodeZero
+    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.6 """ nupkg netcoreNupkg, "src/FSharpLint.Core.netcore") |> assertExitCodeZero
 )
 
 // --------------------------------------------------------------------------------------

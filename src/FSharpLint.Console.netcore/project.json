@@ -9,34 +9,21 @@
       ]
     }
   },
-  "dependencies": {
-    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160509",
-    "FSharp.Compiler.Service.netcore": "1.0.0-alpha-00001",
-      "Microsoft.NETCore.App": {
-          "type": "platform",
-          "version": "1.0.0-rc2-3002702"
-      },
-    "FSharpLint.Core.netcore":{
-      "target":"project",
-      "type": "build"
-    }
-  },
   "tools": {
-    "dotnet-compile-fsc": {
-      "version": "1.0.0-preview1-*",
-      "imports": [
-        "dnxcore50",
-        "portable-net45+win81",
-        "netstandard1.3"
-      ]
-    }
+    "dotnet-compile-fsc": "1.0.0-preview2-*",
+    "dotnet-mergenupkg": "1.0.*"
   },
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "portable-net45+win8",
-        "dnxcore50"
-      ]
+      "dependencies": {
+        "Microsoft.NETCore.App": "1.0.0",
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
+        "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
+        "FSharpLint.Core.netcore":{
+          "target":"project",
+          "type": "build"
+        }
+      }
     }
   }
 }

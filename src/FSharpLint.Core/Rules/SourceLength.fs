@@ -71,7 +71,7 @@ module SourceLength =
                 | Property -> 
                     checkRuleBroken i binding.RangeOfBindingAndRhs "MaxLinesInProperty" "Property"
                 | Other -> ()
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, isModule, _, _, _, _, range)) when isModule -> 
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, isModule, _, _, _, _, range)) when isModule -> 
                 checkRuleBroken i range "MaxLinesInModule" "Module"
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
                 match repr with
@@ -86,6 +86,7 @@ module SourceLength =
                     | _ -> ()
                 | SynTypeDefnRepr.ObjectModel(_) -> 
                     checkRuleBroken i range "MaxLinesInClass" "Classes and interface"
+                | SynTypeDefnRepr.Exception(_) -> ()
             | _ -> ()
 
             i <- i + 1
