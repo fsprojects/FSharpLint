@@ -45,8 +45,8 @@ module NameConventions =
                 | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
                 | Field(SynField.Field(_, _, _, _, _, _, access, _))
                 | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
-                | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, access, _))
-                | ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, _, access, _))
+                | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _))
+                | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
                 | Pattern(SynPat.Named(_, _, _, access, _))
                 | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
                     isPublic (isSynAccessPublic access) isPrivateWhenReachedBinding skipArray.[i].ParentIndex
@@ -58,7 +58,6 @@ module NameConventions =
                 | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
                     if isPrivateWhenReachedBinding then false
                     else isPublic (isSynAccessPublic access) true skipArray.[i].ParentIndex
-                | ExceptionDefinition(_)
                 | EnumCase(_)
                 | TypeRepresentation(_)
                 | Type(_)
@@ -433,7 +432,7 @@ module NameConventions =
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, isModule, _, _, _, _, _)) -> 
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, isModule, _, _, _, _, _)) -> 
                 let checkIdent = 
                     if isModule then CheckIdentifiers.checkModule checkRule
                     else CheckIdentifiers.checkNamespace checkRule
@@ -445,7 +444,7 @@ module NameConventions =
                 identifier |> Option.iter (CheckIdentifiers.checkRecordField checkRule)
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
                 CheckIdentifiers.checkEnumCase checkRule identifier
-            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
+            | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
                 match unionCase with
                 | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
                     CheckIdentifiers.checkException checkRule identifier

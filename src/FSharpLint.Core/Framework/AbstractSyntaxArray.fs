@@ -65,7 +65,6 @@ module AbstractSyntaxArray =
         | ModuleOrNamespace = 70uy
         | ModuleDeclaration = 71uy
         | Binding = 72uy
-        | ExceptionDefinition = 73uy
         | TypeDefinition = 74uy
         | Field = 75uy
         | Type = 76uy
@@ -131,7 +130,6 @@ module AbstractSyntaxArray =
         | ModuleOrNamespace(_) -> SyntaxNode.ModuleOrNamespace
         | ModuleDeclaration(_) -> SyntaxNode.ModuleDeclaration
         | AstNode.Binding(_) -> SyntaxNode.Binding
-        | ExceptionDefinition(_) -> SyntaxNode.ExceptionDefinition
         | TypeDefinition(_) -> SyntaxNode.TypeDefinition
         | AstNode.Field(_) -> SyntaxNode.Field
         | Type(_) -> SyntaxNode.Type

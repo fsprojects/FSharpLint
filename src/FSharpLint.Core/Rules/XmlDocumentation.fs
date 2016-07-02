@@ -107,11 +107,11 @@ module XmlDocumentation =
         let mutable i = 0
         while i < syntaxArray.Length do
             match syntaxArray.[i].Actual with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, xmlDoc, _, access, range)) ->
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, xmlDoc, _, access, range)) ->
                 if ruleAccessEnabled visitorInfo i access "ModuleDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationModuleError")
 
-            | AstNode.ExceptionRepresentation(SynExceptionRepr.ExceptionDefnRepr(_, _, _, xmlDoc, access, range)) ->
+            | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, xmlDoc, access, range)) ->
                 if ruleAccessEnabled visitorInfo i access "ExceptionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
                     visitorInfo.PostError range (getString "RulesXmlDocumentationExceptionError")
 
@@ -155,7 +155,7 @@ module XmlDocumentation =
                         if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                             visitorInfo.PostError range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
                     match typeDefnRep with
-                    | Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
+                    | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
                         fields |> List.iter evalField
                     | _ -> ()
             | _ -> ()
