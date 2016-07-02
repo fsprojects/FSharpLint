@@ -41,29 +41,19 @@
     "Text": "../FSharpLint.Core/Text.resx",
     "DefaultConfiguration.FSharpLint": "../FSharpLint.Core/DefaultConfiguration.FSharpLint"
   },
-  "dependencies": {
-    "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-*",
-    "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
-    "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-*",
-    "FParsec": "1.0.2",
-    "NETStandard.Library": "1.6.0"
-  },
   "tools": {
-    "dotnet-compile-fsc": {
-      "version": "1.0.0-preview2-*",
-      "imports": [
-        "dnxcore50",
-        "portable-net45+win81"
-      ]
-    },
-    "dotnet-mergenupkg": { "version": "1.0.*" }
+    "dotnet-compile-fsc": "1.0.0-preview2-*",
+    "dotnet-mergenupkg": "1.0.*"
   },
   "frameworks": {
     "netstandard1.6": {
-      "imports": [
-        "portable-net45+win8",
-        "dnxcore50"
-      ]
+      "dependencies": {
+        "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
+        "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
+        "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-*",
+        "FParsec": "1.0.2",
+        "NETStandard.Library": "1.6.0"
+      }
     }
   }
 }
