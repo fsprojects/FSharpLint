@@ -39,7 +39,7 @@
         "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
         "FParsec": "1.0.2",
         "NUnit": "3.2.1",
-        "dotnet-test-nunit": "3.4.0-alpha-*"
+        "dotnet-test-nunit": "3.4.0-alpha-*",
         "FSharpLint.Core.netcore":{
           "target":"project",
           "type": "build"
