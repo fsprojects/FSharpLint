@@ -51,8 +51,12 @@
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
         "FSharp.Compiler.Service.ProjectCracker.netcore": "1.0.0-alpha-*",
-        "FParsec": "1.0.2",
         "NETStandard.Library": "1.6.0"
+      }
+    },
+    "portable-net45+win81": {
+      "dependencies": {
+        "FParsec": "1.0.2"
       }
     }
   }
