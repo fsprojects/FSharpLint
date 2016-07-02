@@ -37,18 +37,15 @@
         "Microsoft.NETCore.App": "1.0.0",
         "Microsoft.FSharp.Core.netcore": "1.0.0-alpha-160629",
         "FSharp.Compiler.Service.netcore": "1.0.0-alpha-*",
-        "NUnit": "3.2.1",
         "dotnet-test-nunit": "3.4.0-alpha-*",
+        "FParsec": "1.0.2",
+        "NUnit": "3.2.1",
         "FSharpLint.Core.netcore": {
           "target": "project",
           "type": "build"
         }
-      }
-    },
-    "portable-net45+win81": {
-      "dependencies": {
-        "FParsec": "1.0.2"
-      }
+      },
+      "imports": "portable-net45+netcore45+wp8"
     }
   }
 }
