@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25402.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{FFB38D12-8E91-42C9-ABA6-2AAE5C60F805}"
 EndProject
@@ -30,9 +30,9 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Core", "src\FSha
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest", "tests\FSharpLint.FunctionalTest\FSharpLint.FunctionalTest.fsproj", "{5BA8565C-6A3F-489B-8C0A-0F2E31366B2B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.MSBuildIntegration", "src\FSharpLint.MSBuildIntegration\FSharpLint.MSBuildIntegration.fsproj", "{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.MSBuild", "src\FSharpLint.MSBuild\FSharpLint.MSBuild.fsproj", "{69A2554E-2D5F-4BF7-A24F-76BE8CAB6A6F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FAKE", "src\FSharpLint.FAKE\FSharpLint.FAKE.fsproj", "{F66EF621-E053-4E68-A35A-56F16FA8697B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Fake", "src\FSharpLint.Fake\FSharpLint.Fake.fsproj", "{F66EF621-E053-4E68-A35A-56F16FA8697B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

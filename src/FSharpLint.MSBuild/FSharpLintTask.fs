@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace FSharpLint.MSBuildIntegration
+namespace FSharpLint.MSBuild
 
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities

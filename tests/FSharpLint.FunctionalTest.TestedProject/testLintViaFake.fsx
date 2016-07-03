@@ -3,8 +3,8 @@ open Fake
 open System
 
 #I @"FSharpLintFakeTaskTest/"
-#r @"FSharpLintFakeTaskTest/FSharpLint.FAKE.dll"
-open FSharpLint.FAKE
+#r @"FSharpLintFakeTaskTest/FSharpLint.Fake.dll"
+open FSharpLint.Fake
 
 Target "Lint" (fun _ -> !! "FSharpLint.FunctionalTest.TestedProject.fsproj" |> Seq.iter (FSharpLint id))
 

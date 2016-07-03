@@ -7,10 +7,10 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>69a2554e-2d5f-4bf7-a24f-76be8cab6a6f</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>FSharpLint.MSBuildIntegration</RootNamespace>
-    <AssemblyName>FSharpLint.MSBuildIntegration</AssemblyName>
+    <RootNamespace>FSharpLint.MSBuild</RootNamespace>
+    <AssemblyName>FSharpLint.MSBuild</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>FSharpLint.MSBuildIntegration</Name>
+    <Name>FSharpLint.MSBuild</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -22,7 +22,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\FSharpLint.MSBuildIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FSharpLint.MSBuild.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,7 +31,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
-    <DocumentationFile>bin\Release\FSharpLint.MSBuildIntegration.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\FSharpLint.MSBuild.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

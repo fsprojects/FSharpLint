@@ -42,10 +42,10 @@ module TestPackageHelper =
                 "Release"
             #endif
 
-        copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharpLint.MSBuildIntegration.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.MSBuildIntegration/bin/" + binDir + "/FSharp.Core.dll")
+        copyToTaskDir (@"../../../../src/FSharpLint.MSBuild/bin/" + binDir + "/FSharpLint.MSBuild.dll")
+        copyToTaskDir (@"../../../../src/FSharpLint.MSBuild/bin/" + binDir + "/FSharp.Core.dll")
 
-        copyToTaskDir (@"../../../../src/FSharpLint.FAKE/bin/" + binDir + "/FSharpLint.FAKE.dll")
+        copyToTaskDir (@"../../../../src/FSharpLint.Fake/bin/" + binDir + "/FSharpLint.Fake.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharpLint.Core.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.ProjectCracker.dll")
         copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.ProjectCrackerTool.exe")

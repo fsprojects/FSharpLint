@@ -7,11 +7,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>f66ef621-e053-4e68-a35a-56f16fa8697b</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>FSharpLint.FAKE</RootNamespace>
-    <AssemblyName>FSharpLint.FAKE</AssemblyName>
+    <RootNamespace>FSharpLint.Fake</RootNamespace>
+    <AssemblyName>FSharpLint.Fake</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>
-    <Name>FSharpLint.FAKE</Name>
+    <Name>FSharpLint.Fake</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
@@ -24,7 +24,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\FSharpLint.FAKE.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\FSharpLint.Fake.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
