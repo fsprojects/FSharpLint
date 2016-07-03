@@ -23,6 +23,9 @@ build/
 [Bb]in/
 [Oo]bj/
 
+#Don't ignore our own task's build directory
+!src/FSharpLint.MSBuild/build/
+
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packaging/*/build/
 
