@@ -160,9 +160,16 @@ module AbstractSyntaxArray =
         member __.SkipPosition = skipPosition
         member __.Depth = depth
 
+    /// We just want a hash of the last identifier.
+    let rec private getIdentHash = function
+        | [ident] -> hash ident
+        | _::rest -> getIdentHash rest
+        | [] -> 0
+        
+    /// Get hash code of an ast node to be used for the fuzzy match of hints against the ast.
     let private getHashCode node = 
         match node with
-        | Identifier(x) when (List.isEmpty >> not) x -> x |> Seq.last |> hash
+        | Identifier(idents) -> getIdentHash idents
         | Pattern(SynPat.Const(SynConst.Bool(x), _))
         | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Byte(x), _))
