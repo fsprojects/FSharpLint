@@ -18,7 +18,9 @@ namespace FSharpLint.Framework
 
 module Utilities =
     
-    let hash2 one two =
+    /// Fast hash of two objects without having to allocate 
+    /// (e.g. a common approach would be to take the hash code of a tuple of the two objects).
+    let inline hash2 one two =
         let mutable current = 23
         current <- current * 31 + hash one
         current * 31 + hash two

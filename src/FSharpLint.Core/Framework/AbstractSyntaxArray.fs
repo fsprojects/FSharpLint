@@ -259,7 +259,8 @@ module AbstractSyntaxArray =
 
         while left.Count > 0 do
             let stackedNode = left.Pop()
-            let astNode = stackedNode.Node.AstNode
+            let node = stackedNode.Node
+            let astNode = node.AstNode
             let depth = stackedNode.Depth
         
             tryAddPossibleSkips depth
@@ -267,19 +268,19 @@ module AbstractSyntaxArray =
             let children = traverseNode astNode
             children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1)))
 
-            if stackedNode.Node.ExtraSyntaxInfo <> ExtraSyntaxInfo.None then
+            if node.ExtraSyntaxInfo <> ExtraSyntaxInfo.None then
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
                 let syntaxNode =
-                    match stackedNode.Node.ExtraSyntaxInfo with
+                    match node.ExtraSyntaxInfo with
                     | ExtraSyntaxInfo.LambdaArg -> SyntaxNode.LambdaArg
                     | ExtraSyntaxInfo.LambdaBody -> SyntaxNode.LambdaBody
                     | ExtraSyntaxInfo.Else -> SyntaxNode.Else
-                    | _ -> failwith ("Unknown extra syntax info: " + string stackedNode.Node.ExtraSyntaxInfo)
+                    | _ -> failwith ("Unknown extra syntax info: " + string node.ExtraSyntaxInfo)
 
                 nodes.Add (Node(Utilities.hash2 syntaxNode 0, astNode))
 
-            match astNodeToSyntaxNode stackedNode.Node.AstNode with
+            match astNodeToSyntaxNode astNode with
             | SyntaxNode.Other -> ()
             | syntaxNode -> 
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
