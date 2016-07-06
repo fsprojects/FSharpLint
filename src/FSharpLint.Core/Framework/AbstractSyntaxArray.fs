@@ -272,8 +272,7 @@ module AbstractSyntaxArray =
         
             tryAddPossibleSkips depth
 
-            let children = traverseNode astNode
-            children |> List.rev |> List.iter (fun node -> left.Push (StackedNode(node, depth + 1)))
+            traverseNode astNode (fun node -> left.Push (StackedNode(node, depth + 1)))
 
             if node.ExtraSyntaxInfo <> ExtraSyntaxInfo.None then
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
