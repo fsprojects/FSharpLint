@@ -78,6 +78,7 @@
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application/Lint.fs" />
     <Compile Include="Application/FSharpLintWorker.fs" />
+    <Compile Include="Application/ConfigurationManager.fs" />
     <!-- Exclude for now as uses old api <Compile Include="Application/ConfigurationManager.fs" /> -->
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>

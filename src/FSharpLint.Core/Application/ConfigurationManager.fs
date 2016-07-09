@@ -20,29 +20,16 @@ namespace FSharpLint.Application
 
 module ConfigurationManager =
 
+    open System.Collections.Generic
     open System.IO
-    open FSharpLint.Application.ConfigurationManagement
     open FSharpLint.Framework.Configuration
-
-    /// Check a config using checkers implemented by visitors.
-    /// These are used to verify hints are valid etc.
-    let private checkConfig config =
-        try
-            let configFailures = configCheckers() |> (checkConfigsForFailures config)
-
-            match configFailures with
-            | [] -> ConfigurationResult.Success(config)
-            | firstFailure::_ -> ConfigurationResult.Failure(FailedToLoadConfig(firstFailure)) 
-        with
-        | ConfigurationException(message) ->
-            ConfigurationResult.Failure(FailedToLoadConfig("Failed to load default config: " + message)) 
 
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
         let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
             match directoryInfo with
-                | null -> parentDirectories
-                | _ -> getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
+            | null -> parentDirectories
+            | _ -> getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
 
         DirectoryInfo path |> getParentDirectories []
 
@@ -54,14 +41,8 @@ module ConfigurationManager =
     /// If the file does not exist `None` will be returned.
     let private tryLoadConfig filePath =
         if File.Exists(filePath) then
-            try
-                let newConfig = File.ReadAllText filePath |> configuration
-
-                match checkConfig newConfig with
-                    | ConfigurationResult.Success(config) -> Some(config)
-                    | ConfigurationResult.Failure(_) -> None
-            with
-                | _ -> None
+            try File.ReadAllText filePath |> configuration |> Some
+            with _ -> None
         else
             None
 
@@ -70,33 +51,30 @@ module ConfigurationManager =
     /// Intended to allow for all the configuration files for all the projects in a solution
     /// to be grouped in a single place where they can be modified.
     type ConfigurationManager() =
-        let loadedConfigs = System.Collections.Generic.Dictionary<DirectoryInfo, Configuration>()
-                
-        let checkedDefaultConfiguration = checkConfig defaultConfiguration      
+        let loadedConfigs = Dictionary<DirectoryInfo, Configuration>()    
 
-        member this.LoadConfigurationForProject(projectFilePath) =
+        member __.LoadConfigurationForProject(projectFilePath) =
             let getConfig (directory:DirectoryInfo) =
                 let filePath = Path.Combine(directory.FullName, SettingsFileName)
 
-                if loadedConfigs.ContainsKey directory then
-                    None
+                if loadedConfigs.ContainsKey directory then None
                 else
                     match tryLoadConfig filePath with
                     | Some(config) -> Some(directory, config)
                     | None -> None
                 
             Path.GetDirectoryName projectFilePath 
-                |> getParentDirectories
-                |> List.choose getConfig
-                |> List.iter loadedConfigs.Add
+            |> getParentDirectories
+            |> List.choose getConfig
+            |> List.iter loadedConfigs.Add
 
-        member this.GetConfigurationForProject(projectFilePath) =
+        member __.GetConfigurationForProject(projectFilePath) =
             let tryGetConfig dir =
                 match loadedConfigs.TryGetValue(dir) with
                 | true, config -> Some(config)
                 | false, _ -> None
 
             Path.GetDirectoryName projectFilePath 
-                |> getParentDirectories
-                |> List.choose tryGetConfig
-                |> List.fold overrideConfiguration defaultConfiguration
+            |> getParentDirectories
+            |> List.choose tryGetConfig
+            |> List.fold overrideConfiguration defaultConfiguration
