@@ -29,7 +29,8 @@
         "../FSharpLint.Core/Application/LintWarning.fs",
         "../FSharpLint.Core/Application/Lint.fsi",
         "../FSharpLint.Core/Application/Lint.fs",
-        "../FSharpLint.Core/Application/FSharpLintWorker.fs"
+        "../FSharpLint.Core/Application/FSharpLintWorker.fs",
+        "../FSharpLint.Core/Application/ConfigurationManager.fs"
       ]
     }
   },
