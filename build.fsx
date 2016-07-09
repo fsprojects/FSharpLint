@@ -137,7 +137,7 @@ Target "DotnetCliRunTests" (fun _ ->
     Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Core.Tests.netcore") |> assertExitCodeZero
 )
 
-let isDotnetCLIInstalled = try Shell.Exec("dotnet", "--version") = 0 with _ -> false
+let isDotnetCLIInstalled = false // Disable until we get FSharp.Compiler.Service netcore package //try Shell.Exec("dotnet", "--version") = 0 with _ -> false
 
 Target "AddNetcoreToNupkg" (fun _ ->
     let nupkg = sprintf "../../packaging/FSharpLint.Core.%s.nupkg" version
