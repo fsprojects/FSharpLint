@@ -78,7 +78,7 @@ module NumberOfItems =
     let private validateType members typeRepresentation visitorInfo isSuppressed =
         let members = 
             match typeRepresentation with
-            | SynTypeDefnRepr.Simple(_) -> members
+            | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> members
             | SynTypeDefnRepr.ObjectModel(_, members, _) -> members
             |> getMembers
 

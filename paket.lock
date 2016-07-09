@@ -3,7 +3,7 @@ NUGET
   specs:
     FParsec (1.0.2)
     FAKE.Lib (4.28.0)
-    FSharp.Compiler.Service (3.0.0)
+    FSharp.Compiler.Service (5.0.0)
     FSharp.Compiler.Service.ProjectCracker (3.0.0)
     NUnit (2.6.4)
 
