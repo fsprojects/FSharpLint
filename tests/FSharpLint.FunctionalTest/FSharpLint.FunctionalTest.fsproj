@@ -54,7 +54,6 @@
     <Compile Include="TestConsoleApplication.fs" />
     <Compile Include="TestPackageHelpers.fs" />
     <Compile Include="TestFakeTask.fs" />
-    <Compile Include="TestMSBuildTask.fs" />
     <Compile Include="TestApi.fs" />
     <None Include="App.config" />
   </ItemGroup>

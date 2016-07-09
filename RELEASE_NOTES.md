@@ -1,3 +1,9 @@
+##### 0.4.1-beta - July 09 2016
+
+* Updated FSharp.Compiler.Service
+* Brought back configuration manager api.
+* Targets FSharp.Core 4.4.0.0
+
 ##### 0.4.0-beta - June 26 2016
 
 * Added initial dotnet core support.
