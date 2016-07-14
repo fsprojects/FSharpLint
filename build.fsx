@@ -115,9 +115,9 @@ Target "CreateNugetPackages" (fun _ ->
             IncludeReferencedProjects = true
             OutputPath = "packaging" }))
 
-#I @"packages/tools/FSharpLint/"
-#r @"packages/tools/FSharpLint/FSharpLint.FAKE.dll"
-open FSharpLint.FAKE
+#I @"packages/tools/FSharpLint.Fake/tools"
+#r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
+open FSharpLint.Fake
 
 Target "Lint" (fun _ ->
     !! "src/**/*.fsproj"

@@ -1,5 +1,6 @@
 type file
-id FSharpLint.FAKE
+id FSharpLint.Fake
+title FSharpLint.Fake
 version 1.0.0-beta
 licenseUrl https://github.com/fsprojects/FSharpLint/blob/master/LICENSE
 projecturl http://fsprojects.github.com/FSharpLint
