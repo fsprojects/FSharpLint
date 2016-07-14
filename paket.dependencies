@@ -12,5 +12,5 @@ source https://nuget.org/api/v2
 
 nuget FAKE
 nuget NUnit.Runners
-nuget FSharpLint
+nuget FSharpLint.Fake
 nuget FSharp.Formatting
