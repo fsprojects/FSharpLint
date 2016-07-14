@@ -1,3 +1,7 @@
+##### 0.4.2-beta - July 14 2016
+
+* Added required project cracker files to FSharpLint.Fake package.
+
 ##### 0.4.1-beta - July 09 2016
 
 * Updated FSharp.Compiler.Service
