@@ -916,7 +916,7 @@ module HintParser =
 
         // a helper function for adding infix operators to opp
         let addInfixOperator prefix precedence associativity =
-            let remainingOpChars_ws = 
+            let remainingOpChars = 
                 if prefix = "=" then
                     notFollowedBy (pstring "==>") |>> fun _ -> ""
                 else if prefix = "|" then
@@ -924,7 +924,7 @@ module HintParser =
                 else
                     manySatisfy (isAnyOf Operators.opchars)
 
-            let op = InfixOperator(prefix, remainingOpChars_ws,
+            let op = InfixOperator(prefix, remainingOpChars,
                                    precedence, associativity, (),
                                    fun remOpChars expr1 expr2 ->
                                         let opIdent = Expression.Identifier [prefix + remOpChars]
@@ -932,7 +932,7 @@ module HintParser =
             opp.AddOperator(op)
 
         let addPrefixOperator prefix precedence =
-            let remainingOpChars_ws = 
+            let remainingOpChars = 
                 if prefix = "!" then
                     manySatisfy (isAnyOf validBangPrefixedOperatorChars)
                 else if prefix = "~" then
@@ -940,7 +940,7 @@ module HintParser =
                 else
                     preturn ""
 
-            opp.AddOperator(PrefixOperator(prefix, remainingOpChars_ws, precedence, true, (),
+            opp.AddOperator(PrefixOperator(prefix, remainingOpChars, precedence, true, (),
                                                 fun remOpChars expr ->
                                                     if prefix = "&" then Expression.AddressOf(true, expr)
                                                     else if prefix = "&&" then Expression.AddressOf(false, expr)
@@ -1034,13 +1034,13 @@ module HintParser =
 
         // a helper function for adding infix operators to opp
         let addInfixOperator operator precedence associativity =
-            let remainingOpChars_ws = 
+            let remainingOpChars = 
                 if operator = "|" then
                     notFollowedBy (pstring "]") |>> fun _ -> ""
                 else
                     manySatisfy (isAnyOf Operators.opchars)
 
-            let op = InfixOperator(operator, remainingOpChars_ws,
+            let op = InfixOperator(operator, remainingOpChars,
                                    precedence, associativity, (),
                                    fun _ patLhs patRhs ->
                                         match operator with
