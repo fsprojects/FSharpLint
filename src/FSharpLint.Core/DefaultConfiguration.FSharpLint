@@ -412,11 +412,5 @@
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
-
-    <CyclomaticComplexity>
-      <Enabled>false</Enabled>
-      <MaxCyclomaticComplexity>10</MaxCyclomaticComplexity>
-      <IncludeMatchStatements>false</IncludeMatchStatements>
-    </CyclomaticComplexity>
   </Analysers>
 </FSharpLintSettings>
