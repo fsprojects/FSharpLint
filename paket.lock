@@ -5,7 +5,7 @@ NUGET
     FAKE.Lib (4.28.0)
     FSharp.Compiler.Service (5.0.0)
     FSharp.Compiler.Service.ProjectCracker (3.0.0)
-    NUnit (2.6.4)
+    NUnit (3.4.1)
 
 GROUP Tools
 NUGET
@@ -19,4 +19,16 @@ NUGET
     FSharpLint.Fake (0.4.2-beta)
     FSharpVSPowerTools.Core (1.9.0)
       FSharp.Compiler.Service (>= 0.0.90)
-    NUnit.Runners (2.6.4)
+    NUnit.ConsoleRunner (3.4.1)
+    NUnit.Extension.NUnitProjectLoader (3.4.1)
+    NUnit.Extension.NUnitV2Driver (3.4.1)
+    NUnit.Extension.NUnitV2ResultWriter (3.4.1)
+    NUnit.Extension.TeamCityEventListener (1.0.1)
+    NUnit.Extension.VSProjectLoader (3.4.1)
+    NUnit.Runners (3.4.1)
+      NUnit.ConsoleRunner (>= 3.4.1)
+      NUnit.Extension.NUnitProjectLoader (>= 3.4.1)
+      NUnit.Extension.NUnitV2Driver (>= 3.4.1)
+      NUnit.Extension.NUnitV2ResultWriter (>= 3.4.1)
+      NUnit.Extension.TeamCityEventListener (>= 1.0.1)
+      NUnit.Extension.VSProjectLoader (>= 3.4.1)

@@ -24,9 +24,9 @@ module TestApi =
     open NUnit.Framework
     open FSharpLint.Application.Lint
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open TestPackageHelper
 
-    [<Literal>]
-    let SourceFile = "../../../TypeChecker.fs"
+    let sourceFile = basePath </> "tests" </> "TypeChecker.fs"
     
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestApi() =
@@ -34,11 +34,11 @@ module TestApi =
             let checker = FSharpChecker.Create()
 
             let options = 
-                checker.GetProjectOptionsFromScript(SourceFile, source) 
+                checker.GetProjectOptionsFromScript(sourceFile, source) 
                 |> Async.RunSynchronously
 
             let parseResults =
-                checker.ParseFileInProject(SourceFile, source, options)
+                checker.ParseFileInProject(sourceFile, source, options)
                 |> Async.RunSynchronously
         
             match parseResults.ParseTree with
@@ -48,7 +48,7 @@ module TestApi =
         [<Category("Performance")>]
         [<Test>]
         member __.``Performance of linting an existing file``() = 
-            let text = File.ReadAllText SourceFile
+            let text = File.ReadAllText sourceFile
             let tree = text |> generateAst
             let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None; FSharpVersion = Version(4, 0) }
             
@@ -60,7 +60,7 @@ module TestApi =
             for _ in 0..iterations do
                 stopwatch.Restart()
                 
-                lintParsedFile OptionalLintParameters.Default fileInfo SourceFile |> ignore
+                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
 
                 stopwatch.Stop()
 

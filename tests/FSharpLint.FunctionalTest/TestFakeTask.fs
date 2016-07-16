@@ -18,17 +18,20 @@ namespace FSharpLint.FunctionalTest
 
 module TestFakeTask =
 
+    open System.Diagnostics
     open System.IO
+    open System.Text
     open NUnit.Framework
+    open TestPackageHelper
 
     let runFake() =
-        let fakeExe = TestPackageHelper.getPath @"../../../../packages/tools/FAKE/tools/FAKE.exe"
+        let fakeExe = basePath </> "packages" </> "tools" </> "FAKE" </> "tools" </> "FAKE.exe"
 
-        let workingDirectory = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/"
+        let workingDirectory = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
 
         let buildFile =
             if Fake.EnvironmentHelper.isMono then
-                System.IO.FileInfo(Path.Combine(workingDirectory, "testLintViaFake.fsx")).FullName
+                FileInfo(Path.Combine(workingDirectory, "testLintViaFake.fsx")).FullName
             else
                 "testLintViaFake.fsx"
 
@@ -36,11 +39,11 @@ module TestFakeTask =
 
         let arguments =
             if Fake.EnvironmentHelper.isMono then
-                sprintf "%s %s" (System.IO.FileInfo(fakeExe).FullName) buildFile
+                sprintf "%s %s" (FileInfo(fakeExe).FullName) buildFile
             else
                 buildFile 
 
-        let startInfo = System.Diagnostics.ProcessStartInfo
+        let startInfo = ProcessStartInfo
                                 (
                                     FileName = file,
                                     Arguments = arguments,
@@ -48,9 +51,9 @@ module TestFakeTask =
                                     WorkingDirectory = workingDirectory,
                                     UseShellExecute = false)
 
-        use app = System.Diagnostics.Process.Start(startInfo)
+        use app = Process.Start(startInfo)
 
-        let output = System.Text.StringBuilder()
+        let output = StringBuilder()
         
         while not app.StandardOutput.EndOfStream do
             app.StandardOutput.ReadLine() |> output.Append |> ignore
@@ -77,7 +80,7 @@ module TestFakeTask =
                   "`x=null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
                   "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
 
-            let allFound = List.forall (fun x -> output.Contains(x)) expectedErrors
+            let allFound = expectedErrors |> List.forall output.Contains
 
             let failInfo = sprintf "FAKE output didn't contain expected lint warnings. output: %s" output
                 

@@ -4,7 +4,7 @@
 
 #r @"packages/tools/FAKE/tools/FakeLib.dll"
 open Fake 
-open Fake.Git
+open Fake.Testing
 open Fake.AssemblyInfoFile
 open Fake.ReleaseNotesHelper
 open System
@@ -85,22 +85,20 @@ Target "Build" (fun _ ->
 
 Target "RunTests" (fun _ ->
     !! testAssemblies 
-    |> NUnit (fun p ->
+    |> NUnit3 (fun p ->
         { p with
-            DisableShadowCopy = true
+            ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            ExcludeCategory = "Performance"
-            OutputFile = "TestResults.xml" })
+            Where = "cat != Performance" })
 )
 
 Target "RunFunctionalTests" (fun _ ->
     !! "tests/**/bin/Release/*FunctionalTest*.dll" 
-    |> NUnit (fun p ->
+    |> NUnit3 (fun p ->
         { p with
-            DisableShadowCopy = true
+            ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            ExcludeCategory = "Performance"
-            OutputFile = "TestResults.xml" })
+            Where = "cat != Performance" })
 )
 
 // --------------------------------------------------------------------------------------

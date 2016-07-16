@@ -57,7 +57,6 @@
     <Compile Include="Framework/TestAst.fs" />
     <Compile Include="Framework/TestFuzzyHintMatcher.fs" />
     <Compile Include="Framework/TestAbstractSyntaxArray.fs" />
-
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
     <Compile Include="Rules/TestNameConventionRules.fs" />
@@ -70,13 +69,15 @@
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
-    
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -87,9 +88,6 @@
       <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
       <Private>True</Private>
     </ProjectReference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\NUnit\lib\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="FParsec">
       <HintPath>..\..\packages\FParsec\lib\net40-client\FParsec.dll</HintPath>
     </Reference>

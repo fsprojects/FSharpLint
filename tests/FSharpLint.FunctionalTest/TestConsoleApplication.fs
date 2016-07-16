@@ -19,7 +19,10 @@ namespace FSharpLint.FunctionalTest
 module Tests =
 
     open System
+    open System.Diagnostics
+    open System.IO
     open NUnit.Framework
+    open TestPackageHelper
 
     type Error =
         { Description: string
@@ -32,18 +35,18 @@ module Tests =
     let runConsoleApp arguments =
         let filename = 
             #if DEBUG
-                @"../../../../src/FSharpLint.Console/bin/fsharplint.exe"
+                basePath </> "src" </> "FSharpLint.Console" </> "bin" </> "fsharplint.exe"
             #else
-                @"../../../../bin/fsharplint.exe"
+                basePath </> "bin" </> "fsharplint.exe"
             #endif
 
-        let startInfo = Diagnostics.ProcessStartInfo
-                                (FileName = IO.Path.GetFullPath filename,
+        let startInfo = ProcessStartInfo
+                                (FileName = Path.GetFullPath filename,
                                  Arguments = arguments,
                                  RedirectStandardOutput = true,
                                  UseShellExecute = false)
 
-        use app = Diagnostics.Process.Start(startInfo)
+        use app = Process.Start(startInfo)
 
         let output = app.StandardOutput.ReadToEnd()
                 
@@ -74,69 +77,78 @@ module Tests =
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
+        let getTestFilePath fileName =
+            basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> fileName
+
         [<Test>]
         member __.InvalidConfig() = 
-            let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = getTestFilePath "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let arguments = sprintf "-f %s" projectFile
 
-            IO.File.WriteAllText("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint", "invalid config file contents")
+            File.WriteAllText(getTestFilePath "Settings.FSharpLint", "invalid config file contents")
 
             let output = runConsoleApp arguments
 
-            IO.File.Delete("../../../FSharpLint.FunctionalTest.TestedProject/Settings.FSharpLint")
+            File.Delete(getTestFilePath "Settings.FSharpLint")
 
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
-            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesInvalidProject.fsproj"
-
+            let projectFile = getTestFilePath "referencesInvalidProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains("could not load the project file"), "Did not find could not load project file error. Program output:\n" + output)
+            Assert.IsTrue(
+                output.Contains("could not load the project file"), 
+                "Did not find could not load project file error. Program output:\n" + output)
 
         [<Test>]
         member __.InvalidProjectFile() = 
-            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/invalidProjectFile.fsproj"
-
+            let projectFile = getTestFilePath "invalidProjectFile.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), sprintf "Output:\n%s" output)
+            Assert.IsTrue(
+                output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), 
+                sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.UnableToFindProjectFile() = 
-            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/iuniubi.fsproj"
-
+            let projectFile = getTestFilePath "iuniubi.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
 
-            Assert.IsTrue(output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), sprintf "Output:\n%s" output)
+            Assert.IsTrue(
+                output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), 
+                sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
-            let projectFile = @"../../../FSharpLint.FunctionalTest.TestedProject/referencesNonExistantProject.fsproj"
-
+            let projectFile = getTestFilePath "referencesNonExistantProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
             
-            Assert.IsTrue(output.Contains("Could not find file") || output.Contains("not found"), sprintf "Output:\n%s" output)
+            Assert.IsTrue(
+                output.Contains("Could not find file") || output.Contains("not found"), 
+                sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.FunctionalTestConsoleApplication() = 
-            let arguments = @"-f ../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = getTestFilePath "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let arguments = sprintf "-f %s" projectFile
 
             let output = runConsoleApp arguments
-
             let errors = getErrorsFromOutput output
 
-            expectedErrors 
-            |> List.iter (fun x -> Assert.True(List.exists (fun y -> y.Description = x) errors, 
-                                               "Errors did not contain expected error:\n" + x +
-                                               ". Program output:\n" + output))
+            for expectedError in expectedErrors do
+                let containsExpectedError = List.exists (fun y -> y.Description = expectedError) errors
+                Assert.True(
+                    containsExpectedError, 
+                    sprintf "Errors did not contain expected error:\n %s. Program output:\n %s" expectedError output)
 
             Assert.AreEqual(expectedErrors.Length, errors.Length)

@@ -19,21 +19,21 @@ namespace FSharpLint.FunctionalTest
 module TestPackageHelper =
 
     open System.IO
+    open NUnit.Framework
 
-    let getPath (path:string) = path.Replace('/', Path.DirectorySeparatorChar)
+    let (</>) x y = Path.Combine(x, y)
 
-    let copy toDirectory path = File.Copy(path, Path.Combine(toDirectory, Path.GetFileName(path)), true)
+    let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".."
+
+    let copy toDirectory path = File.Copy(path, toDirectory </> Path.GetFileName path, true)
 
     let copyFSharpLintTaskFiles toDirectory = 
-        let taskDirectory = 
-            sprintf @"../../../FSharpLint.FunctionalTest.TestedProject/%s/" toDirectory
-            |> getPath
+        let taskDirectory = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> toDirectory
 
-        let taskDirectoryExists = Directory.Exists(taskDirectory)
-        if not taskDirectoryExists then
-            Directory.CreateDirectory(taskDirectory) |> ignore
+        if not (Directory.Exists taskDirectory) then
+            Directory.CreateDirectory taskDirectory |> ignore
 
-        let copyToTaskDir = getPath >> (copy taskDirectory)
+        let copyToTaskDir = copy taskDirectory
 
         let binDir = 
             #if DEBUG
@@ -42,24 +42,25 @@ module TestPackageHelper =
                 "Release"
             #endif
 
-        copyToTaskDir (@"../../../../src/FSharpLint.MSBuild/bin/" + binDir + "/FSharpLint.MSBuild.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.MSBuild/bin/" + binDir + "/FSharp.Core.dll")
+        let getAssemblyPath projectName assemblyName =
+            basePath </> "src" </> projectName </> "bin" </> binDir </> assemblyName
+            
+        getAssemblyPath "FSharpLint.MSBuild" "FSharpLint.MSBuild.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.MSBuild" "FSharp.Core.dll" |> copyToTaskDir
+        
+        getAssemblyPath "FSharpLint.Fake" "FSharpLint.Fake.dll" |> copyToTaskDir
+        
+        getAssemblyPath "FSharpLint.Core" "FSharpLint.Core.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FSharp.Compiler.Service.ProjectCracker.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FSharp.Compiler.Service.ProjectCrackerTool.exe" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FSharp.Compiler.Service.ProjectCrackerTool.exe.config" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FSharp.Compiler.Service.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FParsecCS.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.Core" "FParsec.dll" |> copyToTaskDir
 
-        copyToTaskDir (@"../../../../src/FSharpLint.Fake/bin/" + binDir + "/FSharpLint.Fake.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharpLint.Core.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.ProjectCracker.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.ProjectCrackerTool.exe")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.ProjectCrackerTool.exe.config")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FSharp.Compiler.Service.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FParsecCS.dll")
-        copyToTaskDir (@"../../../../src/FSharpLint.Core/bin/" + binDir + "/FParsec.dll")
+        let taskBuildDirectory = taskDirectory </> "build"
 
-        let taskBuildDirectory = Path.Combine(taskDirectory, "build")
+        if not (Directory.Exists taskBuildDirectory) then
+            Directory.CreateDirectory taskBuildDirectory |> ignore
 
-        let taskBuildDirectoryExists = Directory.Exists(taskBuildDirectory)
-        if not taskBuildDirectoryExists then
-            Directory.CreateDirectory(taskBuildDirectory) |> ignore
-
-        let copyToTaskBuildDir = getPath >> (copy taskBuildDirectory)
-
-        copyToTaskBuildDir @"../../../../packaging/tool/build/FSharpLint.targets"
+        basePath </> "packaging" </> "tool" </> "build" </> "FSharpLint.targets" |> copy taskBuildDirectory
