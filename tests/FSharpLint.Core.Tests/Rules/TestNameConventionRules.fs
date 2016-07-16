@@ -1167,3 +1167,36 @@ type Cat() =
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
         Assert.AreEqual(2, numberOfErrors)
+
+    [<Test>]
+    member this.``Let DU deconstruction must not warn about DU name``() = 
+        this.Parse """
+module Program
+
+type Foo = Foo of bool
+
+let Foo(foo) = Foo(true)"""
+        
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Let parameter DU deconstruction must not warn about DU name``() = 
+        this.Parse """
+module Program
+
+type Foo = Foo of bool
+
+let foo (Foo(v)) = ()"""
+        
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``For pattern DU deconstruction must not warn about DU name``() = 
+        this.Parse """
+module Program
+
+type Foo = Foo of bool
+
+for Foo(foo) in [Foo(true)] do ()"""
+
+        Assert.IsFalse(this.ErrorsExist)
