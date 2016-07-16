@@ -24,6 +24,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
+open TestUtils
 
 let emptyConfig =
     { UseTypeChecker = Some(false)
@@ -32,24 +33,6 @@ let emptyConfig =
           Map.ofList
               [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
                        Settings = Map.ofList [] }) ] }
-
-[<Literal>]
-let SourceFile = "../../../TypeChecker.fs"
-
-let generateAst source =
-    let checker = FSharpChecker.Create()
-
-    let options = 
-        checker.GetProjectOptionsFromScript(SourceFile, source) 
-        |> Async.RunSynchronously
-
-    let parseResults =
-        checker.ParseFileInProject(SourceFile, source, options)
-        |> Async.RunSynchronously
-        
-    match parseResults.ParseTree with
-    | Some(parseTree) -> parseTree
-    | None -> failwith "Failed to parse file."
 
 [<AbstractClass>]
 type TestRuleBase(analyser, ?analysers) =
@@ -67,8 +50,7 @@ type TestRuleBase(analyser, ?analysers) =
         | None -> emptyConfig
 
     member __.TimeAnalyser(iterations, ?overrideConfig) =
-        let text = System.IO.File.ReadAllText SourceFile
-        let tree = text |> generateAst
+        let (tree, text) = getPerformanceTestInput ()
 
         let (array, skipArray) = AbstractSyntaxArray.astToArray tree
 

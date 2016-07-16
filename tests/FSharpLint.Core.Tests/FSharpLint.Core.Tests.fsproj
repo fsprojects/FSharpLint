@@ -50,6 +50,7 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Compile Include="TestUtils.fs" />
     <!-- Framework -->
     <Compile Include="Framework/TestConfiguration.fs" />
     <Compile Include="Framework/TestAstInfo.fs" />

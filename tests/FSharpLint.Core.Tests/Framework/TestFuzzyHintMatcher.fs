@@ -16,35 +16,16 @@
 
 module TestFuzzyHintMatcher
 
-open System.IO
 open System.Diagnostics
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.FuzzyHintMatcher
 open FSharpLint.Framework.HintParser
-open Microsoft.FSharp.Compiler.SourceCodeServices
 open NUnit.Framework
 open FParsec
+open TestUtils
 
 [<TestFixture>]
 type TestAst() =
-
-    [<Literal>]
-    let SourceFile = "../../../TypeChecker.fs"
-
-    let generateAst source =
-        let checker = FSharpChecker.Create()
-
-        let options = 
-            checker.GetProjectOptionsFromScript(SourceFile, source) 
-            |> Async.RunSynchronously
-
-        let parseResults =
-            checker.ParseFileInProject(SourceFile, source, options)
-            |> Async.RunSynchronously
-        
-        match parseResults.ParseTree with
-        | Some(parseTree) -> parseTree
-        | None -> failwith "Failed to parse file."
 
     let toHint hint =
         match run phint hint with
@@ -54,9 +35,7 @@ type TestAst() =
     [<Category("Performance")>]
     [<Test>]
     member __.``Performance of matching fuzzy matching hints``() = 
-        let fileContent = File.ReadAllText SourceFile
-        
-        let tree = generateAst fileContent
+        let (tree, _) = getPerformanceTestInput ()
 
         let (array, skipArray) = astToArray tree
 

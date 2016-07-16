@@ -25,27 +25,10 @@ open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open NUnit.Framework
+open TestUtils
 
 [<TestFixture>]
 type TestAst() =
-
-    [<Literal>]
-    let SourceFile = "../../../TypeChecker.fs"
-
-    let generateAst source =
-        let checker = FSharpChecker.Create()
-
-        let options = 
-            checker.GetProjectOptionsFromScript(SourceFile, source) 
-            |> Async.RunSynchronously
-
-        let parseResults =
-            checker.ParseFileInProject(SourceFile, source, options)
-            |> Async.RunSynchronously
-        
-        match parseResults.ParseTree with
-        | Some(parseTree) -> parseTree
-        | None -> failwith "Failed to parse file."
 
     let astToExpr ast =
         let (|Module|_|) x =
@@ -116,7 +99,7 @@ type TestAst() =
     [<Category("Performance")>]
     [<Test>]
     member __.``Performance of building syntax array``() = 
-        let tree = File.ReadAllText SourceFile |> generateAst
+        let (tree, _) = getPerformanceTestInput ()
 
         let iterations = 100
 
