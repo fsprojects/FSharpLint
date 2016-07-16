@@ -1,3 +1,7 @@
+##### 0.4.2 - July 16 2016
+
+* Fixed name convention bug which warned for DU names inside patterns.
+
 ##### 0.4.2-beta - July 14 2016
 
 * Added required project cracker files to FSharpLint.Fake package.
