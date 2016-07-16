@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FSharpLintSettings>
+  <Analysers>
+    <Typography>
+      <Rules>
+        <MaxCharactersOnLine>
+          <Enabled>true</Enabled>
+          <Length>120</Length>
+        </MaxCharactersOnLine>
+
+        <TrailingWhitespaceOnLine>
+          <Enabled>true</Enabled>
+        </TrailingWhitespaceOnLine>
+      </Rules>
+    </Typography>
+
+    <NestedStatements>
+      <Enabled>true</Enabled>
+      <Depth>8</Depth>
+    </NestedStatements>
+
+    <NumberOfItems>
+      <Rules>
+        <MaxNumberOfMembers>
+          <Enabled>false</Enabled>
+          <MaxItems>32</MaxItems>
+        </MaxNumberOfMembers>
+      </Rules>
+      <Enabled>true</Enabled>
+    </NumberOfItems>
+
+    <SourceLength>
+      <Rules>
+        <MaxLinesInFunction>
+          <Enabled>false</Enabled>
+        </MaxLinesInFunction>
+
+        <MaxLinesInLambdaFunction>
+          <Enabled>true</Enabled>
+          <Lines>7</Lines>
+        </MaxLinesInLambdaFunction>
+
+        <MaxLinesInMatchLambdaFunction>
+          <Enabled>false</Enabled>
+        </MaxLinesInMatchLambdaFunction>
+
+        <MaxLinesInValue>
+          <Enabled>false</Enabled>
+        </MaxLinesInValue>
+
+        <MaxLinesInConstructor>
+          <Enabled>false</Enabled>
+        </MaxLinesInConstructor>
+
+        <MaxLinesInMember>
+          <Enabled>false</Enabled>
+        </MaxLinesInMember>
+
+        <MaxLinesInProperty>
+          <Enabled>false</Enabled>
+          <Lines>70</Lines>
+        </MaxLinesInProperty>
+
+        <MaxLinesInClass>
+          <Enabled>false</Enabled>
+        </MaxLinesInClass>
+
+        <MaxLinesInEnum>
+          <Enabled>false</Enabled>
+        </MaxLinesInEnum>
+
+        <MaxLinesInUnion>
+          <Enabled>false</Enabled>
+        </MaxLinesInUnion>
+
+        <MaxLinesInRecord>
+          <Enabled>false</Enabled>
+        </MaxLinesInRecord>
+
+        <MaxLinesInModule>
+          <Enabled>false</Enabled>
+        </MaxLinesInModule>
+      </Rules>
+      <Enabled>true</Enabled>
+    </SourceLength>
+  </Analysers>
+</FSharpLintSettings>
