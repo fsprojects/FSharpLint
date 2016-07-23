@@ -1,5 +1,6 @@
 type file
 id FSharpLint.MSBuild
+title FSharpLint.MSBuild
 version 1.0.0-beta
 licenseUrl https://github.com/fsprojects/FSharpLint/blob/master/LICENSE
 projecturl http://fsprojects.github.com/FSharpLint
@@ -11,3 +12,5 @@ tags
 files
     build ==> build
     bin/Release/*.dll ==> tools
+    bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe ==> tools
+    bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe.config ==> tools
