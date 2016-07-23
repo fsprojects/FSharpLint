@@ -1,3 +1,7 @@
+##### 0.4.4 - July 23 2016
+
+* Fixed structure of FSharpLint.MSBuild package
+
 ##### 0.4.3 - July 23 2016
 
 * Updated FSharp.Compiler.Service
