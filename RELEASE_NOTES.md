@@ -1,3 +1,7 @@
+##### 0.4.3 - July 23 2016
+
+* Updated FSharp.Compiler.Service
+
 ##### 0.4.2 - July 16 2016
 
 * Fixed name convention bug which warned for DU names inside patterns.
