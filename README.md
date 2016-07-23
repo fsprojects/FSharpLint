@@ -1,7 +1,7 @@
 [![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/issue)](http://issuestats.com/github/fsprojects/FSharpLint)
 [![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/pr)](http://issuestats.com/github/fsprojects/FSharpLint)
 
-#FSharpLint [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.svg?style=flat)](https://www.nuget.org/packages/FSharpLint/)
+#FSharpLint
 
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
@@ -19,9 +19,13 @@ Each directory aims to contain a README.md file with a brief technical overview 
 
 The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it.
 
-###Nuget
+###Nuget Packages
 
-A [package is availiable on nuget](https://www.nuget.org/packages/FSharpLint/) - it sets up msbuild to run the tool after build on any projects the package is installed onto.
+Package | Version
+------- | --------
+[MSBuild Task](https://www.nuget.org/packages/FSharpLint.MSBuild/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.MSBuild.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.MSBuild/)
+[FAKE Task](https://www.nuget.org/packages/FSharpLint.Fake/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Fake.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Fake/)
+[API](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/)
 
 ###Build Status
 
