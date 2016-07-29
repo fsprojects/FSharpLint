@@ -1,10 +1,10 @@
 source https://www.myget.org/F/dotnet-core/api/v3/index.json
 source https://nuget.org/api/v2
 
-nuget FParsec
-nuget NUnit
-nuget FSharp.Compiler.Service
-nuget FSharp.Compiler.Service.ProjectCracker
+nuget FParsec >= 1.0.2
+nuget NUnit >= 3.4.1
+nuget FSharp.Compiler.Service >= 6.0.0
+nuget FSharp.Compiler.Service.ProjectCracker >= 6.0.0
 nuget FAKE.Lib
 
 group Tools
