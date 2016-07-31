@@ -700,3 +700,30 @@ do
     x = null |> ignore""", config, checkInput = true)
 
         this.ErrorWithMessageExists("`x=null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue
+        
+    /// Regression test for: http://codereview.stackexchange.com/questions/134296/f-function-to-concatenate-some-dsl-scripts-with-indentation#comment251110_134297
+    [<Test>]
+    member this.``Lambda hint correctly matches expression with parameters.``() = 
+        let config = generateHintConfig ["fun x -> x ===> id"]
+        
+        this.Parse("""
+module Goat
+
+do
+    [(1,2,3)] |> Seq.groupBy(fun (store, app, script) -> store)  |> ignore""", config)
+
+        this.AssertNoWarnings()
+        
+    /// Regression test for: http://stackoverflow.com/questions/38412166/how-to-refactor-a-function-using-ignore
+    [<Test>]
+    member this.``Lambda hint does not ignore curried parameters.``() = 
+        let config = generateHintConfig ["fun _ -> () ===> ignore"]
+        
+        this.Parse("""
+module Goat
+
+do
+    let log = fun data medium -> ()
+    ()""", config)
+
+        this.AssertNoWarnings()
