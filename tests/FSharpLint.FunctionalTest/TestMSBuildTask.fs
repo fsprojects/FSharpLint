@@ -18,19 +18,21 @@ namespace FSharpLint.FunctionalTest
 
 module TestMSBuildTask =
 
+    open System.Diagnostics
+    open System.Text
     open NUnit.Framework
+    open TestPackageHelper
 
     let msbuildProject projectFile =
-        let startInfo = System.Diagnostics.ProcessStartInfo
-                                (
-                                    FileName = Fake.MSBuildHelper.msBuildExe,
-                                    Arguments = projectFile,
-                                    RedirectStandardOutput = true,
-                                    UseShellExecute = false)
+        let startInfo = ProcessStartInfo
+                                (FileName = Fake.MSBuildHelper.msBuildExe,
+                                 Arguments = projectFile,
+                                 RedirectStandardOutput = true,
+                                 UseShellExecute = false)
 
-        use app = System.Diagnostics.Process.Start(startInfo)
+        use app = Process.Start(startInfo)
 
-        let output = System.Text.StringBuilder()
+        let output = StringBuilder()
         
         while not app.StandardOutput.EndOfStream do
             app.StandardOutput.ReadLine() |> output.Append |> ignore
@@ -44,7 +46,8 @@ module TestMSBuildTask =
 
         [<Test>]
         member __.FunctionalTestMSBuildTask() = 
-            let projectFile = TestPackageHelper.getPath @"../../../FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
+            let projectFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> 
+                              "FSharpLint.FunctionalTest.TestedProjectMSBuildTask.fsproj"
 
             let output = msbuildProject projectFile
 
@@ -58,8 +61,8 @@ module TestMSBuildTask =
                   "`a<>true` might be able to be refactored into `not a`."
                   "`x=null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
                   "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
-
-            let allFound = List.forall (fun x -> output.Contains(x)) expectedErrors
+                  
+            let allFound = expectedErrors |> List.forall output.Contains
 
             let failInfo = sprintf "MSBuild output didn't contain expected lint warnings. output: %s" output
                 
