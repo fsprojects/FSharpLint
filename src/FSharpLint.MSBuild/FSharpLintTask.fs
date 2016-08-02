@@ -37,8 +37,7 @@ type FSharpLintTask() =
         let directory = Path.GetDirectoryName fullPath
 
         let adSetup = AppDomainSetup(ApplicationBase = directory,
-                                     PrivateBinPath = directory,
-                                     DisallowBindingRedirects = true)
+                                     ConfigurationFile = Path.Combine(directory, "app.config"))
 
         let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
         let remoteLintRunner = 
