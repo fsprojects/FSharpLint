@@ -32,28 +32,32 @@ type FSharpLintTask() =
     member val TreatWarningsAsErrors = false with get, set
 
     override this.Execute() = 
-        let assembly = typeof<FSharpLintTask>.Assembly
-        let fullPath = assembly.Location
-        let directory = Path.GetDirectoryName fullPath
+        try
+            let assembly = typeof<FSharpLintTask>.Assembly
+            let fullPath = assembly.Location
+            let directory = Path.GetDirectoryName fullPath
 
-        let adSetup = AppDomainSetup(ApplicationBase = directory,
-                                     ConfigurationFile = Path.Combine(directory, "app.config"))
+            let adSetup = AppDomainSetup(ApplicationBase = directory,
+                                         ConfigurationFile = Path.Combine(directory, "app.config"))
 
-        let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
-        let remoteLintRunner = 
-            ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
-            :?> AppDomain.LintRunner
+            let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
+            let remoteLintRunner = 
+                ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
+                :?> AppDomain.LintRunner
 
-        for warning in remoteLintRunner.Lint(this.Project) do
-            if this.TreatWarningsAsErrors then
-                this.Log.LogError("", "", "", 
-                                    warning.Filename, 
-                                    warning.StartLine, warning.StartColumn, 
-                                    warning.EndLine, warning.EndColumn, warning.Info, null)
-            else
-                this.Log.LogWarning("", "", "", 
-                                    warning.Filename, 
-                                    warning.StartLine, warning.StartColumn, 
-                                    warning.EndLine, warning.EndColumn, warning.Info, null)
+            for warning in remoteLintRunner.Lint(this.Project) do
+                if this.TreatWarningsAsErrors then
+                    this.Log.LogError("", "", "", 
+                                        warning.Filename, 
+                                        warning.StartLine, warning.StartColumn, 
+                                        warning.EndLine, warning.EndColumn, warning.Info)
+                else
+                    this.Log.LogWarning("", "", "", 
+                                        warning.Filename, 
+                                        warning.StartLine, warning.StartColumn, 
+                                        warning.EndLine, warning.EndColumn, warning.Info)
 
-        true
+            true
+        with e -> 
+            this.Log.LogErrorFromException(e, showStackTrace = true, showDetail = true, file = this.Project)
+            false
