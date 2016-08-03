@@ -33,7 +33,7 @@ module AppDomain =
     type LintRunner() = 
         inherit MarshalByRefObject()
 
-        member __.Lint(projectFile) =
+        member __.Lint(projectFile, notifyFailure) =
             let warnings = ResizeArray()
 
             let errorReceived (error:LintWarning.Warning) = 
@@ -50,6 +50,10 @@ module AppDomain =
                   FinishEarly = None
                   Configuration = None }
 
-            match FSharpLintWorker.RunLint(projectFile, options, None) with
+            let progressReceived = function
+                | ProjectProgress.Failed(file, e) -> notifyFailure file e
+                | _ -> ()                
+
+            match FSharpLintWorker.RunLint(projectFile, options, Some(progressReceived)) with
             | Success -> warnings
             | Failure(message) -> failwith message
