@@ -30,10 +30,19 @@ module AppDomain =
           EndColumn: int
           Info: string }
 
+    type Failure =
+        { Filename: String
+          Exception: exn }
+
     type LintRunner() = 
         inherit MarshalByRefObject()
+        
+        let failureEvent = Event<_>()
 
-        member __.Lint(projectFile, notifyFailure) =
+        [<CLIEvent>]
+        member this.Failure = failureEvent.Publish
+
+        member __.Lint(projectFile) =
             let warnings = ResizeArray()
 
             let errorReceived (error:LintWarning.Warning) = 
@@ -51,7 +60,8 @@ module AppDomain =
                   Configuration = None }
 
             let progressReceived = function
-                | ProjectProgress.Failed(file, e) -> notifyFailure file e
+                | ProjectProgress.Failed(file, e) -> 
+                    failureEvent.Trigger { Filename = file; Exception = e }
                 | _ -> ()                
 
             match FSharpLintWorker.RunLint(projectFile, options, Some(progressReceived)) with

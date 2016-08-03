@@ -45,11 +45,13 @@ type FSharpLintTask() =
                 ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
                 :?> AppDomain.LintRunner
 
-            let onFileFailure file e =
-                this.Log.LogWarning(sprintf "FSharpLint.MSBuild failed to lint file %s." file)
-                this.Log.LogWarningFromException(e, showStackTrace = true)
+            let onFailure (failure:AppDomain.Failure) =
+                this.Log.LogWarning(sprintf "FSharpLint.MSBuild failed to lint file %s." failure.Filename)
+                this.Log.LogWarningFromException(failure.Exception, showStackTrace = true)
 
-            for warning in remoteLintRunner.Lint(this.Project, onFileFailure) do
+            remoteLintRunner.Failure.Add onFailure
+
+            for warning in remoteLintRunner.Lint(this.Project) do
                 if this.TreatWarningsAsErrors then
                     this.Log.LogError("", "", "", 
                                         warning.Filename, 
