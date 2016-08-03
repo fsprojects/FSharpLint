@@ -1,3 +1,7 @@
+##### 0.4.5-beta - August 4 2016
+
+* Run linter in separate AppDomain in MSBuild package so that we can add binding redirects to get the correct version of FSharp.Core
+
 ##### 0.4.4 - July 23 2016
 
 * Fixed structure of FSharpLint.MSBuild package
