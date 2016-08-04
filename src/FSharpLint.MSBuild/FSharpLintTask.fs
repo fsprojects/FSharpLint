@@ -23,7 +23,7 @@ open System.Security.Policy
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 
-type private Proxy(project, onFailure) =
+type Proxy(project, onFailure) =
     inherit MarshalByRefObject()
 
     member this.Lint() =
@@ -39,9 +39,11 @@ type private Proxy(project, onFailure) =
             ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
             :?> AppDomain.LintRunner
 
-        remoteLintRunner.Failure.Add onFailure
+        remoteLintRunner.Failure.Add this.OnFailure
 
-        remoteLintRunner.Lint(project)    
+        remoteLintRunner.Lint(project)
+
+    member private this.OnFailure(args) = onFailure args        
 
 [<Serializable>]
 type FSharpLintTask() = 
