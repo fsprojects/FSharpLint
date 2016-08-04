@@ -47,6 +47,7 @@ module TestPackageHelper =
             
         getAssemblyPath "FSharpLint.MSBuild" "FSharpLint.MSBuild.dll" |> copyToTaskDir
         getAssemblyPath "FSharpLint.MSBuild" "FSharp.Core.dll" |> copyToTaskDir
+        getAssemblyPath "FSharpLint.MSBuild" "app.config" |> copyToTaskDir
         
         getAssemblyPath "FSharpLint.Fake" "FSharpLint.Fake.dll" |> copyToTaskDir
         

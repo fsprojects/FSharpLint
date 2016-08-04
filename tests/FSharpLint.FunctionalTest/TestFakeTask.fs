@@ -44,12 +44,11 @@ module TestFakeTask =
                 buildFile 
 
         let startInfo = ProcessStartInfo
-                                (
-                                    FileName = file,
-                                    Arguments = arguments,
-                                    RedirectStandardOutput = true,
-                                    WorkingDirectory = workingDirectory,
-                                    UseShellExecute = false)
+                                (FileName = file,
+                                 Arguments = arguments,
+                                 RedirectStandardOutput = true,
+                                 WorkingDirectory = workingDirectory,
+                                 UseShellExecute = false)
 
         use app = Process.Start(startInfo)
 

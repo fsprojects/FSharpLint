@@ -16,11 +16,36 @@
 
 namespace FSharpLint.MSBuild
 
+open System
+open System.IO
+open System.Reflection
+open System.Security.Policy
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
-open FSharpLint.Application
-open FSharpLint.Application.FSharpLintWorker
 
+type Proxy(project, onFailure) =
+    inherit MarshalByRefObject()
+
+    member this.Lint() =
+        let assembly = typeof<Proxy>.Assembly
+        let fullPath = assembly.Location
+        let directory = Path.GetDirectoryName fullPath
+
+        let adSetup = AppDomainSetup(ApplicationBase = directory,
+                                     ConfigurationFile = Path.Combine(directory, "app.config"))
+
+        let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
+        let remoteLintRunner = 
+            ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
+            :?> AppDomain.LintRunner
+
+        remoteLintRunner.Failure.Add this.OnFailure
+
+        remoteLintRunner.Lint(project)
+
+    member private this.OnFailure(args) = onFailure args        
+
+[<Serializable>]
 type FSharpLintTask() = 
     inherit Task()
 
@@ -30,41 +55,26 @@ type FSharpLintTask() =
     member val TreatWarningsAsErrors = false with get, set
 
     override this.Execute() = 
-        let treatWarningsAsErrors = this.TreatWarningsAsErrors
-        let logWarning:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogWarning
-        let logError:(string * string * string * string * int * int * int * int * string * obj[]) -> unit = this.Log.LogError
-        let logFailure:(string -> unit) = this.Log.LogWarning
-        
-        let progress (progress:ProjectProgress) =
-            match progress with
-            | Failed(filename, e) ->
-                sprintf 
-                    "Failed to parse file %s, Exception Message: %s \nException Stack Trace: %s"
-                    filename
-                    e.Message
-                    e.StackTrace
-                    |> logFailure
-            | _ -> ()
-        
-        let errorReceived (error:LintWarning.Warning) = 
-            let filename = error.Range.FileName
-            let startLine = error.Range.StartLine
-            let startColumn = error.Range.StartColumn + 1
-            let endLine = error.Range.EndLine
-            let endColumn = error.Range.EndColumn + 1
+        try
+            let warnings = Proxy(this.Project, this.OnFailure).Lint()
 
-            if treatWarningsAsErrors then
-                logError("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
-            else
-                logWarning("", "", "", filename, startLine, startColumn, endLine, endColumn, error.Info, null)
-        
-        let options = 
-            { ReceivedWarning = Some(errorReceived)
-              FinishEarly = None
-              Configuration = None }
-        
-        match FSharpLintWorker.RunLint(this.Project, options, Some(progress)) with
-        | Success -> ()
-        | Failure(message) -> logFailure message
+            for warning in warnings do
+                if this.TreatWarningsAsErrors then
+                    this.Log.LogError("", "", "", 
+                                      warning.Filename, 
+                                      warning.StartLine, warning.StartColumn, 
+                                      warning.EndLine, warning.EndColumn, warning.Info)
+                else
+                    this.Log.LogWarning("", "", "", 
+                                        warning.Filename, 
+                                        warning.StartLine, warning.StartColumn, 
+                                        warning.EndLine, warning.EndColumn, warning.Info)
 
-        true
+            true
+        with e -> 
+            this.Log.LogErrorFromException(e, showStackTrace = true, showDetail = true, file = this.Project)
+            false
+
+    member this.OnFailure(args: AppDomain.FailureEventArgs) =
+        this.Log.LogWarning(sprintf "FSharpLint.MSBuild failed to lint file %s." args.Filename)
+        this.Log.LogWarningFromException(args.Exception, showStackTrace = true)
