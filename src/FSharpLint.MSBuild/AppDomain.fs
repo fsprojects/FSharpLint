@@ -30,14 +30,19 @@ module AppDomain =
           EndColumn: int
           Info: string }
 
-    type Failure =
-        { Filename: String
-          Exception: exn }
+    [<Serializable>]
+    type FailureEventArgs(filename, e) =
+        inherit EventArgs()
+
+        member __.Filename: string = filename
+        member __.Exception: exn = e
+
+    type FailureEventHandler = delegate of obj * FailureEventArgs -> unit
 
     type LintRunner() = 
         inherit MarshalByRefObject()
         
-        let failureEvent = Event<_>()
+        let failureEvent = Event<FailureEventHandler, FailureEventArgs>()
 
         [<CLIEvent>]
         member this.Failure = failureEvent.Publish
@@ -61,7 +66,7 @@ module AppDomain =
 
             let progressReceived = function
                 | ProjectProgress.Failed(file, e) -> 
-                    failureEvent.Trigger { Filename = file; Exception = e }
+                    failureEvent.Trigger(null, FailureEventArgs(file, e))
                 | _ -> ()                
 
             match FSharpLintWorker.RunLint(projectFile, options, Some(progressReceived)) with

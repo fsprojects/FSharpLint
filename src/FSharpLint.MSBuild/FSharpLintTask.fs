@@ -23,6 +23,27 @@ open System.Security.Policy
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 
+type private Proxy(project, onFailure) =
+    inherit MarshalByRefObject()
+
+    member this.Lint() =
+        let assembly = typeof<Proxy>.Assembly
+        let fullPath = assembly.Location
+        let directory = Path.GetDirectoryName fullPath
+
+        let adSetup = AppDomainSetup(ApplicationBase = directory,
+                                     ConfigurationFile = Path.Combine(directory, "app.config"))
+
+        let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
+        let remoteLintRunner = 
+            ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
+            :?> AppDomain.LintRunner
+
+        remoteLintRunner.Failure.Add onFailure
+
+        remoteLintRunner.Lint(project)    
+
+[<Serializable>]
 type FSharpLintTask() = 
     inherit Task()
 
@@ -33,30 +54,14 @@ type FSharpLintTask() =
 
     override this.Execute() = 
         try
-            let assembly = typeof<FSharpLintTask>.Assembly
-            let fullPath = assembly.Location
-            let directory = Path.GetDirectoryName fullPath
+            let warnings = Proxy(this.Project, this.OnFailure).Lint()
 
-            let adSetup = AppDomainSetup(ApplicationBase = directory,
-                                         ConfigurationFile = Path.Combine(directory, "app.config"))
-
-            let ad = AppDomain.CreateDomain("FSharpLint.MSBuild", Evidence(), adSetup)
-            let remoteLintRunner = 
-                ad.CreateInstanceAndUnwrap(assembly.FullName, "FSharpLint.MSBuild.AppDomain+LintRunner")
-                :?> AppDomain.LintRunner
-
-            let onFailure (failure:AppDomain.Failure) =
-                this.Log.LogWarning(sprintf "FSharpLint.MSBuild failed to lint file %s." failure.Filename)
-                this.Log.LogWarningFromException(failure.Exception, showStackTrace = true)
-
-            remoteLintRunner.Failure.Add onFailure
-
-            for warning in remoteLintRunner.Lint(this.Project) do
+            for warning in warnings do
                 if this.TreatWarningsAsErrors then
                     this.Log.LogError("", "", "", 
-                                        warning.Filename, 
-                                        warning.StartLine, warning.StartColumn, 
-                                        warning.EndLine, warning.EndColumn, warning.Info)
+                                      warning.Filename, 
+                                      warning.StartLine, warning.StartColumn, 
+                                      warning.EndLine, warning.EndColumn, warning.Info)
                 else
                     this.Log.LogWarning("", "", "", 
                                         warning.Filename, 
@@ -67,3 +72,7 @@ type FSharpLintTask() =
         with e -> 
             this.Log.LogErrorFromException(e, showStackTrace = true, showDetail = true, file = this.Project)
             false
+
+    member this.OnFailure(args: AppDomain.FailureEventArgs) =
+        this.Log.LogWarning(sprintf "FSharpLint.MSBuild failed to lint file %s." args.Filename)
+        this.Log.LogWarningFromException(args.Exception, showStackTrace = true)
