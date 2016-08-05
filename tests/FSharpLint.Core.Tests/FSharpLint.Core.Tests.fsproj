@@ -21,7 +21,8 @@
     <Tailcalls>false</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>5</WarningLevel>
+    <NoWarn>52</NoWarn>
     <DocumentationFile>bin\Debug\FSharpLint.Core.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,6 +32,7 @@
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>5</WarningLevel>
+    <NoWarn>52</NoWarn>
     <DocumentationFile>bin\Release\FSharpLint.Core.Tests.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
