@@ -1,3 +1,7 @@
+##### 0.4.5 - August 5 2016
+
+* Added missing app.config file to FSharpLint.MSBuild package
+
 ##### 0.4.5-beta - August 4 2016
 
 * Run linter in separate AppDomain in MSBuild package so that we can add binding redirects to get the correct version of FSharp.Core
