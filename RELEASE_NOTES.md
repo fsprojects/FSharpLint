@@ -1,3 +1,7 @@
+##### 0.4.6 - August 21 2016
+
+* Bug fixed by @Krzysztof-Cieslak: https://github.com/fsprojects/FSharpLint/issues/172
+
 ##### 0.4.5 - August 5 2016
 
 * Added missing app.config file to FSharpLint.MSBuild package
