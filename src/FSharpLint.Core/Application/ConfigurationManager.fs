@@ -27,7 +27,7 @@ module ConfigurationManager =
         let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
             match directoryInfo with
             | null -> parentDirectories
-            | _ -> getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
+            | _ -> getParentDirectories (directoryInfo.FullName::parentDirectories) directoryInfo.Parent
 
         DirectoryInfo path |> getParentDirectories []
 
@@ -49,19 +49,19 @@ module ConfigurationManager =
     /// Intended to allow for all the configuration files for all the projects in a solution
     /// to be grouped in a single place where they can be modified.
     type ConfigurationManager() =
-        let loadedConfigs = Dictionary<DirectoryInfo, Configuration>()    
+        let loadedConfigs = Dictionary<string, Configuration>()
 
         member __.LoadConfigurationForProject(projectFilePath) =
-            let getConfig (directory:DirectoryInfo) =
-                let filePath = Path.Combine(directory.FullName, SettingsFileName)
+            let getConfig (directory) =
+                let filePath = Path.Combine(directory, SettingsFileName)
 
                 if loadedConfigs.ContainsKey directory then None
                 else
                     match tryLoadConfig filePath with
                     | Some(config) -> Some(directory, config)
                     | None -> None
-                
-            Path.GetDirectoryName projectFilePath 
+
+            Path.GetDirectoryName projectFilePath
             |> getParentDirectories
             |> List.choose getConfig
             |> List.iter loadedConfigs.Add
@@ -72,7 +72,7 @@ module ConfigurationManager =
                 | true, config -> Some(config)
                 | false, _ -> None
 
-            Path.GetDirectoryName projectFilePath 
+            Path.GetDirectoryName projectFilePath
             |> getParentDirectories
             |> List.choose tryGetConfig
             |> List.fold overrideConfiguration defaultConfiguration
