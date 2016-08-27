@@ -114,6 +114,7 @@ module Lint =
     open FSharpLint
     open FSharpLint.Framework
     open FSharpLint.Framework.AbstractSyntaxArray
+    open FSharpLint.Framework.Analyser
           
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -170,8 +171,8 @@ module Lint =
           Configuration: Configuration.Configuration
           FSharpVersion: Version }
 
-    let private analysers = 
-        [ (Rules.Binding.analyser, Rules.Binding.AnalyserName)
+    let private analyserFactories = 
+        [ Rules.Binding.BindingAnalyser (*
           (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
@@ -180,7 +181,7 @@ module Lint =
           (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
-          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
+          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)*) ]
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
@@ -189,26 +190,27 @@ module Lint =
                   LintWarning.Range = range
                   LintWarning.Input = fileInfo.Text } |> lintInfo.ErrorReceived
 
-            let visitorInfo = 
+            let context = 
                 { Ast.Text = fileInfo.Text
                   Ast.FSharpVersion = lintInfo.FSharpVersion
                   Ast.Config = lintInfo.Configuration
                   Ast.PostError = postError }
 
-            let analysers = analysers |> List.map (fun (analyser, name) -> (analyser visitorInfo, name))
-
             Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
-            let isAnalyserEnabled analyserName =
-                match Configuration.isAnalyserEnabled lintInfo.Configuration analyserName with
-                | Some(_) -> true | None -> false
-
             try 
-                let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+                let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
-                for (analyser, analyserName) in analysers do 
-                    if isAnalyserEnabled analyserName then
-                        analyser fileInfo.TypeCheckResults array skipArray
+                let analysisArgs = 
+                    { Context = context
+                      CheckResults = fileInfo.TypeCheckResults
+                      SyntaxArray = syntaxArray
+                      SkipArray = skipArray }
+                
+                for analyserFactory in analyserFactories do 
+                    let analyser = analyserFactory lintInfo.Configuration
+
+                    if analyser.Enabled then analyser.Analyse analysisArgs
             with 
             | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 
