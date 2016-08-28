@@ -177,14 +177,13 @@ module Lint =
     let private analyserFactories = 
         [ analyserFactory Rules.Binding.BindingAnalyser
           analyserFactory Rules.NumberOfItems.NumberOfItemsAnalyser
+          analyserFactory Rules.SourceLength.SourceLengthAnalyser
         
          (*
           (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
-          (Rules.NumberOfItems.analyser, Rules.NumberOfItems.AnalyserName)
           (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)
-          (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)*) ]

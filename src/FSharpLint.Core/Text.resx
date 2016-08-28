@@ -201,7 +201,7 @@
   <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
     <value>`raise` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesSourceLengthError" xml:space="preserve">
+  <data name="SourceLength" xml:space="preserve">
     <value>{0} was {2} lines long, expected to be less than {1} lines long.</value>
   </data>
   <data name="RulesTypographyFileLengthError" xml:space="preserve">
