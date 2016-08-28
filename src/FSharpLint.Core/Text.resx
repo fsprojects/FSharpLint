@@ -186,16 +186,16 @@
   <data name="RulesNestedStatementsError" xml:space="preserve">
     <value>Code expected not to be nested more deeply than a depth of {0}.</value>
   </data>
-  <data name="RulesNumberOfItemsBooleanConditionsError" xml:space="preserve">
+  <data name="MaxNumberOfBooleanOperatorsInCondition" xml:space="preserve">
     <value>Conditions expected to contain at most {0} boolean operators.</value>
   </data>
-  <data name="RulesNumberOfItemsClassMembersError" xml:space="preserve">
-    <value>Class expected to have a maximum of {0} members.</value>
+  <data name="MaxNumberOfMembers" xml:space="preserve">
+    <value>Type expected to have a maximum of {0} members.</value>
   </data>
-  <data name="RulesNumberOfItemsFunctionError" xml:space="preserve">
+  <data name="MaxNumberOfFunctionParameters" xml:space="preserve">
     <value>Functions expected to have a maximum of {0} parameters.</value>
   </data>
-  <data name="RulesNumberOfItemsTupleError" xml:space="preserve">
+  <data name="MaxNumberOfItemsInTuple" xml:space="preserve">
     <value>Tuple expected to have a maximum of {0} items.</value>
   </data>
   <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
