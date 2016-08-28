@@ -183,7 +183,7 @@
   <data name="RulesNamingConventionsUnderscoreError" xml:space="preserve">
     <value>Identifiers expected to not contain underscores, an underscore was found in: `{0}`.</value>
   </data>
-  <data name="RulesNestedStatementsError" xml:space="preserve">
+  <data name="NestedStatements" xml:space="preserve">
     <value>Code expected not to be nested more deeply than a depth of {0}.</value>
   </data>
   <data name="MaxNumberOfBooleanOperatorsInCondition" xml:space="preserve">

@@ -178,11 +178,11 @@ module Lint =
         [ analyserFactory Rules.Binding.BindingAnalyser
           analyserFactory Rules.NumberOfItems.NumberOfItemsAnalyser
           analyserFactory Rules.SourceLength.SourceLengthAnalyser
+          analyserFactory Rules.NestedStatements.NestedStatementsAnalyser
         
          (*
           (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
-          (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
           (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
