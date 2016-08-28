@@ -171,8 +171,14 @@ module Lint =
           Configuration: Configuration.Configuration
           FSharpVersion: Version }
 
+    let private analyserFactory (constructorf: Configuration.Configuration -> 't when 't :> Analyser) =
+        (fun config -> constructorf config :> Analyser)
+
     let private analyserFactories = 
-        [ Rules.Binding.BindingAnalyser (*
+        [ analyserFactory Rules.Binding.BindingAnalyser
+          analyserFactory Rules.NumberOfItems.NumberOfItemsAnalyser
+        
+         (*
           (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)

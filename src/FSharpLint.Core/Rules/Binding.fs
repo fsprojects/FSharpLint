@@ -173,8 +173,3 @@ module Binding =
 
         override this.Analyse analysisArgs = 
             Analysis.analyse this analysisArgs
-
-
-
-
-
