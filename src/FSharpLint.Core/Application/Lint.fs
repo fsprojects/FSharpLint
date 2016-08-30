@@ -179,6 +179,7 @@ module Lint =
           analyserFactory Rules.NumberOfItems.NumberOfItemsAnalyser
           analyserFactory Rules.SourceLength.SourceLengthAnalyser
           analyserFactory Rules.NestedStatements.NestedStatementsAnalyser
+          analyserFactory Rules.FunctionReimplementation.FunctionReimplementationAnalyser
         
          (*
           (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
