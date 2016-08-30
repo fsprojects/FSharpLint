@@ -21,59 +21,82 @@ module RaiseWithTooManyArguments =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.Configuration
+    
+    module Analysis =
+        type IRaiseWithTooManyArguementsAnalyser =
+            abstract member FailwithWithSingleArgument: Rule
+            abstract member RaiseWithSingleArgument: Rule
+            abstract member NullArgWithSingleArgument: Rule
+            abstract member InvalidOpWithSingleArgument: Rule
+            abstract member InvalidArgWithTwoArguments: Rule
+            abstract member FailwithfWithArgumentsMatchingFormatString: Rule
 
-    [<Literal>]
-    let AnalyserName = "RaiseWithTooManyArguments"
-
-    let private (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
-        | SynExpr.Ident(ident)::arguments when List.length arguments > maxArgs && ident.idText = identifier ->
-            Some()
-        | _ -> None
-
-    let private (|RaiseWithFormatStringTooManyArgs|_|) identifier = function
-        | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _), _)::arguments 
-            when ident.idText = identifier && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
+        let private (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
+            | SynExpr.Ident(ident)::arguments when List.length arguments > maxArgs && ident.idText = identifier ->
                 Some()
-        | _ -> None
-            
-    let analyser visitorInfo _ syntaxArray skipArray = 
-        let isEnabled i ruleName =
-            match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
-            | Some(_) -> 
-                let isSuppressed =
-                    AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-                    |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-                not isSuppressed
-            | None -> false
-            
-        let postError ruleName errorName range isEnabled =
-            if isEnabled ruleName then
-                Resources.GetString errorName
-                |> visitorInfo.PostError range
+            | _ -> None
 
-        let mutable i = 0
-        while i < syntaxArray.Length do
-            match syntaxArray.[i].Actual with
-            | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr -> 
-                match expr with
-                | FuncApp(expressions, range) -> 
-                    match expressions with
-                    | RaiseWithTooManyArgs "failwith" 1 ->
-                        postError "FailwithWithSingleArgument" "FailwithWithSingleArgument" range (isEnabled i)
-                    | RaiseWithTooManyArgs "raise" 1 -> 
-                        postError "RaiseWithSingleArgument" "RulesRaiseWithSingleArgument" range (isEnabled i)
-                    | RaiseWithTooManyArgs "nullArg" 1 -> 
-                        postError "NullArgWithSingleArgument" "RulesNullArgWithSingleArgument" range (isEnabled i)
-                    | RaiseWithTooManyArgs "invalidOp" 1 -> 
-                        postError "InvalidOpWithSingleArgument" "RulesInvalidOpWithSingleArgument" range (isEnabled i)
-                    | RaiseWithTooManyArgs "invalidArg" 2 -> 
-                        postError "InvalidArgWithTwoArguments" "InvalidArgWithTwoArguments" range (isEnabled i)
-                    | RaiseWithFormatStringTooManyArgs "failwithf" -> 
-                        postError "FailwithfWithArgumentsMatchingFormatString" "FailwithfWithArgumentsMatchingFormatString" range (isEnabled i)
+        let private (|RaiseWithFormatStringTooManyArgs|_|) identifier = function
+            | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _), _)::arguments 
+                when ident.idText = identifier && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
+                    Some()
+            | _ -> None
+            
+        let analyse (analyser:IRaiseWithTooManyArguementsAnalyser) analysisArgs =             
+            let mutable i = 0
+            while i < analysisArgs.SyntaxArray.Length do
+                match analysisArgs.SyntaxArray.[i].Actual with
+                | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr -> 
+                    match expr with
+                    | FuncApp(expressions, range) -> 
+                        let maybeRuleBroken =
+                            match expressions with
+                            | RaiseWithTooManyArgs "failwith" 1 ->
+                                Some analyser.FailwithWithSingleArgument
+                            | RaiseWithTooManyArgs "raise" 1 -> 
+                                Some analyser.RaiseWithSingleArgument
+                            | RaiseWithTooManyArgs "nullArg" 1 -> 
+                                Some analyser.NullArgWithSingleArgument
+                            | RaiseWithTooManyArgs "invalidOp" 1 -> 
+                                Some analyser.InvalidOpWithSingleArgument
+                            | RaiseWithTooManyArgs "invalidArg" 2 -> 
+                                Some analyser.InvalidArgWithTwoArguments
+                            | RaiseWithFormatStringTooManyArgs "failwithf" -> 
+                                Some analyser.FailwithfWithArgumentsMatchingFormatString
+                            | _ -> None
+
+                        match maybeRuleBroken with
+                        | Some(ruleBroken) -> ruleBroken.MessageFormat() |> analysisArgs.Context.PostError range
+                        | None -> ()
                     | _ -> ()
                 | _ -> ()
-            | _ -> ()
 
-            i <- i + 1
+                i <- i + 1
+
+    [<Sealed>]
+    type RaiseWithTooManyArguementsAnalyser(config) =
+        inherit Analyser.Analyser(name = "Binding", code = "1", config = config)
+
+        interface Analysis.IRaiseWithTooManyArguementsAnalyser with
+            member this.FailwithWithSingleArgument = 
+                this.Rule(ruleName = "FailwithWithSingleArgument", code = "1", ruleConfig = config)
+
+            member this.RaiseWithSingleArgument = 
+                this.Rule(ruleName = "RaiseWithSingleArgument", code = "2", ruleConfig = config)
+
+            member this.NullArgWithSingleArgument = 
+                this.Rule(ruleName = "NullArgWithSingleArgument", code = "3", ruleConfig = config)
+
+            member this.InvalidOpWithSingleArgument = 
+                this.Rule(ruleName = "InvalidOpWithSingleArgument", code = "4", ruleConfig = config)
+
+            member this.InvalidArgWithTwoArguments = 
+                this.Rule(ruleName = "InvalidArgWithTwoArguments", code = "5", ruleConfig = config)
+
+            member this.FailwithfWithArgumentsMatchingFormatString = 
+                this.Rule(ruleName = "FailwithfWithArgumentsMatchingFormatString", code = "6", ruleConfig = config)
+
+        override this.Analyse analysisArgs = 
+            Analysis.analyse this analysisArgs
