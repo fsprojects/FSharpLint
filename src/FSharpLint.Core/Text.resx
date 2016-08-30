@@ -147,19 +147,16 @@
   <data name="LintError" xml:space="preserve">
     <value>Error in file {0} on line {1} starting at column {2}</value>
   </data>
-  <data name="RulesCyclomaticComplexityError" xml:space="preserve">
-    <value>This binding has a cyclomatic complexity of {0}, expecting a cyclomatic complexity of less than {1}.</value>
-  </data>
-  <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
+  <data name="FailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
     <value>`failwithf` has more arguments than were found in its format string, these further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesFailwithWithSingleArgument" xml:space="preserve">
+  <data name="FailwithWithSingleArgument" xml:space="preserve">
     <value>`failwith` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="FavourIgnoreOverLetWild" xml:space="preserve">
     <value>The `ignore` function is usually favoured over `let _ = ...` when ignoring the result of an expression.</value>
   </data>
-  <data name="RulesReimplementsFunction" xml:space="preserve">
+  <data name="ReimplementsFunction" xml:space="preserve">
     <value>If `{0}` has no mutable arguments partially applied then the lambda can be removed.</value>
   </data>
   <data name="RulesHintRefactor" xml:space="preserve">
@@ -198,7 +195,7 @@
   <data name="MaxNumberOfItemsInTuple" xml:space="preserve">
     <value>Tuple expected to have a maximum of {0} items.</value>
   </data>
-  <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
+  <data name="RaiseWithSingleArgument" xml:space="preserve">
     <value>`raise` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="SourceLength" xml:space="preserve">
@@ -228,13 +225,13 @@
   <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>
-  <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
+  <data name="InvalidArgWithTwoArguments" xml:space="preserve">
     <value>`invalidArg` should have two arguments, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesInvalidOpWithSingleArgument" xml:space="preserve">
+  <data name="InvalidOpWithSingleArgument" xml:space="preserve">
     <value>`invalidOp` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
+  <data name="NullArgWithSingleArgument" xml:space="preserve">
     <value>`nullArg` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
   <data name="TupleOfWildcards" xml:space="preserve">
@@ -243,7 +240,7 @@
   <data name="LintSourceError" xml:space="preserve">
     <value>Error on line {0} starting at column {1}</value>
   </data>
-  <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
+  <data name="CanBeReplacedWithComposition" xml:space="preserve">
     <value>If no mutable arguments are partially applied in the chain of function calls, then the function calls and lambda could be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
   </data>
   <data name="RulesXmlDocumentationTypeError" xml:space="preserve">
