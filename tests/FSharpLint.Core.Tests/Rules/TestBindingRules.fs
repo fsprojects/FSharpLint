@@ -85,7 +85,7 @@ let a = List.iter (fun x -> ()) []"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.UslessBinding() = 
+    member this.UselessBinding() = 
         this.Parse("""
 module Program
 
@@ -95,7 +95,7 @@ let a = a""", checkInput = true)
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
-    member this.NotUslessBindingAsShadowingMutableWithImmutable() = 
+    member this.NotUselessBindingAsShadowingMutableWithImmutable() = 
         this.Parse """
 module Program
 
@@ -105,7 +105,7 @@ let a = a"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.NotUslessBindingAsShadowingImmutableWithMutable() = 
+    member this.NotUselessBindingAsShadowingImmutableWithMutable() = 
         this.Parse """
 module Program
 
@@ -115,7 +115,7 @@ let mutable a = a"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.UslessBindingSuppressed() = 
+    member this.UselessBindingSuppressed() = 
         this.Parse """
 module Program
 
@@ -126,7 +126,7 @@ let a = a"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.UslessBindingWithParens() = 
+    member this.UselessBindingWithParens() = 
         this.Parse("""
 module Program
 
