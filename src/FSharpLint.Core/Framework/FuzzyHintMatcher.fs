@@ -16,6 +16,7 @@
 
 namespace FSharpLint.Framework
 
+open Analyser
 open HintParser
 open MergeSyntaxTrees
 open System.Collections.Generic
@@ -75,7 +76,8 @@ module FuzzyHintMatcher =
     /// Searches the abstract syntax array for possible hint matches using the hint trie.
     /// Any possible matches that are found will be given to the callback function `notify`,
     /// any matches found are not guaranteed and it's expected that the caller verify the match.
-    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
+    let possibleMatches analysisArgs (hintTrie:Edges) notify = 
+        let nodeArray, skipArray = analysisArgs.SyntaxArray, analysisArgs.SkipArray
         assert (nodeArray.Length = skipArray.Length)
 
         let len = nodeArray.Length

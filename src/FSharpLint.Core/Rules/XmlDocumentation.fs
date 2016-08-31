@@ -94,8 +94,8 @@ module XmlDocumentation =
         
     let analyser visitorInfo _ syntaxArray skipArray = 
         let isNotSuppressed ruleName i =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
+            Analyser.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> Analyser.isRuleSuppressed AnalyserName ruleName
             |> not
 
         let ruleAccessEnabled visitorInfo i access ruleName =

@@ -146,7 +146,7 @@ module Binding =
                 | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
                     checkForWildcardNamedWithAsPattern analysisArgs pattern analyser i
                 | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, range) as pattern, _)]), _, _)) ->
-                    let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs 2 analysisArgs.SyntaxArray analysisArgs.SkipArray i
+                    let breadcrumbs = getBreadcrumbs 2 analysisArgs i
                     if (not << isTupleMemberArgs breadcrumbs) range then
                         let identifier = identifier.Lid |> List.map (fun x -> x.idText)
                         checkTupleOfWildcards analysisArgs pattern identifier analyser i

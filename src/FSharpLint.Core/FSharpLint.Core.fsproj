@@ -61,9 +61,9 @@
     <Compile Include="Framework/AstInfo.fs" />
     <Compile Include="Framework/AbstractSyntaxArray.fs" />
     <Compile Include="Framework/Resources.fs" />
+    <Compile Include="Framework/Analyser.fs" />
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework/FuzzyHintMatcher.fs" />
-    <Compile Include="Framework/Analyser.fs" />
     <!-- Rules -->
     <Compile Include="Rules/NameConventions.fs" />
     <Compile Include="Rules/NumberOfItems.fs" />

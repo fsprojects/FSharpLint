@@ -159,10 +159,10 @@
   <data name="ReimplementsFunction" xml:space="preserve">
     <value>If `{0}` has no mutable arguments partially applied then the lambda can be removed.</value>
   </data>
-  <data name="RulesHintRefactor" xml:space="preserve">
+  <data name="HintRefactor" xml:space="preserve">
     <value>`{0}` might be able to be refactored into `{1}`.</value>
   </data>
-  <data name="RulesHintSuggestion" xml:space="preserve">
+  <data name="HintSuggestion" xml:space="preserve">
     <value>`{0}`; suggestion: {1}.</value>
   </data>
   <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">

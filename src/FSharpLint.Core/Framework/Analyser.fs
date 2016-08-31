@@ -20,6 +20,7 @@ module Analyser =
 
     open System
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open AbstractSyntaxArray
 
     [<NoComparison; NoEquality>]
     type AnalysisArgs = 
@@ -27,6 +28,50 @@ module Analyser =
           CheckResults: FSharpCheckFileResults option
           SyntaxArray: AbstractSyntaxArray.Node []
           SkipArray: AbstractSyntaxArray.Skip [] }
+
+    let getBreadcrumbs maxBreadcrumbs analysisArgs i =
+        let syntaxArray, skipArray = analysisArgs.SyntaxArray, analysisArgs.SkipArray
+        let rec getBreadcrumbs breadcrumbs i =
+            if i = 0 then
+                let node = syntaxArray.[i].Actual
+                node::breadcrumbs
+            else if i < skipArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                let node = syntaxArray.[i].Actual
+                let parenti = skipArray.[i].ParentIndex
+                getBreadcrumbs (node::breadcrumbs) parenti
+            else
+                breadcrumbs
+
+        if i = 0 then [] 
+        else getBreadcrumbs [] (skipArray.[i].ParentIndex) |> List.rev
+
+    let getSuppressMessageAttributes (syntaxArray: Node []) (skipArray: Skip []) i =
+        let rec getSuppressMessageAttributes breadcrumbs i =
+            if i = 0 then
+                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
+                if List.isEmpty node then breadcrumbs
+                else node::breadcrumbs
+            else if i < skipArray.Length then
+                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
+                let parenti = skipArray.[i].ParentIndex
+                if List.isEmpty node then
+                    getSuppressMessageAttributes breadcrumbs parenti
+                else
+                    getSuppressMessageAttributes (node::breadcrumbs) parenti
+            else
+                breadcrumbs
+
+        getSuppressMessageAttributes [] i
+
+    [<Literal>]
+    let SuppressRuleWildcard = "*"
+
+    let isRuleSuppressed analyserName ruleName suppressedRuleAttributes =
+        let isSuppressed (l:Ast.SuppressedMessage, _) = 
+            l.Category = analyserName && (l.Rule = SuppressRuleWildcard || l.Rule = ruleName)
+
+        suppressedRuleAttributes
+        |> List.exists (List.exists isSuppressed)
 
     type Rule(analyserName, name, code, ruleConfig) =
         member __.Name = name
@@ -38,13 +83,13 @@ module Analyser =
             String.Format(Resources.GetString name, args)
 
         member __.IsSuppressed analysisArgs i =
-            AbstractSyntaxArray.getSuppressMessageAttributes analysisArgs.SyntaxArray analysisArgs.SkipArray i 
-            |> AbstractSyntaxArray.isRuleSuppressed analyserName name
+            getSuppressMessageAttributes analysisArgs.SyntaxArray analysisArgs.SkipArray i 
+            |> isRuleSuppressed analyserName name
 
         member this.NotSuppressed analysisArgs i = this.IsSuppressed analysisArgs i |> not
     
     [<AbstractClass>]
-    type Analyser(name, code, config) =
+    type Analyser(name:string, code, config) =
         member __.Name = name
         member __.Code = code
         member __.Enabled = true
