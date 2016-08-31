@@ -181,12 +181,12 @@ module Lint =
           analyserFactory Rules.NestedStatements.NestedStatementsAnalyser
           analyserFactory Rules.FunctionReimplementation.FunctionReimplementationAnalyser
           analyserFactory Rules.RaiseWithTooManyArguments.RaiseWithTooManyArguementsAnalyser
+          analyserFactory Rules.HintMatcher.HintsAnalyser
         
          (*
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
-          (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
-          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)*) ]
+          (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)*) ]
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
