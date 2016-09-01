@@ -222,7 +222,7 @@
   <data name="WildcardNamedWithAsPattern" xml:space="preserve">
     <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` can simply be `x`.</value>
   </data>
-  <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
+  <data name="ExceptionDefinitionXmlDoc" xml:space="preserve">
     <value>Expected exception type to have xml documentation.</value>
   </data>
   <data name="InvalidArgWithTwoArguments" xml:space="preserve">
@@ -243,28 +243,28 @@
   <data name="CanBeReplacedWithComposition" xml:space="preserve">
     <value>If no mutable arguments are partially applied in the chain of function calls, then the function calls and lambda could be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
   </data>
-  <data name="RulesXmlDocumentationTypeError" xml:space="preserve">
+  <data name="TypeDefinitionXmlDoc" xml:space="preserve">
     <value>Expected type to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationMemberError" xml:space="preserve">
+  <data name="MemberDefinitionXmlDoc" xml:space="preserve">
     <value>Expected member to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationModuleError" xml:space="preserve">
+  <data name="ModuleDefinitionXmlDoc" xml:space="preserve">
     <value>Expected module to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
+  <data name="EnumDefinitionXmlDoc" xml:space="preserve">
     <value>Expected enum `{0}` to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
+  <data name="UnionDefinitionXmlDoc" xml:space="preserve">
     <value>Expected union case `{0}` to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
+  <data name="RecordDefinitionXmlDoc" xml:space="preserve">
     <value>Expected record case `{0}` to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
+  <data name="AutoPropertyDefinitionXmlDoc" xml:space="preserve">
     <value>Expected auto property `{0}` to have xml documentation.</value>
   </data>
-  <data name="RulesXmlDocumentationLetError" xml:space="preserve">
+  <data name="LetDefinitionXmlDoc" xml:space="preserve">
     <value>Expected let to have xml documentation.</value>
   </data>
 </root>

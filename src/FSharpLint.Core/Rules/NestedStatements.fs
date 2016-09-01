@@ -143,7 +143,7 @@ module NestedStatements =
 
     [<Sealed>]
     type NestedStatementsAnalyser(config) =
-        inherit Analyser.Analyser(name = "NestedStatements", code = "1", config = config)
+        inherit Analyser.Analyser(name = "NestedStatements", code = "4", config = config)
 
         member this.NestedStatements = 
             NestedStatementsRule(this.Name, "NestedStatements",  "1", config)

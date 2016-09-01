@@ -77,7 +77,7 @@ module RaiseWithTooManyArguments =
 
     [<Sealed>]
     type RaiseWithTooManyArguementsAnalyser(config) =
-        inherit Analyser.Analyser(name = "Binding", code = "1", config = config)
+        inherit Analyser.Analyser(name = "RaiseWithTooManyArguements", code = "6", config = config)
 
         interface Analysis.IRaiseWithTooManyArguementsAnalyser with
             member this.FailwithWithSingleArgument = 

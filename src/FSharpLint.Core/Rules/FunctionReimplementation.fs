@@ -152,7 +152,7 @@ module FunctionReimplementation =
 
     [<Sealed>]
     type FunctionReimplementationAnalyser(config) =
-        inherit Analyser.Analyser(name = "Binding", code = "1", config = config)
+        inherit Analyser.Analyser(name = "FunctionReimplementation", code = "5", config = config)
 
         interface Analysis.IFunctionReimplementationAnalyser with
             member this.ReimplementsFunction = 

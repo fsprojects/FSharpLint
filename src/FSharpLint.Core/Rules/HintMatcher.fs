@@ -616,7 +616,7 @@ module HintMatcher =
 
     [<Sealed>]
     type HintsAnalyser(config) =
-        inherit Analyser.Analyser(name = "Hints", code = "1", config = config)
+        inherit Analyser.Analyser(name = "Hints", code = "7", config = config)
 
         member this.Hints = 
             HintsRule(this.Name, "Hints",  "1", config)
