@@ -1,3 +1,7 @@
+##### 0.4.7-beta - September 9 2016
+
+* Included FSharp.Core.sigdata and FSharp.Core.optdata in the FSharpLint.MSBuild package.
+
 ##### 0.4.6 - August 21 2016
 
 * Bug fixed by @Krzysztof-Cieslak: https://github.com/fsprojects/FSharpLint/issues/172
