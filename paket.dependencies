@@ -6,6 +6,7 @@ nuget NUnit >= 3.4.1
 nuget FSharp.Compiler.Service >= 6.0.0
 nuget FSharp.Compiler.Service.ProjectCracker >= 6.0.0
 nuget FAKE.Lib
+nuget FSharp.Core ~> 4.0.0.1
 
 group Tools
 source https://nuget.org/api/v2

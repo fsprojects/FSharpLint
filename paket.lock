@@ -5,6 +5,7 @@ NUGET
     FSharp.Compiler.Service (6.0)
     FSharp.Compiler.Service.ProjectCracker (6.0)
     NUnit (3.4.1)
+    FSharp.Core (4.0.0.1)
 
 GROUP Tools
 NUGET
