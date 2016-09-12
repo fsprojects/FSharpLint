@@ -412,8 +412,8 @@ module NameConventions =
         
     let analyser visitorInfo checkFile syntaxArray skipArray = 
         let isNotSuppressed i ruleName =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
+            Analyser.getSuppressMessageAttributes syntaxArray skipArray i 
+            |> Analyser.isRuleSuppressed AnalyserName ruleName
             |> not
 
         let isEnabled ruleName = 

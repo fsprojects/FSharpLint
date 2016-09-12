@@ -24,132 +24,142 @@ module FunctionReimplementation =
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
-    open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.ExpressionUtilities
-
-    [<Literal>]
-    let AnalyserName = "FunctionReimplementation"
     
-    let isRuleEnabled config ruleName =
-        isRuleEnabled config AnalyserName ruleName |> Option.isSome 
+    module Analysis =
+        type IFunctionReimplementationAnalyser =
+            abstract member ReimplementsFunction: Rule
+            abstract member CanBeReplacedWithComposition: Rule
 
-    let rec simplePatternsLength = function
-        | SynSimplePats.SimplePats(patterns, _) -> 
-            List.length patterns
-        | SynSimplePats.Typed(simplePatterns, _, _) -> 
-            simplePatternsLength simplePatterns
+        let rec simplePatternsLength = function
+            | SynSimplePats.SimplePats(patterns, _) -> 
+                List.length patterns
+            | SynSimplePats.Typed(simplePatterns, _, _) -> 
+                simplePatternsLength simplePatterns
 
-    let rec private getLambdaParamIdent = function
-        | SynSimplePats.SimplePats(pattern::_, _) -> 
-            let rec getIdent = function
-                | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
-                | SynSimplePat.Typed(simplePattern, _, _)
-                | SynSimplePat.Attrib(simplePattern, _, _) ->
-                    getIdent simplePattern
+        let rec private getLambdaParamIdent = function
+            | SynSimplePats.SimplePats(pattern::_, _) -> 
+                let rec getIdent = function
+                    | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
+                    | SynSimplePat.Typed(simplePattern, _, _)
+                    | SynSimplePat.Attrib(simplePattern, _, _) ->
+                        getIdent simplePattern
 
-            getIdent pattern |> Some
-        | SynSimplePats.SimplePats(_) -> None
-        | SynSimplePats.Typed(simplePatterns, _, _) -> 
-            getLambdaParamIdent simplePatterns
+                getIdent pattern |> Some
+            | SynSimplePats.SimplePats(_) -> None
+            | SynSimplePats.Typed(simplePatterns, _, _) -> 
+                getLambdaParamIdent simplePatterns
 
-    let validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo =
-        let canBeReplacedWithFunctionComposition expression = 
-            let getLastElement = List.rev >> List.head
+        let validateLambdaCannotBeReplacedWithComposition lambda range analysisArgs (analyser:IFunctionReimplementationAnalyser) =
+            let canBeReplacedWithFunctionComposition expression = 
+                let getLastElement = List.rev >> List.head
 
-            let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) numFunctionCalls =
-                let rec appliedValuesAreConstants appliedValues =
-                    match appliedValues with
-                    | (SynExpr.Const(_)| SynExpr.Null(_))::rest -> appliedValuesAreConstants rest
-                    | [SynExpr.App(_) | SynExpr.Ident(_)] -> true
+                let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) numFunctionCalls =
+                    let rec appliedValuesAreConstants appliedValues =
+                        match appliedValues with
+                        | (SynExpr.Const(_)| SynExpr.Null(_))::rest -> appliedValuesAreConstants rest
+                        | [SynExpr.App(_) | SynExpr.Ident(_)] -> true
+                        | _ -> false
+
+                    match AstNode.Expression expression with
+                    | FuncApp((SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues, _)
+                            when appliedValuesAreConstants appliedValues -> 
+
+                        match getLastElement appliedValues with
+                        | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                            lastArgument.idText = lambdaArgument.idText
+                        | SynExpr.App(_, false, _, _, _) as nextFunction ->
+                            lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        | _ -> false
                     | _ -> false
 
-                match AstNode.Expression expression with
-                | FuncApp((SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues, _)
-                        when appliedValuesAreConstants appliedValues -> 
-
-                    match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
-                        lastArgument.idText = lambdaArgument.idText
-                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
-                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
-                    | _ -> false
+                match lambda.Arguments with
+                | [singleParameter] -> 
+                    getLambdaParamIdent singleParameter
+                    |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
                 | _ -> false
-
-            match lambda.Arguments with
-            | [singleParameter] -> 
-                getLambdaParamIdent singleParameter
-                |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
-            | _ -> false
             
-        if canBeReplacedWithFunctionComposition lambda.Body then
-            Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
+            if canBeReplacedWithFunctionComposition lambda.Body then
+                analyser.CanBeReplacedWithComposition.MessageFormat() 
+                |> analysisArgs.Context.PostError range 
 
-    let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range visitorInfo =
-        let isConstructor expr =
-            let symbol = getSymbolFromIdent checkFile expr
+        let validateLambdaIsNotPointless lambda range analysisArgs (analyser:IFunctionReimplementationAnalyser) =
+            let isConstructor expr =
+                let symbol = getSymbolFromIdent analysisArgs.CheckResults expr
 
-            match symbol with
-            | Some(symbol) -> 
-                match symbol.Symbol with 
-                | s when s.DisplayName = ".ctor" -> true
-                | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
-                | _ -> false
-            | Some(_) | None -> false
+                match symbol with
+                | Some(symbol) -> 
+                    match symbol.Symbol with 
+                    | s when s.DisplayName = ".ctor" -> true
+                    | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
+                    | _ -> false
+                | Some(_) | None -> false
         
-        let rec isFunctionPointless expression = function
-            | Some(parameter:Ident) :: parameters ->
-                match expression with
-                | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
-                    when identifier.idText = parameter.idText ->
-                        isFunctionPointless expression parameters
-                | _ -> None
-            | None :: _ -> None
-            | [] -> 
-                match expression with
-                | Identifier(ident, _) -> 
-                    if visitorInfo.FSharpVersion.Major >= 4 || 
-                       (not << isConstructor) expression then
-                        Some(ident)
-                    else
-                        None
-                | _ -> None
+            let rec isFunctionPointless expression = function
+                | Some(parameter:Ident) :: parameters ->
+                    match expression with
+                    | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
+                        when identifier.idText = parameter.idText ->
+                            isFunctionPointless expression parameters
+                    | _ -> None
+                | None :: _ -> None
+                | [] -> 
+                    match expression with
+                    | Identifier(ident, _) -> 
+                        if analysisArgs.Context.FSharpVersion.Major >= 4 || 
+                           (not << isConstructor) expression then
+                            Some(ident)
+                        else
+                            None
+                    | _ -> None
 
-        let generateError (identifier:LongIdent) =
-            let identifier = 
-                identifier 
+            let generateError (identifier:LongIdent) =
+                let identifier = 
+                    identifier 
                     |> List.map (fun x -> DemangleOperatorName x.idText)
                     |> String.concat "."
 
-            let errorFormatString = Resources.GetString("RulesReimplementsFunction")
-            let error = System.String.Format(errorFormatString, identifier)
-            visitorInfo.PostError range error
+                analyser.ReimplementsFunction.MessageFormat(identifier)
+                |> analysisArgs.Context.PostError range
 
-        let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
+            let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
 
-        isFunctionPointless lambda.Body argumentsAsIdentifiers
-        |> Option.iter generateError
+            isFunctionPointless lambda.Body argumentsAsIdentifiers
+            |> Option.iter generateError
 
-    let analyser visitorInfo checkFile syntaxArray skipArray = 
-        let isSuppressed i ruleName = 
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
-            |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
+        let analyse (analyser:IFunctionReimplementationAnalyser) analysisArgs = 
+            let reimplementsRule = analyser.ReimplementsFunction
+            let compositionRule = analyser.CanBeReplacedWithComposition
 
-        let isEnabled i ruleName = isRuleEnabled visitorInfo.Config ruleName && not (isSuppressed i ruleName)
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
-            match syntaxArray.[i].Actual with
-            | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
-                match lambda with
-                | Lambda(lambda, range) -> 
-                    if (not << List.isEmpty) lambda.Arguments then
-                        if isEnabled i "ReimplementsFunction" then
-                            validateLambdaIsNotPointless checkFile lambda range visitorInfo
+            let mutable i = 0
+            while i < analysisArgs.SyntaxArray.Length do
+                match analysisArgs.SyntaxArray.[i].Actual with
+                | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
+                    match lambda with
+                    | Lambda(lambda, range) -> 
+                        if (not << List.isEmpty) lambda.Arguments then
+                            if reimplementsRule.Enabled && reimplementsRule.NotSuppressed analysisArgs i then
+                                validateLambdaIsNotPointless lambda range analysisArgs analyser
                     
-                        if isEnabled i "CanBeReplacedWithComposition" then
-                            validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo
+                            if compositionRule.Enabled && compositionRule.NotSuppressed analysisArgs i then
+                                validateLambdaCannotBeReplacedWithComposition lambda range analysisArgs analyser
+                    | _ -> ()
                 | _ -> ()
-            | _ -> ()
 
-            i <- i + 1
+                i <- i + 1
+
+    [<Sealed>]
+    type FunctionReimplementationAnalyser(config) =
+        inherit Analyser.Analyser(name = "FunctionReimplementation", code = "5", config = config)
+
+        interface Analysis.IFunctionReimplementationAnalyser with
+            member this.ReimplementsFunction = 
+                this.Rule(ruleName = "ReimplementsFunction", code = "1", ruleConfig = config)
+
+            member this.CanBeReplacedWithComposition = 
+                this.Rule(ruleName = "CanBeReplacedWithComposition", code = "2", ruleConfig = config)
+
+        override this.Analyse analysisArgs = 
+            Analysis.analyse this analysisArgs

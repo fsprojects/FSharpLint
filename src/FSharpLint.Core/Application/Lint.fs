@@ -114,6 +114,7 @@ module Lint =
     open FSharpLint
     open FSharpLint.Framework
     open FSharpLint.Framework.AbstractSyntaxArray
+    open FSharpLint.Framework.Analyser
           
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -170,17 +171,22 @@ module Lint =
           Configuration: Configuration.Configuration
           FSharpVersion: Version }
 
-    let private analysers = 
-        [ (Rules.Binding.analyser, Rules.Binding.AnalyserName)
-          (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
+    let private analyserFactory (constructorf: Configuration.Configuration -> 't when 't :> Analyser) =
+        (fun config -> constructorf config :> Analyser)
+
+    let private analyserFactories = 
+        [ analyserFactory Rules.Binding.BindingAnalyser
+          analyserFactory Rules.NumberOfItems.NumberOfItemsAnalyser
+          analyserFactory Rules.SourceLength.SourceLengthAnalyser
+          analyserFactory Rules.NestedStatements.NestedStatementsAnalyser
+          analyserFactory Rules.FunctionReimplementation.FunctionReimplementationAnalyser
+          analyserFactory Rules.RaiseWithTooManyArguments.RaiseWithTooManyArguementsAnalyser
+          analyserFactory Rules.HintMatcher.HintsAnalyser
+          analyserFactory Rules.XmlDocumentation.XmlDocumentationAnalyser
+        
+         (*
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
-          (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
-          (Rules.NumberOfItems.analyser, Rules.NumberOfItems.AnalyserName)
-          (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)
-          (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
-          (Rules.Typography.analyser, Rules.Typography.AnalyserName)
-          (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
-          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
+          (Rules.Typography.analyser, Rules.Typography.AnalyserName)*) ]
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
@@ -189,26 +195,27 @@ module Lint =
                   LintWarning.Range = range
                   LintWarning.Input = fileInfo.Text } |> lintInfo.ErrorReceived
 
-            let visitorInfo = 
+            let context = 
                 { Ast.Text = fileInfo.Text
                   Ast.FSharpVersion = lintInfo.FSharpVersion
                   Ast.Config = lintInfo.Configuration
                   Ast.PostError = postError }
 
-            let analysers = analysers |> List.map (fun (analyser, name) -> (analyser visitorInfo, name))
-
             Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
-            let isAnalyserEnabled analyserName =
-                match Configuration.isAnalyserEnabled lintInfo.Configuration analyserName with
-                | Some(_) -> true | None -> false
-
             try 
-                let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+                let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
-                for (analyser, analyserName) in analysers do 
-                    if isAnalyserEnabled analyserName then
-                        analyser fileInfo.TypeCheckResults array skipArray
+                let analysisArgs = 
+                    { Context = context
+                      CheckResults = fileInfo.TypeCheckResults
+                      SyntaxArray = syntaxArray
+                      SkipArray = skipArray }
+                
+                for analyserFactory in analyserFactories do 
+                    let analyser = analyserFactory lintInfo.Configuration
+
+                    if analyser.Enabled then analyser.Analyse analysisArgs
             with 
             | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 
