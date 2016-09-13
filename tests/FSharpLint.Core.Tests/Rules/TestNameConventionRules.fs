@@ -803,7 +803,7 @@ module program
 exception MyError of string
 """
 
-        let error = "Expected a pascal case identifier, found `MyError`."
+        let error = "Consider changing `MyError` to PascalCase."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -814,7 +814,7 @@ module program
 exception myError of string
 """
 
-        let error = "Expected a pascal case identifier, found `myError`."
+        let error = "Consider changing `myError` to PascalCase."
         
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -825,7 +825,7 @@ module program
 exception MyErrorException of string
 """
 
-        let error = "Exception identifier expected to end with 'Exception', found `MyErrorException`."
+        let error = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
         
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -836,7 +836,7 @@ module program
 exception MyError of string
 """
 
-        let error = "Exception identifier expected to end with 'Exception', found `MyError`."
+        let error = "Consider changing `MyError` to be suffixed with 'Exception'."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
