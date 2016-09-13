@@ -149,7 +149,7 @@
         </TypeNamesMustBePascalCase>
 
         <RecordFieldNamesMustBePascalCase>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
         </RecordFieldNamesMustBePascalCase>
 
         <EnumCasesMustBePascalCase>
