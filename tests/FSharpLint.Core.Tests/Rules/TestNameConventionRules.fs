@@ -136,6 +136,16 @@ module Program
 
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
+    /// Regression test for https://github.com/ionide/ionide-vscode-fsharp/issues/153
+    /// (type aliases were thought to be interfaces)
+    [<Test>]
+    member this.TypeAliasIsNotTreatedAsInterface() = 
+        this.Parse """
+module Program
+  type Matrix = int[,]"""
+
+        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
     [<Test>]
     member this.InterfaceNameDoesNotBeginWithI() = 
         this.Parse """
