@@ -79,11 +79,11 @@ module NameConventions =
     [<Literal>]
     let AnalyserName = "NameConventions"
 
-    let private pascalCaseRegex = Regex(@"^[A-Z]([a-z]|[A-Z]|\d)*", RegexOptions.Compiled)
+    let private pascalCaseRegex = Regex(@"^(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
 
     let isPascalCase (identifier:string) = pascalCaseRegex.IsMatch(identifier)
 
-    let private camelCaseRegex = Regex(@"^_*[a-z]([a-z]|[A-Z]|\d)*", RegexOptions.Compiled)
+    let private camelCaseRegex = Regex(@"^_*(\p{Ll}|\p{Lo}|\p{Lm})(\p{L}|\p{N})*", RegexOptions.Compiled)
 
     let isCamelCase (identifier:string) = camelCaseRegex.IsMatch(identifier)
 
