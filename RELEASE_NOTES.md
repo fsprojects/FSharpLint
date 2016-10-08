@@ -1,3 +1,12 @@
+##### 0.4.9 - October 8 2016
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/184
+
+##### 0.4.8 - September 13 2016
+
+* Updated wording of warnings.
+* Disabled `RecordFieldNamesMustBePascalCase` naming rule by default.
+
 ##### 0.4.7-beta - September 9 2016
 
 * Included FSharp.Core.sigdata and FSharp.Core.optdata in the FSharpLint.MSBuild package.
