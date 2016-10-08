@@ -1210,3 +1210,24 @@ type Foo = Foo of bool
 for Foo(foo) in [Foo(true)] do ()"""
 
         Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Upper case international characters recognised by PascalCase rule``() =
+        this.Parse """
+module Program
+
+type Ścieżka = Ścieżka of string
+        """
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Lower case international characters recognised by camelCase rule``() =
+        this.Parse """
+module Program
+
+let foo () =
+    let żcieżka = 0
+        """
+
+        Assert.IsFalse(this.ErrorsExist)
