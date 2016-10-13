@@ -273,6 +273,7 @@ module Ast =
         | SynType.App(synType, _, types, _, _, _, _) -> 
             types |> List.revIter (typeNode >> add)
             add <| typeNode synType
+        | SynType.StructTuple(types, _)
         | SynType.Tuple(types, _) -> 
             types |> List.revIter (snd >> typeNode >> add)
         | SynType.Fun(synType, synType1, _)
@@ -324,6 +325,7 @@ module Ast =
             add <| patternNode pattern1
             add <| patternNode pattern
         | SynPat.ArrayOrList(_, patterns, _)
+        | SynPat.StructTuple(patterns, _)
         | SynPat.Tuple(patterns, _)
         | SynPat.Ands(patterns, _) -> patterns |> List.revIter (patternNode >> add)
         | SynPat.Attrib(pattern, _, _)
@@ -374,6 +376,7 @@ module Ast =
         | SynExpr.Typed(expression, synType, _) -> 
             add <| typeNode synType
             add <| expressionNode expression
+        | SynExpr.StructTuple(expressions, _, _)
         | SynExpr.Tuple(expressions, _, _)
         | SynExpr.ArrayOrList(_, expressions, _) -> expressions |> List.revIter (expressionNode >> add)
         | SynExpr.Record(_, Some(expr, _), _, _) -> add <| expressionNode expr
