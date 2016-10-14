@@ -391,6 +391,7 @@ module NameConventions =
             checker isPublic pattern
             checkPattern isPublic checker false pat
         | SynPat.Ands(pats, _)
+        | SynPat.StructTuple(pats, _)
         | SynPat.Tuple(pats, _)
         | SynPat.ArrayOrList(_, pats, _) -> 
             checker isPublic pattern
