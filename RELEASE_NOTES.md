@@ -1,3 +1,7 @@
+##### 0.4.10 - October 24 2016
+
+* Updated FSharp.Compiler.Service
+
 ##### 0.4.9 - October 8 2016
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/184
