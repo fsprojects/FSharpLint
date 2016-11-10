@@ -94,8 +94,8 @@
           snd (x, y) ===> y
           List.fold f x [] ===> x
           Array.fold f x [||] ===> x
-          List.foldBack f x [] ===> x
-          Array.foldBack f x [||] ===> x
+          List.foldBack f [] x ===> x
+          Array.foldBack f [||] x ===> x
           x - 0 ===> x
           x * 1 ===> x
           x / 1 ===> x
