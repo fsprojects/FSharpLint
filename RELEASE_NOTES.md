@@ -1,3 +1,7 @@
+##### 0.4.11 - November 10 2016
+
+* Bug fixed by [@rexcfnghk](https://github.com/rexcfnghk): https://github.com/fsprojects/FSharpLint/issues/189
+
 ##### 0.4.10 - October 24 2016
 
 * Updated FSharp.Compiler.Service
@@ -17,7 +21,7 @@
 
 ##### 0.4.6 - August 21 2016
 
-* Bug fixed by @Krzysztof-Cieslak: https://github.com/fsprojects/FSharpLint/issues/172
+* Bug fixed by [@Krzysztof-Cieslak](https://github.com/Krzysztof-Cieslak): https://github.com/fsprojects/FSharpLint/issues/172
 
 ##### 0.4.5 - August 5 2016
 
