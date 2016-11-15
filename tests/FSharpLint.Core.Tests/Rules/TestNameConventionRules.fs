@@ -1228,6 +1228,20 @@ module Program
 
 let foo () =
     let żcieżka = 0
+    ()
+        """
+
+        Assert.IsFalse(this.ErrorsExist)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/191
+    [<Test>]
+    member this.``Backticked let binding identifier not checked by name convention rules``() =
+        this.Parse """
+module Program
+
+let foo () =
+    let ``¯\_(ツ)_/¯`` = ignore
+    ()
         """
 
         Assert.IsFalse(this.ErrorsExist)
