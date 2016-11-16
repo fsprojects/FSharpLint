@@ -26,6 +26,7 @@ module NameConventions =
     open System.Linq
     open System.Text.RegularExpressions
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
@@ -79,6 +80,20 @@ module NameConventions =
     [<Literal>]
     let AnalyserName = "NameConventions"
 
+    [<Literal>]
+    let private NumberOfExpectedBackticks = 4
+
+    /// Is an identifier surrounded by double backticks? e.g. `let ``some identifier`` = 0`.
+    /// Unfortunately it's having to compare the length of the identifier in the source vs identifier length in AST, 
+    /// the information as to whether the identifier was backticked doesn't appear to be in the AST.
+    let private isDoubleBackTickedIdent (identifier:Ident) =
+        let diffOfRangeAgainstIdent (r:range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
+
+        let range = identifier.idRange
+        not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
+
+    let private isNotDoubleBackTickedIdent = isDoubleBackTickedIdent >> not
+
     let private pascalCaseRegex = Regex(@"^(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
 
     let isPascalCase (identifier:string) = pascalCaseRegex.IsMatch(identifier)
@@ -92,16 +107,24 @@ module NameConventions =
     let patternContainsUnderscore (identifier:string) = identifier.TrimStart('_') |> containsUnderscore
 
     let private pascalCaseRule (identifier:Ident) =
-        if not <| isPascalCase identifier.idText then Some "RulesNamingConventionsPascalCaseError" else None
+        if isNotDoubleBackTickedIdent identifier && not <| isPascalCase identifier.idText then 
+            Some "RulesNamingConventionsPascalCaseError" 
+        else None
 
     let private camelCaseRule (identifier:Ident) =
-        if not <| isCamelCase identifier.idText then Some "RulesNamingConventionsCamelCaseError" else None
+        if isNotDoubleBackTickedIdent identifier && not <| isCamelCase identifier.idText then 
+            Some "RulesNamingConventionsCamelCaseError" 
+        else None
 
     let private underscoreRule (identifier:Ident) =
-        if containsUnderscore identifier.idText then Some "RulesNamingConventionsUnderscoreError" else None
+        if isNotDoubleBackTickedIdent identifier && containsUnderscore identifier.idText then 
+            Some "RulesNamingConventionsUnderscoreError" 
+        else None
 
     let private underscoreInPatternRule (identifier:Ident) =
-        if patternContainsUnderscore identifier.idText then Some "RulesNamingConventionsUnderscoreError" else None
+        if isNotDoubleBackTickedIdent identifier && patternContainsUnderscore identifier.idText then 
+            Some "RulesNamingConventionsUnderscoreError" 
+        else None
 
     let private notOperator = isOperator >> not
 
