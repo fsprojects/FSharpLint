@@ -1,3 +1,7 @@
+##### 0.4.12 - November 16 2016
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/191
+
 ##### 0.4.11 - November 10 2016
 
 * Bug fixed by [@rexcfnghk](https://github.com/rexcfnghk): https://github.com/fsprojects/FSharpLint/issues/189
