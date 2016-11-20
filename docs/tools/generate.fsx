@@ -14,7 +14,7 @@ let info =
     "project-author", "Matthew Mcveigh"
     "project-summary", "A lint tool for F#."
     "project-github", githubLink
-    "project-nuget", "http://nuget.org/packages/FSharpLint" ]
+    "project-nuget", "http://nuget.org/packages/FSharpLint.Core" ]
 
 // --------------------------------------------------------------------------------------
 // For typical project, no changes are needed below
@@ -50,7 +50,7 @@ let content    = __SOURCE_DIRECTORY__ @@ "../content"
 let output     = __SOURCE_DIRECTORY__ @@ "../output"
 let files      = __SOURCE_DIRECTORY__ @@ "../files"
 let templates  = __SOURCE_DIRECTORY__ @@ "templates"
-let formatting = __SOURCE_DIRECTORY__ @@ "../../tools/FSharp.Formatting/"
+let formatting = __SOURCE_DIRECTORY__ @@ "../../packages/tools/FSharp.Formatting/"
 let docTemplate = formatting @@ "templates/docpage.cshtml"
 
 // Where to look for *.cshtml templates (in this order)

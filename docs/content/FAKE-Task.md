@@ -1,6 +1,8 @@
-#Using the FAKE Task
+# Running the FAKE Task
 
-The [FAKE](http://fsharp.github.io/FAKE/) task can be accessed by referencing `FSharpLint.FAKE.dll`, this dll is built to `src/FSharpLint.FAKE/bin/Release/FSharpLint.FAKE.dll` and also included in the [nuget package](https://www.nuget.org/packages/FSharpLint/).
+Install the [package via nuget](https://www.nuget.org/packages/FSharpLint.Fake/), the nuget package 
+contains `FSharpLint.Fake.dll` which provides an `FSharpLint` function in the namespace `FSharpLint.Fake` which 
+when called will run the task.
 
 ## Parameters
 
@@ -11,8 +13,9 @@ The [FAKE](http://fsharp.github.io/FAKE/) task can be accessed by referencing `F
 
 Run lint on multiple projects (here we are linting all projects with a directory in the `src` directory):
 
-    #r @"packages/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
-    open FSharpLint.FAKE
+    #I @"packages/tools/FSharpLint.Fake/tools"
+    #r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
+    open FSharpLint.Fake
 
     Target "Lint" (fun _ ->
         !! "src/**/*.fsproj"
@@ -20,8 +23,9 @@ Run lint on multiple projects (here we are linting all projects with a directory
 
 Run lint on a single project:
 
-    #r @"packages/FSharpLint.0.1.12/FSharpLint.FAKE.dll"
-    open FSharpLint.FAKE
+    #I @"packages/tools/FSharpLint.Fake/tools"
+    #r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
+    open FSharpLint.Fake
 
     Target "Lint" (fun _ -> 
         FSharpLint id "src/FSharpLint.Application/FSharpLint.Application.fsproj")
@@ -32,6 +36,6 @@ Use the identity function to keep the default options:
 
     FSharpLint id projectFile
 
-Use a function that updates the options record to change the default options (here we are setting a directory for FSharpLint to lookup `FSharp.Core.dll` from):
+For custom options, use a function that updates the options:
 
-    FSharpLint (fun options -> { options with FSharpCoreDirectory = "/somedirectory" }) projectFile
+    FSharpLint (fun options -> { options with FailBuildIfAnyWarnings = true }) projectFile
