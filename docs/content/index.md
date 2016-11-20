@@ -71,12 +71,6 @@ After refactoring we end up with the following program with no lint errors:
 
 On windows run `build.cmd` and on unix based systems run `build.sh`. These will build the framework and put the console application into the `/bin` directory (the application will be named `fsharplint.exe`), all the tests will be run - all of which should pass. The MSBuild task assembly will have been built to `/src/FSharpLint.MSBuildIntegration/bin/Release/FSharpLint.MSBuildIntegration.dll`.
 
-#####Troubleshooting a failing build
-
-On windows you may find yourself getting an error loading `FSharp.Data.DesignTime.dll` (HRESULT: 0x80131515), the solution to this is to right click on `lib/FSharp.Data.DesignTime.dll` in explorer, go to properties, and then click unblock.
-
-Also on windows if the tests in `FSharpLint.Rules.Tests` are all failing with a `ParseException`, then the solution most probably is to dump `FSharp.Core.optdata` and `FSharp.Core.sigdata` into `tests\FSharpLint.Rules.Tests\bin\Release` or `tests\FSharpLint.Rules.Tests\bin\Debug` depending upon your build target. This shouldn't be required, it seems to only happen on some builds on some computers. To get the `FSharp.Core.optdata` and `FSharp.Core.sigdata` you need to find where your FSharp.Core is located - the path will be something along the lines of `C:\Program Files\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0` (F# 3.0) or `C:\Program Files\Reference Assemblies\Microsoft\FSharp\.NETFramework\v4.0\4.3.1.0` (F# 3.1)
-
 ####Running The Tool
 
 The tool can be run from the command line, or as an MSBuild task. 
