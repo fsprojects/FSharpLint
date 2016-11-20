@@ -22,22 +22,22 @@ The following program:
 Run against the lint tool generates the following errors:
 
 	[lang=error]
-    Interface identifiers should begin with the letter I found interface ExampleInterface
+    Consider changing `ExampleInterface` to be prefixed with `I`.
     Error in file Program.fs on line 1 starting at column 5
     type ExampleInterface =
          ^
 
-    Expected pascal case identifier but was print
+    Consider changing `print` to PascalCase.
     Error in file Program.fs on line 2 starting at column 19
        abstract member print : unit -> unit
                        ^
 
-    Pointless function redefines op_Addition
+    If `(+)` has no mutable arguments partially applied the lambda can be removed.
     Error in file Program.fs on line 6 starting at column 23
         let x = List.fold (fun x y -> x + y) 0 [1;2;3]
                            ^
 
-After refactoring to the fix the lint errors, we end up with the following program:
+Refactored using lint's warnings:
 
     type IExampleInterface =
        abstract member Print : unit -> unit
@@ -51,12 +51,12 @@ After refactoring to the fix the lint errors, we end up with the following progr
 If we run lint again it will find a new error, it's worth running the tool until it no longer finds any errors:
 
 	[lang=error]
-    List.fold + 0 can be refactored into List.sum
+    `List.fold (+) 0 x` might be able to be refactored to `List.sum x`.
     Error in file Program.fs on line 6 starting at column 12
     let x = List.fold (+) 0 [1;2;3]
             ^
 
-After refactoring we end up with the following program with no lint errors:
+After refactoring again we have with no lint errors:
 
     type IExampleInterface =
        abstract member Print : unit -> unit
@@ -69,13 +69,7 @@ After refactoring we end up with the following program with no lint errors:
 
 ####Building The Tool
 
-On windows run `build.cmd` and on unix based systems run `build.sh`. These will build the framework and put the console application into the `/bin` directory (the application will be named `fsharplint.exe`), all the tests will be run - all of which should pass. The MSBuild task assembly will have been built to `/src/FSharpLint.MSBuildIntegration/bin/Release/FSharpLint.MSBuildIntegration.dll`.
-
-#####Troubleshooting a failing build
-
-On windows you may find yourself getting an error loading `FSharp.Data.DesignTime.dll` (HRESULT: 0x80131515), the solution to this is to right click on `lib/FSharp.Data.DesignTime.dll` in explorer, go to properties, and then click unblock.
-
-Also on windows if the tests in `FSharpLint.Rules.Tests` are all failing with a `ParseException`, then the solution most probably is to dump `FSharp.Core.optdata` and `FSharp.Core.sigdata` into `tests\FSharpLint.Rules.Tests\bin\Release` or `tests\FSharpLint.Rules.Tests\bin\Debug` depending upon your build target. This shouldn't be required, it seems to only happen on some builds on some computers. To get the `FSharp.Core.optdata` and `FSharp.Core.sigdata` you need to find where your FSharp.Core is located - the path will be something along the lines of `C:\Program Files\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0` (F# 3.0) or `C:\Program Files\Reference Assemblies\Microsoft\FSharp\.NETFramework\v4.0\4.3.1.0` (F# 3.1)
+On windows run `build.cmd` and on unix based systems run `build.sh`.
 
 ####Running The Tool
 
@@ -146,20 +140,13 @@ The following code breaks the rule `NameConventions.InterfaceNamesMustBeginWithI
     type Printable =
         abstract member Print : unit -> unit
         
-It will result in the warning: `Interface identifiers should begin with the letter I found interface Printable`.
+It will result in the warning: ```Consider changing `Printable` to be prefixed with `I`.```
 
 We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]`
 
 The following code has the `SuppressMessage` attribute applied to it, this code will generate no warning:
 
     [<SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]
-    type Printable =
-        abstract member Print : unit -> unit
-        
-        
-This could also be written using property initialisers as:
-
-    [<SuppressMessage(Category = "NameConventions", CheckId = "InterfaceNamesMustBeginWithI")>]
     type Printable =
         abstract member Print : unit -> unit
 
@@ -181,11 +168,7 @@ In the configuration file paths can be used to specify files that should be incl
 
 ####Running Lint From An Application
 
-The project `src/FSharpLint.Application` contains `RunLint.fs` that contains the following function:
+Install the [`FSharp.Core` nuget package](https://www.nuget.org/packages/FSharpLint.Core/).
 
-    /// Parses and runs the linter on all the files in a project.
-    val parseProject : projectInformation: ProjectParseInfo -> Result
-
-This function is how all the current tools (MSBuild task and console application) run the lint tool on a single project. You pass it a record with information needed to locate the project along with three functions: `finishEarly` lets you stop the lint tool at any time by returning true, `progress` gets passed information on what file is currently being linted within the project, every time a rule is found to be broken `errorReceived` is passed details on the broken rule.
-
-If you've built the tool, the assembly to reference to access this function will be: `/bin/FSharpLint.Application.dll`
+The namespace `FSharpLint.Application` contains a module named `Lint` which provides several functions
+to lint a project/source file/source string.
