@@ -1,8 +1,10 @@
-#### Using the Console Application
+#### Running the Console Application
 
-The console application is a very simple wrapper around the lint tool, with a required argument of `-f`, `-sf`, or `-source`. `-f` lints against an entire project, `-sf` can be used to lint a single file, and `-source` lints against a given string.
+The console application is a wrapper around the linter, with a required argument of: `-f`, `-sf`, or `-source`. 
 
-If you get a `ParseException` reported when running the tool it's likely that your `FSharp.Core.dll` is in a non-standard directory - if this is not the case please report it as an issue. When it *is* in a non-standard directory you can use the `-core` argument to specify the directory where your `FSharp.Core.dll` is located.
+* `-f` lints an entire project.
+* `-sf` lints a single file.
+* `-source` lints a string.
 
 ##### Example
 
@@ -10,7 +12,7 @@ If you get a `ParseException` reported when running the tool it's likely that yo
 
 `C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj` is the path of the project file of the project that we want to lint.
 
-To run the tool we need to open the command line, `cd` into the directory containing `fsharplint.exe` and then run the tool using the `-f` argument to specify the project file:
+To run the linter, open the command line, `cd` into the directory containing `fsharplint.exe` and run the tool using the `-f` argument to specify the project file:
 
     >cd C:\FSharpLint\bin
     >fsharplint -f "C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj"
@@ -23,7 +25,6 @@ To run the tool we need to open the command line, `cd` into the directory contai
 
 | Arguments | Description | Example |
 | --- | :------------- | --- |
-| `-f` | Specifies the path to the project file of the project to be linted. **(Required if -sf or source not specified)** | `-f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
-| `-sf` | Specifies the path to a single source file to be linted. **(Required if -f or -source not specified)** | `-f "C:\FSharpProjectDirectory\Uploader.fsx"` |
-| `-source` | Lints a given string **(Required if -f or -sf not specified)** | `-source "let x = fun _ -> ()"` |
-| `-core` | Specifies the path to the directory containing `FSharp.Core.dll` to be used to parse the project, this directory must contain `FSharp.Core.sigdata` and `FSharp.Core.optdata` alongside `FSharp.Core.dll` **(Optional)** | `-core "C:\Program Files (x86)\Reference Assemblies\Microsoft\FSharp\3.0\Runtime\v4.0"` |
+| `-f` | Path to the project file. | `-f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
+| `-sf` | Path to a source file. | `-f "C:\FSharpProjectDirectory\Uploader.fsx"` |
+| `-source` | String to be linted. | `-source "let x = fun _ -> ()"` |
