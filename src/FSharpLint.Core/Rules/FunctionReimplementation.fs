@@ -83,7 +83,10 @@ module FunctionReimplementation =
             | _ -> false
             
         if canBeReplacedWithFunctionComposition lambda.Body then
-            Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
+            visitorInfo.Suggest
+                { Range = range 
+                  Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+                  SuggestedFix = None }
 
     let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range visitorInfo =
         let isConstructor expr =
@@ -123,7 +126,7 @@ module FunctionReimplementation =
 
             let errorFormatString = Resources.GetString("RulesReimplementsFunction")
             let error = System.String.Format(errorFormatString, identifier)
-            visitorInfo.PostError range error
+            visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
 
         let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
 

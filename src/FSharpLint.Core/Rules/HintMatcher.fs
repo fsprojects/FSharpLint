@@ -510,7 +510,7 @@ module HintMatcher =
                 let errorFormatString = Resources.GetString("RulesHintSuggestion")
                 System.String.Format(errorFormatString, matched, message)
 
-        visitorInfo.PostError range error
+        visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
 
     let getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
         let symbol =

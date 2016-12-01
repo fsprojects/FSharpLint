@@ -44,7 +44,7 @@ module NumberOfItems =
             if List.length items > maxItems && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
                 let error = String.Format(errorFormatString, maxItems)
-                visitorInfo.PostError (items.[maxItems].Range) error)
+                visitorInfo.Suggest { Range = items.[maxItems].Range; Message = error; SuggestedFix = None })
 
     let private validateFunction (constructorArguments:SynConstructorArgs) visitorInfo isSuppressed = 
         let ruleName = "MaxNumberOfFunctionParameters"
@@ -55,7 +55,7 @@ module NumberOfItems =
                     when List.length parameters > maxParameters && not <| isSuppressed ruleName -> 
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
                 let error = String.Format(errorFormatString, maxParameters)
-                visitorInfo.PostError parameters.[maxParameters].Range error
+                visitorInfo.Suggest { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None }
             | _ -> ()
 
         maxItemsForRule visitorInfo.Config ruleName
@@ -89,7 +89,7 @@ module NumberOfItems =
             if List.length members > maxMembers && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
                 let error = String.Format(errorFormatString, maxMembers)
-                visitorInfo.PostError (members.[maxMembers].Range) error)
+                visitorInfo.Suggest { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None })
 
     let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
         let rec isApplicationNode i = 
@@ -125,7 +125,7 @@ module NumberOfItems =
             if numberOfBooleanOperators > maxBooleanOperators && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
                 let error = String.Format(errorFormatString, maxBooleanOperators)
-                visitorInfo.PostError condition.Range error
+                visitorInfo.Suggest { Range = condition.Range; Message = error; SuggestedFix = None }
 
         maxItemsForRule visitorInfo.Config ruleName
         |> Option.iter checkNumberOfBooleanOperatorsInCondition

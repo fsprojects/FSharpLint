@@ -50,8 +50,7 @@ module RaiseWithTooManyArguments =
             
         let postError ruleName errorName range isEnabled =
             if isEnabled ruleName then
-                Resources.GetString errorName
-                |> visitorInfo.PostError range
+                visitorInfo.Suggest { Range = range; Message = Resources.GetString errorName; SuggestedFix = None }
 
         let mutable i = 0
         while i < syntaxArray.Length do

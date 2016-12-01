@@ -184,16 +184,16 @@ module Lint =
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
-            let postError range error =
-                { LintWarning.Info = error
-                  LintWarning.Range = range
+            let postSuggestion (suggestion:Ast.LintSuggestion) =
+                { LintWarning.Range = suggestion.Range
+                  LintWarning.Info = suggestion.Message
                   LintWarning.Input = fileInfo.Text } |> lintInfo.ErrorReceived
 
             let visitorInfo = 
                 { Ast.Text = fileInfo.Text
                   Ast.FSharpVersion = lintInfo.FSharpVersion
                   Ast.Config = lintInfo.Configuration
-                  Ast.PostError = postError }
+                  Ast.Suggest = postSuggestion }
 
             let analysers = analysers |> List.map (fun (analyser, name) -> (analyser visitorInfo, name))
 

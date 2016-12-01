@@ -33,6 +33,30 @@ module Ast =
 
           /// CheckId property of the SuppressedMessageAttribute. (The name of the rule to be suppressed).
           Rule: string }
+
+    /// Information for consuming applications to provide an automated fix for a lint suggestion.
+    [<NoEquality; NoComparison>]
+    type SuggestedFix =
+        { /// Text to be replaced.
+          FromText: string 
+
+          /// Location of the text to be replaced.
+          FromRange: range
+
+          /// Text to replace the `FromText`, i.e. the fix.
+          ToText: string }
+
+    /// A lint "warning", sources the location of the warning with a suggestion on how it may be fixed.
+    [<NoEquality; NoComparison>]
+    type LintSuggestion = 
+        { /// Location of the code that prompted the suggestion.
+          Range: range
+
+          /// Suggestion message to describe the possible problem to the user.
+          Message: string
+
+          /// Information to provide an automated fix.
+          SuggestedFix: SuggestedFix option }
     
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
     [<NoEquality; NoComparison>]
@@ -43,9 +67,10 @@ module Ast =
           /// The current lint config to be used by visitors.
           Config: Configuration.Configuration
 
-          /// Used by visitors to report errors.
-          PostError: range -> string -> unit
+          /// Used by visitors to report warnings.
+          Suggest: LintSuggestion -> unit
           
+          /// Source of the current file being analysed.
           Text: string }
 
         member this.UseTypeChecker = 

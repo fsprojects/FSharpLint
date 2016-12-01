@@ -132,7 +132,9 @@ module NestedStatements =
                 if areChildrenNested node && not <| isMetaData node i && not <| isElseIf node i then
                     if depth >= errorDepth then
                         if not (isSuppressed i) then
-                            getRange node |> Option.iter (fun range -> visitorInfo.PostError range error)
+                            getRange node 
+                            |> Option.iter (fun range -> 
+                                visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None })
 
                         // Skip children as we've had an error containing them.
                         let skipChildren = i + skipArray.[i].NumberOfChildren + 1

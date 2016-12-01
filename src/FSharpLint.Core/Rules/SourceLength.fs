@@ -47,7 +47,10 @@ module SourceLength =
                         |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
                 
                     if not isSuppressed then 
-                        visitorInfo.PostError range (error errorName maxExpectedLines actualLines) 
+                        visitorInfo.Suggest 
+                            { Range = range 
+                              Message = error errorName maxExpectedLines actualLines
+                              SuggestedFix = None }
                 | Some(_) | None -> ()
             | None -> ()
 

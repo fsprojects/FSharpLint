@@ -48,9 +48,10 @@ module Binding =
                 | _ -> false
                 
             if findWildAndIgnoreParens pattern && isSuppressed ruleName |> not then
-                visitorParameters.VisitorInfo.PostError 
-                    range 
-                    (Resources.GetString("RulesFavourIgnoreOverLetWildError"))
+                visitorParameters.VisitorInfo.Suggest 
+                    { Range = range 
+                      Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+                      SuggestedFix = None }
 
     let checkForWildcardNamedWithAsPattern visitorParameters pattern isSuppressed =
         let ruleName = "WildcardNamedWithAsPattern"
@@ -61,9 +62,10 @@ module Binding =
             match pattern with
             | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
                 if isSuppressed ruleName |> not then
-                    visitorParameters.VisitorInfo.PostError 
-                        range 
-                        (Resources.GetString("RulesWildcardNamedWithAsPattern"))
+                    visitorParameters.VisitorInfo.Suggest 
+                        { Range = range 
+                          Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
+                          SuggestedFix = None }
             | _ -> ()
 
     let checkForUselessBinding visitorParameters pattern expr range isSuppressed =
@@ -99,9 +101,10 @@ module Binding =
 
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
                 if exprIdentMatchesBindingIdent bindingIdent expr && isSuppressed ruleName |> not then
-                    visitorParameters.VisitorInfo.PostError 
-                        range 
-                        (Resources.GetString("RulesUselessBindingError")))
+                    visitorParameters.VisitorInfo.Suggest 
+                        { Range = range 
+                          Message = Resources.GetString("RulesUselessBindingError")
+                          SuggestedFix = None })
             | _ -> ()
 
     let checkTupleOfWildcards visitorParameters pattern identifier isSuppressed =
@@ -126,7 +129,7 @@ module Binding =
                     let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
                     let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
                     let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                    visitorParameters.VisitorInfo.PostError range error
+                    visitorParameters.VisitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
             | _ -> ()
 
     let private isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =
