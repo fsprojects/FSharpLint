@@ -78,6 +78,24 @@ module Ast =
             | Some(true) -> true
             | Some(_) | None -> false
 
+        /// Tries to find the source code within a given range.
+        member this.TryFindTextOfRange(range:range) =
+            let findPos (pos:pos) = 
+                let rec findLineStart lineNumber currLine currPos =
+                    if currLine = lineNumber then Some currPos
+                    else
+                        let nextLinePos = this.Text.IndexOf('\n', currPos)
+                        if nextLinePos >= 0 then findLineStart lineNumber (currLine + 1) (nextLinePos + 1)
+                        else None
+
+                findLineStart pos.Line 1 0
+                |> Option.map (fun x -> x + pos.Column)
+            
+            match findPos range.Start, findPos range.End with
+            | Some(startIndex), Some(endIndex) -> 
+                this.Text.Substring(startIndex, endIndex - startIndex) |> Some
+            | _ -> None
+
     /// Nodes in the AST to be visited.
     [<NoEquality; NoComparison>]
     type AstNode =

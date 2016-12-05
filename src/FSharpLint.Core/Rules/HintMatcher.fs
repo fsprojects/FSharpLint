@@ -21,6 +21,7 @@ module HintMatcher =
     open System.Diagnostics
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
+    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Ast
@@ -125,6 +126,7 @@ module HintMatcher =
         [<NoEquality; NoComparison>]
         type Arguments =
             { LambdaArguments: Map<char, string>
+              MatchedVariables: Map<char, range>
               Expression: AstNode
               Hint: Expression
               FSharpCheckFileResults: FSharpCheckFileResults option
@@ -203,7 +205,10 @@ module HintMatcher =
                 | AstNode.Expression(SynExpr.Ident(identifier)) when identifier.idText = arguments.LambdaArguments.[variable] -> 
                     true
                 | _ -> false
-            | Expression.Variable(_)
+            | Expression.Variable(var) ->
+                match expr with AstNode.Expression(expr) -> Some expr.Range | _ -> None
+                |> Option.iter (fun range -> arguments.MatchedVariables.Add(var, range) |> ignore)
+                true
             | Expression.Wildcard ->
                 true
             | Expression.Null
@@ -497,20 +502,24 @@ module HintMatcher =
         |> List.map (function LambdaArg(expr) -> hintToString (HintExpr expr))
         |> String.concat " "
 
-    let hintError hint visitorInfo range =
+    let hintError hint (visitorInfo:VisitorInfo) range matchedVariables =
         let matched = hintToString hint.Match
 
-        let error =
-            match hint.Suggestion with
-            | Suggestion.Expr(expr) -> 
-                let suggestion = hintToString (HintExpr expr)
-                let errorFormatString = Resources.GetString("RulesHintRefactor")
-                System.String.Format(errorFormatString, matched, suggestion)
-            | Suggestion.Message(message) -> 
-                let errorFormatString = Resources.GetString("RulesHintSuggestion")
-                System.String.Format(errorFormatString, matched, message)
+        match hint.Suggestion with
+        | Suggestion.Expr(expr) -> 
+            let suggestion = hintToString (HintExpr expr)
+            let errorFormatString = Resources.GetString("RulesHintRefactor")
+            let error = System.String.Format(errorFormatString, matched, suggestion)
 
-        visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
+            let suggestedFix = 
+                visitorInfo.TryFindTextOfRange range
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = "" })
+
+            visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = suggestedFix }
+        | Suggestion.Message(message) -> 
+            let errorFormatString = Resources.GetString("RulesHintSuggestion")
+            let error = System.String.Format(errorFormatString, matched, message)
+            visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
 
     let getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
         let symbol =
@@ -571,10 +580,11 @@ module HintMatcher =
         | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
         | AstNode.Pattern(pattern), HintPat(hintPattern) ->
             if MatchPattern.matchHintPattern (pattern, hintPattern) then
-                hintError hint visitorInfo pattern.Range
+                hintError hint visitorInfo pattern.Range (Map.ofList [])
         | AstNode.Expression(expr), HintExpr(hintExpr) -> 
             let arguments =
                 { MatchExpression.LambdaArguments = Map.ofList []
+                  MatchExpression.MatchedVariables = Map.ofList []
                   MatchExpression.Expression = node.Actual
                   MatchExpression.Hint = hintExpr
                   MatchExpression.FSharpCheckFileResults = checkFile
@@ -584,9 +594,9 @@ module HintMatcher =
                 match hint.Match, hint.Suggestion with
                 | HintExpr(Expression.Lambda(_)), Suggestion.Expr(Expression.Identifier(_)) -> 
                     if lambdaCanBeReplacedWithFunction checkFile breadcrumbs expr.Range then
-                        hintError hint visitorInfo expr.Range
+                        hintError hint visitorInfo expr.Range arguments.MatchedVariables
                 | _ ->
-                    hintError hint visitorInfo expr.Range
+                    hintError hint visitorInfo expr.Range arguments.MatchedVariables
         | _ -> ()
 
     let analyser getHints visitorInfo checkFile (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
