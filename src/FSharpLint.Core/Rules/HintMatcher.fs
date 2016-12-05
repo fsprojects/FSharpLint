@@ -18,6 +18,7 @@ namespace FSharpLint.Rules
 
 module HintMatcher =
 
+    open System.Collections.Generic
     open System.Diagnostics
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
@@ -126,7 +127,7 @@ module HintMatcher =
         [<NoEquality; NoComparison>]
         type Arguments =
             { LambdaArguments: Map<char, string>
-              MatchedVariables: Map<char, range>
+              MatchedVariables: Dictionary<char, range>
               Expression: AstNode
               Hint: Expression
               FSharpCheckFileResults: FSharpCheckFileResults option
@@ -444,7 +445,17 @@ module HintMatcher =
         | Expression.Identifier(identifier) -> String.concat "." identifier
         | x -> Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString()); ""
 
-    let rec hintToString = function
+    let rec hintToString replace (visitorInfo:VisitorInfo) (matchedVariables:Dictionary<_, _>) hintNode =
+        let hintToString = hintToString replace visitorInfo matchedVariables
+
+        match hintNode with
+        | HintExpr(Expression.Variable(varChar)) when replace -> 
+            match matchedVariables.TryGetValue varChar with
+            | true, range -> 
+                match visitorInfo.TryFindTextOfRange range with 
+                | Some(replacement) -> replacement 
+                | _ -> varChar.ToString()
+            | _ -> varChar.ToString()
         | HintExpr(Expression.Variable(x))
         | HintPat(Pattern.Variable(x)) -> x.ToString()
         | HintExpr(Expression.Wildcard)
@@ -472,7 +483,8 @@ module HintMatcher =
         | HintExpr(Expression.Parentheses(hint)) -> "(" + hintToString (HintExpr hint) + ")"
         | HintPat(Pattern.Parentheses(hint)) -> "(" + hintToString (HintPat hint) + ")"
         | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) -> 
-            "fun " + lambdaArgumentsToString arguments + " -> " + hintToString (HintExpr body)
+            "fun " + lambdaArgumentsToString replace visitorInfo matchedVariables arguments 
+                + " -> " + hintToString (HintExpr body)
         | HintExpr(Expression.LambdaArg(argument)) ->
             hintToString (HintExpr argument)
         | HintExpr(Expression.LambdaBody(body)) ->
@@ -497,23 +509,25 @@ module HintMatcher =
             "else " + hintToString (HintExpr expr)
         | HintExpr(Expression.Null)
         | HintPat(Pattern.Null) -> "null"
-    and lambdaArgumentsToString (arguments:LambdaArg list) = 
+    and lambdaArgumentsToString replace visitorInfo matchedVariables (arguments:LambdaArg list) = 
         arguments
-        |> List.map (function LambdaArg(expr) -> hintToString (HintExpr expr))
+        |> List.map (function LambdaArg(expr) -> hintToString replace visitorInfo matchedVariables (HintExpr expr))
         |> String.concat " "
 
     let hintError hint (visitorInfo:VisitorInfo) range matchedVariables =
-        let matched = hintToString hint.Match
+        let matched = hintToString false visitorInfo matchedVariables hint.Match
 
         match hint.Suggestion with
         | Suggestion.Expr(expr) -> 
-            let suggestion = hintToString (HintExpr expr)
+            let suggestion = hintToString false visitorInfo matchedVariables (HintExpr expr)
             let errorFormatString = Resources.GetString("RulesHintRefactor")
             let error = System.String.Format(errorFormatString, matched, suggestion)
+            
+            let toText = hintToString true visitorInfo matchedVariables (HintExpr expr)
 
             let suggestedFix = 
                 visitorInfo.TryFindTextOfRange range
-                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = "" })
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText })
 
             visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = suggestedFix }
         | Suggestion.Message(message) -> 
@@ -580,11 +594,11 @@ module HintMatcher =
         | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
         | AstNode.Pattern(pattern), HintPat(hintPattern) ->
             if MatchPattern.matchHintPattern (pattern, hintPattern) then
-                hintError hint visitorInfo pattern.Range (Map.ofList [])
+                hintError hint visitorInfo pattern.Range (Dictionary<_, _>())
         | AstNode.Expression(expr), HintExpr(hintExpr) -> 
             let arguments =
                 { MatchExpression.LambdaArguments = Map.ofList []
-                  MatchExpression.MatchedVariables = Map.ofList []
+                  MatchExpression.MatchedVariables = Dictionary<_, _>()
                   MatchExpression.Expression = node.Actual
                   MatchExpression.Hint = hintExpr
                   MatchExpression.FSharpCheckFileResults = checkFile
