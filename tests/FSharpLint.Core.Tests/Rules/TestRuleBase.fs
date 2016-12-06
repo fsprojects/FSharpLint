@@ -16,7 +16,9 @@
 
 module TestRuleBase
 
+open System
 open System.Diagnostics
+open System.Text
 open NUnit.Framework
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -36,10 +38,10 @@ let emptyConfig =
 
 [<AbstractClass>]
 type TestRuleBase(analyser, ?analysers) =
-    let errorRanges = System.Collections.Generic.List<range * string>()
+    let suggestions = ResizeArray<_>()
 
     let postSuggestion suggestion =
-        errorRanges.Add(suggestion.Range, suggestion.Message)
+        suggestions.Add(suggestion)
 
     let config =
         match analysers with
@@ -105,49 +107,68 @@ type TestRuleBase(analyser, ?analysers) =
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =
-        errorRanges
-        |> Seq.exists (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
+        suggestions
+        |> Seq.exists (fun s -> s.Range.StartLine = startLine && s.Range.StartColumn = startColumn)
 
     member __.ErrorsAt(startLine, startColumn) =
-        errorRanges
-        |> Seq.filter (fun (r, _) -> r.StartLine = startLine && r.StartColumn = startColumn)
+        suggestions
+        |> Seq.filter (fun s -> s.Range.StartLine = startLine && s.Range.StartColumn = startColumn)
 
     member __.ErrorExistsOnLine(startLine) =
-        errorRanges
-        |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
+        suggestions
+        |> Seq.exists (fun s -> s.Range.StartLine = startLine)
 
     member __.NoErrorExistsOnLine(startLine) =
-        errorRanges
-        |> Seq.exists (fun (r, _) -> r.StartLine = startLine)
+        suggestions
+        |> Seq.exists (fun s -> s.Range.StartLine = startLine)
         |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
     member __.NoErrorsExist =
-        errorRanges
-        |> Seq.isEmpty
+        suggestions |> Seq.isEmpty
 
     member __.ErrorsExist =
-        errorRanges
-        |> Seq.isEmpty |> not
+        suggestions |> Seq.isEmpty |> not
 
     member __.ErrorMsg =
-        match errorRanges with
+        match suggestions with
         | xs when xs.Count = 0 -> "No errors"
         | _ ->
-            errorRanges
-            |> Seq.map (fun (r, err) -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
-                r.StartRange.StartLine r.StartColumn r.EndRange.EndLine r.EndRange.EndColumn err ))
-            |> (fun x -> System.String.Join("; ", x))
+            suggestions
+            |> Seq.map (fun s -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
+                s.Range.StartRange.StartLine s.Range.StartColumn 
+                s.Range.EndRange.EndLine s.Range.EndRange.EndColumn s.Message ))
+            |> (fun x -> String.Join("; ", x))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
-        |> Seq.exists (fun (_, e) -> e = message)
+        |> Seq.exists (fun s -> s.Message = message)
 
     member __.ErrorWithMessageExists(message) =
-        errorRanges |> Seq.exists (fun (_, e) -> e = message)
+        suggestions |> Seq.exists (fun s -> s.Message = message)
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
 
+    member this.ApplyQuickFix (source:string) =
+        let firstSuggestedFix =
+            suggestions 
+            |> Seq.choose (fun x -> x.SuggestedFix)
+            |> Seq.tryHead
+
+        match firstSuggestedFix with
+        | Some(fix) ->
+            let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
+            let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
+
+            match startIndex, endIndex with
+            | Some(startIndex), Some(endIndex) -> 
+                (StringBuilder source)
+                    .Remove(startIndex, endIndex - startIndex)
+                    .Insert(startIndex, fix.ToText)
+                    .ToString()
+            | _ -> source
+        | None -> source
+
     [<SetUp>]
-    member __.SetUp() = errorRanges.Clear()
+    member __.SetUp() = suggestions.Clear()

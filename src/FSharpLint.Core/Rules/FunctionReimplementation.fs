@@ -20,6 +20,7 @@ namespace FSharpLint.Rules
 /// For example it will warn when it finds a lambda such as: fun a b -> a * b as it is exactly the same as (*).
 module FunctionReimplementation =
     
+    open System
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -121,12 +122,17 @@ module FunctionReimplementation =
         let generateError (identifier:LongIdent) =
             let identifier = 
                 identifier 
-                    |> List.map (fun x -> DemangleOperatorName x.idText)
-                    |> String.concat "."
+                |> List.map (fun x -> DemangleOperatorName x.idText)
+                |> String.concat "."
 
-            let errorFormatString = Resources.GetString("RulesReimplementsFunction")
-            let error = System.String.Format(errorFormatString, identifier)
-            visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None }
+            let suggestedFix = 
+                visitorInfo.TryFindTextOfRange range
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier })
+
+            visitorInfo.Suggest 
+                { Range = range
+                  Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+                  SuggestedFix = suggestedFix }
 
         let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
 

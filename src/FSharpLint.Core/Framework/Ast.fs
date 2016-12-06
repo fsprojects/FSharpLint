@@ -80,18 +80,10 @@ module Ast =
 
         /// Tries to find the source code within a given range.
         member this.TryFindTextOfRange(range:range) =
-            let findPos (pos:pos) = 
-                let rec findLineStart lineNumber currLine currPos =
-                    if currLine = lineNumber then Some currPos
-                    else
-                        let nextLinePos = this.Text.IndexOf('\n', currPos)
-                        if nextLinePos >= 0 then findLineStart lineNumber (currLine + 1) (nextLinePos + 1)
-                        else None
+            let startIndex = ExpressionUtilities.findPos range.Start this.Text
+            let endIndex = ExpressionUtilities.findPos range.End this.Text
 
-                findLineStart pos.Line 1 0
-                |> Option.map (fun x -> x + pos.Column)
-            
-            match findPos range.Start, findPos range.End with
+            match startIndex, endIndex with
             | Some(startIndex), Some(endIndex) -> 
                 this.Text.Substring(startIndex, endIndex - startIndex) |> Some
             | _ -> None

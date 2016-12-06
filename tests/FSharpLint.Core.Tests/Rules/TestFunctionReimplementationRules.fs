@@ -60,6 +60,23 @@ let f = fun a b -> a * b
         this.ErrorMsg.Contains "`( * )`" |> Assert.IsTrue
 
     [<Test>]
+    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() = 
+        let source = """
+module Program
+
+let f = fun a b -> a * b
+"""
+
+        let expected = """
+module Program
+
+let f = ( * )
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
     member this.``Lambda reimplementing long identifier function issues error``() = 
         this.Parse """
 module Program
@@ -68,6 +85,23 @@ let f = fun a b -> List.map a b
 """
 
         Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() = 
+        let source = """
+module Program
+
+let f = fun a b -> List.map a b
+"""
+
+        let expected = """
+module Program
+
+let f = List.map
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
