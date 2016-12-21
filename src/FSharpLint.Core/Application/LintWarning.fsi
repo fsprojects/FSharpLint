@@ -20,10 +20,12 @@ namespace FSharpLint.Application
 module LintWarning =
 
     open Microsoft.FSharp.Compiler.Range
+    open FSharpLint.Framework
+
 
     /// Gets a message stating where a lint warning occured.
     val getWarningMessage : range -> string
-    
+
     /// Generates a message including highlighting where in the code the warning was found.
     val warningInfoLine : getErrorMessage:(range -> string) -> range -> input:string -> string
 
@@ -41,4 +43,7 @@ module LintWarning =
           Range: range
 
           /// Entire input file, needed to display where in the file the error occurred.
-          Input: string }
+          Input: string
+
+          /// Suggested fix for the warning.
+          Fix: Ast.SuggestedFix option}
