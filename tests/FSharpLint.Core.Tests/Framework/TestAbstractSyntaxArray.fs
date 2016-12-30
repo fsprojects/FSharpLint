@@ -133,6 +133,7 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.ModuleDeclaration 0
               Utilities.hash2 SyntaxNode.FuncApp 0
               Utilities.hash2 SyntaxNode.Identifier "map"
+              Utilities.hash2 SyntaxNode.Expression 0
               Utilities.hash2 SyntaxNode.Lambda 0
               Utilities.hash2 SyntaxNode.LambdaArg 0
               Utilities.hash2 SyntaxNode.Identifier "x"
@@ -145,19 +146,20 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
-        Assert.AreEqual([ AbstractSyntaxArray.Skip(13, 0)
-                          AbstractSyntaxArray.Skip(12, 0)
-                          AbstractSyntaxArray.Skip(11, 1)
+        Assert.AreEqual([ AbstractSyntaxArray.Skip(14, 0)
+                          AbstractSyntaxArray.Skip(13, 0)
+                          AbstractSyntaxArray.Skip(12, 1)
                           AbstractSyntaxArray.Skip(0, 2)
-                          AbstractSyntaxArray.Skip(8, 2)
-                          AbstractSyntaxArray.Skip(1, 4)
-                          AbstractSyntaxArray.Skip(0, 5)
-                          AbstractSyntaxArray.Skip(1, 4)
-                          AbstractSyntaxArray.Skip(0, 7)
-                          AbstractSyntaxArray.Skip(3, 4)
-                          AbstractSyntaxArray.Skip(2, 9)
-                          AbstractSyntaxArray.Skip(0, 10)
-                          AbstractSyntaxArray.Skip(0, 10)
+                          AbstractSyntaxArray.Skip(9, 2)
+                          AbstractSyntaxArray.Skip(8, 4)
+                          AbstractSyntaxArray.Skip(1, 5)
+                          AbstractSyntaxArray.Skip(0, 6)
+                          AbstractSyntaxArray.Skip(1, 5)
+                          AbstractSyntaxArray.Skip(0, 8)
+                          AbstractSyntaxArray.Skip(3, 5)
+                          AbstractSyntaxArray.Skip(2, 10)
+                          AbstractSyntaxArray.Skip(0, 11)
+                          AbstractSyntaxArray.Skip(0, 11)
                           AbstractSyntaxArray.Skip(0, 2) ], skipArray)
 
     /// e.g. a lambda arg shouldn't have the body of the lambda in its child nodes (that should be a sibling).

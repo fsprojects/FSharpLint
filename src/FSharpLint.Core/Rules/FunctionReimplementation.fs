@@ -66,14 +66,17 @@ module FunctionReimplementation =
                     | _ -> false
 
                 match AstNode.Expression expression with
-                | FuncApp((SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues, _)
-                        when appliedValuesAreConstants appliedValues -> 
+                | FuncApp(exprs, _) ->
+                    match List.map removeParens exprs with
+                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues
+                            when appliedValuesAreConstants appliedValues -> 
 
-                    match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
-                        lastArgument.idText = lambdaArgument.idText
-                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
-                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        match getLastElement appliedValues with
+                        | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                            lastArgument.idText = lambdaArgument.idText
+                        | SynExpr.App(_, false, _, _, _) as nextFunction ->
+                            lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        | _ -> false
                     | _ -> false
                 | _ -> false
 
