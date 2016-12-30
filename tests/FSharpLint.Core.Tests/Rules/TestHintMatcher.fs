@@ -726,4 +726,146 @@ do
     let log = fun data medium -> ()
     ()""", config)
 
-        this.AssertNoWarnings()
+        this.AssertNoWarnings()  
+      
+    
+[<TestFixture>]
+type TestHintMatcherFixes() =
+    inherit TestRuleBase.TestRuleBase(analyser getHintsFromConfig)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/pull/194#issuecomment-268560761  
+    [<Test>]
+    member this.``Lambdas in hint suggestions must be surrounded with parentheses.``() = 
+        let source = """
+module Program
+
+let x = [1;2;3] |> List.map (fun x -> [x]) |> List.concat
+"""
+ 
+        let expected = """
+module Program
+
+let x = List.collect (fun x -> [x]) [1;2;3]
+"""
+ 
+        this.Parse(source, generateHintConfig ["List.concat (List.map f x) ===> List.collect f x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application moved in suggestion which does not require parentheses must not be surrounded by them.``() = 
+        let source = """
+module Program
+
+let x y = if y 0 then true else false
+"""
+ 
+        let expected = """
+module Program
+
+let x y = y 0
+"""
+ 
+        this.Parse(source, generateHintConfig ["if x then true else false ===> x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application moved in suggestion which requires parens must be surrounded by them.``() = 
+        let source = """
+module Program
+
+let x y = y 0
+"""
+ 
+        let expected = """
+module Program
+
+let x y = y (foo 0)
+"""
+ 
+        this.Parse(source, generateHintConfig ["0 ===> foo 0"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application in suggestion with surrounding parens keeps them.``() = 
+        let source = """
+module Program
+
+let x y = y (foo 0)
+"""
+ 
+        let expected = """
+module Program
+
+let x y = y (foo 0 0)
+"""
+ 
+        this.Parse(source, generateHintConfig ["foo 0 ===> foo 0 0"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application as variable in suggestion with surrounding parens keeps them.``() = 
+        let source = """
+module Program
+
+let x y = bar (foo 0)
+"""
+ 
+        let expected = """
+module Program
+
+let x y = id (foo 0)
+"""
+ 
+        this.Parse(source, generateHintConfig ["bar x ===> id x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application in suggestion with surrounding parens but no longer needs removes surrounding parens.``() = 
+        let source = """
+module Program
+
+let x y = bar (foo 0)
+"""
+ 
+        let expected = """
+module Program
+
+let x y = if foo 0 then 0 else 1
+"""
+ 
+        this.Parse(source, generateHintConfig ["bar x ===> if x then 0 else 1"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application in suggestion with addressof operator keeps parens surrounding application.``() = 
+        let source = """
+module Program
+
+let x y = &(foo 0)
+"""
+ 
+        let expected = """
+module Program
+
+let x y = &&(foo 0)
+"""
+ 
+        this.Parse(source, generateHintConfig ["&x ===> &&x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Function application in suggestion with prefix operator removed, removes parens surrounding application.``() = 
+        let source = """
+module Program
+
+let x y = - -(foo 0)
+"""
+ 
+        let expected = """
+module Program
+
+let x y = foo 0
+"""
+ 
+        this.Parse(source, generateHintConfig ["- -x ===> x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
