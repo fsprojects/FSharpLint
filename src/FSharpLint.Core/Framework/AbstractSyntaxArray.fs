@@ -120,8 +120,7 @@ module AbstractSyntaxArray =
         | Expression(_) -> SyntaxNode.Expression
         | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
         | Pattern(SynPat.Or(_)) -> SyntaxNode.Or
-        | Pattern(Cons(_)) -> 
-            SyntaxNode.Cons
+        | Pattern(Cons(_)) -> SyntaxNode.Cons
         | Pattern(SynPat.Wild(_)) -> SyntaxNode.Wildcard
         | Pattern(SynPat.Const(constant, _)) -> constToSyntaxNode constant
         | Pattern(SynPat.ArrayOrList(_)) -> SyntaxNode.ArrayOrList

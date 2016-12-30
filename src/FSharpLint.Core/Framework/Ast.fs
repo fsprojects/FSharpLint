@@ -181,20 +181,20 @@ module Ast =
         let rec flatten flattened exprToFlatten =
             match exprToFlatten with
             | SynExpr.App(_, _, x, y, _) -> 
-                match removeParens x with
+                match x with
                 | SynExpr.App(_, true, SynExpr.Ident(op), rhs, _) as app ->
-                    let lhs = removeParens y
+                    let lhs = y
 
                     match op.idText with
                     | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> 
-                        flatten [removeParens rhs] lhs
+                        flatten [rhs] lhs
                     | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> 
-                        flatten (removeParens lhs::flattened) (removeParens rhs)
-                    | _ -> flatten (removeParens lhs::flattened) app
+                        flatten (lhs::flattened) rhs
+                    | _ -> flatten (lhs::flattened) app
                 | x -> 
-                    let leftExpr, rightExpr = (x, removeParens y)
-                    flatten (removeParens rightExpr::flattened) leftExpr
-            | expr -> (removeParens expr)::flattened
+                    let leftExpr, rightExpr = (x, y)
+                    flatten (rightExpr::flattened) leftExpr
+            | expr -> expr::flattened
 
         match functionApplication with
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 

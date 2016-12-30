@@ -45,7 +45,7 @@ type TestAst() =
             | _ -> failwith "Expected at least one module or namespace."
         | _ -> failwith "Expected an implementation file."
 
-    let astNodeName = string >> (fun x -> x.Substring(x.LastIndexOf("+") + 1))
+    let astNodeName = removeParens >> string >> (fun x -> x.Substring(x.LastIndexOf("+") + 1))
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application.``() = 
@@ -77,7 +77,7 @@ type TestAst() =
 
     [<Test>]
     member __.``Flatten with function application on lhs of right pipe.``() = 
-        match generateAst "(foo x) |> List.map (fun x -> x)" |> astToExpr |> Expression with
+        match generateAst "foo x |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) -> 
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
