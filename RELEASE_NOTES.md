@@ -1,3 +1,7 @@
+##### 0.5.1-beta - December 31 2016
+
+* Introduced automated fix information to API.
+
 ##### 0.4.12 - November 16 2016
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/191
