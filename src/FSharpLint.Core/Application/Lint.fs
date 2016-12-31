@@ -260,7 +260,7 @@ module Lint =
         | _ -> None
 
     /// Result of running the linter.
-    [<RequireQualifiedAccess; NoComparison>]
+    [<RequireQualifiedAccess; NoEquality; NoComparison>]
     type LintResult =
         | Success of LintWarning.Warning list
         | Failure of LintFailure

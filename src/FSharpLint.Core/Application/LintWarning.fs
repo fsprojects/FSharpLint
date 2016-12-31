@@ -45,7 +45,7 @@ module LintWarning =
     let getWarningWithLocation = warningInfoLine getWarningMessage
 
     /// A lint warning - information on where a lint rule was found to be broken.
-    [<NoComparison>]
+    [<NoEquality; NoComparison>]
     type Warning =
         { /// Warning to display to the user.
           Info: string
