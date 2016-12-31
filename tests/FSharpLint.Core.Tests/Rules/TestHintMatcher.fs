@@ -699,7 +699,7 @@ do
     let x = System.Collections.ArrayList()
     x = null |> ignore""", config, checkInput = true)
 
-        this.ErrorWithMessageExists("`x=null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue
+        this.ErrorWithMessageExists("`x = null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue
         
     /// Regression test for: http://codereview.stackexchange.com/questions/134296/f-function-to-concatenate-some-dsl-scripts-with-indentation#comment251110_134297
     [<Test>]
@@ -871,7 +871,7 @@ let x y = foo 0
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Infix operator in hint fix is formatted as expected``() = 
+    member this.``Infix operator in hint fix is formatted with space either side of it``() = 
         let source = """
 module Program
 
