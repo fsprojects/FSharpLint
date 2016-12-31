@@ -20,6 +20,7 @@ namespace FSharpLint.Rules
 /// For example it will warn when it finds a lambda such as: fun a b -> a * b as it is exactly the same as (*).
 module FunctionReimplementation =
     
+    open System
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -65,14 +66,17 @@ module FunctionReimplementation =
                     | _ -> false
 
                 match AstNode.Expression expression with
-                | FuncApp((SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues, _)
-                        when appliedValuesAreConstants appliedValues -> 
+                | FuncApp(exprs, _) ->
+                    match List.map removeParens exprs with
+                    | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues
+                            when appliedValuesAreConstants appliedValues -> 
 
-                    match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
-                        lastArgument.idText = lambdaArgument.idText
-                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
-                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        match getLastElement appliedValues with
+                        | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                            lastArgument.idText = lambdaArgument.idText
+                        | SynExpr.App(_, false, _, _, _) as nextFunction ->
+                            lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
+                        | _ -> false
                     | _ -> false
                 | _ -> false
 
@@ -83,7 +87,10 @@ module FunctionReimplementation =
             | _ -> false
             
         if canBeReplacedWithFunctionComposition lambda.Body then
-            Resources.GetString("RulesCanBeReplacedWithComposition") |> visitorInfo.PostError range 
+            visitorInfo.Suggest
+                { Range = range 
+                  Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+                  SuggestedFix = None }
 
     let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range visitorInfo =
         let isConstructor expr =
@@ -118,12 +125,17 @@ module FunctionReimplementation =
         let generateError (identifier:LongIdent) =
             let identifier = 
                 identifier 
-                    |> List.map (fun x -> DemangleOperatorName x.idText)
-                    |> String.concat "."
+                |> List.map (fun x -> DemangleOperatorName x.idText)
+                |> String.concat "."
 
-            let errorFormatString = Resources.GetString("RulesReimplementsFunction")
-            let error = System.String.Format(errorFormatString, identifier)
-            visitorInfo.PostError range error
+            let suggestedFix = 
+                visitorInfo.TryFindTextOfRange range
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier })
+
+            visitorInfo.Suggest 
+                { Range = range
+                  Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+                  SuggestedFix = suggestedFix }
 
         let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
 

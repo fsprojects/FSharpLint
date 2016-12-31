@@ -18,6 +18,7 @@ namespace FSharpLint.Rules
 
 module Typography =
 
+    open System
     open System.IO
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
@@ -49,8 +50,10 @@ module Typography =
                 let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber lineLength)
                 if isSuppressed range "MaxCharactersOnLine" |> not then
                     let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
-                    let error = System.String.Format(errorFormatString, (maxCharacters + 1))
-                    visitorInfo.PostError range error
+                    visitorInfo.Suggest
+                        { Range = range 
+                          Message = String.Format(errorFormatString, (maxCharacters + 1))
+                          SuggestedFix = None }
 
     module TrailingWhitespaceOnLine =
         let numberOfSpacesAllowed config =
@@ -113,7 +116,10 @@ module Typography =
                 let whitespaceLength = lengthOfWhitespaceOnEnd line
                 let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
                 if isSuppressed range "TrailingWhitespaceOnLine" |> not then
-                    visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingWhitespaceError"))
+                    visitorInfo.Suggest
+                        { Range = range 
+                          Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
+                          SuggestedFix = None }
                 
     module MaxLinesInFile =
         let private maxLinesInFile config =
@@ -126,10 +132,11 @@ module Typography =
 
         let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines line maxLines =
             if numberOfLines > maxLines then
-                let range = mkRange (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
                 let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
-                let error = System.String.Format(errorFormatString, (maxLines + 1))
-                visitorInfo.PostError range error
+                visitorInfo.Suggest 
+                    { Range = mkRange (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
+                      Message = String.Format(errorFormatString, (maxLines + 1))
+                      SuggestedFix = None }
 
         let checkMaxLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines lastLine =
             let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange visitorInfo numberOfLines lastLine
@@ -141,8 +148,10 @@ module Typography =
             if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
                 let numberOfLinesIncludingTrailingNewLine = numberOfLines + 1
                 let pos = mkPos numberOfLinesIncludingTrailingNewLine 0
-                let range = mkRange pos pos
-                visitorInfo.PostError range (Resources.GetString("RulesTypographyTrailingLineError"))
+                visitorInfo.Suggest 
+                    { Range = mkRange pos pos
+                      Message = Resources.GetString("RulesTypographyTrailingLineError")
+                      SuggestedFix = None }
 
     module NoTabCharacters =
         let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed isInLiteralString =
@@ -151,7 +160,10 @@ module Typography =
             if indexOfTab >= 0 then
                 let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
                 if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
-                    visitorInfo.PostError range (Resources.GetString("RulesTypographyTabCharacterError"))
+                    visitorInfo.Suggest 
+                        { Range = range 
+                          Message = Resources.GetString("RulesTypographyTabCharacterError")
+                          SuggestedFix = None }
 
     module private String =
         let iterLine f input =

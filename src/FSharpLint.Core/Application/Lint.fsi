@@ -133,7 +133,7 @@ module Lint =
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
         
     /// Result of running the linter.
-    [<NoComparison; RequireQualifiedAccess>]
+    [<NoEquality; NoComparison; RequireQualifiedAccess>]
     type LintResult = 
         | Success of LintWarning.Warning list
         | Failure of LintFailure

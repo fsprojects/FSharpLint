@@ -29,6 +29,7 @@ module ExpressionUtilities =
 
     open Microsoft.FSharp.Compiler
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
 
     let (|Identifier|_|) = function
@@ -60,3 +61,15 @@ module ExpressionUtilities =
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x
         | x -> x
+
+    /// Finds index of a given (line number, column) position in a string.
+    let findPos (pos:pos) (str:string) = 
+        let rec findLineStart lineNumber currLine currPos =
+            if currLine = lineNumber then Some currPos
+            else
+                let nextLinePos = str.IndexOf('\n', currPos)
+                if nextLinePos >= 0 then findLineStart lineNumber (currLine + 1) (nextLinePos + 1)
+                else None
+
+        findLineStart pos.Line 1 0
+        |> Option.map (fun x -> x + pos.Column)

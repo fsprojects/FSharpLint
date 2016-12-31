@@ -449,7 +449,8 @@ module NameConventions =
             let formatError errorName =
                 String.Format(Resources.GetString errorName, identifier.idText)
 
-            let postError error = visitorInfo.PostError identifier.idRange error
+            let postError error = 
+                visitorInfo.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
 
             if isEnabled ruleName && notOperator identifier.idText then
                 rule identifier

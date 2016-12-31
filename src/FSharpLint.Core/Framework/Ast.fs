@@ -33,6 +33,30 @@ module Ast =
 
           /// CheckId property of the SuppressedMessageAttribute. (The name of the rule to be suppressed).
           Rule: string }
+
+    /// Information for consuming applications to provide an automated fix for a lint suggestion.
+    [<NoEquality; NoComparison>]
+    type SuggestedFix =
+        { /// Text to be replaced.
+          FromText: string 
+
+          /// Location of the text to be replaced.
+          FromRange: range
+
+          /// Text to replace the `FromText`, i.e. the fix.
+          ToText: string }
+
+    /// A lint "warning", sources the location of the warning with a suggestion on how it may be fixed.
+    [<NoEquality; NoComparison>]
+    type LintSuggestion = 
+        { /// Location of the code that prompted the suggestion.
+          Range: range
+
+          /// Suggestion message to describe the possible problem to the user.
+          Message: string
+
+          /// Information to provide an automated fix.
+          SuggestedFix: SuggestedFix option }
     
     /// Passed to each visitor to provide them with access to the configuration and a way of reporting errors.
     [<NoEquality; NoComparison>]
@@ -43,15 +67,26 @@ module Ast =
           /// The current lint config to be used by visitors.
           Config: Configuration.Configuration
 
-          /// Used by visitors to report errors.
-          PostError: range -> string -> unit
+          /// Used by visitors to report warnings.
+          Suggest: LintSuggestion -> unit
           
+          /// Source of the current file being analysed.
           Text: string }
 
         member this.UseTypeChecker = 
             match this.Config.UseTypeChecker with
             | Some(true) -> true
             | Some(_) | None -> false
+
+        /// Tries to find the source code within a given range.
+        member this.TryFindTextOfRange(range:range) =
+            let startIndex = ExpressionUtilities.findPos range.Start this.Text
+            let endIndex = ExpressionUtilities.findPos range.End this.Text
+
+            match startIndex, endIndex with
+            | Some(startIndex), Some(endIndex) -> 
+                this.Text.Substring(startIndex, endIndex - startIndex) |> Some
+            | _ -> None
 
     /// Nodes in the AST to be visited.
     [<NoEquality; NoComparison>]
@@ -146,20 +181,20 @@ module Ast =
         let rec flatten flattened exprToFlatten =
             match exprToFlatten with
             | SynExpr.App(_, _, x, y, _) -> 
-                match removeParens x with
+                match x with
                 | SynExpr.App(_, true, SynExpr.Ident(op), rhs, _) as app ->
-                    let lhs = removeParens y
+                    let lhs = y
 
                     match op.idText with
                     | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> 
-                        flatten [removeParens rhs] lhs
+                        flatten [rhs] lhs
                     | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> 
-                        flatten (removeParens lhs::flattened) (removeParens rhs)
-                    | _ -> flatten (removeParens lhs::flattened) app
+                        flatten (lhs::flattened) rhs
+                    | _ -> flatten (lhs::flattened) app
                 | x -> 
-                    let leftExpr, rightExpr = (x, removeParens y)
-                    flatten (removeParens rightExpr::flattened) leftExpr
-            | expr -> (removeParens expr)::flattened
+                    let leftExpr, rightExpr = (x, y)
+                    flatten (rightExpr::flattened) leftExpr
+            | expr -> expr::flattened
 
         match functionApplication with
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 
