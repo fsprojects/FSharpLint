@@ -133,7 +133,7 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.ModuleDeclaration 0
               Utilities.hash2 SyntaxNode.FuncApp 0
               Utilities.hash2 SyntaxNode.Identifier "map"
-              Utilities.hash2 SyntaxNode.Expression 0
+              Utilities.hash2 SyntaxNode.Paren 0
               Utilities.hash2 SyntaxNode.Lambda 0
               Utilities.hash2 SyntaxNode.LambdaArg 0
               Utilities.hash2 SyntaxNode.Identifier "x"

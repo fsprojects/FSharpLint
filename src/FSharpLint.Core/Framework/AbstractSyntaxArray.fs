@@ -32,6 +32,7 @@ module AbstractSyntaxArray =
         | FuncApp = 4uy
         | Unit = 5uy
         | AddressOf = 6uy
+        | Paren = 7uy
         
         | If = 10uy
         | Else = 11uy
@@ -118,6 +119,7 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.IfThenElse(_)) -> SyntaxNode.If
         | Expression(SynExpr.Const(constant, _)) -> constToSyntaxNode constant
         | Expression(SynExpr.Ident(_) | SynExpr.LongIdent(_) | SynExpr.LongIdentSet(_)) -> SyntaxNode.Other
+        | Expression(SynExpr.Paren(_)) -> SyntaxNode.Paren
         | Expression(_) -> SyntaxNode.Expression
         | Pattern(SynPat.Ands(_)) -> SyntaxNode.And
         | Pattern(SynPat.Or(_)) -> SyntaxNode.Or

@@ -33,6 +33,10 @@ open System.Collections.Generic
 /// which is pretty fast.
 module FuzzyHintMatcher =
 
+    open Microsoft.FSharp.Compiler.Ast
+
+    open Ast
+
     /// Confirms if two parts of the ast look alike.
     /// This is required as hints can bind variables: the bound location needs to be compared to
     /// parts of the ast that the hint covers with the same variable.
@@ -48,6 +52,11 @@ module FuzzyHintMatcher =
                 nodeArray.[i].Hashcode = nodeArray.[j].Hashcode)
         else false
 
+    let inline private isParen (node:AbstractSyntaxArray.Node) =
+        match node.Actual with
+        | AstNode.Expression(SynExpr.Paren(_)) -> true
+        | _ -> false
+
     /// Compares the hint trie against a given location in the abstract syntax array.
     let rec private checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (boundVariables:Dictionary<_, _>) notify =
         trie.MatchedHint |> List.iter notify
@@ -55,9 +64,13 @@ module FuzzyHintMatcher =
         if i < nodeArray.Length then
             let node = nodeArray.[i]
 
-            match trie.Edges.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
-            | false, _ -> ()
+            if isParen node then
+                // Skip the paren.
+                checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
+            else
+                match trie.Edges.Lookup.TryGetValue node.Hashcode with
+                | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
+                | false, _ -> ()
 
             trie.Edges.AnyMatch 
             |> List.iter (fun (var, trie) -> 
