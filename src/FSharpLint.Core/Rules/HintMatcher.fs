@@ -143,6 +143,32 @@ module HintMatcher =
             | SynExpr.App(_) -> Some 1
             | _ -> None
 
+        let requiresParenthesis (matchedVariables:Dictionary<_, _>) hintNode parentAstNode parentHintNode =
+            let parentPrecedence =
+                match parentHintNode with
+                | Some(hint) -> ofHint hint
+                | None ->
+                    match parentAstNode with
+                    | Some(AstNode.Expression(expr)) -> ofExpr expr
+                    | Some(_) | None -> None
+
+            let hintPrecedence =
+                match hintNode with
+                | HintExpr(Expression.Variable(varChar)) -> 
+                    match matchedVariables.TryGetValue varChar with
+                    | true, { Precedence = exprPrecedence; Range = _ } -> exprPrecedence
+                    | _ -> None
+                | hint -> ofHint hint
+
+            match hintPrecedence, parentPrecedence with
+            | Some hint, Some parent -> hint >= parent
+            | _ -> false
+
+    let private filterParens astNodes = 
+        let isNotParen = function AstNode.Expression(SynExpr.Paren(_)) -> false | _ -> true
+
+        List.filter isNotParen astNodes
+
     module private MatchExpression =
 
         /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
@@ -216,7 +242,7 @@ module HintMatcher =
                     | None -> true
                 | None -> 
                     /// Check if in `new` expr or function application (either could be a constructor).
-                    match arguments.Breadcrumbs with
+                    match filterParens arguments.Breadcrumbs with
                     | PossiblyInMethod 
                     | PossiblyInConstructor -> false
                     | _ -> true
@@ -477,27 +503,6 @@ module HintMatcher =
                 Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString())
                 ""
 
-        let requiresParenthesis (matchedVariables:Dictionary<_, _>) hintNode parentAstNode parentHintNode =
-            let parentPrecedence =
-                match parentHintNode with
-                | Some(hint) -> Precedence.ofHint hint
-                | None ->
-                    match parentAstNode with
-                    | Some(AstNode.Expression(expr)) -> Precedence.ofExpr expr
-                    | Some(_) | None -> None
-
-            let hintPrecedence =
-                match hintNode with
-                | HintExpr(Expression.Variable(varChar)) -> 
-                    match matchedVariables.TryGetValue varChar with
-                    | true, { Precedence = exprPrecedence; Range = _ } -> exprPrecedence
-                    | _ -> None
-                | hint -> Precedence.ofHint hint
-
-            match hintPrecedence, parentPrecedence with
-            | Some hint, Some parent -> hint >= parent
-            | _ -> false
-
         let rec toString replace parentAstNode (visitorInfo:VisitorInfo) (matchedVariables:Dictionary<_, _>) parentHintNode hintNode =
             let toString = toString replace parentAstNode visitorInfo matchedVariables (Some hintNode)
 
@@ -563,7 +568,7 @@ module HintMatcher =
                     "else " + toString (HintExpr expr)
                 | HintExpr(Expression.Null)
                 | HintPat(Pattern.Null) -> "null"
-            if replace && requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then "(" + str + ")"
+            if replace && Precedence.requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then "(" + str + ")"
             else str
         and private lambdaArgumentsToString replace parentAstNode visitorInfo matchedVariables (arguments:LambdaArg list) = 
             arguments
@@ -631,7 +636,7 @@ module HintMatcher =
                 /// fallback to say it is delegate type.
                 true
 
-        match breadcrumbs with
+        match filterParens breadcrumbs with
         | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
         | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
             let index = exprs |> List.tryFindIndex (fun x -> x.Range = range)
