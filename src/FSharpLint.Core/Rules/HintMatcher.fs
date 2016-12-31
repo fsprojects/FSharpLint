@@ -208,10 +208,10 @@ module HintMatcher =
                 | _ -> None
 
             match breadcrumbs with
-            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(SynExpr.Paren(_))::AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
-            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(SynExpr.Paren(_))::AstNode.Expression(SynExpr.New(_))::_
-            | AstNode.Expression(SynExpr.Paren(_))::AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
-            | AstNode.Expression(SynExpr.Paren(_))::AstNode.Expression(SynExpr.New(_))::_ ->
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.TypeParameter(_)::AstNode.Expression(SynExpr.New(_))::_
+            | AstNode.Expression(SynExpr.New(_))::_ ->
                 PossiblyInConstructor
             | AstNode.Expression(PossiblyMethodCallOrConstructor)::_
             | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(PossiblyMethodCallOrConstructor)::_
