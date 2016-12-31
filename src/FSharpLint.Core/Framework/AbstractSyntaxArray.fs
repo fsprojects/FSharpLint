@@ -19,6 +19,7 @@ namespace FSharpLint.Framework
 module AbstractSyntaxArray =
 
     open System.Collections.Generic
+    open System.Diagnostics
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
 
@@ -147,10 +148,12 @@ module AbstractSyntaxArray =
         | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
         | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
 
-    [<Struct; NoEquality; NoComparison>]
+    [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type Node(hashcode: int, actual: AstNode) = 
         member __.Hashcode = hashcode
         member __.Actual = actual
+
+        member private __.DebuggerDisplay = "AstNode: " + string actual
 
     [<Struct>]
     type private PossibleSkip(skipPosition: int, depth: int) = 
@@ -210,10 +213,13 @@ module AbstractSyntaxArray =
         member __.Node = node
         member __.Depth = depth
 
-    [<Struct>]
+    [<Struct; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type Skip(numberOfChildren: int, parentIndex: int) = 
         member __.NumberOfChildren = numberOfChildren
         member __.ParentIndex = parentIndex
+
+        member private __.DebuggerDisplay = 
+            "Skip: NumberOfChildren=" + string numberOfChildren + ", ParentIndex=" + string parentIndex
 
     /// Keep index of position so skip array can be created in the correct order.
     [<Struct>]
