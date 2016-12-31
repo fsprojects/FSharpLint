@@ -530,11 +530,11 @@ module HintMatcher =
                 | HintExpr(Expression.FunctionApplication(expressions)) ->
                     expressions |> surroundExpressionsString (HintExpr >> toString) "" "" " "
                 | HintExpr(Expression.InfixOperator(operator, leftHint, rightHint)) ->
-                    toString (HintExpr leftHint) + opToString operator + toString (HintExpr rightHint)
+                    toString (HintExpr leftHint) + " " + opToString operator + " " + toString (HintExpr rightHint)
                 | HintPat(Pattern.Cons(leftHint, rightHint)) ->
                     toString (HintPat leftHint) + "::" + toString (HintPat rightHint)
                 | HintPat(Pattern.Or(leftHint, rightHint)) ->
-                    toString (HintPat leftHint) + "|" + toString (HintPat rightHint)
+                    toString (HintPat leftHint) + " | " + toString (HintPat rightHint)
                 | HintExpr(Expression.AddressOf(singleAmp, hint)) ->
                     (if singleAmp then "&" else "&&") + toString (HintExpr hint)
                 | HintExpr(Expression.PrefixOperator(operator, hint)) ->

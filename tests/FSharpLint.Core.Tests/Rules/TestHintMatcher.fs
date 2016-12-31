@@ -869,3 +869,24 @@ let x y = foo 0
  
         this.Parse(source, generateHintConfig ["- -x ===> x"])
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Infix operator in hint fix is formatted as expected``() = 
+        let source = """
+module Program
+
+let x y =
+    y
+    |> List.map (fun x -> x)
+    |> List.map id
+"""
+ 
+        let expected = """
+module Program
+
+let x y =
+    List.map ((fun x -> x) >> id) y
+"""
+ 
+        this.Parse(source, generateHintConfig ["List.map f (List.map g x) ===> List.map (g >> f) x"])
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
