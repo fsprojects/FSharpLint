@@ -23,6 +23,7 @@ open NUnit.Framework
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework
+open FSharpLint.Framework.Analyser
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
@@ -58,7 +59,7 @@ type TestRuleBase(analyser, ?analysers) =
 
         let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
 
-        let visitorInfo =
+        let analyserInfo =
             { FSharpVersion = System.Version(3, 1); Config = config; Suggest = ignore; Text = text }
 
         let stopwatch = Stopwatch.StartNew()
@@ -68,10 +69,11 @@ type TestRuleBase(analyser, ?analysers) =
             stopwatch.Restart()
 
             analyser 
-                visitorInfo
-                None
-                array
-                skipArray
+                { Info = analyserInfo
+                  CheckFile = None
+                  SyntaxArray = array
+                  SkipArray = skipArray
+                  Tokeniser = FSharpSourceTokenizer([], None) }
 
             stopwatch.Stop()
 
@@ -98,12 +100,17 @@ type TestRuleBase(analyser, ?analysers) =
 
         let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
 
-        let visitorInfo = { Config = config; Suggest = postSuggestion; FSharpVersion = version; Text = input }
+        let analyserInfo = { Config = config; Suggest = postSuggestion; FSharpVersion = version; Text = input }
         
         match parseSource input config (FSharpChecker.Create()) with
         | Success(parseInfo) ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
-            analyser visitorInfo parseInfo.TypeCheckResults syntaxArray skipArray
+            analyser 
+                { Info = analyserInfo
+                  CheckFile = parseInfo.TypeCheckResults
+                  SyntaxArray = syntaxArray
+                  SkipArray = skipArray
+                  Tokeniser = FSharpSourceTokenizer([], None) }
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =

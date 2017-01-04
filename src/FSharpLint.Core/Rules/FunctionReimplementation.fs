@@ -25,6 +25,7 @@ module FunctionReimplementation =
     open Microsoft.FSharp.Compiler.PrettyNaming
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.ExpressionUtilities
@@ -32,10 +33,10 @@ module FunctionReimplementation =
     [<Literal>]
     let AnalyserName = "FunctionReimplementation"
     
-    let isRuleEnabled config ruleName =
+    let private isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome 
 
-    let rec simplePatternsLength = function
+    let rec private simplePatternsLength = function
         | SynSimplePats.SimplePats(patterns, _) -> 
             List.length patterns
         | SynSimplePats.Typed(simplePatterns, _, _) -> 
@@ -54,7 +55,7 @@ module FunctionReimplementation =
         | SynSimplePats.Typed(simplePatterns, _, _) -> 
             getLambdaParamIdent simplePatterns
 
-    let validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo =
+    let private validateLambdaCannotBeReplacedWithComposition lambda range analyserInfo =
         let canBeReplacedWithFunctionComposition expression = 
             let getLastElement = List.rev >> List.head
 
@@ -87,12 +88,12 @@ module FunctionReimplementation =
             | _ -> false
             
         if canBeReplacedWithFunctionComposition lambda.Body then
-            visitorInfo.Suggest
+            analyserInfo.Suggest
                 { Range = range 
                   Message = Resources.GetString("RulesCanBeReplacedWithComposition")
                   SuggestedFix = None }
 
-    let validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range visitorInfo =
+    let private validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range analyserInfo =
         let isConstructor expr =
             let symbol = getSymbolFromIdent checkFile expr
 
@@ -115,7 +116,7 @@ module FunctionReimplementation =
             | [] -> 
                 match expression with
                 | Identifier(ident, _) -> 
-                    if visitorInfo.FSharpVersion.Major >= 4 || 
+                    if analyserInfo.FSharpVersion.Major >= 4 || 
                        (not << isConstructor) expression then
                         Some(ident)
                     else
@@ -129,10 +130,10 @@ module FunctionReimplementation =
                 |> String.concat "."
 
             let suggestedFix = 
-                visitorInfo.TryFindTextOfRange range
+                analyserInfo.TryFindTextOfRange range
                 |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier })
 
-            visitorInfo.Suggest 
+            analyserInfo.Suggest 
                 { Range = range
                   Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
                   SuggestedFix = suggestedFix }
@@ -141,13 +142,15 @@ module FunctionReimplementation =
 
         isFunctionPointless lambda.Body argumentsAsIdentifiers
         |> Option.iter generateError
+        
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
-    let analyser visitorInfo checkFile syntaxArray skipArray = 
         let isSuppressed i ruleName = 
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
 
-        let isEnabled i ruleName = isRuleEnabled visitorInfo.Config ruleName && not (isSuppressed i ruleName)
+        let isEnabled i ruleName = isRuleEnabled args.Info.Config ruleName && not (isSuppressed i ruleName)
 
         let mutable i = 0
         while i < syntaxArray.Length do
@@ -157,10 +160,10 @@ module FunctionReimplementation =
                 | Lambda(lambda, range) -> 
                     if (not << List.isEmpty) lambda.Arguments then
                         if isEnabled i "ReimplementsFunction" then
-                            validateLambdaIsNotPointless checkFile lambda range visitorInfo
+                            validateLambdaIsNotPointless args.CheckFile lambda range args.Info
                     
                         if isEnabled i "CanBeReplacedWithComposition" then
-                            validateLambdaCannotBeReplacedWithComposition lambda range visitorInfo
+                            validateLambdaCannotBeReplacedWithComposition lambda range args.Info
                 | _ -> ()
             | _ -> ()
 

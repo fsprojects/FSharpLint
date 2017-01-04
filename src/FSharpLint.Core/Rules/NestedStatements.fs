@@ -21,6 +21,7 @@ module NestedStatements =
     open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
 
@@ -85,12 +86,14 @@ module NestedStatements =
 
         distance
 
-    let analyser visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
+
         let isSuppressed i =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName AbstractSyntaxArray.SuppressRuleWildcard
 
-        match configDepth visitorInfo.Config with
+        match configDepth args.Info.Config with
         | Some(errorDepth) ->
             let error = error errorDepth
 
@@ -134,7 +137,7 @@ module NestedStatements =
                         if not (isSuppressed i) then
                             getRange node 
                             |> Option.iter (fun range -> 
-                                visitorInfo.Suggest { Range = range; Message = error; SuggestedFix = None })
+                                args.Info.Suggest { Range = range; Message = error; SuggestedFix = None })
 
                         // Skip children as we've had an error containing them.
                         let skipChildren = i + skipArray.[i].NumberOfChildren + 1

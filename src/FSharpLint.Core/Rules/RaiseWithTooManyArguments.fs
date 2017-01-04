@@ -21,6 +21,7 @@ module RaiseWithTooManyArguments =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
 
@@ -38,9 +39,11 @@ module RaiseWithTooManyArguments =
                 Some()
         | _ -> None
             
-    let analyser visitorInfo _ syntaxArray skipArray = 
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
+
         let isEnabled i ruleName =
-            match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
+            match isRuleEnabled args.Info.Config AnalyserName ruleName with
             | Some(_) -> 
                 let isSuppressed =
                     AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
@@ -50,7 +53,7 @@ module RaiseWithTooManyArguments =
             
         let postError ruleName errorName range isEnabled =
             if isEnabled ruleName then
-                visitorInfo.Suggest { Range = range; Message = Resources.GetString errorName; SuggestedFix = None }
+                args.Info.Suggest { Range = range; Message = Resources.GetString errorName; SuggestedFix = None }
 
         let mutable i = 0
         while i < syntaxArray.Length do

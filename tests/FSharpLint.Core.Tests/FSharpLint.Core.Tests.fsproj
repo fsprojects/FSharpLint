@@ -60,6 +60,7 @@
     <Compile Include="Framework/TestAst.fs" />
     <Compile Include="Framework/TestFuzzyHintMatcher.fs" />
     <Compile Include="Framework/TestAbstractSyntaxArray.fs" />
+    <Compile Include="Framework/TestAnalyser.fs" />
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
     <Compile Include="Rules/TestNameConventionRules.fs" />
