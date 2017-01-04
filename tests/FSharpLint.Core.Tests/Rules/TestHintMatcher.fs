@@ -890,3 +890,27 @@ let x y =
  
         this.Parse(source, generateHintConfig ["List.map f (List.map g x) ===> List.map (g >> f) x"])
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    /// see: https://github.com/ionide/ionide-vscode-fsharp/issues/326 
+    /// and: https://github.com/Microsoft/visualfsharp/issues/2149
+    [<Test>]
+    member this.``Correctly format hint suggested fix for func app of operators``() = 
+        let source = """
+module Program
+
+let x y =
+    [ 1 .. 5]
+    |> List.map ((+) 1)
+    |> List.map ((*) 2)
+"""
+ 
+        let expected = """
+module Program
+
+let x y =
+    List.map (((+) 1) >> ((*) 2)) [ 1 .. 5]
+"""
+ 
+        this.Parse(source, generateHintConfig ["List.map f (List.map g x) ===> List.map (g >> f) x"])
+        let foo = this.ApplyQuickFix source
+        Assert.AreEqual(expected, foo)
