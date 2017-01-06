@@ -213,8 +213,7 @@ module Lint =
                             { CheckFile = fileInfo.TypeCheckResults
                               SyntaxArray = array
                               SkipArray = skipArray
-                              Info = analyserInfo
-                              Tokeniser = FSharpSourceTokenizer([], Some fileInfo.File) }
+                              Info = analyserInfo }
             with
             | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 

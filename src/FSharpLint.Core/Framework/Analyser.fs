@@ -81,5 +81,4 @@ module Analyser =
         { Info: AnalyserInfo
           CheckFile: FSharpCheckFileResults option
           SyntaxArray: AbstractSyntaxArray.Node []
-          SkipArray: AbstractSyntaxArray.Skip []
-          Tokeniser: FSharpSourceTokenizer }
+          SkipArray: AbstractSyntaxArray.Skip [] }

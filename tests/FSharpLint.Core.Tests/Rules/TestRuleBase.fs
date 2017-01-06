@@ -72,8 +72,7 @@ type TestRuleBase(analyser, ?analysers) =
                 { Info = analyserInfo
                   CheckFile = None
                   SyntaxArray = array
-                  SkipArray = skipArray
-                  Tokeniser = FSharpSourceTokenizer([], None) }
+                  SkipArray = skipArray }
 
             stopwatch.Stop()
 
@@ -109,8 +108,7 @@ type TestRuleBase(analyser, ?analysers) =
                 { Info = analyserInfo
                   CheckFile = parseInfo.TypeCheckResults
                   SyntaxArray = syntaxArray
-                  SkipArray = skipArray
-                  Tokeniser = FSharpSourceTokenizer([], None) }
+                  SkipArray = skipArray }
         | _ -> failwith "Failed to parse input."
 
     member __.ErrorExistsAt(startLine, startColumn) =
