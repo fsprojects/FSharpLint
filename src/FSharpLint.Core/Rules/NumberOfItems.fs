@@ -22,6 +22,7 @@ module NumberOfItems =
     open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.Configuration
 
@@ -36,17 +37,17 @@ module NumberOfItems =
             | Some(_) | None -> None
         | Some(_) | None -> None
 
-    let private validateTuple (items:SynExpr list) visitorInfo isSuppressed =
+    let private validateTuple (items:SynExpr list) args isSuppressed =
         let ruleName = "MaxNumberOfItemsInTuple"
 
-        maxItemsForRule visitorInfo.Config ruleName
+        maxItemsForRule args.Info.Config ruleName
         |> Option.iter (fun maxItems ->
             if List.length items > maxItems && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
                 let error = String.Format(errorFormatString, maxItems)
-                visitorInfo.Suggest { Range = items.[maxItems].Range; Message = error; SuggestedFix = None })
+                args.Info.Suggest { Range = items.[maxItems].Range; Message = error; SuggestedFix = None })
 
-    let private validateFunction (constructorArguments:SynConstructorArgs) visitorInfo isSuppressed = 
+    let private validateFunction (constructorArguments:SynConstructorArgs) args isSuppressed = 
         let ruleName = "MaxNumberOfFunctionParameters"
 
         let checkNumberOfParameters maxParameters =
@@ -55,10 +56,10 @@ module NumberOfItems =
                     when List.length parameters > maxParameters && not <| isSuppressed ruleName -> 
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
                 let error = String.Format(errorFormatString, maxParameters)
-                visitorInfo.Suggest { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None }
+                args.Info.Suggest { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None }
             | _ -> ()
 
-        maxItemsForRule visitorInfo.Config ruleName
+        maxItemsForRule args.Info.Config ruleName
         |> Option.iter checkNumberOfParameters
 
     let private getMembers (members:SynMemberDefn list) =
@@ -75,7 +76,7 @@ module NumberOfItems =
         members 
         |> List.filter isPublicMember
 
-    let private validateType members typeRepresentation visitorInfo isSuppressed =
+    let private validateType members typeRepresentation args isSuppressed =
         let members = 
             match typeRepresentation with
             | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> members
@@ -84,12 +85,12 @@ module NumberOfItems =
 
         let ruleName = "MaxNumberOfMembers"
                                                         
-        maxItemsForRule visitorInfo.Config ruleName
+        maxItemsForRule args.Info.Config ruleName
         |> Option.iter (fun maxMembers ->
             if List.length members > maxMembers && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
                 let error = String.Format(errorFormatString, maxMembers)
-                visitorInfo.Suggest { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None })
+                args.Info.Suggest { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None })
 
     let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
         let rec isApplicationNode i = 
@@ -103,7 +104,7 @@ module NumberOfItems =
         if i <= 0 then false
         else isApplicationNode skipArray.[i].ParentIndex
 
-    let private validateCondition condition visitorInfo isSuppressed =
+    let private validateCondition condition args isSuppressed =
         let rec countBooleanOperators total = function
             | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
             | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) -> 
@@ -125,35 +126,34 @@ module NumberOfItems =
             if numberOfBooleanOperators > maxBooleanOperators && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
                 let error = String.Format(errorFormatString, maxBooleanOperators)
-                visitorInfo.Suggest { Range = condition.Range; Message = error; SuggestedFix = None }
+                args.Info.Suggest { Range = condition.Range; Message = error; SuggestedFix = None }
 
-        maxItemsForRule visitorInfo.Config ruleName
+        maxItemsForRule args.Info.Config ruleName
         |> Option.iter checkNumberOfBooleanOperatorsInCondition
     
-    let analyser visitorInfo _ syntaxArray skipArray = 
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
+
         let isSuppressed i ruleName = 
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+            
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
-                validateFunction constructorArguments visitorInfo (isSuppressed i)
+                validateFunction constructorArguments args (isSuppressed i)
             | AstNode.Expression(expression) ->
                 match expression with
                 | SynExpr.Tuple(expressions, _, _) ->
                     if not <| isInApplication syntaxArray skipArray i then
-                        validateTuple expressions visitorInfo (isSuppressed i)
+                        validateTuple expressions args (isSuppressed i)
                 | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
                 | SynExpr.While(_, condition, _, _)
                 | SynExpr.Assert(condition, _) ->
-                    validateCondition condition visitorInfo (isSuppressed i)
+                    validateCondition condition args (isSuppressed i)
                 | _ -> ()
             | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
-                validateCondition whenExpr visitorInfo (isSuppressed i)
+                validateCondition whenExpr args (isSuppressed i)
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
-                validateType members typeRepresentation visitorInfo (isSuppressed i)
+                validateType members typeRepresentation args (isSuppressed i)
             | _ -> ()
-            
-            i <- i + 1

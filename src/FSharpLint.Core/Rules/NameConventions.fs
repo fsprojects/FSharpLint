@@ -16,7 +16,7 @@
 
 namespace FSharpLint.Rules
 
-module Option =
+module private Option =
     let filter f = function None -> None | Some x -> if f x then Some x else None
 
 /// Checks whether any code in an F# program violates best practices for naming identifiers.
@@ -29,6 +29,7 @@ module NameConventions =
     open Microsoft.FSharp.Compiler.Range
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     
@@ -128,7 +129,7 @@ module NameConventions =
 
     let private notOperator = isOperator >> not
 
-    module CheckIdentifiers =
+    module private CheckIdentifiers =
         [<Literal>]
         let private IdentifiersMustNotContainUnderscores = "IdentifiersMustNotContainUnderscores"
 
@@ -238,7 +239,7 @@ module NameConventions =
 
             checkRule interfaceRule ruleName identifier
             
-    let isActivePattern (identifier:Ident) =
+    let private isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
     /// Is an attribute from FSharp.Core with a given name?
@@ -282,11 +283,11 @@ module NameConventions =
 
             attributes |> List.exists attributeHasExpectedName
 
-    let isLiteral = isCoreAttribute "Literal"
+    let private isLiteral = isCoreAttribute "Literal"
 
-    let isMeasureType = isCoreAttribute "Measure"
+    let private isMeasureType = isCoreAttribute "Measure"
 
-    let isUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
+    let private isUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
         let symbol = checkFile.GetSymbolUseAtLocation(
                         ident.idRange.StartLine, 
                         ident.idRange.EndColumn, 
@@ -316,7 +317,7 @@ module NameConventions =
             members |> List.forall canBeInInterface
         | _ -> false
 
-    let checkLongIdent checkRule valData isPublic = function
+    let private checkLongIdent checkRule valData isPublic = function
         | SynPat.LongIdent(longIdentifier, _, _, args, access, _) -> 
             let isPublic = function 
                 | Some(access) -> access = SynAccess.Public && isPublic ()
@@ -345,7 +346,7 @@ module NameConventions =
         | Some(access) -> isCurrentlyPublic && access = SynAccess.Public
         | None -> isCurrentlyPublic
 
-    let checkValueOrFunction checkRule typeChecker isPublic pattern = 
+    let private checkValueOrFunction checkRule typeChecker isPublic pattern = 
         let isUnionCase ident =
             match typeChecker with
             | Some(typeChecker) -> isUnionCase typeChecker ident
@@ -371,7 +372,7 @@ module NameConventions =
                 CheckIdentifiers.checkParameter checkRule ident
         | _ -> ()
 
-    let checkMember checkRule _ = function
+    let private checkMember checkRule _ = function
         | SynPat.LongIdent(longIdent, _, _, _, _, _) -> 
             if not longIdent.Lid.IsEmpty then
                 let ident = longIdent.Lid.Last()
@@ -381,7 +382,7 @@ module NameConventions =
             CheckIdentifiers.checkParameter checkRule ident
         | _ -> ()
         
-    let rec checkPattern isPublic checker argsAreParameters pattern = 
+    let rec private checkPattern isPublic checker argsAreParameters pattern = 
         match pattern with
         | SynPat.OptionalVal(_) -> () 
         | SynPat.LongIdent(_, _, _, args, access, _) -> 
@@ -434,14 +435,16 @@ module NameConventions =
         | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
         | SynSimplePat.Attrib(_) -> None
         
-    let analyser visitorInfo checkFile syntaxArray skipArray = 
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
+
         let isNotSuppressed i ruleName =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
             |> not
 
         let isEnabled ruleName = 
-            match Configuration.isRuleEnabled visitorInfo.Config AnalyserName ruleName with
+            match Configuration.isRuleEnabled args.Info.Config AnalyserName ruleName with
             | Some(_) -> true
             | None -> false
 
@@ -450,7 +453,7 @@ module NameConventions =
                 String.Format(Resources.GetString errorName, identifier.idText)
 
             let postError error = 
-                visitorInfo.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
+                args.Info.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
 
             if isEnabled ruleName && notOperator identifier.idText then
                 rule identifier
@@ -458,10 +461,9 @@ module NameConventions =
                 |> Option.map formatError
                 |> Option.iter postError
 
-        let checkFile = if visitorInfo.UseTypeChecker then checkFile else None
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+        let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
+        
+        for i = 0 to syntaxArray.Length - 1 do
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
@@ -543,5 +545,3 @@ module NameConventions =
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
-
-            i <- i + 1

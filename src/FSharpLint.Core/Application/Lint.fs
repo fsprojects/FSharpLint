@@ -184,19 +184,19 @@ module Lint =
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         if not <| lintInfo.FinishEarly() then
-            let postSuggestion (suggestion:Ast.LintSuggestion) =
+            let postSuggestion (suggestion:Analyser.LintSuggestion) =
                 { LintWarning.Range = suggestion.Range
                   LintWarning.Info = suggestion.Message
                   LintWarning.Input = fileInfo.Text
                   LintWarning.Fix = suggestion.SuggestedFix } |> lintInfo.ErrorReceived
 
-            let visitorInfo =
-                { Ast.Text = fileInfo.Text
-                  Ast.FSharpVersion = lintInfo.FSharpVersion
-                  Ast.Config = lintInfo.Configuration
-                  Ast.Suggest = postSuggestion }
-
-            let analysers = analysers |> List.map (fun (analyser, name) -> (analyser visitorInfo, name))
+            let analyserInfo =
+                { Analyser.Text = fileInfo.Text
+                  Analyser.FSharpVersion = lintInfo.FSharpVersion
+                  Analyser.Config = lintInfo.Configuration
+                  Analyser.Suggest = postSuggestion }
+                  
+            let analysers = analysers |> List.map (fun (analyser, name) -> (analyser, name))
 
             Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
@@ -209,7 +209,11 @@ module Lint =
 
                 for (analyser, analyserName) in analysers do
                     if isAnalyserEnabled analyserName then
-                        analyser fileInfo.TypeCheckResults array skipArray
+                        analyser 
+                            { CheckFile = fileInfo.TypeCheckResults
+                              SyntaxArray = array
+                              SkipArray = skipArray
+                              Info = analyserInfo }
             with
             | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 

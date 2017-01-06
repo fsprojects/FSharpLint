@@ -22,6 +22,7 @@ module SourceLength =
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
     open FSharpLint.Framework.AstInfo
     open FSharpLint.Framework.Configuration
@@ -35,9 +36,11 @@ module SourceLength =
 
     let private length (range:range) = range.EndLine - range.StartLine
 
-    let analyser visitorInfo _ syntaxArray skipArray = 
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
+
         let checkRuleBroken i range ruleName errorName =
-            match isRuleEnabled visitorInfo.Config AnalyserName ruleName with
+            match isRuleEnabled args.Info.Config AnalyserName ruleName with
             | Some(_, ruleSettings) -> 
                 let actualLines = length range
                 match Map.tryFind "Lines" ruleSettings with
@@ -47,15 +50,14 @@ module SourceLength =
                         |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
                 
                     if not isSuppressed then 
-                        visitorInfo.Suggest 
+                        args.Info.Suggest 
                             { Range = range 
                               Message = error errorName maxExpectedLines actualLines
                               SuggestedFix = None }
                 | Some(_) | None -> ()
             | None -> ()
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+            
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
                 checkRuleBroken i range "MaxLinesInLambdaFunction" "Lambda function"
@@ -91,5 +93,3 @@ module SourceLength =
                     checkRuleBroken i range "MaxLinesInClass" "Classes and interface"
                 | SynTypeDefnRepr.Exception(_) -> ()
             | _ -> ()
-
-            i <- i + 1

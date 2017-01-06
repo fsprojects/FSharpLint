@@ -21,6 +21,7 @@ module Typography =
     open System
     open System.IO
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Configuration
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
@@ -29,13 +30,13 @@ module Typography =
     [<Literal>]
     let AnalyserName = "Typography"
     
-    let isAnalyserEnabled config =
+    let private isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
 
-    let isEnabled ruleName config =
+    let private isEnabled ruleName config =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
-    module MaxCharactersOnLine =
+    module private MaxCharactersOnLine =
         let maxCharactersOnLine config =
             match isRuleEnabled config AnalyserName "MaxCharactersOnLine" with
             | Some(_, ruleSettings) -> 
@@ -44,18 +45,18 @@ module Typography =
                 | _ -> None
             | _ -> None
 
-        let checkMaxCharactersOnLine mkRange (visitorInfo:VisitorInfo) line lineNumber isSuppressed maxCharacters =
+        let checkMaxCharactersOnLine mkRange analyserInfo line lineNumber isSuppressed maxCharacters =
             let lineLength = String.length line
             if lineLength > maxCharacters then
                 let range = mkRange (mkPos lineNumber (maxCharacters + 1)) (mkPos lineNumber lineLength)
                 if isSuppressed range "MaxCharactersOnLine" |> not then
                     let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
-                    visitorInfo.Suggest
+                    analyserInfo.Suggest
                         { Range = range 
                           Message = String.Format(errorFormatString, (maxCharacters + 1))
                           SuggestedFix = None }
 
-    module TrailingWhitespaceOnLine =
+    module private TrailingWhitespaceOnLine =
         let numberOfSpacesAllowed config =
             match isRuleEnabled config AnalyserName "TrailingWhitespaceOnLine" with
             | Some(_, ruleSettings) -> 
@@ -104,24 +105,24 @@ module Typography =
         let private lengthOfWhitespaceOnEnd (str:string) =
             str.Length - str.TrimEnd().Length
 
-        let checkTrailingWhitespaceOnLine mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed  =
+        let checkTrailingWhitespaceOnLine mkRange analyserInfo (line:string) lineNumber isSuppressed  =
             let ignoringBlankLinesAndIsBlankLine =
-                isIgnoringBlankLines visitorInfo.Config && System.String.IsNullOrWhiteSpace(line)
+                isIgnoringBlankLines analyserInfo.Config && System.String.IsNullOrWhiteSpace(line)
                 
             let stringEndsWithWhitespace =
                 not ignoringBlankLinesAndIsBlankLine &&
-                not <| doesStringNotEndWithWhitespace visitorInfo.Config line
+                not <| doesStringNotEndWithWhitespace analyserInfo.Config line
 
             if stringEndsWithWhitespace then
                 let whitespaceLength = lengthOfWhitespaceOnEnd line
                 let range = mkRange (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
                 if isSuppressed range "TrailingWhitespaceOnLine" |> not then
-                    visitorInfo.Suggest
+                    analyserInfo.Suggest
                         { Range = range 
                           Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
                           SuggestedFix = None }
                 
-    module MaxLinesInFile =
+    module private MaxLinesInFile =
         let private maxLinesInFile config =
             match isRuleEnabled config AnalyserName "MaxLinesInFile" with
             | Some(_, ruleSettings) -> 
@@ -130,37 +131,37 @@ module Typography =
                 | Some(_) | None -> None
             | None -> None
 
-        let private checkNumberOfLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines line maxLines =
+        let private checkNumberOfLinesInFile mkRange analyserInfo numberOfLines line maxLines =
             if numberOfLines > maxLines then
                 let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
-                visitorInfo.Suggest 
+                analyserInfo.Suggest 
                     { Range = mkRange (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
                       Message = String.Format(errorFormatString, (maxLines + 1))
                       SuggestedFix = None }
 
-        let checkMaxLinesInFile mkRange (visitorInfo:VisitorInfo) numberOfLines lastLine =
-            let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange visitorInfo numberOfLines lastLine
+        let checkMaxLinesInFile mkRange analyserInfo numberOfLines lastLine =
+            let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange analyserInfo numberOfLines lastLine
 
-            maxLinesInFile visitorInfo.Config |> Option.iter checkNumberOfLinesInFile
+            maxLinesInFile analyserInfo.Config |> Option.iter checkNumberOfLinesInFile
 
-    module TrailingNewLineInFile =
-        let checkTrailingNewLineInFile mkRange (visitorInfo:VisitorInfo) (file:string) numberOfLines =
-            if isEnabled "TrailingNewLineInFile" visitorInfo.Config && file.EndsWith("\n") then
+    module private TrailingNewLineInFile =
+        let checkTrailingNewLineInFile mkRange analyserInfo numberOfLines =
+            if isEnabled "TrailingNewLineInFile" analyserInfo.Config && analyserInfo.Text.EndsWith("\n") then
                 let numberOfLinesIncludingTrailingNewLine = numberOfLines + 1
                 let pos = mkPos numberOfLinesIncludingTrailingNewLine 0
-                visitorInfo.Suggest 
+                analyserInfo.Suggest 
                     { Range = mkRange pos pos
                       Message = Resources.GetString("RulesTypographyTrailingLineError")
                       SuggestedFix = None }
 
-    module NoTabCharacters =
-        let checkNoTabCharacters mkRange (visitorInfo:VisitorInfo) (line:string) lineNumber isSuppressed isInLiteralString =
+    module private NoTabCharacters =
+        let checkNoTabCharacters mkRange analyserInfo (line:string) lineNumber isSuppressed isInLiteralString =
             let indexOfTab = line.IndexOf('\t')
 
             if indexOfTab >= 0 then
                 let range = mkRange (mkPos lineNumber indexOfTab) (mkPos lineNumber (indexOfTab + 1))
                 if (isSuppressed range "NoTabCharacters" || isInLiteralString range) |> not then
-                    visitorInfo.Suggest 
+                    analyserInfo.Suggest 
                         { Range = range 
                           Message = Resources.GetString("RulesTypographyTabCharacterError")
                           SuggestedFix = None }
@@ -186,13 +187,14 @@ module Typography =
                 | None -> ()
 
             iterateLines (readLine ()) 0
+            
+    let analyser (args: AnalyserArgs) : unit = 
+        let syntaxArray = args.SyntaxArray
 
-    let analyser visitorInfo _ (syntaxArray:AbstractSyntaxArray.Node[]) _ = 
-        if isAnalyserEnabled visitorInfo.Config then
-            let mutable i = 0
+        if isAnalyserEnabled args.Info.Config then
             let suppressMessageAttributes = ResizeArray()
             let literalStrings = ResizeArray()
-            while i < syntaxArray.Length do
+            for i = 0 to syntaxArray.Length - 1 do
                 let node = syntaxArray.[i].Actual
 
                 getSuppressMessageAttributes node
@@ -202,8 +204,6 @@ module Typography =
                 | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
                     literalStrings.Add(value, range)
                 | _ -> ()
-
-                i <- i + 1
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
                 range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
@@ -221,24 +221,24 @@ module Typography =
 
             let mkRange = mkRange System.String.Empty
 
-            let maxCharacterOnLine = MaxCharactersOnLine.maxCharactersOnLine visitorInfo.Config 
-            let noTabRuleEnabled = isEnabled "NoTabCharacters" visitorInfo.Config
-            let trailingWhitespaceEnabled = isEnabled "TrailingWhitespaceOnLine" visitorInfo.Config
+            let maxCharacterOnLine = MaxCharactersOnLine.maxCharactersOnLine args.Info.Config 
+            let noTabRuleEnabled = isEnabled "NoTabCharacters" args.Info.Config
+            let trailingWhitespaceEnabled = isEnabled "TrailingWhitespaceOnLine" args.Info.Config
 
             let analyseLine line i isLastLineInFile =
                 let lineNumber = i + 1
 
                 maxCharacterOnLine
-                |> Option.iter (MaxCharactersOnLine.checkMaxCharactersOnLine mkRange visitorInfo line lineNumber isSuppressed)
+                |> Option.iter (MaxCharactersOnLine.checkMaxCharactersOnLine mkRange args.Info line lineNumber isSuppressed)
                 
                 if trailingWhitespaceEnabled then
-                    TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange visitorInfo line lineNumber isSuppressed
+                    TrailingWhitespaceOnLine.checkTrailingWhitespaceOnLine mkRange args.Info line lineNumber isSuppressed
                     
                 if noTabRuleEnabled then
-                    NoTabCharacters.checkNoTabCharacters mkRange visitorInfo line lineNumber isSuppressed isInLiteralString
+                    NoTabCharacters.checkNoTabCharacters mkRange args.Info line lineNumber isSuppressed isInLiteralString
 
                 if isLastLineInFile then
-                    TrailingNewLineInFile.checkTrailingNewLineInFile mkRange visitorInfo visitorInfo.Text lineNumber
-                    MaxLinesInFile.checkMaxLinesInFile mkRange visitorInfo lineNumber line
+                    TrailingNewLineInFile.checkTrailingNewLineInFile mkRange args.Info lineNumber
+                    MaxLinesInFile.checkMaxLinesInFile mkRange args.Info lineNumber line
 
-            visitorInfo.Text |> String.iterLine analyseLine
+            args.Info.Text |> String.iterLine analyseLine

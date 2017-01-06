@@ -57,4 +57,4 @@ module LintWarning =
           Input: string
 
           /// Suggested fix for the warning.
-          Fix: Ast.SuggestedFix option}
+          Fix: Analyser.SuggestedFix option}
