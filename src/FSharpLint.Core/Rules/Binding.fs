@@ -157,9 +157,8 @@ module Binding =
         let isSuppressed i ruleName =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+            
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) 
                     when isLetBinding i syntaxArray skipArray ->
@@ -174,5 +173,3 @@ module Binding =
                     let identifier = identifier.Lid |> List.map (fun x -> x.idText)
                     checkTupleOfWildcards args pattern identifier (isSuppressed i)
             | _ -> ()
-
-            i <- i + 1

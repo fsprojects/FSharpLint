@@ -151,9 +151,8 @@ module FunctionReimplementation =
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
 
         let isEnabled i ruleName = isRuleEnabled args.Info.Config ruleName && not (isSuppressed i ruleName)
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+        
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
                 match lambda with
@@ -166,5 +165,3 @@ module FunctionReimplementation =
                             validateLambdaCannotBeReplacedWithComposition lambda range args.Info
                 | _ -> ()
             | _ -> ()
-
-            i <- i + 1

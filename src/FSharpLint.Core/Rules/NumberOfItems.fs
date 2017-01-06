@@ -137,9 +137,8 @@ module NumberOfItems =
         let isSuppressed i ruleName = 
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+            
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
                 validateFunction constructorArguments args (isSuppressed i)
@@ -158,5 +157,3 @@ module NumberOfItems =
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
                 validateType members typeRepresentation args (isSuppressed i)
             | _ -> ()
-            
-            i <- i + 1

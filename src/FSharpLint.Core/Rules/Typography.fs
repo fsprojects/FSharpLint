@@ -192,10 +192,9 @@ module Typography =
         let syntaxArray = args.SyntaxArray
 
         if isAnalyserEnabled args.Info.Config then
-            let mutable i = 0
             let suppressMessageAttributes = ResizeArray()
             let literalStrings = ResizeArray()
-            while i < syntaxArray.Length do
+            for i = 0 to syntaxArray.Length - 1 do
                 let node = syntaxArray.[i].Actual
 
                 getSuppressMessageAttributes node
@@ -205,8 +204,6 @@ module Typography =
                 | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
                     literalStrings.Add(value, range)
                 | _ -> ()
-
-                i <- i + 1
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
                 range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine

@@ -108,9 +108,8 @@ module XmlDocumentation =
             configExceptionHeader analyserInfo.Config ruleName && isNotSuppressed ruleName i
 
         let suggest range message = args.Info.Suggest { Range = range; Message = message; SuggestedFix = None }
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+        
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, xmlDoc, _, access, range)) ->
                 if ruleAccessEnabled args.Info i access "ModuleDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
@@ -164,5 +163,3 @@ module XmlDocumentation =
                         fields |> List.iter evalField
                     | _ -> ()
             | _ -> ()
-
-            i <- i + 1

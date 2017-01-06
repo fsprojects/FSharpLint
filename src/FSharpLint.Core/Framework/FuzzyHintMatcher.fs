@@ -88,17 +88,14 @@ module FuzzyHintMatcher =
     /// Searches the abstract syntax array for possible hint matches using the hint trie.
     /// Any possible matches that are found will be given to the callback function `notify`,
     /// any matches found are not guaranteed and it's expected that the caller verify the match.
-    let possibleMatches (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
-        assert (nodeArray.Length = skipArray.Length)
+    let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
+        assert (syntaxArray.Length = skipArray.Length)
 
-        let len = nodeArray.Length
-
-        let mutable i = 0
-        while i < len do
-            let node = nodeArray.[i]
+        let len = syntaxArray.Length
+        
+        for i = 0 to syntaxArray.Length - 1 do
+            let node = syntaxArray.[i]
             
             match hintTrie.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray (Dictionary<_, _>()) (notify i)
+            | true, trie -> checkTrie (i + 1) trie syntaxArray skipArray (Dictionary<_, _>()) (notify i)
             | false, _ -> ()
-
-            i <- i + 1

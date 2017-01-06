@@ -54,9 +54,8 @@ module RaiseWithTooManyArguments =
         let postError ruleName errorName range isEnabled =
             if isEnabled ruleName then
                 args.Info.Suggest { Range = range; Message = Resources.GetString errorName; SuggestedFix = None }
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+                
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr -> 
                 match expr with
@@ -77,5 +76,3 @@ module RaiseWithTooManyArguments =
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
-
-            i <- i + 1

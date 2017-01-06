@@ -462,9 +462,8 @@ module NameConventions =
                 |> Option.iter postError
 
         let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+        
+        for i = 0 to syntaxArray.Length - 1 do
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
@@ -546,5 +545,3 @@ module NameConventions =
                     | _ -> ()
                 | _ -> ()
             | _ -> ()
-
-            i <- i + 1

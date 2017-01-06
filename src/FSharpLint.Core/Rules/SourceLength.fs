@@ -56,9 +56,8 @@ module SourceLength =
                               SuggestedFix = None }
                 | Some(_) | None -> ()
             | None -> ()
-
-        let mutable i = 0
-        while i < syntaxArray.Length do
+            
+        for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range)) -> 
                 checkRuleBroken i range "MaxLinesInLambdaFunction" "Lambda function"
@@ -94,5 +93,3 @@ module SourceLength =
                     checkRuleBroken i range "MaxLinesInClass" "Classes and interface"
                 | SynTypeDefnRepr.Exception(_) -> ()
             | _ -> ()
-
-            i <- i + 1
