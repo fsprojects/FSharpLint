@@ -59,8 +59,6 @@ module Configuration =
         | MaxItems of int
         | Length of int
         | Hints of Hint list
-        | MaxCyclomaticComplexity of int
-        | IncludeMatchStatements of bool
         | OneSpaceAllowedAfterOperator of bool
         | NumberOfSpacesAllowed of int
         | IgnoreBlankLines of bool
@@ -70,10 +68,8 @@ module Configuration =
         | Lines(x)
         | Depth(x)
         | MaxItems(x)
-        | MaxCyclomaticComplexity(x)
         | Length(x)
         | NumberOfSpacesAllowed(x) -> x :> obj
-        | IncludeMatchStatements(x)
         | OneSpaceAllowedAfterOperator(x)
         | Enabled(x)
         | IgnoreBlankLines(x) -> x.ToString() :> obj
@@ -270,8 +266,6 @@ module Configuration =
         | "Depth" -> Depth(setting.Value |> int)
         | "Length" -> Length(setting.Value |> int)
         | "MaxItems" -> MaxItems(setting.Value |> int)
-        | "MaxCyclomaticComplexity" -> MaxCyclomaticComplexity(setting.Value |> int)
-        | "IncludeMatchStatements" -> IncludeMatchStatements(setting.Value |> bool.Parse)
         | "Hints" -> Hints(parseHints setting.Value)
         | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
         | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
