@@ -54,7 +54,7 @@
           (List.length x) > 0 ===> not (List.isEmpty x)
           (Array.length x) <> 0 ===> not (Array.isEmpty x)
           (Seq.length x) <> 0 ===> not (Seq.isEmpty x)
-          
+
           List.concat (List.map f x) ===> List.collect f x
           Array.concat (Array.map f x) ===> Array.collect f x
           Seq.concat (Seq.map f x) ===> Seq.collect f x
@@ -120,7 +120,7 @@
           id x ===> x
           id >> f ===> f
           f >> id ===> f
-          
+
           x = null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
           null = x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
           x <> null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
@@ -132,53 +132,99 @@
 
     <NameConventions>
       <Rules>
-        <IdentifiersMustNotContainUnderscores>
-          <Enabled>true</Enabled>
-        </IdentifiersMustNotContainUnderscores>
 
-        <InterfaceNamesMustBeginWithI>
+        <InterfaceNames>
           <Enabled>true</Enabled>
-        </InterfaceNamesMustBeginWithI>
+          <Prefix>I</Prefix>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </InterfaceNames>
 
-        <ExceptionNamesMustEndWithException>
+        <ExceptionNames>
           <Enabled>true</Enabled>
-        </ExceptionNamesMustEndWithException>
+          <Suffix>Exception</Suffix>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </ExceptionNames>
 
-        <TypeNamesMustBePascalCase>
+        <TypeNames>
           <Enabled>true</Enabled>
-        </TypeNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </TypeNames>
 
-        <RecordFieldNamesMustBePascalCase>
+        <RecordFieldNames>
           <Enabled>false</Enabled>
-        </RecordFieldNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </RecordFieldNames>
 
-        <EnumCasesMustBePascalCase>
+        <EnumCasesNames>
           <Enabled>true</Enabled>
-        </EnumCasesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </EnumCasesNames>
 
-        <ModuleNamesMustBePascalCase>
+        <UnionCasesNames>
           <Enabled>true</Enabled>
-        </ModuleNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </UnionCasesNames>
 
-        <LiteralNamesMustBePascalCase>
+        <ModuleNames>
           <Enabled>true</Enabled>
-        </LiteralNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </ModuleNames>
 
-        <NamespaceNamesMustBePascalCase>
+        <LiteralNames>
           <Enabled>true</Enabled>
-        </NamespaceNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </LiteralNames>
 
-        <MemberNamesMustBePascalCase>
+        <NamespaceNames>
           <Enabled>true</Enabled>
-        </MemberNamesMustBePascalCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </NamespaceNames>
 
-        <ParameterMustBeCamelCase>
+        <MemberNames>
           <Enabled>true</Enabled>
-        </ParameterMustBeCamelCase>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </MemberNames>
+
+        <ParameterNames>
+          <Enabled>true</Enabled>
+          <Naming>CamelCase</Naming>
+          <Underscores>false</Underscores>
+        </ParameterNames>
+
+        <MeasureTypeNames>
+          <Enabled>true</Enabled>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </MeasureTypeNames>
+
+        <ActivePatternNames>
+          <Enabled>true</Enabled>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </ActivePatternNames>
+
+        <PublicValuesNames>
+          <Enabled>true</Enabled>
+          <Naming>PascalCase</Naming>
+          <Underscores>false</Underscores>
+        </PublicValuesNames>
 
         <NonPublicValuesCamelCase>
           <Enabled>true</Enabled>
+          <Naming>CamelCase</Naming>
+          <Underscores>false</Underscores>
         </NonPublicValuesCamelCase>
+
       </Rules>
       <Enabled>true</Enabled>
     </NameConventions>

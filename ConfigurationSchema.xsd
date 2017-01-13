@@ -20,7 +20,7 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  
+
   <xs:complexType name="Enabled">
     <xs:sequence>
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
@@ -53,23 +53,43 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="Naming">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PascalCase" />
+      <xs:enumeration value="CamelCase " />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="NameConvention">
+    <xs:sequence>
+      <xs:element name="Naming" maxOccurs="1" minOccurs="0" type="Naming" />
+      <xs:element name="Prefix" maxOccurs="1" minOccurs="0" type="xs:string" />
+      <xs:element name="Suffix" maxOccurs="1" minOccurs="0" type="xs:string" />
+      <xs:element name="Underscores" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="NameConventions">
     <xs:sequence>
       <xs:element name="Rules" maxOccurs="1" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="IdentifiersMustNotContainUnderscores" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="InterfaceNamesMustBeginWithI" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="ExceptionNamesMustEndWithException" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="TypeNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="RecordFieldNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="EnumCasesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="ModuleNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="LiteralNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="NamespaceNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="MemberNamesMustBePascalCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="ParameterMustBeCamelCase" maxOccurs="1" minOccurs="0" type="Enabled" />
-            <xs:element name="NonPublicValuesCamelCase" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="InterfaceNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="ExceptionNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="TypeNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="RecordFieldNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="EnumCasesNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="UnionCasesNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="ModuleNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="LiteralNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="NamespaceNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="MemberNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="ParameterNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="MeasureTypeNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="ActivePatternNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="PublicValuesNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
+            <xs:element name="NonPublicValuesNames" maxOccurs="1" minOccurs="0" type="NameConvention" />
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -131,7 +151,7 @@
               </xs:complexType>
             </xs:element>
 
-            <xs:element name="NoTabCharacters" maxOccurs="1" minOccurs="0" type="Enabled" />              
+            <xs:element name="NoTabCharacters" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TrailingNewLineInFile" maxOccurs="1" minOccurs="0" type="Enabled" />
 
             <xs:element name="TrailingWhitespaceOnLine" maxOccurs="1" minOccurs="0">
@@ -257,7 +277,7 @@
       <xs:element name="IncludeMatchStatements" maxOccurs="1" minOccurs="0" type="xs:boolean" />
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:complexType name="Analysers">
     <xs:sequence>
       <xs:element name="Hints" maxOccurs="1" minOccurs="0" type="Hints" />
@@ -273,7 +293,7 @@
       <xs:element name="CyclomaticComplexity" maxOccurs="1" minOccurs="0" type="CyclomaticComplexity" />
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:element name="FSharpLintSettings">
     <xs:complexType>
       <xs:sequence>
