@@ -181,10 +181,10 @@
     <value>Consider changing `{0}` to remove any underscores.</value>
   </data>
   <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
-    <value>Consider changing `{0}`to be started with .</value>
+    <value>Consider changing `{0}`to be prefixed with .</value>
   </data>
   <data name="RulesNamingConventionsSuffixError" xml:space="preserve">
-    <value>Consider changing `{0}`to be ended with .</value>
+    <value>Consider changing `{0}`to be suffixed with .</value>
   </data>
   <data name="RulesNestedStatementsError" xml:space="preserve">
     <value>Code suggested not to be nested more deeply than a depth of {0}.</value>

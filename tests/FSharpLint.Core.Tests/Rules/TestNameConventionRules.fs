@@ -20,50 +20,72 @@ open NUnit.Framework
 open FSharpLint.Rules.NameConventions
 open FSharpLint.Framework.Configuration
 
-let config = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
+let config =
+    let pascalRule = { Rule.Settings = Map.ofList [
+                                        ("Enabled", Enabled(true))
+                                        ("Naming", Naming(Naming.PascalCase))
+                                        ("Underscores", Underscores(false)) ] }
 
-    Map.ofList 
-        [ (AnalyserName, 
-            { Rules = Map.ofList 
-                [ ("IdentifiersMustNotContainUnderscores", ruleEnabled) 
-                  ("InterfaceNamesMustBeginWithI", ruleEnabled) 
-                  ("ExceptionNamesMustEndWithException", ruleEnabled) 
-                  ("TypeNamesMustBePascalCase", ruleEnabled) 
-                  ("ParameterMustBeCamelCase", ruleEnabled) 
-                  ("RecordFieldNamesMustBePascalCase", ruleEnabled) 
-                  ("EnumCasesMustBePascalCase", ruleEnabled) 
-                  ("ModuleNamesMustBePascalCase", ruleEnabled) 
-                  ("LiteralNamesMustBePascalCase", ruleEnabled) 
-                  ("NamespaceNamesMustBePascalCase", ruleEnabled) 
-                  ("MemberNamesMustBePascalCase", ruleEnabled) 
-                  ("PublicValuesPascalOrCamelCase", ruleEnabled) 
-                  ("NonPublicValuesCamelCase", ruleEnabled) ] 
+    let camelRule = { Rule.Settings = Map.ofList [
+                                        ("Enabled", Enabled(true))
+                                        ("Naming", Naming(Naming.CamelCase))
+                                        ("Underscores", Underscores(false)) ] }
+
+    let interfaceRule = { Rule.Settings = Map.ofList [
+                                            ("Enabled", Enabled(true))
+                                            ("Naming", Naming(Naming.PascalCase))
+                                            ("Underscores", Underscores(false))
+                                            ("Prefix", Prefix("I")) ] }
+
+    let exceptionRule = { Rule.Settings = Map.ofList [
+                                            ("Enabled", Enabled(true))
+                                            ("Naming", Naming(Naming.PascalCase))
+                                            ("Underscores", Underscores(false))
+                                            ("Suffix", Suffix("Exception")) ] }
+
+    Map.ofList
+        [ (AnalyserName,
+            { Rules = Map.ofList
+                [ ("InterfaceNames", interfaceRule)
+                  ("ExceptionNames", exceptionRule)
+                  ("TypeNames", pascalRule)
+                  ("RecordFieldNames", pascalRule)
+                  ("EnumCasesNames", pascalRule)
+                  ("UnionCasesNames", pascalRule)
+                  ("ModuleNames", pascalRule)
+                  ("LiteralNames", pascalRule)
+                  ("NamespaceNames", pascalRule)
+                  ("MemberNames", pascalRule)
+                  ("ParameterNames", camelRule)
+                  ("MeasureTypeNames", pascalRule)
+                  ("ActivePatternNames", pascalRule)
+                  ("PublicValuesNames", pascalRule)
+                  ("NonPublicValuesNames", camelRule) ]
               Settings = Map.ofList [] }) ]
-              
+
 [<TestFixture>]
 type TestNameConventionRules() =
     inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Category("Performance")>]
     [<Test>]
-    member this.``Performance of naming analyser``() = 
+    member this.``Performance of naming analyser``() =
         Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
-    member __.IsPascalCase() = 
+    member __.IsPascalCase() =
         Assert.IsTrue(isPascalCase "DogInBin")
 
         Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
-    member __.IsCamelCase() = 
+    member __.IsCamelCase() =
         Assert.IsTrue(isCamelCase "dogInBin")
 
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member __.ContainsUnderScore() = 
+    member __.ContainsUnderScore() =
         Assert.IsTrue(containsUnderscore "dog_")
 
         Assert.IsTrue(containsUnderscore "_dog")
@@ -73,7 +95,7 @@ type TestNameConventionRules() =
         Assert.IsFalse(containsUnderscore "dog")
 
     [<Test>]
-    member this.``Unit of measure issues no casing naming warning.``() = 
+    member this.``Unit of measure issues no casing naming warning.``() =
         this.Parse """
 [<Measure>] type L
 
@@ -82,23 +104,23 @@ type TestNameConventionRules() =
         Assert.IsFalse(this.ErrorsExist, "Unexpected warning: " + this.ErrorMsg)
 
     [<Test>]
-    member this.``Unit of measure issues underscore naming warning.``() = 
+    member this.``Unit of measure issues underscore naming warning.``() =
         this.Parse """
 [<Measure>] type us_Gal"""
 
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
-    member this.ClassNameIsPascalCase() = 
+    member this.ClassNameIsPascalCase() =
         this.Parse """
 module Program
   type MyClass2() as this =
     member this.PrintMessage() = ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
-        
+
     [<Test>]
-    member this.ClassNameIsCamelCase() = 
+    member this.ClassNameIsCamelCase() =
         this.Parse """
 module Program
   type myClass2() as this =
@@ -107,7 +129,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.ClassNameIsCamelCaseSuppressed() = 
+    member this.ClassNameIsCamelCaseSuppressed() =
         this.Parse """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "TypeNamesMustBePascalCase")>]
@@ -117,7 +139,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.InterfaceNameBeginsWithI() = 
+    member this.InterfaceNameBeginsWithI() =
         this.Parse """
 module Program
   type IPrintable =
@@ -128,7 +150,7 @@ module Program
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/100
     /// (static classes were thought to be interfaces)
     [<Test>]
-    member this.StaticClassIsNotTreatedAsInterface() = 
+    member this.StaticClassIsNotTreatedAsInterface() =
         this.Parse """
 module Program
   type Printable =
@@ -139,7 +161,7 @@ module Program
     /// Regression test for https://github.com/ionide/ionide-vscode-fsharp/issues/153
     /// (type aliases were thought to be interfaces)
     [<Test>]
-    member this.TypeAliasIsNotTreatedAsInterface() = 
+    member this.TypeAliasIsNotTreatedAsInterface() =
         this.Parse """
 module Program
   type Matrix = int[,]"""
@@ -147,7 +169,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.InterfaceNameDoesNotBeginWithI() = 
+    member this.InterfaceNameDoesNotBeginWithI() =
         this.Parse """
 module Program
   type Printable =
@@ -156,7 +178,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.AbstractClassNameDoesNotBeginWithI() = 
+    member this.AbstractClassNameDoesNotBeginWithI() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -166,7 +188,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(6, 7))
 
     [<Test>]
-    member this.InterfaceNameDoesNotBeginWithISuppressed() = 
+    member this.InterfaceNameDoesNotBeginWithISuppressed() =
         this.Parse """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]
@@ -176,7 +198,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.ClassMemberIsPascalCase() = 
+    member this.ClassMemberIsPascalCase() =
         this.Parse """
 module Program
   type MyClass2() as this =
@@ -185,7 +207,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(4, 16))
 
     [<Test>]
-    member this.ClassMemberIsCamelCase() = 
+    member this.ClassMemberIsCamelCase() =
         this.Parse """
 module Program
   type MyClass2() as this =
@@ -195,7 +217,7 @@ module Program
 
     /// The new member (constructor) is not pascal case so check it does not post an error.
     [<Test>]
-    member this.ConstructorDoesNotPostError() = 
+    member this.ConstructorDoesNotPostError() =
         this.Parse """
 module Program
 type MyClass(x) =
@@ -204,7 +226,7 @@ type MyClass(x) =
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
     [<Test>]
-    member this.EnumNameIsPascalCase() = 
+    member this.EnumNameIsPascalCase() =
         this.Parse """
 module Program
   type MyEnum =
@@ -213,7 +235,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.EnumNameIsCamelCase() = 
+    member this.EnumNameIsCamelCase() =
         this.Parse """
 module Program
   type myEnum =
@@ -222,7 +244,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.EnumCaseIsPascalCase() = 
+    member this.EnumCaseIsPascalCase() =
         this.Parse """
 module Program
   type MyEnum =
@@ -231,7 +253,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member this.EnumCaseIsCamelCase() = 
+    member this.EnumCaseIsCamelCase() =
         this.Parse """
 module Program
   type MyEnum =
@@ -240,7 +262,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member this.EnumCaseIsCamelCaseSuppressed() = 
+    member this.EnumCaseIsCamelCaseSuppressed() =
         this.Parse """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "EnumCasesMustBePascalCase")>]
@@ -250,7 +272,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
-    member this.UnionNameIsPascalCase() = 
+    member this.UnionNameIsPascalCase() =
         this.Parse """
 module Program
   type Union =
@@ -259,7 +281,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.UnionNameIsCamelCase() = 
+    member this.UnionNameIsCamelCase() =
         this.Parse """
 module Program
   type union =
@@ -268,7 +290,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.UnionCaseIsPascalCase() = 
+    member this.UnionCaseIsPascalCase() =
         this.Parse """
 module Program
   type Union =
@@ -277,7 +299,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member this.UnionCaseIsCamelCase() = 
+    member this.UnionCaseIsCamelCase() =
         this.Parse """
 module Program
   type Union =
@@ -286,7 +308,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(4, 6))
 
     [<Test>]
-    member this.RecordNameIsPascalCase() = 
+    member this.RecordNameIsPascalCase() =
         this.Parse """
 module Program
   type Record = { dog: int }"""
@@ -294,7 +316,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.RecordNameIsCamelCase() = 
+    member this.RecordNameIsCamelCase() =
         this.Parse """
 module Program
   type record = { dog: int }"""
@@ -302,7 +324,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.RecordFieldIsPascalCase() = 
+    member this.RecordFieldIsPascalCase() =
         this.Parse """
 module Program
   type Record = { Dog: int }"""
@@ -310,7 +332,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 18))
 
     [<Test>]
-    member this.RecordFieldIsCamelCase() = 
+    member this.RecordFieldIsCamelCase() =
         this.Parse """
 module Program
   type Record = { dog: int }"""
@@ -318,7 +340,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 18))
 
     [<Test>]
-    member this.RecordFieldIsCamelCaseSuppressed() = 
+    member this.RecordFieldIsCamelCaseSuppressed() =
         this.Parse """
 module Program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "RecordFieldNamesMustBePascalCase")>]
@@ -327,7 +349,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.TypeAbbreviationIsPascalCase() = 
+    member this.TypeAbbreviationIsPascalCase() =
         this.Parse """
 module Program
   type Cat = int"""
@@ -335,7 +357,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.TypeAbbreviationIsCamelCase() = 
+    member this.TypeAbbreviationIsCamelCase() =
         this.Parse """
 module Program
   type cat = int"""
@@ -343,7 +365,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.ModuleNameIsPascalCase() = 
+    member this.ModuleNameIsPascalCase() =
         this.Parse """
 module Program
   let main = ()"""
@@ -351,7 +373,7 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(2, 7))
 
     [<Test>]
-    member this.ModuleNameIsCamelCase() = 
+    member this.ModuleNameIsCamelCase() =
         this.Parse """
 module program
   let main = ()"""
@@ -359,7 +381,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(2, 7))
 
     [<Test>]
-    member this.ModuleNameIsCamelCaseSuppressed() = 
+    member this.ModuleNameIsCamelCaseSuppressed() =
         this.Parse """
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ModuleNamesMustBePascalCase")>]
 module program
@@ -368,27 +390,27 @@ module program
         Assert.IsFalse(this.ErrorExistsOnLine(3))
 
     [<Test>]
-    member this.NamespaceIsPascalCase() = 
+    member this.NamespaceIsPascalCase() =
         this.Parse """
 namespace Matt.Dog.Cat"""
 
         Assert.IsFalse(this.ErrorExistsAt(2, 10))
 
     [<Test>]
-    member this.NamespaceIsCamelCase() = 
+    member this.NamespaceIsCamelCase() =
         this.Parse """
 namespace matt.dog.cat"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
-    member this.LiteralPatternMatchExpectNoErrors() = 
+    member this.LiteralPatternMatchExpectNoErrors() =
         this.Parse """
 module program
   [<Literal>]
   let Dog = true
 
-  let main = 
+  let main =
     match true with
     | Dog -> ()
     | _ -> ()"""
@@ -397,10 +419,10 @@ module program
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
     [<Test>]
-    member this.MnemonicWildcardInPatternMatch() = 
+    member this.MnemonicWildcardInPatternMatch() =
         this.Parse """
 module program
-  let main = 
+  let main =
     match true with
     | _dog -> ()
     | _ -> ()"""
@@ -408,21 +430,21 @@ module program
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
     [<Test>]
-    member this.UnderscoreInMatchPatternIdent() = 
+    member this.UnderscoreInMatchPatternIdent() =
         this.Parse """
 module program
-  let main = 
+  let main =
     match true with
     | d_og -> ()
     | _ -> ()"""
 
         Assert.IsTrue(this.ErrorExistsOnLine(5))
-        
+
     [<Test>]
-    member this.VariablePatternMatchIsCamelCase() = 
+    member this.VariablePatternMatchIsCamelCase() =
         this.Parse """
 module program
-  let main = 
+  let main =
     match true with
     | dog -> ()"""
 
@@ -430,7 +452,7 @@ module program
 
     /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member this.PublicTupleIsPascalCase() = 
+    member this.PublicTupleIsPascalCase() =
         this.Parse """
 module program
 
@@ -440,7 +462,7 @@ module program
 
     /// A tuple inside a binding should be treated as private.
     [<Test>]
-    member this.TupleInsideBindingExprIsPascalCase() = 
+    member this.TupleInsideBindingExprIsPascalCase() =
         this.Parse """
 module program
 
@@ -450,7 +472,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(5, 9))
 
     [<Test>]
-    member this.PrivateTupleIsPascalCase() = 
+    member this.PrivateTupleIsPascalCase() =
         this.Parse """
 module program
   let private Cat, private dog = 1, 0"""
@@ -458,7 +480,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
-    member this.PrivateTupleIsPascalCaseSuppressed() = 
+    member this.PrivateTupleIsPascalCaseSuppressed() =
         this.Parse """
 module program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
@@ -467,36 +489,36 @@ module program
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.PublicTupleIsCamelCase() = 
+    member this.PublicTupleIsCamelCase() =
         this.Parse """
 module program
-  let main = 
+  let main =
     let (cat, _) = 1, 0"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 9))
 
     [<Test>]
-    member this.PatternMatchAsIsPascalCase() = 
+    member this.PatternMatchAsIsPascalCase() =
         this.Parse """
 module program
-  let main = 
+  let main =
     match true with
     | _ as Dog -> ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 11))
 
     [<Test>]
-    member this.PatternMatchAsIsCamelCase() = 
+    member this.PatternMatchAsIsCamelCase() =
         this.Parse """
 module program
-  let main = 
+  let main =
     match true with
     | _ as dog -> ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(5, 11))
 
     [<Test>]
-    member this.DelegateNameIsPascalCase() = 
+    member this.DelegateNameIsPascalCase() =
         this.Parse """
 module program
   type Delegate2 = delegate of int * int -> int"""
@@ -504,7 +526,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.DelegateNameIsCamelCase() = 
+    member this.DelegateNameIsCamelCase() =
         this.Parse """
 module program
   type delegate2 = delegate of int * int -> int"""
@@ -513,7 +535,7 @@ module program
 
     /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
-    member this.PublicFunctionNameIsPascalCase() = 
+    member this.PublicFunctionNameIsPascalCase() =
         this.Parse """
 module program
   let Main () = ()"""
@@ -521,7 +543,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 6))
 
     [<Test>]
-    member this.PrivateFunctionNameIsPascalCase() = 
+    member this.PrivateFunctionNameIsPascalCase() =
         this.Parse """
 module program
   let private Main () = ()"""
@@ -529,7 +551,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
-    member this.FunctionNameNestedInBindingIsPascalCase() = 
+    member this.FunctionNameNestedInBindingIsPascalCase() =
         this.Parse """
 module program
   let main () =
@@ -539,7 +561,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.FunctionNameNestedInBindingIsCamelCase() = 
+    member this.FunctionNameNestedInBindingIsCamelCase() =
         this.Parse """
 module program
   let main () =
@@ -549,7 +571,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.PublicFunctionNameIsCamelCase() = 
+    member this.PublicFunctionNameIsCamelCase() =
         this.Parse """
 module program
   let main () = ()"""
@@ -557,7 +579,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 6))
 
     [<Test>]
-    member this.FunctionParameterIsPascalCase() = 
+    member this.FunctionParameterIsPascalCase() =
         this.Parse """
 module program
   let main Dog = ()"""
@@ -565,7 +587,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(3, 11))
 
     [<Test>]
-    member this.FunctionParameterIsPascalCaseSuppressed() = 
+    member this.FunctionParameterIsPascalCaseSuppressed() =
         this.Parse """
 module program
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
@@ -574,7 +596,7 @@ module program
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.FunctionParameterIsCamelCase() = 
+    member this.FunctionParameterIsCamelCase() =
         this.Parse """
 module program
   let main dog = ()"""
@@ -582,7 +604,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 11))
 
     [<Test>]
-    member this.ConstructorParameterIsPascalCase() = 
+    member this.ConstructorParameterIsPascalCase() =
         this.Parse """
 module Program
   type MyClass2(Cats) as this =
@@ -591,7 +613,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 16))
 
     [<Test>]
-    member this.ConstructorParameterIsCamelCase() = 
+    member this.ConstructorParameterIsCamelCase() =
         this.Parse """
 module Program
   type MyClass2(cats) as this =
@@ -600,11 +622,11 @@ module Program
         Assert.IsFalse(this.ErrorExistsAt(3, 16))
 
     [<Test>]
-    member this.StructNameIsPascalCase() = 
+    member this.StructNameIsPascalCase() =
         this.Parse """
 module program
   type Point2D =
-    struct 
+    struct
       val X: float
       val Y: float
       new(x: float, y: float) = { X = x; Y = y }
@@ -613,11 +635,11 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.StructNameIsCamelCase() = 
+    member this.StructNameIsCamelCase() =
         this.Parse """
 module program
   type point2D =
-    struct 
+    struct
       val X: float
       val Y: float
       new(x: float, y: float) = { X = x; Y = y }
@@ -626,7 +648,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.PropertyIsPascalCase() = 
+    member this.PropertyIsPascalCase() =
         this.Parse """
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
@@ -637,7 +659,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(6, 16))
 
     [<Test>]
-    member this.PropertyIsCamelCase() = 
+    member this.PropertyIsCamelCase() =
         this.Parse """
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
@@ -648,7 +670,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(6, 16))
 
     [<Test>]
-    member this.PropertyIsCamelCaseSuppressed() = 
+    member this.PropertyIsCamelCaseSuppressed() =
         this.Parse """
   [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "MemberNamesMustBePascalCase")>]
   type Shape2D(x0 : float, y0 : float) =
@@ -660,7 +682,7 @@ module program
         Assert.IsFalse(this.ErrorExistsOnLine(7))
 
     [<Test>]
-    member this.AbstractMemberNameIsPascalCase() = 
+    member this.AbstractMemberNameIsPascalCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -670,7 +692,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(5, 20))
 
     [<Test>]
-    member this.AbstractMemberNameIsCamelCase() = 
+    member this.AbstractMemberNameIsCamelCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -680,7 +702,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(5, 20))
 
     [<Test>]
-    member this.AbstractPropertyNameIsPascalCase() = 
+    member this.AbstractPropertyNameIsPascalCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -690,7 +712,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(5, 13))
 
     [<Test>]
-    member this.AbstractPropertyNameIsCamelCase() = 
+    member this.AbstractPropertyNameIsCamelCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -700,7 +722,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(5, 13))
 
     [<Test>]
-    member this.DefaultMemberIsPascalCase() = 
+    member this.DefaultMemberIsPascalCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -711,7 +733,7 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(6, 17))
 
     [<Test>]
-    member this.DefaultMemberIsCamelCase() = 
+    member this.DefaultMemberIsCamelCase() =
         this.Parse """
 module program
   [<AbstractClass>]
@@ -722,7 +744,7 @@ module program
         Assert.IsTrue(this.ErrorExistsAt(6, 17))
 
     [<Test>]
-    member this.PatternFunctionValidActivePattern() = 
+    member this.PatternFunctionValidActivePattern() =
         this.Parse """
 module program
 let (|Even|Odd|) = function
@@ -736,7 +758,7 @@ match 4 with
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.PatternFunctionValidPartialActivePattern() = 
+    member this.PatternFunctionValidPartialActivePattern() =
         this.Parse """
 module program
 let (|Even|_|) = function
@@ -746,7 +768,7 @@ let (|Even|_|) = function
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.ActivePatternContainsUnderscore() = 
+    member this.ActivePatternContainsUnderscore() =
         this.Parse """
 module program
 let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
@@ -758,7 +780,7 @@ match 4 with
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.ActivePatternContainsUnderscoreSuppressed() = 
+    member this.ActivePatternContainsUnderscoreSuppressed() =
         this.Parse """
 module program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "IdentifiersMustNotContainUnderscores")>]
@@ -771,7 +793,7 @@ match 4 with
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.ActivePatternDoesNotContainUnderscore() = 
+    member this.ActivePatternDoesNotContainUnderscore() =
         this.Parse """
 module program
 let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
@@ -783,11 +805,11 @@ match 4 with
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.PartialActivePatternContainsUnderscore() = 
+    member this.PartialActivePatternContainsUnderscore() =
         this.Parse """
 module program
 let (|Ev_en|_|) input = if input % 2 = 0 then Some 4 else None
-        
+
 match 3 with
 | Ev_en(x) -> ()
 | dog -> ()"""
@@ -795,11 +817,11 @@ match 3 with
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.PartialActivePatternDoesNotContainUnderscore() = 
+    member this.PartialActivePatternDoesNotContainUnderscore() =
         this.Parse """
 module program
 let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
-        
+
 match 3 with
 | Even(x) -> ()
 | dog -> ()"""
@@ -807,7 +829,7 @@ match 3 with
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.ExceptionIsPascalCase() = 
+    member this.ExceptionIsPascalCase() =
         this.Parse """
 module program
 exception MyError of string
@@ -818,29 +840,29 @@ exception MyError of string
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member this.ExceptionIsCamelCase() = 
+    member this.ExceptionIsCamelCase() =
         this.Parse """
 module program
 exception myError of string
 """
 
         let error = "Consider changing `myError` to PascalCase."
-        
+
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member this.ExceptionEndsWithException() = 
+    member this.ExceptionEndsWithException() =
         this.Parse """
 module program
 exception MyErrorException of string
 """
 
         let error = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
-        
+
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member this.ExceptionDoesNotEndWithException() = 
+    member this.ExceptionDoesNotEndWithException() =
         this.Parse """
 module program
 exception MyError of string
@@ -851,17 +873,17 @@ exception MyError of string
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member this.ExceptionDoesNotEndWithExceptionSuppressed() = 
+    member this.ExceptionDoesNotEndWithExceptionSuppressed() =
         this.Parse """
 module program
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNamesMustEndWithException")>]
 exception MyError of string
 """
-        
+
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
     [<Test>]
-    member this.ForLoopIdentifierIsCamelCase() = 
+    member this.ForLoopIdentifierIsCamelCase() =
         this.Parse """
 module program
 for i = 10 downto 1 do System.Console.Write(i)
@@ -870,7 +892,7 @@ for i = 10 downto 1 do System.Console.Write(i)
         Assert.IsFalse(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member this.ForLoopIdentifierIsPascalCase() = 
+    member this.ForLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
 for I = 10 downto 1 do System.Console.Write(I)
@@ -879,7 +901,7 @@ for I = 10 downto 1 do System.Console.Write(I)
         Assert.IsTrue(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member this.ForEachLoopIdentifierIsCamelCase() = 
+    member this.ForEachLoopIdentifierIsCamelCase() =
         this.Parse """
 module program
 for i in 1..10 do System.Console.Write(i)
@@ -888,7 +910,7 @@ for i in 1..10 do System.Console.Write(i)
         Assert.IsFalse(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member this.ForEachLoopIdentifierIsPascalCase() = 
+    member this.ForEachLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
 for I in 1..10 do System.Console.Write(I)
@@ -897,7 +919,7 @@ for I in 1..10 do System.Console.Write(I)
         Assert.IsTrue(this.ErrorExistsAt(3, 4))
 
     [<Test>]
-    member this.CompilerGeneratedArgumentName() = 
+    member this.CompilerGeneratedArgumentName() =
         this.Parse """
 module program
 (fun _ -> ())
@@ -906,57 +928,57 @@ module program
         Assert.IsFalse(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.TypeExtensionMethodIsPascalCase() = 
+    member this.TypeExtensionMethodIsPascalCase() =
         this.Parse """
 module program
 
 type MyClass() =
     member this.F() = 100
 
-type MyClass with 
+type MyClass with
     member this.Goat() = 200"""
 
         Assert.IsFalse(this.ErrorExistsAt(8, 16))
 
     [<Test>]
-    member this.TypeExtensionMethodIsCamelCase() = 
+    member this.TypeExtensionMethodIsCamelCase() =
         this.Parse """
 module program
 
 type MyClass() =
     member this.F() = 100
 
-type MyClass with 
+type MyClass with
     member this.goat() = 200"""
 
         Assert.IsTrue(this.ErrorExistsAt(8, 16))
 
     [<Test>]
-    member this.TypeExtensionTypeIsCamelCase() = 
+    member this.TypeExtensionTypeIsCamelCase() =
         this.Parse """
 module program
 
 type myClass() =
     member this.F() = 100
 
-type myClass with 
+type myClass with
     member this.Goat() = 200"""
 
         Assert.IsFalse(this.ErrorExistsAt(7, 5))
 
     [<Test>]
-    member this.TypeExtensionTypeIsPascalCase() = 
+    member this.TypeExtensionTypeIsPascalCase() =
         this.Parse """
 module program
 
 type MyClass() =
     member this.F() = 100
 
-type MyClass with 
+type MyClass with
     member this.Goat() = 200"""
 
         Assert.IsFalse(this.ErrorExistsAt(7, 5))
-        
+
     [<Test>]
     member this.LiteralIsPascalCase() =
         this.Parse """
@@ -966,7 +988,7 @@ module program
 let Cat = 5"""
 
         Assert.IsFalse(this.ErrorExistsAt(5, 4))
-        
+
     [<Test>]
     member this.LiteralIsCamelCase() =
         this.Parse """
@@ -976,7 +998,7 @@ module program
 let cat = 5"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
-        
+
     [<Test>]
     member this.LiteralIsCamelCaseWithParen() =
         this.Parse """
@@ -986,7 +1008,7 @@ module program
 let (cat) = 5"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 5))
-        
+
     [<Test>]
     member this.LiteralIsCamelCaseSuppressed() =
         this.Parse """
@@ -997,7 +1019,7 @@ module program
 let cat = 5"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(6))
-        
+
     [<Test>]
     member this.FullyQualifiedLiteralIsPascalCase() =
         this.Parse """
@@ -1007,7 +1029,7 @@ module program
 let Cat = 5"""
 
         Assert.IsFalse(this.ErrorExistsAt(5, 4))
-        
+
     [<Test>]
     member this.FullyQualifiedLiteralIsCamelCase() =
         this.Parse """
@@ -1017,7 +1039,7 @@ module program
 let cat = 5"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
-                
+
     [<Test>]
     member this.CamelCaseLetBindingInType() =
         this.Parse """
@@ -1029,7 +1051,7 @@ type Dog() =
     member this.Goat() = ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(5, 8))
-                
+
     [<Test>]
     member this.PascalCaseLetBindingInType() =
         this.Parse """
@@ -1041,7 +1063,7 @@ type Dog() =
     member this.Goat() = ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 8))
-                
+
     [<Test>]
     member this.PascalCaseLetBindingInMethod() =
         this.Parse """
@@ -1053,7 +1075,7 @@ type Cat() =
     ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 8))
-                
+
     [<Test>]
     member this.CamelCaseLetBindingInMethod() =
         this.Parse """
@@ -1065,7 +1087,7 @@ type Cat() =
     ()"""
 
         Assert.IsFalse(this.ErrorExistsAt(6, 8))
-                
+
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
         this.Parse ("""
@@ -1077,7 +1099,7 @@ type Abbreviation = LiteralAttribute
 let Dog = 6""", checkInput = true)
 
         Assert.IsFalse(this.ErrorExistsAt(7, 4))
-                
+
     [<Test>]
     member this.CamelCaseTypeAbbreviationOfLiteral() =
         this.Parse("""
@@ -1089,14 +1111,14 @@ type Abbreviation = LiteralAttribute
 let dog = 6""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(7, 4))
-                
+
     [<Test>]
     member this.ParameterUnionCaseContainingValueDoesNotGenerateWarning() =
         this.Parse("""
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
-let extractInt (SingleCaseDU myInt) = 
+let extractInt (SingleCaseDU myInt) =
   myInt
 
 let singleCaseDU = SingleCaseDU 5
@@ -1104,14 +1126,14 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU""", checkInput = true)
 
         Assert.IsTrue(this.NoErrorsExist)
-                
+
     [<Test>]
     member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
         this.Parse("""
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
-let extractInt (SingleCaseDU MyInt) = 
+let extractInt (SingleCaseDU MyInt) =
   MyInt
 
 let singleCaseDU = SingleCaseDU 5
@@ -1119,7 +1141,7 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU""", checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
-                
+
     [<Test>]
     member this.UnionCaseInBindingContainingValueDoesNotGenerateWarning() =
         this.Parse("""
@@ -1130,7 +1152,7 @@ type SingleCaseDU = SingleCaseDU of int
 let (SingleCaseDU myInt) = (SingleCaseDU 5)""", checkInput = true)
 
         Assert.IsTrue(this.NoErrorsExist)
-                
+
     [<Test>]
     member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
         this.Parse("""
@@ -1141,7 +1163,7 @@ type SingleCaseDU = SingleCaseDU of int
 let (SingleCaseDU MyInt) = (SingleCaseDU 5)""", checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
-                
+
     [<Test>]
     member this.UnionCaseWithoutValueGeneratesWarningWhenNotTypeCheckingInput() =
         this.Parse("""
@@ -1152,7 +1174,7 @@ type SingleCaseDUNoValues = | SingleCaseDUNoValues
 let foo SingleCaseDUNoValues = ()""", checkInput = false)
 
         Assert.IsTrue(this.ErrorsExist)
-                
+
     [<Test>]
     member this.UnionCaseWithoutValueDoesNotGenerateWarningWhenTypeCheckingInput() =
         this.Parse("""
@@ -1164,10 +1186,10 @@ let foo SingleCaseDUNoValues = ()""", checkInput = true)
 
         Assert.IsTrue(this.NoErrorsExist)
 
-    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99 
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99
     /// (duplicated warning for underscore in identifier).
     [<Test>]
-    member this.MemberWithUnderscoreDoesNotHaveDuplicateWarnings() = 
+    member this.MemberWithUnderscoreDoesNotHaveDuplicateWarnings() =
         this.Parse """
 module Program
 
@@ -1179,29 +1201,29 @@ type Cat() =
         Assert.AreEqual(2, numberOfErrors)
 
     [<Test>]
-    member this.``Let DU deconstruction must not warn about DU name``() = 
+    member this.``Let DU deconstruction must not warn about DU name``() =
         this.Parse """
 module Program
 
 type Foo = Foo of bool
 
 let Foo(foo) = Foo(true)"""
-        
+
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.``Let parameter DU deconstruction must not warn about DU name``() = 
+    member this.``Let parameter DU deconstruction must not warn about DU name``() =
         this.Parse """
 module Program
 
 type Foo = Foo of bool
 
 let foo (Foo(v)) = ()"""
-        
+
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.``For pattern DU deconstruction must not warn about DU name``() = 
+    member this.``For pattern DU deconstruction must not warn about DU name``() =
         this.Parse """
 module Program
 

@@ -393,9 +393,6 @@ module NameConventions =
             let ruleName = CheckIdentifiers.toString rule
 
             let checkRule (settings : Map<string, Setting>) ident =
-                printfn "SETTINGS: %A" settings
-                printfn "IDENT: %A" ident
-
                 let testNaming ident =
                     settings.TryFind "Naming"
                     |> Option.bind (fun setting ->
