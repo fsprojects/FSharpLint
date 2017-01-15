@@ -84,17 +84,18 @@ module NameConventions =
 
     [<Literal>]
     let private NumberOfExpectedBackticks = 4
-
-    /// Is an identifier surrounded by double backticks? e.g. `let ``some identifier`` = 0`.
+        
+    /// Is an identifier not surrounded by double backticks? e.g. not `let ``some identifier`` = 0`.
     /// Unfortunately it's having to compare the length of the identifier in the source vs identifier length in AST,
     /// the information as to whether the identifier was backticked doesn't appear to be in the AST.
-    let private isDoubleBackTickedIdent (identifier:Ident) =
-        let diffOfRangeAgainstIdent (r:range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
+    let private isNotDoubleBackTickedIdent = 
+        let isDoubleBackTickedIdent (identifier:Ident) =
+            let diffOfRangeAgainstIdent (r:range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
 
-        let range = identifier.idRange
-        not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
-
-    let private isNotDoubleBackTickedIdent = isDoubleBackTickedIdent >> not
+            let range = identifier.idRange
+            not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
+    
+        isDoubleBackTickedIdent >> not
 
     let private pascalCaseRegex = Regex(@"^(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
 

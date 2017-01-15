@@ -214,7 +214,6 @@
 
         <PublicValuesNames>
           <Enabled>true</Enabled>
-          <Naming>PascalCase</Naming>
           <Underscores>false</Underscores>
         </PublicValuesNames>
 
