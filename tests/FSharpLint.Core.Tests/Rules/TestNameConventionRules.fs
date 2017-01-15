@@ -864,11 +864,11 @@ exception MyErrorException of string
     [<Test>]
     member this.ExceptionDoesNotEndWithException() =
         this.Parse """
-module program
+module Program
 exception MyError of string
 """
 
-        let error = "Consider changing `MyError` to be suffixed with 'Exception'."
+        let error = "Consider changing `MyError` to be suffixed with `Exception`."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 

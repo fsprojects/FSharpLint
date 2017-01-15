@@ -168,12 +168,6 @@
   <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">
     <value>Consider changing `{0}` to camelCase.</value>
   </data>
-  <data name="RulesNamingConventionsExceptionError" xml:space="preserve">
-    <value>Consider changing `{0}` to be suffixed with 'Exception'.</value>
-  </data>
-  <data name="RulesNamingConventionsInterfaceError" xml:space="preserve">
-    <value>Consider changing `{0}` to be prefixed with 'I'.</value>
-  </data>
   <data name="RulesNamingConventionsPascalCaseError" xml:space="preserve">
     <value>Consider changing `{0}` to PascalCase.</value>
   </data>
@@ -181,10 +175,10 @@
     <value>Consider changing `{0}` to remove any underscores.</value>
   </data>
   <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
-    <value>Consider changing `{0}`to be prefixed with .</value>
+    <value>Consider changing `{0}` to be prefixed with `{1}`.</value>
   </data>
   <data name="RulesNamingConventionsSuffixError" xml:space="preserve">
-    <value>Consider changing `{0}`to be suffixed with .</value>
+    <value>Consider changing `{0}` to be suffixed with `{1}`.</value>
   </data>
   <data name="RulesNestedStatementsError" xml:space="preserve">
     <value>Code suggested not to be nested more deeply than a depth of {0}.</value>

@@ -386,6 +386,9 @@ module NameConventions =
             let formatError errorName =
                 String.Format(Resources.GetString errorName, identifier.idText)
 
+            let formatError2 additional errorName =
+                String.Format(Resources.GetString errorName, identifier.idText, additional)
+
             let postError error =
                 args.Info.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
 
@@ -395,34 +398,46 @@ module NameConventions =
                 let testNaming ident =
                     settings.TryFind "Naming"
                     |> Option.bind (function
-                        | Naming(Naming.PascalCase) -> pascalCaseRule ident
-                        | Naming(Naming.CamelCase) -> camelCaseRule ident
+                        | Naming(Naming.PascalCase) -> 
+                            pascalCaseRule ident |> Option.map formatError 
+                        | Naming(Naming.CamelCase) -> 
+                            camelCaseRule ident |> Option.map formatError 
                         | _ -> None )
 
                 let testUnderscores ident =
                     settings.TryFind "Underscores"
-                    |> Option.bind (function Underscores(true) -> underscoreRule ident | _ -> None)
+                    |> Option.bind (function 
+                        | Underscores(true) -> 
+                            underscoreRule ident |> Option.map formatError 
+                        | _ -> None)
 
                 let testPrefix (ident : Ident) =
                     settings.TryFind "Prefix"
-                    |> Option.bind (function Prefix(x) -> prefixRule x ident | _ -> None)
+                    |> Option.bind (function 
+                        | Prefix(prefix) -> 
+                            prefixRule prefix ident |> Option.map (formatError2 prefix)
+                        | _ -> None)
 
                 let testSufix (ident : Ident) =
                     settings.TryFind "Suffix"
-                    |> Option.bind (function Suffix(x) -> suffixRule x ident | _ -> None)
+                    |> Option.bind (function 
+                        | Suffix(suffix) -> 
+                            suffixRule suffix ident |> Option.map (formatError2 suffix)
+                        | _ -> None)
 
                 [ yield testNaming ident
                   yield testUnderscores ident
                   yield testPrefix ident
-                  yield testSufix ident ] |> List.choose id
+                  yield testSufix ident ]
 
             ruleName
             |> getSettings
             |> Option.iter (fun settings ->
                 if notOperator identifier.idText then
-                    for rule in checkRule settings identifier do
+                    let errors = checkRule settings identifier |> List.choose id
+                    for error in errors do
                         if isNotSuppressed i ruleName then
-                            formatError rule |> postError)
+                            postError error)
 
         let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
 
@@ -445,7 +460,7 @@ module NameConventions =
             | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
                 match unionCase with
                 | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
-                    checkRule CheckIdentifiers.ExceptionNames  identifier
+                    checkRule CheckIdentifiers.ExceptionNames identifier
             | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
                 checkRule CheckIdentifiers.NonPublicValuesNames  identifier
             | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
