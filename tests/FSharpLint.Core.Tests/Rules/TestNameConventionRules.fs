@@ -43,6 +43,10 @@ let config =
                                             ("Underscores", Underscores(false))
                                             ("Suffix", Suffix("Exception")) ] }
 
+    let measureRule = { Rule.Settings = Map.ofList [
+                                            ("Enabled", Enabled(true))
+                                            ("Underscores", Underscores(false)) ] }
+
     Map.ofList
         [ (AnalyserName,
             { Rules = Map.ofList
@@ -57,7 +61,7 @@ let config =
                   ("NamespaceNames", pascalRule)
                   ("MemberNames", pascalRule)
                   ("ParameterNames", camelRule)
-                  ("MeasureTypeNames", pascalRule)
+                  ("MeasureTypeNames", measureRule)
                   ("ActivePatternNames", pascalRule)
                   ("PublicValuesNames", pascalRule)
                   ("NonPublicValuesNames", camelRule) ]

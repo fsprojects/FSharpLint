@@ -203,7 +203,6 @@
 
         <MeasureTypeNames>
           <Enabled>true</Enabled>
-          <Naming>PascalCase</Naming>
           <Underscores>false</Underscores>
         </MeasureTypeNames>
 
