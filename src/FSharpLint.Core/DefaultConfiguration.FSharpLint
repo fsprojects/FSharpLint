@@ -219,11 +219,11 @@
           <Underscores>false</Underscores>
         </PublicValuesNames>
 
-        <NonPublicValuesCamelCase>
+        <NonPublicValuesNames>
           <Enabled>true</Enabled>
           <Naming>CamelCase</Naming>
           <Underscores>false</Underscores>
-        </NonPublicValuesCamelCase>
+        </NonPublicValuesNames>
 
       </Rules>
       <Enabled>true</Enabled>

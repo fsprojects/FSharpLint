@@ -56,18 +56,18 @@
   <xs:simpleType name="Naming">
     <xs:restriction base="xs:string">
       <xs:enumeration value="PascalCase" />
-      <xs:enumeration value="CamelCase " />
+      <xs:enumeration value="CamelCase" />
     </xs:restriction>
   </xs:simpleType>
 
   <xs:complexType name="NameConvention">
-    <xs:sequence>
+    <xs:all>
       <xs:element name="Naming" maxOccurs="1" minOccurs="0" type="Naming" />
       <xs:element name="Prefix" maxOccurs="1" minOccurs="0" type="xs:string" />
       <xs:element name="Suffix" maxOccurs="1" minOccurs="0" type="xs:string" />
       <xs:element name="Underscores" maxOccurs="1" minOccurs="0" type="xs:boolean" />
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
-    </xs:sequence>
+    </xs:all>
   </xs:complexType>
 
   <xs:complexType name="NameConventions">
