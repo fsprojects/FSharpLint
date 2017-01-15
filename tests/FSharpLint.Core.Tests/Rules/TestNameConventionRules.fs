@@ -132,11 +132,11 @@ module Program
     member this.ClassNameIsCamelCaseSuppressed() =
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "TypeNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "TypeNames")>]
   type myClass2() as this =
     member this.PrintMessage() = ()"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.InterfaceNameBeginsWithI() =
@@ -191,11 +191,11 @@ module program
     member this.InterfaceNameDoesNotBeginWithISuppressed() =
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNames")>]
   type Printable =
     abstract member Print : unit -> unit"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ClassMemberIsPascalCase() =
@@ -265,11 +265,11 @@ module Program
     member this.EnumCaseIsCamelCaseSuppressed() =
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "EnumCasesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "EnumCasesNames")>]
   type MyEnum =
     | enumCase = 1"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.UnionNameIsPascalCase() =
@@ -343,10 +343,10 @@ module Program
     member this.RecordFieldIsCamelCaseSuppressed() =
         this.Parse """
 module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "RecordFieldNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "RecordFieldNames")>]
   type Record = { dog: int }"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.TypeAbbreviationIsPascalCase() =
@@ -383,11 +383,11 @@ module program
     [<Test>]
     member this.ModuleNameIsCamelCaseSuppressed() =
         this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ModuleNamesMustBePascalCase")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ModuleNames")>]
 module program
   let main = ()"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(3))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.NamespaceIsPascalCase() =
@@ -482,11 +482,11 @@ module program
     [<Test>]
     member this.PrivateTupleIsPascalCaseSuppressed() =
         this.Parse """
-module program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesNames")>]
   let private Cat, private dog = 1, 0"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+  
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.PublicTupleIsCamelCase() =
@@ -589,11 +589,11 @@ module program
     [<Test>]
     member this.FunctionParameterIsPascalCaseSuppressed() =
         this.Parse """
-module program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesCamelCase")>]
+module Program
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesNames")>]
   let main Dog = ()"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+  
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FunctionParameterIsCamelCase() =
@@ -672,14 +672,14 @@ module program
     [<Test>]
     member this.PropertyIsCamelCaseSuppressed() =
         this.Parse """
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "MemberNamesMustBePascalCase")>]
+  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "MemberNames")>]
   type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
     member this.centerX with get() = x and set xval = x <- xval"""
-
-        Assert.IsFalse(this.ErrorExistsOnLine(7))
+    
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.AbstractMemberNameIsPascalCase() =
@@ -782,15 +782,15 @@ match 4 with
     [<Test>]
     member this.ActivePatternContainsUnderscoreSuppressed() =
         this.Parse """
-module program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "IdentifiersMustNotContainUnderscores")>]
+module Program
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ActivePatternNames")>]
 let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
 
 match 4 with
 | Ev_en -> ()
 | Odd -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
@@ -875,12 +875,12 @@ exception MyError of string
     [<Test>]
     member this.ExceptionDoesNotEndWithExceptionSuppressed() =
         this.Parse """
-module program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNamesMustEndWithException")>]
+module Program
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNames")>]
 exception MyError of string
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ForLoopIdentifierIsCamelCase() =
@@ -1012,13 +1012,13 @@ let (cat) = 5"""
     [<Test>]
     member this.LiteralIsCamelCaseSuppressed() =
         this.Parse """
-module program
+module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "LiteralNamesMustBePascalCase")>]
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "LiteralNames")>]
 [<Literal>]
 let cat = 5"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(6))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FullyQualifiedLiteralIsPascalCase() =

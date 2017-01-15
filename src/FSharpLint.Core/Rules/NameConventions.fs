@@ -382,7 +382,6 @@ module NameConventions =
         let getSettings ruleName =
             Configuration.isRuleEnabled args.Info.Config AnalyserName ruleName |> Option.map snd
 
-
         let checkNamingRule i rule (identifier:Ident) =
             let formatError errorName =
                 String.Format(Resources.GetString errorName, identifier.idText)
@@ -395,50 +394,35 @@ module NameConventions =
             let checkRule (settings : Map<string, Setting>) ident =
                 let testNaming ident =
                     settings.TryFind "Naming"
-                    |> Option.bind (fun setting ->
-                        match setting with
+                    |> Option.bind (function
                         | Naming(Naming.PascalCase) -> pascalCaseRule ident
                         | Naming(Naming.CamelCase) -> camelCaseRule ident
                         | _ -> None )
 
                 let testUnderscores ident =
                     settings.TryFind "Underscores"
-                    |> Option.bind (fun setting ->
-                        match setting with
-                        | Underscores(true) -> underscoreRule ident
-                        | _ -> None )
+                    |> Option.bind (function Underscores(true) -> underscoreRule ident | _ -> None)
 
                 let testPrefix (ident : Ident) =
                     settings.TryFind "Prefix"
-                    |> Option.bind (fun setting ->
-                        match setting with
-                        | Prefix(x) ->  prefixRule x ident
-                        | _ -> None )
+                    |> Option.bind (function Prefix(x) -> prefixRule x ident | _ -> None)
 
                 let testSufix (ident : Ident) =
                     settings.TryFind "Suffix"
-                    |> Option.bind (fun setting ->
-                        match setting with
-                        | Suffix(x) ->  suffixRule x ident
-                        | _ -> None )
+                    |> Option.bind (function Suffix(x) -> suffixRule x ident | _ -> None)
 
-                [
-                    yield testNaming ident
-                    yield testUnderscores ident
-                    yield testPrefix ident
-                    yield testSufix ident
-                ]
+                [ yield testNaming ident
+                  yield testUnderscores ident
+                  yield testPrefix ident
+                  yield testSufix ident ] |> List.choose id
 
             ruleName
             |> getSettings
             |> Option.iter (fun settings ->
                 if notOperator identifier.idText then
-                    checkRule settings identifier
-                    |> List.iter (
-                        Option.filter (fun _ -> isNotSuppressed i ruleName)
-                        >> Option.map formatError
-                        >> Option.iter postError)
-            )
+                    for rule in checkRule settings identifier do
+                        if isNotSuppressed i ruleName then
+                            formatError rule |> postError)
 
         let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
 
