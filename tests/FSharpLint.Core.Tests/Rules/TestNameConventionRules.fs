@@ -24,28 +24,28 @@ let config =
     let pascalRule = { Rule.Settings = Map.ofList [
                                         ("Enabled", Enabled(true))
                                         ("Naming", Naming(Naming.PascalCase))
-                                        ("Underscores", Underscores(false)) ] }
+                                        ("Underscores", Underscores(true)) ] }
 
     let camelRule = { Rule.Settings = Map.ofList [
                                         ("Enabled", Enabled(true))
                                         ("Naming", Naming(Naming.CamelCase))
-                                        ("Underscores", Underscores(false)) ] }
+                                        ("Underscores", Underscores(true)) ] }
 
     let interfaceRule = { Rule.Settings = Map.ofList [
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
-                                            ("Underscores", Underscores(false))
+                                            ("Underscores", Underscores(true))
                                             ("Prefix", Prefix("I")) ] }
 
     let exceptionRule = { Rule.Settings = Map.ofList [
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
-                                            ("Underscores", Underscores(false))
+                                            ("Underscores", Underscores(true))
                                             ("Suffix", Suffix("Exception")) ] }
 
     let publicOrMeasureRule = { Rule.Settings = Map.ofList [
                                                     ("Enabled", Enabled(true))
-                                                    ("Underscores", Underscores(false)) ] }
+                                                    ("Underscores", Underscores(true)) ] }
 
     Map.ofList
         [ (AnalyserName,

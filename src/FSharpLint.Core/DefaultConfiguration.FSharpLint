@@ -137,90 +137,90 @@
           <Enabled>true</Enabled>
           <Prefix>I</Prefix>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </InterfaceNames>
 
         <ExceptionNames>
           <Enabled>true</Enabled>
           <Suffix>Exception</Suffix>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </ExceptionNames>
 
         <TypeNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </TypeNames>
 
         <RecordFieldNames>
           <Enabled>false</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </RecordFieldNames>
 
         <EnumCasesNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </EnumCasesNames>
 
         <UnionCasesNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </UnionCasesNames>
 
         <ModuleNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </ModuleNames>
 
         <LiteralNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </LiteralNames>
 
         <NamespaceNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </NamespaceNames>
 
         <MemberNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </MemberNames>
 
         <ParameterNames>
           <Enabled>true</Enabled>
           <Naming>CamelCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </ParameterNames>
 
         <MeasureTypeNames>
           <Enabled>true</Enabled>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </MeasureTypeNames>
 
         <ActivePatternNames>
           <Enabled>true</Enabled>
           <Naming>PascalCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </ActivePatternNames>
 
         <PublicValuesNames>
           <Enabled>true</Enabled>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </PublicValuesNames>
 
         <NonPublicValuesNames>
           <Enabled>true</Enabled>
           <Naming>CamelCase</Naming>
-          <Underscores>false</Underscores>
+          <Underscores>true</Underscores>
         </NonPublicValuesNames>
 
       </Rules>
