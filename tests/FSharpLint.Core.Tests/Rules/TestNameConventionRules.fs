@@ -101,7 +101,7 @@ type TestNameConventionRules() =
 
 [<Measure>] type usGal"""
 
-        Assert.IsFalse(this.ErrorsExist, "Unexpected warning: " + this.ErrorMsg)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.``Unit of measure issues underscore naming warning.``() =
@@ -573,10 +573,10 @@ module program
     [<Test>]
     member this.PublicFunctionNameIsCamelCase() =
         this.Parse """
-module program
+module Program
   let main () = ()"""
-
-        Assert.IsFalse(this.ErrorExistsAt(3, 6))
+  
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.FunctionParameterIsPascalCase() =
@@ -746,7 +746,7 @@ module program
     [<Test>]
     member this.PatternFunctionValidActivePattern() =
         this.Parse """
-module program
+module Program
 let (|Even|Odd|) = function
 | i when i % 2 = 0 -> Even
 | _ -> Odd
@@ -755,17 +755,17 @@ match 4 with
 | Even -> ()
 | Odd -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsAt(3, 5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.PatternFunctionValidPartialActivePattern() =
         this.Parse """
-module program
+module Program
 let (|Even|_|) = function
 | i when i % 2 = 0 -> Some(i)
 | _ -> None"""
 
-        Assert.IsFalse(this.ErrorExistsAt(3, 5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ActivePatternContainsUnderscore() =
@@ -795,14 +795,14 @@ match 4 with
     [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
         this.Parse """
-module program
+module Program
 let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 
 match 4 with
 | Even -> ()
 | Odd -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsAt(3, 5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.PartialActivePatternContainsUnderscore() =
@@ -819,14 +819,14 @@ match 3 with
     [<Test>]
     member this.PartialActivePatternDoesNotContainUnderscore() =
         this.Parse """
-module program
+module Program
 let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
 
 match 3 with
 | Even(x) -> ()
 | dog -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsAt(3, 5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ExceptionIsPascalCase() =
@@ -1125,7 +1125,7 @@ let singleCaseDU = SingleCaseDU 5
 
 let result = extractInt singleCaseDU""", checkInput = true)
 
-        Assert.IsTrue(this.NoErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
@@ -1184,7 +1184,7 @@ type SingleCaseDUNoValues = | SingleCaseDUNoValues
 
 let foo SingleCaseDUNoValues = ()""", checkInput = true)
 
-        Assert.IsTrue(this.NoErrorsExist)
+        this.AssertNoWarnings()
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99
     /// (duplicated warning for underscore in identifier).
@@ -1220,7 +1220,7 @@ type Foo = Foo of bool
 
 let foo (Foo(v)) = ()"""
 
-        Assert.IsFalse(this.ErrorsExist)
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.``For pattern DU deconstruction must not warn about DU name``() =
@@ -1252,8 +1252,8 @@ let foo () =
     let żcieżka = 0
     ()
         """
-
-        Assert.IsFalse(this.ErrorsExist)
+        
+        this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/191
     [<Test>]
@@ -1265,5 +1265,5 @@ let foo () =
     let ``¯\_(ツ)_/¯`` = ignore
     ()
         """
-
-        Assert.IsFalse(this.ErrorsExist)
+        
+        this.AssertNoWarnings()
