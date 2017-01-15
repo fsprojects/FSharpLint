@@ -269,15 +269,7 @@
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
     </xs:sequence>
   </xs:complexType>
-
-  <xs:complexType name="CyclomaticComplexity">
-    <xs:sequence>
-      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
-      <xs:element name="MaxCyclomaticComplexity" maxOccurs="1" minOccurs="0" type="xs:unsignedInt" />
-      <xs:element name="IncludeMatchStatements" maxOccurs="1" minOccurs="0" type="xs:boolean" />
-    </xs:sequence>
-  </xs:complexType>
-
+  
   <xs:complexType name="Analysers">
     <xs:sequence>
       <xs:element name="Hints" maxOccurs="1" minOccurs="0" type="Hints" />
@@ -290,7 +282,6 @@
       <xs:element name="Binding" maxOccurs="1" minOccurs="0" type="Binding" />
       <xs:element name="FunctionReimplementation" maxOccurs="1" minOccurs="0" type="FunctionReimplementation" />
       <xs:element name="XmlDocumentation" maxOccurs="1" minOccurs="0" type="XmlDocumentation" />
-      <xs:element name="CyclomaticComplexity" maxOccurs="1" minOccurs="0" type="CyclomaticComplexity" />
     </xs:sequence>
   </xs:complexType>
 
