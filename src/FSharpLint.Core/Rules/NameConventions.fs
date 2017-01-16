@@ -515,12 +515,5 @@ module NameConventions =
                 match pattern with
                 | SynPat.Named(_, identifier, isThis, _, _) when not isThis ->
                     checkRule CheckIdentifiers.NonPublicValuesNames  identifier
-                | SynPat.LongIdent(longIdentifier, _, _, _, _, _) ->
-                    // Don't bother checking for camelCase as F# will warn for PascalCase
-                    // in patterns outside of bindings
-                    match longIdentifier.Lid with
-                    | identifier::_ ->
-                        checkRule CheckIdentifiers.UnionCasesNames identifier
-                    | _ -> ()
                 | _ -> ()
             | _ -> ()
