@@ -107,34 +107,30 @@ module NameConventions =
 
     let containsUnderscore (identifier:string) = identifier.Contains("_")
 
-    let private pascalCaseRule (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && not <| isPascalCase identifier.idText then
-            Some "RulesNamingConventionsPascalCaseError"
+    let private pascalCaseRule (identifier:string) =
+        if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
         else None
 
-    let private camelCaseRule (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && not <| isCamelCase identifier.idText then
-            Some "RulesNamingConventionsCamelCaseError"
+    let private camelCaseRule (identifier:string) =
+        if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
         else None
 
-    let private underscoreRule allowPrefix (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && containsUnderscore identifier.idText then
+    let private underscoreRule allowPrefix (identifier:string) =
+        if containsUnderscore identifier then
             if not allowPrefix then
                 Some "RulesNamingConventionsUnderscoreError"
-            else if identifier.idText.TrimStart('_').Contains("_") then
+            else if identifier.TrimStart('_').Contains("_") then
                 Some "RulesNamingConventionsUnderscoreError"
             else
                 None
         else None
 
-    let private prefixRule prefix (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && not (identifier.idText.StartsWith prefix) then
-            Some "RulesNamingConventionsPrefixError"
+    let private prefixRule prefix (identifier:string) =
+        if not (identifier.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
         else None
 
-    let private suffixRule suffix (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && not (identifier.idText.EndsWith suffix) then
-            Some "RulesNamingConventionsSuffixError"
+    let private suffixRule suffix (identifier:string) =
+        if not (identifier.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
         else None
 
     let private notOperator = isOperator >> not
@@ -176,6 +172,10 @@ module NameConventions =
 
     let private isActivePattern (identifier:Ident) =
         Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
+
+    let private activePatternIdentifiers (identifier:Ident) =
+            identifier.idText.Split('|')
+            |> Seq.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
     /// Is an attribute from FSharp.Core with a given name?
     /// e.g. check for Literal attribute.
@@ -391,8 +391,6 @@ module NameConventions =
             let postError error =
                 args.Info.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
 
-            let ruleName = CheckIdentifiers.toString rule
-
             let checkRule (settings : Map<string, Setting>) ident =
                 let testNaming ident =
                     settings.TryFind "Naming"
@@ -412,14 +410,14 @@ module NameConventions =
                             underscoreRule true ident |> Option.map formatError 
                         | Underscores(NamingUnderscores.AllowAny) | _ -> None)
 
-                let testPrefix (ident : Ident) =
+                let testPrefix ident =
                     settings.TryFind "Prefix"
                     |> Option.bind (function 
                         | Prefix(prefix) -> 
                             prefixRule prefix ident |> Option.map (formatError2 prefix)
                         | _ -> None)
 
-                let testSufix (ident : Ident) =
+                let testSufix ident =
                     settings.TryFind "Suffix"
                     |> Option.bind (function 
                         | Suffix(suffix) -> 
@@ -430,15 +428,22 @@ module NameConventions =
                   yield testUnderscores ident
                   yield testPrefix ident
                   yield testSufix ident ]
+                  
+            if notOperator identifier.idText && isNotDoubleBackTickedIdent identifier then
+                let ruleName = CheckIdentifiers.toString rule
 
-            ruleName
-            |> getSettings
-            |> Option.iter (fun settings ->
-                if notOperator identifier.idText then
-                    let errors = checkRule settings identifier |> List.choose id
+                let checkIdentifier settings ident =
+                    let errors = checkRule settings ident |> List.choose id
                     for error in errors do
-                        if isNotSuppressed i ruleName then
-                            postError error)
+                        if isNotSuppressed i ruleName then postError error
+                    
+                getSettings ruleName
+                |> Option.iter (fun settings ->
+                    if rule = CheckIdentifiers.ActivePatternNames then
+                        activePatternIdentifiers identifier
+                        |> Seq.iter (checkIdentifier settings)
+                    else
+                        checkIdentifier settings identifier.idText)
 
         let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
 
