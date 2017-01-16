@@ -54,6 +54,11 @@ module Configuration =
         | PascalCase = 0
         | CamelCase = 1
 
+    type NamingUnderscores =
+        | AllowPrefix = 0
+        | AllowAny = 1
+        | None = 2
+
     type Hint = { Hint: string; ParsedHint: HintParser.Hint }
 
     type Setting =
@@ -70,7 +75,7 @@ module Configuration =
         | Naming of Naming
         | Prefix of string
         | Suffix of string
-        | Underscores of bool
+        | Underscores of NamingUnderscores
 
     let private settingToXml = function
         | Lines(x)
@@ -78,11 +83,11 @@ module Configuration =
         | MaxItems(x)
         | Length(x)
         | NumberOfSpacesAllowed(x) -> x :> obj
+        | Underscores(x) -> x :> obj
         | Prefix(x)
         | Suffix(x) -> x :> obj
         | OneSpaceAllowedAfterOperator(x)
         | Enabled(x)
-        | Underscores(x)
         | IgnoreBlankLines(x) -> x.ToString() :> obj
         | Access(x) -> x :> obj
         | Naming(x) -> x :> obj
@@ -90,7 +95,7 @@ module Configuration =
             hints
             |> List.map (fun x -> x.Hint)
             |> String.concat System.Environment.NewLine
-            |> (fun x -> XCData(x)) :> obj
+            |> XCData :> obj
 
     let private settingsToXml (settings:Map<string, Setting>) =
         settings
@@ -286,7 +291,7 @@ module Configuration =
         | "Naming" -> Naming(setting.Value |> fromEnum "Naming")
         | "Prefix" -> Prefix(setting.Value)
         | "Suffix" -> Suffix(setting.Value)
-        | "Underscores" -> Underscores(setting.Value |> bool.Parse)
+        | "Underscores" -> Underscores(setting.Value |> fromEnum "NamingUnderscores")
         | settingName ->
             sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
 

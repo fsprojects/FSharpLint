@@ -97,7 +97,7 @@ module NameConventions =
     
         isDoubleBackTickedIdent >> not
 
-    let private pascalCaseRegex = Regex(@"^(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
+    let private pascalCaseRegex = Regex(@"^_*(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
 
     let isPascalCase (identifier:string) = pascalCaseRegex.IsMatch(identifier)
 
@@ -106,8 +106,6 @@ module NameConventions =
     let isCamelCase (identifier:string) = camelCaseRegex.IsMatch(identifier)
 
     let containsUnderscore (identifier:string) = identifier.Contains("_")
-
-    let patternContainsUnderscore (identifier:string) = identifier.TrimStart('_') |> containsUnderscore
 
     let private pascalCaseRule (identifier:Ident) =
         if isNotDoubleBackTickedIdent identifier && not <| isPascalCase identifier.idText then
@@ -119,14 +117,14 @@ module NameConventions =
             Some "RulesNamingConventionsCamelCaseError"
         else None
 
-    let private underscoreRule (identifier:Ident) =
+    let private underscoreRule allowPrefix (identifier:Ident) =
         if isNotDoubleBackTickedIdent identifier && containsUnderscore identifier.idText then
-            Some "RulesNamingConventionsUnderscoreError"
-        else None
-
-    let private underscoreInPatternRule (identifier:Ident) =
-        if isNotDoubleBackTickedIdent identifier && patternContainsUnderscore identifier.idText then
-            Some "RulesNamingConventionsUnderscoreError"
+            if not allowPrefix then
+                Some "RulesNamingConventionsUnderscoreError"
+            else if identifier.idText.TrimStart('_').Contains("_") then
+                Some "RulesNamingConventionsUnderscoreError"
+            else
+                None
         else None
 
     let private prefixRule prefix (identifier:Ident) =
@@ -408,9 +406,11 @@ module NameConventions =
                 let testUnderscores ident =
                     settings.TryFind "Underscores"
                     |> Option.bind (function 
-                        | Underscores(true) -> 
-                            underscoreRule ident |> Option.map formatError 
-                        | _ -> None)
+                        | Underscores(NamingUnderscores.None) -> 
+                            underscoreRule false ident |> Option.map formatError 
+                        | Underscores(NamingUnderscores.AllowPrefix) -> 
+                            underscoreRule true ident |> Option.map formatError 
+                        | Underscores(NamingUnderscores.AllowAny) | _ -> None)
 
                 let testPrefix (ident : Ident) =
                     settings.TryFind "Prefix"

@@ -21,50 +21,53 @@ open FSharpLint.Rules.NameConventions
 open FSharpLint.Framework.Configuration
 
 let config =
-    let pascalRule = { Rule.Settings = Map.ofList [
-                                        ("Enabled", Enabled(true))
-                                        ("Naming", Naming(Naming.PascalCase))
-                                        ("Underscores", Underscores(true)) ] }
+    let pascalRule underscores = 
+        { Rule.Settings = Map.ofList [
+                            ("Enabled", Enabled(true))
+                            ("Naming", Naming(Naming.PascalCase))
+                            ("Underscores", Underscores(underscores)) ] }
 
-    let camelRule = { Rule.Settings = Map.ofList [
-                                        ("Enabled", Enabled(true))
-                                        ("Naming", Naming(Naming.CamelCase))
-                                        ("Underscores", Underscores(true)) ] }
+    let camelRule underscores = 
+        { Rule.Settings = Map.ofList [
+                                ("Enabled", Enabled(true))
+                                ("Naming", Naming(Naming.CamelCase))
+                                ("Underscores", Underscores(underscores)) ] }
 
     let interfaceRule = { Rule.Settings = Map.ofList [
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
-                                            ("Underscores", Underscores(true))
+                                            ("Underscores", Underscores(NamingUnderscores.None))
                                             ("Prefix", Prefix("I")) ] }
 
     let exceptionRule = { Rule.Settings = Map.ofList [
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
-                                            ("Underscores", Underscores(true))
+                                            ("Underscores", Underscores(NamingUnderscores.None))
                                             ("Suffix", Suffix("Exception")) ] }
 
-    let publicOrMeasureRule = { Rule.Settings = Map.ofList [
-                                                    ("Enabled", Enabled(true))
-                                                    ("Underscores", Underscores(true)) ] }
+    let publicOrMeasureRule underscores = 
+        { Rule.Settings = Map.ofList [
+                                ("Enabled", Enabled(true))
+                                ("Underscores", Underscores(underscores)) ] }
 
     Map.ofList
         [ (AnalyserName,
             { Rules = Map.ofList
                 [ ("InterfaceNames", interfaceRule)
                   ("ExceptionNames", exceptionRule)
-                  ("TypeNames", pascalRule)
-                  ("RecordFieldNames", pascalRule)
-                  ("EnumCasesNames", pascalRule)
-                  ("UnionCasesNames", pascalRule)
-                  ("ModuleNames", pascalRule)
-                  ("LiteralNames", pascalRule)
-                  ("NamespaceNames", pascalRule)
-                  ("MemberNames", pascalRule)
-                  ("ParameterNames", camelRule)
-                  ("MeasureTypeNames", publicOrMeasureRule)
-                  ("ActivePatternNames", pascalRule)
-                  ("PublicValuesNames", publicOrMeasureRule)
-                  ("NonPublicValuesNames", camelRule) ]
+                  ("TypeNames", pascalRule NamingUnderscores.None)
+                  ("RecordFieldNames", pascalRule NamingUnderscores.None)
+                  ("EnumCasesNames", pascalRule NamingUnderscores.None)
+                  ("UnionCasesNames", pascalRule NamingUnderscores.None)
+                  ("ModuleNames", pascalRule NamingUnderscores.None)
+                  ("LiteralNames", pascalRule NamingUnderscores.None)
+                  ("NamespaceNames", pascalRule NamingUnderscores.None)
+                  ("MemberNames", pascalRule NamingUnderscores.AllowPrefix)
+                  ("ParameterNames", camelRule NamingUnderscores.AllowPrefix)
+                  ("MeasureTypeNames", publicOrMeasureRule NamingUnderscores.None)
+                  ("ActivePatternNames", pascalRule NamingUnderscores.None)
+                  ("PublicValuesNames", publicOrMeasureRule NamingUnderscores.AllowPrefix)
+                  ("NonPublicValuesNames", camelRule NamingUnderscores.AllowPrefix) ]
               Settings = Map.ofList [] }) ]
 
 [<TestFixture>]
@@ -425,13 +428,13 @@ module program
     [<Test>]
     member this.MnemonicWildcardInPatternMatch() =
         this.Parse """
-module program
+module Program
   let main =
     match true with
     | _dog -> ()
     | _ -> ()"""
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.UnderscoreInMatchPatternIdent() =
@@ -1198,11 +1201,11 @@ let foo SingleCaseDUNoValues = ()""", checkInput = true)
 module Program
 
 type Cat() =
-    member x._Print() = ()"""
+    member x.Pri_nt() = ()"""
 
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
-        Assert.AreEqual(2, numberOfErrors)
+        Assert.AreEqual(1, numberOfErrors)
 
     [<Test>]
     member this.``Let DU deconstruction must not warn about DU name``() =
@@ -1270,4 +1273,14 @@ let foo () =
     ()
         """
         
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``When prefix of underscores is allowed expect no suggestions when the remaining member ident is PascalCase``() =
+        this.Parse """
+module Program
+
+type Cat() =
+    member x.__Print() = ()"""
+
         this.AssertNoWarnings()
