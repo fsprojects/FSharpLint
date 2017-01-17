@@ -1,3 +1,7 @@
+##### 0.6.1-beta - January 17 2017
+
+* Naming rules now customisable thanks to [@Krzysztof-Cieslak](https://github.com/Krzysztof-Cieslak).
+
 ##### 0.5.1-beta - December 31 2016
 
 * Introduced automated fix information to API.
