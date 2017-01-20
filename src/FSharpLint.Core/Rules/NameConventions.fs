@@ -370,6 +370,18 @@ module NameConventions =
         | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
         | SynSimplePat.Attrib(_) -> None
 
+    module QuickFixes =
+        let removeAllUnderscores (ident: Ident) =
+            let toText = ident.idText.Replace("_", "")
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = toText }
+
+        let removeNonPrefixingUnderscores (ident: Ident) =
+            let prefixingUnderscores = 
+                ident.idText |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
+
+            let toText = prefixingUnderscores + ident.idText.Replace("_", "")
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = toText }
+
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -388,40 +400,54 @@ module NameConventions =
             let formatError2 additional errorName =
                 String.Format(Resources.GetString errorName, identifier.idText, additional)
 
-            let postError error =
-                args.Info.Suggest { Range = identifier.idRange; Message = error; SuggestedFix = None }
+            let suggest message suggestedFix =
+                args.Info.Suggest { Range = identifier.idRange; Message = message; SuggestedFix = suggestedFix }
 
             let checkRule (settings : Map<string, Setting>) ident =
-                let testNaming ident =
+                let tryAddFix fix message = (message, fix |> Option.map (fun fixFunc -> fixFunc identifier))
+
+                let testNaming ident : (string * SuggestedFix option) option =
                     settings.TryFind "Naming"
                     |> Option.bind (function
                         | Naming(Naming.PascalCase) -> 
-                            pascalCaseRule ident |> Option.map formatError 
+                            pascalCaseRule ident 
+                            |> Option.map formatError 
+                            |> Option.map (tryAddFix None)
                         | Naming(Naming.CamelCase) -> 
-                            camelCaseRule ident |> Option.map formatError 
+                            camelCaseRule ident 
+                            |> Option.map formatError 
+                            |> Option.map (tryAddFix None)
                         | _ -> None )
 
                 let testUnderscores ident =
                     settings.TryFind "Underscores"
                     |> Option.bind (function 
                         | Underscores(NamingUnderscores.None) -> 
-                            underscoreRule false ident |> Option.map formatError 
+                            underscoreRule false ident 
+                            |> Option.map formatError 
+                            |> Option.map (tryAddFix <| Some QuickFixes.removeAllUnderscores)
                         | Underscores(NamingUnderscores.AllowPrefix) -> 
-                            underscoreRule true ident |> Option.map formatError 
+                            underscoreRule true ident 
+                            |> Option.map formatError 
+                            |> Option.map (tryAddFix <| Some QuickFixes.removeNonPrefixingUnderscores)
                         | Underscores(NamingUnderscores.AllowAny) | _ -> None)
 
-                let testPrefix ident =
+                let testPrefix ident : (string * SuggestedFix option) option =
                     settings.TryFind "Prefix"
                     |> Option.bind (function 
                         | Prefix(prefix) -> 
-                            prefixRule prefix ident |> Option.map (formatError2 prefix)
+                            prefixRule prefix ident 
+                            |> Option.map (formatError2 prefix)
+                            |> Option.map (tryAddFix None)
                         | _ -> None)
 
-                let testSufix ident =
+                let testSufix ident : (string * SuggestedFix option) option =
                     settings.TryFind "Suffix"
                     |> Option.bind (function 
                         | Suffix(suffix) -> 
-                            suffixRule suffix ident |> Option.map (formatError2 suffix)
+                            suffixRule suffix ident 
+                            |> Option.map (formatError2 suffix)
+                            |> Option.map (tryAddFix None)
                         | _ -> None)
 
                 [ yield testNaming ident
@@ -433,9 +459,9 @@ module NameConventions =
                 let ruleName = CheckIdentifiers.toString rule
 
                 let checkIdentifier settings ident =
-                    let errors = checkRule settings ident |> List.choose id
-                    for error in errors do
-                        if isNotSuppressed i ruleName then postError error
+                    let brokenRules = checkRule settings ident |> List.choose id
+                    for (message, suggestedFix) in brokenRules do
+                        if isNotSuppressed i ruleName then suggest message suggestedFix
                     
                 getSettings ruleName
                 |> Option.iter (fun settings ->

@@ -1284,3 +1284,37 @@ type Cat() =
     member x.__Print() = ()"""
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Quick fix for underscores with config of `None` when will remove prefixing underscores.``() = 
+        let source = """
+module Program
+
+type _Cat = | Foo
+"""
+ 
+        let expected = """
+module Program
+
+type Cat = | Foo
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() = 
+        let source = """
+module Program
+
+let __foo_bar = 0
+"""
+ 
+        let expected = """
+module Program
+
+let __foobar = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
