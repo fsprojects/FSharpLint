@@ -1318,3 +1318,35 @@ let __foobar = 0
  
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for prefixes adds missing prefix to identifier.``() =
+        let source = """
+module Program
+  type Printable =
+    abstract member Print : unit -> unit
+"""
+ 
+        let expected = """
+module Program
+  type IPrintable =
+    abstract member Print : unit -> unit
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
+        let source = """
+module Program
+exception Foo of string
+"""
+ 
+        let expected = """
+module Program
+exception FooException of string
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)

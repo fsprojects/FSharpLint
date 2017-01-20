@@ -382,6 +382,12 @@ module NameConventions =
             let toText = prefixingUnderscores + ident.idText.Replace("_", "")
             { FromText = ident.idText; FromRange = ident.idRange; ToText = toText }
 
+        let addPrefix prefix (ident: Ident) =
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText }
+
+        let addSuffix suffix (ident: Ident) =
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix }
+
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -438,7 +444,7 @@ module NameConventions =
                         | Prefix(prefix) -> 
                             prefixRule prefix ident 
                             |> Option.map (formatError2 prefix)
-                            |> Option.map (tryAddFix None)
+                            |> Option.map (tryAddFix <| Some (QuickFixes.addPrefix prefix))
                         | _ -> None)
 
                 let testSufix ident : (string * SuggestedFix option) option =
@@ -447,7 +453,7 @@ module NameConventions =
                         | Suffix(suffix) -> 
                             suffixRule suffix ident 
                             |> Option.map (formatError2 suffix)
-                            |> Option.map (tryAddFix None)
+                            |> Option.map (tryAddFix <| Some (QuickFixes.addSuffix suffix))
                         | _ -> None)
 
                 [ yield testNaming ident
