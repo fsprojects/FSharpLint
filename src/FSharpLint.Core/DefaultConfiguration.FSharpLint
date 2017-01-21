@@ -125,6 +125,8 @@
           null = x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
           x <> null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
           null <> x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
+
+          Array.append a (Array.append b c) ===> Array.concat [|a; b; c|]
         ]]>
       </Hints>
       <Enabled>true</Enabled>
