@@ -388,6 +388,21 @@ module NameConventions =
         let addSuffix suffix (ident: Ident) =
             { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix }
 
+        let private mapFirstChar map (str:string) =
+            if str.Length > 0 then
+                let firstChar = map str.[0] |> string
+                let rest = str.Substring 1
+                firstChar + rest
+            else ""
+
+        let toPascalCase (ident: Ident) =
+            let pascalCaseIdent = ident.idText |> mapFirstChar Char.ToUpper
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = pascalCaseIdent }
+
+        let toCamelCase (ident: Ident) =
+            let camelCaseIdent = ident.idText |> mapFirstChar Char.ToLower
+            { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent }
+
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -410,20 +425,20 @@ module NameConventions =
                 args.Info.Suggest { Range = identifier.idRange; Message = message; SuggestedFix = suggestedFix }
 
             let checkRule (settings : Map<string, Setting>) ident =
-                let tryAddFix fix message = (message, fix |> Option.map (fun fixFunc -> fixFunc identifier))
+                let tryAddFix fix message = (message, fix identifier)
 
-                let testNaming ident : (string * SuggestedFix option) option =
+                let testNaming ident =
                     settings.TryFind "Naming"
                     |> Option.bind (function
                         | Naming(Naming.PascalCase) -> 
                             pascalCaseRule ident 
                             |> Option.map formatError 
-                            |> Option.map (tryAddFix None)
+                            |> Option.map (tryAddFix QuickFixes.toPascalCase)
                         | Naming(Naming.CamelCase) -> 
                             camelCaseRule ident 
                             |> Option.map formatError 
-                            |> Option.map (tryAddFix None)
-                        | _ -> None )
+                            |> Option.map (tryAddFix QuickFixes.toCamelCase)
+                        | _ -> None)
 
                 let testUnderscores ident =
                     settings.TryFind "Underscores"
@@ -431,29 +446,29 @@ module NameConventions =
                         | Underscores(NamingUnderscores.None) -> 
                             underscoreRule false ident 
                             |> Option.map formatError 
-                            |> Option.map (tryAddFix <| Some QuickFixes.removeAllUnderscores)
+                            |> Option.map (tryAddFix QuickFixes.removeAllUnderscores)
                         | Underscores(NamingUnderscores.AllowPrefix) -> 
                             underscoreRule true ident 
                             |> Option.map formatError 
-                            |> Option.map (tryAddFix <| Some QuickFixes.removeNonPrefixingUnderscores)
+                            |> Option.map (tryAddFix QuickFixes.removeNonPrefixingUnderscores)
                         | Underscores(NamingUnderscores.AllowAny) | _ -> None)
 
-                let testPrefix ident : (string * SuggestedFix option) option =
+                let testPrefix ident =
                     settings.TryFind "Prefix"
                     |> Option.bind (function 
                         | Prefix(prefix) -> 
                             prefixRule prefix ident 
                             |> Option.map (formatError2 prefix)
-                            |> Option.map (tryAddFix <| Some (QuickFixes.addPrefix prefix))
+                            |> Option.map (tryAddFix (QuickFixes.addPrefix prefix))
                         | _ -> None)
 
-                let testSufix ident : (string * SuggestedFix option) option =
+                let testSufix ident =
                     settings.TryFind "Suffix"
                     |> Option.bind (function 
                         | Suffix(suffix) -> 
                             suffixRule suffix ident 
                             |> Option.map (formatError2 suffix)
-                            |> Option.map (tryAddFix <| Some (QuickFixes.addSuffix suffix))
+                            |> Option.map (tryAddFix (QuickFixes.addSuffix suffix))
                         | _ -> None)
 
                 [ yield testNaming ident
@@ -467,7 +482,7 @@ module NameConventions =
                 let checkIdentifier settings ident =
                     let brokenRules = checkRule settings ident |> List.choose id
                     for (message, suggestedFix) in brokenRules do
-                        if isNotSuppressed i ruleName then suggest message suggestedFix
+                        if isNotSuppressed i ruleName then suggest message (Some suggestedFix)
                     
                 getSettings ruleName
                 |> Option.iter (fun settings ->

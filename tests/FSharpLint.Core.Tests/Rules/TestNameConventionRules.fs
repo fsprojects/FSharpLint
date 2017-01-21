@@ -1350,3 +1350,37 @@ exception FooException of string
  
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() = 
+        let source = """
+module Program
+
+let foo X = 0
+"""
+ 
+        let expected = """
+module Program
+
+let foo x = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() = 
+        let source = """
+module Program
+
+type cat = | Foo
+"""
+ 
+        let expected = """
+module Program
+
+type Cat = | Foo
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
