@@ -1,3 +1,8 @@
+##### 0.6.2-beta - January 21 2017
+
+* Added suggested fixes for naming rules.
+* New hint by [@smoothdeveloper](https://github.com/smoothdeveloper): https://github.com/fsprojects/FSharpLint/pull/207
+
 ##### 0.6.1-beta - January 17 2017
 
 * Naming rules now customisable thanks to [@Krzysztof-Cieslak](https://github.com/Krzysztof-Cieslak).
