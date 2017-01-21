@@ -92,16 +92,6 @@ type TestNameConventionRules() =
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member __.ContainsUnderScore() =
-        Assert.IsTrue(containsUnderscore "dog_")
-
-        Assert.IsTrue(containsUnderscore "_dog")
-
-        Assert.IsTrue(containsUnderscore "d_og")
-
-        Assert.IsFalse(containsUnderscore "dog")
-
-    [<Test>]
     member this.``Unit of measure issues no casing naming warning.``() =
         this.Parse """
 [<Measure>] type L
@@ -1284,3 +1274,120 @@ type Cat() =
     member x.__Print() = ()"""
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Quick fix for underscores with config of `None` when will remove prefixing underscores.``() = 
+        let source = """
+module Program
+
+type _Cat = | Foo
+"""
+ 
+        let expected = """
+module Program
+
+type Cat = | Foo
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() = 
+        let source = """
+module Program
+
+let __foo_bar = 0
+"""
+ 
+        let expected = """
+module Program
+
+let __foobar = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for prefixes adds missing prefix to identifier.``() =
+        let source = """
+module Program
+  type Printable =
+    abstract member Print : unit -> unit
+"""
+ 
+        let expected = """
+module Program
+  type IPrintable =
+    abstract member Print : unit -> unit
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
+        let source = """
+module Program
+exception Foo of string
+"""
+ 
+        let expected = """
+module Program
+exception FooException of string
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() = 
+        let source = """
+module Program
+
+let foo X = 0
+"""
+ 
+        let expected = """
+module Program
+
+let foo x = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for camel case takes into account underscore prefixes.``() = 
+        let source = """
+module Program
+
+let foo _X = 0
+"""
+ 
+        let expected = """
+module Program
+
+let foo _x = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() = 
+        let source = """
+module Program
+
+type cat = | Foo
+"""
+ 
+        let expected = """
+module Program
+
+type Cat = | Foo
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
