@@ -97,15 +97,15 @@ module NameConventions =
     
         isDoubleBackTickedIdent >> not
 
-    let private pascalCaseRegex = Regex(@"^_*(\p{Lu}|\p{Lt})(\p{L}|\p{N})*", RegexOptions.Compiled)
+    let isPascalCase (identifier:string) = 
+        let withoutUnderscorePrefix = identifier.TrimStart '_'
+        if withoutUnderscorePrefix.Length = 0 then true
+        else Char.IsUpper withoutUnderscorePrefix.[0]
 
-    let isPascalCase (identifier:string) = pascalCaseRegex.IsMatch(identifier)
-
-    let private camelCaseRegex = Regex(@"^_*(\p{Ll}|\p{Lo}|\p{Lm})(\p{L}|\p{N})*", RegexOptions.Compiled)
-
-    let isCamelCase (identifier:string) = camelCaseRegex.IsMatch(identifier)
-
-    let containsUnderscore (identifier:string) = identifier.Contains("_")
+    let isCamelCase (identifier:string) = 
+        let withoutUnderscorePrefix = identifier.TrimStart '_'
+        if withoutUnderscorePrefix.Length = 0 then true
+        else Char.IsLower withoutUnderscorePrefix.[0]
 
     let private pascalCaseRule (identifier:string) =
         if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
@@ -116,7 +116,7 @@ module NameConventions =
         else None
 
     let private underscoreRule allowPrefix (identifier:string) =
-        if containsUnderscore identifier then
+        if identifier.Contains "_" then
             if not allowPrefix then
                 Some "RulesNamingConventionsUnderscoreError"
             else if identifier.TrimStart('_').Contains("_") then
@@ -389,10 +389,13 @@ module NameConventions =
             { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix }
 
         let private mapFirstChar map (str:string) =
-            if str.Length > 0 then
-                let firstChar = map str.[0] |> string
-                let rest = str.Substring 1
-                firstChar + rest
+            let prefix = 
+                str |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
+            let withoutPrefix = str.Substring prefix.Length
+            if withoutPrefix.Length > 0 then
+                let firstChar = map withoutPrefix.[0] |> string
+                let rest = withoutPrefix.Substring 1
+                prefix + firstChar + rest
             else ""
 
         let toPascalCase (ident: Ident) =

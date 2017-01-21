@@ -92,16 +92,6 @@ type TestNameConventionRules() =
         Assert.IsFalse(isCamelCase "DogInBin")
 
     [<Test>]
-    member __.ContainsUnderScore() =
-        Assert.IsTrue(containsUnderscore "dog_")
-
-        Assert.IsTrue(containsUnderscore "_dog")
-
-        Assert.IsTrue(containsUnderscore "d_og")
-
-        Assert.IsFalse(containsUnderscore "dog")
-
-    [<Test>]
     member this.``Unit of measure issues no casing naming warning.``() =
         this.Parse """
 [<Measure>] type L
@@ -1363,6 +1353,23 @@ let foo X = 0
 module Program
 
 let foo x = 0
+"""
+ 
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quick fix for camel case takes into account underscore prefixes.``() = 
+        let source = """
+module Program
+
+let foo _X = 0
+"""
+ 
+        let expected = """
+module Program
+
+let foo _x = 0
 """
  
         this.Parse source
