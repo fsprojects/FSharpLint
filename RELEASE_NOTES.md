@@ -1,3 +1,7 @@
+##### 0.6.3-beta - January 22 2017
+
+* Improved performance of naming analyser.
+
 ##### 0.6.2-beta - January 21 2017
 
 * Added suggested fixes for naming rules.
