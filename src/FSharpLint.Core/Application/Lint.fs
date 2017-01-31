@@ -358,11 +358,7 @@ module Lint =
 
         match getProjectFileInfo projectFilePath with
         | Success(projectOptions) ->
-            let compileFiles =
-                projectOptions.OtherOptions
-                |> Seq.filter (fun x -> x.StartsWith "-" |> not)
-                |> Seq.toList
-
+            let compileFiles = projectOptions.ProjectFileNames |> Array.toList
             match loadConfigAndParseFilesInProject compileFiles projectOptions with
             | Success() -> lintWarnings |> Seq.toList |> LintResult.Success
             | Failure(x) -> LintResult.Failure(x)
