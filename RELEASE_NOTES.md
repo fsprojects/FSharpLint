@@ -1,3 +1,7 @@
+##### 0.6.4-beta - January 30 2017
+
+* Updated `FSharp.Compiler.Service`
+
 ##### 0.6.3-beta - January 22 2017
 
 * Improved performance of naming analyser.

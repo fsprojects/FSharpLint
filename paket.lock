@@ -3,10 +3,10 @@ NUGET
   remote: https://www.nuget.org/api/v2
     FAKE.Lib (4.41.6)
     FParsec (1.0.2)
-    FSharp.Compiler.Service (8.0)
+    FSharp.Compiler.Service (9.0.1)
       System.Collections.Immutable (>= 1.2)
       System.Reflection.Metadata (>= 1.4.1-beta-24227-04)
-    FSharp.Compiler.Service.ProjectCracker (8.0)
+    FSharp.Compiler.Service.ProjectCracker (9.0.1)
     FSharp.Core (4.0.0.1)
     NUnit (3.5)
     System.Collections.Immutable (1.2)
