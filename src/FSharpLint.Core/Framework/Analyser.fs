@@ -57,6 +57,8 @@ module Analyser =
 
           /// Used by visitors to report warnings.
           Suggest: LintSuggestion -> unit
+
+          SuggestAsync: Async<LintSuggestion> -> unit
           
           /// Source of the current file being analysed.
           Text: string }

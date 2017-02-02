@@ -49,7 +49,7 @@ module Program =
             |> Console.WriteLine
 
         let parseInfo =
-            { FinishEarly = None
+            { CancellationToken = None
               ReceivedWarning = Some warningReceived
               Configuration = None }
 
@@ -61,7 +61,7 @@ module Program =
             |> Console.WriteLine
 
         let parseInfo =
-            { FinishEarly = None
+            { CancellationToken = None
               ReceivedWarning = Some reportLintWarning
               Configuration = None }
 
@@ -77,7 +77,7 @@ module Program =
             |> Console.WriteLine
 
         let parseInfo =
-            { FinishEarly = None
+            { CancellationToken = None
               ReceivedWarning = Some reportLintWarning
               Configuration = None }
 

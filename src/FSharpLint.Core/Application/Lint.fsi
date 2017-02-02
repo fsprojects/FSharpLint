@@ -59,6 +59,7 @@ module ConfigurationManagement =
 [<AutoOpen>]
 module Lint =
 
+    open System.Threading
     open FSharpLint.Framework
 
     /// Provides information on what the linter is currently doing.
@@ -79,9 +80,8 @@ module Lint =
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
     type OptionalLintParameters =
-        { /// This function will be called as the linter progresses through the AST of each file.
-          /// The linter will stop linting if this function returns true.
-          FinishEarly: (unit -> bool) option
+        { /// Cancels a lint in progress.
+          CancellationToken: CancellationToken option
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.

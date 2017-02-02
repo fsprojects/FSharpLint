@@ -61,7 +61,7 @@ module AppDomain =
         
             let options = 
                 { ReceivedWarning = Some(errorReceived)
-                  FinishEarly = None
+                  CancellationToken = None
                   Configuration = None }
 
             let progressReceived = function

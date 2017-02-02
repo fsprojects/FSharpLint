@@ -83,7 +83,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
 
     let options = 
         { ReceivedWarning = Some(errorReceived)
-          FinishEarly = None
+          CancellationToken = None
           Configuration = None }
 
     match FSharpLintWorker.RunLint(projectFile, options, Some(parserProgress)) with
