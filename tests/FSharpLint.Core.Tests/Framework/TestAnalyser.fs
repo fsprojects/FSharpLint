@@ -26,7 +26,7 @@ type TestAnalyser() =
     [<Test>]
     member __.``TryFindTextOfRange gets expected text from given ranges``() = 
         let analyserInfo =
-            { AnalyserInfo.Config = { UseTypeChecker = None; IgnoreFiles = None; Analysers = Map.empty }
+            { AnalyserInfo.Config = { IgnoreFiles = None; Analysers = Map.empty }
               AnalyserInfo.FSharpVersion = Version()
               AnalyserInfo.Suggest = ignore
               AnalyserInfo.Text = "123\n345\n678" }

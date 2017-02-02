@@ -56,16 +56,13 @@ module ParseFile =
             |> Async.RunSynchronously
 
         let typeCheckFile () =
-            match configuration.UseTypeChecker with
-            | Some(true) ->
-                let results = 
-                    checker.CheckFileInProject(parseResults, file, 0, source, options) 
-                    |> Async.RunSynchronously
+            let results = 
+                checker.CheckFileInProject(parseResults, file, 0, source, options) 
+                |> Async.RunSynchronously
 
-                match results with
-                | FSharpCheckFileAnswer.Succeeded(x) -> Success(Some(x))
-                | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
-            | Some(false) | None -> Success(None)
+            match results with
+            | FSharpCheckFileAnswer.Succeeded(x) -> Success(Some(x))
+            | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
 
         match parseResults.ParseTree with
         | Some(parseTree) -> 

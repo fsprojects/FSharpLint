@@ -335,17 +335,16 @@ module NameConventions =
 
     let private isMeasureType = isCoreAttribute "Measure"
 
-    let private isUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
+    let private isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
         let symbol = checkFile.GetSymbolUseAtLocation(
-                        ident.idRange.StartLine,
-                        ident.idRange.EndColumn,
-                        "",
-                        [ident.idText])
+                        ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
                         |> Async.RunSynchronously
 
-        match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> true
-        | Some(_) | None -> false
+        let isUnionCase =
+            match symbol with
+            | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> true
+            | Some(_) | None -> false
+        not isUnionCase
 
     let private isInterface typeDef =
         let hasConstructor = function
@@ -395,9 +394,9 @@ module NameConventions =
         | Some(SynAccess.Internal | SynAccess.Private) -> false
 
     let private checkValueOrFunction checkRule rules typeChecker isPublic pattern =
-        let isUnionCase ident =
+        let isNotUnionCase ident =
             match typeChecker with
-            | Some(typeChecker) -> isUnionCase typeChecker ident
+            | Some(typeChecker) -> isNotUnionCase typeChecker ident
             | None -> false
 
         match pattern with
@@ -406,7 +405,7 @@ module NameConventions =
             | Some(ident) ->
                 if isActivePattern ident then
                     checkRule rules.ActivePatternNames ident
-                else if not <| isUnionCase ident then
+                else if isNotUnionCase ident then
                     if isPublic then
                         checkRule rules.PublicValuesNames ident
                     else
@@ -416,7 +415,7 @@ module NameConventions =
         | SynPat.OptionalVal(ident, _) ->
             if isActivePattern ident then
                 checkRule rules.ActivePatternNames ident
-            else if not <| isUnionCase ident then
+            else if isNotUnionCase ident then
                 checkRule rules.ParameterNames ident
         | _ -> ()
 
@@ -504,8 +503,6 @@ module NameConventions =
                               SuggestedFix = Some suggestedFix }
             | _ -> ()
 
-        let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
-
         for i = 0 to syntaxArray.Length - 1 do
             let checkRule = checkNamingRule i
 
@@ -529,7 +526,7 @@ module NameConventions =
             | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
                 checkRule rules.NonPublicValuesNames  identifier
             | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-                checkPattern false (checkValueOrFunction checkRule rules checkFile) false pattern
+                checkPattern false (checkValueOrFunction checkRule rules args.CheckFile) false pattern
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                 | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
@@ -550,7 +547,7 @@ module NameConventions =
                     | SynComponentInfo.ComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
                         match List.tryLast identifier with
                         | Some(typeIdentifier) ->
-                            if isMeasureType attrs checkFile then
+                            if isMeasureType attrs args.CheckFile then
                                 checkRule rules.MeasureTypeNames  typeIdentifier
                             else if isInterface typeDef then
                                 checkRule rules.InterfaceNames  typeIdentifier
@@ -558,7 +555,7 @@ module NameConventions =
                                 identifier |> List.iter (checkRule rules.TypeNames)
                         | _ -> ()
             | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-                if isLiteral attributes checkFile then
+                if isLiteral attributes args.CheckFile then
                     let rec checkLiteral = function
                     | SynPat.Named(_, identifier, _, _, _) ->
                         checkRule rules.LiteralNames identifier
@@ -570,7 +567,7 @@ module NameConventions =
                     match identifierTypeFromValData valData with
                     | Value | Function ->
                         let isPublic = isPublic syntaxArray skipArray i
-                        checkPattern isPublic (checkValueOrFunction checkRule rules checkFile) true pattern
+                        checkPattern isPublic (checkValueOrFunction checkRule rules args.CheckFile) true pattern
                     | Member | Property ->
                         checkPattern false (checkMember checkRule rules) true pattern
                     | _ -> ()

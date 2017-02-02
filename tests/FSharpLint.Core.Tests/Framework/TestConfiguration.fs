@@ -127,8 +127,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Empty config writes correct XML document``() = 
         let config =
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = Map.empty }
 
         let doc = config.ToXmlDocument().ToString()
@@ -136,24 +135,6 @@ type TestConfiguration() =
         let expectedXml = 
             """
 <FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <Analysers />
-</FSharpLintSettings>"""
-
-        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
-
-    [<Test>]
-    member __.``Config specifying to use type checker writes correct XML document``() = 
-        let config =
-            { UseTypeChecker = Some(true)
-              IgnoreFiles = None
-              Analysers = Map.empty }
-
-        let doc = config.ToXmlDocument().ToString()
-
-        let expectedXml = 
-            """
-<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <UseTypeChecker>True</UseTypeChecker>
     <Analysers />
 </FSharpLintSettings>"""
 
@@ -162,8 +143,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config specifying files to ignore writes correct XML document``() = 
         let config =
-            { UseTypeChecker = None
-              IgnoreFiles = Some({ Update = IgnoreFiles.IgnoreFilesUpdate.Add
+            { IgnoreFiles = Some({ Update = IgnoreFiles.IgnoreFilesUpdate.Add
                                    Files = []
                                    Content = "assemblyinfo.*"})
               Analysers = Map.empty }
@@ -192,8 +172,7 @@ type TestConfiguration() =
               Rules = [ ("ReimplementsFunction", rule)  ] |> Map.ofList }
 
         let config =
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = [ ("FunctionReimplementation", analyser)  ] |> Map.ofList }
 
         let doc = config.ToXmlDocument().ToString()
@@ -228,8 +207,7 @@ type TestConfiguration() =
               Rules = Map.empty }
 
         let config =
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = [ ("Hints", analyser)  ] |> Map.ofList }
 
         let doc = config.ToXmlDocument().ToString()
@@ -403,8 +381,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Overridden global configuration returned when a global path has been added``() = 
         let loadedConfig = 
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = 
                 ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
                                  Rules = [] |> Map.ofList }] |> Map.ofList }
@@ -423,8 +400,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Overridden configuration returned when there is a path added``() = 
         let loadedConfig = 
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = 
                 ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
                                  Rules = [] |> Map.ofList }] |> Map.ofList }
@@ -443,14 +419,12 @@ type TestConfiguration() =
     [<Test>]
     member __.``Overridden configuration overrides global config``() = 
         let globalConfig = 
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = 
                 ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
                                  Rules = [] |> Map.ofList }] |> Map.ofList }
         let loadedConfig = 
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = 
                 ["Binding", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
                               Rules = [] |> Map.ofList }] |> Map.ofList }
@@ -470,8 +444,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Update config updates differences``() = 
         let configFromAnalysers analysers =
-            { UseTypeChecker = None
-              IgnoreFiles = None
+            { IgnoreFiles = None
               Analysers = analysers }
             
         let partialConfigToUpdate = 

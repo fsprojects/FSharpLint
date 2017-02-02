@@ -61,11 +61,6 @@ module Analyser =
           /// Source of the current file being analysed.
           Text: string }
 
-        member this.UseTypeChecker = 
-            match this.Config.UseTypeChecker with
-            | Some(true) -> true
-            | Some(_) | None -> false
-
         /// Tries to find the source code within a given range.
         member this.TryFindTextOfRange(range:range) =
             let startIndex = ExpressionUtilities.findPos range.Start this.Text

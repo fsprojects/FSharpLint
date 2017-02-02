@@ -228,8 +228,7 @@ module Configuration =
 
     [<NoComparison>]
     type Configuration =
-        { UseTypeChecker: bool option
-          IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
+        { IgnoreFiles: IgnoreFiles.IgnoreFilesConfig option
           Analysers: Map<string, Analyser> }
 
         member private this.AnalysersToXml() =
@@ -249,11 +248,6 @@ module Configuration =
 
                         let attr = XAttribute(XName.op_Implicit "Update", value)
                         yield XElement(getName "IgnoreFiles", XCData(content), attr)
-                   | None -> ()
-
-                   match this.UseTypeChecker with
-                   | Some(useTypeChecker) ->
-                        yield XElement(getName "UseTypeChecker", useTypeChecker.ToString())
                    | None -> ()
 
                    yield XElement(getName "Analysers", this.AnalysersToXml()) |]
@@ -315,18 +309,12 @@ module Configuration =
 
         (analyser.Name.LocalName, analyserDetails)
 
-    let private getUseTypeChecker (config:XElement) =
-        match config.ElementByLocalName("UseTypeChecker") with
-        | None -> None
-        | Some(element) -> element.Value.ToUpperInvariant() = "TRUE" |> Some
-
     /// Parse a configuration file.
     let configuration (file:string) =
         use configReader = new System.IO.StringReader(file)
         let config = XDocument.Load(configReader).Root
 
-        { UseTypeChecker = getUseTypeChecker config
-          IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
+        { IgnoreFiles = IgnoreFiles.getIgnorePathsFromConfig config
           Analysers =
             match config.ElementByLocalName("Analysers") with
             | Some(analysers) -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
@@ -355,8 +343,7 @@ module Configuration =
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride configToOverrideWith =
-        { UseTypeChecker = configToOverrideWith.UseTypeChecker
-          IgnoreFiles =
+        { IgnoreFiles =
                 match configToOverrideWith.IgnoreFiles with
                 | Some({ Update = IgnoreFiles.Overwrite }) ->
                     configToOverrideWith.IgnoreFiles
