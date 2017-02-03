@@ -340,11 +340,9 @@ module NameConventions =
                         ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
                         |> Async.RunSynchronously
 
-        let isUnionCase =
-            match symbol with
-            | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> true
-            | Some(_) | None -> false
-        not isUnionCase
+        match symbol with
+        | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
+        | Some(_) | None -> true
 
     let private isInterface typeDef =
         let hasConstructor = function
@@ -397,7 +395,7 @@ module NameConventions =
         let isNotUnionCase ident =
             match typeChecker with
             | Some(typeChecker) -> isNotUnionCase typeChecker ident
-            | None -> false
+            | None -> true
 
         match pattern with
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
