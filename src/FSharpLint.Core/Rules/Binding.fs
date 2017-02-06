@@ -76,32 +76,36 @@ module Binding =
                 | SynPat.Named(_, ident, _, _, _) -> Some(ident)
                 | _ -> None
 
-            let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
-                | SynExpr.Paren(expr, _, _, _) -> 
-                    exprIdentMatchesBindingIdent bindingIdent expr
-                | SynExpr.Ident(ident) ->
-                    let isSymbolMutable (ident:Ident) =
-                        let symbol =
-                            checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                            |> Async.RunSynchronously
+            let checkNotMutable (ident:Ident) =
+                async {
+                    let! symbol =
+                        checkFile.GetSymbolUseAtLocation(
+                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-                        let isMutable (symbol:FSharpSymbolUse) = 
-                            match symbol.Symbol with
-                            | :? FSharpMemberOrFunctionOrValue as v -> v.IsMutable
-                            | _ -> false
+                    let isNotMutable (symbol:FSharpSymbolUse) = 
+                        match symbol.Symbol with
+                        | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+                        | _ -> true
 
-                        symbol |> Option.exists isMutable
-
-                    ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
-                | _ -> false
-
-            findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
-                if exprIdentMatchesBindingIdent bindingIdent expr && isSuppressed ruleName |> not then
-                    args.Info.Suggest 
+                    let getSuggestion _ =
                         { Range = range 
                           Message = Resources.GetString("RulesUselessBindingError")
-                          SuggestedFix = None })
-            | _ -> ()
+                          SuggestedFix = None }
+
+                    return symbol |> Option.filter isNotMutable |> Option.map getSuggestion |> Option.toList }
+
+            let rec matchingIdentifier (bindingIdent:Ident) = function
+                | SynExpr.Paren(expr, _, _, _) -> 
+                    matchingIdentifier bindingIdent expr
+                | SynExpr.Ident(ident) when ident.idText = bindingIdent.idText -> Some ident
+                | _ -> None
+
+            findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
+                match matchingIdentifier bindingIdent expr with
+                | Some(ident) when isSuppressed ruleName |> not ->
+                    checkNotMutable ident |> args.Info.SuggestAsync 
+                | Some(_) | None -> ())
+        | _ -> ()
 
     let private checkTupleOfWildcards args pattern identifier isSuppressed =
         let ruleName = "TupleOfWildcards"
