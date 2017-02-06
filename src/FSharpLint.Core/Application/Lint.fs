@@ -235,7 +235,7 @@ module Lint =
                     asyncSuggestions
                     |> Async.Parallel
                     |> runSynchronously
-                    |> Array.iter suggest
+                    |> Array.iter (List.iter suggest)
                 with
                 | :? TimeoutException -> () // Do nothing.
         with

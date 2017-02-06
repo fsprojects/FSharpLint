@@ -95,7 +95,7 @@ type TestRuleBase(analyser, ?analysers) =
         let analyserInfo = 
             { Config = config
               Suggest = postSuggestion
-              SuggestAsync = Async.RunSynchronously >> postSuggestion
+              SuggestAsync = Async.RunSynchronously >> List.iter postSuggestion
               FSharpVersion = version
               Text = input }
         
