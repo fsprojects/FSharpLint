@@ -586,51 +586,59 @@ module HintMatcher =
                 args.Info.TryFindTextOfRange range
                 |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText })
 
-            args.Info.Suggest { Range = range; Message = error; SuggestedFix = suggestedFix }
+            { Range = range; Message = error; SuggestedFix = suggestedFix }
         | Suggestion.Message(message) -> 
             let errorFormatString = Resources.GetString("RulesHintSuggestion")
             let error = System.String.Format(errorFormatString, matched, message)
-            args.Info.Suggest { Range = range; Message = error; SuggestedFix = None }
+            { Range = range; Message = error; SuggestedFix = None }
 
-    let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
-        let symbol =
-            checkFile.GetSymbolUseAtLocation(
-                methodIdent.Range.StartLine,
-                methodIdent.Range.EndColumn,
-                "", 
-                methodIdent.Lid |> List.map (fun x -> x.idText))
-                |> Async.RunSynchronously
+    let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) = 
+        async {
+            let! symbol =
+                checkFile.GetSymbolUseAtLocation(
+                    methodIdent.Range.StartLine,
+                    methodIdent.Range.EndColumn,
+                    "", 
+                    methodIdent.Lid |> List.map (fun x -> x.idText))
 
-        match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
-            let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+            return
+                match symbol with
+                | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
+                    let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
-            if symbol.IsMember && (not << Seq.isEmpty) symbol.CurriedParameterGroups then
-                symbol.CurriedParameterGroups.[0] |> Some
-            else
-                None
-        | _ -> None
+                    if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
+                    else None
+                | _ -> None }
+
+    [<NoEquality; NoComparison>]
+    type Suggestion =
+        | AsyncSuggestions of Async<LintSuggestion list>
+        | Suggestion of LintSuggestion
 
     /// Check a lambda function can be replaced with a function,
     /// it will not be if the lambda is automatically getting
     /// converted to a delegate type e.g. Func<T>.
-    let private lambdaCanBeReplacedWithFunction checkFile breadcrumbs range =
-        let isParameterDelegateType index methodIdent =
+    let private tryReplaceLambdaWithFunction checkFile breadcrumbs range work =
+        let ifNotParameterDelegateType index methodIdent work =
             match checkFile with
             | Some(checkFile) ->
-                let parameters = getMethodParameters checkFile methodIdent
+                async {
+                    let! parameters = getMethodParameters checkFile methodIdent
 
-                match parameters with
-                | Some(parameters) when index < Seq.length parameters ->
-                    let parameter = parameters.[index]
-
-                    parameter.Type.HasTypeDefinition &&
-                    parameter.Type.TypeDefinition.IsDelegate
-                | _ -> false
+                    return
+                        match parameters with
+                        | Some(parameters) when index < Seq.length parameters ->
+                            let parameter = parameters.[index]
+                            if not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate) then
+                                [work ()]
+                            else []
+                        | _ -> [work ()] }
+                |> AsyncSuggestions
+                |> Some
             | None ->
                 /// When we're unable to check the parameters 
                 /// fallback to say it is delegate type.
-                true
+                None
 
         match filterParens breadcrumbs with
         | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
@@ -638,12 +646,12 @@ module HintMatcher =
             let index = exprs |> List.tryFindIndex (fun x -> x.Range = range)
 
             match index with
-            | Some(index) -> not <| isParameterDelegateType index methodIdent
-            | None -> false
+            | Some(index) -> ifNotParameterDelegateType index methodIdent work
+            | None -> None
         | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_
         | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), arg, _))::_ -> 
-            not <| isParameterDelegateType 0 methodIdent
-        | _ -> true
+            ifNotParameterDelegateType 0 methodIdent work
+        | _ -> Some(Suggestion(work ()))
 
     let private confirmFuzzyMatch args (node:AbstractSyntaxArray.Node) breadcrumbs (hint:HintParser.Hint) =
         match node.Actual, hint.Match with
@@ -652,6 +660,7 @@ module HintMatcher =
         | AstNode.Pattern(pattern), HintPat(hintPattern) ->
             if MatchPattern.matchHintPattern (pattern, hintPattern) then
                 hintError hint args pattern.Range (Dictionary<_, _>()) None
+                |> args.Info.Suggest 
         | AstNode.Expression(expr), HintExpr(hintExpr) -> 
             let arguments =
                 { MatchExpression.LambdaArguments = Map.ofList []
@@ -664,10 +673,16 @@ module HintMatcher =
             if MatchExpression.matchHintExpr arguments then
                 match hint.Match, hint.Suggestion with
                 | HintExpr(Expression.Lambda(_)), Suggestion.Expr(Expression.Identifier(_)) -> 
-                    if lambdaCanBeReplacedWithFunction args.CheckFile breadcrumbs expr.Range then
+                    let generateSuggestion () = 
                         hintError hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
+
+                    match tryReplaceLambdaWithFunction args.CheckFile breadcrumbs expr.Range generateSuggestion with 
+                    | Some(Suggestion(suggestion)) -> args.Info.Suggest suggestion
+                    | Some(AsyncSuggestions(suggestions)) -> args.Info.SuggestAsync suggestions
+                    | None -> ()
                 | _ ->
                     hintError hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
+                    |> args.Info.Suggest 
         | _ -> ()
 
     let analyser getHints (args: AnalyserArgs) : unit = 
