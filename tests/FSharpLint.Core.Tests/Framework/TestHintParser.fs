@@ -573,6 +573,26 @@ type TestHintParser() =
         match run phint "List.fold (+) 0 x ===> List.sum x" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.MapToSumIntoSumByHint() =
+        let expected =
+            { Match = Expression.FunctionApplication
+                        [ Expression.Identifier(["List"; "sum"])
+                          Expression.Parentheses(
+                              Expression.FunctionApplication(
+                                  [ Expression.Identifier(["List"; "map"])
+                                    Expression.Variable('x')
+                                    Expression.Variable('y') ])) ] |> HintExpr
+              Suggestion = Suggestion.Expr(
+                                Expression.FunctionApplication(
+                                    [ Expression.Identifier(["List"; "sumBy"])
+                                      Expression.Variable('x')
+                                      Expression.Variable('y') ])) }
+ 
+        match run phint "List.sum (List.map x y) ===> List.sumBy x y" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
     member __.IdHint() = 

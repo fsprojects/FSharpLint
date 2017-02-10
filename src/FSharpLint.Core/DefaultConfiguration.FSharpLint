@@ -103,6 +103,9 @@
           List.fold (+) 0 x ===> List.sum x
           Array.fold (+) 0 x ===> Array.sum x
           Seq.fold (+) 0 x ===> Seq.sum x
+          List.sum (List.map x y) ===> List.sumBy x y
+          Array.sum (Array.map x y) ===> Array.sumBy x y
+          Seq.sum (Seq.map x y) ===> Seq.sumBy x y
 
           List.empty ===> []
           Array.empty ===> [||]
