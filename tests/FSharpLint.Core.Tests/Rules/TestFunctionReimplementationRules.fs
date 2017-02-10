@@ -40,7 +40,7 @@ type TestFunctionReimplementationRules() =
         Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
 
     [<Test>]
-    member this.LambdaReimplementingMultiplcationIssuesError() = 
+    member this.LambdaReimplementingMultiplicationIssuesError() = 
         this.Parse """
 module Program
 
@@ -163,7 +163,7 @@ let f = List.map (fun x -> String x) ["1";"2"]
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
-    member this.LambdaReimplementingMultiplcationIssuesErrorSuppressed() = 
+    member this.LambdaReimplementingMultiplicationIssuesErrorSuppressed() = 
         this.Parse """
 module Program
 
@@ -174,7 +174,7 @@ let f = fun a b -> a * b
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.LambdaReimplementingMultiplcationIssuesErrorSuppressedWithRuleName() = 
+    member this.LambdaReimplementingMultiplicationIssuesErrorSuppressedWithRuleName() = 
         this.Parse """
 module Program
 
@@ -280,7 +280,7 @@ let f = fun _ -> ceil x
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.MultiplcationLambdaWithWildcardParameterDoesNotIssueError() = 
+    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() = 
         this.Parse """
 module Program
 
