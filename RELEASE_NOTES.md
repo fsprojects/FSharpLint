@@ -1,3 +1,8 @@
+##### 0.6.5-beta - February 11 2017
+
+* Updated `FSharp.Compiler.Service`
+* New hints by [@ErikSchierboom](https://github.com/ErikSchierboom)
+
 ##### 0.6.4-beta - January 30 2017
 
 * Updated `FSharp.Compiler.Service`
