@@ -613,6 +613,26 @@ type TestHintParser() =
         match run phint "List.average (List.map x y) ===> List.averageBy x y" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.MapToConcatIntoCollectHint() =
+        let expected =
+            { Match = Expression.FunctionApplication
+                        [ Expression.Identifier(["List"; "concat"])
+                          Expression.Parentheses(
+                              Expression.FunctionApplication(
+                                  [ Expression.Identifier(["List"; "map"])
+                                    Expression.Variable('x')
+                                    Expression.Variable('y') ])) ] |> HintExpr
+              Suggestion = Suggestion.Expr(
+                                Expression.FunctionApplication(
+                                    [ Expression.Identifier(["List"; "collect"])
+                                      Expression.Variable('x')
+                                      Expression.Variable('y') ])) }
+ 
+        match run phint "List.concat (List.map x y) ===> List.collect x y" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
     member __.IdHint() = 
