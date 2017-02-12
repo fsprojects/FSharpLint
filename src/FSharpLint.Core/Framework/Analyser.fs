@@ -50,7 +50,7 @@ module Analyser =
           /// Suggestion is only considered valid when all type checks resolve to true.
           TypeChecks: Async<bool> list }
 
-        member this.WithTypeCheck typeCheck =
+        member internal this.WithTypeCheck typeCheck =
             match typeCheck with
             | Some(check) -> { this with TypeChecks = check::this.TypeChecks }
             | None -> this

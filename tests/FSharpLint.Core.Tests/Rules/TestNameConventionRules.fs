@@ -1368,3 +1368,18 @@ type Cat = | Foo
  
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/97
+    [<Test>]
+    member this.``Deconstructing union case in func arg does not suggest to rename union case``() = 
+        let source = """
+module String10 =
+    type T = private | String10 of string
+
+    let create str = String10 str
+
+    let value (String10 str) = str"""
+ 
+        this.Parse source
+        
+        this.AssertNoWarnings()
