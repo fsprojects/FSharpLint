@@ -44,7 +44,16 @@ module Analyser =
           Message: string
 
           /// Information to provide an automated fix.
-          SuggestedFix: SuggestedFix option }
+          SuggestedFix: SuggestedFix option
+          
+          /// Async type checks to be performed to confirm this suggestion is valid.
+          /// Suggestion is only considered valid when all type checks resolve to true.
+          TypeChecks: Async<bool> list }
+
+        member this.WithTypeCheck typeCheck =
+            match typeCheck with
+            | Some(check) -> { this with TypeChecks = check::this.TypeChecks }
+            | None -> this
     
     /// Passed to each analyser to provide them with access to the configuration and a way of reporting errors.
     [<NoEquality; NoComparison>]
@@ -60,11 +69,6 @@ module Analyser =
           
           /// Source of the current file being analysed.
           Text: string }
-
-        member this.UseTypeChecker = 
-            match this.Config.UseTypeChecker with
-            | Some(true) -> true
-            | Some(_) | None -> false
 
         /// Tries to find the source code within a given range.
         member this.TryFindTextOfRange(range:range) =

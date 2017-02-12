@@ -47,7 +47,8 @@ module Binding =
                 args.Info.Suggest 
                     { Range = range 
                       Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-                      SuggestedFix = None }
+                      SuggestedFix = None
+                      TypeChecks = [] }
 
     let private checkForWildcardNamedWithAsPattern args pattern isSuppressed =
         let ruleName = "WildcardNamedWithAsPattern"
@@ -61,7 +62,8 @@ module Binding =
                     args.Info.Suggest 
                         { Range = range 
                           Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
-                          SuggestedFix = None }
+                          SuggestedFix = None
+                          TypeChecks = [] }
             | _ -> ()
 
     let private checkForUselessBinding args pattern expr range isSuppressed =
@@ -76,32 +78,38 @@ module Binding =
                 | SynPat.Named(_, ident, _, _, _) -> Some(ident)
                 | _ -> None
 
-            let rec exprIdentMatchesBindingIdent (bindingIdent:Ident) = function
+            let checkNotMutable (ident:Ident) =
+                async {
+                    let! symbol =
+                        checkFile.GetSymbolUseAtLocation(
+                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+
+                    let isNotMutable (symbol:FSharpSymbolUse) = 
+                        match symbol.Symbol with
+                        | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+                        | _ -> true
+
+                    return 
+                        match symbol with
+                        | Some(symbol) -> isNotMutable symbol
+                        | None -> false }
+
+            let rec matchingIdentifier (bindingIdent:Ident) = function
                 | SynExpr.Paren(expr, _, _, _) -> 
-                    exprIdentMatchesBindingIdent bindingIdent expr
-                | SynExpr.Ident(ident) ->
-                    let isSymbolMutable (ident:Ident) =
-                        let symbol =
-                            checkFile.GetSymbolUseAtLocation(ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                            |> Async.RunSynchronously
-
-                        let isMutable (symbol:FSharpSymbolUse) = 
-                            match symbol.Symbol with
-                            | :? FSharpMemberOrFunctionOrValue as v -> v.IsMutable
-                            | _ -> false
-
-                        symbol |> Option.exists isMutable
-
-                    ident.idText = bindingIdent.idText && isSymbolMutable ident |> not
-                | _ -> false
+                    matchingIdentifier bindingIdent expr
+                | SynExpr.Ident(ident) when ident.idText = bindingIdent.idText -> Some ident
+                | _ -> None
 
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
-                if exprIdentMatchesBindingIdent bindingIdent expr && isSuppressed ruleName |> not then
+                match matchingIdentifier bindingIdent expr with
+                | Some(ident) when isSuppressed ruleName |> not ->
                     args.Info.Suggest 
                         { Range = range 
                           Message = Resources.GetString("RulesUselessBindingError")
-                          SuggestedFix = None })
-            | _ -> ()
+                          SuggestedFix = None
+                          TypeChecks = [checkNotMutable ident] }
+                | Some(_) | None -> ())
+        | _ -> ()
 
     let private checkTupleOfWildcards args pattern identifier isSuppressed =
         let ruleName = "TupleOfWildcards"
@@ -125,7 +133,7 @@ module Binding =
                     let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
                     let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
                     let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None }
+                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
             | _ -> ()
 
     let private isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =

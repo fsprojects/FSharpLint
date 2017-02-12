@@ -108,8 +108,10 @@ module ConfigurationManagement =
 module Lint =
 
     open System
+    open System.Collections.Concurrent
     open System.Collections.Generic
     open System.IO
+    open System.Threading
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint
     open FSharpLint.Framework
@@ -164,7 +166,7 @@ module Lint =
 
     [<NoEquality; NoComparison>]
     type LintInfo =
-        { FinishEarly: unit -> bool
+        { CancellationToken: CancellationToken option
           ErrorReceived: LintWarning.Warning -> unit
           ReportLinterProgress: ProjectProgress -> unit
           Configuration: Configuration.Configuration
@@ -182,42 +184,84 @@ module Lint =
           (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 
+    module private Async =
+        let combine f x y = async {
+            let! x = x 
+            let! y = y 
+            return f x y }
+
+        let map f xAsync = async {
+            let! x = xAsync 
+            return f x }
+
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
-        if not <| lintInfo.FinishEarly() then
-            let postSuggestion (suggestion:Analyser.LintSuggestion) =
-                { LintWarning.Range = suggestion.Range
-                  LintWarning.Info = suggestion.Message
-                  LintWarning.Input = fileInfo.Text
-                  LintWarning.Fix = suggestion.SuggestedFix } |> lintInfo.ErrorReceived
+        let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
-            let analyserInfo =
-                { Analyser.Text = fileInfo.Text
-                  Analyser.FSharpVersion = lintInfo.FSharpVersion
-                  Analyser.Config = lintInfo.Configuration
-                  Analyser.Suggest = postSuggestion }
-                  
-            let analysers = analysers |> List.map (fun (analyser, name) -> (analyser, name))
+        let suggest (suggestion:Analyser.LintSuggestion) =
+            { LintWarning.Range = suggestion.Range
+              LintWarning.Info = suggestion.Message
+              LintWarning.Input = fileInfo.Text
+              LintWarning.Fix = suggestion.SuggestedFix } |> lintInfo.ErrorReceived
 
-            Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
+        let trySuggest (suggestion:Analyser.LintSuggestion) =
+            if suggestion.TypeChecks.IsEmpty then suggest suggestion
+            else suggestionsRequiringTypeChecks.Push suggestion
 
-            let isAnalyserEnabled analyserName =
-                match Configuration.isAnalyserEnabled lintInfo.Configuration analyserName with
-                | Some(_) -> true | None -> false
+        let analyserInfo =
+            { Analyser.Text = fileInfo.Text
+              Analyser.FSharpVersion = lintInfo.FSharpVersion
+              Analyser.Config = lintInfo.Configuration
+              Analyser.Suggest = trySuggest }
 
-            try
-                let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+        Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
-                for (analyser, analyserName) in analysers do
-                    if isAnalyserEnabled analyserName then
-                        analyser 
-                            { CheckFile = fileInfo.TypeCheckResults
-                              SyntaxArray = array
-                              SkipArray = skipArray
-                              Info = analyserInfo }
-            with
-            | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
+        let isAnalyserEnabled analyserName =
+            match Configuration.isAnalyserEnabled lintInfo.Configuration analyserName with
+            | Some(_) -> true | None -> false
 
-            ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
+        let cancelHasNotBeenRequested () =
+            match lintInfo.CancellationToken with 
+            | Some(x) -> not x.IsCancellationRequested 
+            | None -> true
+
+        try
+            let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+
+            for (analyser, analyserName) in analysers do
+                if isAnalyserEnabled analyserName && cancelHasNotBeenRequested () then
+                    analyser 
+                        { CheckFile = fileInfo.TypeCheckResults
+                          SyntaxArray = array
+                          SkipArray = skipArray
+                          Info = analyserInfo }
+
+            if cancelHasNotBeenRequested () then
+                let runSynchronously work =
+                    let timeoutMs = 200
+                    match lintInfo.CancellationToken with
+                    | Some(cancellationToken) -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
+                    | None -> Async.RunSynchronously(work, timeoutMs)
+
+                try
+                    let typeChecksSuccessful (typeChecks: Async<bool> list) = 
+                        typeChecks 
+                        |> List.reduce (Async.combine (&&))
+
+                    let typeCheckSuggestion (suggestion: Analyser.LintSuggestion) =
+                        typeChecksSuccessful suggestion.TypeChecks 
+                        |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
+                        
+                    suggestionsRequiringTypeChecks
+                    |> Seq.map typeCheckSuggestion
+                    |> Async.Parallel
+                    |> runSynchronously
+                    |> Array.iter (function Some(suggestion) -> suggest suggestion | None -> ())
+                with
+                | :? TimeoutException -> () // Do nothing.
+        with
+        | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
+
+        ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
 
     let getProjectFileInfo projectFilePath =
         // TODO: Find how to extract exceptions from ProjectCracker API rather than parsing them.
@@ -272,9 +316,8 @@ module Lint =
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
     type OptionalLintParameters =
-        { /// This function will be called as the linter progresses through the AST of each file.
-          /// The linter will stop linting if this function returns true.
-          FinishEarly: (unit -> bool) option
+        { /// Cancels a lint in progress.
+          CancellationToken: CancellationToken option
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
@@ -283,7 +326,7 @@ module Lint =
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option }
 
-        static member Default = { FinishEarly = None; Configuration = None; ReceivedWarning = None }
+        static member Default = { CancellationToken = None; Configuration = None; ReceivedWarning = None }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
@@ -319,7 +362,7 @@ module Lint =
         let parseFilesInProject config files projectOptions =
             let lintInformation =
                 { Configuration = config
-                  FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
+                  CancellationToken = optionalParams.CancellationToken
                   ErrorReceived = warningReceived
                   ReportLinterProgress = projectProgress
                   FSharpVersion = System.Version(4, 0) }
@@ -381,7 +424,7 @@ module Lint =
 
         let lintInformation =
             { Configuration = config
-              FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
+              CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
               ReportLinterProgress = ignore
               FSharpVersion = parsedFileInfo.FSharpVersion }
@@ -433,7 +476,7 @@ module Lint =
 
         let lintInformation =
             { Configuration = config
-              FinishEarly = match optionalParams.FinishEarly with Some(f) -> f | None -> fun _ -> false
+              CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
               ReportLinterProgress = ignore
               FSharpVersion = parsedFileInfo.FSharpVersion }

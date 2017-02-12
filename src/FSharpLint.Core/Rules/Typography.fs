@@ -54,7 +54,8 @@ module Typography =
                     analyserInfo.Suggest
                         { Range = range 
                           Message = String.Format(errorFormatString, (maxCharacters + 1))
-                          SuggestedFix = None }
+                          SuggestedFix = None
+                          TypeChecks = [] }
 
     module private TrailingWhitespaceOnLine =
         let numberOfSpacesAllowed config =
@@ -120,7 +121,8 @@ module Typography =
                     analyserInfo.Suggest
                         { Range = range 
                           Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
-                          SuggestedFix = None }
+                          SuggestedFix = None
+                          TypeChecks = [] }
                 
     module private MaxLinesInFile =
         let private maxLinesInFile config =
@@ -137,7 +139,8 @@ module Typography =
                 analyserInfo.Suggest 
                     { Range = mkRange (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
                       Message = String.Format(errorFormatString, (maxLines + 1))
-                      SuggestedFix = None }
+                      SuggestedFix = None
+                      TypeChecks = [] }
 
         let checkMaxLinesInFile mkRange analyserInfo numberOfLines lastLine =
             let checkNumberOfLinesInFile = checkNumberOfLinesInFile mkRange analyserInfo numberOfLines lastLine
@@ -152,7 +155,8 @@ module Typography =
                 analyserInfo.Suggest 
                     { Range = mkRange pos pos
                       Message = Resources.GetString("RulesTypographyTrailingLineError")
-                      SuggestedFix = None }
+                      SuggestedFix = None
+                      TypeChecks = [] }
 
     module private NoTabCharacters =
         let checkNoTabCharacters mkRange analyserInfo (line:string) lineNumber isSuppressed isInLiteralString =
@@ -164,7 +168,8 @@ module Typography =
                     analyserInfo.Suggest 
                         { Range = range 
                           Message = Resources.GetString("RulesTypographyTabCharacterError")
-                          SuggestedFix = None }
+                          SuggestedFix = None 
+                          TypeChecks = [] }
 
     module private String =
         let iterLine f input =

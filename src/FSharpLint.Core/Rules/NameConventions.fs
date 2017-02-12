@@ -290,62 +290,31 @@ module NameConventions =
 
     let private notOperator = isOperator >> not
 
-    /// Is an attribute from FSharp.Core with a given name?
+    /// Is an attribute with a given name?
     /// e.g. check for Literal attribute.
-    let private isCoreAttribute name (attributes:SynAttributes) (checkFile:FSharpCheckFileResults option) =
+    let private isAttribute name (attributes:SynAttributes) =
         let fullName = name + "Attribute"
 
-        match checkFile with
-        | Some(checkFile) ->
-            let isAttributeFromCore (attribute:SynAttribute) =
-                let range = attribute.TypeName.Range
-                let names = attribute.TypeName.Lid |> List.map (fun x -> x.idText)
+        let attributeHasExpectedName (attribute:SynAttribute) =
+            match List.tryLast attribute.TypeName.Lid with
+            | Some(ident) -> ident.idText = fullName || ident.idText = name
+            | None -> false
 
-                let symbol =
-                    checkFile.GetSymbolUseAtLocation(range.EndLine + 1, range.EndColumn, "", names)
-                    |> Async.RunSynchronously
+        attributes |> List.exists attributeHasExpectedName
 
+    let private isLiteral = isAttribute "Literal"
+
+    let private isMeasureType = isAttribute "Measure"
+
+    let private isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) = async {
+            let! symbol = checkFile.GetSymbolUseAtLocation(
+                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+
+            return
                 match symbol with
-                | Some(symbol) ->
-                    match symbol.Symbol with
-                    | :? FSharpEntity as entity when
-                            entity.IsFSharpAbbreviation &&
-                            entity.AbbreviatedType.TypeDefinition.DisplayName = fullName ->
-                        match entity.AbbreviatedType.TypeDefinition.Namespace with
-                        | Some(name) when name.EndsWith("FSharp.Core") -> true
-                        | _ -> false
-                    | :? FSharpEntity as entity when
-                            entity.IsClass && entity.DisplayName = fullName ->
-                        match entity.Namespace with
-                        | Some(name) when name.EndsWith("FSharp.Core") -> true
-                        | _ -> false
-                    | _ -> false
-                | _ -> false
-
-            attributes |> List.exists isAttributeFromCore
-        | None ->
-            let attributeHasExpectedName (attribute:SynAttribute) =
-                match List.tryLast attribute.TypeName.Lid with
-                | Some(ident) -> ident.idText = fullName || ident.idText = name
-                | None -> false
-
-            attributes |> List.exists attributeHasExpectedName
-
-    let private isLiteral = isCoreAttribute "Literal"
-
-    let private isMeasureType = isCoreAttribute "Measure"
-
-    let private isUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
-        let symbol = checkFile.GetSymbolUseAtLocation(
-                        ident.idRange.StartLine,
-                        ident.idRange.EndColumn,
-                        "",
-                        [ident.idText])
-                        |> Async.RunSynchronously
-
-        match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> true
-        | Some(_) | None -> false
+                | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
+                | Some(_) | None -> true
+        }
 
     let private isInterface typeDef =
         let hasConstructor = function
@@ -395,44 +364,44 @@ module NameConventions =
         | Some(SynAccess.Internal | SynAccess.Private) -> false
 
     let private checkValueOrFunction checkRule rules typeChecker isPublic pattern =
-        let isUnionCase ident =
-            match typeChecker with
-            | Some(typeChecker) -> isUnionCase typeChecker ident
-            | None -> false
+        let checkNotUnionCase ident =
+            typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
 
         match pattern with
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
             match List.tryLast longIdent.Lid with
+            | Some(ident) when isActivePattern ident ->
+                checkRule rules.ActivePatternNames ident
             | Some(ident) ->
-                if isActivePattern ident then
-                    checkRule rules.ActivePatternNames ident
-                else if not <| isUnionCase ident then
-                    if isPublic then
-                        checkRule rules.PublicValuesNames ident
-                    else
-                        checkRule rules.NonPublicValuesNames ident
-            | None -> ()
+                let checkNotUnionCase = checkNotUnionCase ident
+                if isPublic then
+                    checkRule rules.PublicValuesNames ident
+                else
+                    checkRule rules.NonPublicValuesNames ident
+                |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
+            | None -> []
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
             if isActivePattern ident then
                 checkRule rules.ActivePatternNames ident
-            else if not <| isUnionCase ident then
+            else 
+                let checkNotUnionCase = checkNotUnionCase ident
                 checkRule rules.ParameterNames ident
-        | _ -> ()
+                |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
+        | _ -> []
 
     let private checkMember checkRule rules _ = function
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
             match List.tryLast longIdent.Lid with
             | Some(ident) -> checkRule rules.MemberNames ident
-            | None -> ()
+            | None -> []
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
             checkRule rules.ParameterNames ident
-        | _ -> ()
+        | _ -> []
 
     let rec private checkPattern isPublic checker argsAreParameters pattern =
         match pattern with
-        | SynPat.OptionalVal(_) -> ()
         | SynPat.LongIdent(_, _, _, args, access, _) ->
             let isPublic = checkIfPublic isPublic access
 
@@ -441,34 +410,31 @@ module NameConventions =
                 | SynConstructorArgs.NamePatPairs(pats, _) -> pats.IsEmpty
                 | SynConstructorArgs.Pats(pats) -> pats.IsEmpty
 
+            let argSuggestions =
+                match args with
+                | SynConstructorArgs.NamePatPairs(pats, _) ->
+                    pats |> List.collect (snd >> checkPattern false checker false)
+                | SynConstructorArgs.Pats(pats) ->
+                    pats |> List.collect (checkPattern false checker false)
+
             // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
             if hasNoArgs || argsAreParameters then
-                checker isPublic pattern
-
-            match args with
-            | SynConstructorArgs.NamePatPairs(pats, _) ->
-                for (_, pat) in pats do
-                    checkPattern false checker false pat
-            | SynConstructorArgs.Pats(pats) ->
-                pats |> List.iter (checkPattern false checker false)
+                checker isPublic pattern @ argSuggestions
+            else 
+                argSuggestions
         | SynPat.Named(p, _, _, access, _) ->
             let isPublic = checkIfPublic isPublic access
-            checker isPublic pattern
-            checkPattern isPublic checker false p
+            checker isPublic pattern @ checkPattern isPublic checker false p
         | SynPat.Or(p1, p2, _) ->
-            checker isPublic pattern
-            checkPattern isPublic checker false p1
-            checkPattern isPublic checker false p2
-        | SynPat.Paren(pat, _) ->
-            checker isPublic pattern
-            checkPattern isPublic checker false pat
+            [p1; p2] |> List.collect (checkPattern isPublic checker false)
+        | SynPat.Paren(p, _) ->
+            checkPattern isPublic checker false p
         | SynPat.Ands(pats, _)
         | SynPat.StructTuple(pats, _)
         | SynPat.Tuple(pats, _)
         | SynPat.ArrayOrList(_, pats, _) ->
-            checker isPublic pattern
-            pats |> List.iter (checkPattern isPublic checker false)
-        | SynPat.Record(pats, _) -> ()
+            pats |> List.collect (checkPattern isPublic checker false)
+        | SynPat.Record(_)
         | SynPat.IsInst(_)
         | SynPat.QuoteExpr(_)
         | SynPat.Null(_)
@@ -476,7 +442,8 @@ module NameConventions =
         | SynPat.Attrib(_)
         | SynPat.Const(_)
         | SynPat.Wild(_)
-        | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> ()
+        | SynPat.OptionalVal(_)
+        | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> []
 
     let rec private identFromSimplePat = function
         | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
@@ -496,15 +463,18 @@ module NameConventions =
         let checkNamingRule i (rule: NamingRule option) (identifier:Ident) =
             match rule with
             | Some(rule) when notOperator identifier.idText && isNotDoubleBackTickedIdent identifier ->
-                for (message, suggestedFix) in rule.Check identifier do
-                    if isNotSuppressed i rule.Name then 
-                        args.Info.Suggest 
+                rule.Check identifier
+                |> List.choose (fun (message, suggestedFix) ->
+                    if isNotSuppressed i rule.Name then
+                        Some 
                             { Range = identifier.idRange
                               Message = message
-                              SuggestedFix = Some suggestedFix }
-            | _ -> ()
+                              SuggestedFix = Some suggestedFix
+                              TypeChecks = [] }
+                    else None)
+            | _ -> []
 
-        let checkFile = if args.Info.UseTypeChecker then args.CheckFile else None
+        let suggest suggestion = args.Info.Suggest suggestion
 
         for i = 0 to syntaxArray.Length - 1 do
             let checkRule = checkNamingRule i
@@ -515,29 +485,33 @@ module NameConventions =
                     if isModule then checkRule rules.ModuleNames
                     else checkRule rules.NamespaceNames
 
-                identifier |> List.iter checkIdent
+                identifier |> List.collect checkIdent |> List.iter args.Info.Suggest
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
-                checkRule rules.UnionCasesNames identifier
+                checkRule rules.UnionCasesNames identifier |> List.iter args.Info.Suggest
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
-                identifier |> Option.iter (checkRule rules.RecordFieldNames)
+                identifier 
+                |> Option.map (checkRule rules.RecordFieldNames)
+                |> Option.iter (List.iter args.Info.Suggest)
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
-                checkRule rules.EnumCasesNames identifier
+                checkRule rules.EnumCasesNames identifier |> List.iter args.Info.Suggest
             | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
                 match unionCase with
                 | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
-                    checkRule rules.ExceptionNames identifier
+                    checkRule rules.ExceptionNames identifier |> List.iter args.Info.Suggest
             | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
-                checkRule rules.NonPublicValuesNames  identifier
+                checkRule rules.NonPublicValuesNames  identifier |> List.iter args.Info.Suggest
             | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-                checkPattern false (checkValueOrFunction checkRule rules checkFile) false pattern
+                checkPattern false (checkValueOrFunction checkRule rules args.CheckFile) false pattern
+                |> List.iter suggest
             | AstNode.MemberDefinition(memberDef) ->
                 match memberDef with
                 | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
-                    checkRule rules.MemberNames  identifier
-                | SynMemberDefn.ImplicitCtor(_, _, args, _, _) ->
-                    for arg in args do
+                    checkRule rules.MemberNames  identifier |> List.iter args.Info.Suggest
+                | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
+                    for arg in ctorArgs do
                         identFromSimplePat arg
-                        |> Option.iter (checkRule rules.ParameterNames)
+                        |> Option.map (checkRule rules.ParameterNames)
+                        |> Option.iter (List.iter args.Info.Suggest)
                 | _ -> ()
             | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) ->
                 let isNotTypeExtension =
@@ -550,33 +524,39 @@ module NameConventions =
                     | SynComponentInfo.ComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
                         match List.tryLast identifier with
                         | Some(typeIdentifier) ->
-                            if isMeasureType attrs checkFile then
-                                checkRule rules.MeasureTypeNames  typeIdentifier
+                            if isMeasureType attrs then
+                                checkRule rules.MeasureTypeNames typeIdentifier
+                                |> List.iter args.Info.Suggest
                             else if isInterface typeDef then
-                                checkRule rules.InterfaceNames  typeIdentifier
+                                checkRule rules.InterfaceNames typeIdentifier
+                                |> List.iter args.Info.Suggest
                             else
-                                identifier |> List.iter (checkRule rules.TypeNames)
+                                identifier 
+                                |> List.collect (checkRule rules.TypeNames) 
+                                |> List.iter args.Info.Suggest
                         | _ -> ()
             | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-                if isLiteral attributes checkFile then
+                if isLiteral attributes then
                     let rec checkLiteral = function
                     | SynPat.Named(_, identifier, _, _, _) ->
                         checkRule rules.LiteralNames identifier
                     | SynPat.Paren(p, _) -> checkLiteral p
-                    | _ -> ()
+                    | _ -> []
 
-                    checkLiteral pattern
+                    checkLiteral pattern |> List.iter args.Info.Suggest
                 else
                     match identifierTypeFromValData valData with
                     | Value | Function ->
                         let isPublic = isPublic syntaxArray skipArray i
-                        checkPattern isPublic (checkValueOrFunction checkRule rules checkFile) true pattern
+                        checkPattern isPublic (checkValueOrFunction checkRule rules args.CheckFile) true pattern
+                        |> List.iter suggest
                     | Member | Property ->
                         checkPattern false (checkMember checkRule rules) true pattern
+                        |> List.iter suggest
                     | _ -> ()
             | AstNode.Match(SynMatchClause.Clause(pattern, _, _, _, _)) ->
                 match pattern with
                 | SynPat.Named(_, identifier, isThis, _, _) when not isThis ->
-                    checkRule rules.NonPublicValuesNames  identifier
+                    checkRule rules.NonPublicValuesNames identifier |> List.iter args.Info.Suggest
                 | _ -> ()
             | _ -> ()

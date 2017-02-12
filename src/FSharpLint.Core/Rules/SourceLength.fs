@@ -53,7 +53,8 @@ module SourceLength =
                         args.Info.Suggest 
                             { Range = range 
                               Message = error errorName maxExpectedLines actualLines
-                              SuggestedFix = None }
+                              SuggestedFix = None 
+                              TypeChecks = [] }
                 | Some(_) | None -> ()
             | None -> ()
             

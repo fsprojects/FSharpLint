@@ -45,7 +45,8 @@ module NumberOfItems =
             if List.length items > maxItems && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
                 let error = String.Format(errorFormatString, maxItems)
-                args.Info.Suggest { Range = items.[maxItems].Range; Message = error; SuggestedFix = None })
+                args.Info.Suggest 
+                    { Range = items.[maxItems].Range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
     let private validateFunction (constructorArguments:SynConstructorArgs) args isSuppressed = 
         let ruleName = "MaxNumberOfFunctionParameters"
@@ -56,7 +57,8 @@ module NumberOfItems =
                     when List.length parameters > maxParameters && not <| isSuppressed ruleName -> 
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
                 let error = String.Format(errorFormatString, maxParameters)
-                args.Info.Suggest { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None }
+                args.Info.Suggest 
+                    { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] }
             | _ -> ()
 
         maxItemsForRule args.Info.Config ruleName
@@ -90,7 +92,8 @@ module NumberOfItems =
             if List.length members > maxMembers && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
                 let error = String.Format(errorFormatString, maxMembers)
-                args.Info.Suggest { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None })
+                args.Info.Suggest 
+                    { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
     let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
         let rec isApplicationNode i = 
@@ -126,7 +129,7 @@ module NumberOfItems =
             if numberOfBooleanOperators > maxBooleanOperators && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
                 let error = String.Format(errorFormatString, maxBooleanOperators)
-                args.Info.Suggest { Range = condition.Range; Message = error; SuggestedFix = None }
+                args.Info.Suggest { Range = condition.Range; Message = error; SuggestedFix = None; TypeChecks = [] }
 
         maxItemsForRule args.Info.Config ruleName
         |> Option.iter checkNumberOfBooleanOperatorsInCondition

@@ -30,8 +30,7 @@ open FSharpLint.Framework.ParseFile
 open TestUtils
 
 let emptyConfig =
-    { UseTypeChecker = Some(false)
-      IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+    { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
       Analysers =
           Map.ofList
               [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
@@ -41,14 +40,23 @@ let emptyConfig =
 type TestRuleBase(analyser, ?analysers) =
     let suggestions = ResizeArray<_>()
 
-    let postSuggestion suggestion =
-        suggestions.Add(suggestion)
+    let postSuggestion (suggestion:Analyser.LintSuggestion) =
+        if not suggestion.TypeChecks.IsEmpty then
+            let successfulTypeCheck = 
+                suggestion.TypeChecks 
+                |> Async.Parallel 
+                |> Async.RunSynchronously
+                |> Array.reduce (&&)
+
+            if successfulTypeCheck then 
+                suggestions.Add(suggestion)
+        else
+            suggestions.Add(suggestion)
 
     let config =
         match analysers with
         | Some(analysers) -> 
-            { UseTypeChecker = Some(false)
-              IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+            { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
               Analysers = analysers }
         | None -> emptyConfig
 
@@ -88,25 +96,24 @@ type TestRuleBase(analyser, ?analysers) =
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
-                { UseTypeChecker = Some(false)
-                  IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+                { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
                   Analysers = overrideAnalysers }
             | None -> config
 
-        let checkInput = match checkInput with | Some(x) -> x | None -> false
-
-        let config = { config with UseTypeChecker = Some(checkInput) }
-
         let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
 
-        let analyserInfo = { Config = config; Suggest = postSuggestion; FSharpVersion = version; Text = input }
+        let analyserInfo = 
+            { Config = config
+              Suggest = postSuggestion
+              FSharpVersion = version
+              Text = input }
         
         match parseSource input config (FSharpChecker.Create()) with
         | Success(parseInfo) ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             analyser 
                 { Info = analyserInfo
-                  CheckFile = parseInfo.TypeCheckResults
+                  CheckFile = match checkInput with Some(true) -> parseInfo.TypeCheckResults | _ -> None
                   SyntaxArray = syntaxArray
                   SkipArray = skipArray }
         | _ -> failwith "Failed to parse input."

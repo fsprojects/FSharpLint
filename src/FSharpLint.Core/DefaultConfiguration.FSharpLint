@@ -6,8 +6,6 @@
     ]]>
   </IgnoreFiles>
 
-  <UseTypeChecker>false</UseTypeChecker>
-
   <Analysers>
     <Hints>
       <Hints>

@@ -53,7 +53,8 @@ module RaiseWithTooManyArguments =
             
         let postError ruleName errorName range isEnabled =
             if isEnabled ruleName then
-                args.Info.Suggest { Range = range; Message = Resources.GetString errorName; SuggestedFix = None }
+                args.Info.Suggest 
+                    { Range = range; Message = Resources.GetString errorName; SuggestedFix = None; TypeChecks = [] }
                 
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with

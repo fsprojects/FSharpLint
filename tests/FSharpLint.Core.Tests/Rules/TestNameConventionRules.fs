@@ -1098,18 +1098,6 @@ let Dog = 6""", checkInput = true)
         Assert.IsFalse(this.ErrorExistsAt(7, 4))
 
     [<Test>]
-    member this.CamelCaseTypeAbbreviationOfLiteral() =
-        this.Parse("""
-module program
-
-type Abbreviation = LiteralAttribute
-
-[<Abbreviation>]
-let dog = 6""", checkInput = true)
-
-        Assert.IsTrue(this.ErrorExistsAt(7, 4))
-
-    [<Test>]
     member this.ParameterUnionCaseContainingValueDoesNotGenerateWarning() =
         this.Parse("""
 module Program
@@ -1158,17 +1146,6 @@ module Program
 type SingleCaseDU = SingleCaseDU of int
 
 let (SingleCaseDU MyInt) = (SingleCaseDU 5)""", checkInput = true)
-
-        Assert.IsTrue(this.ErrorsExist)
-
-    [<Test>]
-    member this.UnionCaseWithoutValueGeneratesWarningWhenNotTypeCheckingInput() =
-        this.Parse("""
-module Program
-
-type SingleCaseDUNoValues = | SingleCaseDUNoValues
-
-let foo SingleCaseDUNoValues = ()""", checkInput = false)
 
         Assert.IsTrue(this.ErrorsExist)
 
