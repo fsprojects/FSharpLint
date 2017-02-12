@@ -29,7 +29,6 @@ type TestAnalyser() =
             { AnalyserInfo.Config = { IgnoreFiles = None; Analysers = Map.empty }
               AnalyserInfo.FSharpVersion = Version()
               AnalyserInfo.Suggest = ignore
-              AnalyserInfo.SuggestAsync = ignore
               AnalyserInfo.Text = "123\n345\n678" }
 
         let textOfRange (line1, col1) (line2, col2) = 

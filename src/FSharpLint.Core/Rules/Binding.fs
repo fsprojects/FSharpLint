@@ -47,7 +47,8 @@ module Binding =
                 args.Info.Suggest 
                     { Range = range 
                       Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-                      SuggestedFix = None }
+                      SuggestedFix = None
+                      TypeChecks = [] }
 
     let private checkForWildcardNamedWithAsPattern args pattern isSuppressed =
         let ruleName = "WildcardNamedWithAsPattern"
@@ -61,7 +62,8 @@ module Binding =
                     args.Info.Suggest 
                         { Range = range 
                           Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
-                          SuggestedFix = None }
+                          SuggestedFix = None
+                          TypeChecks = [] }
             | _ -> ()
 
     let private checkForUselessBinding args pattern expr range isSuppressed =
@@ -87,12 +89,10 @@ module Binding =
                         | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
                         | _ -> true
 
-                    let getSuggestion _ =
-                        { Range = range 
-                          Message = Resources.GetString("RulesUselessBindingError")
-                          SuggestedFix = None }
-
-                    return symbol |> Option.filter isNotMutable |> Option.map getSuggestion |> Option.toList }
+                    return 
+                        match symbol with
+                        | Some(symbol) -> isNotMutable symbol
+                        | None -> false }
 
             let rec matchingIdentifier (bindingIdent:Ident) = function
                 | SynExpr.Paren(expr, _, _, _) -> 
@@ -103,7 +103,11 @@ module Binding =
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
                 match matchingIdentifier bindingIdent expr with
                 | Some(ident) when isSuppressed ruleName |> not ->
-                    checkNotMutable ident |> args.Info.SuggestAsync 
+                    args.Info.Suggest 
+                        { Range = range 
+                          Message = Resources.GetString("RulesUselessBindingError")
+                          SuggestedFix = None
+                          TypeChecks = [checkNotMutable ident] }
                 | Some(_) | None -> ())
         | _ -> ()
 
@@ -129,7 +133,7 @@ module Binding =
                     let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
                     let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
                     let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None }
+                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
             | _ -> ()
 
     let private isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =

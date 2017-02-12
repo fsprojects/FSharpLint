@@ -363,58 +363,44 @@ module NameConventions =
         | Some(SynAccess.Public) | None -> isCurrentlyPublic
         | Some(SynAccess.Internal | SynAccess.Private) -> false
 
-    [<NoEquality; NoComparison>]
-    type Suggestion =
-        | AsyncSuggestions of Async<LintSuggestion list>
-        | Suggestion of LintSuggestion
-
     let private checkValueOrFunction checkRule rules typeChecker isPublic pattern =
-        let ifNotUnionCase ident work =
-            match typeChecker with
-            | Some(typeChecker) -> 
-                async {
-                    let! isNotUnionCase = isNotUnionCase typeChecker ident
-                    if isNotUnionCase then 
-                        return work ()
-                    else return [] } 
-                |> AsyncSuggestions 
-                |> List.singleton
-            | None -> work () |> List.map Suggestion
+        let checkNotUnionCase ident =
+            typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
 
         match pattern with
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
             match List.tryLast longIdent.Lid with
             | Some(ident) when isActivePattern ident ->
                 checkRule rules.ActivePatternNames ident
-                |> List.map Suggestion
             | Some(ident) ->
-                ifNotUnionCase ident
-                    (fun _ ->
-                        if isPublic then
-                            checkRule rules.PublicValuesNames ident
-                        else
-                            checkRule rules.NonPublicValuesNames ident)
+                let checkNotUnionCase = checkNotUnionCase ident
+                if isPublic then
+                    checkRule rules.PublicValuesNames ident
+                else
+                    checkRule rules.NonPublicValuesNames ident
+                |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
             | None -> []
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
             if isActivePattern ident then
                 checkRule rules.ActivePatternNames ident
-                |> List.map Suggestion
             else 
-                ifNotUnionCase ident (fun _ -> checkRule rules.ParameterNames ident)
+                let checkNotUnionCase = checkNotUnionCase ident
+                checkRule rules.ParameterNames ident
+                |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
         | _ -> []
 
     let private checkMember checkRule rules _ = function
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
             match List.tryLast longIdent.Lid with
-            | Some(ident) -> checkRule rules.MemberNames ident |> List.map Suggestion
+            | Some(ident) -> checkRule rules.MemberNames ident
             | None -> []
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
-            checkRule rules.ParameterNames ident |> List.map Suggestion
+            checkRule rules.ParameterNames ident
         | _ -> []
 
-    let rec private checkPattern isPublic checker argsAreParameters pattern : Suggestion list =
+    let rec private checkPattern isPublic checker argsAreParameters pattern =
         match pattern with
         | SynPat.LongIdent(_, _, _, args, access, _) ->
             let isPublic = checkIfPublic isPublic access
@@ -480,13 +466,15 @@ module NameConventions =
                 rule.Check identifier
                 |> List.choose (fun (message, suggestedFix) ->
                     if isNotSuppressed i rule.Name then
-                        Some { Range = identifier.idRange; Message = message; SuggestedFix = Some suggestedFix }
+                        Some 
+                            { Range = identifier.idRange
+                              Message = message
+                              SuggestedFix = Some suggestedFix
+                              TypeChecks = [] }
                     else None)
             | _ -> []
 
-        let suggest = function
-            | AsyncSuggestions(suggestions) -> args.Info.SuggestAsync suggestions
-            | Suggestion(suggestion) -> args.Info.Suggest suggestion
+        let suggest suggestion = args.Info.Suggest suggestion
 
         for i = 0 to syntaxArray.Length - 1 do
             let checkRule = checkNamingRule i

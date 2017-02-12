@@ -91,7 +91,8 @@ module FunctionReimplementation =
             analyserInfo.Suggest
                 { Range = range 
                   Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-                  SuggestedFix = None }
+                  SuggestedFix = None
+                  TypeChecks = [] }
 
     let private validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range analyserInfo =
         let isConstructor expr =
@@ -136,7 +137,8 @@ module FunctionReimplementation =
             analyserInfo.Suggest 
                 { Range = range
                   Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-                  SuggestedFix = suggestedFix }
+                  SuggestedFix = suggestedFix
+                  TypeChecks = [] }
 
         let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev
 

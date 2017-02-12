@@ -40,8 +40,18 @@ let emptyConfig =
 type TestRuleBase(analyser, ?analysers) =
     let suggestions = ResizeArray<_>()
 
-    let postSuggestion suggestion =
-        suggestions.Add(suggestion)
+    let postSuggestion (suggestion:Analyser.LintSuggestion) =
+        if not suggestion.TypeChecks.IsEmpty then
+            let successfulTypeCheck = 
+                suggestion.TypeChecks 
+                |> Async.Parallel 
+                |> Async.RunSynchronously
+                |> Array.reduce (&&)
+
+            if successfulTypeCheck then 
+                suggestions.Add(suggestion)
+        else
+            suggestions.Add(suggestion)
 
     let config =
         match analysers with
@@ -58,7 +68,7 @@ type TestRuleBase(analyser, ?analysers) =
         let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
 
         let analyserInfo =
-            { FSharpVersion = System.Version(3, 1); Config = config; Suggest = ignore; SuggestAsync = ignore; Text = text }
+            { FSharpVersion = System.Version(3, 1); Config = config; Suggest = ignore; Text = text }
 
         let stopwatch = Stopwatch.StartNew()
         let times = ResizeArray()
@@ -95,7 +105,6 @@ type TestRuleBase(analyser, ?analysers) =
         let analyserInfo = 
             { Config = config
               Suggest = postSuggestion
-              SuggestAsync = Async.RunSynchronously >> List.iter postSuggestion
               FSharpVersion = version
               Text = input }
         

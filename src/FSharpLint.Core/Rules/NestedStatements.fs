@@ -137,7 +137,8 @@ module NestedStatements =
                         if not (isSuppressed i) then
                             getRange node 
                             |> Option.iter (fun range -> 
-                                args.Info.Suggest { Range = range; Message = error; SuggestedFix = None })
+                                args.Info.Suggest 
+                                    { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
                         // Skip children as we've had an error containing them.
                         let skipChildren = i + skipArray.[i].NumberOfChildren + 1

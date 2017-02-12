@@ -184,23 +184,34 @@ module Lint =
           (Rules.XmlDocumentation.analyser, Rules.XmlDocumentation.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 
+    module private Async =
+        let combine f x y = async {
+            let! x = x 
+            let! y = y 
+            return f x y }
+
+        let map f xAsync = async {
+            let! x = xAsync 
+            return f x }
+
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
+        let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
+
         let suggest (suggestion:Analyser.LintSuggestion) =
             { LintWarning.Range = suggestion.Range
               LintWarning.Info = suggestion.Message
               LintWarning.Input = fileInfo.Text
               LintWarning.Fix = suggestion.SuggestedFix } |> lintInfo.ErrorReceived
 
-        let asyncSuggestions = ConcurrentStack<_>()
+        let trySuggest (suggestion:Analyser.LintSuggestion) =
+            if suggestion.TypeChecks.IsEmpty then suggest suggestion
+            else suggestionsRequiringTypeChecks.Push suggestion
 
         let analyserInfo =
             { Analyser.Text = fileInfo.Text
               Analyser.FSharpVersion = lintInfo.FSharpVersion
               Analyser.Config = lintInfo.Configuration
-              Analyser.Suggest = suggest
-              Analyser.SuggestAsync = asyncSuggestions.Push }
-                  
-        let analysers = analysers |> List.map (fun (analyser, name) -> (analyser, name))
+              Analyser.Suggest = trySuggest }
 
         Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
@@ -232,10 +243,19 @@ module Lint =
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
-                    asyncSuggestions
+                    let typeChecksSuccessful (typeChecks: Async<bool> list) = 
+                        typeChecks 
+                        |> List.reduce (Async.combine (&&))
+
+                    let typeCheckSuggestion (suggestion: Analyser.LintSuggestion) =
+                        typeChecksSuccessful suggestion.TypeChecks 
+                        |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
+                        
+                    suggestionsRequiringTypeChecks
+                    |> Seq.map typeCheckSuggestion
                     |> Async.Parallel
                     |> runSynchronously
-                    |> Array.iter (List.iter suggest)
+                    |> Array.iter (function Some(suggestion) -> suggest suggestion | None -> ())
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
