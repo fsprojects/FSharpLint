@@ -1,3 +1,8 @@
+##### 0.7.0-beta - February 12 2017
+
+* Type checks performed at end of lint in parallel
+* Linter now cancellable.
+
 ##### 0.6.5-beta - February 11 2017
 
 * Updated `FSharp.Compiler.Service`
