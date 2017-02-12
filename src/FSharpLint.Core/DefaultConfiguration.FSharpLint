@@ -107,6 +107,9 @@
           List.average (List.map x y) ===> List.averageBy x y
           Array.average (Array.map x y) ===> Array.averageBy x y
           Seq.average (Seq.map x y) ===> Seq.averageBy x y
+          (List.take x y, List.skip x y) ===> List.splitAt x y
+          (Array.take x y, Array.skip x y) ===> Array.splitAt x y
+          (Seq.take x y, Seq.skip x y) ===> Seq.splitAt x y
 
           List.empty ===> []
           Array.empty ===> [||]

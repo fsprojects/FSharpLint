@@ -613,6 +613,28 @@ type TestHintParser() =
         match run phint "List.average (List.map x y) ===> List.averageBy x y" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
+
+    [<Test>]
+    member __.TupleTakeAndSkipIntoSplitAtHint() =
+        let expected =
+            { Match = Expression.Tuple(
+                        [ Expression.FunctionApplication(
+                             [ Expression.Identifier(["List"; "take"])
+                               Expression.Variable('x')
+                               Expression.Variable('y') ])
+                          Expression.FunctionApplication(
+                             [ Expression.Identifier(["List"; "skip"])
+                               Expression.Variable('x')
+                               Expression.Variable('y') ]) ]) |> HintExpr
+              Suggestion = Suggestion.Expr(
+                                Expression.FunctionApplication(
+                                    [ Expression.Identifier(["List"; "splitAt"])
+                                      Expression.Variable('x')
+                                      Expression.Variable('y') ])) }
+ 
+        match run phint "(List.take x y, List.skip x y) ===> List.splitAt x y" with
+        | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
+        | Failure(message, _, _) -> Assert.Fail(message)
             
     [<Test>]
     member __.IdHint() = 
