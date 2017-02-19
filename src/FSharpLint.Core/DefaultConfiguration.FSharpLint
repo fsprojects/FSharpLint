@@ -465,5 +465,9 @@
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
+
+    <UnnecasseryNew>
+      <Enabled>true</Enabled>
+    </UnnecasseryNew>
   </Analysers>
 </FSharpLintSettings>

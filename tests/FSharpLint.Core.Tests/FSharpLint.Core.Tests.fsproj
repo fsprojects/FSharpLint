@@ -73,6 +73,7 @@
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
+    <Compile Include="Rules/TestUnnecessaryNew.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
