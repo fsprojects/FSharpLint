@@ -1,7 +1,7 @@
 ﻿module TestRedundantNewKeyword
 
 open NUnit.Framework
-open FSharpLint.Rules.UnnecessaryNew
+open FSharpLint.Rules.RedundantNewKeyword
 open FSharpLint.Framework.Configuration
 
 let config = 
@@ -22,6 +22,16 @@ module Program
 let _ = new System.Version()""", checkInput = true)
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.``RedundantNewKeyword analyser does not offer suggestions when suppressed.``() = 
+        this.Parse("""
+module Program
+
+[<System.Diagnostics.CodeAnalysis.SuppressMessage("RedundantNewKeyword", "*")>]
+let _ = new System.Version()""", checkInput = true)
+
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.``New keyword not considered unnecassery if used with a constructor of a type which implements IDisposable.``() = 

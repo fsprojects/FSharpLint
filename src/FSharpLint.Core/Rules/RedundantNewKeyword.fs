@@ -20,23 +20,17 @@ module RedundantNewKeyword =
         else
             false
 
-    let private isRuleEnabled config ruleName =
-        isRuleEnabled config AnalyserName ruleName |> Option.isSome
-
     let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident:LongIdentWithDots) = async {
         let names = ident.Lid |> List.map (fun x -> x.idText)
         let! symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, "", names)
 
         return
             match symbol with
-            | Some(symbol) -> 
-                if symbol.Symbol :? FSharpMemberOrFunctionOrValue then
-                    let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
-                    let ctorForType = ctor.EnclosingEntity
-                    Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces
-                else 
-                    false
-            | None -> false }
+            | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
+                let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+                let ctorForType = ctor.EnclosingEntity
+                Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces
+            | Some(_) | None -> false }
 
     let private generateFix (info:AnalyserInfo) range =
         info.TryFindTextOfRange range
@@ -48,22 +42,21 @@ module RedundantNewKeyword =
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
-        let isSuppressed i ruleName =
+        let isNotSuppressed i ruleName =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
+            |> not
             
         match args.CheckFile with
         | Some(checker) ->
             for i = 0 to syntaxArray.Length - 1 do
                 match syntaxArray.[i].Actual with
-                | AstNode.Expression(SynExpr.New(_, synType, _, range)) ->
-                    match synType with 
-                    | SynType.LongIdent(identifier) ->
+                | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)) ->
+                    if isNotSuppressed i "*" then
                         args.Info.Suggest
                             { Range = range
                               Message = Resources.GetString("RulesRedundantNewKeyword")
                               SuggestedFix = generateFix args.Info range
                               TypeChecks = [doesNotImplementIDisposable checker identifier] }
-                    | _ -> ()
                 | _ -> ()
         | None -> ()
