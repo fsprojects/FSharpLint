@@ -38,6 +38,13 @@ module UnnecessaryNew =
                     false
             | None -> false }
 
+    let private generateFix (info:AnalyserInfo) range =
+        info.TryFindTextOfRange range
+        |> Option.map (fun fromText -> 
+            let withoutLeadingWhitespace = fromText.TrimStart()
+            let newKeywordRemoved = withoutLeadingWhitespace.Substring(3).TrimStart()
+            { FromText = fromText; FromRange = range; ToText = newKeywordRemoved })
+
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -51,10 +58,12 @@ module UnnecessaryNew =
                 match syntaxArray.[i].Actual with
                 | AstNode.Expression(SynExpr.New(_, synType, _, range)) ->
                     match synType with 
-                    | SynType.LongIdent(identifier) -> 
-                        let check = doesNotImplementIDisposable checker identifier
+                    | SynType.LongIdent(identifier) ->
                         args.Info.Suggest
-                            { Range = range; Message = "suggestion"; SuggestedFix = None; TypeChecks = [check] }
+                            { Range = range
+                              Message = "suggestion"
+                              SuggestedFix = generateFix args.Info range
+                              TypeChecks = [doesNotImplementIDisposable checker identifier] }
                     | _ -> ()
                 | _ -> ()
         | None -> ()

@@ -31,3 +31,18 @@ module Program
 let _ = new System.IO.MemoryStream()""", checkInput = true)
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Quick fix for unnecassery new keyword.``() =
+        let source = """
+module Program
+
+let _ = new System.Version()"""
+ 
+        let expected = """
+module Program
+
+let _ = System.Version()"""
+ 
+        this.Parse(source, checkInput = true)
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
