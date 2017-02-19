@@ -61,7 +61,7 @@ module UnnecessaryNew =
                     | SynType.LongIdent(identifier) ->
                         args.Info.Suggest
                             { Range = range
-                              Message = "suggestion"
+                              Message = Resources.GetString("RulesRedundantNewKeyword")
                               SuggestedFix = generateFix args.Info range
                               TypeChecks = [doesNotImplementIDisposable checker identifier] }
                     | _ -> ()

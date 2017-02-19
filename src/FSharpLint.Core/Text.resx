@@ -267,4 +267,7 @@
   <data name="RulesXmlDocumentationLetError" xml:space="preserve">
     <value>Let binding suggested to have xml documentation.</value>
   </data>
+  <data name="RulesRedundantNewKeyword" xml:space="preserve">
+    <value>Usage of `new` keyword here is redundant.</value>
+  </data>
 </root>
