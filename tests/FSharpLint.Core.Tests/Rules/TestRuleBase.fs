@@ -168,7 +168,7 @@ type TestRuleBase(analyser, ?analysers) =
             |> Seq.choose (fun x -> x.SuggestedFix)
             |> Seq.tryHead
 
-        match firstSuggestedFix with
+        match firstSuggestedFix |> Option.bind (fun x -> x.Value) with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source

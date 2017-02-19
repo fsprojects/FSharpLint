@@ -44,7 +44,7 @@ module Analyser =
           Message: string
 
           /// Information to provide an automated fix.
-          SuggestedFix: SuggestedFix option
+          SuggestedFix: Lazy<SuggestedFix option> option
           
           /// Async type checks to be performed to confirm this suggestion is valid.
           /// Suggestion is only considered valid when all type checks resolve to true.

@@ -32,12 +32,12 @@ module RedundantNewKeyword =
                 Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces
             | Some(_) | None -> false }
 
-    let private generateFix (info:AnalyserInfo) range =
+    let private generateFix (info:AnalyserInfo) range = lazy(
         info.TryFindTextOfRange range
         |> Option.map (fun fromText -> 
             let withoutLeadingWhitespace = fromText.TrimStart()
             let newKeywordRemoved = withoutLeadingWhitespace.Substring(3).TrimStart()
-            { FromText = fromText; FromRange = range; ToText = newKeywordRemoved })
+            { FromText = fromText; FromRange = range; ToText = newKeywordRemoved }))
 
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -56,7 +56,7 @@ module RedundantNewKeyword =
                         args.Info.Suggest
                             { Range = range
                               Message = Resources.GetString("RulesRedundantNewKeyword")
-                              SuggestedFix = generateFix args.Info range
+                              SuggestedFix = Some(generateFix args.Info range)
                               TypeChecks = [doesNotImplementIDisposable checker identifier] }
                 | _ -> ()
         | None -> ()

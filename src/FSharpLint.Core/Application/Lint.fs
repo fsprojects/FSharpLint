@@ -199,10 +199,11 @@ module Lint =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let suggest (suggestion:Analyser.LintSuggestion) =
-            { LintWarning.Range = suggestion.Range
-              LintWarning.Info = suggestion.Message
-              LintWarning.Input = fileInfo.Text
-              LintWarning.Fix = suggestion.SuggestedFix } |> lintInfo.ErrorReceived
+            lintInfo.ErrorReceived
+                { LintWarning.Range = suggestion.Range
+                  LintWarning.Info = suggestion.Message
+                  LintWarning.Input = fileInfo.Text
+                  LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
 
         let trySuggest (suggestion:Analyser.LintSuggestion) =
             if suggestion.TypeChecks.IsEmpty then suggest suggestion
