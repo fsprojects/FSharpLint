@@ -465,5 +465,9 @@
       </Rules>
       <Enabled>false</Enabled>
     </XmlDocumentation>
+
+    <RedundantNewKeyword>
+      <Enabled>true</Enabled>
+    </RedundantNewKeyword>
   </Analysers>
 </FSharpLintSettings>
