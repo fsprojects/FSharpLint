@@ -130,14 +130,14 @@ module FunctionReimplementation =
                 |> List.map (fun x -> DemangleOperatorName x.idText)
                 |> String.concat "."
 
-            let suggestedFix = 
+            let suggestedFix = lazy(
                 analyserInfo.TryFindTextOfRange range
-                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier })
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
 
             analyserInfo.Suggest 
                 { Range = range
                   Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-                  SuggestedFix = suggestedFix
+                  SuggestedFix = Some suggestedFix
                   TypeChecks = [] }
 
         let argumentsAsIdentifiers = lambda.Arguments |> List.map getLambdaParamIdent |> List.rev

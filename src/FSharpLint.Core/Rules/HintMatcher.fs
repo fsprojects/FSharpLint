@@ -599,11 +599,11 @@ module HintMatcher =
             
             let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
 
-            let suggestedFix = 
+            let suggestedFix = lazy(
                 args.Info.TryFindTextOfRange range
-                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText })
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText }))
 
-            { Range = range; Message = error; SuggestedFix = suggestedFix; TypeChecks = typeChecks }
+            { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
         | Suggestion.Message(message) -> 
             let errorFormatString = Resources.GetString("RulesHintSuggestion")
             let error = System.String.Format(errorFormatString, matched, message)

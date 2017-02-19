@@ -79,22 +79,22 @@ module NameConventions =
         |> Seq.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
     module QuickFixes =
-        let removeAllUnderscores (ident: Ident) =
+        let removeAllUnderscores (ident: Ident) = lazy(
             let toText = ident.idText.Replace("_", "")
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = toText }
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
-        let removeNonPrefixingUnderscores (ident: Ident) =
+        let removeNonPrefixingUnderscores (ident: Ident) = lazy(
             let prefixingUnderscores = 
                 ident.idText |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
 
             let toText = prefixingUnderscores + ident.idText.Replace("_", "")
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = toText }
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
-        let addPrefix prefix (ident: Ident) =
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText }
+        let addPrefix prefix (ident: Ident) = lazy(
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText })
 
-        let addSuffix suffix (ident: Ident) =
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix }
+        let addSuffix suffix (ident: Ident) = lazy(
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix })
 
         let private mapFirstChar map (str:string) =
             let prefix = 
@@ -106,13 +106,13 @@ module NameConventions =
                 prefix + firstChar + rest
             else ""
 
-        let toPascalCase (ident: Ident) =
+        let toPascalCase (ident: Ident) = lazy(
             let pascalCaseIdent = ident.idText |> mapFirstChar Char.ToUpper
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = pascalCaseIdent }
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = pascalCaseIdent })
 
-        let toCamelCase (ident: Ident) =
+        let toCamelCase (ident: Ident) = lazy(
             let camelCaseIdent = ident.idText |> mapFirstChar Char.ToLower
-            { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent }
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
             
     type private NamingRule =
         { Name: string
