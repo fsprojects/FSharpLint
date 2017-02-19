@@ -278,7 +278,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="UnnecasseryNew">
+  <xs:complexType name="RedundantNewKeyword">
     <xs:sequence>
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
     </xs:sequence>
@@ -296,7 +296,7 @@
       <xs:element name="Binding" maxOccurs="1" minOccurs="0" type="Binding" />
       <xs:element name="FunctionReimplementation" maxOccurs="1" minOccurs="0" type="FunctionReimplementation" />
       <xs:element name="XmlDocumentation" maxOccurs="1" minOccurs="0" type="XmlDocumentation" />
-      <xs:element name="UnnecasseryNew" maxOccurs="1" minOccurs="0" type="UnnecasseryNew" />
+      <xs:element name="RedundantNewKeyword" maxOccurs="1" minOccurs="0" type="RedundantNewKeyword" />
     </xs:sequence>
   </xs:complexType>
 

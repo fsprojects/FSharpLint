@@ -1,4 +1,4 @@
-﻿module TestUnnecessaryNew
+﻿module TestRedundantNewKeyword
 
 open NUnit.Framework
 open FSharpLint.Rules.UnnecessaryNew
@@ -11,7 +11,7 @@ let config =
         [ (AnalyserName, { Rules = Map.empty; Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
               
 [<TestFixture>]
-type TestUnnecessaryNew() =
+type TestRedundantNewKeyword() =
     inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]

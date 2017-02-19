@@ -1,6 +1,6 @@
 ﻿namespace FSharpLint.Rules
 
-module UnnecessaryNew =
+module RedundantNewKeyword =
     
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
@@ -10,7 +10,7 @@ module UnnecessaryNew =
     open FSharpLint.Framework.Configuration
 
     [<Literal>]
-    let AnalyserName = "UnnecessaryNew"
+    let AnalyserName = "RedundantNewKeyword"
 
     let private implementsIDisposable (fsharpType:FSharpType) =
         if fsharpType.HasTypeDefinition then
