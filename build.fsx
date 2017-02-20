@@ -28,7 +28,7 @@ let summaryApi = "FSharpLint Api (Lint tool for F#)."
 // List of author names (for NuGet package)
 let authors = [ "Matthew Mcveigh" ]
 
-let version = "0.7.0-beta"
+let version = "0.7.1-beta"
 
 // File system information 
 // (<solutionFile>.sln is built during the building process)

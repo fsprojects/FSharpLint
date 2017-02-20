@@ -1,3 +1,7 @@
+##### 0.7.1-beta - February 20 2017
+
+* Added suggestion for redundant usages of the `new` keyword.
+
 ##### 0.7.0-beta - February 12 2017
 
 * Type checks performed at end of lint in parallel
