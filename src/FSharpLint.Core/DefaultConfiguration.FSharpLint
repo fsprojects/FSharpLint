@@ -424,48 +424,6 @@
       <Enabled>true</Enabled>
     </FunctionReimplementation>
 
-    <XmlDocumentation>
-      <Rules>
-        <ModuleDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </ModuleDefinitionHeader>
-        <ExceptionDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </ExceptionDefinitionHeader>
-        <TypeDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </TypeDefinitionHeader>
-        <MemberDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </MemberDefinitionHeader>
-        <EnumDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </EnumDefinitionHeader>
-        <UnionDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </UnionDefinitionHeader>
-        <RecordDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </RecordDefinitionHeader>
-        <AutoPropertyDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </AutoPropertyDefinitionHeader>
-        <LetDefinitionHeader>
-          <Access>None</Access>
-          <Enabled>false</Enabled>
-        </LetDefinitionHeader>
-      </Rules>
-      <Enabled>false</Enabled>
-    </XmlDocumentation>
-
     <RedundantNewKeyword>
       <Enabled>true</Enabled>
     </RedundantNewKeyword>

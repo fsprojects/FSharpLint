@@ -1,3 +1,11 @@
+##### 0.7.3-beta - February 23 2017
+
+* Updated `FSharp.Compiler.Service`
+
+##### 0.7.2-beta - February 23 2017
+
+* Updated `FSharp.Compiler.Service`
+
 ##### 0.7.1-beta - February 20 2017
 
 * Added suggestion for redundant usages of the `new` keyword.

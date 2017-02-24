@@ -88,11 +88,10 @@ The tool can be run from the command line, or as an MSBuild task.
 * [NestedStatements](NestedStatements.html)
 * [NumberOfItems](NumberOfItems.html)
 * [FunctionReimplementation](FunctionReimplementation.html)
-* [XmlDocumentation](XmlDocumentation.html)
 * [Binding](Binding.html)
 * [RaiseWithTooManyArguments](RaiseWithTooManyArguments.html)
 
-Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all xml documentation rules can be done by turning off just the analyser in the configuration.
+Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all naming rules can be done by turning off just the analyser in the configuration.
 
 ####Configuration Files
 

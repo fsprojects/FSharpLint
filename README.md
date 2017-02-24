@@ -35,7 +35,7 @@ Mono 4.0.2 | .NET 4.5
 
 ###Licensing
 
-The project is licensed under GPLv3. For more information on the license see the LICENSE file and http://www.gnu.org/licenses/quick-guide-gplv3.html.
+The project is licensed under MIT. For more information on the license see the LICENSE file.
 
 ###Contact
 

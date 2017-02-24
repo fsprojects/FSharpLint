@@ -257,27 +257,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="XmlDocumentation">
-    <xs:sequence>
-      <xs:element name="Rules" maxOccurs="1" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="ModuleDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="ExceptionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="TypeDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="MemberDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="EnumDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="UnionDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="RecordDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="AutoPropertyDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-            <xs:element name="LetDefinitionHeader" maxOccurs="1" minOccurs="0" type="Access" />
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="RedundantNewKeyword">
     <xs:sequence>
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
@@ -295,7 +274,6 @@
       <xs:element name="RaiseWithTooManyArguments" maxOccurs="1" minOccurs="0" type="RaiseWithTooManyArguments" />
       <xs:element name="Binding" maxOccurs="1" minOccurs="0" type="Binding" />
       <xs:element name="FunctionReimplementation" maxOccurs="1" minOccurs="0" type="FunctionReimplementation" />
-      <xs:element name="XmlDocumentation" maxOccurs="1" minOccurs="0" type="XmlDocumentation" />
       <xs:element name="RedundantNewKeyword" maxOccurs="1" minOccurs="0" type="RedundantNewKeyword" />
     </xs:sequence>
   </xs:complexType>
