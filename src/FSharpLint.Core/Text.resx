@@ -222,9 +222,6 @@
   <data name="RulesWildcardNamedWithAsPattern" xml:space="preserve">
     <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` replaced with `x`.</value>
   </data>
-  <data name="RulesXmlDocumentationExceptionError" xml:space="preserve">
-    <value>Exception type suggested to have xml documentation.</value>
-  </data>
   <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
     <value>`invalidArg` should have two arguments, further arguments will be ignored by the compiler.</value>
   </data>
@@ -242,30 +239,6 @@
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Lambda may be able to be replaced with composition. e.g. `fun x -> x |> isValid |> not` could be replaced with `isValid >> not`.</value>
-  </data>
-  <data name="RulesXmlDocumentationTypeError" xml:space="preserve">
-    <value>Type suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationMemberError" xml:space="preserve">
-    <value>Member suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationModuleError" xml:space="preserve">
-    <value>Module suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationEnumError" xml:space="preserve">
-    <value>Enum `{0}` suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationUnionError" xml:space="preserve">
-    <value>Union case `{0}` suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationRecordError" xml:space="preserve">
-    <value>Record field `{0}` suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationAutoPropertyError" xml:space="preserve">
-    <value>Auto property `{0}` suggested to have xml documentation.</value>
-  </data>
-  <data name="RulesXmlDocumentationLetError" xml:space="preserve">
-    <value>Let binding suggested to have xml documentation.</value>
   </data>
   <data name="RulesRedundantNewKeyword" xml:space="preserve">
     <value>Usage of `new` keyword here is redundant.</value>

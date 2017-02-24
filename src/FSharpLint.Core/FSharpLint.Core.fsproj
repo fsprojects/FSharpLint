@@ -68,7 +68,6 @@
     <Compile Include="Rules/NameConventions.fs" />
     <Compile Include="Rules/NumberOfItems.fs" />
     <Compile Include="Rules/Binding.fs" />
-    <Compile Include="Rules/XmlDocumentation.fs" />
     <Compile Include="Rules/SourceLength.fs" />
     <Compile Include="Rules/NestedStatements.fs" />
     <Compile Include="Rules/Typography.fs" />
