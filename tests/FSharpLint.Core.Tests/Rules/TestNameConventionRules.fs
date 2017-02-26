@@ -1367,3 +1367,16 @@ module String10 =
         this.Parse source
         
         this.AssertNoWarnings()
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/188
+    [<Test>]
+    member this.``Single long ident union case in func arg does must not suggest rename``() = 
+        let source = """
+module Program
+type WithCamel = YesCamel
+
+let SomeCamel WithCamel.YesCamel = 12  """
+ 
+        this.Parse source
+        
+        this.AssertNoWarnings()
