@@ -291,14 +291,13 @@ module NameConventions =
     let private isMeasureType = isAttribute "Measure"
 
     let private isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) = async {
-            let! symbol = checkFile.GetSymbolUseAtLocation(
-                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+        let! symbol = checkFile.GetSymbolUseAtLocation(
+                        ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-            return
-                match symbol with
-                | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
-                | Some(_) | None -> true
-        }
+        return
+            match symbol with
+            | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
+            | Some(_) | None -> true }
 
     let private isInterface typeDef =
         let hasConstructor = function
@@ -318,31 +317,6 @@ module NameConventions =
             members |> List.forall canBeInInterface
         | _ -> false
 
-    let private checkLongIdent checkRule rules valData isPublic = function
-        | SynPat.LongIdent(longIdentifier, _, _, args, access, _) ->
-            let isPublic = function
-                | Some(access) -> access = SynAccess.Public && isPublic ()
-                | None -> isPublic ()
-
-            match args with
-            | SynConstructorArgs.NamePatPairs(_) -> ()
-            | SynConstructorArgs.Pats(_) -> ()
-
-            match List.tryLast longIdentifier.Lid with
-            | Some(lastIdent) ->
-                match identifierTypeFromValData valData with
-                | Value | Function when isActivePattern lastIdent ->
-                    rules.ActivePatternNames |> checkRule lastIdent
-                | Value | Function when isPublic access ->
-                    rules.PublicValuesNames |> checkRule lastIdent
-                | Value | Function ->
-                    rules.NonPublicValuesNames |> checkRule lastIdent
-                | Member | Property ->
-                    rules.MemberNames |> checkRule lastIdent
-                | _ -> ()
-            | _ -> ()
-        | _ -> ()
-
     let private checkIfPublic isCurrentlyPublic = function
         | Some(SynAccess.Public) | None -> isCurrentlyPublic
         | Some(SynAccess.Internal | SynAccess.Private) -> false
@@ -353,17 +327,20 @@ module NameConventions =
 
         match pattern with
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
+            // If a pattern identifier is made up of more than one part then it's not binding a new value.
+            let singleIdentifier = List.length longIdent.Lid = 1
+
             match List.tryLast longIdent.Lid with
             | Some(ident) when isActivePattern ident ->
                 checkRule rules.ActivePatternNames ident
-            | Some(ident) ->
+            | Some(ident) when singleIdentifier ->
                 let checkNotUnionCase = checkNotUnionCase ident
                 if isPublic then
                     checkRule rules.PublicValuesNames ident
                 else
                     checkRule rules.NonPublicValuesNames ident
                 |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
-            | None -> []
+            | None | Some(_) -> []
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
             if isActivePattern ident then
