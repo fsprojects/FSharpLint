@@ -19,3 +19,6 @@ artifacts:
 
   - path: packaging\*.nupkg
     name: NuGet packages
+
+deploy_script:
+  - cmd: .\deploy.cmd

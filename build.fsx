@@ -88,9 +88,9 @@ Target "Default" DoNothing
     ==> "RunFunctionalTests" 
     ==> "RunTests"
     ==> "Lint" 
+    ==> "Package" 
     ==> "Default"
     ==> "GenerateDocs" 
-    ==> "Package" 
     ==> "PublishPackages" 
     ==> "Release"
 
