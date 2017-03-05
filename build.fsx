@@ -1,52 +1,19 @@
-// --------------------------------------------------------------------------------------
-// FAKE build script 
-// --------------------------------------------------------------------------------------
-
 #r @"packages/tools/FAKE/tools/FakeLib.dll"
-open Fake 
-open Fake.Testing
-open Fake.AssemblyInfoFile
-open Fake.ReleaseNotesHelper
+#I @"packages/tools/FSharpLint.Fake/tools"
+#r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
+
 open System
+open Fake 
+open Fake.AssemblyInfoFile
+open Fake.Git
+open Fake.Testing
+open Fake.ReleaseNotesHelper
+open FSharpLint.Fake
 
-// Information about the project are used
-//  - for version and project name in generated AssemblyInfo file
-//  - by the generated NuGet package 
-//  - to run tests and to publish documentation on GitHub gh-pages
-//  - for documentation, you also need to edit info in "docs/tools/generate.fsx"
-
-// The name of the project 
-// (used by attributes in AssemblyInfo, name of a NuGet package and directory in 'src')
 let project = "FSharpLint"
-let projectApi = "FSharpLint.Core"
 
-// Short summary of the project
-// (used as description in AssemblyInfo and as a short summary for NuGet package)
-let summary = "Lint tool for F#."
-let summaryApi = "FSharpLint Api (Lint tool for F#)."
+let release = LoadReleaseNotes "RELEASE_NOTES.md"
 
-// List of author names (for NuGet package)
-let authors = [ "Matthew Mcveigh" ]
-
-let version = "0.7.4-beta"
-
-// File system information 
-// (<solutionFile>.sln is built during the building process)
-let solutionFile  = "FSharpLint"
-// Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
-
-// Git configuration (used for publishing documentation in gh-pages branch)
-// The profile where the project is posted 
-let gitHome = "https://github.com/fsprojects/FSharpLint"
-// The name of the project on GitHub
-let gitName = "FSharpLint"
-
-// Read additional information from the release notes document
-Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
-let release = parseReleaseNotes (IO.File.ReadAllLines "RELEASE_NOTES.md")
-
-// Generate assembly info files with the right version & up-to-date information
 let genAssemblyInfo (projectPath) =
     let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
     let basePath = "src/" + projectName
@@ -54,43 +21,29 @@ let genAssemblyInfo (projectPath) =
     CreateFSharpAssemblyInfo fileName
       [ Attribute.Title project
         Attribute.Product project
-        Attribute.Description summary
-        Attribute.Version version
-        Attribute.FileVersion version ]
+        Attribute.Description "Lint tool for F#."
+        Attribute.Version release.AssemblyVersion
+        Attribute.FileVersion release.AssemblyVersion ]
 
 Target "AssemblyInfo" (fun _ ->
-    !! "src/**/*.fsproj"
-        |> Seq.iter genAssemblyInfo)
-
-// --------------------------------------------------------------------------------------
-// Clean build results & restore NuGet packages
+    !! "src/**/*.fsproj" |> Seq.iter genAssemblyInfo)
 
 Target "RestorePackages" RestorePackages
 
-Target "Clean" (fun _ ->
-    CleanDirs ["bin"]
-)
-
-// --------------------------------------------------------------------------------------
-// Build library & test project
+Target "Clean" (fun _ -> CleanDirs ["bin"])
 
 Target "Build" (fun _ ->
-    !! (solutionFile + ".sln")
+    !! "FSharpLint.sln"
     |> MSBuildRelease "" "Rebuild"
-    |> ignore
-)
-
-// --------------------------------------------------------------------------------------
-// Run the unit tests using test runner
+    |> ignore)
 
 Target "RunTests" (fun _ ->
-    !! testAssemblies 
+    !! "tests/**/bin/Release/*Tests*.dll" 
     |> NUnit3 (fun p ->
         { p with
             ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" })
-)
+            Where = "cat != Performance" }))
 
 Target "RunFunctionalTests" (fun _ ->
     !! "tests/**/bin/Release/*FunctionalTest*.dll" 
@@ -98,13 +51,9 @@ Target "RunFunctionalTests" (fun _ ->
         { p with
             ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" })
-)
+            Where = "cat != Performance" }))
 
-// --------------------------------------------------------------------------------------
-// Create nuget package
-
-Target "CreateNugetPackages" (fun _ ->    
+Target "Package" (fun _ ->    
     Paket.Pack (fun p -> 
         { p with 
             ToolPath = ".paket/paket.exe" 
@@ -113,61 +62,36 @@ Target "CreateNugetPackages" (fun _ ->
             IncludeReferencedProjects = true
             OutputPath = "packaging" }))
 
-#I @"packages/tools/FSharpLint.Fake/tools"
-#r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
-open FSharpLint.Fake
+Target "PublishPackages" (fun _ ->
+    Paket.Push(fun p -> { p with WorkingDir = "packaging" }))
+
+Target "Release" (fun _ ->
+    StageAll ""
+    Commit "" (sprintf "Bump version to %s" release.NugetVersion)
+    Branches.push ""
+
+    Branches.tag "" release.NugetVersion
+    Branches.pushTag "" "origin" release.NugetVersion)
 
 Target "Lint" (fun _ ->
-    !! "src/**/*.fsproj"
-        |> Seq.iter (FSharpLint id))
-
-// --------------------------------------------------------------------------------------
-// .NET CLI and .NET Core
-
-let assertExitCodeZero x = if x = 0 then () else failwithf "Command failed with exit code %i" x
-
-Target "DotnetCliBuild" (fun _ ->
-    Shell.Exec("dotnet", "restore") |> assertExitCodeZero
-    Shell.Exec("dotnet", "--verbose pack --output packaging/dotnetcore --configuration Release", "src/FSharpLint.Core.netcore") |> assertExitCodeZero
-)
-
-Target "DotnetCliRunTests" (fun _ ->
-    Shell.Exec("dotnet", """--verbose test --configuration Release -where "cat != Performance" """, "tests/FSharpLint.Core.Tests.netcore") |> assertExitCodeZero
-)
-
-let isDotnetCLIInstalled = false // Disable until we get FSharp.Compiler.Service netcore package //try Shell.Exec("dotnet", "--version") = 0 with _ -> false
-
-Target "AddNetcoreToNupkg" (fun _ ->
-    let nupkg = sprintf "../../packaging/FSharpLint.Core.%s.nupkg" version
-    let netcoreNupkg = sprintf "packaging/dotnetcore/FSharpLint.Core.netcore.%s.nupkg" release.AssemblyVersion
-
-    Shell.Exec("dotnet", sprintf """mergenupkg --source "%s" --other "%s" --framework netstandard1.5 """ nupkg netcoreNupkg, "src/FSharpLint.Core.netcore") |> assertExitCodeZero
-)
-
-// --------------------------------------------------------------------------------------
-// Generate the documentation web pages
+    !! "src/**/*.fsproj" |> Seq.iter (FSharpLint id))
 
 Target "GenerateDocs" (fun _ ->
-    executeFSI "docs/tools" "generate.fsx" [] |> ignore
-)
+    executeFSI "docs/tools" "generate.fsx" [] |> ignore)
 
-// --------------------------------------------------------------------------------------
-// Run all targets by default. Invoke 'build <Target>' to override
-
-Target "All" DoNothing
+Target "Default" DoNothing
 
 "Clean" 
     ==> "RestorePackages"
     ==> "AssemblyInfo" 
     ==> "Build" 
-    =?> ("DotnetCliBuild", isDotnetCLIInstalled)
     ==> "RunFunctionalTests" 
     ==> "RunTests"
-    =?> ("DotnetCliRunTests", isDotnetCLIInstalled)
     ==> "Lint" 
+    ==> "Default"
     ==> "GenerateDocs" 
-    ==> "CreateNugetPackages" 
-    =?> ("AddNetcoreToNupkg", isDotnetCLIInstalled)
-    ==> "All"
+    ==> "Package" 
+    ==> "PublishPackages" 
+    ==> "Release"
 
-RunTargetOrDefault "All"
+RunTargetOrDefault "Default"
