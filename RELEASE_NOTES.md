@@ -1,3 +1,7 @@
+##### 0.7.4-beta - March 03 2017
+
+* Updated `FSharp.Compiler.Service`
+
 ##### 0.7.3-beta - February 23 2017
 
 * Updated `FSharp.Compiler.Service`

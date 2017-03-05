@@ -3,8 +3,8 @@ source https://nuget.org/api/v2
 
 nuget FParsec >= 1.0.2
 nuget NUnit >= 3.4.1
-nuget FSharp.Compiler.Service >= 11.0.2
-nuget FSharp.Compiler.Service.ProjectCracker >= 11.0.2
+nuget FSharp.Compiler.Service >= 11.0.4
+nuget FSharp.Compiler.Service.ProjectCracker >= 11.0.4
 nuget FAKE.Lib
 nuget FSharp.Core ~> 4.0.0.1
 

@@ -12,7 +12,7 @@ module Binding =
     [<Literal>]
     let AnalyserName = "Binding"
 
-    let private isRuleEnabled config ruleName =
+    let private isRuleEnabled config ruleName = 
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
             
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
@@ -38,7 +38,7 @@ module Binding =
         let ruleName = "WildcardNamedWithAsPattern"
 
         let isEnabled = isRuleEnabled args.Info.Config ruleName
-
+        
         if isEnabled then
             match pattern with
             | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
