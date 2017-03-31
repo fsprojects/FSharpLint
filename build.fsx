@@ -14,8 +14,8 @@ let project = "FSharpLint"
 
 let release = LoadReleaseNotes "RELEASE_NOTES.md"
 
-let genAssemblyInfo (projectPath) =
-    let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+let genAssemblyInfo projectPath =
+    let projectName = IO.Path.GetFileNameWithoutExtension projectPath
     let basePath = "src/" + projectName
     let fileName = basePath + "/AssemblyInfo.fs"
     CreateFSharpAssemblyInfo fileName

@@ -60,23 +60,25 @@ module ParseFile =
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
     /// Parses a file using `FSharp.Compiler.Service`.
-    let parseFile file configuration (checker:FSharpChecker) options =
+    let parseFile file configuration (checker:FSharpChecker) projectOptions =
         let source = System.IO.File.ReadAllText(file)
 
-        let options =
-            match options with
+        let projectOptions =
+            match projectOptions with
             | Some(existingOptions) -> existingOptions
             | None -> 
-                checker.GetProjectOptionsFromScript(file, source) 
-                |> Async.RunSynchronously
+                let (projectOptions, _diagnostics) = 
+                    checker.GetProjectOptionsFromScript(file, source) 
+                    |> Async.RunSynchronously
+                projectOptions
         
-        parse configuration file source (checker, options)
+        parse configuration file source (checker, projectOptions)
         
     /// Parses source code using `FSharp.Compiler.Service`.
     let parseSource source configuration (checker:FSharpChecker) =
         let file = "/home/user/Dog.Test.fsx"
         
-        let options = 
+        let (options, _diagnostics) = 
             checker.GetProjectOptionsFromScript(file, source) 
             |> Async.RunSynchronously
 
