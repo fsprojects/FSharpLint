@@ -8,11 +8,15 @@ open FSharpLint.Framework.AbstractSyntaxArray
 open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.SourceCodeServices
+open Microsoft.FSharp.Reflection
 open NUnit.Framework
 open TestUtils
 
 [<TestFixture>]
 type TestAst() =
+    let unionCaseName (x:'a) = 
+        match FSharpValue.GetUnionFields(x, typeof<'a>) with
+        | case, _ -> case.Name
 
     let astToExpr ast =
         let (|Module|_|) x =
@@ -29,7 +33,7 @@ type TestAst() =
             | _ -> failwith "Expected at least one module or namespace."
         | _ -> failwith "Expected an implementation file."
 
-    let astNodeName = removeParens >> string >> (fun x -> x.Substring(x.LastIndexOf("+") + 1))
+    let astNodeName = removeParens >> unionCaseName
 
     [<Test>]
     member __.``Flatten with right pipe adds lhs to end of function application.``() = 
@@ -55,7 +59,7 @@ type TestAst() =
     [<Test>]
     member __.``Flatten with binary operator on lhs of right pipe.``() = 
         match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
-        | FuncApp(expressions, _) -> 
+        | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
