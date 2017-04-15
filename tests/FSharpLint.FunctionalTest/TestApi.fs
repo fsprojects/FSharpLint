@@ -17,7 +17,7 @@ module TestApi =
         let generateAst source =
             let checker = FSharpChecker.Create()
 
-            let options = 
+            let (options, _diagnostics) = 
                 checker.GetProjectOptionsFromScript(sourceFile, source) 
                 |> Async.RunSynchronously
 
