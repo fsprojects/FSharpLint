@@ -1,8 +1,8 @@
-#NestedStatements
+# NestedStatements
 
 Single rule that checks code is not more deeply nested than a configurable depth.
 
-#####Cause
+##### Cause
 
 A statement is nested deeper than a configurable depth, for example if `MaxItems` was set to 8 (the default) then the following code would cause an error:
 
@@ -17,11 +17,11 @@ A statement is nested deeper than a configurable depth, for example if `MaxItems
 									if true then		// Depth 8
 										()		// Depth 9!!
 
-#####Rationale
+##### Rationale
 
 When code becomes too deeply nested it becomes more difficult to read and understand, try to refactor nested code out into functions. 
 
-#####How To Fix
+##### How To Fix
 
 Reduce the depth of the deepest statement, e.g. to fix the example in the "Cause" section you'd take out on level of depth:
 
@@ -35,7 +35,7 @@ Reduce the depth of the deepest statement, e.g. to fix the example in the "Cause
 								if true then			// Depth 7
 									()			// Depth 8
 
-###Analyser Settings
+### Analyser Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 `Depth` - An integer property that specifies the max depth of a statement. (Default 8)

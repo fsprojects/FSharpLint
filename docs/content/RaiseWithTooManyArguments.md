@@ -1,117 +1,117 @@
-#RaiseWithTooManyArguments
+# RaiseWithTooManyArguments
 
 `raise` [can be passed more than one argument](http://visualfsharp.codeplex.com/workitem/41), in code this is likely to be a mistake and these rules warn when this occurs.
 
-###Analyser Settings
+### Analyser Settings
 
 `Enabled` - A boolean property that can enable and disable this analyser. (Default true)
 
-###Rules
+### Rules
 
-####RaiseWithSingleArgument
+#### RaiseWithSingleArgument
 
-#####Cause
+##### Cause
 
 `raise` is passed more than one argument e.g. `raise (System.ArgumentException("Divisor cannot be zero.")) 5`
 
-#####Rationale
+##### Rationale
 
 `raise` being passed more than one argument (the exception to be thrown) is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-####FailwithWithSingleArgument
+#### FailwithWithSingleArgument
 
-#####Cause
+##### Cause
 
 `failwith` is passed more than one argument e.g. `failwith "Divisor cannot be zero." 5`
 
-#####Rationale
+##### Rationale
 
 `failwith` being passed more than one argument (the error message) is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-####NullArgWithSingleArgument
+#### NullArgWithSingleArgument
 
-#####Cause
+##### Cause
 
 `nullArg` is passed more than one argument e.g. `nullArg "Divisor cannot be zero." 5`
 
-#####Rationale
+##### Rationale
 
 `nullArg` being passed more than one argument (the error message) is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-####InvalidOpWithSingleArgument
+#### InvalidOpWithSingleArgument
 
-#####Cause
+##### Cause
 
 `invalidOp` is passed more than one argument e.g. `invalidOp "Divisor cannot be zero." 5`
 
-#####Rationale
+##### Rationale
 
 `invalidOp` being passed more than one argument (the error message) is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-####FailwithfWithArgumentsMatchingFormatString
+#### FailwithfWithArgumentsMatchingFormatString
 
-#####Cause
+##### Cause
 
 `failwithf` is passed more arguments than the format string (first argument) species e.g. `failwithf "%d" 5 5`
 
-#####Rationale
+##### Rationale
 
 `failwithf` being passed more arguments than the format string (first argument) specifies is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-####InvalidArgWithTwoArguments
+#### InvalidArgWithTwoArguments
 
-#####Cause
+##### Cause
 
 `invalidArg` is passed more than two arguments e.g. `invalidArg "month" "Expected value between 1 and 12"`
 
-#####Rationale
+##### Rationale
 
 `invalidArg` being passed more than two arguments is probably a mistake.
 
-#####How To Fix
+##### How To Fix
 
 Remove the extra arguments.
 
-#####Rule Settings
+##### Rule Settings
 
 `Enabled` - A boolean property that can enable and disable this rule. (Default true)
