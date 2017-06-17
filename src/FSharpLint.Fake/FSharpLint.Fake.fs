@@ -68,7 +68,7 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     let options = 
         { ReceivedWarning = Some(errorReceived)
           CancellationToken = None
-          Configuration = Some(ConfigurationManager.getConfigurationForFile projectFile) }
+          Configuration = None }
 
     match FSharpLintWorker.RunLint(projectFile, options, Some(parserProgress)) with
     | Success when parameters.FailBuildIfAnyWarnings && !numberOfWarnings > 0 ->

@@ -35,7 +35,7 @@ module Program =
         let parseInfo =
             { CancellationToken = None
               ReceivedWarning = Some warningReceived
-              Configuration = Some(ConfigurationManager.getConfigurationForFile projectFile) }
+              Configuration = None }
 
         lintProject parseInfo projectFile (Some parserProgress)
 
@@ -47,7 +47,7 @@ module Program =
         let parseInfo =
             { CancellationToken = None
               ReceivedWarning = Some reportLintWarning
-              Configuration = Some(ConfigurationManager.getConfigurationForFile pathToFile) }
+              Configuration = None }
 
         lintFile parseInfo pathToFile
 
