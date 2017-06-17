@@ -21,13 +21,13 @@ let config =
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
                                             ("Underscores", Underscores(NamingUnderscores.None))
-                                            ("Prefix", Prefix("I")) ] }
+                                            ("Prefix", Prefix(Some("I"))) ] }
 
     let exceptionRule = { Rule.Settings = Map.ofList [
                                             ("Enabled", Enabled(true))
                                             ("Naming", Naming(Naming.PascalCase))
                                             ("Underscores", Underscores(NamingUnderscores.None))
-                                            ("Suffix", Suffix("Exception")) ] }
+                                            ("Suffix", Suffix(Some("Exception"))) ] }
 
     let publicOrMeasureRule underscores = 
         { Rule.Settings = Map.ofList [

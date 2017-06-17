@@ -167,11 +167,11 @@ module NameConventions =
                 | Some(Underscores(NamingUnderscores.AllowAny)) | _ -> None
               Prefix = 
                 match Map.tryFind "Prefix" settings with
-                | Some(Prefix(prefix)) -> Some prefix
+                | Some(Prefix(prefix)) -> prefix
                 | _ -> None
               Suffix = 
                 match Map.tryFind "Suffix" settings with
-                | Some(Suffix(suffix)) -> Some suffix
+                | Some(Suffix(suffix)) -> suffix
                 | _ -> None }
 
     type private Rules = 

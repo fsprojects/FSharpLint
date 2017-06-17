@@ -42,7 +42,6 @@ module TestPackageHelper =
         getAssemblyPath "FSharpLint.Core" "FSharp.Compiler.Service.dll" |> copyToTaskDir
         getAssemblyPath "FSharpLint.Core" "FParsecCS.dll" |> copyToTaskDir
         getAssemblyPath "FSharpLint.Core" "FParsec.dll" |> copyToTaskDir
-        getAssemblyPath "FSharpLint.Core" "System.ValueTuple.dll" |> copyToTaskDir
 
         let taskBuildDirectory = taskDirectory </> "build"
 
