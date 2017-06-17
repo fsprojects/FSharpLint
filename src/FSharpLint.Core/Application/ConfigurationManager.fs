@@ -28,6 +28,16 @@ module ConfigurationManager =
         else
             None
 
+    let getConfigurationForFile filePath =
+        let tryGetConfigForDirectory directoryPath =
+            let configFilePath = Path.Combine(directoryPath, SettingsFileName)
+            tryLoadConfig configFilePath
+
+        Path.GetDirectoryName filePath
+        |> getParentDirectories
+        |> List.choose tryGetConfigForDirectory
+        |> List.fold overrideConfiguration defaultConfiguration
+
     /// Loads and stores configurations in memory so that they can easily be modified
     /// and written back out to disk.
     /// Intended to allow for all the configuration files for all the projects in a solution

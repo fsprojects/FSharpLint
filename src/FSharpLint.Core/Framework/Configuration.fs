@@ -57,8 +57,8 @@ module Configuration =
         | IgnoreBlankLines of bool
         | Access of Access
         | Naming of Naming
-        | Prefix of string
-        | Suffix of string
+        | Prefix of string option
+        | Suffix of string option
         | Underscores of NamingUnderscores
 
     let private settingToXml = function
@@ -254,6 +254,9 @@ module Configuration =
         |> List.filter (System.String.IsNullOrWhiteSpace >> not)
         |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
 
+    let private emptyStringAsNone str =
+        if System.String.IsNullOrWhiteSpace str then None else Some str
+
     let private parseSetting (setting:XElement) =
         match setting.Name.LocalName with
         | "Enabled" -> Enabled(setting.Value |> bool.Parse)
@@ -267,8 +270,8 @@ module Configuration =
         | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
         | "Access" -> Access(setting.Value |> fromEnum "Access")
         | "Naming" -> Naming(setting.Value |> fromEnum "Naming")
-        | "Prefix" -> Prefix(setting.Value)
-        | "Suffix" -> Suffix(setting.Value)
+        | "Prefix" -> Prefix(emptyStringAsNone setting.Value)
+        | "Suffix" -> Suffix(emptyStringAsNone setting.Value)
         | "Underscores" -> Underscores(setting.Value |> fromEnum "NamingUnderscores")
         | settingName ->
             sprintf "Found unknown setting %s" settingName |> ConfigurationException |> raise
