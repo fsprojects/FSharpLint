@@ -2,9 +2,9 @@ framework: net40, net45
 source https://nuget.org/api/v2
 
 nuget FParsec >= 1.0.2
-nuget NUnit >= 3.4.1
-nuget FSharp.Compiler.Service >= 12.0.8
-nuget FSharp.Compiler.Service.ProjectCracker >= 12.0.8
+nuget NUnit >= 3.7.1
+nuget FSharp.Compiler.Service >= 13.0.0
+nuget FSharp.Compiler.Service.ProjectCracker >= 13.0.0
 nuget FAKE.Lib
 nuget FSharp.Core ~> 4.0.0.1
 
