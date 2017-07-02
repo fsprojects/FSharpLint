@@ -1,3 +1,9 @@
+##### 0.7.6 - July 02 2017
+
+* Fixed https://github.com/fsprojects/FSharpLint/issues/229
+* Fixed https://github.com/fsprojects/FSharpLint/issues/227
+* Updated `FSharp.Compiler.Service`
+
 ##### 0.7.5-beta - March 31 2017
 
 * Updated `FSharp.Compiler.Service`
