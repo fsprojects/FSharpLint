@@ -18,6 +18,17 @@ module Configuration =
     let private getName name =
         XName.Get(name, Namespace)
 
+    type Update =
+        | Add
+        | Overwrite
+
+        static member From(el:XElement) =
+            let updateAttribute = el.Attributes() |> Seq.tryFind (fun x -> x.Name.LocalName = "Update")
+            
+            match updateAttribute with
+            | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
+            | Some(_) | None -> Overwrite
+
     type XElement with
         member this.ElementByLocalName localName =
             this.Elements()
@@ -45,13 +56,15 @@ module Configuration =
 
     type Hint = { Hint: string; ParsedHint: HintParser.Hint }
 
+    type Hints = { Hints: Hint list; Update: Update }
+
     type Setting =
         | Enabled of bool
         | Lines of int
         | Depth of int
         | MaxItems of int
         | Length of int
-        | Hints of Hint list
+        | Hints of Hints
         | OneSpaceAllowedAfterOperator of bool
         | NumberOfSpacesAllowed of int
         | IgnoreBlankLines of bool
@@ -76,7 +89,7 @@ module Configuration =
         | Access(x) -> x :> obj
         | Naming(x) -> x :> obj
         | Hints(hints) ->
-            hints
+            hints.Hints
             |> List.map (fun x -> x.Hint)
             |> String.concat System.Environment.NewLine
             |> XCData :> obj
@@ -161,13 +174,9 @@ module Configuration =
                     when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
                 | _ -> isCurrentlyIgnored) false
 
-        type IgnoreFilesUpdate =
-            | Add
-            | Overwrite
-
         [<NoComparison>]
         type IgnoreFilesConfig =
-            { Update: IgnoreFilesUpdate
+            { Update: Update
               Files: Ignore list
 
               /// Unparsed value from the configuration XML file.
@@ -175,13 +184,8 @@ module Configuration =
               Content: string }
 
         let private parseIgnoreFiles (ignoreFiles:XElement) =
-            let updateAttribute = ignoreFiles.Attributes() |> Seq.tryFind (fun x -> x.Name.LocalName = "Update")
-
             { Files = ignoreFiles.Value.Trim() |> parseLines |> Seq.map parseIgnorePath |> Seq.toList
-              Update =
-                match updateAttribute with
-                | Some(attribute) when attribute.Value.ToUpperInvariant() = "ADD" -> Add
-                | Some(_) | None -> Overwrite
+              Update = Update.From ignoreFiles
               Content = ignoreFiles.Value }
 
         let getIgnorePathsFromConfig (configRoot:XElement) =
@@ -227,8 +231,8 @@ module Configuration =
                    | Some({ Content = content; Update = updateType }) ->
                         let value =
                             match updateType with
-                                | IgnoreFiles.Add -> "Add"
-                                | IgnoreFiles.Overwrite -> "Overwrite"
+                                | Add -> "Add"
+                                | Overwrite -> "Overwrite"
 
                         let attr = XAttribute(XName.op_Implicit "Update", value)
                         yield XElement(getName "IgnoreFiles", XCData(content), attr)
@@ -243,16 +247,20 @@ module Configuration =
         if not valid then sprintf "Found unknown XmlDocumentation %s value %s" name value |> ConfigurationException |> raise
         ret
 
-    let private parseHints (hintsText:string) =
+    let private parseHints (el:XElement) =
+        let hintsText = el.Value
         let parseHint hint =
             match FParsec.CharParsers.run HintParser.phint hint with
             | FParsec.CharParsers.Success(hint, _, _) -> hint
             | FParsec.CharParsers.Failure(error, _, _) ->
                 raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
 
-        parseLines hintsText
-        |> List.filter (System.String.IsNullOrWhiteSpace >> not)
-        |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
+        let hints =
+            parseLines hintsText
+            |> List.filter (System.String.IsNullOrWhiteSpace >> not)
+            |> List.map (fun x -> { Hint = x; ParsedHint = parseHint x })
+
+        { Hints = hints; Update = Update.From el }
 
     let private emptyStringAsNone str =
         if System.String.IsNullOrWhiteSpace str then None else Some str
@@ -264,7 +272,7 @@ module Configuration =
         | "Depth" -> Depth(setting.Value |> int)
         | "Length" -> Length(setting.Value |> int)
         | "MaxItems" -> MaxItems(setting.Value |> int)
-        | "Hints" -> Hints(parseHints setting.Value)
+        | "Hints" -> Hints(parseHints setting)
         | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
         | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
         | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
@@ -313,7 +321,14 @@ module Configuration =
             | Some(value) -> yield (keyValuePair.Key, overwriteValue keyValuePair.Value value)
             | None -> yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList
 
-    let private overrideRuleSettings _ newProperty = newProperty
+    let private overrideRuleSettings (oldSetting:Setting) (newSetting:Setting) = 
+        match oldSetting, newSetting with
+        | Hints(oldHints), Hints(newHints) -> 
+            if newHints.Update = Overwrite then
+                newSetting
+            else
+                Hints({ Hints = List.append oldHints.Hints newHints.Hints; Update = newHints.Update })
+        | _ -> newSetting
 
     let private overrideRule (oldRule:Rule) (newRule:Rule) : Rule =
         { Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings }
@@ -332,9 +347,9 @@ module Configuration =
     let overrideConfiguration configToOverride configToOverrideWith =
         { IgnoreFiles =
                 match configToOverrideWith.IgnoreFiles with
-                | Some({ Update = IgnoreFiles.Overwrite }) ->
+                | Some({ Update = Overwrite }) ->
                     configToOverrideWith.IgnoreFiles
-                | Some({ Update = IgnoreFiles.Add } as newIgnore) ->
+                | Some({ Update = Add } as newIgnore) ->
                     let combinedFiles =
                         match configToOverride.IgnoreFiles with
                         | Some(previousIgnore) ->

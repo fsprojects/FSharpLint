@@ -703,7 +703,7 @@ module HintMatcher =
 
         match Map.tryFind "Hints" analyser.Settings with
         | Some(Hints(hints)) -> 
-            List.map (fun x -> x.ParsedHint) hints
+            List.map (fun x -> x.ParsedHint) hints.Hints
             |> MergeSyntaxTrees.mergeHints
         | _ ->
             Debug.Assert(false, "Hints analyser was not in the configuration.")

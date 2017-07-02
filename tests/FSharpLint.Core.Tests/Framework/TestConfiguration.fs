@@ -12,7 +12,17 @@ type System.String with
     member this.RemoveWhitepsace() =
         System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
 
-let emptyLoadedConfigs = { LoadedConfigs = Map.ofList []; PathsAdded = []; GlobalConfigs = [] }
+let emptyLoadedConfigs = { LoadedConfigs = Map.empty; PathsAdded = []; GlobalConfigs = [] }
+
+let dummyHint str =
+    { Hint = str; ParsedHint = { Match = HintExpr Expression.Wildcard; Suggestion = Message "" } }
+
+let configWithHints hints updateType =
+    let hints = Hints({ Hints = hints; Update = updateType })
+    { IgnoreFiles = None
+      Analysers = 
+        ["Hints", { Settings = ["Hints", hints] |> Map.ofList
+                    Rules = Map.empty }] |> Map.ofList }
 
 [<TestFixture>]
 type TestConfiguration() =
@@ -127,7 +137,7 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config specifying files to ignore writes correct XML document``() = 
         let config =
-            { IgnoreFiles = Some({ Update = IgnoreFiles.IgnoreFilesUpdate.Add
+            { IgnoreFiles = Some({ Update = Add
                                    Files = []
                                    Content = "assemblyinfo.*"})
               Analysers = Map.empty }
@@ -187,7 +197,7 @@ type TestConfiguration() =
               { Hint = "not (a <> b) ===> a = b"; ParsedHint = parsedHint } ]
 
         let analyser =
-            { Settings = [ ("Hints", Hints(hints))  ] |> Map.ofList
+            { Settings = [ ("Hints", Hints({ Hints = hints; Update = Overwrite }))  ] |> Map.ofList
               Rules = Map.empty }
 
         let config =
@@ -424,6 +434,34 @@ type TestConfiguration() =
         let expectedConfig = overrideConfiguration overridenGlobalConfig loadedConfig
 
         Assert.AreEqual(Some expectedConfig, config)
+
+    [<Test>]
+    member __.``Overridden configuration with hints of update type 'Add' are added to existing hints``() = 
+        let initial = configWithHints [dummyHint "foo 1 ===> foo"] Overwrite
+        let updated = configWithHints [dummyHint "foo 2 ===> foo"] Add
+
+        let overridden = overrideConfiguration initial updated
+
+        let hintAnalyser = Map.find "Hints" overridden.Analysers
+        match Map.find "Hints" hintAnalyser.Settings with
+        | Hints(hints) -> 
+            let hints = hints.Hints |> List.map (fun x -> x.Hint)
+            Assert.AreEqual(Set.ofList ["foo 1 ===> foo"; "foo 2 ===> foo"], Set.ofList hints)
+        | _ -> Assert.Fail("Expected hints setting to be of hints type.")
+
+    [<Test>]
+    member __.``Overridden configuration with hints of update type 'Overwrite' ovewrite existing hints``() = 
+        let initial = configWithHints [dummyHint "foo 1 ===> foo"] Overwrite
+        let updated = configWithHints [dummyHint "foo 2 ===> foo"] Overwrite
+
+        let overridden = overrideConfiguration initial updated
+
+        let hintAnalyser = Map.find "Hints" overridden.Analysers
+        match Map.find "Hints" hintAnalyser.Settings with
+        | Hints(hints) -> 
+            let hints = hints.Hints |> List.map (fun x -> x.Hint)
+            Assert.AreEqual(["foo 2 ===> foo"], hints)
+        | _ -> Assert.Fail("Expected hints setting to be of hints type.")
 
     [<Test>]
     member __.``Update config updates differences``() = 
