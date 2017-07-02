@@ -14,7 +14,7 @@ open FSharpLint.Framework.ParseFile
 open TestUtils
 
 let emptyConfig =
-    { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+    { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
       Analysers =
           Map.ofList
               [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
@@ -40,7 +40,7 @@ type TestRuleBase(analyser, ?analysers) =
     let config =
         match analysers with
         | Some(analysers) -> 
-            { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+            { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
               Analysers = analysers }
         | None -> emptyConfig
 
@@ -80,7 +80,7 @@ type TestRuleBase(analyser, ?analysers) =
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
-                { IgnoreFiles = Some({ Files = []; Update = IgnoreFiles.Add; Content = "" })
+                { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
                   Analysers = overrideAnalysers }
             | None -> config
 

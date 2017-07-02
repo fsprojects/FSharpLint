@@ -22,7 +22,7 @@ let generateHintConfig hints =
     Map.ofList 
         [ (AnalyserName, 
             { Rules = Map.empty 
-              Settings = Map.ofList [ ("Hints", Hints(parseHints hints)) ] }) ]
+              Settings = Map.ofList [ ("Hints", Hints({ Hints = parseHints hints; Update = Overwrite })) ] }) ]
     
 [<TestFixture>]
 type TestHintMatcher() =

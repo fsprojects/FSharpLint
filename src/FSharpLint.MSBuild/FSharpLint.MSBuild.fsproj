@@ -63,9 +63,11 @@
     </Content>
     <Content Include="..\..\packages\FSharp.Core\lib\net40\FSharp.Core.sigdata">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>FSharp.Core.sigdata</Link>
     </Content>
     <Content Include="..\..\packages\FSharp.Core\lib\net40\FSharp.Core.optdata">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>FSharp.Core.optdata</Link>
     </Content>
   </ItemGroup>
   <ItemGroup>
@@ -88,9 +90,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />
-    <Reference Include="System.ValueTuple">
-      <HintPath>..\..\packages\System.ValueTuple\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
-    </Reference>
     <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj">
       <Name>FSharpLint.Core</Name>
       <Project>{1173ca4a-b636-4945-96c8-6f7e92f6a3f6}</Project>
