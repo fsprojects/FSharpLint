@@ -1,3 +1,7 @@
+##### 0.7.7 - August 20 2017
+
+* Fixed https://github.com/fsprojects/FSharpLint/issues/237
+
 ##### 0.7.6 - July 02 2017
 
 * Fixed https://github.com/fsprojects/FSharpLint/issues/229
