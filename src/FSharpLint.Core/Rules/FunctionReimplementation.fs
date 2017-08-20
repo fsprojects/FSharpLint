@@ -27,7 +27,7 @@ module FunctionReimplementation =
             simplePatternsLength simplePatterns
 
     let rec private getLambdaParamIdent = function
-        | SynSimplePats.SimplePats(pattern::_, _) -> 
+        | SynSimplePats.SimplePats([pattern], _) -> 
             let rec getIdent = function
                 | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
                 | SynSimplePat.Typed(simplePattern, _, _)

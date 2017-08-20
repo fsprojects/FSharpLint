@@ -43,6 +43,17 @@ let f = fun a b -> a * b
 
         this.ErrorMsg.Contains "`( * )`" |> Assert.IsTrue
 
+    /// Regression test for https://github.com/fsprojects/FSharpLint/issues/237
+    [<Test>]
+    member this.``When there's a tuple pattern in the lambda eta contraction should not be recommended.``() = 
+        this.Parse """
+module Program
+
+let f = List.map (fun (x,_) -> id x) []
+"""
+
+        this.AssertNoWarnings()
+
     [<Test>]
     member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() = 
         let source = """
