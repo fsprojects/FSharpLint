@@ -386,7 +386,7 @@ module Lint =
 
         match getProjectFileInfo projectFilePath with
         | Success(projectOptions) ->
-            let compileFiles = projectOptions.ProjectFileNames |> Array.toList
+            let compileFiles = projectOptions.SourceFiles |> Array.toList
             match loadConfigAndParseFilesInProject compileFiles projectOptions with
             | Success() -> lintWarnings |> Seq.toList |> LintResult.Success
             | Failure(x) -> LintResult.Failure(x)
