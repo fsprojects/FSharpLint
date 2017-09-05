@@ -61,6 +61,14 @@
     </Compile>
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+    <Content Include="..\..\packages\FSharp.Core\lib\net40\FSharp.Core.sigdata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>FSharp.Core.sigdata</Link>
+    </Content>
+    <Content Include="..\..\packages\FSharp.Core\lib\net40\FSharp.Core.optdata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>FSharp.Core.optdata</Link>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Compiler.Service">
