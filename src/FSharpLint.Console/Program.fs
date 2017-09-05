@@ -69,7 +69,7 @@ module Program =
 
     let private getParseFailureReason = function
         | ParseFile.FailedToParseFile(failures) ->
-            let getFailureReason (x:Microsoft.FSharp.Compiler.FSharpErrorInfo) =
+            let getFailureReason (x:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
                 sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
             String.Join(", ", failures |> Array.map getFailureReason)

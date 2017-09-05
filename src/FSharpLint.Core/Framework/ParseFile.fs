@@ -3,6 +3,8 @@
 /// Provides functionality to parse F# files using `FSharp.Compiler.Service`.
 module ParseFile = 
 
+    open System.IO
+    open System.Reflection
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open Microsoft.FSharp.Compiler
@@ -59,27 +61,41 @@ module ParseFile =
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
+    /// Todo: Remove this when fsharp.core is updated to version that no longer requires sigdata/optdata
+    /// Added this as FSharp.Core was resolving to GAC where there's no sigdata/optdata
+    let getProjectOptionsFromScript (checker:FSharpChecker) file source =
+        let fsharplintAssembly = typeof<FSharpLint.Framework.Ast.AstNode>.Assembly
+        let assemblyDirectory = Path.GetDirectoryName fsharplintAssembly.Location
+        let bundledFsharpCore = Path.Combine(assemblyDirectory, "FSharp.Core.dll")
+        
+        let (options, _diagnostics) = 
+            checker.GetProjectOptionsFromScript(file, source) 
+            |> Async.RunSynchronously
+            
+        if File.Exists bundledFsharpCore then
+            let useOwnFSharpCore =
+                options.OtherOptions 
+                |> Array.map (fun x -> if x.Contains "FSharp.Core.dll" then "-r:" + bundledFsharpCore else x)
+
+            { options with OtherOptions = useOwnFSharpCore }
+        else
+            options
+
     /// Parses a file using `FSharp.Compiler.Service`.
     let parseFile file configuration (checker:FSharpChecker) projectOptions =
-        let source = System.IO.File.ReadAllText(file)
+        let source = File.ReadAllText(file)
 
         let projectOptions =
             match projectOptions with
             | Some(existingOptions) -> existingOptions
-            | None -> 
-                let (projectOptions, _diagnostics) = 
-                    checker.GetProjectOptionsFromScript(file, source) 
-                    |> Async.RunSynchronously
-                projectOptions
+            | None -> getProjectOptionsFromScript checker file source
         
         parse configuration file source (checker, projectOptions)
         
     /// Parses source code using `FSharp.Compiler.Service`.
     let parseSource source configuration (checker:FSharpChecker) =
-        let file = "/home/user/Dog.Test.fsx"
+        let file = "test.fsx"
         
-        let (options, _diagnostics) = 
-            checker.GetProjectOptionsFromScript(file, source) 
-            |> Async.RunSynchronously
+        let options = getProjectOptionsFromScript checker file source
 
         parse configuration file source (checker, options)

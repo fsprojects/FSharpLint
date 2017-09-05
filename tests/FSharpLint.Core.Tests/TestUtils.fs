@@ -3,6 +3,7 @@
     open System.IO
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open NUnit.Framework
+    open FSharpLint.Framework
 
     let (</>) x y = Path.Combine(x, y)
 
@@ -13,9 +14,7 @@
     let generateAst source =
         let checker = FSharpChecker.Create()
 
-        let (options, _diagnostics) = 
-            checker.GetProjectOptionsFromScript(performanceTestSourceFile, source) 
-            |> Async.RunSynchronously
+        let options = ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source
 
         let parseResults =
             checker.ParseFileInProject(performanceTestSourceFile, source, options)

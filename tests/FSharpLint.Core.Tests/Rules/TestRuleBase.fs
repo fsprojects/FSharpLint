@@ -100,7 +100,11 @@ type TestRuleBase(analyser, ?analysers) =
                   CheckFile = match checkInput with Some(true) -> parseInfo.TypeCheckResults | _ -> None
                   SyntaxArray = syntaxArray
                   SkipArray = skipArray }
-        | _ -> failwith "Failed to parse input."
+        | Failed(ParseFileFailure.AbortedTypeCheck) -> 
+            failwith "Failed to parse input - aborted type check."
+        | Failed(ParseFileFailure.FailedToParseFile(errors)) -> 
+            let failures = errors |> Array.map string |> String.concat "\n"
+            failwith ("Failed to parse input, failed with:\n" + failures)
 
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions

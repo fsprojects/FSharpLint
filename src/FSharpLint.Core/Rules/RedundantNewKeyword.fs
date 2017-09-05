@@ -28,8 +28,9 @@ module RedundantNewKeyword =
             match symbol with
             | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
                 let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
-                let ctorForType = ctor.EnclosingEntity
-                Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces
+                ctor.EnclosingEntity
+                |> Option.exists (fun ctorForType -> 
+                    Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
             | Some(_) | None -> false }
 
     let private generateFix (info:AnalyserInfo) range = lazy(

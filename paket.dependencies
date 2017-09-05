@@ -1,12 +1,13 @@
-framework: net40, net45
+framework: net45
 source https://nuget.org/api/v2
 
-nuget FParsec >= 1.0.2
-nuget NUnit >= 3.7.1
-nuget FSharp.Compiler.Service >= 13.0.0
-nuget FSharp.Compiler.Service.ProjectCracker >= 13.0.0
+nuget FParsec >= 1.0.3
+nuget NUnit >= 3.8.1
+nuget FSharp.Compiler.Service >= 14.0.2
+nuget FSharp.Compiler.Service.ProjectCracker >= 14.0.2
 nuget FAKE.Lib
 nuget FSharp.Core ~> 4.0.0.1
+nuget System.Collections.Immutable < 1.4
 
 group Tools
 source https://nuget.org/api/v2
