@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <DefineConstants>NO_PROJECTCRACKER;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +33,7 @@
     <Compile Include="../FSharpLint.Core/Application/LintWarning.fs" />
     <Compile Include="../FSharpLint.Core/Application/Lint.fsi" />
     <Compile Include="../FSharpLint.Core/Application/Lint.fs" />
-    <Compile Include="../FSharpLint.Core/Application/FSharpLintWorker.fs" />
+    <!-- <Compile Include="../FSharpLint.Core/Application/FSharpLintWorker.fs" /> -->
     <Compile Include="../FSharpLint.Core/Application/ConfigurationManager.fs" />
 
     <Compile Include="../FSharpLint.Core/AssemblyInfo.fs">
