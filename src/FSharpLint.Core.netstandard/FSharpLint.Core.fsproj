@@ -39,6 +39,11 @@
     <Compile Include="../FSharpLint.Core/AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
     </Compile>
+
+    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
+    <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />
