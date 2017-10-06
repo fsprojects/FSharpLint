@@ -14,7 +14,7 @@ let config =
 type TestRedundantNewKeyword() =
     inherit TestRuleBase.TestRuleBase(analyser, config)
 
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Lint gives suggestion when new keyword is not required.``() = 
         this.Parse("""
 module Program
@@ -42,7 +42,7 @@ let _ = new System.IO.MemoryStream()""", checkInput = true)
 
         this.AssertNoWarnings()
 
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Quick fix for unnecassery new keyword.``() =
         let source = """
 module Program

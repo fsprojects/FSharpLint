@@ -68,7 +68,7 @@ let a = List.iter (fun x -> ()) []"""
 
         Assert.IsFalse(this.ErrorsExist)
 
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.UselessBinding() = 
         this.Parse("""
 module Program
@@ -109,7 +109,7 @@ let a = a"""
 
         Assert.IsFalse(this.ErrorsExist)
 
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.UselessBindingWithParens() = 
         this.Parse("""
 module Program
