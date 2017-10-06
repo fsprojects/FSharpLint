@@ -35,7 +35,11 @@ Target "Clean" (fun _ -> CleanDirs ["bin"])
 Target "Build" (fun _ ->
     !! "FSharpLint.sln"
     |> MSBuildRelease "" "Rebuild"
-    |> ignore)
+    |> ignore
+    
+    DotNetCli.Build (fun p ->
+       { p with
+           Project = "FSharpLint.netstandard.sln" }))
 
 Target "RunTests" (fun _ ->
     !! "tests/**/bin/Release/*Tests*.dll" 
@@ -43,7 +47,12 @@ Target "RunTests" (fun _ ->
         { p with
             ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" }))
+            Where = "cat != Performance" })
+    
+    DotNetCli.Test (fun p ->
+       { p with
+           AdditionalArgs = ["--filter"; "\"TestCategory!=Performance & TestCategory!=NetstandardKnownFailure\""]
+           Project = "tests/FSharpLint.Core.Tests.netstandard" }))
 
 Target "RunFunctionalTests" (fun _ ->
     !! "tests/**/bin/Release/*FunctionalTest*.dll" 
