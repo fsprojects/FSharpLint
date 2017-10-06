@@ -448,9 +448,12 @@ module Configuration =
         let resourceName = "DefaultConfiguration.FSharpLint"
 
         use stream = assembly.GetManifestResourceStream(resourceName)
-        use reader = new System.IO.StreamReader(stream)
+        match stream with
+        | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
+        | stream ->
+            use reader = new System.IO.StreamReader(stream)
 
-        reader.ReadToEnd() |> configuration
+            reader.ReadToEnd() |> configuration
 
     /// Checks if a analyser in the configuration is enabled.
     /// Returns the analyser settings if the analyser was enabled; None otherwise.
