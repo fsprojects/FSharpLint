@@ -28,7 +28,13 @@ let genAssemblyInfo projectPath =
 Target "AssemblyInfo" (fun _ ->
     !! "src/**/*.fsproj" |> Seq.iter genAssemblyInfo)
 
-Target "RestorePackages" RestorePackages
+Target "RestorePackages" (fun _ ->
+    RestorePackages ()
+    
+    DotNetCli.Restore (fun p ->
+       { p with
+           Project = "tools/tools.proj" })
+    )
 
 Target "Clean" (fun _ -> CleanDirs ["bin"])
 
