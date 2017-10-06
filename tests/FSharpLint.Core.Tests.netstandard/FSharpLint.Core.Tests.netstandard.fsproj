@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="3.7.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="TestUtils.fs" />
+    <!-- Framework -->
+    <Compile Include="Framework/TestConfiguration.fs" />
+    <Compile Include="Framework/TestAstInfo.fs" />
+    <Compile Include="Framework/TestHintParser.fs" />
+    <Compile Include="Framework/TestAst.fs" />
+    <Compile Include="Framework/TestFuzzyHintMatcher.fs" />
+    <Compile Include="Framework/TestAbstractSyntaxArray.fs" />
+    <Compile Include="Framework/TestAnalyser.fs" />
+    <!-- Rules -->
+    <Compile Include="Rules/TestRuleBase.fs" />
+    <Compile Include="Rules/TestNameConventionRules.fs" />
+    <Compile Include="Rules/TestBindingRules.fs" />
+    <Compile Include="Rules/TestNumberOfItemsRules.fs" />
+    <Compile Include="Rules/TestSourceLengthRules.fs" />
+    <Compile Include="Rules/TestNestedStatementsRules.fs" />
+    <Compile Include="Rules/TestTypographyRules.fs" />
+    <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
+    <Compile Include="Rules/TestHintMatcher.fs" />
+    <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
+    <Compile Include="Rules/TestRedundantNewKeyword.fs" />
+
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Core.netstandard\FSharpLint.Core.fsproj" />
+  </ItemGroup>
+
+</Project>
