@@ -96,7 +96,9 @@ Target "Release" (fun _ ->
     Branches.pushTag "" "origin" release.NugetVersion)
 
 Target "Lint" (fun _ ->
-    !! "src/**/*.fsproj" |> Seq.iter (FSharpLint id))
+    !! "src/**/*.fsproj"
+    -- "src/FSharpLint.Core.netstandard/*.fsproj"
+    |> Seq.iter (FSharpLint id))
 
 Target "GenerateDocs" (fun _ ->
     executeFSI "docs/tools" "generate.fsx" [] |> ignore)
