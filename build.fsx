@@ -69,7 +69,20 @@ Target "Package" (fun _ ->
             Version = release.NugetVersion
             ReleaseNotes = toLines release.Notes
             IncludeReferencedProjects = true
-            OutputPath = "packaging" }))
+            OutputPath = "packaging" })
+    
+    DotNetCli.Pack (fun p ->
+       { p with
+           AdditionalArgs = [sprintf "/p:Version=%s" release.NugetVersion]
+           Project = "src/FSharpLint.Core.netstandard/FSharpLint.Core.fsproj" })
+
+    let sourcePkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" release.NugetVersion
+    let otherPkg = sprintf "src/FSharpLint.Core.netstandard/bin/Release/FSharpLint.Core.%s.nupkg" release.NugetVersion
+    sprintf "mergenupkg --source %s --other %s --framework netstandard2.0" (".." </> sourcePkg) (".." </> otherPkg)
+    |> DotNetCli.RunCommand (fun p ->
+       { p with
+           WorkingDir = "tools" })
+    )
 
 Target "PublishPackages" (fun _ ->
     Paket.Push(fun p -> { p with WorkingDir = "packaging" }))
