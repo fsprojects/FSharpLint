@@ -93,9 +93,10 @@ module ParseFile =
         parse configuration file source (checker, projectOptions)
         
     /// Parses source code using `FSharp.Compiler.Service`.
-    let parseSource source configuration (checker:FSharpChecker) =
-        let file = "test.fsx"
-        
-        let options = getProjectOptionsFromScript checker file source
+    let parseSourceFile fileName source configuration (checker:FSharpChecker) =        
+        let options = getProjectOptionsFromScript checker fileName source
 
-        parse configuration file source (checker, options)
+        parse configuration fileName source (checker, options)
+        
+    let parseSource source configuration (checker:FSharpChecker) = 
+        parseSourceFile "test.fsx" source configuration checker
