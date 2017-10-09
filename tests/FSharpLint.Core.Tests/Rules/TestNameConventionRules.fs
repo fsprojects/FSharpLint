@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open FSharpLint.Rules.NameConventions
+open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
 
 let config =
@@ -62,6 +63,13 @@ type TestNameConventionRules() =
     [<Test>]
     member this.``Performance of naming analyser``() =
         Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/240
+    [<Test>]
+    member this.``Linter must not complain about naming of fsx file``() =
+        this.Parse(""""let main() = ()""", fileName = "3i-3.fsx")
+
+        this.AssertNoWarnings()
 
     [<Test>]
     member __.IsPascalCase() =

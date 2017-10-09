@@ -76,7 +76,7 @@ type TestRuleBase(analyser, ?analysers) =
 
         result
 
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion): unit = 
+    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion, ?fileName): unit = 
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
@@ -91,8 +91,13 @@ type TestRuleBase(analyser, ?analysers) =
               Suggest = postSuggestion
               FSharpVersion = version
               Text = input }
+
+        let parseResults =
+            match fileName with
+            | Some(fileName) -> parseSourceFile fileName input config (FSharpChecker.Create())
+            | None -> parseSource input config (FSharpChecker.Create())
         
-        match parseSource input config (FSharpChecker.Create()) with
+        match parseResults with
         | Success(parseInfo) ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             analyser 
