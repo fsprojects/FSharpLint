@@ -410,6 +410,15 @@ module NameConventions =
         | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
         | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
         | SynSimplePat.Attrib(_) -> None
+
+    /// Is module name implicitly created from file name?
+    let private isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, isModule, _, _, _, _, range)) =
+        let zeroLengthRange (r:range) =
+            (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
+
+        // Check the identifiers in the module name have no length.
+        // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
+        isModule && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
                       
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -441,12 +450,13 @@ module NameConventions =
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, isModule, _, _, _, _, _)) ->
-                let checkIdent =
-                    if isModule then checkRule rules.ModuleNames
-                    else checkRule rules.NamespaceNames
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, isModule, _, _, _, _, _) as synModule) ->
+                if not <| isImplicitModule synModule then
+                    let checkIdent =
+                        if isModule then checkRule rules.ModuleNames
+                        else checkRule rules.NamespaceNames
 
-                identifier |> List.collect checkIdent |> List.iter args.Info.Suggest
+                    identifier |> List.collect checkIdent |> List.iter args.Info.Suggest
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
                 checkRule rules.UnionCasesNames identifier |> List.iter args.Info.Suggest
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
