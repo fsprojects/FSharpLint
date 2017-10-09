@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="3.7.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../FSharpLint.Core.Tests/TestUtils.fs" />
+    <!-- Framework -->
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestConfiguration.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestAstInfo.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestHintParser.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestAst.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestFuzzyHintMatcher.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestAbstractSyntaxArray.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Framework/TestAnalyser.fs" />
+    <!-- Rules -->
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestRuleBase.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestNameConventionRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestBindingRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestNumberOfItemsRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestSourceLengthRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestNestedStatementsRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestTypographyRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestFunctionReimplementationRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestHintMatcher.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestRaiseWithTooManyArgumentsRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestRedundantNewKeyword.fs" />
+
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Core.netstandard\FSharpLint.Core.fsproj" />
+  </ItemGroup>
+
+</Project>

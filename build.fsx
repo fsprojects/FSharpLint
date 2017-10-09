@@ -28,14 +28,24 @@ let genAssemblyInfo projectPath =
 Target "AssemblyInfo" (fun _ ->
     !! "src/**/*.fsproj" |> Seq.iter genAssemblyInfo)
 
-Target "RestorePackages" RestorePackages
+Target "RestorePackages" (fun _ ->
+    RestorePackages ()
+    
+    DotNetCli.Restore (fun p ->
+       { p with
+           Project = "tools/tools.proj" })
+    )
 
 Target "Clean" (fun _ -> CleanDirs ["bin"])
 
 Target "Build" (fun _ ->
     !! "FSharpLint.sln"
     |> MSBuildRelease "" "Rebuild"
-    |> ignore)
+    |> ignore
+    
+    DotNetCli.Build (fun p ->
+       { p with
+           Project = "FSharpLint.netstandard.sln" }))
 
 Target "RunTests" (fun _ ->
     !! "tests/**/bin/Release/*Tests*.dll" 
@@ -43,7 +53,12 @@ Target "RunTests" (fun _ ->
         { p with
             ShadowCopy = false
             TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" }))
+            Where = "cat != Performance" })
+    
+    DotNetCli.Test (fun p ->
+       { p with
+           AdditionalArgs = ["--filter"; "\"TestCategory!=Performance & TestCategory!=NetstandardKnownFailure\""]
+           Project = "tests/FSharpLint.Core.Tests.netstandard" }))
 
 Target "RunFunctionalTests" (fun _ ->
     !! "tests/**/bin/Release/*FunctionalTest*.dll" 
@@ -60,7 +75,20 @@ Target "Package" (fun _ ->
             Version = release.NugetVersion
             ReleaseNotes = toLines release.Notes
             IncludeReferencedProjects = true
-            OutputPath = "packaging" }))
+            OutputPath = "packaging" })
+    
+    DotNetCli.Pack (fun p ->
+       { p with
+           AdditionalArgs = [sprintf "/p:Version=%s" release.NugetVersion]
+           Project = "src/FSharpLint.Core.netstandard/FSharpLint.Core.fsproj" })
+
+    let sourcePkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" release.NugetVersion
+    let otherPkg = sprintf "src/FSharpLint.Core.netstandard/bin/Release/FSharpLint.Core.%s.nupkg" release.NugetVersion
+    sprintf "mergenupkg --source %s --other %s --framework netstandard2.0" (".." </> sourcePkg) (".." </> otherPkg)
+    |> DotNetCli.RunCommand (fun p ->
+       { p with
+           WorkingDir = "tools" })
+    )
 
 Target "PublishPackages" (fun _ ->
     Paket.Push(fun p -> { p with WorkingDir = "packaging" }))
@@ -74,7 +102,9 @@ Target "Release" (fun _ ->
     Branches.pushTag "" "origin" release.NugetVersion)
 
 Target "Lint" (fun _ ->
-    !! "src/**/*.fsproj" |> Seq.iter (FSharpLint id))
+    !! "src/**/*.fsproj"
+    -- "src/FSharpLint.Core.netstandard/*.fsproj"
+    |> Seq.iter (FSharpLint id))
 
 Target "GenerateDocs" (fun _ ->
     executeFSI "docs/tools" "generate.fsx" [] |> ignore)

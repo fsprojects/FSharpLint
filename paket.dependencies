@@ -16,3 +16,10 @@ nuget FAKE
 nuget NUnit.Runners
 nuget FSharpLint.Fake
 nuget FSharp.Formatting
+
+group Netcore
+storage: none
+source https://www.nuget.org/api/v2/
+
+nuget FSharp.Compiler.Service
+nuget FParsec

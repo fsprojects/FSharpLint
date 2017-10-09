@@ -248,6 +248,8 @@ module Lint =
 
         ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
 
+#if NO_PROJECTCRACKER
+#else
     let getProjectFileInfo projectFilePath =
         // TODO: Find how to extract exceptions from ProjectCracker API rather than parsing them.
         let parseExceptionMessage str =
@@ -271,6 +273,7 @@ module Lint =
         | Some(logStr) when logStr.StartsWith(invalidProjectFile) || logStr.StartsWith(fileNotFound) ->
             Failure(MSBuildFailedToLoadProjectFile(projectFilePath, parseExceptionMessage logStr))
         | None | Some(_) -> Success projectOptions
+#endif
 
     let configFailureToLintFailure = function
         | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)
@@ -330,6 +333,8 @@ module Lint =
           /// Version of F# the source code of the file was written in.
           FSharpVersion: Version }
 
+#if NO_PROJECTCRACKER
+#else
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let lintProject optionalParams projectFilePath progress =
@@ -391,6 +396,7 @@ module Lint =
             | Success() -> lintWarnings |> Seq.toList |> LintResult.Success
             | Failure(x) -> LintResult.Failure(x)
         | Failure(x) -> LintResult.Failure(x)
+#endif
 
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.

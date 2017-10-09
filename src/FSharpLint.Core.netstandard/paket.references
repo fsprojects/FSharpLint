@@ -1,0 +1,4 @@
+group NetCore
+
+FSharp.Compiler.Service
+FParsec

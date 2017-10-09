@@ -7,7 +7,11 @@
 
     let (</>) x y = Path.Combine(x, y)
 
+#if NETCOREAPP2_0
+    let private basePath = __SOURCE_DIRECTORY__ </>  ".." </> ".."
+#else
     let private basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".."
+#endif
 
     let private performanceTestSourceFile = basePath </> "tests" </> "TypeChecker.fs"
 

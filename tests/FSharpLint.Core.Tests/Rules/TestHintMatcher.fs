@@ -572,7 +572,7 @@ match [] with
         Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type.``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
@@ -587,7 +587,7 @@ TakesDelegate().Foo(fun _ -> ())""", config, checkInput = true)
         Assert.IsFalse(this.ErrorsExist)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type (more than one argument).``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
@@ -617,7 +617,7 @@ TakesDelegate().Foo("", fun _ -> ())""", config, checkInput = true)
         Assert.IsTrue(this.ErrorsExist)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type (multiple args).``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
@@ -633,7 +633,7 @@ object.Foo("", fun _ -> ())""", config, checkInput = true)
         Assert.IsFalse(this.ErrorsExist)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
-    [<Test>]
+    [<Test; Category("NetstandardKnownFailure")>]
     member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type.``() = 
         let config = generateHintConfig ["fun _ -> () ===> ignore"]
         
