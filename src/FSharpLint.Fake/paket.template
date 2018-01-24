@@ -11,7 +11,5 @@ tags
     F#, fsharp, lint, FSharpLint, fslint, FAKE, task
 files
     bin/Release/*.dll ==> tools
-    bin/Release/FSharp.Core.optdata ==> tools
-    bin/Release/FSharp.Core.sigdata ==> tools
     bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe ==> tools
     bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe.config ==> tools
