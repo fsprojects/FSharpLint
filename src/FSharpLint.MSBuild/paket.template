@@ -12,8 +12,6 @@ tags
 files
     build ==> build
     bin/Release/*.dll ==> tools
-    bin/Release/FSharp.Core.optdata ==> tools
-    bin/Release/FSharp.Core.sigdata ==> tools
     bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe ==> tools
     bin/Release/FSharp.Compiler.Service.ProjectCrackerTool.exe.config ==> tools
     bin/Release/app.config ==> tools

@@ -78,28 +78,6 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member __.FunctionsAsExpectedWithInvalidReferencedProjectFile() = 
-            let projectFile = getTestFilePath "referencesInvalidProject.fsproj"
-            let arguments = sprintf "-f %s" projectFile
-
-            let output = runConsoleApp arguments
-
-            Assert.IsTrue(
-                output.Contains("could not load the project file"), 
-                "Did not find could not load project file error. Program output:\n" + output)
-
-        [<Test>]
-        member __.InvalidProjectFile() = 
-            let projectFile = getTestFilePath "invalidProjectFile.fsproj"
-            let arguments = sprintf "-f %s" projectFile
-
-            let output = runConsoleApp arguments
-            
-            Assert.IsTrue(
-                output.StartsWith("MSBuild could not load the project file") && output.Contains("invalidProjectFile.fsproj"), 
-                sprintf "Output:\n%s" output)
-
-        [<Test>]
         member __.UnableToFindProjectFile() = 
             let projectFile = getTestFilePath "iuniubi.fsproj"
             let arguments = sprintf "-f %s" projectFile
@@ -108,17 +86,6 @@ module Tests =
 
             Assert.IsTrue(
                 output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), 
-                sprintf "Output:\n%s" output)
-
-        [<Test>]
-        member __.FunctionsAsExpectedWithNonExistantFindReferencedProjectFile() = 
-            let projectFile = getTestFilePath "referencesNonExistantProject.fsproj"
-            let arguments = sprintf "-f %s" projectFile
-
-            let output = runConsoleApp arguments
-            
-            Assert.IsTrue(
-                output.Contains("Could not find file") || output.Contains("not found"), 
                 sprintf "Output:\n%s" output)
 
         [<Test>]
