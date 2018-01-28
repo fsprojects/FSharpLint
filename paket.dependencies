@@ -1,19 +1,19 @@
 framework: net45
 source https://nuget.org/api/v2
 
-nuget FParsec >= 1.0.3
-nuget NUnit >= 3.9.0
-nuget FSharp.Compiler.Service >= 17.0.1
-nuget FSharp.Compiler.Service.ProjectCracker >= 17.0.1
-nuget FAKE.Lib >= 4.64.4
-nuget FSharp.Core >= 4.1.18
+nuget FParsec
+nuget NUnit
+nuget FSharp.Compiler.Service
+nuget FSharp.Compiler.Service.ProjectCracker
+nuget FAKE.Lib
+nuget FSharp.Core
 nuget System.Collections.Immutable < 1.4
 
 group Tools
 source https://nuget.org/api/v2
 
-nuget FAKE >= 4.64.4
-nuget NUnit.Runners >= 3.7.0
+nuget FAKE
+nuget NUnit.Runners
 nuget FSharpLint.Fake
 nuget FSharp.Formatting
 
@@ -21,5 +21,6 @@ group Netcore
 storage: none
 source https://www.nuget.org/api/v2/
 
+nuget FSharp.Core
 nuget FSharp.Compiler.Service
 nuget FParsec
