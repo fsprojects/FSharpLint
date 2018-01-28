@@ -99,7 +99,7 @@ let f = List.map
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
-    [<Test; Category("NetstandardKnownFailure")>]
+    [<Test>]
     member this.``Lambda to pointfree constructor application should not be suggested unless using F# 4 or above``() = 
         this.Parse("""
 module Program
@@ -113,7 +113,7 @@ let f = List.map (fun x -> Duck x) ["1";"2"]
         this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
-    [<Test; Category("NetstandardKnownFailure")>]
+    [<Test>]
     member this.``Lambda to pointfree long identifer constructor application should not be suggested unless using F# 4 or above``() = 
         this.Parse("""
 module Program

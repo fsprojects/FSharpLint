@@ -57,7 +57,7 @@ Target "RunTests" (fun _ ->
     
     DotNetCli.Test (fun p ->
        { p with
-           AdditionalArgs = ["--filter"; "\"TestCategory!=Performance & TestCategory!=NetstandardKnownFailure\""]
+           AdditionalArgs = ["--filter"; "\"TestCategory!=Performance\""]
            Project = "tests/FSharpLint.Core.Tests.netstandard" }))
 
 Target "RunFunctionalTests" (fun _ ->

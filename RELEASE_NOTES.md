@@ -1,3 +1,7 @@
+##### 0.9.0 - January 28 2018
+
+* .net standard 2.0 support, thanks to [@enricosada](https://github.com/enricosada)
+
 ##### 0.9.0-beta - October 19 2017
 
 * .net standard 2.0 support, thanks to [@enricosada](https://github.com/enricosada)
