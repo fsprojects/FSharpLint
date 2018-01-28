@@ -1152,7 +1152,7 @@ let (SingleCaseDU MyInt) = (SingleCaseDU 5)""", checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
 
-    [<Test; Category("NetstandardKnownFailure")>]
+    [<Test>]
     member this.UnionCaseWithoutValueDoesNotGenerateWarningWhenTypeCheckingInput() =
         this.Parse("""
 module Program
