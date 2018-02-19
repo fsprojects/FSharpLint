@@ -21,7 +21,7 @@
         let options = ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source
 
         let parseResults =
-            checker.ParseFileInProject(performanceTestSourceFile, source, options)
+            checker.ParseFile(performanceTestSourceFile, source, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
         
         match parseResults.ParseTree with

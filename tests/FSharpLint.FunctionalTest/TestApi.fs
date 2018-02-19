@@ -22,7 +22,7 @@ module TestApi =
                 |> Async.RunSynchronously
 
             let parseResults =
-                checker.ParseFileInProject(sourceFile, source, options)
+                checker.ParseFile(sourceFile, source, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
                 |> Async.RunSynchronously
         
             match parseResults.ParseTree with

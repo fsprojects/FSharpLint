@@ -38,7 +38,7 @@ module ParseFile =
         
     let private parse configuration file source (checker:FSharpChecker, options) =
         let parseResults = 
-            checker.ParseFileInProject(file, source, options)
+            checker.ParseFile(file, source, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
 
         let typeCheckFile () =
