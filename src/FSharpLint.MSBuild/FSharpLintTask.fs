@@ -54,7 +54,7 @@ type FSharpLintTask() =
                                         warning.StartLine, warning.StartColumn, 
                                         warning.EndLine, warning.EndColumn, warning.Info)
 
-            true
+            (not this.TreatWarningsAsErrors) || (Seq.isEmpty warnings)
         with e -> 
             this.Log.LogErrorFromException(e, showStackTrace = true, showDetail = true, file = this.Project)
             false
