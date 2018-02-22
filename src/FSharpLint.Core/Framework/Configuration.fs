@@ -445,8 +445,8 @@ module Configuration =
     /// This function loads and returns this default configuration.
     let defaultConfiguration =
         let assembly = typeof<Configuration>.GetTypeInfo().Assembly
-        let resourceName = "DefaultConfiguration.FSharpLint"
-
+        let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+                         |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.FSharpLint", System.StringComparison.Ordinal))
         use stream = assembly.GetManifestResourceStream(resourceName)
         match stream with
         | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)

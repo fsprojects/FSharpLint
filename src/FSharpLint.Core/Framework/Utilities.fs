@@ -8,6 +8,8 @@ module Utilities =
         let mutable current = 23
         current <- current * 31 + hash one
         current * 31 + hash two
+        
+    let (</>) x y = System.IO.Path.Combine(x, y)
 
 module ExpressionUtilities =
 
