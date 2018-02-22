@@ -43,4 +43,5 @@
     <ProjectReference Include="..\..\src\FSharpLint.Core.netstandard\FSharpLint.Core.fsproj" />
   </ItemGroup>
 
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

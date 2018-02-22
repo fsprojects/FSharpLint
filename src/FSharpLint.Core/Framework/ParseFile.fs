@@ -10,6 +10,7 @@ module ParseFile =
     open Microsoft.FSharp.Compiler
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
+    open Utilities
 
     /// Information for a file to be linted that is given to the analysers.
     [<NoEquality; NoComparison>]
@@ -60,26 +61,55 @@ module ParseFile =
                   File = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
-
-    /// Todo: Remove this when fsharp.core is updated to version that no longer requires sigdata/optdata
-    /// Added this as FSharp.Core was resolving to GAC where there's no sigdata/optdata
-    let getProjectOptionsFromScript (checker:FSharpChecker) file source =
-        let fsharplintAssembly = typeof<FSharpLint.Framework.Ast.AstNode>.Assembly
-        let assemblyDirectory = Path.GetDirectoryName fsharplintAssembly.Location
-        let bundledFsharpCore = Path.Combine(assemblyDirectory, "FSharp.Core.dll")
         
-        let (options, _diagnostics) = 
-            checker.GetProjectOptionsFromScript(file, source) 
-            |> Async.RunSynchronously
-            
-        if File.Exists bundledFsharpCore then
-            let useOwnFSharpCore =
-                options.OtherOptions 
-                |> Array.map (fun x -> if x.Contains "FSharp.Core.dll" then "-r:" + bundledFsharpCore else x)
+    // See: https://github.com/fsharp/FSharp.Compiler.Service/issues/847.
+    let private dotnetCoreReferences () =
+        let fsharpCoreDir = Path.GetDirectoryName(typeof<FSharp.Collections.List<_>>.Assembly.Location)
+        let runtimeDir = Path.GetDirectoryName(typeof<System.Object>.Assembly.Location)
 
-            { options with OtherOptions = useOwnFSharpCore }
-        else
-            options
+        [ fsharpCoreDir </> "FSharp.Core.dll"
+          runtimeDir </> "mscorlib.dll"
+          runtimeDir </> "System.Console.dll"
+          runtimeDir </> "System.Runtime.dll"
+          runtimeDir </> "System.Private.CoreLib.dll"
+          runtimeDir </> "System.ObjectModel.dll"
+          runtimeDir </> "System.IO.dll"
+          runtimeDir </> "System.Linq.dll"
+          runtimeDir </> "System.Net.Requests.dll"
+          runtimeDir </> "System.Runtime.Numerics.dll"
+          runtimeDir </> "System.Threading.Tasks.dll"
+          
+          typeof<System.Console>.Assembly.Location
+          typeof<System.ComponentModel.DefaultValueAttribute>.Assembly.Location
+          typeof<System.ComponentModel.PropertyChangedEventArgs>.Assembly.Location
+          typeof<System.IO.BufferedStream>.Assembly.Location
+          typeof<System.Linq.Enumerable>.Assembly.Location
+          typeof<System.Net.WebRequest>.Assembly.Location
+          typeof<System.Numerics.BigInteger>.Assembly.Location
+          typeof<System.Threading.Tasks.TaskExtensions>.Assembly.Location ]
+        |> List.distinct
+        |> List.filter File.Exists
+        |> List.distinctBy Path.GetFileName
+        |> List.map (fun location -> "-r:" + location)
+        
+    let getProjectOptionsFromScript (checker:FSharpChecker) file source =
+        #if NETSTANDARD2_0
+        let assumeDotNetFramework = false
+        #else
+        let assumeDotNetFramework = true
+        #endif
+
+        let (options, _diagnostics) = 
+            checker.GetProjectOptionsFromScript(file, source, assumeDotNetFramework = assumeDotNetFramework) 
+            |> Async.RunSynchronously
+
+        let otherOptions =
+            if assumeDotNetFramework then options.OtherOptions
+            else 
+                [| yield! options.OtherOptions |> Array.filter (fun x -> not (x.StartsWith("-r:")))
+                   yield! dotnetCoreReferences() |]
+
+        { options with OtherOptions = otherOptions }
 
     /// Parses a file using `FSharp.Compiler.Service`.
     let parseFile file configuration (checker:FSharpChecker) projectOptions =

@@ -4,8 +4,7 @@
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open NUnit.Framework
     open FSharpLint.Framework
-
-    let (</>) x y = Path.Combine(x, y)
+    open Utilities
 
 #if NETCOREAPP2_0
     let private basePath = __SOURCE_DIRECTORY__ </>  ".." </> ".."
