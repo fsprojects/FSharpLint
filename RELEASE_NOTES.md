@@ -1,3 +1,8 @@
+##### 0.9.1-beta - February 22 2018
+
+* Fixed https://github.com/fsprojects/FSharpLint/issues/256 by [@SteveGilham](https://github.com/SteveGilham)
+* Fixed https://github.com/fsprojects/FSharpLint/issues/252 by [@SteveGilham](https://github.com/SteveGilham)
+
 ##### 0.9.0 - January 28 2018
 
 * .net standard 2.0 support, thanks to [@enricosada](https://github.com/enricosada)
