@@ -60,8 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
-      <HintPath>..\..\packages\FAKE.Lib.3.33.0\lib\net451\FakeLib.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\..\packages\FAKE.Lib\lib\net451\FakeLib.dll</HintPath>
     </Reference>
     <Reference Include="FSharp.Compiler.Service">
       <HintPath>..\..\packages\FSharp.Compiler.Service\lib\net45\FSharp.Compiler.Service.dll</HintPath>
