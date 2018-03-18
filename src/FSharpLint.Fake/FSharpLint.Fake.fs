@@ -50,7 +50,7 @@ let defaultLintOptions =
 let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
     let parameters = defaultLintOptions |> setParams
 
-    traceStartTask "FSharpLint" projectFile
+    use _traceStartTask = traceStartTaskUsing "FSharpLint" projectFile
 
     let numberOfWarnings, numberOfFiles = ref 0, ref 0
     
@@ -77,5 +77,3 @@ let FSharpLint (setParams: LintOptions->LintOptions) (projectFile: string) =
         tracefn "Successfully linted %s. Linted %d files and found %d warnings." projectFile !numberOfFiles !numberOfWarnings
     | Failure(message) ->
         sprintf "Failed to lint %s. Failed with: %s" projectFile message |> traceError
-
-    traceEndTask "FSharpLint" projectFile
