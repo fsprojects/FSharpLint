@@ -60,5 +60,6 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
+  <Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
   <Import Project="$(MSBuildProjectDirectory)\FSharpLintMSBuildTaskTest\build\FSharpLint.targets" />
 </Project>
