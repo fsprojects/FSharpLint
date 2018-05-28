@@ -28,7 +28,7 @@ module RedundantNewKeyword =
             match symbol with
             | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
                 let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
-                ctor.EnclosingEntity
+                ctor.DeclaringEntity
                 |> Option.exists (fun ctorForType -> 
                     Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
             | Some(_) | None -> false }
