@@ -55,7 +55,6 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="AppDomain.fs" />
     <Compile Include="FSharpLintTask.fs" />
     <Compile Include="AssemblyInfo.fs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
