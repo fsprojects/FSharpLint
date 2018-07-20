@@ -5,8 +5,8 @@ nuget FParsec
 nuget NUnit
 nuget FSharp.Compiler.Service
 nuget FSharp.Compiler.Service.ProjectCracker
-nuget FAKE.Lib
-nuget FSharp.Core
+nuget FAKE.Lib ~> 4.64.13
+nuget FSharp.Core redirects:force
 nuget System.Collections.Immutable < 1.4
 
 group Tools
@@ -21,6 +21,7 @@ group Netcore
 storage: none
 source https://www.nuget.org/api/v2/
 
-nuget FSharp.Core >= 4.3.4
+nuget FSharp.Core
 nuget FSharp.Compiler.Service
 nuget FParsec
+

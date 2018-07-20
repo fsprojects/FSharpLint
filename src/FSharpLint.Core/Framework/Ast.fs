@@ -368,6 +368,7 @@ module Ast =
             add <| patternNode pattern
         | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
             matchClauses |> List.revIter (matchNode >> add)
+        | SynExpr.MatchBang(_, expression, matchClauses, _, _)
         | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _)
         | SynExpr.Match(_, expression, matchClauses, _, _) -> 
             matchClauses |> List.revIter (matchNode >> add)

@@ -42,7 +42,7 @@
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core">
-      <HintPath>..\..\packages\FSharp.Core\lib\net45\FSharp.Core.dll</HintPath>
+      <HintPath>$(MSBuildProjectDirectory)\FSharpLintMSBuildTaskTest\FSharp.Core.dll</HintPath>
       <Private>True</Private>
       <Paket>True</Paket>
     </Reference>

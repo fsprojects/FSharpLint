@@ -63,8 +63,12 @@ module TestFakeTask =
                   "`x = null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
                   "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
 
-            let allFound = expectedErrors |> List.forall output.Contains
+            let missingErrors = expectedErrors |> List.filter (output.Contains >> not)
 
-            let failInfo = sprintf "FAKE output didn't contain expected lint warnings. output: %s" output
+            let failInfo = 
+                sprintf 
+                    "FAKE output didn't contain expected lint warnings.\nExpected %s.\noutput: %s" 
+                    (String.concat "; " missingErrors)
+                    output
                 
-            Assert.IsTrue(allFound, failInfo)
+            Assert.IsTrue(missingErrors.IsEmpty, failInfo)
