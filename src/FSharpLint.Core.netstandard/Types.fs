@@ -28,11 +28,8 @@ module Types =
             | SynType.LongIdent lid ->
                 match lid |> longIdentWithDotsToString with
                 | "list"
-                | "List"
                 | "option"
-                | "Option"
-                | "ref"
-                | "Ref" as typeName ->
+                | "ref" as typeName ->
                     // Prefer postfix.
                     if not isPostfix
                     then 

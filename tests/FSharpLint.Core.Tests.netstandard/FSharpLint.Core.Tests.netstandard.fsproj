@@ -30,6 +30,7 @@
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestNumberOfItemsRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestSourceLengthRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestNestedStatementsRules.fs" />
+    <Compile Include="../FSharpLint.Core.Tests/Rules/TestTypesRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestTypographyRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestFunctionReimplementationRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestHintMatcher.fs" />
