@@ -77,6 +77,7 @@
     <Compile Include="Rules/Binding.fs" />
     <Compile Include="Rules/SourceLength.fs" />
     <Compile Include="Rules/NestedStatements.fs" />
+    <Compile Include="Rules\Types.fs" />
     <Compile Include="Rules/Typography.fs" />
     <Compile Include="Rules/FunctionReimplementation.fs" />
     <Compile Include="Rules/HintMatcher.fs" />
