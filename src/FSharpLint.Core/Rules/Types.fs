@@ -18,7 +18,7 @@ module Types =
     let private isRuleEnabled config ruleName = 
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
-    let private checkTypePrefixing args range typeName isPostfix isSuppressed =
+    let private checkTypePrefixing args range typeName typeArgs isPostfix isSuppressed =
         let ruleName = "TypePrefixing"
 
         let isEnabled = isRuleEnabled args.Info.Config ruleName
@@ -37,25 +37,38 @@ module Types =
                     if not isPostfix
                     then 
                         let error = sprintf "Use postfix syntax for F# type %s" typeName
-                        args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
+                        let suggestedFix = lazy(
+                            (args.Info.TryFindTextOfRange range, typeArgs)
+                            ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
+                        args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
                 | "array" ->
                     // Prefer special postfix (e.g. int[]).
                     let error = "Use special postfix syntax for F# type array" 
-                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
-                | _ ->
+                    let suggestedFix = lazy(
+                        (args.Info.TryFindTextOfRange range, typeArgs)
+                        ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
+                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
+                | typeName ->
                     // Prefer prefix.
                     if isPostfix
                     then 
+                        let suggestedFix = lazy(
+                            (args.Info.TryFindTextOfRange range, typeArgs)
+                            ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
                         let error = "Use prefix syntax for generic types" 
-                        args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
-            | _ ->
-                // Prefer prefix.
-                if isPostfix
-                then 
-                    let error = "Use prefix syntax for generic types" 
-                    args.Info.Suggest { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] }
+                        args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
+            | _ -> ()
 
     let analyser (args: AnalyserArgs) : unit = 
+
+        let synTypeToString (synType:SynType) =
+            args.Info.TryFindTextOfRange synType.Range
+
+        let typeArgsToString (typeArgs:SynType list) =
+            let typeStrings = typeArgs |> List.choose synTypeToString
+            if typeStrings.Length = typeArgs.Length 
+            then typeStrings |> String.concat "," |> Some
+            else None
 
         if isAnalyserEnabled args.Info.Config then
             let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -66,6 +79,7 @@ module Types =
                 
             for i = 0 to syntaxArray.Length - 1 do
                 match syntaxArray.[i].Actual with
-                | AstNode.Type (SynType.App (typeName, _, _, _, _, isPostfix, range)) ->
-                    checkTypePrefixing args range typeName isPostfix (isSuppressed i)
+                | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
+                    let typeArgs = typeArgsToString typeArgs
+                    checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
                 | _ -> ()
