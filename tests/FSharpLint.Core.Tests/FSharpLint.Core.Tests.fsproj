@@ -74,6 +74,7 @@
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
     <Compile Include="Rules/TestRedundantNewKeyword.fs" />
     <Compile Include="Rules\TestFormattingRules.fs" />
+    <Compile Include="Rules\TestNamespacesRules.fs" />
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
