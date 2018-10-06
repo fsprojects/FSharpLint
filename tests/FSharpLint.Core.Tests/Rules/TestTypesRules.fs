@@ -110,21 +110,119 @@ type T = int []
         this.Parse """
 module Program
 
-type T<'a> = T of 'a
-
-type X = int T
+type X = int Generic
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 9))
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
 
     [<Test>]
     member this.``No error for generic type prefix syntax``() =
         this.Parse """
 module Program
 
-type T<'a> = T of 'a
-
-type X = T<int>
+type X = Generic<int>
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Quickfix for F# List type``() = 
+        let source = """
+module Program
+
+type T = list<int>
+"""
+
+        let expected = """
+module Program
+
+type T = int list
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quickfix for F# Option type``() = 
+        let source = """
+module Program
+
+type T = option<int>
+"""
+
+        let expected = """
+module Program
+
+type T = int option
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quickfix for F# Ref type``() = 
+        let source = """
+module Program
+
+type T = ref<int>
+"""
+
+        let expected = """
+module Program
+
+type T = int ref
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quickfix for F# array type from prefix syntax``() = 
+        let source = """
+module Program
+
+type T = array<int>
+"""
+
+        let expected = """
+module Program
+
+type T = int []
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quickfix for F# array type from standard postfix syntax``() = 
+        let source = """
+module Program
+
+type T = int array
+"""
+
+        let expected = """
+module Program
+
+type T = int []
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Quickfix for generic type``() = 
+        let source = """
+module Program
+
+type T = int Generic
+"""
+
+        let expected = """
+module Program
+
+type T = Generic<int>
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
