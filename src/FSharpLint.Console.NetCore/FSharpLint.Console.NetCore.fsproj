@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\FSharpLint.Console\Program.fs">
-    </Compile>
+    <Compile Include="..\FSharpLint.Console\Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
