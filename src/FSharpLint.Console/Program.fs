@@ -44,7 +44,7 @@ module Program =
               Configuration = None }
     
 #if NO_PROJECTCRACKER
-        ()
+        failwith "this build does not support project files."
 #else
         lintProject parseInfo projectFile (Some parserProgress)
 #endif
