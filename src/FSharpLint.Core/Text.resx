@@ -132,9 +132,6 @@
   <data name="ConsoleFinished" xml:space="preserve">
     <value>Finished.</value>
   </data>
-  <data name="ConsoleHelp" xml:space="preserve">
-    <value>Use -f followed by the absolute path of the .fsproj file of the project to lint to run the tool.</value>
-  </data>
   <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
     <value>MSBuild could not load the project file {0} because: {1}</value>
   </data>

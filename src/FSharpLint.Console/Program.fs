@@ -7,7 +7,13 @@ module Program =
     open FSharpLint.Application
 
     let private help () =
-        Resources.GetString("ConsoleHelp") |> Console.WriteLine
+
+#if NO_PROJECTCRACKER
+#else
+        printfn "-f <project.fsproj>        lint project"
+#endif
+        printfn "-sf <file.fs>              lint single file"
+        printfn "-source 'let foo = 5'      lint source code"
 
     let private printException (e:Exception) =
         "Exception Message:" + Environment.NewLine +
@@ -36,8 +42,12 @@ module Program =
             { CancellationToken = None
               ReceivedWarning = Some warningReceived
               Configuration = None }
-
+    
+#if NO_PROJECTCRACKER
+        ()
+#else
         lintProject parseInfo projectFile (Some parserProgress)
+#endif
 
     let private runLintOnFile pathToFile =
         let reportLintWarning (warning:LintWarning.Warning) =
