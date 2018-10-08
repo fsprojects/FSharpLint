@@ -427,5 +427,14 @@
     <RedundantNewKeyword>
       <Enabled>true</Enabled>
     </RedundantNewKeyword>
+
+    <Formatting>
+      <Rules>
+        <TypedItemSpacing>
+          <Enabled>true</Enabled>
+        </TypedItemSpacing>
+      </Rules>
+      <Enabled>true</Enabled>
+    </Formatting>
   </Analysers>
 </FSharpLintSettings>
