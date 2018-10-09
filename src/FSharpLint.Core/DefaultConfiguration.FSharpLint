@@ -448,9 +448,12 @@
         <PatternMatchOrClausesOnNewLine>
           <Enabled>true</Enabled>
         </PatternMatchOrClausesOnNewLine>
-         <PatternMatchClauseIndentation>
+        <PatternMatchClauseIndentation>
           <Enabled>true</Enabled>
-        </PatternMatchClauseIndentation>        
+        </PatternMatchClauseIndentation>
+        <PatternMatchExpressionIndentation>
+          <Enabled>true</Enabled>
+        </PatternMatchExpressionIndentation>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>

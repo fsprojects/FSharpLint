@@ -16,7 +16,8 @@ let config =
                   ("TypePrefixing", ruleEnabled)
                   ("PatternMatchClausesOnNewLine", ruleEnabled)
                   ("PatternMatchOrClausesOnNewLine", ruleEnabled)
-                  ("PatternMatchClauseIndentation", ruleEnabled) ]
+                  ("PatternMatchClauseIndentation", ruleEnabled)
+                  ("PatternMatchExpressionIndentation", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
  
               
@@ -464,3 +465,31 @@ module Program
 """
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+    [<Test>]
+    member this.``Error for pattern match clauses indentation for expression on newline``() =
+        this.Parse"""
+module Program
+
+match 1 with
+| 1 -> 
+true
+| 2 -> 
+    false)
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+
+    [<Test>]
+    member this.``No error for pattern match clauses with indentation for expression on newline``() =
+        this.Parse"""
+module Program
+
+match 1 with
+| 1 -> 
+    true
+| 2 -> 
+    false)
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)

@@ -276,4 +276,7 @@
   <data name="RulesFormattingPatternMatchClauseSameIndentationError" xml:space="preserve">
     <value>Match clauses should be at the same indentation level.</value>
   </data>
+  <data name="RulesFormattingMatchExpressionIndentationError" xml:space="preserve">
+    <value>If RHS of pattern match case is on newline, it should be indentend by one level.</value>
+  </data>
 </root>
