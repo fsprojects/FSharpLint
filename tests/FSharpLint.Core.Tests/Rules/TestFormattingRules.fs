@@ -200,6 +200,8 @@ module Program
 type T = list<int>
 """
 
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+
     [<Test>]
     member this.``No error for F# List type postfix syntax``() =
         this.Parse """
