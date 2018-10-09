@@ -138,7 +138,7 @@ module Formatting =
             if isEnabled && isSuppressed ruleName |> not then
                 clauses
                 |> List.iter (fun clause ->
-                    if clause.Range.StartColumn <> matchExprStartColumn then
+                    if clause.Range.StartColumn - 2 <> matchExprStartColumn then
                         args.Info.Suggest
                             { Range = clause.Range
                               Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")

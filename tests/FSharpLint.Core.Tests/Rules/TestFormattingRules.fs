@@ -404,3 +404,27 @@ type T = Generic<int>
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Error for pattern match clauses at different indentation``() =
+        this.Parse"""
+module Program
+
+match 1 with
+| 1 -> true
+    | 2 -> false
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 6))
+
+    [<Test>]
+    member this.``No error for pattern match clauses with same indentation``() =
+        this.Parse"""
+module Program
+
+match 1 with
+| 1 -> true
+| 2 -> false
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
