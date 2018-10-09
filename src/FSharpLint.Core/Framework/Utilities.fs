@@ -59,3 +59,11 @@ module ExpressionUtilities =
 
         findLineStart pos.Line 1 0
         |> Option.map (fun x -> x + pos.Column)
+
+    /// Converts a LongIdent to a String.
+    let longIdentToString (lid:LongIdent) =
+        lid |> List.map (fun li -> li.idText) |> String.concat "."
+
+    /// Converts a LongIdentWithDots to a String.
+    let longIdentWithDotsToString (lidwd:LongIdentWithDots) =
+        lidwd.Lid |> longIdentToString

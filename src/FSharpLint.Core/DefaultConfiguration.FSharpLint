@@ -439,6 +439,9 @@
         <PatternMatchFormatting>
           <Enabled>true</Enabled>
         </PatternMatchFormatting>
+        <TypePrefixing>
+          <Enabled>true</Enabled>
+        </TypePrefixing
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>
