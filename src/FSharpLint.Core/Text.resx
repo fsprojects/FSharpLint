@@ -291,4 +291,7 @@
   <data name="RulesConventionsTopLevelNamespaceError" xml:space="preserve">
     <value>Prefer namespaces at top level.</value>
   </data>
+  <data name="RulesTypographyIndentationError" xml:space="preserve">
+    <value>Indentation must use a multiple of {0} spaces.</value>
+  </data>
 </root>

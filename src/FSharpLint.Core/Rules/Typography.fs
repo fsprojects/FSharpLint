@@ -172,9 +172,10 @@ module Typography =
                 if numLeadingSpaces % expectedSpaces <> 0 then
                     let range = mkRange (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
                     if isSuppressed range "Indentation" |> not then
+                        let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
                         analyserInfo.Suggest
                             { Range = range
-                              Message = sprintf "Indentation must use a multiple of %i spaces." expectedSpaces
+                              Message =  String.Format(errorFormatString, expectedSpaces) 
                               SuggestedFix = None
                               TypeChecks = [] })
 
