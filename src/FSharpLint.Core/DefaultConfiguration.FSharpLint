@@ -441,7 +441,7 @@
         </PatternMatchFormatting>
         <TypePrefixing>
           <Enabled>true</Enabled>
-        </TypePrefixing
+        </TypePrefixing>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>

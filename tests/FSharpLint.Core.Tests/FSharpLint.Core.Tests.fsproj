@@ -70,7 +70,6 @@
     <Compile Include="Rules/TestNestedStatementsRules.fs" />
     <Compile Include="Rules/TestTypographyRules.fs" />
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
-    <Compile Include="Rules\TestTypesRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
     <Compile Include="Rules/TestRedundantNewKeyword.fs" />

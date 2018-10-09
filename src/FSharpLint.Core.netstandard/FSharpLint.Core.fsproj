@@ -24,7 +24,6 @@
     <Compile Include="../FSharpLint.Core/Rules/SourceLength.fs" />
     <Compile Include="../FSharpLint.Core/Rules/NestedStatements.fs" />
     <Compile Include="../FSharpLint.Core/Rules/Typography.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/Types.fs" />
     <Compile Include="../FSharpLint.Core/Rules/FunctionReimplementation.fs" />
     <Compile Include="../FSharpLint.Core/Rules/HintMatcher.fs" />
     <Compile Include="../FSharpLint.Core/Rules/RaiseWithTooManyArguments.fs" />
