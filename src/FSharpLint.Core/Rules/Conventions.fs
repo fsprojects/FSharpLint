@@ -30,7 +30,7 @@ module Conventions =
                 then
                     args.Info.Suggest
                         { Range = range 
-                          Message = "Prefer namespaces at top level"
+                          Message = Resources.GetString("RulesConventionsTopLevelNamespaceError")
                           SuggestedFix = None
                           TypeChecks = [] }
 
