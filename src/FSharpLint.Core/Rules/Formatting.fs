@@ -130,6 +130,20 @@ module Formatting =
                               SuggestedFix = None
                               TypeChecks = [] })
 
+        let checkPatternMatchClauseIndentation args matchExprStartColumn (clauses:SynMatchClause list) isSuppressed =
+            let ruleName = "PatternMatchClauseIndentation"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                clauses
+                |> List.iter (fun clause ->
+                    if clause.Range.StartColumn <> matchExprStartColumn then
+                        args.Info.Suggest
+                            { Range = clause.Range
+                              Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
+                              SuggestedFix = None
+                              TypeChecks = [] })
 
     module private TypePrefixing =
 
@@ -208,10 +222,11 @@ module Formatting =
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
                 TupleFormatting.checkTupleHasParentheses args parentNode tupleExpr.Range (isSuppressed i)
                 TupleFormatting.checkTupleCommaSpacing args tupleExpr.Range (isSuppressed i)
-            | AstNode.Expression (SynExpr.Match (_, _, clauses, _, _))
-            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, _)) ->
+            | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
+            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) ->
                 PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
                 PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
+                PatternMatchFormatting.checkPatternMatchClauseIndentation args range.StartColumn clauses (isSuppressed i)
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)

@@ -267,4 +267,7 @@
   <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
     <value>Use prefix syntax for generic type.</value>
   </data>
+  <data name="RulesFormattingPatternMatchClauseIndentationError" xml:space="preserve">
+    <value>Match clauses should be at same indentation level.</value>
+  </data>
 </root>

@@ -433,15 +433,24 @@
         <TypedItemSpacing>
           <Enabled>true</Enabled>
         </TypedItemSpacing>
-        <TupleFormatting>
+        <TupleCommaSpacing>
           <Enabled>true</Enabled>
-        </TupleFormatting>
-        <PatternMatchFormatting>
+        </TupleCommaSpacing>
+        <TupleParentheses>
           <Enabled>true</Enabled>
-        </PatternMatchFormatting>
+        </TupleParentheses>
         <TypePrefixing>
           <Enabled>true</Enabled>
         </TypePrefixing>
+        <PatternMatchClausesOnNewLine>
+          <Enabled>true</Enabled>
+        </PatternMatchClausesOnNewLine>
+        <PatternMatchOrClausesOnNewLine>
+          <Enabled>true</Enabled>
+        </PatternMatchOrClausesOnNewLine>
+         <PatternMatchClauseIndentation>
+          <Enabled>true</Enabled>
+        </PatternMatchClauseIndentation>        
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>

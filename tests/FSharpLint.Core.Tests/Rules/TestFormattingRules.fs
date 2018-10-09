@@ -15,7 +15,8 @@ let config =
                   ("TupleParentheses", ruleEnabled)
                   ("TypePrefixing", ruleEnabled)
                   ("PatternMatchClausesOnNewLine", ruleEnabled)
-                  ("PatternMatchOrClausesOnNewLine", ruleEnabled) ]
+                  ("PatternMatchOrClausesOnNewLine", ruleEnabled)
+                  ("PatternMatchClauseIndentation", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
  
               
