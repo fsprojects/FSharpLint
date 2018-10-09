@@ -1,7 +1,7 @@
-﻿module TestNamespacesRules
+﻿module TestConventionsRules
 
 open NUnit.Framework
-open FSharpLint.Rules.Namespaces
+open FSharpLint.Rules.Conventions
 open FSharpLint.Framework.Configuration
 
 let config = 
@@ -15,7 +15,7 @@ let config =
              
  
 [<TestFixture>]
-type TestNamespaces() =
+type TestConventions() =
     inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]

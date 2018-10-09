@@ -1,18 +1,15 @@
 ﻿namespace FSharpLint.Rules
 
-module Namespaces =
+module Conventions =
 
-    open System
-    open System.IO
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Configuration
     open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework.Ast
 
     [<Literal>]
-    let AnalyserName = "Namespaces"
+    let AnalyserName = "Conventions"
     
     let private isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
@@ -28,14 +25,14 @@ module Namespaces =
             let isEnabled = isEnabled ruleName args.Info.Config
 
             if isEnabled && isSuppressed ruleName |> not then
-            let (SynModuleOrNamespace(_, _, isModule, _, _, _, _, _)) = moduleOrNamespace
-            if isModule
-            then
-                args.Info.Suggest
-                    { Range = range 
-                      Message = "Prefer namespaces at top level"
-                      SuggestedFix = None
-                      TypeChecks = [] }
+                let (SynModuleOrNamespace(_, _, isModule, _, _, _, _, _)) = moduleOrNamespace
+                if isModule
+                then
+                    args.Info.Suggest
+                        { Range = range 
+                          Message = "Prefer namespaces at top level"
+                          SuggestedFix = None
+                          TypeChecks = [] }
 
     let analyser (args: AnalyserArgs) : unit = 
         if isAnalyserEnabled args.Info.Config then

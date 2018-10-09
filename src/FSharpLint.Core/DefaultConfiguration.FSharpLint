@@ -467,13 +467,13 @@
       <Enabled>true</Enabled>
     </Formatting>
 
-    <Namespaces>
+    <Conventions>
       <Rules>
         <TopLevelNamespace>
           <Enabled>true</Enabled>
         </TopLevelNamespace>
       </Rules>
       <Enabled>true</Enabled>
-    </Namespaces>
+    </Conventions>
   </Analysers>
 </FSharpLintSettings>
