@@ -258,4 +258,13 @@
   <data name="RulesFormattingTypedItemSpacingError" xml:space="preserve">
     <value>Use spaces around ':' in typed item.</value>
   </data>
+  <data name="RulesFormattingF#ArrayPostfixError" xml:space="preserve">
+    <value>Use special postfix syntax for F# type array.</value>
+  </data>
+  <data name="RulesFormattingF#PostfixGenericError" xml:space="preserve">
+    <value>Use postfix syntax for F# type {0}.</value>
+  </data>
+  <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
+    <value>Use prefix syntax for generic type.</value>
+  </data>
 </root>

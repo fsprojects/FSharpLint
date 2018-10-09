@@ -2,6 +2,7 @@
 
 module Formatting =
     
+    open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
@@ -150,18 +151,25 @@ module Formatting =
                         // Prefer postfix.
                         if not isPostfix
                         then 
-                            let error = sprintf "Use postfix syntax for F# type %s" typeName
+                            let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
                             let suggestedFix = lazy(
                                 (args.Info.TryFindTextOfRange range, typeArgs)
                                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
-                            args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
+                            args.Info.Suggest 
+                                { Range = range 
+                                  Message =  String.Format(errorFormatString, typeName)
+                                  SuggestedFix = Some suggestedFix
+                                  TypeChecks = [] }
                     | "array" ->
                         // Prefer special postfix (e.g. int[]).
-                        let error = "Use special postfix syntax for F# type array" 
                         let suggestedFix = lazy(
                             (args.Info.TryFindTextOfRange range, typeArgs)
                             ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
-                        args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
+                        args.Info.Suggest 
+                            { Range = range
+                              Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
+                              SuggestedFix = Some suggestedFix
+                              TypeChecks = [] }
                     | typeName ->
                         // Prefer prefix.
                         if isPostfix
@@ -169,8 +177,11 @@ module Formatting =
                             let suggestedFix = lazy(
                                 (args.Info.TryFindTextOfRange range, typeArgs)
                                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
-                            let error = "Use prefix syntax for generic types" 
-                            args.Info.Suggest { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] }
+                            args.Info.Suggest 
+                                { Range = range
+                                  Message = Resources.GetString("RulesFormattingGenericPrefixError")
+                                  SuggestedFix = Some suggestedFix
+                                  TypeChecks = [] }
                 | _ -> ()
 
     let analyser (args: AnalyserArgs) : unit = 
