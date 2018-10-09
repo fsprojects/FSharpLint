@@ -34,7 +34,7 @@ module Formatting =
                                 |> Some)
                             args.Info.Suggest 
                                 { Range = range 
-                                  Message = "Use spaces around ':' in typed expression."
+                                  Message = Resources.GetString("RulesFormattingTypedItemSpacingError")
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
                     | _ -> ())
@@ -58,7 +58,7 @@ module Formatting =
                             |> Some)
                         args.Info.Suggest
                             { Range = range
-                              Message = "Use parentheses for tuple instantiation."
+                              Message = Resources.GetString("RulesFormattingTupleParenthesesError")
                               SuggestedFix = Some suggestedFix
                               TypeChecks = [] })
 
@@ -85,7 +85,7 @@ module Formatting =
                                 |> Some)
                             args.Info.Suggest
                                 { Range = range
-                                  Message = "Comma in tuple instantiation should be followed by single space."
+                                  Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
                     | _ -> ())
@@ -104,7 +104,7 @@ module Formatting =
                     if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
                         args.Info.Suggest
                             { Range = clauseTwo.Range
-                              Message = "Each match clause should be placed on its own line"
+                              Message = Resources.GetString("RulesFormattingPatternMatchClausesOnNewLineError")
                               SuggestedFix = None
                               TypeChecks = [] })
 
@@ -124,7 +124,7 @@ module Formatting =
                     if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
                         args.Info.Suggest
                             { Range = clauseTwo.Range
-                              Message = "Each 'or' match clause should be placed on its own line"
+                              Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
                               SuggestedFix = None
                               TypeChecks = [] })
 
