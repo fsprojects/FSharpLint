@@ -10,12 +10,13 @@ let config =
     Map.ofList 
         [ (AnalyserName, 
             { Rules = Map.ofList 
-                [ ("TypedItemSpacing", ruleEnabled) ]
+                [ ("TypedItemSpacing", ruleEnabled)
+                  ("TupleFormatting", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
  
               
 [<TestFixture>]
-type Testformatting() =
+type TestFormatting() =
     inherit TestRuleBase.TestRuleBase(analyser, config)
 
     [<Test>]
@@ -26,6 +27,15 @@ module Program
 let (x:int) = 1""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
+
+    [<Test>]
+    member this.``No error for typed pattern with spaces around colon``() = 
+        this.Parse("""
+module Program
+
+let (x : int) = 1""")
+
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``Quickfix for typed pattern with missing spaces``() = 
@@ -42,3 +52,96 @@ let (x : int) = 1"""
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    
+    [<Test>]
+    member this.``Error for tuple instantiation without parentheses``() =
+        this.Parse("""
+module Program
+
+let x = 1, 2""")
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+
+    [<Test>]
+    member this.``Quickfix for tuple instantiation without parentheses``() =
+        let source = """
+module Program
+
+let x = 1, 2"""
+
+        let expected = """
+module Program
+
+let x = (1, 2)"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``No error for tuple instantiation with parentheses``() =
+        this.Parse("""
+module Program
+
+let x = (1, 2)""")
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for tuple instantiation without space after comma``() =
+        this.Parse("""
+module Program
+
+let x = (1,2)""")
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+
+    [<Test>]
+    member this.``Quickfix for tuple instantiation without space after comma``() =
+        let source = """
+module Program
+
+let x = (1,2)"""
+
+
+        let expected = """
+module Program
+
+let x = (1, 2)"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Error for tuple instantiation with two spaces after comma``() =
+        this.Parse("""
+module Program
+
+let x = (1,  2)""")
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+
+    [<Test>]
+    member this.``Quickfix for tuple instantiation with two spaces after comma``() =
+        let source = """
+module Program
+
+let x = (1,  2)"""
+
+
+        let expected = """
+module Program
+
+let x = (1, 2)"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``No error for tuple instantiation with single space after comma``() =
+        this.Parse("""
+module Program
+
+let x = (1, 2)""")
+
+        Assert.IsTrue(this.NoErrorsExist)
