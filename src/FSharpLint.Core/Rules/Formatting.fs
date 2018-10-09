@@ -130,18 +130,38 @@ module Formatting =
                               SuggestedFix = None
                               TypeChecks = [] })
 
-        let checkPatternMatchClauseIndentation args matchExprStartColumn (clauses:SynMatchClause list) isSuppressed =
+        let checkPatternMatchClauseIndentation args matchExprStartColumn (clauses:SynMatchClause list) isLambda isSuppressed =
             let ruleName = "PatternMatchClauseIndentation"
 
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
+            let offset = if isLambda then 0 else -2
+
             if isEnabled && isSuppressed ruleName |> not then
                 clauses
-                |> List.iter (fun clause ->
-                    if clause.Range.StartColumn - 2 <> matchExprStartColumn then
-                        args.Info.Suggest
-                            { Range = clause.Range
+                |> List.tryHead
+                |> Option.iter (fun firstClause ->
+                    if isLambda then
+                        if firstClause.Range.StartColumn <> matchExprStartColumn then
+                          args.Info.Suggest
+                            { Range = firstClause.Range
+                              Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
+                              SuggestedFix = None
+                              TypeChecks = [] }                       
+                     elif firstClause.Range.StartColumn - 2 <> matchExprStartColumn then
+                          args.Info.Suggest
+                            { Range = firstClause.Range
                               Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
+                              SuggestedFix = None
+                              TypeChecks = [] })
+
+                clauses
+                |> List.pairwise
+                |> List.iter (fun (clauseOne, clauseTwo) ->
+                    if clauseOne.Range.StartColumn <> clauseTwo.Range.StartColumn then
+                        args.Info.Suggest
+                            { Range = clauseTwo.Range
+                              Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
                               SuggestedFix = None
                               TypeChecks = [] })
 
@@ -223,10 +243,15 @@ module Formatting =
                 TupleFormatting.checkTupleHasParentheses args parentNode tupleExpr.Range (isSuppressed i)
                 TupleFormatting.checkTupleCommaSpacing args tupleExpr.Range (isSuppressed i)
             | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
-            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) ->
+            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) as node ->
+                let isLambda =
+                    match node with
+                    | AstNode.Expression (SynExpr.MatchLambda _) -> true
+                    | _ -> false
+
                 PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
                 PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
-                PatternMatchFormatting.checkPatternMatchClauseIndentation args range.StartColumn clauses (isSuppressed i)
+                PatternMatchFormatting.checkPatternMatchClauseIndentation args range.StartColumn clauses isLambda (isSuppressed i)
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)

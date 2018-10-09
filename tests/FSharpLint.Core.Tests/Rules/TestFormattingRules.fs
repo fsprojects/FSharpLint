@@ -428,3 +428,39 @@ match 1 with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for lambda pattern match clauses at different indentation``() =
+        this.Parse"""
+module Program
+
+1 |> (function
+    | 1 -> true
+        | 2 -> false)
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 10))
+
+    [<Test>]
+    member this.``No error for lambda pattern match clauses with same indentation``() =
+        this.Parse"""
+module Program
+
+1 |> (function
+    | 1 -> true
+    | 2 -> false)
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for lambda pattern match clauses without level of indentation for clauses``() =
+        this.Parse"""
+module Program
+
+1 |> (function
+| 1 -> true
+| 2 -> false)
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 2))
