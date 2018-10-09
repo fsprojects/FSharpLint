@@ -67,6 +67,7 @@ module Configuration =
         | Hints of Hints
         | OneSpaceAllowedAfterOperator of bool
         | NumberOfSpacesAllowed of int
+        | NumberOfIndentationSpaces of int
         | IgnoreBlankLines of bool
         | Access of Access
         | Naming of Naming
@@ -80,6 +81,7 @@ module Configuration =
         | MaxItems(x)
         | Length(x)
         | NumberOfSpacesAllowed(x) -> x :> obj
+        | NumberOfIndentationSpaces(x) -> x :> obj
         | Underscores(x) -> x :> obj
         | Prefix(x)
         | Suffix(x) -> x :> obj
@@ -275,6 +277,7 @@ module Configuration =
         | "Hints" -> Hints(parseHints setting)
         | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
         | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
+        | "NumberOfIndentationSpaces" -> NumberOfIndentationSpaces(setting.Value |> int)
         | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
         | "Access" -> Access(setting.Value |> fromEnum "Access")
         | "Naming" -> Naming(setting.Value |> fromEnum "Naming")

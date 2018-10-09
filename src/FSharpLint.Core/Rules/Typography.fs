@@ -155,6 +155,29 @@ module Typography =
                           SuggestedFix = None 
                           TypeChecks = [] }
 
+    module private Indentation =
+        let private numberOfIndentationSpaces config =
+            match isRuleEnabled config AnalyserName "Indentation" with
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "NumberOfIndentationSpaces" ruleSettings with
+                | Some(NumberOfIndentationSpaces(lines)) -> Some(lines)
+                | Some(_) | None -> None
+            | None -> None
+
+        let checkIndentation mkRange analyserInfo (line:string) lineNumber isSuppressed =
+            numberOfIndentationSpaces analyserInfo.Config 
+            |> Option.iter (fun expectedSpaces ->
+                let numLeadingSpaces = line.Length - line.TrimStart().Length
+
+                if numLeadingSpaces % expectedSpaces <> 0 then
+                    let range = mkRange (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
+                    if isSuppressed range "Indentation" |> not then
+                        analyserInfo.Suggest
+                            { Range = range
+                              Message = sprintf "Indentation must use a multiple of %i spaces." expectedSpaces
+                              SuggestedFix = None
+                              TypeChecks = [] })
+
     module private String =
         let iterLine f input =
             use reader = new StringReader(input)
@@ -213,6 +236,7 @@ module Typography =
             let maxCharacterOnLine = MaxCharactersOnLine.maxCharactersOnLine args.Info.Config 
             let noTabRuleEnabled = isEnabled "NoTabCharacters" args.Info.Config
             let trailingWhitespaceEnabled = isEnabled "TrailingWhitespaceOnLine" args.Info.Config
+            let indentationEnabled = isEnabled "Indentation" args.Info.Config
 
             let analyseLine line i isLastLineInFile =
                 let lineNumber = i + 1
@@ -225,6 +249,9 @@ module Typography =
                     
                 if noTabRuleEnabled then
                     NoTabCharacters.checkNoTabCharacters mkRange args.Info line lineNumber isSuppressed isInLiteralString
+
+                if indentationEnabled then
+                    Indentation.checkIndentation mkRange args.Info line lineNumber isSuppressed
 
                 if isLastLineInFile then
                     TrailingNewLineInFile.checkTrailingNewLineInFile mkRange args.Info lineNumber

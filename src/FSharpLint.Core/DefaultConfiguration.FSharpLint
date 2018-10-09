@@ -327,6 +327,11 @@
           <OneSpaceAllowedAfterOperator>true</OneSpaceAllowedAfterOperator>
           <IgnoreBlankLines>true</IgnoreBlankLines>
         </TrailingWhitespaceOnLine>
+
+        <Indentation>
+          <Enabled>true</Enabled>
+          <NumberOfIndentationSpaces>4</NumberOfIndentationSpaces>
+        </Indentation>
       </Rules>
       <Enabled>true</Enabled>
     </Typography>

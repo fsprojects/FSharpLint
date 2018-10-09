@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules.Typography
 open FSharpLint.Framework.Configuration
 
-let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlankLines = 
+let setupConfig numberOfSpacesAllowed numberOfIndentationSpaces isOneSpaceAllowedAfterOperator ignoreBlankLines = 
     Map.ofList 
         [ 
             (AnalyserName, 
@@ -57,12 +57,22 @@ let setupConfig numberOfSpacesAllowed isOneSpaceAllowedAfterOperator ignoreBlank
                                              IgnoreBlankLines(ignoreBlankLines))
                                         ] 
                                 }) 
+                            ("Indentation",
+                                {
+                                    Settings = Map.ofList
+                                        [
+                                            ("Enabled", Enabled(true)) 
+
+                                            ("NumberOfIndentationSpaces",
+                                             NumberOfIndentationSpaces(numberOfIndentationSpaces))
+                                        ]
+                                })
                         ]
                     Settings = Map.ofList []
                 })
             ]
 
-let config = setupConfig 0 false false
+let config = setupConfig 0 4 false false
  
 [<TestFixture>]
 type TestTypography() =
@@ -110,50 +120,50 @@ type TestTypography() =
 
     [<Test>]
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
-        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 true false)
+        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 4 true false)
                         
         Assert.IsFalse(this.ErrorExistsAt(1, 8))
 
     [<Test>]
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() = 
-        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 false false)
+        this.Parse("fun x -> " + System.Environment.NewLine + "    ()", setupConfig 0 4 false false)
 
         Assert.IsTrue(this.ErrorExistsAt(1, 8))
 
     [<Test>]
     member this.MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() = 
-        this.Parse("fun x ->  " + System.Environment.NewLine + "    ()", setupConfig 0 true false)
+        this.Parse("fun x ->  " + System.Environment.NewLine + "    ()", setupConfig 0 4 true false)
                         
         Assert.IsTrue(this.ErrorExistsAt(1, 8))
 
     [<Test>]
     member this.NoSpacesOnEndOfLineWithNoSpacesAllowed() = 
-        this.Parse("let line = 55", setupConfig 0 false false)
+        this.Parse("let line = 55", setupConfig 0 4 false false)
         
         Assert.IsFalse(this.ErrorExistsAt(1, 13))
 
     [<Test>]
     member this.OneSpaceOnEndOfLineWithNoSpacesAllowed() = 
-        this.Parse("let line = 55 ", setupConfig 0 false false)
+        this.Parse("let line = 55 ", setupConfig 0 4 false false)
         
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
 
     [<Test>]
     member this.OneSpaceOnEndOfLineWithOneSpaceAllowed() = 
-        this.Parse("let line = 55 ", setupConfig 1 false false)
+        this.Parse("let line = 55 ", setupConfig 1 4 false false)
         
         Assert.IsFalse(this.ErrorExistsAt(1, 14))
         Assert.IsFalse(this.ErrorExistsAt(1, 13))
 
     [<Test>]
     member this.TwoSpacesOnEndOfLineWithOneSpaceAllowed() = 
-        this.Parse("let line = 55  ", setupConfig 1 false false)
+        this.Parse("let line = 55  ", setupConfig 1 4 false false)
         
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
 
     [<Test>]
     member this.TwoSpacesOnEndOfLineWithTwoSpacesAllowed() = 
-        this.Parse("let line = 55  ", setupConfig 2 false false)
+        this.Parse("let line = 55  ", setupConfig 2 4 false false)
         
         Assert.IsFalse(this.ErrorExistsAt(1, 15))
         Assert.IsFalse(this.ErrorExistsAt(1, 14))
@@ -167,7 +177,7 @@ type TestTypography() =
 
     [<Test>]
     member this.WhitespaceEntireLineIgnoreBlankLines() = 
-        this.Parse(" ", setupConfig 0 false true)
+        this.Parse(" ", setupConfig 0 1 false true)
 
         Assert.IsFalse(this.ErrorExistsAt(1, 0))
 
@@ -208,3 +218,23 @@ type TestTypography() =
         this.Parse ("let dog = 9" + System.Environment.NewLine)
 
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
+
+    [<Test>]
+    member this.``Error for incorrect indentation``() =
+        this.Parse """
+module P
+
+let x =
+  x"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+
+    [<Test>]
+    member this.``No error for correct indentation``() =
+        this.Parse """
+module P
+
+let x =
+    x"""
+
+        Assert.IsTrue(this.NoErrorsExist)
