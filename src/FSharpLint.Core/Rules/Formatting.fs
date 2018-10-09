@@ -41,57 +41,92 @@ module Formatting =
 
     module private TupleFormatting =
 
-        let private checkTupleHasParentheses args parentNode range =
-            match parentNode with
-            | Some (AstNode.Expression (SynExpr.Paren _)) ->
-                ()
-            | _ ->
-                args.Info.TryFindTextOfRange(range)
-                |> Option.iter (fun text ->
-                    let suggestedFix = lazy(
-                        { FromRange = range; FromText = text; ToText = "(" + text + ")" }
-                        |> Some)
-                    args.Info.Suggest
-                        { Range = range
-                          Message = "Use parentheses for tuple instantiation."
-                          SuggestedFix = Some suggestedFix
-                          TypeChecks = [] })
-
-        let private checkTupleCommaSpacing args range =
-            args.Info.TryFindTextOfRange(range)
-            |> Option.iter (fun text ->
-                let splitText = text.Split(',') |> List.ofArray
-                match splitText with
-                | _ :: tail ->
-                    if tail |> List.exists (fun item -> item.TrimStart().Length <> item.Length - 1) then
-                        let fixedText =
-                            splitText
-                            |> List.map (fun (item:string) -> item.Trim())
-                            |> String.concat ", "
-                        let suggestedFix = lazy(
-                            { FromRange = range 
-                              FromText = text
-                              ToText = fixedText } 
-                            |> Some)
-                        args.Info.Suggest
-                            { Range = range
-                              Message = "Comma in tuple instantiation should be followed by single space."
-                              SuggestedFix = Some suggestedFix
-                              TypeChecks = [] }
-                | _ -> ()
-            )
-
-        let checkTupleFormatting args (tupleExpr:SynExpr) parentNode isSuppressed =
-            let ruleName = "TupleFormatting"
+        let checkTupleHasParentheses args parentNode range isSuppressed =
+            let ruleName = "TupleParentheses"
 
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
-                match tupleExpr with
-                | SynExpr.Tuple (_, _, range) ->
-                    checkTupleCommaSpacing args range
-                    checkTupleHasParentheses args parentNode range
-                | _ -> ()
+                match parentNode with
+                | Some (AstNode.Expression (SynExpr.Paren _)) ->
+                    ()
+                | _ ->
+                    args.Info.TryFindTextOfRange(range)
+                    |> Option.iter (fun text ->
+                        let suggestedFix = lazy(
+                            { FromRange = range; FromText = text; ToText = "(" + text + ")" }
+                            |> Some)
+                        args.Info.Suggest
+                            { Range = range
+                              Message = "Use parentheses for tuple instantiation."
+                              SuggestedFix = Some suggestedFix
+                              TypeChecks = [] })
+
+        let checkTupleCommaSpacing args range isSuppressed =
+            let ruleName = "TupleCommaSpacing"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                args.Info.TryFindTextOfRange(range)
+                |> Option.iter (fun text ->
+                    let splitText = text.Split(',') |> List.ofArray
+                    match splitText with
+                    | _ :: tail ->
+                        if tail |> List.exists (fun item -> item.TrimStart().Length <> item.Length - 1) then
+                            let fixedText =
+                                splitText
+                                |> List.map (fun (item:string) -> item.Trim())
+                                |> String.concat ", "
+                            let suggestedFix = lazy(
+                                { FromRange = range 
+                                  FromText = text
+                                  ToText = fixedText } 
+                                |> Some)
+                            args.Info.Suggest
+                                { Range = range
+                                  Message = "Comma in tuple instantiation should be followed by single space."
+                                  SuggestedFix = Some suggestedFix
+                                  TypeChecks = [] }
+                    | _ -> ())
+
+    module private PatternMatchFormatting =
+
+        let checkPatternMatchClausesOnNewLine args (clauses:SynMatchClause list) isSuppressed =
+            let ruleName = "PatternMatchClausesOnNewLine"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                clauses
+                |> List.pairwise
+                |> List.iter (fun (clauseOne, clauseTwo) -> 
+                    if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
+                        args.Info.Suggest
+                            { Range = clauseTwo.Range
+                              Message = "Each match clause should be placed on its own line"
+                              SuggestedFix = None
+                              TypeChecks = [] })
+
+        let checkPatternMatchOrClausesOnNewLine args (clauses:SynMatchClause list) isSuppressed =
+            let ruleName = "PatternMatchOrClausesOnNewLine"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                clauses
+                |> List.collect (function
+                    | SynMatchClause.Clause (SynPat.Or (firstPat, secondPat, _), _, _, _, _) ->
+                        [firstPat; secondPat]
+                    | _ -> [])
+                |> List.pairwise
+                |> List.iter (fun (clauseOne, clauseTwo) -> 
+                    if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
+                        args.Info.Suggest
+                            { Range = clauseTwo.Range
+                              Message = "Each 'or' match clause should be placed on its own line"
+                              SuggestedFix = None
+                              TypeChecks = [] })
 
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -106,5 +141,10 @@ module Formatting =
                 TypedItemSpacing.checkTypedItemSpacing args range (isSuppressed i) 
             | AstNode.Expression (SynExpr.Tuple _ as tupleExpr) ->
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
-                TupleFormatting.checkTupleFormatting args tupleExpr parentNode (isSuppressed i)
+                TupleFormatting.checkTupleHasParentheses args parentNode tupleExpr.Range (isSuppressed i)
+                TupleFormatting.checkTupleCommaSpacing args tupleExpr.Range (isSuppressed i)
+            | AstNode.Expression (SynExpr.Match (_, _, clauses, _, _))
+            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, _)) ->
+                PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
+                PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
             | _ -> ()

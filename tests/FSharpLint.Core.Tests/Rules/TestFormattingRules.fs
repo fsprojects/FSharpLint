@@ -11,7 +11,10 @@ let config =
         [ (AnalyserName, 
             { Rules = Map.ofList 
                 [ ("TypedItemSpacing", ruleEnabled)
-                  ("TupleFormatting", ruleEnabled) ]
+                  ("TupleCommaSpacing", ruleEnabled)
+                  ("TupleParentheses", ruleEnabled)
+                  ("PatternMatchClausesOnNewLine", ruleEnabled)
+                  ("PatternMatchOrClausesOnNewLine", ruleEnabled) ]
               Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
  
               
@@ -143,5 +146,47 @@ let x = (1, 2)"""
 module Program
 
 let x = (1, 2)""")
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for pattern match clauses on same line``() =
+        this.Parse("""
+module Program
+
+match 1 with
+| 1 -> 1 | 2 -> 2""")
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+
+    [<Test>]
+    member this.``No error for pattern match clauses on different lines``() =
+        this.Parse("""
+module Program
+
+match 1 with
+| 1 -> 1
+| 2 -> 2""")
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for pattern match or clauses on same line``() =
+        this.Parse("""
+module Program
+
+match 1 with
+| 1 | 2 -> 2""")
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 6))
+
+    [<Test>]
+    member this.``No error for pattern match or clauses on different lines``() =
+        this.Parse("""
+module Program
+
+match 1 with
+| 1
+| 2 -> 2""")
 
         Assert.IsTrue(this.NoErrorsExist)

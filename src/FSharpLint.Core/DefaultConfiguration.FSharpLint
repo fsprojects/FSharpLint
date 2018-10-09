@@ -433,6 +433,12 @@
         <TypedItemSpacing>
           <Enabled>true</Enabled>
         </TypedItemSpacing>
+        <TupleFormatting>
+          <Enabled>true</Enabled>
+        </TupleFormatting>
+        <PatternMatchFormatting>
+          <Enabled>true</Enabled>
+        </PatternMatchFormatting>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>
