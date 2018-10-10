@@ -15,6 +15,7 @@ let config =
                   ("TupleParentheses", ruleEnabled)
                   ("TypePrefixing", ruleEnabled)
                   ("ModuleDeclSpacing", ruleEnabled)
+                  ("ClassMemberSpacing", ruleEnabled)
                   ("PatternMatchClausesOnNewLine", ruleEnabled)
                   ("PatternMatchOrClausesOnNewLine", ruleEnabled)
                   ("PatternMatchClauseIndentation", ruleEnabled)
@@ -611,3 +612,43 @@ let y = 2
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for no space between class members``() =
+        this.Parse """
+module Program
+
+type T = T of int with 
+    static member x = 1
+    static member x = 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+
+    [<Test>]
+    member this.``No error for correct spacing between class members``() =
+        this.Parse """
+module Program
+
+type T = T of int with
+    static member x = 1
+
+    static member x = 2
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for too much spacing between class members``() =
+        this.Parse """
+module Program
+
+type T = T of int with
+    static member x = 1
+
+
+
+    static member x = 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 0))

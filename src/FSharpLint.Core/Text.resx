@@ -282,4 +282,7 @@
   <data name="RulesFormattingModuleDeclSpacingError" xml:space="preserve">
     <value>Separate module declarations with 2 blank lines.</value>
   </data>
+  <data name="RulesFormattingClassMemberSpacingError" xml:space="preserve">
+    <value>Class members should be separated by 1 blank line.</value>
+  </data>
 </root>

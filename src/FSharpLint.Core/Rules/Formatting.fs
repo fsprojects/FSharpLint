@@ -234,7 +234,7 @@ module Formatting =
                                   TypeChecks = [] }
                 | _ -> ()
 
-    module private ModuleFormatting =
+    module private Spacing =
 
         let checkModuleDeclSpacing args synModuleOrNamespace isSuppressed =
             let ruleName = "ModuleDeclSpacing"
@@ -267,6 +267,34 @@ module Formatting =
                                   SuggestedFix = None
                                   TypeChecks = [] })
                 | _ -> ()
+
+        let checkClassMemberSpacing args (members:SynMemberDefns) isSuppressed =
+            let ruleName = "ClassMemberSpacing"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                members
+                |> List.pairwise
+                |> List.iter (fun (memberOne, memberTwo) ->
+                    if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 then
+                        let intermediateRange = 
+                            let startLine = memberOne.Range.EndLine + 1
+                            let endLine = memberTwo.Range.StartLine
+                            let endOffset = 
+                                if startLine = endLine 
+                                then 1
+                                else 0
+
+                            mkRange 
+                                ""
+                                (mkPos (memberOne.Range.EndLine + 1) 0)
+                                (mkPos (memberTwo.Range.StartLine + endOffset) 0)
+                        args.Info.Suggest
+                            { Range = intermediateRange
+                              Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
+                              SuggestedFix = None
+                              TypeChecks = [] })
 
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -308,5 +336,8 @@ module Formatting =
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
             | AstNode.ModuleOrNamespace synModuleOrNamespace ->
-                ModuleFormatting.checkModuleDeclSpacing args synModuleOrNamespace (isSuppressed i)
+                Spacing.checkModuleDeclSpacing args synModuleOrNamespace (isSuppressed i)
+            | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, _, members, _))
+            | AstNode.TypeRepresentation (SynTypeDefnRepr.ObjectModel (_, members, _)) ->
+                Spacing.checkClassMemberSpacing args members (isSuppressed i)
             | _ -> ()

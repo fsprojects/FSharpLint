@@ -457,6 +457,9 @@
         <ModuleDeclSpacing>
           <Enabled>true</Enabled>
         </ModuleDeclSpacing>
+        <ClassMemberSpacing>
+          <Enabled>true</Enabled>
+        </ClassMemberSpacing>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>
