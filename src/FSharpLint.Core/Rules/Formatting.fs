@@ -258,7 +258,8 @@ module Formatting =
                 TupleFormatting.checkTupleHasParentheses args parentNode tupleExpr.Range (isSuppressed i)
                 TupleFormatting.checkTupleCommaSpacing args tupleExpr.Range (isSuppressed i)
             | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
-            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) as node ->
+            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) 
+            | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
                 let isLambda =
                     match node with
                     | AstNode.Expression (SynExpr.MatchLambda _) -> true

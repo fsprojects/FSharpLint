@@ -195,6 +195,31 @@ match 1 with
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``Error for exception match clauses on same line``() =
+        this.Parse("""
+module Program
+
+try
+    2/0
+with
+| :? System.DivideByZeroException -> 1 | :? System.Exception -> 2 """)
+
+        Assert.IsTrue(this.ErrorExistsAt(7, 41))
+
+    [<Test>]
+    member this.``No error for exception match clauses on same line``() =
+        this.Parse("""
+module Program
+
+try
+    2/0
+with
+| :? System.DivideByZeroException -> 1
+| :? System.Exception -> 2 """)
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``Error for F# List type prefix syntax``() =
         this.Parse """
 module Program
@@ -431,6 +456,32 @@ match 1 with
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``Error for exception pattern match clauses at different indentation``() =
+        this.Parse """
+module Program
+
+try
+    2/0
+with
+    | :? System.DivideByZeroException -> 1
+    | :? System.Exception -> 2 """
+
+        Assert.IsTrue(this.ErrorExistsAt(7, 6))
+
+    [<Test>]
+    member this.``No error for exception pattern match clauses with same indentation``() =
+        this.Parse """
+module Program
+
+try
+    2/0
+with
+| :? System.DivideByZeroException -> 1
+| :? System.Exception -> 2 """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``Error for lambda pattern match clauses at different indentation``() =
         this.Parse"""
 module Program
@@ -491,5 +542,35 @@ match 1 with
 | 2 -> 
     false)
 """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for exception pattern match clauses indentation for expression on newline``() =
+        this.Parse """
+module Program
+
+try
+    2/0
+with
+| :? System.DivideByZeroException ->
+1
+| :? System.Exception ->
+    2 """
+
+        Assert.IsTrue(this.ErrorExistsAt(8, 0))
+
+    [<Test>]
+    member this.``No error for exception pattern match clauses with indentation for expression on newline``() =
+        this.Parse """
+module Program
+
+try
+    2/0
+with
+| :? System.DivideByZeroException ->
+    1
+| :? System.Exception ->
+    2 """
 
         Assert.IsTrue(this.NoErrorsExist)
