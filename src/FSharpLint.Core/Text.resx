@@ -285,4 +285,10 @@
   <data name="RulesFormattingClassMemberSpacingError" xml:space="preserve">
     <value>Class members should be separated by 1 blank line.</value>
   </data>
+  <data name="RulesFormattingUnionDefinitionIndentationError" xml:space="preserve">
+    <value>Union definition cases should be indented one level on a new line.</value>
+  </data>
+  <data name="RulesFormattingUnionDefinitionSameIndentationError" xml:space="preserve">
+    <value>Union definition cases should be at the same indentation level.</value>
+  </data>
 </root>

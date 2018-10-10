@@ -460,6 +460,9 @@
         <ClassMemberSpacing>
           <Enabled>true</Enabled>
         </ClassMemberSpacing>
+        <UnionDefinitionIndentation>
+          <Enabled>true</Enabled>
+        </UnionDefinitionIndentation>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>

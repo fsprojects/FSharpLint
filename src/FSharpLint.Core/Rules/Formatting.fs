@@ -296,6 +296,39 @@ module Formatting =
                               SuggestedFix = None
                               TypeChecks = [] })
 
+    module private TypeDefinitionFormatting =
+
+        let checkUnionDefinitionIndentation args typeDefnRepr typeDefnStartColumn isSuppressed =
+            let ruleName = "UnionDefinitionIndentation"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                
+                match typeDefnRepr with
+                | SynTypeDefnRepr.Simple((SynTypeDefnSimpleRepr.Union (_, cases, _)), _) ->
+                    match cases with
+                    | []
+                    | [_] -> ()
+                    | firstCase :: _ ->
+                        if firstCase.Range.StartColumn <> typeDefnStartColumn + 1 then
+                          args.Info.Suggest
+                            { Range = firstCase.Range
+                              Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
+                              SuggestedFix = None
+                              TypeChecks = [] }
+
+                        cases
+                        |> List.pairwise
+                        |> List.iter (fun (caseOne, caseTwo) ->
+                            if caseOne.Range.StartColumn <> caseTwo.Range.StartColumn then
+                                args.Info.Suggest
+                                    { Range = caseTwo.Range
+                                      Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
+                                      SuggestedFix = None
+                                      TypeChecks = [] })
+                | _ -> ()
+
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -337,7 +370,9 @@ module Formatting =
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
             | AstNode.ModuleOrNamespace synModuleOrNamespace ->
                 Spacing.checkModuleDeclSpacing args synModuleOrNamespace (isSuppressed i)
-            | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, _, members, _))
+            | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->
+                Spacing.checkClassMemberSpacing args members (isSuppressed i)
+                TypeDefinitionFormatting.checkUnionDefinitionIndentation args repr defnRange.StartColumn (isSuppressed i)
             | AstNode.TypeRepresentation (SynTypeDefnRepr.ObjectModel (_, members, _)) ->
                 Spacing.checkClassMemberSpacing args members (isSuppressed i)
             | _ -> ()
