@@ -14,6 +14,7 @@ let config =
                   ("TupleCommaSpacing", ruleEnabled)
                   ("TupleParentheses", ruleEnabled)
                   ("TypePrefixing", ruleEnabled)
+                  ("ModuleDeclSpacing", ruleEnabled)
                   ("PatternMatchClausesOnNewLine", ruleEnabled)
                   ("PatternMatchOrClausesOnNewLine", ruleEnabled)
                   ("PatternMatchClauseIndentation", ruleEnabled)
@@ -572,5 +573,41 @@ with
     1
 | :? System.Exception ->
     2 """
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for missing space between module declarations``() =
+        this.Parse """
+module Program
+
+let x = 1
+
+let y = 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+
+    [<Test>]
+    member this.``Error for no space between module declarations``() =
+        this.Parse """
+module Program
+
+let x = 1
+let y = 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+
+    [<Test>]
+    member this.``No error for correct spacing between module declarations``() =
+        this.Parse """
+module Program
+
+let x = 1
+
+
+let y = 2
+"""
 
         Assert.IsTrue(this.NoErrorsExist)

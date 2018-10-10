@@ -454,6 +454,9 @@
         <PatternMatchExpressionIndentation>
           <Enabled>true</Enabled>
         </PatternMatchExpressionIndentation>
+        <ModuleDeclSpacing>
+          <Enabled>true</Enabled>
+        </ModuleDeclSpacing>
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>

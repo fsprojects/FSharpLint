@@ -279,4 +279,7 @@
   <data name="RulesFormattingMatchExpressionIndentationError" xml:space="preserve">
     <value>If RHS of pattern match case is on newline, it should be indentend by one level.</value>
   </data>
+  <data name="RulesFormattingModuleDeclSpacingError" xml:space="preserve">
+    <value>Separate module declarations with 2 blank lines.</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ module Formatting =
     
     open System
     open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.Range
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
@@ -233,6 +234,40 @@ module Formatting =
                                   TypeChecks = [] }
                 | _ -> ()
 
+    module private ModuleFormatting =
+
+        let checkModuleDeclSpacing args synModuleOrNamespace isSuppressed =
+            let ruleName = "ModuleDeclSpacing"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+
+                match synModuleOrNamespace with
+                | SynModuleOrNamespace (_, _, _, decls, _, _, _, _) ->
+                    decls
+                    |> List.pairwise
+                    |> List.iter (fun (declOne, declTwo) ->
+                        if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 then
+                            let intermediateRange = 
+                                let startLine = declOne.Range.EndLine + 1
+                                let endLine = declTwo.Range.StartLine
+                                let endOffset = 
+                                    if startLine = endLine 
+                                    then 1
+                                    else 0
+
+                                mkRange 
+                                    ""
+                                    (mkPos (declOne.Range.EndLine + 1) 0)
+                                    (mkPos (declTwo.Range.StartLine + endOffset) 0)
+                            args.Info.Suggest
+                                { Range = intermediateRange
+                                  Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
+                                  SuggestedFix = None
+                                  TypeChecks = [] })
+                | _ -> ()
+
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -272,4 +307,6 @@ module Formatting =
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
+            | AstNode.ModuleOrNamespace synModuleOrNamespace ->
+                ModuleFormatting.checkModuleDeclSpacing args synModuleOrNamespace (isSuppressed i)
             | _ -> ()
