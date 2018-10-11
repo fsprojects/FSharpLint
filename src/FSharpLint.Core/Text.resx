@@ -249,7 +249,7 @@
   <data name="RulesFormattingPatternMatchOrClausesOnNewLineError" xml:space="preserve">
     <value>Each 'or' match clause should be placed on its own line</value>
   </data>
-  <data name="RulesFormattingTupleCommaSpacingErrpr" xml:space="preserve">
+  <data name="RulesFormattingTupleCommaSpacingError" xml:space="preserve">
     <value>Comma in tuple instantiation should be followed by single space.</value>
   </data>
   <data name="RulesFormattingTupleParenthesesError" xml:space="preserve">
