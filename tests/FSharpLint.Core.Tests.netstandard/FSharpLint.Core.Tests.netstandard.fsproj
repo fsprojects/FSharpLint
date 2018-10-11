@@ -36,7 +36,6 @@
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestRaiseWithTooManyArgumentsRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestRedundantNewKeyword.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestFormattingRules.fs" />
-    <Compile Include="../FSharpLint.Core.Tests/Rules/TestNamespacesRules.fs" />
     <Compile Include="../FSharpLint.Core.Tests/Rules/TestConventionsRules.fs" />
 
     <Compile Include="Program.fs" />

@@ -83,7 +83,6 @@
     <Compile Include="Rules/RaiseWithTooManyArguments.fs" />
     <Compile Include="Rules/RedundantNewKeyword.fs" />
     <Compile Include="Rules\Formatting.fs" />
-    <Compile Include="Rules\Namespaces.fs" />
     <Compile Include="Rules\Conventions.fs" />
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
