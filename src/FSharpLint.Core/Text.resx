@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -238,9 +238,57 @@
     <value>Error on line {0} starting at column {1}</value>
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
-    <value>Lambda may be able to be replaced with composition. e.g. `fun x -> x |> isValid |> not` could be replaced with `isValid >> not`.</value>
+    <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
   </data>
   <data name="RulesRedundantNewKeyword" xml:space="preserve">
     <value>Usage of `new` keyword here is redundant.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClausesOnNewLineError" xml:space="preserve">
+    <value>Each match clause should be placed on its own line.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchOrClausesOnNewLineError" xml:space="preserve">
+    <value>Each 'or' match clause should be placed on its own line</value>
+  </data>
+  <data name="RulesFormattingTupleCommaSpacingError" xml:space="preserve">
+    <value>Comma in tuple instantiation should be followed by single space.</value>
+  </data>
+  <data name="RulesFormattingTupleParenthesesError" xml:space="preserve">
+    <value>Use parentheses for tuple instantiation.</value>
+  </data>
+  <data name="RulesFormattingTypedItemSpacingError" xml:space="preserve">
+    <value>Use spaces around ':' in typed item.</value>
+  </data>
+  <data name="RulesFormattingF#ArrayPostfixError" xml:space="preserve">
+    <value>Use special postfix syntax for F# type array.</value>
+  </data>
+  <data name="RulesFormattingF#PostfixGenericError" xml:space="preserve">
+    <value>Use postfix syntax for F# type {0}.</value>
+  </data>
+  <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
+    <value>Use prefix syntax for generic type.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClauseIndentationError" xml:space="preserve">
+    <value>Match clauses should be in line with 'match' keyword.</value>
+  </data>
+  <data name="RulesFormattingLambdaPatternMatchClauseIndentationError" xml:space="preserve">
+    <value>Match clauses should be indented one level from 'function' keyword.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClauseSameIndentationError" xml:space="preserve">
+    <value>Match clauses should be at the same indentation level.</value>
+  </data>
+  <data name="RulesFormattingMatchExpressionIndentationError" xml:space="preserve">
+    <value>If RHS of pattern match case is on newline, it should be indentend by one level.</value>
+  </data>
+  <data name="RulesFormattingModuleDeclSpacingError" xml:space="preserve">
+    <value>Separate module declarations with 2 blank lines.</value>
+  </data>
+  <data name="RulesFormattingClassMemberSpacingError" xml:space="preserve">
+    <value>Class members should be separated by 1 blank line.</value>
+  </data>
+  <data name="RulesFormattingUnionDefinitionIndentationError" xml:space="preserve">
+    <value>Union definition cases should be indented one level on a new line.</value>
+  </data>
+  <data name="RulesFormattingUnionDefinitionSameIndentationError" xml:space="preserve">
+    <value>Union definition cases should be at the same indentation level.</value>
   </data>
 </root>

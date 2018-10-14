@@ -49,7 +49,10 @@ module Tests =
               Code = splitOutput.[i + 2] } ]
 
     let expectedErrors =
-        [ "`not (a = b)` might be able to be refactored into `a <> b`."
+        [ 
+          "Use parentheses for tuple instantiation."
+          "Comma in tuple instantiation should be followed by single space."
+          "`not (a = b)` might be able to be refactored into `a <> b`."
           "`not (a <> b)` might be able to be refactored into `a = b`."
           "`fun x -> x` might be able to be refactored into `id`."
           "`not true` might be able to be refactored into `false`."

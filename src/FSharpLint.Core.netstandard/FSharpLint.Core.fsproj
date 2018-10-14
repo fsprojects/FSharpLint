@@ -28,6 +28,7 @@
     <Compile Include="../FSharpLint.Core/Rules/HintMatcher.fs" />
     <Compile Include="../FSharpLint.Core/Rules/RaiseWithTooManyArguments.fs" />
     <Compile Include="../FSharpLint.Core/Rules/RedundantNewKeyword.fs" />
+    <Compile Include="../FSharpLint.Core/Rules/Formatting.fs" />
     <!-- Application  -->
     <Compile Include="../FSharpLint.Core/Application/LintWarning.fsi" />
     <Compile Include="../FSharpLint.Core/Application/LintWarning.fs" />

@@ -82,6 +82,7 @@
     <Compile Include="Rules/HintMatcher.fs" />
     <Compile Include="Rules/RaiseWithTooManyArguments.fs" />
     <Compile Include="Rules/RedundantNewKeyword.fs" />
+    <Compile Include="Rules\Formatting.fs" />
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
     <Compile Include="Application/LintWarning.fs" />

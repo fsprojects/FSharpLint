@@ -427,5 +427,44 @@
     <RedundantNewKeyword>
       <Enabled>true</Enabled>
     </RedundantNewKeyword>
+
+    <Formatting>
+      <Rules>
+        <TypedItemSpacing>
+          <Enabled>true</Enabled>
+        </TypedItemSpacing>
+        <TupleCommaSpacing>
+          <Enabled>true</Enabled>
+        </TupleCommaSpacing>
+        <TupleParentheses>
+          <Enabled>true</Enabled>
+        </TupleParentheses>
+        <TypePrefixing>
+          <Enabled>true</Enabled>
+        </TypePrefixing>
+        <PatternMatchClausesOnNewLine>
+          <Enabled>true</Enabled>
+        </PatternMatchClausesOnNewLine>
+        <PatternMatchOrClausesOnNewLine>
+          <Enabled>true</Enabled>
+        </PatternMatchOrClausesOnNewLine>
+        <PatternMatchClauseIndentation>
+          <Enabled>true</Enabled>
+        </PatternMatchClauseIndentation>
+        <PatternMatchExpressionIndentation>
+          <Enabled>true</Enabled>
+        </PatternMatchExpressionIndentation>
+        <ModuleDeclSpacing>
+          <Enabled>true</Enabled>
+        </ModuleDeclSpacing>
+        <ClassMemberSpacing>
+          <Enabled>true</Enabled>
+        </ClassMemberSpacing>
+        <UnionDefinitionIndentation>
+          <Enabled>true</Enabled>
+        </UnionDefinitionIndentation>
+      </Rules>
+      <Enabled>true</Enabled>
+    </Formatting>
   </Analysers>
 </FSharpLintSettings>
