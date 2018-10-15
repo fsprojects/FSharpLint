@@ -329,7 +329,7 @@
         </TrailingWhitespaceOnLine>
 
         <Indentation>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
           <NumberOfIndentationSpaces>4</NumberOfIndentationSpaces>
         </Indentation>
       </Rules>
