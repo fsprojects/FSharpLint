@@ -3,6 +3,7 @@
 module Typography =
 
     open System
+    open System.Collections.Generic
     open System.IO
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
@@ -164,14 +165,22 @@ module Typography =
                 | Some(_) | None -> None
             | None -> None
 
-        let checkIndentation mkRange analyserInfo (line:string) lineNumber isSuppressed =
+        let checkIndentation mkRange analyserInfo (line:string) lineNumber (indentationOverrides:Dictionary<int,int>) isSuppressed =
             numberOfIndentationSpaces analyserInfo.Config 
             |> Option.iter (fun expectedSpaces ->
                 let numLeadingSpaces = line.Length - line.TrimStart().Length
+                let range = mkRange (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
 
-                if numLeadingSpaces % expectedSpaces <> 0 then
-                    let range = mkRange (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
-                    if isSuppressed range "Indentation" |> not then
+                if isSuppressed range "Indentation" |> not then
+                    if indentationOverrides.ContainsKey lineNumber then
+                        if numLeadingSpaces <> indentationOverrides.[lineNumber] then
+                            let errorString = Resources.GetString("RulesTypographyRecordFieldIndentationError")
+                            analyserInfo.Suggest
+                                { Range = range
+                                  Message =  errorString
+                                  SuggestedFix = None
+                                  TypeChecks = [] }
+                    elif numLeadingSpaces % expectedSpaces <> 0 then
                         let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
                         analyserInfo.Suggest
                             { Range = range
@@ -207,6 +216,7 @@ module Typography =
         if isAnalyserEnabled args.Info.Config then
             let suppressMessageAttributes = ResizeArray()
             let literalStrings = ResizeArray()
+            let indentationOverrides = Dictionary()
             for i = 0 to syntaxArray.Length - 1 do
                 let node = syntaxArray.[i].Actual
 
@@ -216,6 +226,11 @@ module Typography =
                 match node with
                 | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
                     literalStrings.Add(value, range)
+                | Expression(SynExpr.Record(recordFields=((firstField, _), _, _)::otherFields)) ->
+                    let expectedIndentation = firstField.Range.StartColumn
+                    otherFields
+                    |> List.iter (fun ((fieldName, _), _, _) -> 
+                        indentationOverrides.Add(fieldName.Range.StartLine, expectedIndentation) |> ignore)
                 | _ -> ()
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
@@ -252,7 +267,7 @@ module Typography =
                     NoTabCharacters.checkNoTabCharacters mkRange args.Info line lineNumber isSuppressed isInLiteralString
 
                 if indentationEnabled then
-                    Indentation.checkIndentation mkRange args.Info line lineNumber isSuppressed
+                    Indentation.checkIndentation mkRange args.Info line lineNumber indentationOverrides isSuppressed
 
                 if isLastLineInFile then
                     TrailingNewLineInFile.checkTrailingNewLineInFile mkRange args.Info lineNumber

@@ -24,7 +24,7 @@ let setupConfig numberOfSpacesAllowed numberOfIndentationSpaces isOneSpaceAllowe
                                     Settings = Map.ofList
                                         [ 
                                             ("Enabled", Enabled(true))
-                                            ("Length", Length(10))
+                                            ("Length", Length(20))
                                         ] 
                                 }) 
                             ("NoTabCharacters", 
@@ -85,9 +85,9 @@ type TestTypography() =
 
     [<Test>]
     member this.TooManyCharactersOnLine() = 
-        this.Parse "let line = 55 + 77 + 77"
+        this.Parse "let line = 55 + 77 + 77 + 55 + 55 + 55 + 77 + 55 + 55 + 77 + 55 + 55 + 77 + 77"
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 11))
+        Assert.IsTrue(this.ErrorExistsAt(1, 21))
 
     [<Test>]
     member this.TooManyCharactersOnLineSuppressed() = 
@@ -236,5 +236,27 @@ module P
 
 let x =
     x"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for incorrect record field indentation``() =
+        this.Parse """
+module P
+
+let rainbow =
+    { X = "X"
+          Y = "Y"}"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+
+    [<Test>]
+    member this.``No error for correct record field indentation``() =
+        this.Parse """
+module P
+
+let rainbow =
+    { X = "X"
+      Y = "Y"}"""
 
         Assert.IsTrue(this.NoErrorsExist)
