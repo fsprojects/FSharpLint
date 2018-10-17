@@ -110,13 +110,13 @@ To override to turn off you'd set enabled to false in your own configuration fil
 
 	[lang=xml]
     <?xml version="1.0" encoding="utf-8"?>
-	<FSharpLintSettings>
-	    <Analysers>
-			<FunctionReimplementation>
-				<Enabled>True</Enabled>
-			</FunctionReimplementation>
-		</Analysers>
-	</FSharpLintSettings>
+    <FSharpLintSettings>
+      <Analysers>
+        <FunctionReimplementation>
+          <Enabled>False</Enabled>
+        </FunctionReimplementation>
+      </Analysers>
+    </FSharpLintSettings>
 
 #### Disabling rules and analysers within code
 
