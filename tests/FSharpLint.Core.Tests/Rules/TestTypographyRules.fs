@@ -24,7 +24,7 @@ let setupConfig numberOfSpacesAllowed numberOfIndentationSpaces isOneSpaceAllowe
                                     Settings = Map.ofList
                                         [ 
                                             ("Enabled", Enabled(true))
-                                            ("Length", Length(20))
+                                            ("Length", Length(40))
                                         ] 
                                 }) 
                             ("NoTabCharacters", 
@@ -87,7 +87,7 @@ type TestTypography() =
     member this.TooManyCharactersOnLine() = 
         this.Parse "let line = 55 + 77 + 77 + 55 + 55 + 55 + 77 + 55 + 55 + 77 + 55 + 55 + 77 + 77"
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 21))
+        Assert.IsTrue(this.ErrorExistsAt(1, 41))
 
     [<Test>]
     member this.TooManyCharactersOnLineSuppressed() = 
@@ -258,5 +258,31 @@ module P
 let rainbow =
     { X = "X"
       Y = "Y"}"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for correct array member indentation``() =
+        this.Parse """
+module P
+
+let pascalsTriangle =
+    [| 1
+       2
+       3
+    |]"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for correct list member indentation``() =
+        this.Parse """
+module P
+
+let pascalsTriangle =
+    [ 1
+      2
+      3
+    ]"""
 
         Assert.IsTrue(this.NoErrorsExist)

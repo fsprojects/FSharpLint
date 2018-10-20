@@ -209,7 +209,25 @@ module Typography =
                 | None -> ()
 
             iterateLines (readLine ()) 0
-            
+
+    let firstRangePerLine (ranges:range list) =
+        List.foldBack
+            (fun (range:range) map -> Map.add range.StartLine range map)
+            ranges
+            Map.empty
+        |> Map.toList
+        |> List.unzip
+        |> snd
+
+    let extractSeqExprItems seqExpr =
+        let rec helper items = function
+            | SynExpr.Sequential(expr1=expr1; expr2=expr2) ->
+                helper (expr1::items) expr2
+            | other ->
+                (other::items)
+
+        helper [] seqExpr
+
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray = args.SyntaxArray
 
@@ -226,11 +244,43 @@ module Typography =
                 match node with
                 | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
                     literalStrings.Add(value, range)
-                | Expression(SynExpr.Record(recordFields=((firstField, _), _, _)::otherFields)) ->
-                    let expectedIndentation = firstField.Range.StartColumn
-                    otherFields
-                    |> List.iter (fun ((fieldName, _), _, _) -> 
-                        indentationOverrides.Add(fieldName.Range.StartLine, expectedIndentation) |> ignore)
+                | Expression(SynExpr.Record(recordFields=recordFields)) ->
+                    let fieldRanges =
+                        recordFields
+                        |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
+                        |> firstRangePerLine
+                    match fieldRanges with
+                    | (firstField::otherFields) ->
+                        let expectedIndentation = firstField.StartColumn
+                        otherFields
+                        |> List.iter (fun fieldRange ->
+                            indentationOverrides.Add(fieldRange.StartLine, expectedIndentation) |> ignore)
+                    | _ -> ()
+                | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
+                    let exprs = extractSeqExprItems expr
+                    let exprRanges =
+                        exprs
+                        |> List.map (fun expr -> expr.Range)
+                        |> firstRangePerLine
+                    match exprRanges with
+                    | (firstExpr::otherExprs) ->
+                        let expectedIndentation = firstExpr.StartColumn
+                        otherExprs
+                        |> List.iter (fun exprRange ->
+                            indentationOverrides.Add(exprRange.StartLine, expectedIndentation) |> ignore)
+                    | _ -> ()
+                | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
+                    let exprRanges =
+                        exprs
+                        |> List.map (fun expr -> expr.Range)
+                        |> firstRangePerLine
+                    match exprRanges with
+                    | (firstExpr::otherExprs) ->
+                        let expectedIndentation = firstExpr.StartColumn
+                        otherExprs
+                        |> List.iter (fun exprRange ->
+                            indentationOverrides.Add(exprRange.StartLine, expectedIndentation) |> ignore)
+                    | _ -> ()
                 | _ -> ()
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
