@@ -466,5 +466,14 @@
       </Rules>
       <Enabled>true</Enabled>
     </Formatting>
+
+    <Conventions>
+      <Rules>
+        <TopLevelNamespace>
+          <Enabled>true</Enabled>
+        </TopLevelNamespace>
+      </Rules>
+      <Enabled>true</Enabled>
+    </Conventions>
   </Analysers>
 </FSharpLintSettings>

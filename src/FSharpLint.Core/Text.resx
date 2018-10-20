@@ -288,4 +288,7 @@
   <data name="RulesFormattingUnionDefinitionSameIndentationError" xml:space="preserve">
     <value>Union definition cases should be at the same indentation level.</value>
   </data>
+  <data name="RulesConventionsTopLevelNamespaceError" xml:space="preserve">
+    <value>Prefer namespaces at top level.</value>
+  </data>
 </root>
