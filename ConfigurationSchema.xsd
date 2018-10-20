@@ -316,6 +316,7 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="TopLevelNamespace" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="RecursiveAsyncFunction" maxOccurs="1" minOccurs="0" type="Enabled" />
           </xs:sequence>
         </xs:complexType>
       </xs:element>

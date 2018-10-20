@@ -300,4 +300,7 @@
   <data name="RulesTypographyOverridenIndentationError" xml:space="preserve">
     <value>Invalid indentation.</value>
   </data>
+  <data name="RulesConventionsRecursiveAsyncFunctionError" xml:space="preserve">
+    <value>Recursive async functions ending with a `do!` recursive call will leak memory; prefer `return!`.</value>
+  </data>
 </root>
