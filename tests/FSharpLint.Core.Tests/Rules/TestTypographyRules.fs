@@ -262,6 +262,17 @@ let rainbow =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for correct record field indentation with multiple fields per line``() =
+        this.Parse """
+module P
+
+let rainbow =
+    { X = "X"; Z = "Z"
+      Y = "Y"; W = "W"}"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for correct array member indentation``() =
         this.Parse """
 module P

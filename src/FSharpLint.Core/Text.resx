@@ -297,4 +297,7 @@
   <data name="RulesTypographyRecordFieldIndentationError" xml:space="preserve">
     <value>Record fields should be aligned.</value>
   </data>
+  <data name="RulesTypographyOverridenIndentationError" xml:space="preserve">
+    <value>Invalid indentation.</value>
+  </data>
 </root>

@@ -174,7 +174,7 @@ module Typography =
                 if isSuppressed range "Indentation" |> not then
                     if indentationOverrides.ContainsKey lineNumber then
                         if numLeadingSpaces <> indentationOverrides.[lineNumber] then
-                            let errorString = Resources.GetString("RulesTypographyRecordFieldIndentationError")
+                            let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
                             analyserInfo.Suggest
                                 { Range = range
                                   Message =  errorString
