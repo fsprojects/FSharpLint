@@ -273,6 +273,19 @@ let rainbow =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for correct multiline record field indentation``() =
+        this.Parse """
+module P
+
+let rainbow =
+    { X =
+        (fun x ->
+            x + 1)
+      Y = "Y"}"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for correct array member indentation``() =
         this.Parse """
 module P
@@ -318,5 +331,33 @@ let res =
     1
     |> add 2
     |> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional multiline pipeline indentation``() =
+        this.Parse """
+module P
+
+let res = 1
+          |> (fun x ->
+              x + 1)
+          |> (fun x ->
+              x - 3)"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional object expression indentation``() =
+        this.Parse """
+module P
+
+let comparer =
+    { new IComparer<string> with
+          member x.Compare(s1, s2) =
+              let rev (s : String) =
+                  new String (Array.rev (s.ToCharArray()))
+              let reversed = rev s1 i
+              reversed.CompareTo (rev s2) }"""
 
         Assert.IsTrue(this.NoErrorsExist)

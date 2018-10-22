@@ -156,7 +156,18 @@ module Typography =
                           SuggestedFix = None 
                           TypeChecks = [] }
 
+    module Dictionary =
+        let addOrUpdate key value (dict:Dictionary<'key,'value>) =
+            if dict.ContainsKey(key) then
+                dict.Remove(key) |> ignore
+            
+            dict.Add(key, value)
+
     module private Indentation =
+        type IndentationOverride =
+            | Absolute of int
+            | Offset of int
+
         let private numberOfIndentationSpaces config =
             match isRuleEnabled config AnalyserName "Indentation" with
             | Some(_, ruleSettings) -> 
@@ -165,7 +176,7 @@ module Typography =
                 | Some(_) | None -> None
             | None -> None
 
-        let checkIndentation mkRange analyserInfo (line:string) lineNumber (indentationOverrides:Dictionary<int,int>) isSuppressed =
+        let checkIndentation mkRange analyserInfo (line:string) lineNumber (indentationOverrides:Dictionary<int,IndentationOverride>) isSuppressed =
             numberOfIndentationSpaces analyserInfo.Config 
             |> Option.iter (fun expectedSpaces ->
                 let numLeadingSpaces = line.Length - line.TrimStart().Length
@@ -173,13 +184,23 @@ module Typography =
 
                 if isSuppressed range "Indentation" |> not then
                     if indentationOverrides.ContainsKey lineNumber then
-                        if numLeadingSpaces <> indentationOverrides.[lineNumber] then
-                            let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                            analyserInfo.Suggest
-                                { Range = range
-                                  Message =  errorString
-                                  SuggestedFix = None
-                                  TypeChecks = [] }
+                        match indentationOverrides.[lineNumber] with
+                        | Absolute expectedIndentation ->
+                            if numLeadingSpaces <> expectedIndentation then
+                                let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                                analyserInfo.Suggest
+                                    { Range = range
+                                      Message =  errorString
+                                      SuggestedFix = None
+                                      TypeChecks = [] }
+                        | Offset indentationOffset ->
+                            if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
+                                let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                                analyserInfo.Suggest
+                                    { Range = range
+                                      Message =  String.Format(errorFormatString, expectedSpaces) 
+                                      SuggestedFix = None
+                                      TypeChecks = [] }
                     elif numLeadingSpaces % expectedSpaces <> 0 then
                         let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
                         analyserInfo.Suggest
@@ -249,12 +270,14 @@ module Typography =
                         recordFields
                         |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
                         |> firstRangePerLine
+
                     match fieldRanges with
                     | (firstField::otherFields) ->
                         let expectedIndentation = firstField.StartColumn
+
                         otherFields
                         |> List.iter (fun fieldRange ->
-                            indentationOverrides.Add(fieldRange.StartLine, expectedIndentation) |> ignore)
+                            Dictionary.addOrUpdate fieldRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides)
                     | _ -> ()
                 | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
                     let exprs = extractSeqExprItems expr
@@ -267,7 +290,10 @@ module Typography =
                         let expectedIndentation = firstExpr.StartColumn
                         otherExprs
                         |> List.iter (fun exprRange ->
-                            indentationOverrides.Add(exprRange.StartLine, expectedIndentation) |> ignore)
+                            Dictionary.addOrUpdate exprRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides 
+                            [(exprRange.StartLine + 1)..exprRange.EndLine]
+                            |> List.iter (fun offsetLine ->
+                                Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
                     | _ -> ()
                 | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
                     let exprRanges =
@@ -279,12 +305,18 @@ module Typography =
                         let expectedIndentation = firstExpr.StartColumn
                         otherExprs
                         |> List.iter (fun exprRange ->
-                            indentationOverrides.Add(exprRange.StartLine, expectedIndentation) |> ignore)
+                            Dictionary.addOrUpdate exprRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides 
+                            [(exprRange.StartLine + 1)..exprRange.EndLine]
+                            |> List.iter (fun offsetLine ->
+                                Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
                     | _ -> ()
                 | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
                     when ident.idText = "op_PipeRight" ->
                     let expectedIndentation = innerArg.Range.StartColumn
-                    indentationOverrides.Add(outerArg.Range.StartLine, expectedIndentation) |> ignore
+                    Dictionary.addOrUpdate outerArg.Range.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides
+                    [(outerArg.Range.StartLine + 1)..outerArg.Range.EndLine]
+                    |> List.iter (fun offsetLine ->
+                        Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides)
                 | _ -> ()
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
