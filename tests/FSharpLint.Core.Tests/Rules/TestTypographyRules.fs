@@ -297,3 +297,26 @@ let pascalsTriangle =
     ]"""
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional pipeline indentation``() =
+        this.Parse """
+module P
+
+let res = 1
+          |> add 2
+          |> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for standard pipeline indentation``() =
+        this.Parse """
+module P
+
+let res =
+    1
+    |> add 2
+    |> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)

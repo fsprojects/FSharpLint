@@ -281,6 +281,10 @@ module Typography =
                         |> List.iter (fun exprRange ->
                             indentationOverrides.Add(exprRange.StartLine, expectedIndentation) |> ignore)
                     | _ -> ()
+                | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
+                    when ident.idText = "op_PipeRight" ->
+                    let expectedIndentation = innerArg.Range.StartColumn
+                    indentationOverrides.Add(outerArg.Range.StartLine, expectedIndentation) |> ignore
                 | _ -> ()
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
