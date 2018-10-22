@@ -156,13 +156,6 @@ module Typography =
                           SuggestedFix = None 
                           TypeChecks = [] }
 
-    module Dictionary =
-        let addOrUpdate key value (dict:Dictionary<'key,'value>) =
-            if dict.ContainsKey(key) then
-                dict.Remove(key) |> ignore
-            
-            dict.Add(key, value)
-
     module private Indentation =
         type IndentationOverride =
             | Absolute of int
@@ -175,6 +168,68 @@ module Typography =
                 | Some(NumberOfIndentationSpaces(lines)) -> Some(lines)
                 | Some(_) | None -> None
             | None -> None
+
+        let private firstRangePerLine (ranges:range list) =
+            List.foldBack
+                (fun (range:range) map -> Map.add range.StartLine range map)
+                ranges
+                Map.empty
+            |> Map.toList
+            |> List.unzip
+            |> snd
+
+        let private extractSeqExprItems seqExpr =
+            let rec helper items = function
+                | SynExpr.Sequential(expr1=expr1; expr2=expr2) ->
+                    helper (expr1::items) expr2
+                | other ->
+                    (other::items)
+
+            helper [] seqExpr
+
+        let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:range) =
+            let absoluteOverride = (rangeToUpdate.StartLine, (Absolute(expectedIndentation)))
+            let relativeOverrides =
+                [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
+                |> List.map (fun offsetLine ->
+                    (offsetLine, (Offset(expectedIndentation))))
+            (absoluteOverride::relativeOverrides)
+
+        let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:range list) =
+            match ranges with
+            | (first::others) ->
+                 let expectedIndentation = first.StartColumn
+                 others |> List.map (fun other -> (other.StartLine, (Absolute(expectedIndentation))))
+            | _ -> []
+
+        let indentationOverridesForNode (node:AstNode) =
+            match node with
+            | Expression(SynExpr.Record(recordFields=recordFields)) ->
+                recordFields
+                |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
+                |> firstRangePerLine
+                |> createAbsoluteAndOffsetOverridesBasedOnFirst
+            | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
+                extractSeqExprItems expr
+                |> List.map (fun expr -> expr.Range)
+                |> firstRangePerLine
+                |> createAbsoluteAndOffsetOverridesBasedOnFirst
+            | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
+                exprs
+                |> List.map (fun expr -> expr.Range)
+                |> firstRangePerLine
+                |> createAbsoluteAndOffsetOverridesBasedOnFirst
+            | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
+                when ident.idText = "op_PipeRight" ->
+                let expectedIndentation = innerArg.Range.StartColumn
+                createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
+            | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
+                let expectedIndentation = newExprRange.StartColumn + 4
+                bindings
+                |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
+                |> firstRangePerLine
+                |> List.collect (createAbsoluteAndOffsetOverrides expectedIndentation)
+            | _ -> []
 
         let checkIndentation mkRange analyserInfo (line:string) lineNumber (indentationOverrides:Dictionary<int,IndentationOverride>) isSuppressed =
             numberOfIndentationSpaces analyserInfo.Config 
@@ -231,24 +286,6 @@ module Typography =
 
             iterateLines (readLine ()) 0
 
-    let firstRangePerLine (ranges:range list) =
-        List.foldBack
-            (fun (range:range) map -> Map.add range.StartLine range map)
-            ranges
-            Map.empty
-        |> Map.toList
-        |> List.unzip
-        |> snd
-
-    let extractSeqExprItems seqExpr =
-        let rec helper items = function
-            | SynExpr.Sequential(expr1=expr1; expr2=expr2) ->
-                helper (expr1::items) expr2
-            | other ->
-                (other::items)
-
-        helper [] seqExpr
-
     let analyser (args: AnalyserArgs) : unit = 
         let syntaxArray = args.SyntaxArray
 
@@ -265,71 +302,11 @@ module Typography =
                 match node with
                 | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
                     literalStrings.Add(value, range)
-                | Expression(SynExpr.Record(recordFields=recordFields)) ->
-                    let fieldRanges =
-                        recordFields
-                        |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
-                        |> firstRangePerLine
-
-                    match fieldRanges with
-                    | (firstField::otherFields) ->
-                        let expectedIndentation = firstField.StartColumn
-
-                        otherFields
-                        |> List.iter (fun fieldRange ->
-                            Dictionary.addOrUpdate fieldRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides)
-                    | _ -> ()
-                | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
-                    let exprs = extractSeqExprItems expr
-                    let exprRanges =
-                        exprs
-                        |> List.map (fun expr -> expr.Range)
-                        |> firstRangePerLine
-                    match exprRanges with
-                    | (firstExpr::otherExprs) ->
-                        let expectedIndentation = firstExpr.StartColumn
-                        otherExprs
-                        |> List.iter (fun exprRange ->
-                            Dictionary.addOrUpdate exprRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides 
-                            [(exprRange.StartLine + 1)..exprRange.EndLine]
-                            |> List.iter (fun offsetLine ->
-                                Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
-                    | _ -> ()
-                | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
-                    let exprRanges =
-                        exprs
-                        |> List.map (fun expr -> expr.Range)
-                        |> firstRangePerLine
-                    match exprRanges with
-                    | (firstExpr::otherExprs) ->
-                        let expectedIndentation = firstExpr.StartColumn
-                        otherExprs
-                        |> List.iter (fun exprRange ->
-                            Dictionary.addOrUpdate exprRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides 
-                            [(exprRange.StartLine + 1)..exprRange.EndLine]
-                            |> List.iter (fun offsetLine ->
-                                Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
-                    | _ -> ()
-                | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
-                    when ident.idText = "op_PipeRight" ->
-                    let expectedIndentation = innerArg.Range.StartColumn
-                    Dictionary.addOrUpdate outerArg.Range.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides
-                    [(outerArg.Range.StartLine + 1)..outerArg.Range.EndLine]
-                    |> List.iter (fun offsetLine ->
-                        Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides)
-                | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
-                    let expectedIndentation = newExprRange.StartColumn + 4
-                    let bindingRanges =
-                        bindings
-                        |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
-                        |> firstRangePerLine
-                    bindingRanges
-                    |> List.iter (fun bindingRange ->
-                        Dictionary.addOrUpdate bindingRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides
-                        [(bindingRange.StartLine + 1)..bindingRange.EndLine]
-                        |> List.iter (fun offsetLine ->
-                            Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
                 | _ -> ()
+
+                Indentation.indentationOverridesForNode node
+                |> List.iter (fun (line, indentationOverride) ->
+                    Dictionary.addOrUpdate line indentationOverride indentationOverrides)
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
                 range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
