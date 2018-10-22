@@ -24,7 +24,7 @@ let setupConfig numberOfSpacesAllowed numberOfIndentationSpaces isOneSpaceAllowe
                                     Settings = Map.ofList
                                         [ 
                                             ("Enabled", Enabled(true))
-                                            ("Length", Length(40))
+                                            ("Length", Length(60))
                                         ] 
                                 }) 
                             ("NoTabCharacters", 
@@ -87,7 +87,7 @@ type TestTypography() =
     member this.TooManyCharactersOnLine() = 
         this.Parse "let line = 55 + 77 + 77 + 55 + 55 + 55 + 77 + 55 + 55 + 77 + 55 + 55 + 77 + 77"
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 41))
+        Assert.IsTrue(this.ErrorExistsAt(1, 61))
 
     [<Test>]
     member this.TooManyCharactersOnLineSuppressed() = 

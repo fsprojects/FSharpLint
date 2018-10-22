@@ -317,6 +317,18 @@ module Typography =
                     [(outerArg.Range.StartLine + 1)..outerArg.Range.EndLine]
                     |> List.iter (fun offsetLine ->
                         Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides)
+                | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
+                    let expectedIndentation = newExprRange.StartColumn + 4
+                    let bindingRanges =
+                        bindings
+                        |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
+                        |> firstRangePerLine
+                    bindingRanges
+                    |> List.iter (fun bindingRange ->
+                        Dictionary.addOrUpdate bindingRange.StartLine (Indentation.Absolute(expectedIndentation)) indentationOverrides
+                        [(bindingRange.StartLine + 1)..bindingRange.EndLine]
+                        |> List.iter (fun offsetLine ->
+                            Dictionary.addOrUpdate offsetLine (Indentation.Offset(expectedIndentation)) indentationOverrides))
                 | _ -> ()
 
             let rangeContainsOtherRange (containingRange:range) (range:range) =
