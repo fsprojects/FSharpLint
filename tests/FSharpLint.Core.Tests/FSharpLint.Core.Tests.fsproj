@@ -30,7 +30,6 @@
     <Compile Include="Rules/TestRedundantNewKeyword.fs" />
     <Compile Include="Rules/TestFormattingRules.fs" />
     <Compile Include="Rules/TestConventionsRules.fs" />
-    <None Include="App.config" />
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />

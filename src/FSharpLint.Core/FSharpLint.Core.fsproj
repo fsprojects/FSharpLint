@@ -42,8 +42,8 @@
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application/Lint.fs" />
     <Compile Include="Application/ConfigurationManager.fs" />
-    <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
-    <EmbeddedResource Include="Text.resx">
+    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
+    <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
