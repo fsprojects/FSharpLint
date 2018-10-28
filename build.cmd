@@ -1,14 +1,6 @@
 @echo off
 cls
 
-.paket\paket.bootstrapper.exe
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
+dotnet restore build.proj --verbosity n
 
-.paket\paket.exe restore
-if errorlevel 1 (
-  exit /b %errorlevel%
-)
-
-packages\tools\FAKE\tools\FAKE.exe build.fsx %*
+dotnet fake run build.fsx

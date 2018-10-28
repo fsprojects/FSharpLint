@@ -8,7 +8,10 @@ module TestApi =
     open NUnit.Framework
     open FSharpLint.Application.Lint
     open Microsoft.FSharp.Compiler.SourceCodeServices
-    open TestPackageHelper
+
+    let (</>) x y = Path.Combine(x, y)
+
+    let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 
     let sourceFile = basePath </> "tests" </> "TypeChecker.fs"
     

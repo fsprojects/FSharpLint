@@ -332,6 +332,7 @@ module Ast =
         | SynExpr.JoinIn(expression, _, expression1, _)
         | SynExpr.While(_, expression, expression1, _)
         | SynExpr.TryFinally(expression, expression1, _, _, _)
+        | SynExpr.Set(expression, expression1, _)
         | SynExpr.DotSet(expression, _, expression1, _) -> 
             add <| expressionNode expression1
             add <| expressionNode expression
@@ -369,6 +370,7 @@ module Ast =
         | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
             matchClauses |> List.revIter (matchNode >> add)
         | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _)
+        | SynExpr.MatchBang(_, expression, matchClauses, _, _)
         | SynExpr.Match(_, expression, matchClauses, _, _) -> 
             matchClauses |> List.revIter (matchNode >> add)
             add <| expressionNode expression

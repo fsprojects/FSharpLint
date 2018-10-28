@@ -99,7 +99,6 @@ module Lint =
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint
     open FSharpLint.Framework
-    open FSharpLint.Framework.AbstractSyntaxArray
 
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -123,6 +122,31 @@ module Lint =
 
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
+
+        member this.Description
+            with get() =
+                let getParseFailureReason = function
+                    | ParseFile.FailedToParseFile(failures) ->
+                        let getFailureReason (x:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
+                            sprintf "failed to parse file %s, message: %s" x.FileName x.Message
+
+                        String.Join(", ", failures |> Array.map getFailureReason)
+                    | ParseFile.AbortedTypeCheck -> "Aborted type check."
+
+                match this with
+                | ProjectFileCouldNotBeFound(projectPath) ->
+                    String.Format(Resources.GetString("ConsoleProjectFileCouldNotBeFound"), projectPath)
+                | MSBuildFailedToLoadProjectFile(projectPath, InvalidProjectFileMessage(message)) ->
+                    String.Format(Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile"), projectPath, message)
+                | FailedToLoadConfig(message) ->
+                    String.Format(Resources.GetString("ConsoleFailedToLoadConfig"), message)
+                | RunTimeConfigError ->
+                    Resources.GetString("ConsoleRunTimeConfigError")
+                | FailedToParseFile(failure) ->
+                    "Lint failed to parse a file. Failed with: " + getParseFailureReason failure
+                | FailedToParseFilesInProject(failures) -> 
+                    let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
+                    "Lint failed to parse files. Failed with: " + failureReasons
 
     [<NoComparison>]
     type Result<'t> =
@@ -248,32 +272,74 @@ module Lint =
 
         ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
 
-#if NO_PROJECTCRACKER
-#else
-    let getProjectFileInfo projectFilePath =
-        // TODO: Find how to extract exceptions from ProjectCracker API rather than parsing them.
-        let parseExceptionMessage str =
-            let message = Text.RegularExpressions.Regex.Match(str, @"^.+Exception: (.*) Line \d")
-            if message.Success && message.Groups.Count = 2 then
-                InvalidProjectFileMessage message.Groups.[1].Value
-            else
-                InvalidProjectFileMessage str
+    let private runProcess (workingDir: string) (exePath: string) (args: string) =
+        let psi = System.Diagnostics.ProcessStartInfo()
+        psi.FileName <- exePath
+        psi.WorkingDirectory <- workingDir
+        psi.RedirectStandardOutput <- true
+        psi.RedirectStandardError <- true
+        psi.Arguments <- args
+        psi.CreateNoWindow <- true
+        psi.UseShellExecute <- false
+        
+        use p = new System.Diagnostics.Process()
+        p.StartInfo <- psi
+        let sbOut = System.Text.StringBuilder()
+        p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore)
+        let sbErr = System.Text.StringBuilder()
+        p.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore)
+        p.Start() |> ignore
+        p.BeginOutputReadLine()
+        p.BeginErrorReadLine()
+        p.WaitForExit()
+        
+        let exitCode = p.ExitCode
 
-        // Setting `FSharpLintEnabled` to `false` is very important as `ProjectCracker` can build the project file,
-        // so if run as an msbuild task without this property we'd end up with an infinite loop of builds (taking out the machine).
-        let msBuildProperties = ["FSharpLintEnabled", "false"]
+        exitCode, (workingDir, exePath, args)
 
-        let projectOptions, log =
-            ProjectCracker.GetProjectOptionsFromProjectFileLogged(projectFilePath, msBuildProperties)
+    let getProjectFileInfo projectFilePath = 
+        let projDir = System.IO.Path.GetDirectoryName projectFilePath
+        
+        let msBuildResults =
+            let runCmd exePath args = runProcess projDir exePath (args |> String.concat " ")
+            let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
+        
+            projectFilePath
+            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] []
+            
+        match msBuildResults with
+        | Result.Ok [getFscArgsResult; getP2PRefsResult] ->
+            match getFscArgsResult, getP2PRefsResult with
+            | Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa), Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.ResolvedP2PRefs p2p) ->
+                
+                let projDir = Path.GetDirectoryName projectFilePath
 
-        let invalidProjectFile, fileNotFound =
-            "Microsoft.Build.Exceptions.InvalidProjectFileException", "System.IO.FileNotFoundException"
+                let isSourceFile (option:string) =
+                    option.TrimStart().StartsWith("-") |> not
+                
+                let compileFilesToAbsolutePath (f: string) =
+                    if Path.IsPathRooted f then 
+                        f 
+                    else 
+                        Path.Combine(projDir, f)
 
-        match log.TryFind projectFilePath with
-        | Some(logStr) when logStr.StartsWith(invalidProjectFile) || logStr.StartsWith(fileNotFound) ->
-            Failure(MSBuildFailedToLoadProjectFile(projectFilePath, parseExceptionMessage logStr))
-        | None | Some(_) -> Success projectOptions
-#endif
+                { ProjectFileName = projectFilePath
+                  SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
+                  OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
+                  ReferencedProjects = [||] //p2pProjects |> Array.ofList
+                  IsIncompleteTypeCheckEnvironment = false
+                  UseScriptResolutionRules = false
+                  LoadTime = DateTime.Now
+                  UnresolvedReferences = None
+                  OriginalLoadReferences = []
+                  ExtraProjectInfo = None
+                  ProjectId = None
+                  Stamp = None } |> Success
+            | _ -> failwith "meow"
+        | Result.Ok r ->
+            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
+        | Result.Error r ->
+            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
 
     let configFailureToLintFailure = function
         | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)
@@ -333,8 +399,6 @@ module Lint =
           /// Version of F# the source code of the file was written in.
           FSharpVersion: Version }
 
-#if NO_PROJECTCRACKER
-#else
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let lintProject optionalParams projectFilePath progress =
@@ -396,7 +460,6 @@ module Lint =
             | Success() -> lintWarnings |> Seq.toList |> LintResult.Success
             | Failure(x) -> LintResult.Failure(x)
         | Failure(x) -> LintResult.Failure(x)
-#endif
 
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.

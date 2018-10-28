@@ -1,3 +1,7 @@
+##### 0.10.0 - October 07 2018
+
+* Move solution to dotnet core.
+
 ##### 0.9.1-beta - February 22 2018
 
 * Fixed https://github.com/fsprojects/FSharpLint/issues/256 by [@SteveGilham](https://github.com/SteveGilham)

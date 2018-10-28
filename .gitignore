@@ -194,3 +194,6 @@ packaging/api/lib
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintMSBuildTaskTest/
 /paket-files/
+
+DesignTimeBuild/
+.vs/
