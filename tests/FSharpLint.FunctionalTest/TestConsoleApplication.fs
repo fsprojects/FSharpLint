@@ -46,13 +46,11 @@ module Tests =
 
         let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
 
-        [ for i in errorIndexes -> 
-            { Description = splitOutput.[i]
-              Location = splitOutput.[i + 1]
-              Code = splitOutput.[i + 2] } ]
+        set [ for i in errorIndexes -> splitOutput.[i] ]
 
     let expectedErrors =
-        [ 
+        set [ 
+          "Separate module declarations with 2 blank lines."
           "Use parentheses for tuple instantiation."
           "Comma in tuple instantiation should be followed by single space."
           "Prefer namespaces at top level."
@@ -103,10 +101,4 @@ module Tests =
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
 
-            for expectedError in expectedErrors do
-                let containsExpectedError = List.exists (fun y -> y.Description = expectedError) errors
-                Assert.True(
-                    containsExpectedError, 
-                    sprintf "Errors did not contain expected error:\n %s. Program output:\n %s" expectedError output)
-
-            Assert.AreEqual(expectedErrors.Length, errors.Length)
+            Assert.AreEqual(expectedErrors, errors)
