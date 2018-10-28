@@ -257,8 +257,44 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="Formatting">
+    <xs:sequence>
+      <xs:element name="Rules" maxOccurs="1" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="TypedItemSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="TupleCommaSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="TupleParentheses" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="TypePrefixing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="PatternMatchClausesOnNewLine" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="PatternMatchOrClausesOnNewLine" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="PatternMatchClauseIndentation" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="PatternMatchExpressionIndentation" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="ModuleDeclSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="ClassMemberSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="UnionDefinitionIndentation" maxOccurs="1" minOccurs="0" type="Enabled" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="RedundantNewKeyword">
     <xs:sequence>
+      <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Conventions">
+    <xs:sequence>
+      <xs:element name="Rules" maxOccurs="1" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="TopLevelNamespace" maxOccurs="1" minOccurs="0" type="Enabled" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
     </xs:sequence>
   </xs:complexType>
@@ -275,6 +311,8 @@
       <xs:element name="Binding" maxOccurs="1" minOccurs="0" type="Binding" />
       <xs:element name="FunctionReimplementation" maxOccurs="1" minOccurs="0" type="FunctionReimplementation" />
       <xs:element name="RedundantNewKeyword" maxOccurs="1" minOccurs="0" type="RedundantNewKeyword" />
+      <xs:element name="Formatting" maxOccurs="1" minOccurs="0" type="Formatting" />
+      <xs:element name="Conventions" maxOccurs="1" minOccurs="0" type="Conventions" />
     </xs:sequence>
   </xs:complexType>
 

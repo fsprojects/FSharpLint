@@ -13,35 +13,37 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->
-    <Compile Include="../FSharpLint.Core/Framework/Utilities.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/HintParser.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/Configuration.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/Ast.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/AstInfo.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/AbstractSyntaxArray.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/Resources.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/ParseFile.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/FuzzyHintMatcher.fs" />
-    <Compile Include="../FSharpLint.Core/Framework/Analyser.fs" />
+    <Compile Include="Framework/Utilities.fs" />
+    <Compile Include="Framework/HintParser.fs" />
+    <Compile Include="Framework/Configuration.fs" />
+    <Compile Include="Framework/Ast.fs" />
+    <Compile Include="Framework/AstInfo.fs" />
+    <Compile Include="Framework/AbstractSyntaxArray.fs" />
+    <Compile Include="Framework/Resources.fs" />
+    <Compile Include="Framework/ParseFile.fs" />
+    <Compile Include="Framework/FuzzyHintMatcher.fs" />
+    <Compile Include="Framework/Analyser.fs" />
     <!-- Rules -->
-    <Compile Include="../FSharpLint.Core/Rules/NameConventions.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/NumberOfItems.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/Binding.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/SourceLength.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/NestedStatements.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/Typography.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/FunctionReimplementation.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/HintMatcher.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/RaiseWithTooManyArguments.fs" />
-    <Compile Include="../FSharpLint.Core/Rules/RedundantNewKeyword.fs" />
+    <Compile Include="Rules/NameConventions.fs" />
+    <Compile Include="Rules/NumberOfItems.fs" />
+    <Compile Include="Rules/Binding.fs" />
+    <Compile Include="Rules/SourceLength.fs" />
+    <Compile Include="Rules/NestedStatements.fs" />
+    <Compile Include="Rules/Typography.fs" />
+    <Compile Include="Rules/FunctionReimplementation.fs" />
+    <Compile Include="Rules/HintMatcher.fs" />
+    <Compile Include="Rules/RaiseWithTooManyArguments.fs" />
+    <Compile Include="Rules/RedundantNewKeyword.fs" />
+    <Compile Include="Rules/Formatting.fs" />
+    <Compile Include="Rules/Conventions.fs" />
     <!-- Application  -->
-    <Compile Include="../FSharpLint.Core/Application/LintWarning.fsi" />
-    <Compile Include="../FSharpLint.Core/Application/LintWarning.fs" />
-    <Compile Include="../FSharpLint.Core/Application/Lint.fsi" />
-    <Compile Include="../FSharpLint.Core/Application/Lint.fs" />
-    <Compile Include="../FSharpLint.Core/Application/ConfigurationManager.fs" />
-    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
-    <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
+    <Compile Include="Application/LintWarning.fsi" />
+    <Compile Include="Application/LintWarning.fs" />
+    <Compile Include="Application/Lint.fsi" />
+    <Compile Include="Application/Lint.fs" />
+    <Compile Include="Application/ConfigurationManager.fs" />
+    <EmbeddedResource Include="DefaultConfiguration.FSharpLint" />
+    <EmbeddedResource Include="Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

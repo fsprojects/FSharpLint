@@ -7,7 +7,9 @@ module Program =
     open FSharpLint.Application
 
     let private help () =
-        Resources.GetString("ConsoleHelp") |> Console.WriteLine
+        printfn "-f <project.fsproj>        lint project"
+        printfn "-sf <file.fs>              lint single file"
+        printfn "-source 'let foo = 5'      lint source code"
 
     let private printException (e:Exception) =
         "Exception Message:" + Environment.NewLine +
