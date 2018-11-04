@@ -6,14 +6,6 @@
 *.user
 *.sln.docstates
 
-#dotnetcore
-
-project.lock.json
-
-#paket
-
-.paket/paket.exe
-
 # Build results
 
 [Dd]ebug/
