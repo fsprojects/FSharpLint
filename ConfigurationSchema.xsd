@@ -172,6 +172,15 @@
                 </xs:sequence>
               </xs:complexType>
             </xs:element>
+
+            <xs:element name="Indentation" maxOccurs="1" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+                  <xs:element name="NumberOfIndentationSpaces" maxOccurs="1" minOccurs="0" type="xs:unsignedInt" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

@@ -291,4 +291,13 @@
   <data name="RulesConventionsTopLevelNamespaceError" xml:space="preserve">
     <value>Prefer namespaces at top level.</value>
   </data>
+  <data name="RulesTypographyIndentationError" xml:space="preserve">
+    <value>Indentation must use a multiple of {0} spaces.</value>
+  </data>
+  <data name="RulesTypographyRecordFieldIndentationError" xml:space="preserve">
+    <value>Record fields should be aligned.</value>
+  </data>
+  <data name="RulesTypographyOverridenIndentationError" xml:space="preserve">
+    <value>Invalid indentation.</value>
+  </data>
 </root>
