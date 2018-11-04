@@ -11,6 +11,16 @@ module Utilities =
         
     let (</>) x y = System.IO.Path.Combine(x, y)
 
+module Dictionary =
+
+    open System.Collections.Generic
+
+    let addOrUpdate key value (dict:Dictionary<'key,'value>) =
+        if dict.ContainsKey(key) then
+            dict.Remove(key) |> ignore
+
+        dict.Add(key, value)
+
 module ExpressionUtilities =
 
     open Microsoft.FSharp.Compiler
