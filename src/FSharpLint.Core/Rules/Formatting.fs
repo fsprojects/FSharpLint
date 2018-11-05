@@ -18,26 +18,68 @@ module Formatting =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
     module private TypedItemSpacing =
+        let ruleName = "TypedItemSpacing"
+
+        let private typedItemStyle config =
+            match Configuration.isRuleEnabled config AnalyserName ruleName with
+            | Some(_, ruleSettings) -> 
+                match Map.tryFind "TypedItemStyle" ruleSettings with
+                | Some(TypedItemStyle(style)) -> Some(style)
+                | Some(_) | None -> None
+            | None -> None
+
+        let getLeadingSpaces (s:string) =
+            let rec loop i =
+                if i < s.Length && s.[i] = ' '
+                then loop (i + 1)
+                else i
+
+            loop 0
+
+        let getTrailingSpaces (s:string) =
+            let rec loop i count =
+                if i >= 0 && s.[i] = ' '
+                then loop (i - 1) (count + 1)
+                else count
+
+            (loop (s.Length - 1) 0)
+
+        let expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
+            match typedItemStyle with
+            | TypedItemStyle.NoSpaces -> (0, 0)
+            | TypedItemStyle.SpaceAfter -> (0, 1)
+            | TypedItemStyle.SpacesAround -> (1, 1)
+            | _ -> (0, 0)
 
         /// Checks for correct spacing around colon of typed expression.
         let checkTypedItemSpacing args range isSuppressed =
-            let ruleName = "TypedItemSpacing"
 
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
+                let (expectedSpacesBefore, expectedSpacesAfter) = 
+                    typedItemStyle args.Info.Config 
+                    |> Option.defaultValue TypedItemStyle.NoSpaces
+                    |> expectedSpacesFromConfig
+
                 args.Info.TryFindTextOfRange range
                 |> Option.iter (fun text ->
                     match text.Split(':') with
                     | [|otherText; typeText|] ->
-                        if otherText.TrimEnd(' ').Length <> otherText.Length - 1 
-                        || typeText.TrimStart(' ').Length <> typeText.Length - 1 then
+                        let spacesBeforeColon = getTrailingSpaces otherText
+                        let spacesAfterColon = getLeadingSpaces typeText
+                        if spacesBeforeColon <> expectedSpacesBefore || spacesAfterColon <> expectedSpacesAfter then
+                            let trimmedOtherText = otherText.TrimEnd(' ')
+                            let trimmedTypeText = typeText.TrimStart(' ')
+                            let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
+                            let spacesAfterString = " " |> String.replicate expectedSpacesAfter
                             let suggestedFix = lazy(
-                                { FromRange = range; FromText = text; ToText = otherText + " : " + typeText }
+                                { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
                                 |> Some)
+                            let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                             args.Info.Suggest 
                                 { Range = range 
-                                  Message = Resources.GetString("RulesFormattingTypedItemSpacingError")
+                                  Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
                     | _ -> ())
