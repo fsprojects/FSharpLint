@@ -27,6 +27,8 @@ Target.create "Clean" (fun _ ->
     ++ "tests/*/obj" 
     |> Shell.cleanDirs)
 
+Target.create "Restore" (fun _ -> Paket.restore id)
+
 Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
 
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
@@ -74,6 +76,7 @@ Target.create "Default" ignore
 open Fake.Core.TargetOperators
 
 "Clean" 
+    ==> "Restore"
     ==> "Build" 
     ==> "RunTests"
     ==> "RunFunctionalTests" 
