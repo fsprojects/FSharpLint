@@ -436,7 +436,8 @@
     <Formatting>
       <Rules>
         <TypedItemSpacing>
-          <Enabled>true</Enabled>
+          <Enabled>false</Enabled>
+          <TypedItemStyle>NoSpaces</TypedItemStyle>
         </TypedItemSpacing>
         <TupleCommaSpacing>
           <Enabled>true</Enabled>

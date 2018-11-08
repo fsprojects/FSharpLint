@@ -54,6 +54,11 @@ module Configuration =
         | AllowAny = 1
         | None = 2
 
+    type TypedItemStyle =
+        | NoSpaces = 0
+        | SpaceAfter = 1
+        | SpacesAround = 2
+
     type Hint = { Hint: string; ParsedHint: HintParser.Hint }
 
     type Hints = { Hints: Hint list; Update: Update }
@@ -74,6 +79,7 @@ module Configuration =
         | Prefix of string option
         | Suffix of string option
         | Underscores of NamingUnderscores
+        | TypedItemStyle of TypedItemStyle
 
     let private settingToXml = function
         | Lines(x)
@@ -83,6 +89,7 @@ module Configuration =
         | NumberOfSpacesAllowed(x) -> x :> obj
         | NumberOfIndentationSpaces(x) -> x :> obj
         | Underscores(x) -> x :> obj
+        | TypedItemStyle(x) -> x :> obj
         | Prefix(x)
         | Suffix(x) -> x :> obj
         | OneSpaceAllowedAfterOperator(x)
@@ -278,6 +285,7 @@ module Configuration =
         | "OneSpaceAllowedAfterOperator" -> OneSpaceAllowedAfterOperator(setting.Value |> bool.Parse)
         | "NumberOfSpacesAllowed" -> NumberOfSpacesAllowed(setting.Value |> int)
         | "NumberOfIndentationSpaces" -> NumberOfIndentationSpaces(setting.Value |> int)
+        | "TypedItemStyle" -> TypedItemStyle(setting.Value |> fromEnum "TypedItemStyle")
         | "IgnoreBlankLines" -> IgnoreBlankLines(setting.Value |> bool.Parse)
         | "Access" -> Access(setting.Value |> fromEnum "Access")
         | "Naming" -> Naming(setting.Value |> fromEnum "Naming")

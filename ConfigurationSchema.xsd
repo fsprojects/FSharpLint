@@ -266,12 +266,27 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="TypedItemStyle">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NoSpaces" />
+      <xs:enumeration value="SpaceAfter" />
+      <xs:enumeration value="SpacesAround" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:complexType name="Formatting">
     <xs:sequence>
       <xs:element name="Rules" maxOccurs="1" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="TypedItemSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+            <xs:element name="TypedItemSpacing" maxOccurs="1" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Enabled" maxOccurs="1" minOccurs="0" type="xs:boolean" />
+                  <xs:element name="TypedItemStyle" maxOccurs="1" minOccurs="0" type="TypedItemStyle" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
             <xs:element name="TupleCommaSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TupleParentheses" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TypePrefixing" maxOccurs="1" minOccurs="0" type="Enabled" />

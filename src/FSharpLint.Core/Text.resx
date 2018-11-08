@@ -253,7 +253,7 @@
     <value>Use parentheses for tuple instantiation.</value>
   </data>
   <data name="RulesFormattingTypedItemSpacingError" xml:space="preserve">
-    <value>Use spaces around ':' in typed item.</value>
+    <value>Expected {0} space(s) before and {1} space(s) after ':' in typed item.</value>
   </data>
   <data name="RulesFormattingF#ArrayPostfixError" xml:space="preserve">
     <value>Use special postfix syntax for F# type array.</value>
