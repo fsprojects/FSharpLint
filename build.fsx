@@ -66,7 +66,7 @@ Target.create "GenerateDocs" (fun _ ->
         { s with
             Source = "docs-gen/markdown"
             OutputDirectory = "docs"
-            Template = "docs-gen/tools/templates/template.html"
+            Template = "docs-gen/templates/template.html"
             ProjectParameters = projInfo
             LayoutRoots = [] }))
 
