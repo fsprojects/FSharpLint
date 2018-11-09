@@ -478,6 +478,9 @@
         <TopLevelNamespace>
           <Enabled>true</Enabled>
         </TopLevelNamespace>
+        <RecursiveAsyncFunction>
+          <Enabled>false</Enabled>
+        </RecursiveAsyncFunction>
       </Rules>
       <Enabled>true</Enabled>
     </Conventions>
