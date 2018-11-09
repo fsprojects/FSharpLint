@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SourceLength
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Matthew Mcveigh">
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="content/style.css" />
+    <script type="text/javascript" src="content/tips.js"></script>
+	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+        </ul>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          <h1>SourceLength</h1>
+<p>Set of rules that analyse the length of sections of code.</p>
+<h3>Analyser Settings</h3>
+<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
+<h3>Rules</h3>
+<h4>MaxLinesInFunction</h4>
+<h5>Cause</h5>
+<p>A function is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a function becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Refactor to extract out code into smaller composable functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a function. (Default 70)</p>
+<h4>MaxLinesInLambdaFunction</h4>
+<h5>Cause</h5>
+<p>A lambda function is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>Lambda functions are usually used for single lines of code that aren't worth naming to make code more concise. A large lambda function indicates it should probably be a named function.</p>
+<h5>How To Fix</h5>
+<p>Consider using a named function rather than a lambda function.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a lambda function. (Default 7)</p>
+<h4>MaxLinesInMatchLambdaFunction</h4>
+<h5>Cause</h5>
+<p>A match function is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a function becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Use active patterns to help reduce the number of matches/extract code out into composable functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a match function. (Default 70)</p>
+<h4>MaxLinesInValue</h4>
+<h5>Cause</h5>
+<p>A statement binded to a value is made up of more than a configurable number of lines.
+For example the following would break the rule when the maximum number of lines is set to 4:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="i">value</span> <span class="o">=</span> 
+	<span class="k">let</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">x</span> <span class="o">=</span> <span class="n">7</span>
+	<span class="k">let</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">y</span> <span class="o">=</span> <span class="n">6</span>
+	<span class="k">let</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="i">e</span> <span class="o">=</span> <span class="n">5</span>
+	<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="i">r</span> <span class="o">=</span> <span class="n">4</span>
+	<span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="i">r</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs3', 7)" onmouseover="showTip(event, 'fs3', 7)" class="i">y</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs4', 8)" onmouseover="showTip(event, 'fs4', 8)" class="i">e</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs2', 9)" onmouseover="showTip(event, 'fs2', 9)" class="i">x</span>
+</code></pre></td>
+</tr>
+</table>
+<h5>Rationale</h5>
+<p>The larger a value becomes the more complex it becomes.</p>
+<h5>How To Fix</h5>
+<p>Refactor to extract out code into smaller composable functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a value binding. (Default 70)</p>
+<h4>MaxLinesInConstructor</h4>
+<h5>Cause</h5>
+<p>A class constructor is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a constructor becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into private methods or functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a class constructor. (Default 70)</p>
+<h4>MaxLinesInMember</h4>
+<h5>Cause</h5>
+<p>A member is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a member becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into private methods or functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a member. (Default 70)</p>
+<h4>MaxLinesInProperty</h4>
+<h5>Cause</h5>
+<p>A property is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a property becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into private methods or functions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a property. (Default 70)</p>
+<h4>MaxLinesInClass</h4>
+<h5>Cause</h5>
+<p>A class is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a class becomes the more complex it becomes, it also indicates that it may have <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">too many different responsibilities</a>.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into smaller composable classes.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a class. (Default 500)</p>
+<h4>MaxLinesInEnum</h4>
+<h5>Cause</h5>
+<p>An enum is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a enum becomes the more complex it becomes, it also indicates that all the items may not be related.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into smaller enums.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a enum. (Default 500)</p>
+<h4>MaxLinesInUnion</h4>
+<h5>Cause</h5>
+<p>A discriminated union is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a discriminated union becomes the more complex it becomes, it also indicates that all the items may not be related.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into smaller composed discriminated unions.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a discriminated union. (Default 500)</p>
+<h4>MaxLinesInRecord</h4>
+<h5>Cause</h5>
+<p>A record is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a record becomes the more complex it becomes, it also indicates that all the items may not be related.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into smaller composed records.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a record. (Default 500)</p>
+<h4>MaxLinesInModule</h4>
+<h5>Cause</h5>
+<p>A module is made up of more than a configurable number of lines.</p>
+<h5>Rationale</h5>
+<p>The larger a module becomes the more complex it becomes, it also indicates that it may have too many different responsibilities.</p>
+<h5>How To Fix</h5>
+<p>Extract code out into smaller modules.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>Lines</code> - Maximum number of lines in a module. (Default 1000)</p>
+
+          <div class="tip" id="fs1">val value : int<br /><br />Full name: SourceLength.value</div>
+<div class="tip" id="fs2">val x : int</div>
+<div class="tip" id="fs3">val y : int</div>
+<div class="tip" id="fs4">val e : int</div>
+<div class="tip" id="fs5">val r : int</div>
+
+        </div>
+        <div class="span3">
+          <a href="index.html">
+            <img src="content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+          </a>
+
+          <ul class="nav nav-list" id="menu">
+
+            <li class="nav-header">
+              FSharpLint
+            </li>
+
+            <li class="divider"></li>
+
+            <li><a href="http://fsprojects.github.io/FSharpLint/">Source Code on GitHub</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/LICENSE">License (MIT)</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <li class="nav-header">Documentation</li>
+
+            <li><a href="index.html">Introduction</a></li>
+
+            <li class="divider"></li>
+
+            <li><a href="Console-Application.html">Using the command line tool.</a></li>
+
+            <li class="nav-header">Analysers</li>
+
+            <li><a href="Hints.html">Hints</a></li>
+            <li><a href="NameConventions.html">NameConventions</a></li>
+            <li><a href="SourceLength.html">SourceLength</a></li>
+            <li><a href="Typography.html">Typography</a></li>
+            <li><a href="NestedStatements.html">NestedStatements</a></li>
+            <li><a href="NumberOfItems.html">NumberOfItems</a></li>
+            <li><a href="FunctionReimplementation.html">FunctionReimplementation</a></li>
+            <li><a href="XmlDocumentation.html">XmlDocumentation</a></li>
+            <li><a href="Binding.html">Binding</a></li>
+            <li><a href="RaiseWithTooManyArguments.html">RaiseWithTooManyArguments</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="http://fsprojects.github.io/FSharpLint/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>

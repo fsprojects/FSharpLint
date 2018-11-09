@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hints
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Matthew Mcveigh">
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="content/style.css" />
+    <script type="text/javascript" src="content/tips.js"></script>
+	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+        </ul>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          <h1>Hints</h1>
+<h3>Introduction</h3>
+<p>The Hints analyser is inspired by <a href="https://github.com/ndmitchell/hlint">HLint</a>. The hints let users easily write their own rules which are matched against linted code and when matched produce a suggestion that the user provides as part of the hint.</p>
+<p>Every hint is formed of two parts: the match and the suggestion. Both the match and the suggestion are parsed the same way into ASTs, but they have two different purposes; the match AST is analysed against the code being linted looking for any expressions in the code that match the AST, and if there is a match then the suggestion AST is used to display a suggestion on how the code can be refactored.</p>
+<h3>Matching</h3>
+<h5>Match Any Expression</h5>
+<p>Any F# expression can be matched by a variable or wildcard.</p>
+<ul>
+<li>A variable is represented by a single letter e.g. <code>x</code></li>
+<li>A wildcard is represented by the character <code>_</code></li>
+</ul>
+<p>Variables and wildcards are seemingly the same, and in terms of matching they are. The key difference is that using a variable lets you refer to it in the suggestion, enabling you to show where the matched expression should be moved within the matched code.</p>
+<p>For example if we wanted to match the following:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="f">not</span> ((<span class="n">4</span> <span class="o">+</span> <span class="n">4</span>) <span class="o">&gt;</span><span class="o">=</span> (<span class="i">x</span> <span class="o">+</span> <span class="n">77</span> <span class="o">*</span> (<span class="n">9</span> <span class="o">*</span> <span class="i">y</span>)))
+</code></pre></td>
+</tr>
+</table>
+<p>and suggest the following (which is equivalent):</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp">(<span class="n">4</span> <span class="o">+</span> <span class="n">4</span>) <span class="o">&lt;</span> (<span class="i">x</span> <span class="o">+</span> <span class="n">77</span> <span class="o">*</span> (<span class="n">9</span> <span class="o">*</span> <span class="i">y</span>))
+</code></pre></td>
+</tr>
+</table>
+<p>We can use variables here, the expression <code>(4 + 4)</code> can be matched by a variable and <code>(x + 77 * (9 * y))</code> by another, this is shown below using the variables <code>a</code> and <code>b</code>.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">not (a &gt;= b) ===&gt; a &lt;  b
+</code></pre></td></tr></table>
+<h5>Match An Identifier</h5>
+<p>Identifiers in F# code can be matched by using the same identifier in the hint. It's important to note that since single characters are used to represent variables in hints the identifier must be at least 2 characters long.</p>
+<p>For example the following rule uses identifiers:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">List.fold (+) 0 ===&gt; List.sum
+</code></pre></td></tr></table>
+<p><code>List.fold</code> in the hint will match the same identifier in the code. So if <code>List.fold</code> is found anywhere in the F# code being analysed with <code>(+)</code> and <code>0</code> applied to it then the rule will be matched.</p>
+<h5>Match Literal Constants</h5>
+<p>Literal constants can be used to match literal constants in the code, the constants in hints are the same format as constants in F#, so for example if you wanted to match <code>0x4b</code> you could use <code>0x4b</code> in the hint.</p>
+<p>Example:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">not true ===&gt; false
+</code></pre></td></tr></table>
+<p>In the example above the boolean literal <code>true</code> is used to match any F# code where <code>true</code> is applied to the <code>not</code> identifier.</p>
+<h5>Match Function Application and Operators</h5>
+<p>Matching function application, prefix operators, and infix operators in hints are all done in the same way as how you'd write it in F# e.g.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">not true ===&gt; false
+4 + 4 ===&gt; 8
+~x ===&gt; someFunc x
+</code></pre></td></tr></table>
+<p>The first rule above matches <code>true</code> (boolean literal) applied to the function <code>not</code>, the second matches two literal integers (both <code>4</code>) applied to the <code>+</code> binary operator, and the third matches an expression applied to the <code>~</code> prefix operator.</p>
+<p>Read the below section titled "Order Of Operations" for specifying the order of application in a hint.</p>
+<h5>Match Lambda Functions</h5>
+<p>Lambda functions can be matched using the syntax <code>fun args -&gt; ()</code> e.g. <code>fun x y -&gt; x + y</code>.</p>
+<p>The arguments may be either wildcards (<code>_</code>) or 'variables' (a single character). The 'variable' arguments have a particular use: they match a lambda that has that argument as an identifier, and then if that 'variable' is used in the body of the lambda in the hint then it will match the argument's identifier in the body of the code.</p>
+<p>For example:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">fun x -&gt; x ===&gt; id
+</code></pre></td></tr></table>
+<p>The above hint will match a lambda that has a single argument which is an identifier and returns that identifier. <code>fun val -&gt; val</code> would be matched, whereas <code>fun val -&gt; ()</code> would not be matched - to match this you could use the hint: <code>fun _ -&gt; ()</code>.</p>
+<h5>Order Of Operations</h5>
+<p>Generic order of operations can be specified using parentheses. They're described as 'generic' because using parentheses in a hint will also take into account the following operators: <code>|&gt;</code>, <code>||&gt;</code>, <code>|||&gt;</code>, <code>&lt;|</code>, <code>&lt;||</code>, and <code>&lt;|||</code> which are often used to specificy the order of function application.</p>
+<p>Below uses parentheses to match <code>x</code> applied to <code>not</code> and the result of that application applied to <code>someFunc</code>.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="hint">someFunc (not x) ===&gt; someOtherFunc x
+</code></pre></td></tr></table>
+<p>In F# several operators are commonly used to show the order of function application, for example in F# <code>someFunc (not x)</code> could also be written as:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span onmouseout="hideTip(event, 'fs1', 2)" onmouseover="showTip(event, 'fs1', 2)" class="f">not</span> <span class="i">x</span> <span class="o">|&gt;</span> <span class="i">someFunc</span>
+</code></pre></td>
+</tr>
+</table>
+<p>The same code written as a rule <code>not x |&gt; someFunc</code> will match the above, but it is matching against the operator so it will not match <code>someFunc (not x)</code>. However the rule <code>someFunc (not x)</code> will match both.</p>
+<h3>EBNF of a Hint</h3>
+<p>This is incomplete - currently missing a few of the more detailed rules e.g. <code>uint32</code> and <code>infix-operator</code>, for these I'd recommend looking them up in the EBNF for F# as that's what they will be based upon.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+<span class="l">15: </span>
+<span class="l">16: </span>
+<span class="l">17: </span>
+<span class="l">18: </span>
+<span class="l">19: </span>
+<span class="l">20: </span>
+<span class="l">21: </span>
+<span class="l">22: </span>
+<span class="l">23: </span>
+<span class="l">24: </span>
+<span class="l">25: </span>
+<span class="l">26: </span>
+<span class="l">27: </span>
+<span class="l">28: </span>
+<span class="l">29: </span>
+<span class="l">30: </span>
+<span class="l">31: </span>
+<span class="l">32: </span>
+<span class="l">33: </span>
+<span class="l">34: </span>
+<span class="l">35: </span>
+<span class="l">36: </span>
+<span class="l">37: </span>
+<span class="l">38: </span>
+<span class="l">39: </span>
+<span class="l">40: </span>
+<span class="l">41: </span>
+<span class="l">42: </span>
+<span class="l">43: </span>
+<span class="l">44: </span>
+<span class="l">45: </span>
+<span class="l">46: </span>
+<span class="l">47: </span>
+<span class="l">48: </span>
+<span class="l">49: </span>
+<span class="l">50: </span>
+<span class="l">51: </span>
+<span class="l">52: </span>
+<span class="l">53: </span>
+<span class="l">54: </span>
+<span class="l">55: </span>
+<span class="l">56: </span>
+<span class="l">57: </span>
+<span class="l">58: </span>
+<span class="l">59: </span>
+<span class="l">60: </span>
+<span class="l">61: </span>
+<span class="l">62: </span>
+<span class="l">63: </span>
+<span class="l">64: </span>
+<span class="l">65: </span>
+<span class="l">66: </span>
+<span class="l">67: </span>
+<span class="l">68: </span>
+<span class="l">69: </span>
+<span class="l">70: </span>
+<span class="l">71: </span>
+<span class="l">72: </span>
+<span class="l">73: </span>
+<span class="l">74: </span>
+<span class="l">75: </span>
+<span class="l">76: </span>
+<span class="l">77: </span>
+<span class="l">78: </span>
+<span class="l">79: </span>
+<span class="l">80: </span>
+<span class="l">81: </span>
+<span class="l">82: </span>
+<span class="l">83: </span>
+<span class="l">84: </span>
+<span class="l">85: </span>
+<span class="l">86: </span>
+<span class="l">87: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="ebnf">whitespace = " " | "\t" | "\n" | "\r\n" | "\r";
+
+spaces = [{whitespace}];
+
+spaces1 = whitespace, [{whitespace}];
+
+bool = "true" | "false";
+
+unit = "(", [spaces], ")";
+
+constant = bool
+            | unit
+            | character
+            | literal-string
+            | verbatim-string
+            | byte-char
+            | byte-array
+            | verbatim-byte-array
+            | triple-quoted-string
+            | sbyte
+            | byte
+            | int16
+            | uint16
+            | uint32
+            | native-int
+            | unative-int
+            | int64
+            | uint64
+            | single
+            | big-num
+            | decimal
+            | double
+            | int32;
+
+parentheses = "(" expression ")";
+
+wildcard = "_";
+
+variable = letter, -letter;
+
+ident-start-char = "_" | letter;
+
+ident-char = letter | digit | "'" | "_" ;
+
+ident-text = ident-start-char, {ident-char};
+
+ident = ident-text | ("``", {(-("`" | "\n" | "\r" | "\t")) | (("`"), -("`" | "\n" | "\r" | "\t"))}, "``");
+
+ident-or-op = ident | ("(", spaces, operator, spaces, ")");
+
+long-ident = {ident, "."} | ident;
+
+long-ident-or-op = ident, {".", ident}, [".", ident-or-op]
+                    | ident-or-op
+                    | long-ident;
+
+application = constant
+                | variable
+                | wildcard
+                | long-ident-or-op
+                | parentheses;
+
+function-application = long-ident-or-op, identifier, spaces, {application, spaces}, [application, spaces];
+
+prefix-expr = prefix-operator, spaces, expression
+
+infix-expr = expression, spaces, infix-operator, spaces, expression
+
+identifier = long-ident-or-op -letter;
+
+argument-variable = letter;
+
+argument-wildcard = "_";
+
+lambda-arguments = [{(argument-variable | argument-wildcard), spaces1}], 
+                        (argument-variable | argument-wildcard), [spaces]
+
+lambda = "fun", spaces1, lambda-arguments, "-&gt;", spaces, expression;
+
+expression = spaces, (constant | lambda | variable | wildcard | function-application
+                      | identifier | parentheses | infix-expr | prefix-expr), spaces;
+
+suggestion = expression;
+
+match = expression;
+
+hint = match, spaces, "===&gt;", spaces, suggestion;
+</code></pre></td></tr></table>
+<h3>Writing Your Own Hints</h3>
+<p>Currently to provide your own hints you have to overwrite the default hints with your own using the <code>Hints</code>property inside of the <code>Hints</code> rule.</p>
+<p>For example to make the lint tool run with just the two hints: <code>not (a =  b) ===&gt; a &lt;&gt; b</code> and <code>not (a &lt;&gt; b) ===&gt; a =  b</code>, you could use the following config file to override existing hints:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
+<span class="l">11: </span>
+<span class="l">12: </span>
+<span class="l">13: </span>
+<span class="l">14: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="prep">&lt;?</span>xml version=<span class="s">"1.0"</span> encoding=<span class="s">"utf-8"</span><span class="prep">?&gt;</span>
+<span class="k">&lt;</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
+    <span class="k">&lt;</span><span class="i">Analysers</span><span class="k">&gt;</span>
+        <span class="k">&lt;</span><span class="i">Hints</span><span class="k">&gt;</span>
+            <span class="k">&lt;</span><span class="i">Hints</span><span class="k">&gt;</span>
+              <span class="k">&lt;!</span>[CDATA[
+                not (a =  b) ===<span class="k">&gt;</span> a <span class="k">&lt;&gt;</span> b
+                not (a <span class="k">&lt;&gt;</span> b) ===<span class="k">&gt;</span> a =  b
+              ]]<span class="k">&gt;</span>
+            <span class="k">&lt;/</span><span class="i">Hints</span><span class="k">&gt;</span>
+            <span class="k">&lt;</span><span class="i">Enabled</span><span class="k">&gt;</span>true<span class="k">&lt;/</span><span class="i">Enabled</span><span class="k">&gt;</span>
+        <span class="k">&lt;/</span><span class="i">Hints</span><span class="k">&gt;</span>
+    <span class="k">&lt;/</span><span class="i">Analysers</span><span class="k">&gt;</span>
+<span class="k">&lt;/</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
+</code></pre></td></tr></table>
+<h3>Flaws</h3>
+<ul>
+<li><code>===&gt;</code> is used to split the hints into parts, a hint cannot match this valid F# operator.</li>
+<li>Single letter identifiers are used as variables inside a hint, so attempting to match an identifier that is a single letter is not going to work.</li>
+<li>Operators beginning with <code>.</code> e.g. <code>.*</code> will have incorrect precedence and as such should not currently be used in hints.</li>
+</ul>
+<h3>Future Intentions</h3>
+<ul>
+<li>Provide more informative parse errors.</li>
+<li>Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.</li>
+<li>Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements.</li>
+</ul>
+<h3>Analyser Settings</h3>
+<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default True)</p>
+
+          <div class="tip" id="fs1">val not : value:bool -&gt; bool<br /><br />Full name: Microsoft.FSharp.Core.Operators.not</div>
+
+        </div>
+        <div class="span3">
+          <a href="index.html">
+            <img src="content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+          </a>
+
+          <ul class="nav nav-list" id="menu">
+
+            <li class="nav-header">
+              FSharpLint
+            </li>
+
+            <li class="divider"></li>
+
+            <li><a href="http://fsprojects.github.io/FSharpLint/">Source Code on GitHub</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/LICENSE">License (MIT)</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <li class="nav-header">Documentation</li>
+
+            <li><a href="index.html">Introduction</a></li>
+
+            <li class="divider"></li>
+
+            <li><a href="Console-Application.html">Using the command line tool.</a></li>
+
+            <li class="nav-header">Analysers</li>
+
+            <li><a href="Hints.html">Hints</a></li>
+            <li><a href="NameConventions.html">NameConventions</a></li>
+            <li><a href="SourceLength.html">SourceLength</a></li>
+            <li><a href="Typography.html">Typography</a></li>
+            <li><a href="NestedStatements.html">NestedStatements</a></li>
+            <li><a href="NumberOfItems.html">NumberOfItems</a></li>
+            <li><a href="FunctionReimplementation.html">FunctionReimplementation</a></li>
+            <li><a href="XmlDocumentation.html">XmlDocumentation</a></li>
+            <li><a href="Binding.html">Binding</a></li>
+            <li><a href="RaiseWithTooManyArguments.html">RaiseWithTooManyArguments</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="http://fsprojects.github.io/FSharpLint/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>

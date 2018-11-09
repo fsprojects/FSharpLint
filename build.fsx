@@ -52,8 +52,7 @@ Target.create "Release" (fun _ ->
     Git.Branches.pushTag "" "origin" release.NugetVersion)
 
 Target.create "GenerateDocs" (fun _ -> 
-    let docsDir = "docs/output"
-    Shell.cleanDir docsDir
+    Shell.cleanDir "docs"
 
     let projInfo =
         [ "project-name", "FSharpLint"
@@ -62,12 +61,12 @@ Target.create "GenerateDocs" (fun _ ->
           "project-github", "http://fsprojects.github.io/FSharpLint/"
           "project-nuget", "http://nuget.org/packages/FSharpLint.Core" ]
 
-    Shell.copyDir (docsDir + "/content") "docs/files" FileFilter.allFiles
+    Shell.copyDir "docs/content" "docs-gen/files" FileFilter.allFiles
     FSFormatting.createDocs (fun s ->
         { s with
-            Source = "docs/content"
-            OutputDirectory = docsDir
-            Template = "docs/tools/templates/template.html"
+            Source = "docs-gen/markdown"
+            OutputDirectory = "docs"
+            Template = "docs-gen/tools/templates/template.html"
             ProjectParameters = projInfo
             LayoutRoots = [] }))
 
@@ -81,8 +80,8 @@ open Fake.Core.TargetOperators
     ==> "RunTests"
     ==> "RunFunctionalTests" 
     ==> "Package" 
-    ==> "Default"
     ==> "GenerateDocs" 
+    ==> "Default"
     ==> "PublishPackages" 
     ==> "Release"
 

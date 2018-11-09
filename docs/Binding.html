@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Binding
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Matthew Mcveigh">
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.8.23/jquery-ui.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="content/style.css" />
+    <script type="text/javascript" src="content/tips.js"></script>
+	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+        </ul>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          <h1>Binding</h1>
+<p>Set of rules that analyse possible mistakes when binding values.</p>
+<h3>Analyser Settings</h3>
+<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
+<h3>Rules</h3>
+<h4>FavourIgnoreOverLetWild</h4>
+<h5>Cause</h5>
+<p>A value is binded to a wildcard e.g. <code>let _ = Console.ReadLine()</code></p>
+<h5>Rationale</h5>
+<p>Using the ignore function makes it clear what is intended to happen, rather than something that may be a mistake.</p>
+<h5>How To Fix</h5>
+<p>Pipe the value into the ignore function e.g. <code>Console.ReadLine() |&gt; ignore</code></p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>UselessBinding</h4>
+<h5>Cause</h5>
+<p>An identifier is binded to itself e.g. <code>let x = x</code></p>
+<h5>Rationale</h5>
+<p>Pointless statement likely to be an error.</p>
+<h5>How To Fix</h5>
+<p>Remove the binding.</p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>WildcardNamedWithAsPattern</h4>
+<h5>Cause</h5>
+<p>A wildcard is given a name using the as pattern e.g. <code>match something with | _ as x -&gt; x + y</code></p>
+<h5>Rationale</h5>
+<p>The wildcard and as pattern can be replaced with the identifier the value is to be bound to.</p>
+<h5>How To Fix</h5>
+<p>Replace the wildcard with the identifier the wildcard is currently being bound to, e.g. change <code>match something with | _ as x -&gt; x + y</code> to <code>match something with | x -&gt; x + y</code></p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>TupleOfWildcards</h4>
+<h5>Cause</h5>
+<p>A constructor in a pattern has arguments that consist entirely of wildcards e.g. <code>SynPat.Paren(_, _)</code></p>
+<h5>Rationale</h5>
+<p>The tuple of wildcards can be replaced with a single wildcard.</p>
+<h5>How To Fix</h5>
+<p>Replace the tuple with a single wildcard e.g. the example in the cause could be turned into <code>SynPat.Paren(_)</code></p>
+<h5>Rule Settings</h5>
+<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+
+          
+        </div>
+        <div class="span3">
+          <a href="index.html">
+            <img src="content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+          </a>
+
+          <ul class="nav nav-list" id="menu">
+
+            <li class="nav-header">
+              FSharpLint
+            </li>
+
+            <li class="divider"></li>
+
+            <li><a href="http://fsprojects.github.io/FSharpLint/">Source Code on GitHub</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/LICENSE">License (MIT)</a></li>
+            <li><a href="http://fsprojects.github.io/FSharpLint//tree/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <li class="nav-header">Documentation</li>
+
+            <li><a href="index.html">Introduction</a></li>
+
+            <li class="divider"></li>
+
+            <li><a href="Console-Application.html">Using the command line tool.</a></li>
+
+            <li class="nav-header">Analysers</li>
+
+            <li><a href="Hints.html">Hints</a></li>
+            <li><a href="NameConventions.html">NameConventions</a></li>
+            <li><a href="SourceLength.html">SourceLength</a></li>
+            <li><a href="Typography.html">Typography</a></li>
+            <li><a href="NestedStatements.html">NestedStatements</a></li>
+            <li><a href="NumberOfItems.html">NumberOfItems</a></li>
+            <li><a href="FunctionReimplementation.html">FunctionReimplementation</a></li>
+            <li><a href="XmlDocumentation.html">XmlDocumentation</a></li>
+            <li><a href="Binding.html">Binding</a></li>
+            <li><a href="RaiseWithTooManyArguments.html">RaiseWithTooManyArguments</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="http://fsprojects.github.io/FSharpLint/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>
