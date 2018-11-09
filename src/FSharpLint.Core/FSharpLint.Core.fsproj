@@ -10,6 +10,7 @@
     <PackageLicenseUrl>https://github.com/fsprojects/FSharpLint/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->
