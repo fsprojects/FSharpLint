@@ -7,11 +7,7 @@ module Program =
     open FSharpLint.Application
 
     let private help () =
-
-#if NO_PROJECTCRACKER
-#else
         printfn "-f <project.fsproj>        lint project"
-#endif
         printfn "-sf <file.fs>              lint single file"
         printfn "-source 'let foo = 5'      lint source code"
 
@@ -42,12 +38,8 @@ module Program =
             { CancellationToken = None
               ReceivedWarning = Some warningReceived
               Configuration = None }
-    
-#if NO_PROJECTCRACKER
-        failwith "this build does not support project files."
-#else
+
         lintProject parseInfo projectFile (Some parserProgress)
-#endif
 
     let private runLintOnFile pathToFile =
         let reportLintWarning (warning:LintWarning.Warning) =
@@ -76,34 +68,6 @@ module Program =
               Configuration = None }
 
         lintSource parseInfo source
-
-    let private getParseFailureReason = function
-        | ParseFile.FailedToParseFile(failures) ->
-            let getFailureReason (x:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
-                sprintf "failed to parse file %s, message: %s" x.FileName x.Message
-
-            String.Join(", ", failures |> Array.map getFailureReason)
-        | ParseFile.AbortedTypeCheck -> "Aborted type check."
-
-    let private printFailedDescription = function
-        | ProjectFileCouldNotBeFound(projectPath) ->
-            let formatString = Resources.GetString("ConsoleProjectFileCouldNotBeFound")
-            Console.WriteLine(String.Format(formatString, projectPath))
-        | MSBuildFailedToLoadProjectFile(projectPath, InvalidProjectFileMessage(message)) ->
-            let formatString = Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile")
-            Console.WriteLine(String.Format(formatString, projectPath, message))
-        | FailedToLoadConfig(message) ->
-            let formatString = Resources.GetString("ConsoleFailedToLoadConfig")
-            Console.WriteLine(String.Format(formatString, message))
-        | RunTimeConfigError ->
-            Console.WriteLine(Resources.GetString("ConsoleRunTimeConfigError"))
-        | FailedToParseFile(failure) ->
-            "Lint failed to parse a file. Failed with: " + getParseFailureReason failure
-            |> Console.WriteLine
-        | FailedToParseFilesInProject(failures) -> 
-            let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
-            "Lint failed to parse files. Failed with: " + failureReasons
-            |> Console.WriteLine
 
     type private Argument =
         | ProjectFile of string
@@ -140,7 +104,7 @@ module Program =
 
     let private outputLintResult = function
         | LintResult.Success(_) -> Console.WriteLine(Resources.GetString("ConsoleFinished"))
-        | LintResult.Failure(error) -> printFailedDescription error
+        | LintResult.Failure(failure) -> Console.WriteLine(failure.Description)
 
     let private start projectFile =
         if System.IO.File.Exists(projectFile) then

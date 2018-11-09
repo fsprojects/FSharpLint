@@ -1,127 +1,89 @@
-#r @"packages/tools/FAKE/tools/FakeLib.dll"
-#I @"packages/tools/FSharpLint.Fake/tools"
-#r @"packages/tools/FSharpLint.Fake/tools/FSharpLint.Fake.dll"
+#r "paket:
+nuget Fake.DotNet.Cli
+nuget Fake.DotNet.FSFormatting
+nuget Fake.DotNet.Paket
+nuget Fake.DotNet.MSBuild
+nuget Fake.IO.FileSystem
+nuget Fake.Tools.Git
+nuget Fake.Core.ReleaseNotes
+nuget Fake.Core.Target //"
 
 open System
-open Fake 
-open Fake.AssemblyInfoFile
-open Fake.Git
-open Fake.Testing
-open Fake.ReleaseNotesHelper
-open FSharpLint.Fake
+open Fake.Core
+open Fake.DotNet
+open Fake.IO
+open Fake.IO.Globbing.Operators
+open Fake.Tools
 
 let project = "FSharpLint"
 
-let release = LoadReleaseNotes "RELEASE_NOTES.md"
+let release = ReleaseNotes.load "RELEASE_NOTES.md"
+Environment.setEnvironVar "Version" release.NugetVersion
 
-let genAssemblyInfo projectPath =
-    let projectName = IO.Path.GetFileNameWithoutExtension projectPath
-    let basePath = "src/" + projectName
-    let fileName = basePath + "/AssemblyInfo.fs"
-    CreateFSharpAssemblyInfo fileName
-      [ Attribute.Title project
-        Attribute.Product project
-        Attribute.Description "Lint tool for F#."
-        Attribute.Version release.AssemblyVersion
-        Attribute.FileVersion release.AssemblyVersion ]
+Target.create "Clean" (fun _ -> 
+    !! "src/*/bin" 
+    ++ "src/*/obj" 
+    ++ "tests/*/bin" 
+    ++ "tests/*/obj" 
+    |> Shell.cleanDirs)
 
-Target "AssemblyInfo" (fun _ ->
-    !! "src/**/*.fsproj" |> Seq.iter genAssemblyInfo)
+Target.create "Restore" (fun _ -> Paket.restore id)
 
-Target "RestorePackages" (fun _ ->
-    RestorePackages ()
-    
-    DotNetCli.Restore (fun p ->
-       { p with
-           Project = "tools/tools.proj" })
-    )
+Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
 
-Target "Clean" (fun _ -> CleanDirs ["bin"])
+let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
 
-Target "Build" (fun _ ->
-    !! "FSharpLint.sln"
-    |> MSBuildRelease "" "Rebuild"
-    |> ignore
-    
-    DotNetCli.Build (fun p ->
-       { p with
-           Project = "FSharpLint.netstandard.sln" }))
+Target.create "RunTests" (fun _ -> DotNet.test filterPerformanceTests "tests/FSharpLint.Core.Tests")
+Target.create "RunFunctionalTests" (fun _ -> DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest")
 
-Target "RunTests" (fun _ ->
-    !! "tests/**/bin/Release/*Tests*.dll" 
-    |> NUnit3 (fun p ->
-        { p with
-            ShadowCopy = false
-            TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" })
-    
-    DotNetCli.Test (fun p ->
-       { p with
-           AdditionalArgs = ["--filter"; "\"TestCategory!=Performance\""]
-           Project = "tests/FSharpLint.Core.Tests.netstandard" }))
+Target.create "Package" (fun _ ->        
+    let configure (c:DotNet.PackOptions) = { c with Configuration = DotNet.Release; OutputPath = Some "../../packaging" }
+    DotNet.pack configure "src/FSharpLint.Core/FSharpLint.Core.fsproj"
+    DotNet.pack configure "src/FSharpLint.Console/FSharpLint.Console.fsproj")
 
-Target "RunFunctionalTests" (fun _ ->
-    !! "tests/**/bin/Release/*FunctionalTest*.dll" 
-    |> NUnit3 (fun p ->
-        { p with
-            ShadowCopy = false
-            TimeOut = TimeSpan.FromMinutes 20.
-            Where = "cat != Performance" }))
+Target.create "PublishPackages" (fun _ -> Paket.push(fun p -> { p with WorkingDir = "packaging" }))
 
-Target "Package" (fun _ ->    
-    Paket.Pack (fun p -> 
-        { p with 
-            ToolPath = ".paket/paket.exe" 
-            Version = release.NugetVersion
-            ReleaseNotes = toLines release.Notes
-            IncludeReferencedProjects = true
-            OutputPath = "packaging" })
-    
-    DotNetCli.Pack (fun p ->
-       { p with
-           AdditionalArgs = [sprintf "/p:Version=%s" release.NugetVersion]
-           Project = "src/FSharpLint.Core.netstandard/FSharpLint.Core.fsproj" })
+Target.create "Release" (fun _ ->
+    Git.Staging.stageAll ""
+    Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
+    Git.Branches.push ""
 
-    let sourcePkg = sprintf "packaging/FSharpLint.Core.%s.nupkg" release.NugetVersion
-    let otherPkg = sprintf "src/FSharpLint.Core.netstandard/bin/Release/FSharpLint.Core.%s.nupkg" release.NugetVersion
-    sprintf "mergenupkg --source %s --other %s --framework netstandard2.0" (".." </> sourcePkg) (".." </> otherPkg)
-    |> DotNetCli.RunCommand (fun p ->
-       { p with
-           WorkingDir = "tools" })
-    )
+    Git.Branches.tag "" release.NugetVersion
+    Git.Branches.pushTag "" "origin" release.NugetVersion)
 
-Target "PublishPackages" (fun _ ->
-    Paket.Push(fun p -> { p with WorkingDir = "packaging" }))
+Target.create "GenerateDocs" (fun _ -> 
+    let docsDir = "docs/output"
+    Shell.cleanDir docsDir
 
-Target "Release" (fun _ ->
-    StageAll ""
-    Commit "" (sprintf "Bump version to %s" release.NugetVersion)
-    Branches.push ""
+    let projInfo =
+        [ "project-name", "FSharpLint"
+          "project-author", "Matthew Mcveigh"
+          "project-summary", "A lint tool for F#."
+          "project-github", "http://fsprojects.github.io/FSharpLint/"
+          "project-nuget", "http://nuget.org/packages/FSharpLint.Core" ]
 
-    Branches.tag "" release.NugetVersion
-    Branches.pushTag "" "origin" release.NugetVersion)
+    Shell.copyDir (docsDir + "/content") "docs/files" FileFilter.allFiles
+    FSFormatting.createDocs (fun s ->
+        { s with
+            Source = "docs/content"
+            OutputDirectory = docsDir
+            Template = "docs/tools/templates/template.html"
+            ProjectParameters = projInfo
+            LayoutRoots = [] }))
 
-Target "Lint" (fun _ ->
-    !! "src/**/*.fsproj"
-    -- "src/FSharpLint.Core.netstandard/*.fsproj"
-    |> Seq.iter (FSharpLint id))
+Target.create "Default" ignore
 
-Target "GenerateDocs" (fun _ ->
-    executeFSI "docs/tools" "generate.fsx" [] |> ignore)
-
-Target "Default" DoNothing
+open Fake.Core.TargetOperators
 
 "Clean" 
-    ==> "RestorePackages"
-    ==> "AssemblyInfo" 
+    ==> "Restore"
     ==> "Build" 
-    ==> "RunFunctionalTests" 
     ==> "RunTests"
-    ==> "Lint" 
+    ==> "RunFunctionalTests" 
     ==> "Package" 
     ==> "Default"
     ==> "GenerateDocs" 
     ==> "PublishPackages" 
     ==> "Release"
 
-RunTargetOrDefault "Default"
+Target.runOrDefault "Default"

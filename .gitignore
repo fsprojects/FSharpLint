@@ -6,14 +6,6 @@
 *.user
 *.sln.docstates
 
-#dotnetcore
-
-project.lock.json
-
-#paket
-
-.paket/paket.exe
-
 # Build results
 
 [Dd]ebug/
@@ -194,3 +186,6 @@ packaging/api/lib
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintMSBuildTaskTest/
 /paket-files/
+
+DesignTimeBuild/
+.vs/

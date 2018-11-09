@@ -1,2 +1,4 @@
-FSharp.Compiler.Service
-NUnit
+nunit
+NUnit3TestAdapter
+FSharp.Core
+Microsoft.NET.Test.Sdk

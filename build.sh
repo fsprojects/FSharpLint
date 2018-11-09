@@ -3,32 +3,6 @@
 set -eu
 set -o pipefail
 
-cd `dirname $0`
+dotnet restore build.proj --verbosity n
 
-FSIARGS=""
-OS=${OS:-"unknown"}
-if [[ "$OS" != "Windows_NT" ]]
-then
-  FSIARGS="--fsiargs -d:MONO"
-fi
-
-function run() {
-  if [[ "$OS" != "Windows_NT" ]]
-  then
-    mono "$@"
-  else
-    "$@"
-  fi
-}
-
-run .paket/paket.bootstrapper.exe
-
-if [[ "$OS" != "Windows_NT" ]] &&
-       [ ! -e ~/.config/.mono/certs ]
-then
-  mozroots --import --sync --quiet
-fi
-
-run .paket/paket.exe restore
-
-run packages/tools/FAKE/tools/FAKE.exe "$@" $FSIARGS build.fsx
+dotnet fake run build.fsx

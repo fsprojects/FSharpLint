@@ -6,7 +6,10 @@ module Tests =
     open System.Diagnostics
     open System.IO
     open NUnit.Framework
-    open TestPackageHelper
+
+    let (</>) x y = Path.Combine(x, y)
+
+    let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 
     type Error =
         { Description: string
@@ -16,26 +19,26 @@ module Tests =
         override this.ToString() =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
 
-    let runConsoleApp arguments =
-        let filename = 
+    let dotnetFslint arguments =        
+        let binDir = 
             #if DEBUG
-                basePath </> "src" </> "FSharpLint.Console" </> "bin" </> "fsharplint.exe"
+                "Debug"
             #else
-                basePath </> "bin" </> "fsharplint.exe"
+                "Release"
             #endif
 
+        let dll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> binDir </> "netcoreapp2.1" </> "dotnet-fslint.dll"
+
         let startInfo = ProcessStartInfo
-                                (FileName = Path.GetFullPath filename,
-                                 Arguments = arguments,
+                                (FileName = "dotnet",
+                                 Arguments = dll + " " + arguments,
                                  RedirectStandardOutput = true,
-                                 UseShellExecute = false)
+                                 UseShellExecute = false,
+                                 WorkingDirectory = (basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"))
 
         use app = Process.Start(startInfo)
-
         let output = app.StandardOutput.ReadToEnd()
-                
         app.WaitForExit()
-
         output
 
     let getErrorsFromOutput (output:string) = 
@@ -43,13 +46,11 @@ module Tests =
 
         let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
 
-        [ for i in errorIndexes -> 
-            { Description = splitOutput.[i]
-              Location = splitOutput.[i + 1]
-              Code = splitOutput.[i + 2] } ]
+        set [ for i in errorIndexes -> splitOutput.[i] ]
 
     let expectedErrors =
-        [ 
+        set [ 
+          "Separate module declarations with 2 blank lines."
           "Use parentheses for tuple instantiation."
           "Comma in tuple instantiation should be followed by single space."
           "Prefer namespaces at top level."
@@ -65,28 +66,28 @@ module Tests =
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
-        let getTestFilePath fileName =
-            basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> fileName
+        let projectPath =
+            basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
 
         [<Test>]
         member __.InvalidConfig() = 
-            let projectFile = getTestFilePath "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
-            File.WriteAllText(getTestFilePath "Settings.FSharpLint", "invalid config file contents")
+            File.WriteAllText(projectPath </> "Settings.FSharpLint", "invalid config file contents")
 
-            let output = runConsoleApp arguments
+            let output = dotnetFslint arguments
 
-            File.Delete(getTestFilePath "Settings.FSharpLint")
+            File.Delete(projectPath </> "Settings.FSharpLint")
 
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.UnableToFindProjectFile() = 
-            let projectFile = getTestFilePath "iuniubi.fsproj"
+            let projectFile = projectPath </> "iuniubi.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
-            let output = runConsoleApp arguments
+            let output = dotnetFslint arguments
 
             Assert.IsTrue(
                 output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), 
@@ -94,16 +95,10 @@ module Tests =
 
         [<Test>]
         member __.FunctionalTestConsoleApplication() = 
-            let projectFile = getTestFilePath "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
-            let output = runConsoleApp arguments
+            let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
 
-            for expectedError in expectedErrors do
-                let containsExpectedError = List.exists (fun y -> y.Description = expectedError) errors
-                Assert.True(
-                    containsExpectedError, 
-                    sprintf "Errors did not contain expected error:\n %s. Program output:\n %s" expectedError output)
-
-            Assert.AreEqual(expectedErrors.Length, errors.Length)
+            Assert.AreEqual(expectedErrors, errors)

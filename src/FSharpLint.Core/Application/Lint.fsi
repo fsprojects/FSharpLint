@@ -115,19 +115,18 @@ module Lint =
 
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
+
+        member Description: string
         
     /// Result of running the linter.
     [<NoEquality; NoComparison; RequireQualifiedAccess>]
     type LintResult = 
         | Success of LintWarning.Warning list
         | Failure of LintFailure
-
-#if NO_PROJECTCRACKER
-#else
+        
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> progress:(ProjectProgress -> unit) option -> LintResult
-#endif
 
     /// Lints F# source code.
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> fsharpVersion:System.Version -> LintResult
