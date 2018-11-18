@@ -23,8 +23,7 @@ The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the 
 
 Package | Version
 ------- | --------
-[MSBuild Task](https://www.nuget.org/packages/FSharpLint.MSBuild/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.MSBuild.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.MSBuild/)
-[FAKE Task](https://www.nuget.org/packages/FSharpLint.Fake/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Fake.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Fake/)
+[dotnet tool](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/v/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/)
 [API](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/)
 
 ### Build Status
