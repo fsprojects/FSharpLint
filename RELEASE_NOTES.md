@@ -1,3 +1,7 @@
+##### 0.10.1 - November 18 2018
+
+* Pack console application as tool.
+
 ##### 0.10.0 - October 07 2018
 
 * Move solution to dotnet core.

@@ -31,28 +31,12 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h4>Running the Console Application</h4>
+          <h4>Installing the Console Application</h4>
+<p>The linter can be <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install">installed as a dotnet tool</a>.</p>
+<p>Install as a global tool: <code>dotnet install -g dotnet-fsharplint</code>.</p>
+<p>Install as tool to specific directory: <code>dotnet install --tool-path &lt;my_directory&gt; dotnet-fsharplint</code></p>
+<h4>Running the Console Application</h4>
 <p>The console application is a wrapper around the linter, with a required argument of: <code>-f</code>, <code>-sf</code>, or <code>-source</code>.</p>
-<ul>
-<li><code>-f</code> lints an entire project.</li>
-<li><code>-sf</code> lints a single file.</li>
-<li><code>-source</code> lints a string.</li>
-</ul>
-<h5>Example</h5>
-<p><code>C:\FSharpLint\bin</code> is the directory containing <code>fsharplint.exe</code></p>
-<p><code>C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj</code> is the path of the project file of the project that we want to lint.</p>
-<p>To run the linter, open the command line, <code>cd</code> into the directory containing <code>fsharplint.exe</code> and run the tool using the <code>-f</code> argument to specify the project file:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="o">&gt;</span><span class="i">cd</span> <span class="i">C</span><span class="o">:</span>
-<span class="o">&gt;</span><span class="i">fsharplint</span> <span class="o">-</span><span class="i">f</span> <span class="s">&quot;C:\FSharpLint.FunctionalTest.TestedProject\FSharpLint.FunctionalTest.TestedProject.fsproj&quot;</span>
-</code></pre></td>
-</tr>
-</table>
-<h6>Output</h6>
-<p><img src="http://i.imgur.com/0DZTdDR.png" alt="Example run" title="Example run of the console application" /></p>
-<h4>Application Arguments</h4>
 <table>
 <thead>
 <tr class="header">
@@ -63,19 +47,19 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td><p><code>-f</code></p></td>
-<td align="left"><p>Path to the project file.</p></td>
-<td><p><code>-f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
+<td><p><code>-f &lt;project_file_path&gt;</code></p></td>
+<td align="left"><p>Lints an entire project.</p></td>
+<td><p><code>dotnet fsharplint -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
 </tr>
 <tr class="even">
-<td><p><code>-sf</code></p></td>
-<td align="left"><p>Path to a source file.</p></td>
-<td><p><code>-f "C:\FSharpProjectDirectory\Uploader.fsx"</code></p></td>
+<td><p><code>-sf &lt;source_file_path&gt;</code></p></td>
+<td align="left"><p>Lints a single file.</p></td>
+<td><p><code>dotnet fsharplint -sf "C:\FSharpProjectDirectory\Uploader.fsx"</code></p></td>
 </tr>
 <tr class="odd">
-<td><p><code>-source</code></p></td>
-<td align="left"><p>String to be linted.</p></td>
-<td><p><code>-source "let x = fun _ -&gt; ()"</code></p></td>
+<td><p><code>-source &lt;source_string&gt;</code></p></td>
+<td align="left"><p>Lints a string.</p></td>
+<td><p><code>dotnet fsharplint -source "let x = fun _ -&gt; ()"</code></p></td>
 </tr>
 </tbody>
 </table>

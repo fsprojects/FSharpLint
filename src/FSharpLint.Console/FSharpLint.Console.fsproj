@@ -11,7 +11,8 @@
     <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;cli</PackageTags>
     <PackageType>DotNetCliTool</PackageType>
-    <AssemblyName>dotnet-fslint</AssemblyName>
+    <PackAsTool>true</PackAsTool>
+    <AssemblyName>dotnet-fsharplint</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
