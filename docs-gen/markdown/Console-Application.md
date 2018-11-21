@@ -2,9 +2,9 @@
 
 The linter can be [installed as a dotnet tool](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install).
 
-Install as a global tool: `dotnet install -g dotnet-fsharplint`.
+Install as a global tool: `dotnet tool install -g dotnet-fsharplint`.
 
-Install as tool to specific directory: `dotnet install --tool-path <my_directory> dotnet-fsharplint`
+Install as tool to specific directory: `dotnet tool install --tool-path <my_directory> dotnet-fsharplint`
 
 #### Running the Console Application
 
