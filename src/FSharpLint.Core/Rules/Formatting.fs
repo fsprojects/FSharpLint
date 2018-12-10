@@ -214,8 +214,12 @@ module Formatting =
             if isEnabled && isSuppressed ruleName |> not then
                 clauses
                 |> List.iter (fun clause ->
-                    let (SynMatchClause.Clause (pat, _, expr, _, _)) = clause
-                    if expr.Range.StartLine <> pat.Range.EndLine 
+                    let (SynMatchClause.Clause (pat, guard, expr, _, _)) = clause
+                    let matchPatternEndLine =
+                        guard
+                        |> Option.map (fun expr -> expr.Range.EndLine)
+                        |> Option.defaultValue pat.Range.EndLine 
+                    if expr.Range.StartLine <> matchPatternEndLine
                     && expr.Range.StartColumn - 2 <> pat.Range.StartColumn then
                       args.Info.Suggest
                         { Range = expr.Range
