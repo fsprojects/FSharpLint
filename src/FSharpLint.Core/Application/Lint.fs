@@ -95,6 +95,7 @@ module Lint =
     open System.Collections.Concurrent
     open System.Collections.Generic
     open System.IO
+    open System.Runtime.InteropServices
     open System.Threading
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint
@@ -368,6 +369,16 @@ module Lint =
     type LintResult =
         | Success of LintWarning.Warning list
         | Failure of LintFailure
+
+        member self.TryGetSuccess([<Out>] success:byref<LintWarning.Warning list>) =
+            match self with
+            | Success value -> success <- value; true
+            | _ -> false
+        member self.TryGetFailure([<Out>] failure:byref<LintFailure>) =
+            match self with
+            | Failure value -> failure <- value; true
+            | _ -> false
+
 
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
