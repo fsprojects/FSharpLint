@@ -123,6 +123,9 @@ module Lint =
     type LintResult = 
         | Success of LintWarning.Warning list
         | Failure of LintFailure
+
+        member TryGetSuccess : byref<LintWarning.Warning list> -> bool
+        member TryGetFailure : byref<LintFailure> -> bool
         
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.
