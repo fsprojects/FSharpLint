@@ -692,7 +692,7 @@ match 1 with
 | 1 -> 
 true
 | 2 -> 
-    false)
+    false
 """
 
         Assert.IsTrue(this.ErrorExistsAt(6, 0))
@@ -706,7 +706,19 @@ match 1 with
 | 1 -> 
     true
 | 2 -> 
-    false)
+    false
+"""
+
+    [<Test>]
+    member this.``No error for multi-line pattern match clauses with same indentation``() =
+        this.Parse"""
+module Program
+
+match "x" with
+| "a" when 5 > 3 &&
+           4 < 8 &&
+           2 > 9 -> "result"
+| _ -> "otherresult"
 """
 
         Assert.IsTrue(this.NoErrorsExist)
