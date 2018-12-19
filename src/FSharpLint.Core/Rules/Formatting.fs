@@ -312,7 +312,6 @@ module Formatting =
                                   Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
                                   SuggestedFix = None
                                   TypeChecks = [] })
-                | _ -> ()
 
         let checkClassMemberSpacing args (members:SynMemberDefns) isSuppressed =
             let ruleName = "ClassMemberSpacing"

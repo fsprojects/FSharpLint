@@ -178,8 +178,7 @@ module Lint =
         { CancellationToken: CancellationToken option
           ErrorReceived: LintWarning.Warning -> unit
           ReportLinterProgress: ProjectProgress -> unit
-          Configuration: Configuration.Configuration
-          FSharpVersion: Version }
+          Configuration: Configuration.Configuration }
 
     let private analysers =
         [ (Rules.Binding.analyser, Rules.Binding.AnalyserName)
@@ -221,7 +220,6 @@ module Lint =
 
         let analyserInfo =
             { Analyser.Text = fileInfo.Text
-              Analyser.FSharpVersion = lintInfo.FSharpVersion
               Analyser.Config = lintInfo.Configuration
               Analyser.Suggest = trySuggest }
 
@@ -407,10 +405,7 @@ module Lint =
           Source: string
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharpCheckFileResults option
-
-          /// Version of F# the source code of the file was written in.
-          FSharpVersion: Version }
+          TypeCheckResults: FSharpCheckFileResults option }
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
@@ -431,8 +426,7 @@ module Lint =
                 { Configuration = config
                   CancellationToken = optionalParams.CancellationToken
                   ErrorReceived = warningReceived
-                  ReportLinterProgress = projectProgress
-                  FSharpVersion = System.Version(4, 0) }
+                  ReportLinterProgress = projectProgress }
 
             let isIgnoredFile filePath =
                 match config.IgnoreFiles with
@@ -493,8 +487,7 @@ module Lint =
             { Configuration = config
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
-              ReportLinterProgress = ignore
-              FSharpVersion = parsedFileInfo.FSharpVersion }
+              ReportLinterProgress = ignore }
 
         let parsedFileInfo =
             { ParseFile.Text = parsedFileInfo.Source
@@ -507,7 +500,7 @@ module Lint =
         lintWarnings |> Seq.toList |> LintResult.Success
 
     /// Lints F# source code.
-    let lintSource optionalParams source fsharpVersion =
+    let lintSource optionalParams source =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
@@ -520,8 +513,7 @@ module Lint =
             let parsedFileInfo =
                 { Source = parseFileInformation.Text
                   Ast = parseFileInformation.Ast
-                  TypeCheckResults = parseFileInformation.TypeCheckResults
-                  FSharpVersion = fsharpVersion }
+                  TypeCheckResults = parseFileInformation.TypeCheckResults }
 
             lintParsedSource optionalParams parsedFileInfo
         | ParseFile.Failed(failure) -> LintResult.Failure(FailedToParseFile(failure))
@@ -545,8 +537,7 @@ module Lint =
             { Configuration = config
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
-              ReportLinterProgress = ignore
-              FSharpVersion = parsedFileInfo.FSharpVersion }
+              ReportLinterProgress = ignore }
 
         let parsedFileInfo =
             { ParseFile.Text = parsedFileInfo.Source
@@ -559,7 +550,7 @@ module Lint =
         lintWarnings |> Seq.toList |> LintResult.Success
 
     /// Lints an F# file from a given path to the `.fs` file.
-    let lintFile optionalParams filepath fsharpVersion =
+    let lintFile optionalParams filepath =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
@@ -572,8 +563,7 @@ module Lint =
             let parsedFileInfo =
                 { Source = astFileParseInfo.Text
                   Ast = astFileParseInfo.Ast
-                  TypeCheckResults = astFileParseInfo.TypeCheckResults
-                  FSharpVersion = fsharpVersion }
+                  TypeCheckResults = astFileParseInfo.TypeCheckResults }
 
             lintParsedFile optionalParams parsedFileInfo filepath
         | ParseFile.Failed(failure) -> LintResult.Failure(FailedToParseFile(failure))

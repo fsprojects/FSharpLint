@@ -121,8 +121,8 @@ module Program =
     let private startWithArguments arguments =
         arguments
         |> List.iter (function 
-            | SingleFile(file) -> runLintOnFile file (Version(4, 0)) |> outputLintResult
-            | Source(source) -> runLintOnSource source (Version(4, 0)) |> outputLintResult
+            | SingleFile(file) -> runLintOnFile file |> outputLintResult
+            | Source(source) -> runLintOnSource source |> outputLintResult
             | ProjectFile(file) -> start file
             | UnexpectedArgument(_) -> ())
             

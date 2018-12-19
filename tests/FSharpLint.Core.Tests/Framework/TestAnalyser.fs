@@ -1,6 +1,5 @@
 ﻿module TestAnalyser
 
-open System
 open NUnit.Framework
 open FSharpLint.Framework.Analyser
 open Microsoft.FSharp.Compiler.Range
@@ -11,7 +10,6 @@ type TestAnalyser() =
     member __.``TryFindTextOfRange gets expected text from given ranges``() = 
         let analyserInfo =
             { AnalyserInfo.Config = { IgnoreFiles = None; Analysers = Map.empty }
-              AnalyserInfo.FSharpVersion = Version()
               AnalyserInfo.Suggest = ignore
               AnalyserInfo.Text = "123\n345\n678" }
 

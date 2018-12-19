@@ -7,7 +7,6 @@ module FunctionReimplementation =
     open System
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.PrettyNaming
-    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
@@ -78,18 +77,7 @@ module FunctionReimplementation =
                   SuggestedFix = None
                   TypeChecks = [] }
 
-    let private validateLambdaIsNotPointless (checkFile:FSharpCheckFileResults option) lambda range analyserInfo =
-        let isConstructor expr =
-            let symbol = getSymbolFromIdent checkFile expr
-
-            match symbol with
-            | Some(symbol) -> 
-                match symbol.Symbol with 
-                | s when s.DisplayName = ".ctor" -> true
-                | :? FSharpMemberOrFunctionOrValue as v when v.CompiledName = ".ctor" -> true
-                | _ -> false
-            | Some(_) | None -> false
-        
+    let private validateLambdaIsNotPointless lambda range (analyserInfo:AnalyserInfo) =        
         let rec isFunctionPointless expression = function
             | Some(parameter:Ident) :: parameters ->
                 match expression with
@@ -100,12 +88,7 @@ module FunctionReimplementation =
             | None :: _ -> None
             | [] -> 
                 match expression with
-                | Identifier(ident, _) -> 
-                    if analyserInfo.FSharpVersion.Major >= 4 || 
-                       (not << isConstructor) expression then
-                        Some(ident)
-                    else
-                        None
+                | Identifier(ident, _) -> Some(ident)
                 | _ -> None
 
         let generateError (identifier:LongIdent) =
@@ -145,7 +128,7 @@ module FunctionReimplementation =
                 | Lambda(lambda, range) -> 
                     if (not << List.isEmpty) lambda.Arguments then
                         if isEnabled i "ReimplementsFunction" then
-                            validateLambdaIsNotPointless args.CheckFile lambda range args.Info
+                            validateLambdaIsNotPointless lambda range args.Info
                     
                         if isEnabled i "CanBeReplacedWithComposition" then
                             validateLambdaCannotBeReplacedWithComposition lambda range args.Info

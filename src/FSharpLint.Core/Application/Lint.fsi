@@ -88,10 +88,7 @@ module Lint =
           Source: string
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
-
-          /// Version of F# the source code of the file was written in.
-          FSharpVersion: System.Version }
+          TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
           
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -132,14 +129,14 @@ module Lint =
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> progress:(ProjectProgress -> unit) option -> LintResult
 
     /// Lints F# source code.
-    val lintSource : optionalParams:OptionalLintParameters -> source:string -> fsharpVersion:System.Version -> LintResult
+    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
 
     /// Lints F# source code that has already been parsed using 
     /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> fsharpVersion:System.Version -> LintResult
+    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> LintResult
 
     /// Lints an F# file that has already been parsed using 
     /// `FSharp.Compiler.Services` in the calling application. 
