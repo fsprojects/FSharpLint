@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ConsoleCouldNotFindFile" xml:space="preserve">
-    <value>Could not find the project file: {0} on disk.</value>
+    <value>Could not find the file: {0} on disk.</value>
   </data>
   <data name="ConsoleFailedToLoadConfig" xml:space="preserve">
     <value>{0}</value>

@@ -33,11 +33,13 @@ module Tests =
                                 (FileName = "dotnet",
                                  Arguments = dll + " " + arguments,
                                  RedirectStandardOutput = true,
+                                 RedirectStandardError = true,
                                  UseShellExecute = false,
                                  WorkingDirectory = (basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"))
 
         use app = Process.Start(startInfo)
         let output = app.StandardOutput.ReadToEnd()
+        let output = output + app.StandardError.ReadToEnd()
         app.WaitForExit()
         output
 
@@ -90,7 +92,7 @@ module Tests =
             let output = dotnetFslint arguments
 
             Assert.IsTrue(
-                output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), 
+                output.Contains(sprintf "Could not find the file: %s on disk" projectFile), 
                 sprintf "Output:\n%s" output)
 
         [<Test>]
