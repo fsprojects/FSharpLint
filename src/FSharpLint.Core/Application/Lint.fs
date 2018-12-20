@@ -161,7 +161,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string
+        | ReachedEnd of string * LintWarning.Warning list
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -170,7 +170,7 @@ module Lint =
         member this.FilePath() =
             match this with
             | Starting(f)
-            | ReachedEnd(f)
+            | ReachedEnd(f, _)
             | Failed(f, _) -> f
 
     [<NoEquality; NoComparison>]
@@ -207,12 +207,16 @@ module Lint =
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
+        let fileWarnings = ResizeArray()
+
         let suggest (suggestion:Analyser.LintSuggestion) =
-            lintInfo.ErrorReceived
+            let warning = 
                 { LintWarning.Range = suggestion.Range
                   LintWarning.Info = suggestion.Message
                   LintWarning.Input = fileInfo.Text
                   LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
+            lintInfo.ErrorReceived warning
+            fileWarnings.Add warning
 
         let trySuggest (suggestion:Analyser.LintSuggestion) =
             if suggestion.TypeChecks.IsEmpty then suggest suggestion
@@ -271,7 +275,7 @@ module Lint =
         with
         | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 
-        ReachedEnd(fileInfo.File) |> lintInfo.ReportLinterProgress
+        ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
     let private runProcess (workingDir: string) (exePath: string) (args: string) =
         let psi = System.Diagnostics.ProcessStartInfo()
@@ -389,9 +393,12 @@ module Lint =
           Configuration: Configuration.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (LintWarning.Warning -> unit) option }
+          ReceivedWarning: (LintWarning.Warning -> unit) option
+          
+          ReportLinterProgress: (ProjectProgress -> unit) option }
 
-        static member Default = { CancellationToken = None; Configuration = None; ReceivedWarning = None }
+        static member Default = 
+            { CancellationToken = None; Configuration = None; ReceivedWarning = None; ReportLinterProgress = None }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
@@ -409,10 +416,10 @@ module Lint =
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    let lintProject optionalParams projectFilePath progress =
+    let lintProject optionalParams projectFilePath =
         let lintWarnings = LinkedList<LintWarning.Warning>()
 
-        let projectProgress = match progress with Some(f) -> f | None -> ignore
+        let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
 
         let warningReceived (warning:LintWarning.Warning) =
             lintWarnings.AddLast warning |> ignore
@@ -487,7 +494,7 @@ module Lint =
             { Configuration = config
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
-              ReportLinterProgress = ignore }
+              ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
         let parsedFileInfo =
             { ParseFile.Text = parsedFileInfo.Source
@@ -537,7 +544,7 @@ module Lint =
             { Configuration = config
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
-              ReportLinterProgress = ignore }
+              ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
         let parsedFileInfo =
             { ParseFile.Text = parsedFileInfo.Source

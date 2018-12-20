@@ -53,7 +53,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string
+        | ReachedEnd of string * LintWarning.Warning list
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -72,7 +72,9 @@ module Lint =
           Configuration: Configuration.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (LintWarning.Warning -> unit) option }
+          ReceivedWarning: (LintWarning.Warning -> unit) option 
+          
+          ReportLinterProgress: (ProjectProgress -> unit) option }
 
         static member Default: OptionalLintParameters
 
@@ -126,7 +128,7 @@ module Lint =
         
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.
-    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> progress:(ProjectProgress -> unit) option -> LintResult
+    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult
 
     /// Lints F# source code.
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult

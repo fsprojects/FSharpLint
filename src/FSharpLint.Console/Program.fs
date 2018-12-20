@@ -16,7 +16,7 @@ module Program =
         writeLine str ConsoleColor.White Console.Out
         
     let private writeWarningLine (str:string) = 
-        writeLine str ConsoleColor.DarkYellow Console.Out
+        writeLine str ConsoleColor.Yellow Console.Out
         
     let private writeErrorLine (str:string) = 
         writeLine str ConsoleColor.Red Console.Error
@@ -27,38 +27,38 @@ module Program =
         writeInfoLine "-source 'let foo = 5'      lint source code"
         
     let private parserProgress = function
-        | Starting(_)
-        | ReachedEnd(_) -> ()
+        | Starting(file) ->
+            String.Format(Resources.GetString("ConsoleStartingFile"), file) |> writeInfoLine
+        | ReachedEnd(_, warnings) -> 
+            String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> writeInfoLine
         | Failed(file, parseException) ->
-            let formatString = Resources.GetString("ConsoleFailedToParseFile")
-            String.Format(formatString, file) |> writeErrorLine
+            String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> writeErrorLine
             "Exception Message:" + Environment.NewLine +
                 parseException.Message + Environment.NewLine +
                 "Exception Stack Trace:" + Environment.NewLine +
                 parseException.StackTrace + Environment.NewLine
             |> writeErrorLine
 
-    let private runLintOnProject projectFile =
-        let warningReceived = fun (error:LintWarning.Warning) -> 
-            error.Info + Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
-            |> writeWarningLine
+    let private writeLintWarning (error:LintWarning.Warning) =
+        error.Info + Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
+        |> writeWarningLine
+        String.replicate 80 "-" |> writeInfoLine
 
+    let private runLintOnProject projectFile =
         let parseInfo =
             { CancellationToken = None
-              ReceivedWarning = Some warningReceived
-              Configuration = None }
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress }
 
-        lintProject parseInfo projectFile (Some parserProgress)
+        lintProject parseInfo projectFile
 
     let private runLintOnFile pathToFile =
-        let reportLintWarning (warning:LintWarning.Warning) =
-            warning.Info + Environment.NewLine + LintWarning.getWarningWithLocation warning.Range warning.Input
-            |> writeWarningLine
-
         let parseInfo =
             { CancellationToken = None
-              ReceivedWarning = Some reportLintWarning
-              Configuration = None }
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress }
 
         lintFile parseInfo pathToFile
 
@@ -74,7 +74,8 @@ module Program =
         let parseInfo =
             { CancellationToken = None
               ReceivedWarning = Some reportLintWarning
-              Configuration = None }
+              Configuration = None
+              ReportLinterProgress = None }
 
         lintSource parseInfo source
 
@@ -119,7 +120,8 @@ module Program =
         arguments |> List.exists isArgumentSpecifyingWhatToLint
 
     let private outputLintResult = function
-        | LintResult.Success(_) -> Resources.GetString("ConsoleFinished") |> writeInfoLine
+        | LintResult.Success(warnings) -> 
+            String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
         | LintResult.Failure(failure) -> writeErrorLine failure.Description
         
     let private startWithArguments arguments =
@@ -136,8 +138,9 @@ module Program =
                 | UnexpectedArgument(_) -> ()
             with
             | e -> 
-                "Lint failed while analysing " + string arg + 
-                ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace
+                "Lint failed while analysing " + string arg + "." + Environment.NewLine +
+                    "Failed with: " + e.Message + Environment.NewLine + 
+                    "Stack trace:" + e.StackTrace
                 |> writeErrorLine)
             
     [<EntryPoint>]

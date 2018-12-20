@@ -130,7 +130,13 @@
     <value>Failed to resolve references.</value>
   </data>
   <data name="ConsoleFinished" xml:space="preserve">
-    <value>Finished.</value>
+    <value>========== Summary: {0} warnings ==========</value>
+  </data>
+  <data name="ConsoleFinishedFile" xml:space="preserve">
+    <value>========== Finished: {0} warnings ==========</value>
+  </data>
+  <data name="ConsoleStartingFile" xml:space="preserve">
+    <value>========== Linting {0} ==========</value>
   </data>
   <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
     <value>MSBuild could not load the project file {0} because: {1}</value>
