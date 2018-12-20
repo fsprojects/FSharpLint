@@ -128,10 +128,10 @@
           id >> f ===> f
           f >> id ===> f
 
-          x = null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
-          null = x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
-          x <> null ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
-          null <> x ===> m"Consider using pattern matching, or if you're using F# 4 then `isNull`"
+          x = null ===> isNull x
+          null = x ===> isNull x
+          x <> null ===> not (isNull x)
+          null <> x ===> not (isNull x)
 
           Array.append a (Array.append b c) ===> Array.concat [|a; b; c|]
         ]]>
