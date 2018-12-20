@@ -101,5 +101,10 @@ module Tests =
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
+            
+            let expectedMissing = Set.difference expectedErrors errors
+            let notExpected = Set.difference errors expectedErrors
 
-            Assert.AreEqual(expectedErrors, errors)
+            Assert.AreEqual(expectedErrors, errors, 
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
