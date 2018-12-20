@@ -45,10 +45,9 @@ module Tests =
 
     let getErrorsFromOutput (output:string) = 
         let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
-
-        let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
-
-        set [ for i in errorIndexes -> splitOutput.[i] ]
+        
+        set [ for i in 1..splitOutput.Length - 1 do
+                if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
     let expectedErrors =
         set [ 
