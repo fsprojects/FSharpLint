@@ -33,20 +33,21 @@ module Tests =
                                 (FileName = "dotnet",
                                  Arguments = dll + " " + arguments,
                                  RedirectStandardOutput = true,
+                                 RedirectStandardError = true,
                                  UseShellExecute = false,
                                  WorkingDirectory = (basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"))
 
         use app = Process.Start(startInfo)
         let output = app.StandardOutput.ReadToEnd()
+        let output = output + app.StandardError.ReadToEnd()
         app.WaitForExit()
         output
 
     let getErrorsFromOutput (output:string) = 
         let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
-
-        let errorIndexes = seq { for i in 0..splitOutput.Length / 4 - 1 -> 4 * i }
-
-        set [ for i in errorIndexes -> splitOutput.[i] ]
+        
+        set [ for i in 1..splitOutput.Length - 1 do
+                if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
     let expectedErrors =
         set [ 
@@ -61,7 +62,7 @@ module Tests =
           "`not false` might be able to be refactored into `true`."
           "`List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
           "`a <> true` might be able to be refactored into `not a`."
-          "`x = null`; suggestion: Consider using pattern matching, or if you're using F# 4 then `isNull`."
+          "`x = null` might be able to be refactored into `isNull x`."
           "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
@@ -90,7 +91,7 @@ module Tests =
             let output = dotnetFslint arguments
 
             Assert.IsTrue(
-                output.Contains(sprintf "Could not find the project file: %s on disk" projectFile), 
+                output.Contains(sprintf "Could not find the file: %s on disk" projectFile), 
                 sprintf "Output:\n%s" output)
 
         [<Test>]
@@ -100,5 +101,10 @@ module Tests =
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
+            
+            let expectedMissing = Set.difference expectedErrors errors
+            let notExpected = Set.difference errors expectedErrors
 
-            Assert.AreEqual(expectedErrors, errors)
+            Assert.AreEqual(expectedErrors, errors, 
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")

@@ -52,7 +52,7 @@ type TestRuleBase(analyser, ?analysers) =
         let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
 
         let analyserInfo =
-            { FSharpVersion = System.Version(3, 1); Config = config; Suggest = ignore; Text = text }
+            { Config = config; Suggest = ignore; Text = text }
 
         let stopwatch = Stopwatch.StartNew()
         let times = ResizeArray()
@@ -76,7 +76,7 @@ type TestRuleBase(analyser, ?analysers) =
 
         result
 
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fsharpVersion, ?fileName): unit = 
+    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fileName): unit = 
         let config =
             match overrideAnalysers with
             | Some(overrideAnalysers) -> 
@@ -84,12 +84,9 @@ type TestRuleBase(analyser, ?analysers) =
                   Analysers = overrideAnalysers }
             | None -> config
 
-        let version = match fsharpVersion with | Some(x) -> x | None -> System.Version(4, 0)
-
         let analyserInfo = 
             { Config = config
               Suggest = postSuggestion
-              FSharpVersion = version
               Text = input }
 
         let parseResults =

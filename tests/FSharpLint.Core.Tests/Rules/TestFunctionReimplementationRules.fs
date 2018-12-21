@@ -100,43 +100,14 @@ let f = List.map
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
-    member this.``Lambda to pointfree constructor application should not be suggested unless using F# 4 or above``() = 
-        this.Parse("""
-module Program
-
-type Duck(info:string) =
-    do ()
-
-let f = List.map (fun x -> Duck x) ["1";"2"]
-""", checkInput = true, fsharpVersion = System.Version(3, 1))
-
-        this.AssertNoWarnings()
-
-    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
-    [<Test>]
-    member this.``Lambda to pointfree long identifer constructor application should not be suggested unless using F# 4 or above``() = 
-        this.Parse("""
-module Program
-
-module Foo =
-    type Duck(info:string) =
-        do ()
-
-let f = List.map (fun x -> Foo.Duck x) ["1";"2"]
-""", checkInput = true, fsharpVersion = System.Version(3, 1))
-
-        this.AssertNoWarnings()
-
-    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
-    [<Test>]
-    member this.``Lambda to DU constructor application should be suggested when using any version of F#``() = 
+    member this.``Lambda to DU constructor application should be suggested``() = 
         this.Parse("""
 module Program
 
 type Cat = | Meower of string
 
 let f = List.map (fun x -> Meower x) ["1";"2"]
-""", checkInput = true, fsharpVersion = System.Version(3, 1))
+""", checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -153,7 +124,7 @@ let f = List.map (fun x -> Duck x) ["1";"2"]
 
 open System
 let f = List.map (fun x -> String x) ["1";"2"]
-""", checkInput = true, fsharpVersion = System.Version(4, 0))
+""", checkInput = true)
 
         Assert.IsTrue(this.ErrorsExist)
 

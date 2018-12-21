@@ -4,9 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules.RedundantNewKeyword
 open FSharpLint.Framework.Configuration
 
-let config = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
-
+let config =
     Map.ofList 
         [ (AnalyserName, { Rules = Map.empty; Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
               

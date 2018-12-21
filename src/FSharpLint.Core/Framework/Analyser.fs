@@ -42,10 +42,7 @@ module Analyser =
     /// Passed to each analyser to provide them with access to the configuration and a way of reporting errors.
     [<NoEquality; NoComparison>]
     type AnalyserInfo =
-        {  /// Version of F# the source that's being analysed was written in.
-          FSharpVersion: Version
-
-          /// The current lint config to be used by visitors.
+        { /// The current lint config to be used by visitors.
           Config: Configuration.Configuration
 
           /// Used by visitors to report warnings.

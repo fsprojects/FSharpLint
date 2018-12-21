@@ -6,50 +6,59 @@ module Program =
     open FSharpLint.Framework
     open FSharpLint.Application
 
+    let private writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
+        let originalColour = Console.ForegroundColor
+        Console.ForegroundColor <- color
+        writer.WriteLine str
+        Console.ForegroundColor <- originalColour
+        
+    let private writeInfoLine (str:string) = 
+        writeLine str ConsoleColor.White Console.Out
+        
+    let private writeWarningLine (str:string) = 
+        writeLine str ConsoleColor.Yellow Console.Out
+        
+    let private writeErrorLine (str:string) = 
+        writeLine str ConsoleColor.Red Console.Error
+
     let private help () =
-        printfn "-f <project.fsproj>        lint project"
-        printfn "-sf <file.fs>              lint single file"
-        printfn "-source 'let foo = 5'      lint source code"
-
-    let private printException (e:Exception) =
-        "Exception Message:" + Environment.NewLine +
-        e.Message + Environment.NewLine +
-        "Exception Stack Trace:" + Environment.NewLine +
-        e.StackTrace + Environment.NewLine
-        |> Console.WriteLine
-
-    let private failedToParseFileError (file:string) parseException =
-        let formatString = Resources.GetString("ConsoleFailedToParseFile")
-        Console.WriteLine(String.Format(formatString, file))
-        printException parseException
-
+        writeInfoLine "-f <project.fsproj>        lint project"
+        writeInfoLine "-sf <file.fs>              lint single file"
+        writeInfoLine "-source 'let foo = 5'      lint source code"
+        
     let private parserProgress = function
-        | Starting(_)
-        | ReachedEnd(_) -> ()
+        | Starting(file) ->
+            String.Format(Resources.GetString("ConsoleStartingFile"), file) |> writeInfoLine
+        | ReachedEnd(_, warnings) -> 
+            String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> writeInfoLine
         | Failed(file, parseException) ->
-            failedToParseFileError file parseException
+            String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> writeErrorLine
+            "Exception Message:" + Environment.NewLine +
+                parseException.Message + Environment.NewLine +
+                "Exception Stack Trace:" + Environment.NewLine +
+                parseException.StackTrace + Environment.NewLine
+            |> writeErrorLine
 
-    let private runLint projectFile =
-        let warningReceived = fun (error:LintWarning.Warning) -> 
-            error.Info + Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
-            |> Console.WriteLine
+    let private writeLintWarning (error:LintWarning.Warning) =
+        error.Info + Environment.NewLine + LintWarning.getWarningWithLocation error.Range error.Input
+        |> writeWarningLine
+        String.replicate 80 "-" |> writeInfoLine
 
+    let private runLintOnProject projectFile =
         let parseInfo =
             { CancellationToken = None
-              ReceivedWarning = Some warningReceived
-              Configuration = None }
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress }
 
-        lintProject parseInfo projectFile (Some parserProgress)
+        lintProject parseInfo projectFile
 
     let private runLintOnFile pathToFile =
-        let reportLintWarning (warning:LintWarning.Warning) =
-            warning.Info + Environment.NewLine + LintWarning.getWarningWithLocation warning.Range warning.Input
-            |> Console.WriteLine
-
         let parseInfo =
             { CancellationToken = None
-              ReceivedWarning = Some reportLintWarning
-              Configuration = None }
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress }
 
         lintFile parseInfo pathToFile
 
@@ -60,12 +69,13 @@ module Program =
 
         let reportLintWarning (warning:LintWarning.Warning) = 
             warning.Info + Environment.NewLine + LintWarning.warningInfoLine getErrorMessage warning.Range warning.Input
-            |> Console.WriteLine
+            |> writeWarningLine
 
         let parseInfo =
             { CancellationToken = None
               ReceivedWarning = Some reportLintWarning
-              Configuration = None }
+              Configuration = None
+              ReportLinterProgress = None }
 
         lintSource parseInfo source
 
@@ -74,6 +84,13 @@ module Program =
         | SingleFile of string
         | Source of string
         | UnexpectedArgument of string
+
+        override this.ToString() =
+            match this with
+            | ProjectFile(f) -> "project " + f
+            | SingleFile(f) -> "source file " + f
+            | Source(_) -> "source code"
+            | UnexpectedArgument(_) -> "unexpected argument"
 
     let private parseArguments arguments =
         let rec parseArguments parsedArguments = function
@@ -103,28 +120,28 @@ module Program =
         arguments |> List.exists isArgumentSpecifyingWhatToLint
 
     let private outputLintResult = function
-        | LintResult.Success(_) -> Console.WriteLine(Resources.GetString("ConsoleFinished"))
-        | LintResult.Failure(failure) -> Console.WriteLine(failure.Description)
-
-    let private start projectFile =
-        if System.IO.File.Exists(projectFile) then
-            try runLint projectFile |> outputLintResult
-            with
-            | e -> 
-                "Lint failed while analysing " + projectFile + 
-                ".\nFailed with: " + e.Message + "\nStack trace: " + e.StackTrace
-                |> Console.WriteLine
-        else
-            let formatString = Resources.GetString("ConsoleCouldNotFindFile")
-            Console.WriteLine(String.Format(formatString, projectFile))
-
+        | LintResult.Success(warnings) -> 
+            String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
+        | LintResult.Failure(failure) -> writeErrorLine failure.Description
+        
     let private startWithArguments arguments =
         arguments
-        |> List.iter (function 
-            | SingleFile(file) -> runLintOnFile file (Version(4, 0)) |> outputLintResult
-            | Source(source) -> runLintOnSource source (Version(4, 0)) |> outputLintResult
-            | ProjectFile(file) -> start file
-            | UnexpectedArgument(_) -> ())
+        |> List.iter (fun arg ->
+            try
+                match arg with
+                | SingleFile(file) | ProjectFile(file) when not (IO.File.Exists file) ->
+                    let formatString = Resources.GetString("ConsoleCouldNotFindFile")
+                    String.Format(formatString, file) |> writeErrorLine
+                | SingleFile(file) -> runLintOnFile file |> outputLintResult
+                | Source(source) -> runLintOnSource source |> outputLintResult
+                | ProjectFile(projectFile) -> runLintOnProject projectFile |> outputLintResult
+                | UnexpectedArgument(_) -> ()
+            with
+            | e -> 
+                "Lint failed while analysing " + string arg + "." + Environment.NewLine +
+                    "Failed with: " + e.Message + Environment.NewLine + 
+                    "Stack trace:" + e.StackTrace
+                |> writeErrorLine)
             
     [<EntryPoint>]
     let main argv =
@@ -136,7 +153,7 @@ module Program =
 
         if argumentAreInvalid then
             help()
+            -1
         else
             startWithArguments parsedArguments
-
-        0
+            0

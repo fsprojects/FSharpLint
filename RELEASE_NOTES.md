@@ -1,3 +1,9 @@
+##### 0.10.2 - December 20 2018
+
+* API C# interop, thanks to [@jgardella](https://github.com/jgardella)
+* Fix guard indentation in FormattingMatchExpressionIndentation rule, thanks to [@jgardella](https://github.com/jgardella)
+* Command line interface improvements.
+
 ##### 0.10.1 - November 18 2018
 
 * Pack console application as tool.
