@@ -632,8 +632,8 @@ module HintMatcher =
             match exprs |> List.tryFindIndex (fun x -> x.Range = range) with
             | Some(index) -> RequiresCheck(index, methodIdent)
             | None -> CannotBeReplaced
-        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), arg, _))::_
-        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), arg, _))::_ -> 
+        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
+        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
             RequiresCheck(0, methodIdent)
         | _ -> CanBeReplaced
 

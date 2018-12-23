@@ -251,7 +251,7 @@ module Lint =
 
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
-                    let timeoutMs = 200
+                    let timeoutMs = 2000
                     match lintInfo.CancellationToken with
                     | Some(cancellationToken) -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
                     | None -> Async.RunSynchronously(work, timeoutMs)
