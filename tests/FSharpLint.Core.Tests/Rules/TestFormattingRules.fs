@@ -862,3 +862,15 @@ type T =
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+        
+    [<Test>]
+    member this.``No error for correctly indented union defintion cases with attribute``() =
+        this.Parse"""
+module Program
+
+type Option =
+    | [<CompiledName("is-normal")>] IsNormal
+    | CustomClass of string
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)       

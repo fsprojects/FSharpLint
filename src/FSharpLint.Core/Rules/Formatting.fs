@@ -340,6 +340,13 @@ module Formatting =
 
     module private TypeDefinitionFormatting =
 
+        let getUnionCaseStartColumn (SynUnionCase.UnionCase (attrs, _, _, _, _, range)) =
+            match attrs |> List.tryHead with
+            | Some attr ->
+                attr.Range.StartColumn - 2
+            | None ->
+                range.StartColumn
+
         let checkUnionDefinitionIndentation args typeDefnRepr typeDefnStartColumn isSuppressed =
             let ruleName = "UnionDefinitionIndentation"
 
@@ -353,7 +360,7 @@ module Formatting =
                     | []
                     | [_] -> ()
                     | firstCase :: _ ->
-                        if firstCase.Range.StartColumn <> typeDefnStartColumn + 1 then
+                        if getUnionCaseStartColumn firstCase <> typeDefnStartColumn + 1 then
                           args.Info.Suggest
                             { Range = firstCase.Range
                               Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
@@ -363,7 +370,7 @@ module Formatting =
                         cases
                         |> List.pairwise
                         |> List.iter (fun (caseOne, caseTwo) ->
-                            if caseOne.Range.StartColumn <> caseTwo.Range.StartColumn then
+                            if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
                                 args.Info.Suggest
                                     { Range = caseTwo.Range
                                       Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
