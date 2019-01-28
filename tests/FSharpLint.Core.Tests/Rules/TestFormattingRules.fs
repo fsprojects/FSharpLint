@@ -801,6 +801,29 @@ type T = T of int with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+        
+    [<Test>]
+    member this.``No error for correct spacing between class members with comment``() =
+        this.Parse """
+module Program
+
+type GenericOptions =
+    { Props : IHTMLProp list
+      Classes : string list }
+
+    member this.AddModifiers(modifiers) =
+        ()
+
+    /// Conver to standard element
+    member this.ToReactElement(el:IHTMLProp list -> ReactElement list -> ReactElement, ?children): ReactElement =
+        ()
+
+    /// Convert to self closing element
+    member this.ToReactElement(el:IHTMLProp list -> ReactElement): ReactElement =
+        ()
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)       
 
     [<Test>]
     member this.``Error for too much spacing between class members``() =
