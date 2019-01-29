@@ -76,8 +76,6 @@ On windows run `build.cmd` and on unix based systems run `build.sh`.
 The tool can be run from the command line, or as an MSBuild task. 
 
 * [Running the command line tool](Console-Application.html).
-* [Running the MSBuild task](MSBuild-Task.html).
-* [Running the FAKE task](FAKE-Task.html).
 
 #### Analysers
 

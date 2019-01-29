@@ -1,3 +1,7 @@
+##### 0.10.3 - January 29 2019
+
+* Update configuration defaults to exclude formatting rules for now.
+
 ##### 0.10.2 - December 20 2018
 
 * API C# interop, thanks to [@jgardella](https://github.com/jgardella)
