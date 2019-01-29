@@ -51,10 +51,6 @@ module Tests =
 
     let expectedErrors =
         set [ 
-          "Separate module declarations with 2 blank lines."
-          "Use parentheses for tuple instantiation."
-          "Comma in tuple instantiation should be followed by single space."
-          "Prefer namespaces at top level."
           "`not (a = b)` might be able to be refactored into `a <> b`."
           "`not (a <> b)` might be able to be refactored into `a = b`."
           "`fun x -> x` might be able to be refactored into `id`."
