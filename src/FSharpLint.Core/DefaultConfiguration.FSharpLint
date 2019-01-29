@@ -470,7 +470,7 @@
           <Enabled>true</Enabled>
         </UnionDefinitionIndentation>
       </Rules>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
     </Formatting>
 
     <Conventions>
@@ -482,7 +482,7 @@
           <Enabled>false</Enabled>
         </RecursiveAsyncFunction>
       </Rules>
-      <Enabled>true</Enabled>
+      <Enabled>false</Enabled>
     </Conventions>
   </Analysers>
 </FSharpLintSettings>
