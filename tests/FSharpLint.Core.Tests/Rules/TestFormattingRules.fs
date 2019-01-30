@@ -775,6 +775,19 @@ let x = 1
 let y = 2
 """
 
+    [<Test>]
+    member this.``No error for correct spacing between module declarations with comments``() =
+        this.Parse """
+module Program
+
+/// Comment 1
+let x = 1
+
+
+/// Comment 2
+let y = 2
+"""
+
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
