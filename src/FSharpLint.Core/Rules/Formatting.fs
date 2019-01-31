@@ -281,6 +281,22 @@ module Formatting =
                 | _ -> ()
 
     module private Spacing =
+    
+        let countPrecedingCommentLines (args : AnalyserArgs) (startPos : pos) (endPos : pos) =
+            mkRange 
+                ""
+                startPos
+                endPos
+            |> args.Info.TryFindTextOfRange 
+            |> Option.map (fun preceedingText ->
+                let lines = 
+                    preceedingText.Split '\n'
+                    |> Array.rev
+                    |> Array.tail
+                lines
+                |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
+                |> Array.length)
+            |> Option.defaultValue 0
 
         let checkModuleDeclSpacing args synModuleOrNamespace isSuppressed =
             let ruleName = "ModuleDeclSpacing"
@@ -294,7 +310,8 @@ module Formatting =
                     decls
                     |> List.pairwise
                     |> List.iter (fun (declOne, declTwo) ->
-                        if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 then
+                        let numPreceedingCommentLines = countPrecedingCommentLines args declOne.Range.End declTwo.Range.Start
+                        if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 + numPreceedingCommentLines then
                             let intermediateRange = 
                                 let startLine = declOne.Range.EndLine + 1
                                 let endLine = declTwo.Range.StartLine
@@ -322,7 +339,8 @@ module Formatting =
                 members
                 |> List.pairwise
                 |> List.iter (fun (memberOne, memberTwo) ->
-                    if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 then
+                    let numPreceedingCommentLines = countPrecedingCommentLines args memberOne.Range.End memberTwo.Range.Start
+                    if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPreceedingCommentLines then
                         let intermediateRange = 
                             let startLine = memberOne.Range.EndLine + 1
                             let endLine = memberTwo.Range.StartLine
