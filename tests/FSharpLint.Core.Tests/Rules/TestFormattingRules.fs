@@ -579,6 +579,23 @@ type T = int []
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+        
+    [<Test>]
+    member this.``Quickfix for F# array tuple type from standard postfix syntax``() = 
+        let source = """
+module Program
+
+type T = (int * int) array
+"""
+
+        let expected = """
+module Program
+
+type T = (int * int) []
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)       
 
     [<Test>]
     member this.``Quickfix for generic type``() = 
