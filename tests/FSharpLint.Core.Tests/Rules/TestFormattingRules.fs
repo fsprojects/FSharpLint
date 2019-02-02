@@ -721,6 +721,8 @@ match 1 with
     false
 """
 
+        Assert.IsTrue(this.NoErrorsExist)
+
     [<Test>]
     member this.``No error for multi-line pattern match clauses with same indentation``() =
         this.Parse"""
@@ -798,6 +800,8 @@ let x = 1
 
 let y = 2
 """
+
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``No error for correct spacing between module declarations with comments``() =
