@@ -85,6 +85,7 @@ module Formatting =
                     | _ -> ())
 
     module private TupleFormatting =
+        open FSharpLint.Framework.HintParser
 
         let checkTupleHasParentheses args parentNode range isSuppressed =
             let ruleName = "TupleParentheses"
@@ -93,9 +94,11 @@ module Formatting =
 
             if isEnabled && isSuppressed ruleName |> not then
                 match parentNode with
+                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
+                    ()
                 | Some (AstNode.Expression (SynExpr.Paren _)) ->
                     ()
-                | _ ->
+                | x ->
                     args.Info.TryFindTextOfRange(range)
                     |> Option.iter (fun text ->
                         let suggestedFix = lazy(
