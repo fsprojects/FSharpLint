@@ -93,6 +93,8 @@ module Formatting =
 
             if isEnabled && isSuppressed ruleName |> not then
                 match parentNode with
+                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
+                    ()
                 | Some (AstNode.Expression (SynExpr.Paren _)) ->
                     ()
                 | _ ->

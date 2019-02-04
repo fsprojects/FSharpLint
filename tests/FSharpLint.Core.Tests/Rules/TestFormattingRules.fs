@@ -234,6 +234,12 @@ module Program
 let x = 1, 2""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        
+    [<Test>]
+    member this.``No tuple instantiation error for cons operator``() =
+        this.Parse("""let x = "" :: aStringList""")
+        
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``Quickfix for tuple instantiation without parentheses``() =
