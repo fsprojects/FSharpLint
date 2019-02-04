@@ -676,6 +676,18 @@ module Program
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+        
+    [<Test>]
+    member this.``No error for lambda pattern match clauses with no surrounding parentheses, same indentation``() =
+        this.Parse"""
+module Program
+
+1 |> function
+    | 1 -> true
+    | 2 -> false
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)       
 
     [<Test>]
     member this.``Error for lambda pattern match clauses without level of indentation for clauses``() =
@@ -714,6 +726,8 @@ match 1 with
 | 2 -> 
     false
 """
+
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``No error for multi-line pattern match clauses with same indentation``() =
@@ -792,6 +806,8 @@ let x = 1
 
 let y = 2
 """
+
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``No error for correct spacing between module declarations with comments``() =

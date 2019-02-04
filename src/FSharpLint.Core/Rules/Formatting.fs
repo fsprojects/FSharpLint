@@ -139,6 +139,15 @@ module Formatting =
 
     module private PatternMatchFormatting =
 
+        let getLeadingSpaces (args : AnalyserArgs) (range : range) =
+            let range = mkRange "" (mkPos range.StartLine 0) range.End
+            args.Info.TryFindTextOfRange(range)
+            |> Option.map (fun text ->
+                text.ToCharArray()
+                |> Array.takeWhile Char.IsWhiteSpace
+                |> Array.length)
+            |> Option.defaultValue 0
+
         let checkPatternMatchClausesOnNewLine args (clauses:SynMatchClause list) isSuppressed =
             let ruleName = "PatternMatchClausesOnNewLine"
 
@@ -175,23 +184,25 @@ module Formatting =
                               SuggestedFix = None
                               TypeChecks = [] })
 
-        let checkPatternMatchClauseIndentation args matchExprStartColumn (clauses:SynMatchClause list) isLambda isSuppressed =
+        let checkPatternMatchClauseIndentation args matchExprRange (clauses:SynMatchClause list) isLambda isSuppressed =
             let ruleName = "PatternMatchClauseIndentation"
 
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
+                let matchStartIndentation = getLeadingSpaces args matchExprRange
                 clauses
                 |> List.tryHead
                 |> Option.iter (fun firstClause ->
+                    let clauseIndentation = getLeadingSpaces args firstClause.Range
                     if isLambda then
-                        if firstClause.Range.StartColumn <> matchExprStartColumn then
+                        if clauseIndentation <> matchStartIndentation + 4 then
                           args.Info.Suggest
                             { Range = firstClause.Range
                               Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
                               SuggestedFix = None
                               TypeChecks = [] }                       
-                     elif firstClause.Range.StartColumn - 2 <> matchExprStartColumn then
+                    elif clauseIndentation <> matchStartIndentation then
                           args.Info.Suggest
                             { Range = firstClause.Range
                               Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
@@ -199,9 +210,10 @@ module Formatting =
                               TypeChecks = [] })
 
                 clauses
+                |> List.map (fun clause -> (clause, getLeadingSpaces args clause.Range))
                 |> List.pairwise
-                |> List.iter (fun (clauseOne, clauseTwo) ->
-                    if clauseOne.Range.StartColumn <> clauseTwo.Range.StartColumn then
+                |> List.iter (fun ((clauseOne, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
+                    if clauseOneSpaces <> clauseTwoSpaces then
                         args.Info.Suggest
                             { Range = clauseTwo.Range
                               Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
@@ -217,12 +229,14 @@ module Formatting =
                 clauses
                 |> List.iter (fun clause ->
                     let (SynMatchClause.Clause (pat, guard, expr, _, _)) = clause
+                    let clauseIndentation = getLeadingSpaces args clause.Range
+                    let exprIndentation = getLeadingSpaces args expr.Range
                     let matchPatternEndLine =
                         guard
                         |> Option.map (fun expr -> expr.Range.EndLine)
                         |> Option.defaultValue pat.Range.EndLine 
                     if expr.Range.StartLine <> matchPatternEndLine
-                    && expr.Range.StartColumn - 2 <> pat.Range.StartColumn then
+                    && exprIndentation <> clauseIndentation + 4 then
                       args.Info.Suggest
                         { Range = expr.Range
                           Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
@@ -442,7 +456,7 @@ module Formatting =
 
                 PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
                 PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
-                PatternMatchFormatting.checkPatternMatchClauseIndentation args range.StartColumn clauses isLambda (isSuppressed i)
+                PatternMatchFormatting.checkPatternMatchClauseIndentation args range clauses isLambda (isSuppressed i)
                 PatternMatchFormatting.checkPatternMatchExpressionIndentation args clauses (isSuppressed i)
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
