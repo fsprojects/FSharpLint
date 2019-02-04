@@ -273,7 +273,7 @@ module Formatting =
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
                     | "array" ->
-                        // Prefer special postfix (e.g. int[]).
+                        // Prefer special postfix (e.g. int []).
                         let suggestedFix = lazy(
                             (args.Info.TryFindTextOfRange range, typeArgs)
                             ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
@@ -429,8 +429,12 @@ module Formatting =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
             
-        let synTypeToString (synType:SynType) =
-            args.Info.TryFindTextOfRange synType.Range
+        let synTypeToString = function
+            | SynType.Tuple _ as synType ->
+                args.Info.TryFindTextOfRange synType.Range
+                |> Option.map (fun x -> "(" + x + ")")
+            | other ->
+                args.Info.TryFindTextOfRange other.Range
 
         let typeArgsToString (typeArgs:SynType list) =
             let typeStrings = typeArgs |> List.choose synTypeToString
