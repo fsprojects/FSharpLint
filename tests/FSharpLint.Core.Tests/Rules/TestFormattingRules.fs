@@ -643,6 +643,12 @@ match 1 with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+        
+    [<Test>]
+    member this.``No match clause indentation error for struct tuple deconstruction``() =
+          this.Parse """fun struct(x, y) -> ()"""
+        
+          Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``Error for exception pattern match clauses at different indentation``() =
