@@ -442,6 +442,9 @@
         <TupleCommaSpacing>
           <Enabled>true</Enabled>
         </TupleCommaSpacing>
+        <TupleIndentation>
+          <Enabled>true</Enabled>
+        </TupleIndentation>       
         <TupleParentheses>
           <Enabled>true</Enabled>
         </TupleParentheses>

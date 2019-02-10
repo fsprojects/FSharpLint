@@ -288,6 +288,7 @@
               </xs:complexType>
             </xs:element>
             <xs:element name="TupleCommaSpacing" maxOccurs="1" minOccurs="0" type="Enabled" />
+			<xs:element name="TupleIndentation" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TupleParentheses" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="TypePrefixing" maxOccurs="1" minOccurs="0" type="Enabled" />
             <xs:element name="PatternMatchClausesOnNewLine" maxOccurs="1" minOccurs="0" type="Enabled" />

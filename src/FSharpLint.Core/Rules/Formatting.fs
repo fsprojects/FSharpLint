@@ -109,6 +109,26 @@ module Formatting =
                               SuggestedFix = Some suggestedFix
                               TypeChecks = [] })
 
+        // Check that tuple items on separate lines have consistent indentation.
+        let checkTupleIndentation args (tupleExprs : SynExpr list) isSuppressed =
+            let ruleName = "TupleIndentation"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                tupleExprs
+                |> List.groupBy (fun expr -> expr.Range.StartLine)
+                |> List.choose (snd >> List.tryHead)
+                |> List.pairwise
+                |> List.iter (fun (expr, nextExpr) ->
+                    if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
+                         args.Info.Suggest
+                           { Range = mkRange "" expr.Range.Start nextExpr.Range.End
+                             Message = Resources.GetString("RulesFormattingTupleIndentationError")
+                             SuggestedFix = None
+                             TypeChecks = [] })                       
+
+        // Check for single space after commas in tuple.
         let checkTupleCommaSpacing args (tupleExprs : SynExpr list) tupleRange isSuppressed =
             let ruleName = "TupleCommaSpacing"
 
@@ -447,6 +467,7 @@ module Formatting =
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
                 TupleFormatting.checkTupleHasParentheses args parentNode tupleRange (isSuppressed i)
                 TupleFormatting.checkTupleCommaSpacing args exprs tupleRange (isSuppressed i)
+                TupleFormatting.checkTupleIndentation args exprs (isSuppressed i)
             | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
             | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) 
             | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
