@@ -93,8 +93,6 @@ module Formatting =
 
             if isEnabled && isSuppressed ruleName |> not then
                 match parentNode with
-                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
-                    ()
                 | Some (AstNode.Expression (SynExpr.Paren _)) ->
                     ()
                 | _ ->
@@ -465,9 +463,14 @@ module Formatting =
                 TypedItemSpacing.checkTypedItemSpacing args range (isSuppressed i) 
             | AstNode.Expression (SynExpr.Tuple (exprs, _, tupleRange)) ->
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
-                TupleFormatting.checkTupleHasParentheses args parentNode tupleRange (isSuppressed i)
-                TupleFormatting.checkTupleCommaSpacing args exprs tupleRange (isSuppressed i)
-                TupleFormatting.checkTupleIndentation args exprs (isSuppressed i)
+                match parentNode with
+                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
+                    // cons operator is parsed as tuple, ignore it for tuple checking
+                    ()
+                | _ ->
+                    TupleFormatting.checkTupleHasParentheses args parentNode tupleRange (isSuppressed i)
+                    TupleFormatting.checkTupleCommaSpacing args exprs tupleRange (isSuppressed i)
+                    TupleFormatting.checkTupleIndentation args exprs (isSuppressed i)
             | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
             | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) 
             | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
