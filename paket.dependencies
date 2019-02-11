@@ -2,7 +2,7 @@ source https://api.nuget.org/v3/index.json
 
 nuget FParsec
 nuget FSharp.Compiler.Service >= 25.0.1 
-nuget Dotnet.ProjInfo
+nuget Dotnet.ProjInfo ~> 0.31.0
 nuget FSharp.Core ~> 4.3.4
 nuget nunit
 nuget NUnit3TestAdapter
