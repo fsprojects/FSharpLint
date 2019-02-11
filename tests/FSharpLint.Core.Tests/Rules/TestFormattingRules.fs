@@ -21,6 +21,7 @@ let config typedItemSpacingStyle =
             { Rules = Map.ofList 
                 [ ("TypedItemSpacing", typedItemSpacingConfig typedItemSpacingStyle)
                   ("TupleCommaSpacing", ruleEnabled)
+                  ("TupleIndentation", ruleEnabled)
                   ("TupleParentheses", ruleEnabled)
                   ("TypePrefixing", ruleEnabled)
                   ("ModuleDeclSpacing", ruleEnabled)
@@ -272,7 +273,7 @@ module Program
 
 let x = (1,2)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
     member this.``Quickfix for tuple instantiation without space after comma``() =
@@ -297,7 +298,7 @@ module Program
 
 let x = (1,  2)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
     member this.``Quickfix for tuple instantiation with two spaces after comma``() =
@@ -321,6 +322,41 @@ let x = (1, 2)"""
 module Program
 
 let x = (1, 2)""")
+
+        Assert.IsTrue(this.NoErrorsExist)
+        
+    [<Test>]
+    member this.``No error for tuple instantiation with newline after comma``() =
+        this.Parse("""
+module Program
+
+let x = (
+    1, 2,
+    3)""")
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for tuple with newlines and inconsistent indentation``() =
+        this.Parse("""
+module Program
+
+let x = (
+    1,
+        2,
+        3)""")
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+    [<Test>]
+    member this.``No error for tuple with newlines and consistent indentation``() =
+        this.Parse("""
+module Program
+
+let x = (
+    1,
+    2,
+    3)""")
 
         Assert.IsTrue(this.NoErrorsExist)
 

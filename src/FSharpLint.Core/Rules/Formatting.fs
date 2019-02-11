@@ -93,8 +93,6 @@ module Formatting =
 
             if isEnabled && isSuppressed ruleName |> not then
                 match parentNode with
-                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
-                    ()
                 | Some (AstNode.Expression (SynExpr.Paren _)) ->
                     ()
                 | _ ->
@@ -109,33 +107,50 @@ module Formatting =
                               SuggestedFix = Some suggestedFix
                               TypeChecks = [] })
 
-        let checkTupleCommaSpacing args range isSuppressed =
+        // Check that tuple items on separate lines have consistent indentation.
+        let checkTupleIndentation args (tupleExprs : SynExpr list) isSuppressed =
+            let ruleName = "TupleIndentation"
+
+            let isEnabled = isRuleEnabled args.Info.Config ruleName
+
+            if isEnabled && isSuppressed ruleName |> not then
+                tupleExprs
+                |> List.groupBy (fun expr -> expr.Range.StartLine)
+                |> List.choose (snd >> List.tryHead)
+                |> List.pairwise
+                |> List.iter (fun (expr, nextExpr) ->
+                    if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
+                         args.Info.Suggest
+                           { Range = mkRange "" expr.Range.Start nextExpr.Range.End
+                             Message = Resources.GetString("RulesFormattingTupleIndentationError")
+                             SuggestedFix = None
+                             TypeChecks = [] })                       
+
+        // Check for single space after commas in tuple.
+        let checkTupleCommaSpacing args (tupleExprs : SynExpr list) tupleRange isSuppressed =
             let ruleName = "TupleCommaSpacing"
 
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
-                args.Info.TryFindTextOfRange(range)
-                |> Option.iter (fun text ->
-                    let splitText = text.Split(',') |> List.ofArray
-                    match splitText with
-                    | _ :: tail ->
-                        if tail |> List.exists (fun item -> item.TrimStart().Length <> item.Length - 1) then
-                            let fixedText =
-                                splitText
-                                |> List.map (fun (item:string) -> item.Trim())
-                                |> String.concat ", "
-                            let suggestedFix = lazy(
-                                { FromRange = range 
-                                  FromText = text
-                                  ToText = fixedText } 
-                                |> Some)
-                            args.Info.Suggest
-                                { Range = range
-                                  Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
-                                  SuggestedFix = Some suggestedFix
-                                  TypeChecks = [] }
-                    | _ -> ())
+                tupleExprs
+                |> List.pairwise
+                |> List.iter (fun (expr, nextExpr) -> 
+                    if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
+                        let commaRange = mkRange "" expr.Range.End nextExpr.Range.Start
+                        let suggestedFix =
+                            args.Info.TryFindTextOfRange commaRange
+                            |> Option.map (fun commaText ->
+                                lazy(
+                                    { FromRange = commaRange 
+                                      FromText = commaText
+                                      ToText = ", " } |> Some
+                                    ) )
+                        args.Info.Suggest
+                           { Range = commaRange
+                             Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
+                             SuggestedFix = suggestedFix
+                             TypeChecks = [] })
 
     module private PatternMatchFormatting =
 
@@ -446,10 +461,16 @@ module Formatting =
             match syntaxArray.[i].Actual with
             | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
                 TypedItemSpacing.checkTypedItemSpacing args range (isSuppressed i) 
-            | AstNode.Expression (SynExpr.Tuple _ as tupleExpr) ->
+            | AstNode.Expression (SynExpr.Tuple (exprs, _, tupleRange)) ->
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
-                TupleFormatting.checkTupleHasParentheses args parentNode tupleExpr.Range (isSuppressed i)
-                TupleFormatting.checkTupleCommaSpacing args tupleExpr.Range (isSuppressed i)
+                match parentNode with
+                | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
+                    // cons operator is parsed as tuple, ignore it for tuple checking
+                    ()
+                | _ ->
+                    TupleFormatting.checkTupleHasParentheses args parentNode tupleRange (isSuppressed i)
+                    TupleFormatting.checkTupleCommaSpacing args exprs tupleRange (isSuppressed i)
+                    TupleFormatting.checkTupleIndentation args exprs (isSuppressed i)
             | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
             | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) 
             | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->

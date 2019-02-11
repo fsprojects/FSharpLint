@@ -255,6 +255,9 @@
   <data name="RulesFormattingTupleCommaSpacingError" xml:space="preserve">
     <value>Comma in tuple instantiation should be followed by single space.</value>
   </data>
+   <data name="RulesFormattingTupleIndentationError" xml:space="preserve">
+    <value>Sub-expressions of tuple on different lines should have consistent indentation.</value>
+  </data> 
   <data name="RulesFormattingTupleParenthesesError" xml:space="preserve">
     <value>Use parentheses for tuple instantiation.</value>
   </data>
