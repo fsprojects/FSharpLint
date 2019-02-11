@@ -478,11 +478,19 @@ module Formatting =
                     match node with
                     | AstNode.Expression (SynExpr.MatchLambda _) -> true
                     | _ -> false
+                    
+                let isFunctionParameter = 
+                    AbstractSyntaxArray.getBreadcrumbs 3 syntaxArray skipArray i
+                    |> List.exists (function
+                        | Expression (SynExpr.Lambda _ ) -> true
+                        | _ -> false)
 
-                PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
-                PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
-                PatternMatchFormatting.checkPatternMatchClauseIndentation args range clauses isLambda (isSuppressed i)
-                PatternMatchFormatting.checkPatternMatchExpressionIndentation args clauses (isSuppressed i)
+                // Ignore pattern matching in function parameters.
+                if not (isFunctionParameter) then
+                    PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
+                    PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
+                    PatternMatchFormatting.checkPatternMatchClauseIndentation args range clauses isLambda (isSuppressed i)
+                    PatternMatchFormatting.checkPatternMatchExpressionIndentation args clauses (isSuppressed i)
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
