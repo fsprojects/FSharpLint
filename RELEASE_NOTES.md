@@ -1,3 +1,13 @@
+##### 0.10.4 - February 11 2019
+
+* Improve tuple item spacing check, by jgardella
+* Ignore pattern matching in function parameters, by jgardella
+* Fix using FSharpLint.Core targeting `net`, by enricosada
+* Fix match indentation calculation, by jgardella
+* Produce tuple type string correctly, by jgardella
+* Fix false positive for tuple instantiation with cons operator, by jgardella
+* Take comments into account when checking spacing, by jgardella
+
 ##### 0.10.3 - January 29 2019
 
 * Update configuration defaults to exclude formatting rules for now.
