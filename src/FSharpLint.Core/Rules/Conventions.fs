@@ -12,7 +12,7 @@ module Conventions =
 
     [<Literal>]
     let AnalyserName = "Conventions"
-    
+
     let private isAnalyserEnabled config =
         isAnalyserEnabled config AnalyserName |> Option.isSome
 
@@ -27,14 +27,14 @@ module Conventions =
             let isEnabled = isEnabled ruleName args.Info.Config
 
             if isEnabled && isSuppressed ruleName |> not then
-                let (SynModuleOrNamespace(_, _, isModule, _, _, _, _, _)) = moduleOrNamespace
-                if isModule
-                then
+                match moduleOrNamespace with
+                | SynModuleOrNamespace(_, _, (NamedModule | AnonModule), _, _, _, _, _) ->
                     args.Info.Suggest
-                        { Range = range 
+                        { Range = range
                           Message = Resources.GetString("RulesConventionsTopLevelNamespaceError")
                           SuggestedFix = None
                           TypeChecks = [] }
+                | _ -> ()
 
     module private RecursiveAsyncFunction =
 
@@ -51,13 +51,13 @@ module Conventions =
                 |> Some
             | SynPat.Typed (pat, _, _) ->
                 getIdentFromSynPat pat
-            | _ -> 
+            | _ ->
                 None
 
         let private getFunctionNameFromAsyncCompExprBinding = function
             | SynBinding.Binding (headPat=headPat; expr=expr) when isAsyncCompExpr expr ->
                 getIdentFromSynPat headPat
-            | _ -> 
+            | _ ->
                 None
 
         let checkRecursiveAsyncFunction args (range:range) (doBangExpr:SynExpr) breadcrumbs isSuppressed =
@@ -82,27 +82,27 @@ module Conventions =
                     |> List.iter (fun _ ->
                         let suggestedFix = lazy(
                             args.Info.TryFindTextOfRange doTokenRange
-                            |> Option.map (fun fromText -> 
+                            |> Option.map (fun fromText ->
                                 { FromText = fromText
                                   FromRange = doTokenRange
                                   ToText = "return!" }))
 
                         args.Info.Suggest
-                            { Range = range 
+                            { Range = range
                               Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
                               SuggestedFix = Some suggestedFix
                               TypeChecks = [] }
                     )
                 | _ -> ()
 
-    let analyser (args: AnalyserArgs) : unit = 
+    let analyser (args: AnalyserArgs) : unit =
         if isAnalyserEnabled args.Info.Config then
             let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
             let isSuppressed i ruleName =
-                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
                 |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-                
+
             syntaxArray
             |> Array.tryHead
             |> Option.iter (fun firstNode ->
@@ -113,7 +113,7 @@ module Conventions =
 
             for i = 0 to syntaxArray.Length - 1 do
                 let node = syntaxArray.[i].Actual
-                match node with 
+                match node with
                 | AstNode.Expression (SynExpr.DoBang (expr, range)) ->
                     let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs 5 syntaxArray skipArray i
                     RecursiveAsyncFunction.checkRecursiveAsyncFunction args range expr breadcrumbs (isSuppressed i)

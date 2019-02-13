@@ -1,7 +1,7 @@
 ﻿namespace FSharpLint.Rules
 
 module Formatting =
-    
+
     open System
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.Range
@@ -14,7 +14,7 @@ module Formatting =
     [<Literal>]
     let AnalyserName = "Formatting"
 
-    let private isRuleEnabled config ruleName = 
+    let private isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
     module private TypedItemSpacing =
@@ -22,7 +22,7 @@ module Formatting =
 
         let private typedItemStyle config =
             match Configuration.isRuleEnabled config AnalyserName ruleName with
-            | Some(_, ruleSettings) -> 
+            | Some(_, ruleSettings) ->
                 match Map.tryFind "TypedItemStyle" ruleSettings with
                 | Some(TypedItemStyle(style)) -> Some(style)
                 | Some(_) | None -> None
@@ -57,8 +57,8 @@ module Formatting =
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
-                let (expectedSpacesBefore, expectedSpacesAfter) = 
-                    typedItemStyle args.Info.Config 
+                let (expectedSpacesBefore, expectedSpacesAfter) =
+                    typedItemStyle args.Info.Config
                     |> Option.defaultValue TypedItemStyle.NoSpaces
                     |> expectedSpacesFromConfig
 
@@ -77,8 +77,8 @@ module Formatting =
                                 { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
                                 |> Some)
                             let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
-                            args.Info.Suggest 
-                                { Range = range 
+                            args.Info.Suggest
+                                { Range = range
                                   Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
@@ -124,7 +124,7 @@ module Formatting =
                            { Range = mkRange "" expr.Range.Start nextExpr.Range.End
                              Message = Resources.GetString("RulesFormattingTupleIndentationError")
                              SuggestedFix = None
-                             TypeChecks = [] })                       
+                             TypeChecks = [] })
 
         // Check for single space after commas in tuple.
         let checkTupleCommaSpacing args (tupleExprs : SynExpr list) tupleRange isSuppressed =
@@ -135,14 +135,14 @@ module Formatting =
             if isEnabled && isSuppressed ruleName |> not then
                 tupleExprs
                 |> List.pairwise
-                |> List.iter (fun (expr, nextExpr) -> 
+                |> List.iter (fun (expr, nextExpr) ->
                     if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
                         let commaRange = mkRange "" expr.Range.End nextExpr.Range.Start
                         let suggestedFix =
                             args.Info.TryFindTextOfRange commaRange
                             |> Option.map (fun commaText ->
                                 lazy(
-                                    { FromRange = commaRange 
+                                    { FromRange = commaRange
                                       FromText = commaText
                                       ToText = ", " } |> Some
                                     ) )
@@ -171,7 +171,7 @@ module Formatting =
             if isEnabled && isSuppressed ruleName |> not then
                 clauses
                 |> List.pairwise
-                |> List.iter (fun (clauseOne, clauseTwo) -> 
+                |> List.iter (fun (clauseOne, clauseTwo) ->
                     if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
                         args.Info.Suggest
                             { Range = clauseTwo.Range
@@ -191,7 +191,7 @@ module Formatting =
                         [firstPat; secondPat]
                     | _ -> [])
                 |> List.pairwise
-                |> List.iter (fun (clauseOne, clauseTwo) -> 
+                |> List.iter (fun (clauseOne, clauseTwo) ->
                     if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
                         args.Info.Suggest
                             { Range = clauseTwo.Range
@@ -216,7 +216,7 @@ module Formatting =
                             { Range = firstClause.Range
                               Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
                               SuggestedFix = None
-                              TypeChecks = [] }                       
+                              TypeChecks = [] }
                     elif clauseIndentation <> matchStartIndentation then
                           args.Info.Suggest
                             { Range = firstClause.Range
@@ -249,7 +249,7 @@ module Formatting =
                     let matchPatternEndLine =
                         guard
                         |> Option.map (fun expr -> expr.Range.EndLine)
-                        |> Option.defaultValue pat.Range.EndLine 
+                        |> Option.defaultValue pat.Range.EndLine
                     if expr.Range.StartLine <> matchPatternEndLine
                     && exprIndentation <> clauseIndentation + 4 then
                       args.Info.Suggest
@@ -277,13 +277,13 @@ module Formatting =
                     | "Ref" as typeName ->
                         // Prefer postfix.
                         if not isPostfix
-                        then 
+                        then
                             let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
                             let suggestedFix = lazy(
                                 (args.Info.TryFindTextOfRange range, typeArgs)
                                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
-                            args.Info.Suggest 
-                                { Range = range 
+                            args.Info.Suggest
+                                { Range = range
                                   Message =  String.Format(errorFormatString, typeName)
                                   SuggestedFix = Some suggestedFix
                                   TypeChecks = [] }
@@ -292,7 +292,7 @@ module Formatting =
                         let suggestedFix = lazy(
                             (args.Info.TryFindTextOfRange range, typeArgs)
                             ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
-                        args.Info.Suggest 
+                        args.Info.Suggest
                             { Range = range
                               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
                               SuggestedFix = Some suggestedFix
@@ -300,11 +300,11 @@ module Formatting =
                     | typeName ->
                         // Prefer prefix.
                         if isPostfix
-                        then 
+                        then
                             let suggestedFix = lazy(
                                 (args.Info.TryFindTextOfRange range, typeArgs)
                                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
-                            args.Info.Suggest 
+                            args.Info.Suggest
                                 { Range = range
                                   Message = Resources.GetString("RulesFormattingGenericPrefixError")
                                   SuggestedFix = Some suggestedFix
@@ -312,15 +312,15 @@ module Formatting =
                 | _ -> ()
 
     module private Spacing =
-    
+
         let countPrecedingCommentLines (args : AnalyserArgs) (startPos : pos) (endPos : pos) =
-            mkRange 
+            mkRange
                 ""
                 startPos
                 endPos
-            |> args.Info.TryFindTextOfRange 
+            |> args.Info.TryFindTextOfRange
             |> Option.map (fun preceedingText ->
-                let lines = 
+                let lines =
                     preceedingText.Split '\n'
                     |> Array.rev
                     |> Array.tail
@@ -343,15 +343,15 @@ module Formatting =
                     |> List.iter (fun (declOne, declTwo) ->
                         let numPreceedingCommentLines = countPrecedingCommentLines args declOne.Range.End declTwo.Range.Start
                         if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 + numPreceedingCommentLines then
-                            let intermediateRange = 
+                            let intermediateRange =
                                 let startLine = declOne.Range.EndLine + 1
                                 let endLine = declTwo.Range.StartLine
-                                let endOffset = 
-                                    if startLine = endLine 
+                                let endOffset =
+                                    if startLine = endLine
                                     then 1
                                     else 0
 
-                                mkRange 
+                                mkRange
                                     ""
                                     (mkPos (declOne.Range.EndLine + 1) 0)
                                     (mkPos (declTwo.Range.StartLine + endOffset) 0)
@@ -372,15 +372,15 @@ module Formatting =
                 |> List.iter (fun (memberOne, memberTwo) ->
                     let numPreceedingCommentLines = countPrecedingCommentLines args memberOne.Range.End memberTwo.Range.Start
                     if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPreceedingCommentLines then
-                        let intermediateRange = 
+                        let intermediateRange =
                             let startLine = memberOne.Range.EndLine + 1
                             let endLine = memberTwo.Range.StartLine
-                            let endOffset = 
-                                if startLine = endLine 
+                            let endOffset =
+                                if startLine = endLine
                                 then 1
                                 else 0
 
-                            mkRange 
+                            mkRange
                                 ""
                                 (mkPos (memberOne.Range.EndLine + 1) 0)
                                 (mkPos (memberTwo.Range.StartLine + endOffset) 0)
@@ -395,7 +395,7 @@ module Formatting =
         let getUnionCaseStartColumn (args : AnalyserArgs) (SynUnionCase.UnionCase (attrs, _, _, _, _, range)) =
             match attrs |> List.tryHead with
             | Some attr ->
-                mkRange "" (mkPos attr.Range.StartLine 0) attr.Range.Start 
+                mkRange "" (mkPos attr.Range.StartLine 0) attr.Range.Start
                 |> args.Info.TryFindTextOfRange
                 |> Option.bind (fun preceedingText ->
                     let attrStartIndex = preceedingText.IndexOf "[<"
@@ -412,7 +412,7 @@ module Formatting =
             let isEnabled = isRuleEnabled args.Info.Config ruleName
 
             if isEnabled && isSuppressed ruleName |> not then
-                
+
                 match typeDefnRepr with
                 | SynTypeDefnRepr.Simple((SynTypeDefnSimpleRepr.Union (_, cases, _)), _) ->
                     match cases with
@@ -437,13 +437,13 @@ module Formatting =
                                       TypeChecks = [] })
                 | _ -> ()
 
-    let analyser (args: AnalyserArgs) : unit = 
+    let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
         let isSuppressed i ruleName =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-            
+
         let synTypeToString = function
             | SynType.Tuple _ as synType ->
                 args.Info.TryFindTextOfRange synType.Range
@@ -453,15 +453,15 @@ module Formatting =
 
         let typeArgsToString (typeArgs:SynType list) =
             let typeStrings = typeArgs |> List.choose synTypeToString
-            if typeStrings.Length = typeArgs.Length 
+            if typeStrings.Length = typeArgs.Length
             then typeStrings |> String.concat "," |> Some
             else None
 
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
-                TypedItemSpacing.checkTypedItemSpacing args range (isSuppressed i) 
-            | AstNode.Expression (SynExpr.Tuple (exprs, _, tupleRange)) ->
+                TypedItemSpacing.checkTypedItemSpacing args range (isSuppressed i)
+            | AstNode.Expression (SynExpr.Tuple (_, exprs, _, tupleRange)) ->
                 let parentNode = AbstractSyntaxArray.getBreadcrumbs 1 syntaxArray skipArray i |> List.tryHead
                 match parentNode with
                 | Some (AstNode.Expression (SynExpr.App (funcExpr=(SynExpr.Ident ident)))) when ident.idText = "op_ColonColon" ->
@@ -471,15 +471,15 @@ module Formatting =
                     TupleFormatting.checkTupleHasParentheses args parentNode tupleRange (isSuppressed i)
                     TupleFormatting.checkTupleCommaSpacing args exprs tupleRange (isSuppressed i)
                     TupleFormatting.checkTupleIndentation args exprs (isSuppressed i)
-            | AstNode.Expression (SynExpr.Match (_, _, clauses, _, range))
-            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range)) 
+            | AstNode.Expression (SynExpr.Match (_, _, clauses, range))
+            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range))
             | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
                 let isLambda =
                     match node with
                     | AstNode.Expression (SynExpr.MatchLambda _) -> true
                     | _ -> false
-                    
-                let isFunctionParameter = 
+
+                let isFunctionParameter =
                     AbstractSyntaxArray.getBreadcrumbs 3 syntaxArray skipArray i
                     |> List.exists (function
                         | Expression (SynExpr.Lambda _ ) -> true

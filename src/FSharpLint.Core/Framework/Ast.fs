@@ -44,13 +44,13 @@ module Ast =
 
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
     let getSuppressMessageAttributes node =
-        let tryGetArguments (attribute:SynAttribute) = 
-            let tryGetArgumentsFromPropertyInitialisers arguments = 
+        let tryGetArguments (attribute:SynAttribute) =
+            let tryGetArgumentsFromPropertyInitialisers arguments =
                 let rec getPropertyIntiailiserValues category checkid = function
-                    | SynExpr.App(_, 
-                                  _, 
-                                  SynExpr.App(_, _, SynExpr.Ident(op), SynExpr.Ident(propName), _), 
-                                  SynExpr.Const(SynConst.String(argValue, _), _), _)::tail when op.idText = "op_Equality" -> 
+                    | SynExpr.App(_,
+                                  _,
+                                  SynExpr.App(_, _, SynExpr.Ident(op), SynExpr.Ident(propName), _),
+                                  SynExpr.Const(SynConst.String(argValue, _), _), _)::tail when op.idText = "op_Equality" ->
                         if propName.idText = "Category" then
                             getPropertyIntiailiserValues (Some(argValue)) checkid tail
                         else if propName.idText = "CheckId" then
@@ -59,7 +59,7 @@ module Ast =
                             getPropertyIntiailiserValues category checkid tail
                     | _::tail ->
                         getPropertyIntiailiserValues category checkid tail
-                    | [] -> 
+                    | [] ->
                         match category, checkid with
                         | Some(category), Some(checkid) ->
                             Some({ Category = category; Rule = checkid })
@@ -68,11 +68,11 @@ module Ast =
                 getPropertyIntiailiserValues None None arguments
 
             match attribute.ArgExpr with
-            | SynExpr.Paren(SynExpr.Tuple(arguments, _, _), _, _, _) ->
+            | SynExpr.Paren(SynExpr.Tuple(_, arguments, _, _), _, _, _) ->
                 match arguments with
                 | SynExpr.Const(SynConst.String(category, _), _)::SynExpr.Const(SynConst.String(checkid, _), _)::_ ->
                     Some({ Category = category; Rule = checkid })
-                | _ -> 
+                | _ ->
                     tryGetArgumentsFromPropertyInitialisers arguments
             | _ -> None
 
@@ -91,7 +91,7 @@ module Ast =
         | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, range, _))
         | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(attributes, _, _, _, _, range))
         | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, range))
-        | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) -> 
+        | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) ->
             attributes
             |> List.choose tryGetSuppressMessageAttribute
             |> List.map (fun x -> (x, range))
@@ -101,48 +101,48 @@ module Ast =
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x
         | x -> x
-        
+
     /// Inlines pipe operators to give a flat function application expression
-    /// e.g. `x |> List.map id` to `List.map id x`. 
+    /// e.g. `x |> List.map id` to `List.map id x`.
     let (|FuncApp|_|) functionApplication =
         let rec flatten flattened exprToFlatten =
             match exprToFlatten with
-            | SynExpr.App(_, _, x, y, _) -> 
+            | SynExpr.App(_, _, x, y, _) ->
                 match x with
                 | SynExpr.App(_, true, SynExpr.Ident(op), rhs, _) as app ->
                     let lhs = y
 
                     match op.idText with
-                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" -> 
+                    | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" ->
                         flatten [rhs] lhs
-                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" -> 
+                    | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" ->
                         flatten (lhs::flattened) rhs
                     | _ -> flatten (lhs::flattened) app
-                | x -> 
+                | x ->
                     let leftExpr, rightExpr = (x, y)
                     flatten (rightExpr::flattened) leftExpr
             | expr -> expr::flattened
 
         match functionApplication with
-        | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) -> 
+        | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) ->
             Some(flatten [] functionApplication, range)
         | _ -> None
-        
+
     [<NoEquality; NoComparison>]
     type Lambda = { Arguments: SynSimplePats list; Body: SynExpr }
 
-    let (|Lambda|_|) lambda = 
-        /// A match clause is generated by the compiler for each wildcard argument, 
+    let (|Lambda|_|) lambda =
+        /// A match clause is generated by the compiler for each wildcard argument,
         /// this function extracts the body expression of the lambda from those statements.
         let rec removeAutoGeneratedMatchesFromLambda = function
-            | SynExpr.Match(SequencePointInfoForBinding.NoSequencePointAtInvisibleBinding, 
-                            _, 
-                            [SynMatchClause.Clause(SynPat.Wild(_), _, expr, _, _)], _, _) ->
+            | SynExpr.Match(SequencePointInfoForBinding.NoSequencePointAtInvisibleBinding,
+                            _,
+                            [SynMatchClause.Clause(SynPat.Wild(_), _, expr, _, _)], _) ->
                 removeAutoGeneratedMatchesFromLambda expr
             | x -> x
 
         let (|IsCurriedLambda|_|) = function
-            | SynExpr.Lambda(_, _, parameter, (SynExpr.Lambda(_) as inner), _) as outer 
+            | SynExpr.Lambda(_, _, parameter, (SynExpr.Lambda(_) as inner), _) as outer
                     when outer.Range = inner.Range ->
                 Some(parameter, inner)
             | _ -> None
@@ -156,16 +156,16 @@ module Ast =
             | _ -> None
 
         match lambda with
-        | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range) as lambda) -> 
-            getLambdaParametersAndExpression [] lambda 
+        | AstNode.Expression(SynExpr.Lambda(_, _, _, _, range) as lambda) ->
+            getLambdaParametersAndExpression [] lambda
             |> Option.map (fun x -> (x, range))
         | _ -> None
 
     let (|Cons|_|) pattern =
         match pattern with
-        | SynPat.LongIdent(LongIdentWithDots([identifier], _), 
+        | SynPat.LongIdent(LongIdentWithDots([identifier], _),
                            _, _,
-                           Pats([SynPat.Tuple([lhs; rhs], _)]), _, _) 
+                           Pats([SynPat.Tuple(_, [lhs; rhs], _)]), _, _)
                 when identifier.idText = "op_ColonColon" ->
             Some(lhs, rhs)
         | _ -> None
@@ -177,7 +177,7 @@ module Ast =
         | None = 255uy
 
     [<Struct; NoEquality; NoComparison>]
-    type Node(extraInfo:ExtraSyntaxInfo, astNode:AstNode) = 
+    type Node(extraInfo:ExtraSyntaxInfo, astNode:AstNode) =
         member __.ExtraSyntaxInfo = extraInfo
         member __.AstNode = astNode
 
@@ -212,15 +212,15 @@ module Ast =
         let inline revIter f items =
             items |> List.rev |> List.iter f
 
-    let inline private moduleDeclarationChildren node add = 
+    let inline private moduleDeclarationChildren node add =
         match node with
-        | SynModuleDecl.NestedModule(componentInfo, _, moduleDeclarations, _, _) -> 
+        | SynModuleDecl.NestedModule(componentInfo, _, moduleDeclarations, _, _) ->
             moduleDeclarations |> List.revIter (moduleDeclarationNode >> add)
             add <| componentInfoNode componentInfo
         | SynModuleDecl.Let(_, bindings, _) -> bindings |> List.revIter (bindingNode >> add)
         | SynModuleDecl.DoExpr(_, expression, _) -> add <| expressionNode expression
         | SynModuleDecl.Types(typeDefinitions, _) -> typeDefinitions |> List.revIter (typeDefinitionNode >> add)
-        | SynModuleDecl.Exception(SynExceptionDefn.SynExceptionDefn(repr, members, _), _) -> 
+        | SynModuleDecl.Exception(SynExceptionDefn.SynExceptionDefn(repr, members, _), _) ->
             members |> List.revIter (memberDefinitionNode >> add)
             add <| exceptionRepresentationNode repr
         | SynModuleDecl.NamespaceFragment(moduleOrNamespace) -> add <| moduleOrNamespaceNode moduleOrNamespace
@@ -232,15 +232,14 @@ module Ast =
     let inline private typeChildren node add =
         match node with
         | SynType.LongIdentApp(synType, _, _, types, _, _, _)
-        | SynType.App(synType, _, types, _, _, _, _) -> 
+        | SynType.App(synType, _, types, _, _, _, _) ->
             types |> List.revIter (typeNode >> add)
             add <| typeNode synType
-        | SynType.StructTuple(types, _)
-        | SynType.Tuple(types, _) -> 
+        | SynType.Tuple(_, types, _) ->
             types |> List.revIter (snd >> typeNode >> add)
         | SynType.Fun(synType, synType1, _)
         | SynType.StaticConstantNamed(synType, synType1, _)
-        | SynType.MeasureDivide(synType, synType1, _) -> 
+        | SynType.MeasureDivide(synType, synType1, _) ->
             add <| typeNode synType1
             add <| typeNode synType
         | SynType.Var(_)
@@ -252,16 +251,18 @@ module Ast =
         | SynType.MeasurePower(synType, _, _)
         | SynType.Array(_, synType, _) -> add <| typeNode synType
         | SynType.StaticConstantExpr(expression, _) -> add <| expressionNode expression
+        | SynType.AnonRecd (_, typeNames, _) ->
+            typeNames |> List.revIter (snd >> typeNode >> add)
 
-    let inline private memberDefinitionChildren node add = 
+    let inline private memberDefinitionChildren node add =
         match node with
         | SynMemberDefn.Member(binding, _) -> add <| bindingNode binding
         | SynMemberDefn.ImplicitCtor(_, _, patterns, _, _) -> patterns |> List.revIter (simplePatternNode >> add)
-        | SynMemberDefn.ImplicitInherit(synType, expression, _, _) -> 
+        | SynMemberDefn.ImplicitInherit(synType, expression, _, _) ->
             add <| expressionNode expression
             add <| typeNode synType
         | SynMemberDefn.LetBindings(bindings, _, _, _) -> bindings |> List.revIter (bindingNode >> add)
-        | SynMemberDefn.Interface(synType, Some(members), _) -> 
+        | SynMemberDefn.Interface(synType, Some(members), _) ->
             members |> List.revIter (memberDefinitionNode >> add)
             add <| typeNode synType
         | SynMemberDefn.Interface(synType, None, _)
@@ -270,25 +271,24 @@ module Ast =
         | SynMemberDefn.AbstractSlot(_) -> ()
         | SynMemberDefn.ValField(field, _) -> add <| fieldNode field
         | SynMemberDefn.NestedType(typeDefinition, _, _) -> add <| typeDefinitionNode typeDefinition
-        | SynMemberDefn.AutoProperty(_, _, _, Some(synType), _, _, _, _, expression, _, _) -> 
+        | SynMemberDefn.AutoProperty(_, _, _, Some(synType), _, _, _, _, expression, _, _) ->
             add <| expressionNode expression
             add <| typeNode synType
-        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, expression, _, _) -> 
+        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, expression, _, _) ->
             add <| expressionNode expression
 
     let inline private patternChildren node add =
-        match node with 
+        match node with
         | SynPat.IsInst(synType, _) -> add <| typeNode synType
         | SynPat.QuoteExpr(expression, _) -> add <| expressionNode expression
-        | SynPat.Typed(pattern, synType, _) -> 
+        | SynPat.Typed(pattern, synType, _) ->
             add <| typeNode synType
             add <| patternNode pattern
-        | SynPat.Or(pattern, pattern1, _) -> 
+        | SynPat.Or(pattern, pattern1, _) ->
             add <| patternNode pattern1
             add <| patternNode pattern
         | SynPat.ArrayOrList(_, patterns, _)
-        | SynPat.StructTuple(patterns, _)
-        | SynPat.Tuple(patterns, _)
+        | SynPat.Tuple(_, patterns, _)
         | SynPat.Ands(patterns, _) -> patterns |> List.revIter (patternNode >> add)
         | SynPat.Attrib(pattern, _, _)
         | SynPat.Named(pattern, _, _, _, _)
@@ -302,13 +302,13 @@ module Ast =
         | SynPat.Null(_)
         | SynPat.OptionalVal(_) -> ()
         | Cons(lhs, rhs) ->
-            add <| patternNode rhs 
+            add <| patternNode rhs
             add <| patternNode lhs
-        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) -> 
+        | SynPat.LongIdent(_, _, _, constructorArguments, _, _) ->
             add <| constructorArgumentsNode constructorArguments
 
     let inline private expressionChildren node add =
-        match node with 
+        match node with
         | SynExpr.Paren(expression, _, _, _)
         | SynExpr.DotGet(expression, _, _, _)
         | SynExpr.DotIndexedGet(expression, _, _, _)
@@ -333,18 +333,20 @@ module Ast =
         | SynExpr.While(_, expression, expression1, _)
         | SynExpr.TryFinally(expression, expression1, _, _, _)
         | SynExpr.Set(expression, expression1, _)
-        | SynExpr.DotSet(expression, _, expression1, _) -> 
+        | SynExpr.DotSet(expression, _, expression1, _) ->
             add <| expressionNode expression1
             add <| expressionNode expression
-        | SynExpr.Typed(expression, synType, _) -> 
+        | SynExpr.Typed(expression, synType, _) ->
             add <| typeNode synType
             add <| expressionNode expression
-        | SynExpr.StructTuple(expressions, _, _)
-        | SynExpr.Tuple(expressions, _, _)
+        | SynExpr.Tuple(_, expressions, _, _)
         | SynExpr.ArrayOrList(_, expressions, _) -> expressions |> List.revIter (expressionNode >> add)
         | SynExpr.Record(_, Some(expr, _), _, _) -> add <| expressionNode expr
         | SynExpr.Record(_, None, _, _) -> ()
-        | SynExpr.ObjExpr(synType, _, bindings, _, _, _) -> 
+        | SynExpr.AnonRecd(_, Some (expr,_), _, _) ->
+            add <| expressionNode expr
+        | SynExpr.AnonRecd(_, None, _, _) -> ()
+        | SynExpr.ObjExpr(synType, _, bindings, _, _, _) ->
             bindings |> List.revIter (bindingNode >> add)
             add <| typeNode synType
         | SynExpr.ImplicitZero(_)
@@ -358,42 +360,42 @@ module Ast =
         | SynExpr.LibraryOnlyUnionCaseFieldSet(_)
         | SynExpr.ArbitraryAfterError(_) -> ()
         | SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _)
-        | SynExpr.For(_, _, expression, _, expression1, expression2, _) -> 
+        | SynExpr.For(_, _, expression, _, expression1, expression2, _) ->
             add <| expressionNode expression2
             add <| expressionNode expression1
             add <| expressionNode expression
         | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _)
-        | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) -> 
+        | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) ->
             add <| expressionNode expression1
             add <| expressionNode expression
             add <| patternNode pattern
-        | SynExpr.MatchLambda(_, _, matchClauses, _, _) -> 
+        | SynExpr.MatchLambda(_, _, matchClauses, _, _) ->
             matchClauses |> List.revIter (matchNode >> add)
         | SynExpr.TryWith(expression, _, matchClauses, _, _, _, _)
-        | SynExpr.MatchBang(_, expression, matchClauses, _, _)
-        | SynExpr.Match(_, expression, matchClauses, _, _) -> 
+        | SynExpr.MatchBang(_, expression, matchClauses, _)
+        | SynExpr.Match(_, expression, matchClauses, _) ->
             matchClauses |> List.revIter (matchNode >> add)
             add <| expressionNode expression
-        | SynExpr.TypeApp(expression, _, types, _, _, _, _) -> 
+        | SynExpr.TypeApp(expression, _, types, _, _, _, _) ->
             types |> List.revIter (typeNode >> add)
             add <| expressionNode expression
-        | SynExpr.New(_, synType, expression, _) 
+        | SynExpr.New(_, synType, expression, _)
         | SynExpr.TypeTest(expression, synType, _)
         | SynExpr.Upcast(expression, synType, _)
-        | SynExpr.Downcast(expression, synType, _) -> 
+        | SynExpr.Downcast(expression, synType, _) ->
             add <| typeNode synType
             add <| expressionNode expression
-        | SynExpr.LetOrUse(_, _, bindings, expression, _) -> 
+        | SynExpr.LetOrUse(_, _, bindings, expression, _) ->
             add <| expressionNode expression
             bindings |> List.revIter (bindingNode >> add)
         | SynExpr.Ident(ident) -> add <| identifierNode([ident.idText])
-        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) -> 
+        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) ->
             add <| identifierNode(ident |> List.map (fun x -> x.idText))
-        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) -> 
+        | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) ->
             add <| Node(ExtraSyntaxInfo.Else, AstNode.Expression elseExpr)
             add <| expressionNode body
             add <| expressionNode cond
-        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) -> 
+        | SynExpr.IfThenElse(cond, body, None, _, _, _, _) ->
             add <| expressionNode body
             add <| expressionNode cond
         | SynExpr.Lambda(_)
@@ -401,7 +403,7 @@ module Ast =
         | SynExpr.Fixed(_) -> ()
 
     let inline private typeSimpleRepresentationChildren node add =
-        match node with 
+        match node with
         | SynTypeDefnSimpleRepr.Union(_, unionCases, _) -> unionCases |> List.revIter (unionCaseNode >> add)
         | SynTypeDefnSimpleRepr.Enum(enumCases, _) -> enumCases |> List.revIter (enumCaseNode >> add)
         | SynTypeDefnSimpleRepr.Record(_, fields, _) -> fields |> List.revIter (fieldNode >> add)
@@ -412,59 +414,59 @@ module Ast =
         | SynTypeDefnSimpleRepr.None(_) -> ()
 
     let inline private simplePatternsChildren node add =
-        match node with 
-        | SynSimplePats.SimplePats(simplePatterns, _) -> 
+        match node with
+        | SynSimplePats.SimplePats(simplePatterns, _) ->
             simplePatterns |> List.revIter (simplePatternNode >> add)
-        | SynSimplePats.Typed(simplePatterns, synType, _) -> 
+        | SynSimplePats.Typed(simplePatterns, synType, _) ->
             add <| typeNode synType
             add <| simplePatternsNode simplePatterns
 
     let inline private simplePatternChildren node add =
-        match node with 
-        | SynSimplePat.Typed(simplePattern, synType, _) -> 
+        match node with
+        | SynSimplePat.Typed(simplePattern, synType, _) ->
             add <| typeNode synType
             add <| simplePatternNode simplePattern
         | SynSimplePat.Attrib(simplePattern, _, _) -> add <| simplePatternNode simplePattern
         | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| identifierNode([identifier.idText])
 
     let inline private matchChildren node add =
-        match node with 
-        | Clause(pattern, Some(expression), expression1, _, _) -> 
+        match node with
+        | Clause(pattern, Some(expression), expression1, _, _) ->
             add <| expressionNode expression1
             add <| expressionNode expression
             add <| patternNode pattern
-        | Clause(pattern, None, expression1, _, _) -> 
+        | Clause(pattern, None, expression1, _, _) ->
             add <| expressionNode expression1
             add <| patternNode pattern
 
     let inline private constructorArgumentsChildren node add =
-        match node with 
-        | SynConstructorArgs.Pats(patterns) -> 
+        match node with
+        | SynConstructorArgs.Pats(patterns) ->
             patterns |> List.revIter (patternNode >> add)
-        | SynConstructorArgs.NamePatPairs(namePatterns, _) -> 
+        | SynConstructorArgs.NamePatPairs(namePatterns, _) ->
             namePatterns |> List.revIter (snd >> patternNode >> add)
 
     let inline private typeRepresentationChildren node add =
-        match node with 
-        | SynTypeDefnRepr.ObjectModel(_, members, _) -> 
+        match node with
+        | SynTypeDefnRepr.ObjectModel(_, members, _) ->
             members |> List.revIter (memberDefinitionNode >> add)
-        | SynTypeDefnRepr.Simple(typeSimpleRepresentation, _) -> 
+        | SynTypeDefnRepr.Simple(typeSimpleRepresentation, _) ->
             add <| typeSimpleRepresentationNode typeSimpleRepresentation
-        | SynTypeDefnRepr.Exception(exceptionRepr) -> 
+        | SynTypeDefnRepr.Exception(exceptionRepr) ->
             add <| exceptionRepresentationNode exceptionRepr
-            
+
     /// Extracts the child nodes to be visited from a given node.
     let traverseNode node add =
         match node with
         | ModuleDeclaration(x) -> moduleDeclarationChildren x add
-        | ModuleOrNamespace(SynModuleOrNamespace(_, _, _, moduleDeclarations, _, _, _, _)) -> 
+        | ModuleOrNamespace(SynModuleOrNamespace(_, _, _, moduleDeclarations, _, _, _, _)) ->
             moduleDeclarations |> List.revIter (moduleDeclarationNode >> add)
-        | Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)) -> 
+        | Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, expression, _, _)) ->
             add <| expressionNode expression
             add <| patternNode pattern
-        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) -> 
+        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
             add <| unionCaseNode unionCase
-        | TypeDefinition(TypeDefn(componentInfo, typeRepresentation, members, _)) -> 
+        | TypeDefinition(TypeDefn(componentInfo, typeRepresentation, members, _)) ->
             members |> List.revIter (memberDefinitionNode >> add)
             add <| typeRepresentationNode typeRepresentation
             add <| componentInfoNode componentInfo
@@ -477,16 +479,16 @@ module Ast =
         | ConstructorArguments(x) -> constructorArgumentsChildren x add
         | SimplePattern(x) -> simplePatternChildren x add
         | SimplePatterns(x) -> simplePatternsChildren x add
-        | InterfaceImplementation(InterfaceImpl(synType, bindings, _)) -> 
+        | InterfaceImplementation(InterfaceImpl(synType, bindings, _)) ->
             bindings |> List.revIter (bindingNode >> add)
             add <| typeNode synType
         | TypeRepresentation(x) -> typeRepresentationChildren x add
         | FuncApp(exprs, _) -> exprs |> List.revIter (expressionNode >> add)
-        | Lambda({ Arguments = args; Body = body }, _) -> 
+        | Lambda({ Arguments = args; Body = body }, _) ->
             add <| Node(ExtraSyntaxInfo.LambdaBody, AstNode.Expression(body))
             args |> List.revIter (fun arg -> add <| Node(ExtraSyntaxInfo.LambdaArg, AstNode.SimplePatterns arg))
         | Expression(x) -> expressionChildren x add
-        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _))) -> 
+        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _))) ->
             moduleOrNamespaces |> List.revIter (moduleOrNamespaceNode >> add)
 
         | File(ParsedInput.SigFile(_))

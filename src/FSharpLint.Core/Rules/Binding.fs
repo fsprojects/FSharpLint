@@ -1,7 +1,7 @@
 ﻿namespace FSharpLint.Rules
 
 module Binding =
-    
+
     open Microsoft.FSharp.Compiler.Ast
     open Microsoft.FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
@@ -12,9 +12,9 @@ module Binding =
     [<Literal>]
     let AnalyserName = "Binding"
 
-    let private isRuleEnabled config ruleName = 
+    let private isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
-            
+
     /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
     let private checkForBindingToAWildcard args pattern range isSuppressed =
         let ruleName = "FavourIgnoreOverLetWild"
@@ -26,10 +26,10 @@ module Binding =
                 | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
                 | SynPat.Wild(_) -> true
                 | _ -> false
-                
+
             if findWildAndIgnoreParens pattern && isSuppressed ruleName |> not then
-                args.Info.Suggest 
-                    { Range = range 
+                args.Info.Suggest
+                    { Range = range
                       Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
                       SuggestedFix = None
                       TypeChecks = [] }
@@ -38,13 +38,13 @@ module Binding =
         let ruleName = "WildcardNamedWithAsPattern"
 
         let isEnabled = isRuleEnabled args.Info.Config ruleName
-        
+
         if isEnabled then
             match pattern with
             | SynPat.Named(SynPat.Wild(wildcardRange), _, _, _, range) when wildcardRange <> range ->
                 if isSuppressed ruleName |> not then
-                    args.Info.Suggest 
-                        { Range = range 
+                    args.Info.Suggest
+                        { Range = range
                           Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
                           SuggestedFix = None
                           TypeChecks = [] }
@@ -54,7 +54,7 @@ module Binding =
         let ruleName = "UselessBinding"
 
         let isEnabled = isRuleEnabled args.Info.Config ruleName
-            
+
         match args.CheckFile with
         | Some(checkFile) when isEnabled ->
             let rec findBindingIdentifier = function
@@ -68,18 +68,18 @@ module Binding =
                         checkFile.GetSymbolUseAtLocation(
                             ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-                    let isNotMutable (symbol:FSharpSymbolUse) = 
+                    let isNotMutable (symbol:FSharpSymbolUse) =
                         match symbol.Symbol with
                         | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
                         | _ -> true
 
-                    return 
+                    return
                         match symbol with
                         | Some(symbol) -> isNotMutable symbol
                         | None -> false }
 
             let rec matchingIdentifier (bindingIdent:Ident) = function
-                | SynExpr.Paren(expr, _, _, _) -> 
+                | SynExpr.Paren(expr, _, _, _) ->
                     matchingIdentifier bindingIdent expr
                 | SynExpr.Ident(ident) when ident.idText = bindingIdent.idText -> Some ident
                 | _ -> None
@@ -87,8 +87,8 @@ module Binding =
             findBindingIdentifier pattern |> Option.iter (fun bindingIdent ->
                 match matchingIdentifier bindingIdent expr with
                 | Some(ident) when isSuppressed ruleName |> not ->
-                    args.Info.Suggest 
-                        { Range = range 
+                    args.Info.Suggest
+                        { Range = range
                           Message = Resources.GetString("RulesUselessBindingError")
                           SuggestedFix = None
                           TypeChecks = [checkNotMutable ident] }
@@ -112,7 +112,7 @@ module Binding =
                 constructorName + "(" + arguments + ")"
 
             match pattern with
-            | SynPat.Tuple(patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
+            | SynPat.Tuple(_isStruct, patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
                 if isSuppressed ruleName |> not then
                     let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
                     let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
@@ -122,7 +122,7 @@ module Binding =
 
     let private isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =
         if i > 0 then
-            match syntaxArray.[skipArray.[i].ParentIndex].Actual with 
+            match syntaxArray.[skipArray.[i].ParentIndex].Actual with
             | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))
             | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _)) -> true
             | _ -> false
@@ -137,29 +137,29 @@ module Binding =
                 | _ -> None
             | _ -> None
 
-        match breadcrumbs with 
-        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, range)))::AstNode.Expression(SynExpr.ObjExpr(_))::_
-        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, range)))::AstNode.MemberDefinition(_)::_ -> 
+        match breadcrumbs with
+        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, range)))::AstNode.Expression(SynExpr.ObjExpr(_))::_
+        | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, range)))::AstNode.MemberDefinition(_)::_ ->
             tupleRange = range
         | _ -> false
 
-    let analyser (args: AnalyserArgs) : unit = 
+    let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
         let isSuppressed i ruleName =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-            
+
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
-            | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _)) 
+            | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
                     when isLetBinding i syntaxArray skipArray ->
                 checkForBindingToAWildcard args pattern range (isSuppressed i)
                 if not isMutable then
                     checkForUselessBinding args pattern expr range (isSuppressed i)
             | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
                 checkForWildcardNamedWithAsPattern args pattern (isSuppressed i)
-            | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, range) as pattern, _)]), _, _)) ->
+            | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynConstructorArgs.Pats([SynPat.Paren(SynPat.Tuple(_, _, range) as pattern, _)]), _, _)) ->
                 let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs 2 syntaxArray skipArray i
                 if (not << isTupleMemberArgs breadcrumbs) range then
                     let identifier = identifier.Lid |> List.map (fun x -> x.idText)

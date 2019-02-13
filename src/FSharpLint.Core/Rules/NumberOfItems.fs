@@ -2,7 +2,7 @@
 
 /// Checks if a function is declared with more than a configurable number of parameters.
 module NumberOfItems =
-    
+
     open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
@@ -12,7 +12,7 @@ module NumberOfItems =
 
     [<Literal>]
     let AnalyserName = "NumberOfItems"
-    
+
     let private maxItemsForRule config ruleName =
         match isRuleEnabled config AnalyserName ruleName with
         | Some(_, ruleSettings) ->
@@ -29,19 +29,19 @@ module NumberOfItems =
             if List.length items > maxItems && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
                 let error = String.Format(errorFormatString, maxItems)
-                args.Info.Suggest 
+                args.Info.Suggest
                     { Range = items.[maxItems].Range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
-    let private validateFunction (constructorArguments:SynConstructorArgs) args isSuppressed = 
+    let private validateFunction (constructorArguments:SynConstructorArgs) args isSuppressed =
         let ruleName = "MaxNumberOfFunctionParameters"
 
         let checkNumberOfParameters maxParameters =
             match constructorArguments with
-            | SynConstructorArgs.Pats(parameters) 
-                    when List.length parameters > maxParameters && not <| isSuppressed ruleName -> 
+            | SynConstructorArgs.Pats(parameters)
+                    when List.length parameters > maxParameters && not <| isSuppressed ruleName ->
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
                 let error = String.Format(errorFormatString, maxParameters)
-                args.Info.Suggest 
+                args.Info.Suggest
                     { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] }
             | _ -> ()
 
@@ -59,28 +59,28 @@ module NumberOfItems =
             | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _) -> isPublic access
             | _ -> false
 
-        members 
+        members
         |> List.filter isPublicMember
 
     let private validateType members typeRepresentation args isSuppressed =
-        let members = 
+        let members =
             match typeRepresentation with
             | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> members
             | SynTypeDefnRepr.ObjectModel(_, members, _) -> members
             |> getMembers
 
         let ruleName = "MaxNumberOfMembers"
-                                                        
+
         maxItemsForRule args.Info.Config ruleName
         |> Option.iter (fun maxMembers ->
             if List.length members > maxMembers && not <| isSuppressed ruleName then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
                 let error = String.Format(errorFormatString, maxMembers)
-                args.Info.Suggest 
+                args.Info.Suggest
                     { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
     let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
-        let rec isApplicationNode i = 
+        let rec isApplicationNode i =
             if i <= 0 then false
             else
                 match syntaxArray.[i].Actual with
@@ -94,7 +94,7 @@ module NumberOfItems =
     let private validateCondition condition args isSuppressed =
         let rec countBooleanOperators total = function
             | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
-            | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) -> 
+            | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) ->
                 if List.exists ((=) ident.idText) ["op_BooleanOr"; "op_BooleanAnd"; "not"] then
                     countBooleanOperators (total + 1) expr
                 else
@@ -117,21 +117,21 @@ module NumberOfItems =
 
         maxItemsForRule args.Info.Config ruleName
         |> Option.iter checkNumberOfBooleanOperatorsInCondition
-    
-    let analyser (args: AnalyserArgs) : unit = 
+
+    let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
-        let isSuppressed i ruleName = 
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+        let isSuppressed i ruleName =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
-            
+
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
             | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
                 validateFunction constructorArguments args (isSuppressed i)
             | AstNode.Expression(expression) ->
                 match expression with
-                | SynExpr.Tuple(expressions, _, _) ->
+                | SynExpr.Tuple(_, expressions, _, _) ->
                     if not <| isInApplication syntaxArray skipArray i then
                         validateTuple expressions args (isSuppressed i)
                 | SynExpr.IfThenElse(condition, _, _, _, _, _, _)

@@ -22,23 +22,23 @@ module HintMatcher =
         (isAnalyserEnabled config AnalyserName).IsSome
 
     let rec private extractSimplePatterns = function
-        | SynSimplePats.SimplePats(simplePatterns, _) -> 
+        | SynSimplePats.SimplePats(simplePatterns, _) ->
             simplePatterns
-        | SynSimplePats.Typed(simplePatterns, _, _) -> 
+        | SynSimplePats.Typed(simplePatterns, _, _) ->
             extractSimplePatterns simplePatterns
 
     let rec private extractIdent = function
         | SynSimplePat.Id(ident, _, isCompilerGenerated, _, _, _) -> (ident, isCompilerGenerated)
         | SynSimplePat.Attrib(simplePattern, _, _)
         | SynSimplePat.Typed(simplePattern, _, _) -> extractIdent simplePattern
-        
+
     [<RequireQualifiedAccess>]
     type private LambdaArgumentMatch =
         | Variable of variable:char * identifier:string
         | Wildcard
         | NoMatch
 
-    let private matchLambdaArgument (LambdaArg.LambdaArg(hintArg), actualArg) = 
+    let private matchLambdaArgument (LambdaArg.LambdaArg(hintArg), actualArg) =
         match extractSimplePatterns actualArg with
         | [] -> LambdaArgumentMatch.NoMatch
         | simplePattern::_ ->
@@ -47,7 +47,7 @@ module HintMatcher =
             let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
 
             match hintArg with
-            | Expression.LambdaArg(Expression.Variable(variable)) when not isWildcard -> 
+            | Expression.LambdaArg(Expression.Variable(variable)) when not isWildcard ->
                 LambdaArgumentMatch.Variable(variable, identifier.idText)
             | Expression.LambdaArg(Expression.Wildcard) -> LambdaArgumentMatch.Wildcard
             | _ -> LambdaArgumentMatch.NoMatch
@@ -68,9 +68,9 @@ module HintMatcher =
             let allArgsMatch = matches |> List.forall (function LambdaArgumentMatch.NoMatch -> false | _ -> true)
 
             if allArgsMatch then
-                matches 
-                |> List.choose (function 
-                    | LambdaArgumentMatch.Variable(variable, ident) -> Some(variable, ident) 
+                matches
+                |> List.choose (function
+                    | LambdaArgumentMatch.Variable(variable, ident) -> Some(variable, ident)
                     | _ -> None)
                 |> Map.ofList
                 |> LambdaMatch.Match
@@ -96,7 +96,7 @@ module HintMatcher =
         | SynConst.String(x, _) -> Some(Constant.String(x))
         | SynConst.UIntPtr(x) -> Some(Constant.UIntPtr(unativeint x))
         | SynConst.IntPtr(x) -> Some(Constant.IntPtr(nativeint x))
-        | SynConst.UserNum(x, endChar) -> 
+        | SynConst.UserNum(x, endChar) ->
             Some(Constant.UserNum(System.Numerics.BigInteger.Parse(x), endChar.[0]))
         | SynConst.Unit -> Some(Constant.Unit)
         | SynConst.UInt16s(_)
@@ -115,12 +115,12 @@ module HintMatcher =
             | HintPat(_) -> None
 
         let private ofExpr expr =
-            match expr with 
-            | SynExpr.Lambda(_) | SynExpr.MatchLambda(_) | SynExpr.Match(_) 
+            match expr with
+            | SynExpr.Lambda(_) | SynExpr.MatchLambda(_) | SynExpr.Match(_)
             | SynExpr.TryFinally(_) | SynExpr.TryWith(_) -> Some 3
             | SynExpr.IfThenElse(_) -> Some 2
             | SynExpr.InferredDowncast(_) | SynExpr.InferredUpcast(_) | SynExpr.Assert(_) | SynExpr.Fixed(_)
-            | SynExpr.Lazy(_) | SynExpr.New(_) | SynExpr.StructTuple(_)
+            | SynExpr.Lazy(_) | SynExpr.New(_) | SynExpr.Tuple(true (* true = struct tuple  *) , _, _, _)
             | SynExpr.Downcast(_) | SynExpr.Upcast(_) | SynExpr.TypeTest(_) | SynExpr.AddressOf(_)
             | SynExpr.App(_) -> Some 1
             | _ -> None
@@ -136,7 +136,7 @@ module HintMatcher =
 
             let hintPrecedence =
                 match hintNode with
-                | HintExpr(Expression.Variable(varChar)) -> 
+                | HintExpr(Expression.Variable(varChar)) ->
                     match matchedVariables.TryGetValue varChar with
                     | true, expr -> ofExpr expr
                     | _ -> None
@@ -146,7 +146,7 @@ module HintMatcher =
             | Some hint, Some parent -> hint >= parent
             | _ -> false
 
-    let private filterParens astNodes = 
+    let private filterParens astNodes =
         let isNotParen = function AstNode.Expression(SynExpr.Paren(_)) -> false | _ -> true
 
         List.filter isNotParen astNodes
@@ -157,7 +157,7 @@ module HintMatcher =
         let rec private removeParens = function
             | AstNode.Expression(SynExpr.Paren(x, _, _, _)) -> x |> AstNode.Expression |> removeParens
             | x -> x
-            
+
         [<NoEquality; NoComparison>]
         type Arguments =
             { LambdaArguments: Map<char, string>
@@ -167,18 +167,18 @@ module HintMatcher =
               FSharpCheckFileResults: FSharpCheckFileResults option
               Breadcrumbs: AstNode list }
 
-            with 
+            with
                 member this.SubHint(expr, hint) =
                     { this with Expression = expr; Hint = hint }
 
         let private matchExpr = function
-            | AstNode.Expression(SynExpr.Ident(ident)) -> 
+            | AstNode.Expression(SynExpr.Ident(ident)) ->
                 let ident = identAsDecompiledOpName ident
                 Some(Expression.Identifier([ident]))
             | AstNode.Expression(SynExpr.LongIdent(_, ident, _, _)) ->
                 let identifier = ident.Lid |> List.map (fun x -> x.idText)
                 Some(Expression.Identifier(identifier))
-            | AstNode.Expression(SynExpr.Const(constant, _)) -> 
+            | AstNode.Expression(SynExpr.Const(constant, _)) ->
                 matchConst constant |> Option.map Expression.Constant
             | AstNode.Expression(SynExpr.Null(_)) ->
                 Some(Expression.Null)
@@ -197,7 +197,7 @@ module HintMatcher =
                 PossiblyInConstructor
             | AstNode.Expression(PossiblyMethodCallOrConstructor)::_
             | AstNode.Expression(SynExpr.Tuple(_))::AstNode.Expression(PossiblyMethodCallOrConstructor)::_
-            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.TypeParameter(_)::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ -> 
+            | AstNode.Expression(SynExpr.Tuple(_))::AstNode.TypeParameter(_)::AstNode.Expression(PossiblyMethodCallOrConstructor)::_ ->
                 PossiblyInMethod
             | _ -> NotInMethod
 
@@ -206,37 +206,37 @@ module HintMatcher =
             | Match of Async<bool> list
             | NoMatch
 
-        let private (&&~) lhs rhs = 
+        let private (&&~) lhs rhs =
             match lhs, rhs with
             | Match(asyncLhs), Match(asyncRhs) -> Match(asyncLhs @ asyncRhs)
             | _ -> NoMatch
-            
+
         /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
         /// or a named parameter in a method call.
         let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
-            match (leftExpr, opExpr) with 
+            match (leftExpr, opExpr) with
             | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
                 match arguments.FSharpCheckFileResults with
                 | Some(checkFile) ->
                     async {
-                        let! symbolUse = 
+                        let! symbolUse =
                             checkFile.GetSymbolUseAtLocation(
                                 ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
-                                 
-                        return    
+
+                        return
                             match symbolUse with
                             | Some(symbolUse) ->
                                 match symbolUse.Symbol with
                                 | :? FSharpParameter -> false
                                 | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                                 | _ -> true
-                            | None -> true } 
-                    |> List.singleton 
+                            | None -> true }
+                    |> List.singleton
                     |> Match
-                | None -> 
+                | None ->
                     /// Check if in `new` expr or function application (either could be a constructor).
                     match filterParens arguments.Breadcrumbs with
-                    | PossiblyInMethod 
+                    | PossiblyInMethod
                     | PossiblyInConstructor -> NoMatch
                     | _ -> Match([])
             | _ -> Match([])
@@ -248,12 +248,12 @@ module HintMatcher =
             match arguments.Hint with
             | Expression.Variable(variable) when arguments.LambdaArguments |> Map.containsKey variable ->
                 match expr with
-                | AstNode.Expression(SynExpr.Ident(identifier)) 
-                        when identifier.idText = arguments.LambdaArguments.[variable] -> 
+                | AstNode.Expression(SynExpr.Ident(identifier))
+                        when identifier.idText = arguments.LambdaArguments.[variable] ->
                     Match([])
                 | _ -> NoMatch
             | Expression.Variable(var) ->
-                match expr with 
+                match expr with
                 | AstNode.Expression(expr) -> arguments.MatchedVariables.Add(var, expr)
                 | _ -> ()
                 Match([])
@@ -264,7 +264,7 @@ module HintMatcher =
             | Expression.Identifier(_) ->
                 if matchExpr expr = Some(arguments.Hint) then Match([])
                 else NoMatch
-            | Expression.Parentheses(hint) -> 
+            | Expression.Parentheses(hint) ->
                 arguments.SubHint(expr, hint) |> matchHintExpr
             | Expression.Tuple(_) ->
                 matchTuple arguments
@@ -280,7 +280,7 @@ module HintMatcher =
                 matchPrefixOperation arguments
             | Expression.InfixOperator(_) ->
                 matchInfixOperation arguments
-            | Expression.FunctionApplication(_) -> 
+            | Expression.FunctionApplication(_) ->
                 matchFunctionApplication arguments
             | Expression.Lambda(_) -> matchLambda arguments
             | Expression.LambdaArg(_)
@@ -296,7 +296,7 @@ module HintMatcher =
 
         and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
             if List.length expressions = List.length hintExpressions then
-                (expressions, hintExpressions) 
+                (expressions, hintExpressions)
                 ||> List.map2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
                 |> List.fold (&&~) (Match([]))
             else
@@ -304,12 +304,12 @@ module HintMatcher =
 
         and private matchIf arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)), 
-              Expression.If(hintCond, hintExpr, None) -> 
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
+              Expression.If(hintCond, hintExpr, None) ->
                 arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
                 (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr)
-            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)), 
-              Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) -> 
+            | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)),
+              Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) ->
                 arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
                 (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr) &&~
                 (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
@@ -317,16 +317,16 @@ module HintMatcher =
 
         and matchLambda arguments =
             match (arguments.Expression, arguments.Hint) with
-            | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) -> 
+            | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
                 match matchLambdaArguments lambdaArgs args with
-                | LambdaMatch.Match(lambdaArguments) -> 
+                | LambdaMatch.Match(lambdaArguments) ->
                     matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
                 | LambdaMatch.NoMatch -> NoMatch
             | _ -> NoMatch
 
         and private matchTuple arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.Tuple(expressions, _, _)), Expression.Tuple(hintExpressions) ->
+            | AstNode.Expression(SynExpr.Tuple(_, expressions, _, _)), Expression.Tuple(hintExpressions) ->
                 let expressions = List.map AstNode.Expression expressions
                 doExpressionsMatch expressions hintExpressions arguments
             | _ -> NoMatch
@@ -351,13 +351,13 @@ module HintMatcher =
 
         and private matchInfixOperation arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple([leftExpr; rightExpr], _, _), _)), 
+            | AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple(_, [leftExpr; rightExpr], _, _), _)),
                     Expression.InfixOperator(op, left, right) ->
                 arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&~
                 (arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr) &&~
                 (arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr)
-            | AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)), 
-                    Expression.InfixOperator(op, left, right) -> 
+            | AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)),
+                    Expression.InfixOperator(op, left, right) ->
 
                 match removeParens <| AstNode.Expression(infixExpr) with
                 | AstNode.Expression(SynExpr.App(_, true, opExpr, leftExpr, _)) ->
@@ -370,8 +370,8 @@ module HintMatcher =
 
         and private matchPrefixOperation arguments =
             match (arguments.Expression, arguments.Hint) with
-            | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)), 
-                    Expression.PrefixOperator(Expression.Identifier([op]), expr) -> 
+            | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)),
+                    Expression.PrefixOperator(Expression.Identifier([op]), expr) ->
                 arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&~
                 (arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr)
             | _ -> NoMatch
@@ -388,7 +388,7 @@ module HintMatcher =
             | SynPat.LongIdent(ident, _, _, _, _, _) ->
                 let identifier = ident.Lid |> List.map (fun x -> x.idText)
                 Some(Pattern.Identifier(identifier))
-            | SynPat.Const(constant, _) -> 
+            | SynPat.Const(constant, _) ->
                 matchConst constant |> Option.map Pattern.Constant
             | SynPat.Null(_) ->
                 Some(Pattern.Null)
@@ -398,7 +398,7 @@ module HintMatcher =
         let rec private removeParens = function
             | SynPat.Paren(x, _) -> removeParens x
             | x -> x
-    
+
         let rec matchHintPattern (pattern, hint) =
             let pattern = removeParens pattern
 
@@ -414,7 +414,7 @@ module HintMatcher =
                 matchConsPattern (pattern, hint)
             | Pattern.Or(_) ->
                 matchOrPattern (pattern, hint)
-            | Pattern.Parentheses(hint) -> 
+            | Pattern.Parentheses(hint) ->
                 matchHintPattern (pattern, hint)
             | Pattern.Tuple(_) ->
                 matchTuple (pattern, hint)
@@ -441,18 +441,18 @@ module HintMatcher =
 
         and private matchTuple (pattern, hint) =
             match (pattern, hint) with
-            | SynPat.Tuple(patterns, _), Pattern.Tuple(hintExpressions) ->
+            | SynPat.Tuple(_, patterns, _), Pattern.Tuple(hintExpressions) ->
                 doPatternsMatch patterns hintExpressions
             | _ -> false
-            
+
         and private matchConsPattern (pattern, hint) =
             match (pattern, hint) with
             | SynPat.LongIdent(
-                                LongIdentWithDots([ident],_), 
-                                _, 
-                                _, 
-                                Pats([SynPat.Tuple([leftPattern;rightPattern], _)]), 
-                                _, 
+                                LongIdentWithDots([ident],_),
+                                _,
+                                _,
+                                Pats([SynPat.Tuple(_, [leftPattern;rightPattern], _)]),
+                                _,
                                 _), Pattern.Cons(left, right)
                     when ident.idText = "op_ColonColon" ->
                 matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
@@ -488,7 +488,7 @@ module HintMatcher =
 
         let private surroundExpressionsString hintToString left right sep expressions =
             let inside =
-                expressions 
+                expressions
                 |> List.map hintToString
                 |> String.concat sep
 
@@ -496,19 +496,19 @@ module HintMatcher =
 
         let private opToString = function
             | Expression.Identifier(identifier) -> String.concat "." identifier
-            | x -> 
+            | x ->
                 Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString())
                 ""
 
         let rec toString replace parentAstNode args (matchedVariables:Dictionary<_, SynExpr>) parentHintNode hintNode =
             let toString = toString replace parentAstNode args matchedVariables (Some hintNode)
 
-            let str = 
+            let str =
                 match hintNode with
-                | HintExpr(Expression.Variable(varChar)) when replace -> 
+                | HintExpr(Expression.Variable(varChar)) when replace ->
                     match matchedVariables.TryGetValue varChar with
-                    | true, expr -> 
-                        match args.Info.TryFindTextOfRange expr.Range with 
+                    | true, expr ->
+                        match args.Info.TryFindTextOfRange expr.Range with
                         | Some(replacement) -> replacement
                         | _ -> varChar.ToString()
                     | _ -> varChar.ToString()
@@ -517,7 +517,7 @@ module HintMatcher =
                 | HintExpr(Expression.Wildcard)
                 | HintPat(Pattern.Wildcard) -> "_"
                 | HintExpr(Expression.Constant(constant))
-                | HintPat(Pattern.Constant(constant)) -> 
+                | HintPat(Pattern.Constant(constant)) ->
                     constantToString constant
                 | HintExpr(Expression.Identifier(identifier))
                 | HintPat(Pattern.Identifier(identifier)) ->
@@ -538,8 +538,8 @@ module HintMatcher =
                     opToString operator + toString (HintExpr hint)
                 | HintExpr(Expression.Parentheses(hint)) -> "(" + toString (HintExpr hint) + ")"
                 | HintPat(Pattern.Parentheses(hint)) -> "(" + toString (HintPat hint) + ")"
-                | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) -> 
-                    "fun " + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments 
+                | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) ->
+                    "fun " + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments
                         + " -> " + toString (HintExpr body)
                 | HintExpr(Expression.LambdaArg(argument)) ->
                     toString (HintExpr argument)
@@ -567,7 +567,7 @@ module HintMatcher =
                 | HintPat(Pattern.Null) -> "null"
             if replace && Precedence.requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then "(" + str + ")"
             else str
-        and private lambdaArgumentsToString replace parentAstNode args matchedVariables (arguments:LambdaArg list) = 
+        and private lambdaArgumentsToString replace parentAstNode args matchedVariables (arguments:LambdaArg list) =
             arguments
             |> List.map (function LambdaArg(expr) -> toString replace parentAstNode args matchedVariables None (HintExpr expr))
             |> String.concat " "
@@ -576,11 +576,11 @@ module HintMatcher =
         let matched = FormatHint.toString false None args matchedVariables None hint.Match
 
         match hint.Suggestion with
-        | Suggestion.Expr(expr) -> 
+        | Suggestion.Expr(expr) ->
             let suggestion = FormatHint.toString false None args matchedVariables None (HintExpr expr)
             let errorFormatString = Resources.GetString("RulesHintRefactor")
             let error = System.String.Format(errorFormatString, matched, suggestion)
-            
+
             let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
 
             let suggestedFix = lazy(
@@ -588,23 +588,23 @@ module HintMatcher =
                 |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText }))
 
             { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
-        | Suggestion.Message(message) -> 
+        | Suggestion.Message(message) ->
             let errorFormatString = Resources.GetString("RulesHintSuggestion")
             let error = System.String.Format(errorFormatString, matched, message)
             { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
 
-    let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) = 
+    let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
         async {
             let! symbol =
                 checkFile.GetSymbolUseAtLocation(
                     methodIdent.Range.StartLine,
                     methodIdent.Range.EndColumn,
-                    "", 
+                    "",
                     methodIdent.Lid |> List.map (fun x -> x.idText))
 
             return
                 match symbol with
-                | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
+                | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
                     let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
                     if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
@@ -625,22 +625,22 @@ module HintMatcher =
             | _ -> true }
 
     /// Check if lambda can be replaced with an identifier (cannot in the case when is a parameter with the type of a delegate).
-    let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range) = 
+    let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range) =
         match filterParens breadcrumbs with
-        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_ 
-        | AstNode.Expression(SynExpr.Tuple(exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
+        | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
+        | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ ->
             match exprs |> List.tryFindIndex (fun x -> x.Range = range) with
             | Some(index) -> RequiresCheck(index, methodIdent)
             | None -> CannotBeReplaced
         | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
-        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ -> 
+        | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ ->
             RequiresCheck(0, methodIdent)
         | _ -> CanBeReplaced
 
     let private (|SuggestingReplacementOfLambda|OtherSuggestion|) = function
         | HintExpr(Expression.Lambda(_)), Suggestion.Expr(Expression.Identifier(_)) -> SuggestingReplacementOfLambda
         | _ -> OtherSuggestion
-        
+
     let private confirmFuzzyMatch args (node:AbstractSyntaxArray.Node) breadcrumbs (hint:HintParser.Hint) =
         match node.Actual, hint.Match with
         | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
@@ -648,8 +648,8 @@ module HintMatcher =
         | AstNode.Pattern(pattern), HintPat(hintPattern) ->
             if MatchPattern.matchHintPattern (pattern, hintPattern) then
                 hintError [] hint args pattern.Range (Dictionary<_, _>()) None
-                |> args.Info.Suggest 
-        | AstNode.Expression(expr), HintExpr(hintExpr) -> 
+                |> args.Info.Suggest
+        | AstNode.Expression(expr), HintExpr(hintExpr) ->
             let arguments =
                 { MatchExpression.LambdaArguments = Map.ofList []
                   MatchExpression.MatchedVariables = Dictionary<_, _>()
@@ -660,16 +660,16 @@ module HintMatcher =
 
             match MatchExpression.matchHintExpr arguments with
             | MatchExpression.Match(typeChecks) ->
-                let suggest checks = 
+                let suggest checks =
                     hintError checks hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
-                    |> args.Info.Suggest 
+                    |> args.Info.Suggest
 
                 match hint.Match, hint.Suggestion with
-                | SuggestingReplacementOfLambda -> 
+                | SuggestingReplacementOfLambda ->
                     match breadcrumbs, expr.Range with
-                    | RequiresCheck(index, methodIdent) -> 
-                        match args.CheckFile with 
-                        | Some(checkFile) -> 
+                    | RequiresCheck(index, methodIdent) ->
+                        match args.CheckFile with
+                        | Some(checkFile) ->
                             let typeCheck = canReplaceLambdaWithFunction checkFile methodIdent index
                             suggest (typeCheck::typeChecks)
                         | None -> ()
@@ -679,7 +679,7 @@ module HintMatcher =
             | MatchExpression.NoMatch -> ()
         | _ -> ()
 
-    let analyser getHints (args: AnalyserArgs) : unit = 
+    let analyser getHints (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
         let hintKeywordTree = getHints args.Info.Config
@@ -689,7 +689,7 @@ module HintMatcher =
         let confirmFuzzyMatch i =
             let breadcrumbs = AbstractSyntaxArray.getBreadcrumbs maxBreadcrumbs syntaxArray skipArray i
             let isSuppressed =
-                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
                 |> List.exists (List.exists (fun (l, _) -> l.Category = AnalyserName))
             if not isSuppressed then
                 confirmFuzzyMatch args syntaxArray.[i] breadcrumbs
@@ -702,7 +702,7 @@ module HintMatcher =
         let analyser = Map.find AnalyserName config.Analysers
 
         match Map.tryFind "Hints" analyser.Settings with
-        | Some(Hints(hints)) -> 
+        | Some(Hints(hints)) ->
             List.map (fun x -> x.ParsedHint) hints.Hints
             |> MergeSyntaxTrees.mergeHints
         | _ ->

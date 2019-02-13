@@ -21,12 +21,12 @@ module NameConventions =
     [<Literal>]
     let AnalyserName = "NameConventions"
 
-    let isPascalCase (identifier:string) = 
+    let isPascalCase (identifier:string) =
         let withoutUnderscorePrefix = identifier.TrimStart '_'
         if withoutUnderscorePrefix.Length = 0 then true
         else Char.IsUpper withoutUnderscorePrefix.[0]
 
-    let isCamelCase (identifier:string) = 
+    let isCamelCase (identifier:string) =
         let withoutUnderscorePrefix = identifier.TrimStart '_'
         if withoutUnderscorePrefix.Length = 0 then true
         else Char.IsLower withoutUnderscorePrefix.[0]
@@ -47,11 +47,11 @@ module NameConventions =
         else
             None
 
-    let private prefixRule prefix (identifier:string) =
+    let private prefixRule (prefix:string) (identifier:string) =
         if not (identifier.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
         else None
 
-    let private suffixRule suffix (identifier:string) =
+    let private suffixRule (suffix:string) (identifier:string) =
         if not (identifier.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
         else None
 
@@ -68,7 +68,7 @@ module NameConventions =
             Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
         let removeNonPrefixingUnderscores (ident: Ident) = lazy(
-            let prefixingUnderscores = 
+            let prefixingUnderscores =
                 ident.idText |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
 
             let toText = prefixingUnderscores + ident.idText.Replace("_", "")
@@ -81,7 +81,7 @@ module NameConventions =
             Some { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix })
 
         let private mapFirstChar map (str:string) =
-            let prefix = 
+            let prefix =
                 str |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
             let withoutPrefix = str.Substring prefix.Length
             if withoutPrefix.Length > 0 then
@@ -97,7 +97,7 @@ module NameConventions =
         let toCamelCase (ident: Ident) = lazy(
             let camelCaseIdent = ident.idText |> mapFirstChar Char.ToLower
             Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
-            
+
     type private NamingRule =
         { Name: string
           Casing: Naming option
@@ -115,34 +115,34 @@ module NameConventions =
             let tryAddFix fix message = (message, fix identifier)
 
             [ match this.Casing with
-              | Some(Naming.PascalCase) ->                             
+              | Some(Naming.PascalCase) ->
                   yield pascalCaseRule str
                   |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
-              | Some(Naming.CamelCase) -> 
+              | Some(Naming.CamelCase) ->
                   yield camelCaseRule str
                   |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
               | _ -> ()
 
               match this.Underscores with
-              | Some(NamingUnderscores.None) -> 
-                  yield underscoreRule false str 
+              | Some(NamingUnderscores.None) ->
+                  yield underscoreRule false str
                   |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
-              | Some(NamingUnderscores.AllowPrefix) -> 
-                  yield underscoreRule true str 
+              | Some(NamingUnderscores.AllowPrefix) ->
+                  yield underscoreRule true str
                   |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
               | _ -> ()
 
-              match this.Prefix with 
-              | Some(prefix) -> 
-                  yield prefixRule prefix str 
+              match this.Prefix with
+              | Some(prefix) ->
+                  yield prefixRule prefix str
                   |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))
               | None -> ()
 
               match this.Suffix with
-              | Some(suffix) -> 
-                  yield suffixRule suffix str 
+              | Some(suffix) ->
+                  yield suffixRule suffix str
                   |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))
-              | None -> () ] 
+              | None -> () ]
 
         member this.Check (identifier: Ident) =
             if this.Name = "ActivePatternNames" then
@@ -155,26 +155,26 @@ module NameConventions =
 
         static member Build ruleName settings =
             { Name = ruleName
-              Casing = 
+              Casing =
                 match Map.tryFind "Naming" settings with
                 | Some(Naming(Naming.PascalCase)) -> Some Naming.PascalCase
                 | Some(Naming(Naming.CamelCase)) -> Some Naming.CamelCase
                 | _ -> None
-              Underscores = 
+              Underscores =
                 match Map.tryFind "Underscores" settings with
                 | Some(Underscores(NamingUnderscores.AllowPrefix)) -> Some NamingUnderscores.AllowPrefix
                 | Some(Underscores(NamingUnderscores.None)) -> Some NamingUnderscores.None
                 | Some(Underscores(NamingUnderscores.AllowAny)) | _ -> None
-              Prefix = 
+              Prefix =
                 match Map.tryFind "Prefix" settings with
                 | Some(Prefix(prefix)) -> prefix
                 | _ -> None
-              Suffix = 
+              Suffix =
                 match Map.tryFind "Suffix" settings with
                 | Some(Suffix(suffix)) -> suffix
                 | _ -> None }
 
-    type private Rules = 
+    type private Rules =
         { InterfaceNames: NamingRule option
           ExceptionNames: NamingRule option
           TypeNames: NamingRule option
@@ -259,17 +259,17 @@ module NameConventions =
 
     [<Literal>]
     let private NumberOfExpectedBackticks = 4
-        
+
     /// Is an identifier not surrounded by double backticks? e.g. not `let ``some identifier`` = 0`.
     /// Unfortunately it's having to compare the length of the identifier in the source vs identifier length in AST,
     /// the information as to whether the identifier was backticked doesn't appear to be in the AST.
-    let private isNotDoubleBackTickedIdent = 
+    let private isNotDoubleBackTickedIdent =
         let isDoubleBackTickedIdent (identifier:Ident) =
             let diffOfRangeAgainstIdent (r:range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
 
             let range = identifier.idRange
             not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
-    
+
         isDoubleBackTickedIdent >> not
 
     let private notOperator = isOperator >> not
@@ -345,7 +345,7 @@ module NameConventions =
         | SynPat.OptionalVal(ident, _) ->
             if isActivePattern ident then
                 checkRule rules.ActivePatternNames ident
-            else 
+            else
                 let checkNotUnionCase = checkNotUnionCase ident
                 checkRule rules.ParameterNames ident
                 |> List.map (fun (x:Analyser.LintSuggestion) -> x.WithTypeCheck checkNotUnionCase)
@@ -381,7 +381,7 @@ module NameConventions =
             // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
             if hasNoArgs || argsAreParameters then
                 checker isPublic pattern @ argSuggestions
-            else 
+            else
                 argSuggestions
         | SynPat.Named(p, _, _, access, _) ->
             let isPublic = checkIfPublic isPublic access
@@ -391,8 +391,7 @@ module NameConventions =
         | SynPat.Paren(p, _) ->
             checkPattern isPublic checker false p
         | SynPat.Ands(pats, _)
-        | SynPat.StructTuple(pats, _)
-        | SynPat.Tuple(pats, _)
+        | SynPat.Tuple(_, pats, _)
         | SynPat.ArrayOrList(_, pats, _) ->
             pats |> List.collect (checkPattern isPublic checker false)
         | SynPat.Record(_)
@@ -411,15 +410,23 @@ module NameConventions =
         | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
         | SynSimplePat.Attrib(_) -> None
 
+    let isModule (moduleKind: SynModuleOrNamespaceKind) =
+        match moduleKind with
+            | AnonModule
+            | NamedModule -> true
+            | DeclaredNamespace
+            | GlobalNamespace -> false
+
     /// Is module name implicitly created from file name?
-    let private isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, isModule, _, _, _, _, range)) =
+    let private isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =
         let zeroLengthRange (r:range) =
             (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
 
         // Check the identifiers in the module name have no length.
         // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
-        isModule && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
-                      
+        // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
+        isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
+
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
@@ -436,7 +443,7 @@ module NameConventions =
                 rule.Check identifier
                 |> List.choose (fun (message, suggestedFix) ->
                     if isNotSuppressed i rule.Name then
-                        Some 
+                        Some
                             { Range = identifier.idRange
                               Message = message
                               SuggestedFix = Some suggestedFix
@@ -450,17 +457,17 @@ module NameConventions =
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, isModule, _, _, _, _, _) as synModule) ->
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, moduleKind, _, _, _, _, _) as synModule) ->
                 if not <| isImplicitModule synModule then
                     let checkIdent =
-                        if isModule then checkRule rules.ModuleNames
+                        if isModule moduleKind then checkRule rules.ModuleNames
                         else checkRule rules.NamespaceNames
 
                     identifier |> List.collect checkIdent |> List.iter args.Info.Suggest
             | AstNode.UnionCase(SynUnionCase.UnionCase(_, identifier, _, _, _, _)) ->
                 checkRule rules.UnionCasesNames identifier |> List.iter args.Info.Suggest
             | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
-                identifier 
+                identifier
                 |> Option.map (checkRule rules.RecordFieldNames)
                 |> Option.iter (List.iter args.Info.Suggest)
             | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
@@ -502,8 +509,8 @@ module NameConventions =
                                 checkRule rules.InterfaceNames typeIdentifier
                                 |> List.iter args.Info.Suggest
                             else
-                                identifier 
-                                |> List.collect (checkRule rules.TypeNames) 
+                                identifier
+                                |> List.collect (checkRule rules.TypeNames)
                                 |> List.iter args.Info.Suggest
                         | _ -> ()
             | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
