@@ -391,8 +391,7 @@ module NameConventions =
         | SynPat.Paren(p, _) ->
             checkPattern isPublic checker false p
         | SynPat.Ands(pats, _)
-        | SynPat.StructTuple(pats, _)
-        | SynPat.Tuple(pats, _)
+        | SynPat.Tuple(_, pats, _)
         | SynPat.ArrayOrList(_, pats, _) ->
             pats |> List.collect (checkPattern isPublic checker false)
         | SynPat.Record(_)
@@ -411,14 +410,22 @@ module NameConventions =
         | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
         | SynSimplePat.Attrib(_) -> None
 
+    let isModule (moduleKind: SynModuleOrNamespaceKind) =
+        match moduleKind with
+            | AnonModule
+            | NamedModule -> true
+            | DeclaredNamespace
+            | GlobalNamespace -> false
+
     /// Is module name implicitly created from file name?
-    let private isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, isModule, _, _, _, _, range)) =
+    let private isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =
         let zeroLengthRange (r:range) =
             (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
 
         // Check the identifiers in the module name have no length.
         // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
-        isModule && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
+        // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
+        isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
 
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
@@ -450,10 +457,10 @@ module NameConventions =
             let checkRule = checkNamingRule i
 
             match syntaxArray.[i].Actual with
-            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, isModule, _, _, _, _, _) as synModule) ->
+            | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(identifier, _, moduleKind, _, _, _, _, _) as synModule) ->
                 if not <| isImplicitModule synModule then
                     let checkIdent =
-                        if isModule then checkRule rules.ModuleNames
+                        if isModule moduleKind then checkRule rules.ModuleNames
                         else checkRule rules.NamespaceNames
 
                     identifier |> List.collect checkIdent |> List.iter args.Info.Suggest

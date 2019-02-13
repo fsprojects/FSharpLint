@@ -1,7 +1,7 @@
 ﻿namespace FSharpLint.Rules
 
 module NestedStatements =
-    
+
     open System
     open Microsoft.FSharp.Compiler.Ast
     open FSharpLint.Framework
@@ -11,7 +11,7 @@ module NestedStatements =
 
     [<Literal>]
     let AnalyserName = "NestedStatements"
-    
+
     let private configDepth config =
         match isAnalyserEnabled config AnalyserName with
         | Some(analyser) ->
@@ -28,7 +28,7 @@ module NestedStatements =
     /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
     /// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
     let private isCompilerGeneratedMatch = function
-        | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
+        | SynExpr.Match(_, SynExpr.Ident(ident), _, _) when ident.idText.StartsWith("_arg") -> true
         | _ -> false
 
     let private areChildrenNested = function
@@ -49,7 +49,7 @@ module NestedStatements =
         | AstNode.Expression(SynExpr.Match(_) as matchExpr) when not (isCompilerGeneratedMatch matchExpr) -> true
         | _ -> false
 
-    let private getRange = function 
+    let private getRange = function
         | AstNode.Expression(node) -> Some node.Range
         | AstNode.Binding(node) -> Some node.RangeOfBindingAndRhs
         | _ -> None
@@ -70,18 +70,18 @@ module NestedStatements =
 
         distance
 
-    let analyser (args: AnalyserArgs) : unit = 
+    let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 
         let isSuppressed i =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i 
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName AbstractSyntaxArray.SuppressRuleWildcard
 
         match configDepth args.Info.Config with
         | Some(errorDepth) ->
             let error = error errorDepth
 
-            /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo 
+            /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
             /// e.g. lambda arg being a duplicate of the lamdba.
             let isMetaData node i =
                 let parentIndex = skipArray.[i].ParentIndex
@@ -109,7 +109,7 @@ module NestedStatements =
                     if parent <> i && parent <> skipArray.[i].ParentIndex then
                         // Decrement depth until we reach a common parent.
                         depth <- depth - (distanceToCommonParent syntaxArray skipArray i j)
-                        
+
             let mutable i = 0
             while i < syntaxArray.Length do
                 decrementDepthToCommonParent i (i + 1)
@@ -119,9 +119,9 @@ module NestedStatements =
                 if areChildrenNested node && not <| isMetaData node i && not <| isElseIf node i then
                     if depth >= errorDepth then
                         if not (isSuppressed i) then
-                            getRange node 
-                            |> Option.iter (fun range -> 
-                                args.Info.Suggest 
+                            getRange node
+                            |> Option.iter (fun range ->
+                                args.Info.Suggest
                                     { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] })
 
                         // Skip children as we've had an error containing them.

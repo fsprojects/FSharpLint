@@ -10,22 +10,24 @@ open Microsoft.FSharp.Compiler.Ast
 open Microsoft.FSharp.Compiler.SourceCodeServices
 
 let stubBinding attributes =
-    SynBinding.Binding(None, 
-                       SynBindingKind.NormalBinding, 
-                       false, 
-                       false, 
-                       attributes, 
-                       PreXmlDoc.PreXmlDocEmpty, 
-                       SynValData(None, SynValInfo.SynValInfo([], SynArgInfo.SynArgInfo([], false, None)), None), 
-                       SynPat.Wild(range()), 
-                       None, 
-                       SynExpr.Null(range()), 
-                       range(), 
+    SynBinding.Binding(None,
+                       SynBindingKind.NormalBinding,
+                       false,
+                       false,
+                       attributes,
+                       PreXmlDoc.PreXmlDocEmpty,
+                       SynValData(None, SynValInfo.SynValInfo([], SynArgInfo.SynArgInfo([], false, None)), None),
+                       SynPat.Wild(range()),
+                       None,
+                       SynExpr.Null(range()),
+                       range(),
                        SequencePointInfoForBinding.NoSequencePointAtLetBinding)
 
 let stubConstString str = SynExpr.Const(SynConst.String(str, range()), range())
 
-let stubTuple exprs = SynExpr.Tuple(exprs, [], range())
+let stubTuple exprs = SynExpr.Tuple(false, exprs, [], range())
+
+let stubStructTuple exprs = SynExpr.Tuple(true, exprs, [], range())
 
 let stubParen expr = SynExpr.Paren(expr, range(), None, range())
 
@@ -37,21 +39,21 @@ let stubAttribute name argExpr =
       SynAttribute.ArgExpr = argExpr }
 
 let stubPropertyInitialiser propertyName value =
-    SynExpr.App(ExprAtomicFlag.NonAtomic, 
-                false, 
-                SynExpr.App(ExprAtomicFlag.NonAtomic, false, SynExpr.Ident(Ident("op_Equality", range())), SynExpr.Ident(Ident(propertyName, range())), range()), 
-                stubConstString value, 
+    SynExpr.App(ExprAtomicFlag.NonAtomic,
+                false,
+                SynExpr.App(ExprAtomicFlag.NonAtomic, false, SynExpr.Ident(Ident("op_Equality", range())), SynExpr.Ident(Ident(propertyName, range())), range()),
+                stubConstString value,
                 range())
 
 [<TestFixture>]
 type TestAst() =
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithConstructorArgs() = 
-        let attributes = 
-            [ [stubConstString "Analyser"; stubConstString "Rule"] 
-              |> stubTuple 
-              |> stubParen 
+    member __.GetSuppressMessageAttributesWithConstructorArgs() =
+        let attributes =
+            [ [stubConstString "Analyser"; stubConstString "Rule"]
+              |> stubTuple
+              |> stubParen
               |> stubAttribute "SuppressMessage" ]
 
         let binding = AstNode.Binding(stubBinding attributes)
@@ -61,11 +63,11 @@ type TestAst() =
         Assert.AreEqual({ Category = "Analyser"; Rule = "Rule" }, attrs |> List.head |> fst)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisers() = 
-        let attributes = 
-            [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "CheckId" "*"] 
-              |> stubTuple 
-              |> stubParen 
+    member __.GetSuppressMessageAttributesWithPropertyInitialisers() =
+        let attributes =
+            [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "CheckId" "*"]
+              |> stubTuple
+              |> stubParen
               |> stubAttribute "SuppressMessage" ]
 
         let binding = AstNode.Binding(stubBinding attributes)
@@ -75,11 +77,11 @@ type TestAst() =
         Assert.AreEqual({ Category = "Analyser"; Rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() = 
-        let attributes = 
-            [ [stubPropertyInitialiser "SomeProp" "Analyser"; stubPropertyInitialiser "CheckId" "*"] 
-              |> stubTuple 
-              |> stubParen 
+    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() =
+        let attributes =
+            [ [stubPropertyInitialiser "SomeProp" "Analyser"; stubPropertyInitialiser "CheckId" "*"]
+              |> stubTuple
+              |> stubParen
               |> stubAttribute "SuppressMessage" ]
 
         let binding = AstNode.Binding(stubBinding attributes)
@@ -87,11 +89,11 @@ type TestAst() =
         Assert.IsEmpty(getSuppressMessageAttributes binding)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCheckIdProperty() = 
-        let attributes = 
-            [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "SomeProp" "*"] 
-              |> stubTuple 
-              |> stubParen 
+    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCheckIdProperty() =
+        let attributes =
+            [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "SomeProp" "*"]
+              |> stubTuple
+              |> stubParen
               |> stubAttribute "SuppressMessage" ]
 
         let binding = AstNode.Binding(stubBinding attributes)
@@ -99,13 +101,13 @@ type TestAst() =
         Assert.IsEmpty(getSuppressMessageAttributes binding)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersWithExtraProperty() = 
-        let attributes = 
+    member __.GetSuppressMessageAttributesWithPropertyInitialisersWithExtraProperty() =
+        let attributes =
             [ [ stubPropertyInitialiser "AnotherProp" "gwegweg"
                 stubPropertyInitialiser "Category" "Analyser"
-                stubPropertyInitialiser "CheckId" "*" ] 
-              |> stubTuple 
-              |> stubParen 
+                stubPropertyInitialiser "CheckId" "*" ]
+              |> stubTuple
+              |> stubParen
               |> stubAttribute "SuppressMessage" ]
 
         let binding = AstNode.Binding(stubBinding attributes)
