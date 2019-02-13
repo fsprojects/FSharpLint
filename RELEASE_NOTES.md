@@ -1,3 +1,7 @@
+##### 0.10.5 - February 13 2019
+
+* Update `FSharp.Compiler.Service`, by baronfel 
+
 ##### 0.10.4 - February 11 2019
 
 * Improve tuple item spacing check, by jgardella
