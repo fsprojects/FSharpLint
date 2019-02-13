@@ -1,14 +1,14 @@
 ﻿namespace FSharpLint.Framework
 
 module Utilities =
-    
-    /// Fast hash of two objects without having to allocate 
+
+    /// Fast hash of two objects without having to allocate
     /// (e.g. a common approach would be to take the hash code of a tuple of the two objects).
     let inline hash2 one two =
         let mutable current = 23
         current <- current * 31 + hash one
         current * 31 + hash two
-        
+
     let (</>) x y = System.IO.Path.Combine(x, y)
 
 module Dictionary =
@@ -39,9 +39,9 @@ module ExpressionUtilities =
             let identNames = ident |> List.map (fun x -> x.idText)
 
             checkFile.GetSymbolUseAtLocation(
-                range.StartLine, 
-                range.EndColumn, 
-                "", 
+                range.StartLine,
+                range.EndColumn,
+                "",
                 identNames) |> Async.RunSynchronously
         | _ -> None
 
@@ -51,7 +51,7 @@ module ExpressionUtilities =
             PrettyNaming.DecompileOpName ident.idText
         else ident.idText
 
-    let identAsCompiledOpName = PrettyNaming.CompileOpName 
+    let identAsCompiledOpName = PrettyNaming.CompileOpName
 
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function
@@ -59,8 +59,8 @@ module ExpressionUtilities =
         | x -> x
 
     /// Finds index of a given (line number, column) position in a string.
-    let findPos (pos:pos) (str:string) = 
-        let rec findLineStart lineNumber currLine currPos =
+    let findPos (pos:pos) (str:string) =
+        let rec findLineStart (lineNumber:int) currLine (currPos:int) =
             if currLine = lineNumber then Some currPos
             else
                 let nextLinePos = str.IndexOf('\n', currPos)
