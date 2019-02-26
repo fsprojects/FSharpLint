@@ -6,7 +6,6 @@ module HintMatcher =
     open System.Diagnostics
     open FSharp.Compiler.Ast
     open FSharp.Compiler.PrettyNaming
-    open FSharp.Compiler.Range
     open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
@@ -17,9 +16,6 @@ module HintMatcher =
 
     [<Literal>]
     let AnalyserName = "Hints"
-
-    let private isAnalyserEnabled config =
-        (isAnalyserEnabled config AnalyserName).IsSome
 
     let rec private extractSimplePatterns = function
         | SynSimplePats.SimplePats(simplePatterns, _) ->
@@ -227,7 +223,8 @@ module HintMatcher =
                             match symbolUse with
                             | Some(symbolUse) ->
                                 match symbolUse.Symbol with
-                                | :? FSharpParameter -> false
+                                | :? FSharpParameter 
+                                | :? FSharpField -> false
                                 | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                                 | _ -> true
                             | None -> true }
