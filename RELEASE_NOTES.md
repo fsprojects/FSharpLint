@@ -1,3 +1,7 @@
+##### 0.10.6 - February 26 2019
+
+* Update `FSharp.Compiler.Service` 
+
 ##### 0.10.5 - February 13 2019
 
 * Update `FSharp.Compiler.Service`, by baronfel 
