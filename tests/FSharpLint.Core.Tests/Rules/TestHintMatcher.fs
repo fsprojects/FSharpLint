@@ -711,6 +711,25 @@ do
     ()""", config)
 
         this.AssertNoWarnings()  
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/304
+    [<Test>]
+    member this.``Equality hint must not match an expression that's assigning a field within a constructor.``() = 
+        let config = generateHintConfig ["x = true ===> x"]
+        
+        this.Parse("""
+module Goat
+
+type Foo =
+    new() = { X = false }
+    val X : bool
+
+
+do
+    let _ = Foo(X = true)
+    ()""", config, checkInput = true)
+
+        this.AssertNoWarnings()  
       
     
 [<TestFixture>]
