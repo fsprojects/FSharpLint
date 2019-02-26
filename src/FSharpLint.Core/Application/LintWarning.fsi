@@ -3,7 +3,7 @@
 /// Contains functionality to help report lint warnings.
 module LintWarning =
 
-    open Microsoft.FSharp.Compiler.Range
+    open FSharp.Compiler.Range
     open FSharpLint.Framework
 
 

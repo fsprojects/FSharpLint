@@ -1,7 +1,7 @@
 ﻿namespace FSharpLint.Framework
 
 open FParsec
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.SourceCodeServices
 
 module HintParser =
 

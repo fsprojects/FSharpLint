@@ -5,9 +5,9 @@ module Conventions =
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Configuration
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.Range
+    open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Ast
 
     [<Literal>]

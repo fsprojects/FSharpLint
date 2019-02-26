@@ -8,7 +8,7 @@ open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.HintParser
 open FSharpLint.Rules.HintMatcher
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.SourceCodeServices
 
 let generateHintConfig hints =
     let parseHints hints =

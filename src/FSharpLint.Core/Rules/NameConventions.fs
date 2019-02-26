@@ -9,9 +9,9 @@ module NameConventions =
     open System
     open System.Linq
     open System.Text.RegularExpressions
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.Range
+    open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast
@@ -56,7 +56,7 @@ module NameConventions =
         else None
 
     let private isActivePattern (identifier:Ident) =
-        Microsoft.FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
+        FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
     let private activePatternIdentifiers (identifier:Ident) =
         identifier.idText.Split('|')

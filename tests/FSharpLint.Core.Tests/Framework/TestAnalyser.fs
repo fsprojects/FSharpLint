@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open FSharpLint.Framework.Analyser
-open Microsoft.FSharp.Compiler.Range
+open FSharp.Compiler.Range
 
 [<TestFixture>]
 type TestAnalyser() =

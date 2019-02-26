@@ -63,7 +63,7 @@ module Program =
         lintFile parseInfo pathToFile
 
     let private runLintOnSource source =
-        let getErrorMessage (range:Microsoft.FSharp.Compiler.Range.range) =
+        let getErrorMessage (range:FSharp.Compiler.Range.range) =
             let error = Resources.GetString("LintSourceError")
             String.Format(error, range.StartLine, range.StartColumn)
 
