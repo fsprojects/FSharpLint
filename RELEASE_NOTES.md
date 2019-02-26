@@ -1,3 +1,7 @@
+##### 0.10.7 - February 26 2019
+
+* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/304
+
 ##### 0.10.6 - February 26 2019
 
 * Update `FSharp.Compiler.Service` 
