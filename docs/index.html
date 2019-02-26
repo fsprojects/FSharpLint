@@ -147,9 +147,14 @@ let x = List.fold (+) 0 [1;2;3]
 <h4>Building The Tool</h4>
 <p>On windows run <code>build.cmd</code> and on unix based systems run <code>build.sh</code>.</p>
 <h4>Running The Tool</h4>
-<p>The tool can be run from the command line, or as an MSBuild task.</p>
+<p>The tool can be run from the command line as a dotnet tool:</p>
 <ul>
 <li><a href="Console-Application.html">Running the command line tool</a>.</li>
+</ul>
+<p>The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the timebeing it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:</p>
+<ul>
+<li><a href="https://www.nuget.org/packages/FSharpLint.MSBuild">Deprecated MSBuild Task</a></li>
+<li><a href="https://www.nuget.org/packages/FSharpLint.Fake">Deprecated Fake Task</a></li>
 </ul>
 <h4>Analysers</h4>
 <ul>
