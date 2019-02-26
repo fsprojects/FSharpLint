@@ -73,9 +73,14 @@ On windows run `build.cmd` and on unix based systems run `build.sh`.
 
 #### Running The Tool
 
-The tool can be run from the command line, or as an MSBuild task. 
+The tool can be run from the command line as a dotnet tool:
 
 * [Running the command line tool](Console-Application.html).
+
+The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the timebeing it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:
+
+* [Deprecated MSBuild Task](https://www.nuget.org/packages/FSharpLint.MSBuild)
+* [Deprecated Fake Task](https://www.nuget.org/packages/FSharpLint.Fake)
 
 #### Analysers
 
