@@ -223,7 +223,8 @@ module HintMatcher =
                             match symbolUse with
                             | Some(symbolUse) ->
                                 match symbolUse.Symbol with
-                                | :? FSharpParameter -> false
+                                | :? FSharpParameter 
+                                | :? FSharpField -> false
                                 | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                                 | _ -> true
                             | None -> true }
