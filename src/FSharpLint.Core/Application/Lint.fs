@@ -97,7 +97,7 @@ module Lint =
     open System.IO
     open System.Runtime.InteropServices
     open System.Threading
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.SourceCodeServices
     open FSharpLint
     open FSharpLint.Framework
 
@@ -128,7 +128,7 @@ module Lint =
             with get() =
                 let getParseFailureReason = function
                     | ParseFile.FailedToParseFile(failures) ->
-                        let getFailureReason (x:Microsoft.FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
+                        let getFailureReason (x:FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
                             sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
                         String.Join(", ", failures |> Array.map getFailureReason)
@@ -406,7 +406,7 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation =
         { /// File represented as an AST.
-          Ast: Microsoft.FSharp.Compiler.Ast.ParsedInput
+          Ast: FSharp.Compiler.Ast.ParsedInput
 
           /// Contents of the file.
           Source: string

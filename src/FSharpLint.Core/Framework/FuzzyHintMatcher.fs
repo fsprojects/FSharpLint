@@ -17,7 +17,7 @@ open System.Collections.Generic
 /// which is pretty fast.
 module FuzzyHintMatcher =
 
-    open Microsoft.FSharp.Compiler.Ast
+    open FSharp.Compiler.Ast
 
     open Ast
 

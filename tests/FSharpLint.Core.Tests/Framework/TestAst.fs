@@ -5,9 +5,9 @@ open NUnit.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
-open Microsoft.FSharp.Compiler.Range
-open Microsoft.FSharp.Compiler.Ast
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Range
+open FSharp.Compiler.Ast
+open FSharp.Compiler.SourceCodeServices
 
 let stubBinding attributes =
     SynBinding.Binding(None,

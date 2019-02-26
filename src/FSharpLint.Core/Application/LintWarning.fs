@@ -4,7 +4,7 @@
 module LintWarning =
 
     open System
-    open Microsoft.FSharp.Compiler.Range
+    open FSharp.Compiler.Range
     open FSharpLint.Framework
 
     /// Gets a message stating where a lint warning occured.

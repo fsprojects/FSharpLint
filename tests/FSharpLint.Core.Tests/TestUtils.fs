@@ -1,7 +1,7 @@
 ﻿module TestUtils
 
     open System.IO
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.SourceCodeServices
     open NUnit.Framework
     open FSharpLint.Framework
     open Utilities

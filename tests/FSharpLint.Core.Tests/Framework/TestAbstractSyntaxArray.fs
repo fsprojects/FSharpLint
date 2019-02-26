@@ -5,9 +5,9 @@ open System.Diagnostics
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
-open Microsoft.FSharp.Compiler.Ast
-open Microsoft.FSharp.Compiler.Range
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Ast
+open FSharp.Compiler.Range
+open FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Reflection
 open NUnit.Framework
 open TestUtils

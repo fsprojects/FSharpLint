@@ -84,13 +84,13 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation =
         { /// File represented as an AST.
-          Ast: Microsoft.FSharp.Compiler.Ast.ParsedInput
+          Ast: FSharp.Compiler.Ast.ParsedInput
 
           /// Contents of the file.
           Source: string
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: Microsoft.FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
+          TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
           
     type BuildFailure = | InvalidProjectFileMessage of string
 

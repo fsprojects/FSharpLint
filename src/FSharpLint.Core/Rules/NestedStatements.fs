@@ -3,7 +3,7 @@
 module NestedStatements =
 
     open System
-    open Microsoft.FSharp.Compiler.Ast
+    open FSharp.Compiler.Ast
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast

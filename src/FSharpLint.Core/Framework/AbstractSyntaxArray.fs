@@ -4,8 +4,8 @@ module AbstractSyntaxArray =
 
     open System.Collections.Generic
     open System.Diagnostics
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.Range
 
     open Ast
 

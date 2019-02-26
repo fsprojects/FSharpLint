@@ -2,7 +2,7 @@
 
 module AstInfo =
 
-    open Microsoft.FSharp.Compiler.Ast
+    open FSharp.Compiler.Ast
     open Ast
 
     type IdentifierType =

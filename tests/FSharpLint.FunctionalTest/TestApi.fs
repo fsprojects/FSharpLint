@@ -7,7 +7,7 @@ module TestApi =
     open System.Diagnostics
     open NUnit.Framework
     open FSharpLint.Application.Lint
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.SourceCodeServices
 
     let (</>) x y = Path.Combine(x, y)
 

@@ -8,8 +8,8 @@ module Typography =
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Configuration
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.Range
     open FSharpLint.Framework.Ast
 
     [<Literal>]

@@ -7,9 +7,9 @@ module ParseFile =
     open System.Reflection
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
-    open Microsoft.FSharp.Compiler
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.SourceCodeServices
     open Utilities
 
     /// Information for a file to be linted that is given to the analysers.

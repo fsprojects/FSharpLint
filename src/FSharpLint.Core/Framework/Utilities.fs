@@ -23,10 +23,10 @@ module Dictionary =
 
 module ExpressionUtilities =
 
-    open Microsoft.FSharp.Compiler
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.Range
+    open FSharp.Compiler.SourceCodeServices
 
     let (|Identifier|_|) = function
         | SynExpr.Ident(ident) -> Some([ident], ident.idRange)

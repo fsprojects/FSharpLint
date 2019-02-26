@@ -4,10 +4,10 @@ module HintMatcher =
 
     open System.Collections.Generic
     open System.Diagnostics
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.PrettyNaming
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.PrettyNaming
+    open FSharp.Compiler.Range
+    open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast

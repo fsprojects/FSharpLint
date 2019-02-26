@@ -3,8 +3,8 @@
 module Analyser =
 
     open System
-    open Microsoft.FSharp.Compiler.Range
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Range
+    open FSharp.Compiler.SourceCodeServices
 
     /// Information for consuming applications to provide an automated fix for a lint suggestion.
     [<NoEquality; NoComparison>]

@@ -4,8 +4,8 @@ open System
 open System.Diagnostics
 open System.Text
 open NUnit.Framework
-open Microsoft.FSharp.Compiler.Range
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Range
+open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework
 open FSharpLint.Framework.Analyser
 open FSharpLint.Framework.Ast

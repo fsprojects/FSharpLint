@@ -5,8 +5,8 @@
 module FunctionReimplementation =
     
     open System
-    open Microsoft.FSharp.Compiler.Ast
-    open Microsoft.FSharp.Compiler.PrettyNaming
+    open FSharp.Compiler.Ast
+    open FSharp.Compiler.PrettyNaming
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast

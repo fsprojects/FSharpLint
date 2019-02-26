@@ -5,7 +5,7 @@
 module Ast =
 
     open System.Collections.Generic
-    open Microsoft.FSharp.Compiler.Ast
+    open FSharp.Compiler.Ast
 
     /// Represents a SuppressedMessageAttribute found in the AST.
     type SuppressedMessage =
