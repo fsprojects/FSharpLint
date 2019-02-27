@@ -1,4 +1,5 @@
 source https://api.nuget.org/v3/index.json
+storage: none
 
 nuget FParsec
 nuget FSharp.Compiler.Service >= 27.0.1
@@ -10,6 +11,7 @@ nuget Microsoft.NET.Test.Sdk
 
 group Tools
 source https://api.nuget.org/v3/index.json
+storage: none
 
 nuget fake-cli
 nuget FSharp.Formatting
