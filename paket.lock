@@ -567,9 +567,9 @@ NUGET
       System.Xml.XPath (>= 4.3)
 
 GROUP Tools
-STORAGE: NONE
 NUGET
   remote: https://api.nuget.org/v3/index.json
+    fake-cli (5.12.4)
     FSharp.Compiler.Service (2.0.0.6)
     FSharp.Formatting (2.14.4)
       FSharp.Compiler.Service (2.0.0.6)
@@ -577,4 +577,3 @@ NUGET
     FSharp.Formatting.CommandTool (2.14.4)
     FSharpVSPowerTools.Core (2.3)
       FSharp.Compiler.Service (>= 2.0.0.3)
-    fake-cli (5.12.4)

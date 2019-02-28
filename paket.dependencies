@@ -12,7 +12,6 @@ nuget Microsoft.NET.Test.Sdk
 
 group Tools
 source https://api.nuget.org/v3/index.json
-storage: none
 
 nuget fake-cli
 nuget FSharp.Formatting
