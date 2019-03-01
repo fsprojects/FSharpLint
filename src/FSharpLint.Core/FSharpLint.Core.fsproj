@@ -44,11 +44,14 @@
     <Compile Include="Application/LintWarning.fs" />
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application/Lint.fs" />
+    <Compile Include="Application\NewConfigurationManager.fs" />
+    <Compile Include="Application\NewLint.fs" />
     <Compile Include="Application/ConfigurationManager.fs" />
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

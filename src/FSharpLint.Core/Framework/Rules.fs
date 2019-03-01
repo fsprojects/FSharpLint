@@ -3,12 +3,11 @@
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Analyser
 
-type AstNodeRuleParams<'Config> =
+type AstNodeRuleParams =
     { astNode : AstNode 
-      info : AnalyserInfo
-      config : 'Config }
+      fileContent : string }
 
-type Rule<'Params> =
+type RuleWithParams<'Params> =
   { name : string
     identifier : string option
     runner : 'Params -> LintSuggestion [] }

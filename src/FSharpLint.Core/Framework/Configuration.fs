@@ -1,4 +1,4 @@
-﻿namespace FSharpLint.Framework
+﻿namespace FSharpLint.Framework    
 
 /// Loads configuration files from xml into an object.
 /// When a configuration file has already been loaded, loading another one overwrites the existing configuration.

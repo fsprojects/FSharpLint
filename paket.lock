@@ -79,7 +79,7 @@ NUGET
       System.Security.Principal.Windows (>= 4.5)
     NETStandard.Library (2.0.3) - restriction: || (&& (== net461) (< net20) (>= netstandard2.0)) (&& (== net461) (>= netcoreapp1.0)) (== netcoreapp2.1) (== netstandard2.0)
       Microsoft.NETCore.Platforms (>= 1.1)
-    Newtonsoft.Json (12.0.1) - restriction: || (&& (== net461) (>= netcoreapp1.0)) (== netcoreapp2.1) (&& (== netstandard2.0) (>= netcoreapp1.0))
+    Newtonsoft.Json (12.0.1)
     nunit (3.11)
       NETStandard.Library (>= 2.0) - restriction: || (&& (== net461) (< net20) (>= netstandard2.0)) (== netcoreapp2.1) (== netstandard2.0)
     NUnit3TestAdapter (3.13)

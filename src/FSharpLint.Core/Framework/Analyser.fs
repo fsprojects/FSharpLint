@@ -38,32 +38,3 @@ module Analyser =
             match typeCheck with
             | Some(check) -> { this with TypeChecks = check::this.TypeChecks }
             | None -> this
-    
-    /// Passed to each analyser to provide them with access to the configuration and a way of reporting errors.
-    [<NoEquality; NoComparison>]
-    type AnalyserInfo =
-        { /// The current lint config to be used by visitors.
-          Config: Configuration.Configuration
-
-          /// Used by visitors to report warnings.
-          Suggest: LintSuggestion -> unit
-          
-          /// Source of the current file being analysed.
-          Text: string }
-
-        /// Tries to find the source code within a given range.
-        member this.TryFindTextOfRange(range:range) =
-            let startIndex = ExpressionUtilities.findPos range.Start this.Text
-            let endIndex = ExpressionUtilities.findPos range.End this.Text
-
-            match startIndex, endIndex with
-            | Some(startIndex), Some(endIndex) -> 
-                this.Text.Substring(startIndex, endIndex - startIndex) |> Some
-            | _ -> None
-          
-    [<NoEquality; NoComparison>]
-    type AnalyserArgs =
-        { Info: AnalyserInfo
-          CheckFile: FSharpCheckFileResults option
-          SyntaxArray: AbstractSyntaxArray.Node []
-          SkipArray: AbstractSyntaxArray.Skip [] }

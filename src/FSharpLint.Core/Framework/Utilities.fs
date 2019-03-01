@@ -77,3 +77,13 @@ module ExpressionUtilities =
     /// Converts a LongIdentWithDots to a String.
     let longIdentWithDotsToString (lidwd:LongIdentWithDots) =
         lidwd.Lid |> longIdentToString
+        
+    /// Tries to find the source code within a given range.
+    let tryFindTextOfRange (range:range) (text:string) =
+        let startIndex = findPos range.Start text
+        let endIndex = findPos range.End text
+
+        match (startIndex, endIndex) with
+        | Some(startIndex), Some(endIndex) -> 
+            text.Substring(startIndex, endIndex - startIndex) |> Some
+        | _ -> None
