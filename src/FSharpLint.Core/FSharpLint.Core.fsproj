@@ -24,6 +24,8 @@
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework/FuzzyHintMatcher.fs" />
     <Compile Include="Framework/Analyser.fs" />
+    <Compile Include="Framework\Rules.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
     <!-- Rules -->
     <Compile Include="Rules/NameConventions.fs" />
     <Compile Include="Rules/NumberOfItems.fs" />
