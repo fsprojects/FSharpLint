@@ -3,7 +3,7 @@
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
 /// the default configuration and overriding configurations.
-module ConfigurationManagement =
+module NewConfigurationManagement =
 
     open System.IO
     open FSharpLint.Framework.Configuration
@@ -18,16 +18,12 @@ module ConfigurationManagement =
 
     [<RequireQualifiedAccess; NoComparison>]
     type ConfigurationResult =
-        | Success of Configuration
+        | Success of NewConfiguration.Configuration
         | Failure of ConfigFailure
 
     /// Load a FSharpLint configuration file from the contents (string) of the file.
     let loadConfigurationFile configurationFileText =
         NewConfiguration.parseConfig configurationFileText
-
-    /// Overrides a given FSharpLint configuration file with another.
-    let overrideConfigurationFile configurationToOverride configurationToOverrideWith =
-        overrideConfiguration configurationToOverride configurationToOverrideWith
 
     /// Overrides the default FSharpLint configuration.
     /// The default FSharpLint configuration contains all required elements, so
@@ -35,7 +31,7 @@ module ConfigurationManagement =
     /// If you're loading your own configuration you should make sure that it overrides the default
     /// configuration/overrides a configuration that has overriden the default configuration.
     let overrideDefaultConfiguration configurationToOverrideDefault =
-        overrideConfiguration defaultConfiguration configurationToOverrideDefault
+        NewConfiguration.mergeConfig defaultConfiguration configurationToOverrideDefault
 
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
@@ -63,8 +59,7 @@ module ConfigurationManagement =
                     try
                         let newConfig =
                             File.ReadAllText filename
-                            |> configuration
-                            |> (overrideConfiguration configToOveride)
+                            |> (NewConfiguration.mergeConfig configToOveride)
 
                         loadAllConfigs newConfig paths
                     with
@@ -75,7 +70,7 @@ module ConfigurationManagement =
                 else
                     loadAllConfigs configToOveride paths
             | [] ->
-                ConfigurationResult.Success(configToOveride)
+                ConfigurationResult.Success(NewConfiguration.parseConfig configToOveride)
 
         loadAllConfigs defaultConfig subdirectories
 
@@ -89,7 +84,7 @@ module ConfigurationManagement =
         
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
-module Lint =
+module NewLint =
 
     open System
     open System.Collections.Concurrent
@@ -220,6 +215,7 @@ module Lint =
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
+            // Collect suggestions for AstNode rules
             let suggestions =
                 syntaxArray
                 |> Array.collect (fun astNode ->
@@ -227,6 +223,8 @@ module Lint =
                         { astNode = astNode.Actual
                           fileContent = fileInfo.File }
                     enabledRules |> Array.collect (fun rule -> rule.runner astNodeParams))
+                
+            suggestions |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
@@ -369,7 +367,7 @@ module Lint =
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
-          Configuration: Configuration.Configuration option
+          Configuration: NewConfiguration.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option
@@ -415,10 +413,11 @@ module Lint =
                   ReportLinterProgress = projectProgress }
 
             let isIgnoredFile filePath =
-                match config.IgnoreFiles with
-                | Some({ Files = ignoreFiles }) ->
+                match config.ignoreFiles with
+                | [||] -> false
+                | ignoreFiles ->
+                    let parsedIgnoreFiles = ignoreFiles |> Array.map Configuration.parseIgnorePath
                     Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles filePath
-                | None -> false
 
             let parsedFiles =
                 files
@@ -467,7 +466,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> NewConfiguration.parseConfig
 
         let lintInformation =
             { Configuration = config
@@ -490,7 +489,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> NewConfiguration.parseConfig
 
         let checker = FSharpChecker.Create()
 
@@ -517,7 +516,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> NewConfiguration.parseConfig
 
         let lintInformation =
             { Configuration = config
@@ -540,7 +539,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> NewConfiguration.parseConfig
 
         let checker = FSharpChecker.Create()
 

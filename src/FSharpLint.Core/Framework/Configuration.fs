@@ -8,6 +8,8 @@ module Configuration =
 
     open System.Reflection
     open System.Xml.Linq
+    open FSharpLint.Framework
+    open Newtonsoft.Json.Linq
 
     [<Literal>]
     let SettingsFileName = "Settings.FSharpLint"
@@ -356,21 +358,10 @@ module Configuration =
     /// </summary>
     /// <param name="file">Path of the configuration file that will override the existing configuration</param>
     let overrideConfiguration configToOverride configToOverrideWith =
-        { IgnoreFiles =
-                match configToOverrideWith.IgnoreFiles with
-                | Some({ Update = Overwrite }) ->
-                    configToOverrideWith.IgnoreFiles
-                | Some({ Update = Add } as newIgnore) ->
-                    let combinedFiles =
-                        match configToOverride.IgnoreFiles with
-                        | Some(previousIgnore) ->
-                            newIgnore.Files @ previousIgnore.Files
-                        | None -> newIgnore.Files
-
-                    { newIgnore with Files = combinedFiles } |> Some
-                | None ->
-                    configToOverride.IgnoreFiles
-          Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers }
+        let baseConfigJson = JObject.Parse configToOverride
+        let overridingConfigJson = JObject.Parse configToOverrideWith
+        baseConfigJson.Merge(configToOverrideWith)
+        baseConfigJson.ToString()
 
     let private getMapDifferences (map:Map<_, _>) (newMap:Map<_, _>) =
         newMap |> Map.filter (fun key value ->
@@ -457,14 +448,14 @@ module Configuration =
     let defaultConfiguration =
         let assembly = typeof<Configuration>.GetTypeInfo().Assembly
         let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                         |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.FSharpLint", System.StringComparison.Ordinal))
+                         |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.Json", System.StringComparison.Ordinal))
         use stream = assembly.GetManifestResourceStream(resourceName)
         match stream with
         | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
         | stream ->
             use reader = new System.IO.StreamReader(stream)
 
-            reader.ReadToEnd() |> configuration
+            reader.ReadToEnd()
 
     /// Checks if a analyser in the configuration is enabled.
     /// Returns the analyser settings if the analyser was enabled; None otherwise.
@@ -511,14 +502,14 @@ module Configuration =
         type Path = string list
 
         [<NoComparison>]
-        type GlobalConfig = { Path: Path; Name: string; Configuration: Configuration option }
+        type GlobalConfig = { Path: Path; Name: string; Configuration: string option }
 
         /// Keeps configuration files loaded for a list of paths so that
         /// they can be quickly retrieved and updated
         [<NoComparison>]
         type LoadedConfigs =
             { /// Cached configurations for each path.
-              LoadedConfigs: Map<Path, Configuration option>
+              LoadedConfigs: Map<Path, string option>
 
               /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
               /// for each full path. If you wanted to load the configurations for a solution
