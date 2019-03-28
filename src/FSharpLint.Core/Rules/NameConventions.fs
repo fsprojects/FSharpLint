@@ -354,8 +354,11 @@ module NameConventions =
     let private checkMember checkRule rules _ = function
         | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
             match List.tryLast longIdent.Lid with
-            | Some(ident) -> checkRule rules.MemberNames ident
+            | Some(ident) when ident.idText.StartsWith "op_" -> 
+                // Ignore members prefixed with op_, they are a special case used for operator overloading.
+                []
             | None -> []
+            | Some(ident) -> checkRule rules.MemberNames ident
         | SynPat.Named(_, ident, _, _, _)
         | SynPat.OptionalVal(ident, _) ->
             checkRule rules.ParameterNames ident

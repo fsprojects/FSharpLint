@@ -1399,3 +1399,16 @@ let SomeCamel WithCamel.YesCamel = 12  """
         this.Parse source
         
         this.AssertNoWarnings()
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/323
+    [<Test>]
+    member this.``Special op_ prefixed members do not cause errors`` () =
+        let source = """
+type X = X of int
+with
+    static member op_Explicit(X x) = x
+    static member op_Implicit(X x) = x
+"""
+
+        this.Parse source
+        this.AssertNoWarnings()
