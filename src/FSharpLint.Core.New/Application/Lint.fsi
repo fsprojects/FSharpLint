@@ -124,6 +124,9 @@ module Lint =
         member TryGetSuccess : byref<LintWarning.Warning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
         
+    /// Converts a lint suggestion to a warning with the given source text.
+    val suggestionToWarning : string -> Analyser.LintSuggestion -> LintWarning.Warning 
+        
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult

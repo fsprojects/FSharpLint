@@ -4,7 +4,8 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Analyser
 
 type AstNodeRuleParams =
-    { astNode : AstNode 
+    { astNode : AstNode
+      getParents : int -> AstNode list 
       fileContent : string }
 
 type RuleWithParams<'Params> =

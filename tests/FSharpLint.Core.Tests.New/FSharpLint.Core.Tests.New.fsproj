@@ -11,7 +11,11 @@
     <!-- Framework -->
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
+    <Compile Include="Rules\TestAstNodeRulefs.fs" />
     <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
   </ItemGroup>
 
   <ItemGroup>

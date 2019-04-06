@@ -27,6 +27,10 @@
     <Compile Include="Framework/Analyser.fs" />
     <Compile Include="Framework\Rules.fs" />
     <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />

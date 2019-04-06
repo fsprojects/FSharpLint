@@ -15,27 +15,13 @@ open FSharpLint.Framework.ParseFile
 open TestUtils
 
 [<AbstractClass>]
-type TestRuleBase(config:ConfigurationManager.Configuration) =
+type TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
-    let postSuggestion (suggestion:LintWarning.Warning) =
+    abstract Parse : string -> unit
+        
+    member __.postSuggestion (suggestion:LintWarning.Warning) =
         suggestions.Add(suggestion)
-
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fileName): unit =
-        let lintParams =
-            { OptionalLintParameters.Configuration = Some config
-              ReceivedWarning = None
-              CancellationToken = None
-              ReportLinterProgress = None }
-        
-        let parseResults =
-            match fileName with
-            | Some(fileName) -> parseSourceFile fileName input config (FSharpChecker.Create())
-            | None -> parseSource input config (FSharpChecker.Create())
-        
-        match Lint.lintSource lintParams input with
-        | LintResult.Success warnings -> warnings |> List.iter postSuggestion
-        | LintResult.Failure _ -> ()
 
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions

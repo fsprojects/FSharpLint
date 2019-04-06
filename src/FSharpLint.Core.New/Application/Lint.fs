@@ -98,6 +98,7 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
+    open FSharpLint.Framework
 
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -188,17 +189,19 @@ module Lint =
             let! x = xAsync 
             return f x }
 
+    let suggestionToWarning (input:string) (suggestion:Analyser.LintSuggestion) =
+        { LintWarning.Range = suggestion.Range
+          LintWarning.Info = suggestion.Message
+          LintWarning.Input = input
+          LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
+
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
 
         let suggest (suggestion:Analyser.LintSuggestion) =
-            let warning = 
-                { LintWarning.Range = suggestion.Range
-                  LintWarning.Info = suggestion.Message
-                  LintWarning.Input = fileInfo.Text
-                  LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
+            let warning = suggestionToWarning fileInfo.Text suggestion
             lintInfo.ErrorReceived warning
             fileWarnings.Add warning
 
@@ -221,9 +224,12 @@ module Lint =
             // Collect suggestions for AstNode rules
             let suggestions =
                 syntaxArray
-                |> Array.collect (fun astNode ->
+                |> Array.mapi (fun i astNode -> (i, astNode))
+                |> Array.collect (fun (i, astNode) ->
+                    let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                     let astNodeParams =
                         { astNode = astNode.Actual
+                          getParents = getParents
                           fileContent = fileInfo.Text }
                     enabledRules |> Array.collect (fun rule -> rule.runner astNodeParams))
                 
