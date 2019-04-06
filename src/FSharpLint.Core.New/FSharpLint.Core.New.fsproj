@@ -11,6 +11,7 @@
     <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>FSharpLint.Core</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->
@@ -24,29 +25,20 @@
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework/FuzzyHintMatcher.fs" />
     <Compile Include="Framework/Analyser.fs" />
+    <Compile Include="Framework\Rules.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
     <!-- Rules -->
-    <Compile Include="Rules/NameConventions.fs" />
-    <Compile Include="Rules/NumberOfItems.fs" />
-    <Compile Include="Rules/Binding.fs" />
-    <Compile Include="Rules/SourceLength.fs" />
-    <Compile Include="Rules/NestedStatements.fs" />
-    <Compile Include="Rules/Typography.fs" />
-    <Compile Include="Rules/FunctionReimplementation.fs" />
-    <Compile Include="Rules/HintMatcher.fs" />
-    <Compile Include="Rules/RaiseWithTooManyArguments.fs" />
-    <Compile Include="Rules/RedundantNewKeyword.fs" />
-    <Compile Include="Rules/Formatting.fs" />
-    <Compile Include="Rules/Conventions.fs" />
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
     <Compile Include="Application/LintWarning.fs" />
+    <Compile Include="Application\ConfigurationManager.fs" />
     <Compile Include="Application/Lint.fsi" />
-    <Compile Include="Application/Lint.fs" />
-    <Compile Include="Application/ConfigurationManager.fs" />
+    <Compile Include="Application\Lint.fs" />
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

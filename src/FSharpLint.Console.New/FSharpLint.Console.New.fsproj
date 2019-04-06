@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <Title>FSharpLint.Console</Title>
+    <Description>Console application to run FSharpLint.</Description>
+    <Authors>Matthew Mcveigh</Authors>
+    <PackageLicenseUrl>https://github.com/fsprojects/FSharpLint/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
+    <PackageTags>F#;fsharp;lint;FSharpLint;fslint;cli</PackageTags>
+    <PackageType>DotNetCliTool</PackageType>
+    <PackAsTool>true</PackAsTool>
+    <AssemblyName>dotnet-fsharplint</AssemblyName>
+    <RootNamespace>FSharpLint.Console</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FSharpLint.Core.New\FSharpLint.Core.New.fsproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

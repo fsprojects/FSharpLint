@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>FSharpLint.Core.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TestUtils.fs" />
+    <!-- Framework -->
+    <!-- Rules -->
+    <Compile Include="Rules/TestRuleBase.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Core.New\FSharpLint.Core.New.fsproj" />
+  </ItemGroup>
+
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

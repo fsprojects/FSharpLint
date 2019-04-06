@@ -1,0 +1,315 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ConsoleCouldNotFindFile" xml:space="preserve">
+    <value>Could not find the file: {0} on disk.</value>
+  </data>
+  <data name="ConsoleFailedToLoadConfig" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="ConsoleFailedToParseFile" xml:space="preserve">
+    <value>Failed to parse file {0}</value>
+  </data>
+  <data name="ConsoleFailedToResolveReferences" xml:space="preserve">
+    <value>Failed to resolve references.</value>
+  </data>
+  <data name="ConsoleFinished" xml:space="preserve">
+    <value>========== Summary: {0} warnings ==========</value>
+  </data>
+  <data name="ConsoleFinishedFile" xml:space="preserve">
+    <value>========== Finished: {0} warnings ==========</value>
+  </data>
+  <data name="ConsoleStartingFile" xml:space="preserve">
+    <value>========== Linting {0} ==========</value>
+  </data>
+  <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
+    <value>MSBuild could not load the project file {0} because: {1}</value>
+  </data>
+  <data name="ConsoleProjectFileCouldNotBeFound" xml:space="preserve">
+    <value>{0} could not be found on disk.</value>
+  </data>
+  <data name="ConsoleRunTimeConfigError" xml:space="preserve">
+    <value>Failed while reading from config at run time.</value>
+  </data>
+  <data name="LintError" xml:space="preserve">
+    <value>Error in file {0} on line {1} starting at column {2}</value>
+  </data>
+  <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
+    <value>`failwithf` has more arguments than were found in its format string, these further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesFailwithWithSingleArgument" xml:space="preserve">
+    <value>`failwith` should have a single argument, further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
+    <value>The `ignore` function is usually favoured over `let _ = ...` when ignoring the result of an expression.</value>
+  </data>
+  <data name="RulesReimplementsFunction" xml:space="preserve">
+    <value>If `{0}` has no mutable arguments partially applied then the lambda can be removed.</value>
+  </data>
+  <data name="RulesHintRefactor" xml:space="preserve">
+    <value>`{0}` might be able to be refactored into `{1}`.</value>
+  </data>
+  <data name="RulesHintSuggestion" xml:space="preserve">
+    <value>`{0}`; suggestion: {1}.</value>
+  </data>
+  <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">
+    <value>Consider changing `{0}` to camelCase.</value>
+  </data>
+  <data name="RulesNamingConventionsPascalCaseError" xml:space="preserve">
+    <value>Consider changing `{0}` to PascalCase.</value>
+  </data>
+  <data name="RulesNamingConventionsUnderscoreError" xml:space="preserve">
+    <value>Consider changing `{0}` to remove any underscores.</value>
+  </data>
+  <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
+    <value>Consider changing `{0}` to be prefixed with `{1}`.</value>
+  </data>
+  <data name="RulesNamingConventionsSuffixError" xml:space="preserve">
+    <value>Consider changing `{0}` to be suffixed with `{1}`.</value>
+  </data>
+  <data name="RulesNestedStatementsError" xml:space="preserve">
+    <value>Code suggested not to be nested more deeply than a depth of {0}.</value>
+  </data>
+  <data name="RulesNumberOfItemsBooleanConditionsError" xml:space="preserve">
+    <value>Conditions suggested to contain at most {0} boolean operators.</value>
+  </data>
+  <data name="RulesNumberOfItemsClassMembersError" xml:space="preserve">
+    <value>Class suggested to have a maximum of {0} members.</value>
+  </data>
+  <data name="RulesNumberOfItemsFunctionError" xml:space="preserve">
+    <value>Functions suggested to have a maximum of {0} parameters.</value>
+  </data>
+  <data name="RulesNumberOfItemsTupleError" xml:space="preserve">
+    <value>Tuple suggested to have a maximum of {0} items.</value>
+  </data>
+  <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
+    <value>`raise` should have a single argument, further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesSourceLengthError" xml:space="preserve">
+    <value>{0} was {2} lines long, suggested to be less than {1} lines long.</value>
+  </data>
+  <data name="RulesTypographyFileLengthError" xml:space="preserve">
+    <value>File suggested to be less than {0} lines long.</value>
+  </data>
+  <data name="RulesTypographyLineLengthError" xml:space="preserve">
+    <value>Line suggested to be less than {0} characters long.</value>
+  </data>
+  <data name="RulesTypographyTabCharacterError" xml:space="preserve">
+    <value>Consider replacing tab (`\t`) with spaces.</value>
+  </data>
+  <data name="RulesTypographyTrailingLineError" xml:space="preserve">
+    <value>Found trailing whitespace line at end of file.</value>
+  </data>
+  <data name="RulesTypographyTrailingWhitespaceError" xml:space="preserve">
+    <value>Found trailing whitespace at end of line.</value>
+  </data>
+  <data name="RulesUselessBindingError" xml:space="preserve">
+    <value>Binding appears to have no purpose.</value>
+  </data>
+  <data name="RulesWildcardNamedWithAsPattern" xml:space="preserve">
+    <value>Unnecessary wildcard named using the as pattern, the wildcard can be removed e.g. `_ as x` replaced with `x`.</value>
+  </data>
+  <data name="RulesInvalidArgWithTwoArguments" xml:space="preserve">
+    <value>`invalidArg` should have two arguments, further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesInvalidOpWithSingleArgument" xml:space="preserve">
+    <value>`invalidOp` should have a single argument, further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
+    <value>`nullArg` should have a single argument, further arguments will be ignored by the compiler.</value>
+  </data>
+  <data name="RulesTupleOfWildcardsError" xml:space="preserve">
+    <value>A tuple of wildcards in a pattern can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
+  </data>
+  <data name="LintSourceError" xml:space="preserve">
+    <value>Error on line {0} starting at column {1}</value>
+  </data>
+  <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
+    <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
+  </data>
+  <data name="RulesRedundantNewKeyword" xml:space="preserve">
+    <value>Usage of `new` keyword here is redundant.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClausesOnNewLineError" xml:space="preserve">
+    <value>Each match clause should be placed on its own line.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchOrClausesOnNewLineError" xml:space="preserve">
+    <value>Each 'or' match clause should be placed on its own line</value>
+  </data>
+  <data name="RulesFormattingTupleCommaSpacingError" xml:space="preserve">
+    <value>Comma in tuple instantiation should be followed by single space.</value>
+  </data>
+   <data name="RulesFormattingTupleIndentationError" xml:space="preserve">
+    <value>Sub-expressions of tuple on different lines should have consistent indentation.</value>
+  </data> 
+  <data name="RulesFormattingTupleParenthesesError" xml:space="preserve">
+    <value>Use parentheses for tuple instantiation.</value>
+  </data>
+  <data name="RulesFormattingTypedItemSpacingError" xml:space="preserve">
+    <value>Expected {0} space(s) before and {1} space(s) after ':' in typed item.</value>
+  </data>
+  <data name="RulesFormattingF#ArrayPostfixError" xml:space="preserve">
+    <value>Use special postfix syntax for F# type array.</value>
+  </data>
+  <data name="RulesFormattingF#PostfixGenericError" xml:space="preserve">
+    <value>Use postfix syntax for F# type {0}.</value>
+  </data>
+  <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
+    <value>Use prefix syntax for generic type.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClauseIndentationError" xml:space="preserve">
+    <value>Match clauses should be in line with 'match' keyword.</value>
+  </data>
+  <data name="RulesFormattingLambdaPatternMatchClauseIndentationError" xml:space="preserve">
+    <value>Match clauses should be indented one level from 'function' keyword.</value>
+  </data>
+  <data name="RulesFormattingPatternMatchClauseSameIndentationError" xml:space="preserve">
+    <value>Match clauses should be at the same indentation level.</value>
+  </data>
+  <data name="RulesFormattingMatchExpressionIndentationError" xml:space="preserve">
+    <value>If RHS of pattern match case is on newline, it should be indentend by one level.</value>
+  </data>
+  <data name="RulesFormattingModuleDeclSpacingError" xml:space="preserve">
+    <value>Separate module declarations with 2 blank lines.</value>
+  </data>
+  <data name="RulesFormattingClassMemberSpacingError" xml:space="preserve">
+    <value>Class members should be separated by 1 blank line.</value>
+  </data>
+  <data name="RulesFormattingUnionDefinitionIndentationError" xml:space="preserve">
+    <value>Union definition cases should be indented one level on a new line.</value>
+  </data>
+  <data name="RulesFormattingUnionDefinitionSameIndentationError" xml:space="preserve">
+    <value>Union definition cases should be at the same indentation level.</value>
+  </data>
+  <data name="RulesConventionsTopLevelNamespaceError" xml:space="preserve">
+    <value>Prefer namespaces at top level.</value>
+  </data>
+  <data name="RulesTypographyIndentationError" xml:space="preserve">
+    <value>Indentation must use a multiple of {0} spaces.</value>
+  </data>
+  <data name="RulesTypographyRecordFieldIndentationError" xml:space="preserve">
+    <value>Record fields should be aligned.</value>
+  </data>
+  <data name="RulesTypographyOverridenIndentationError" xml:space="preserve">
+    <value>Invalid indentation.</value>
+  </data>
+  <data name="RulesConventionsRecursiveAsyncFunctionError" xml:space="preserve">
+    <value>Recursive async functions ending with a `do!` recursive call will leak memory; prefer `return!`.</value>
+  </data>
+</root>
