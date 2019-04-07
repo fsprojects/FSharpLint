@@ -17,59 +17,6 @@ module Formatting =
     let private isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
-    module private TypePrefixing =
-
-        let checkTypePrefixing args range typeName typeArgs isPostfix isSuppressed =
-            let ruleName = "TypePrefixing"
-
-            let isEnabled = isRuleEnabled args.Info.Config ruleName
-
-            if isEnabled && isSuppressed ruleName |> not then
-                match typeName with
-                | SynType.LongIdent lid ->
-                    match lid |> longIdentWithDotsToString with
-                    | "list"
-                    | "List"
-                    | "option"
-                    | "Option"
-                    | "ref"
-                    | "Ref" as typeName ->
-                        // Prefer postfix.
-                        if not isPostfix
-                        then
-                            let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
-                            let suggestedFix = lazy(
-                                (args.Info.TryFindTextOfRange range, typeArgs)
-                                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
-                            args.Info.Suggest
-                                { Range = range
-                                  Message =  String.Format(errorFormatString, typeName)
-                                  SuggestedFix = Some suggestedFix
-                                  TypeChecks = [] }
-                    | "array" ->
-                        // Prefer special postfix (e.g. int []).
-                        let suggestedFix = lazy(
-                            (args.Info.TryFindTextOfRange range, typeArgs)
-                            ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
-                        args.Info.Suggest
-                            { Range = range
-                              Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
-                              SuggestedFix = Some suggestedFix
-                              TypeChecks = [] }
-                    | typeName ->
-                        // Prefer prefix.
-                        if isPostfix
-                        then
-                            let suggestedFix = lazy(
-                                (args.Info.TryFindTextOfRange range, typeArgs)
-                                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
-                            args.Info.Suggest
-                                { Range = range
-                                  Message = Resources.GetString("RulesFormattingGenericPrefixError")
-                                  SuggestedFix = Some suggestedFix
-                                  TypeChecks = [] }
-                | _ -> ()
-
     module private Spacing =
 
         let countPrecedingCommentLines (args : AnalyserArgs) (startPos : pos) (endPos : pos) =
@@ -203,24 +150,8 @@ module Formatting =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed AnalyserName ruleName
 
-        let synTypeToString = function
-            | SynType.Tuple _ as synType ->
-                args.Info.TryFindTextOfRange synType.Range
-                |> Option.map (fun x -> "(" + x + ")")
-            | other ->
-                args.Info.TryFindTextOfRange other.Range
-
-        let typeArgsToString (typeArgs:SynType list) =
-            let typeStrings = typeArgs |> List.choose synTypeToString
-            if typeStrings.Length = typeArgs.Length
-            then typeStrings |> String.concat "," |> Some
-            else None
-
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
-            | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
-                let typeArgs = typeArgsToString typeArgs
-                TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)
             | AstNode.ModuleOrNamespace synModuleOrNamespace ->
                 Spacing.checkModuleDeclSpacing args synModuleOrNamespace (isSuppressed i)
             | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->

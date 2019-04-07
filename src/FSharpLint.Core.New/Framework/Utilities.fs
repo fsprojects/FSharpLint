@@ -97,3 +97,16 @@ module ExpressionUtilities =
             |> Array.takeWhile Char.IsWhiteSpace
             |> Array.length)
         |> Option.defaultValue 0
+
+    let synTypeToString (text:string) = function
+    | SynType.Tuple _ as synType ->
+        tryFindTextOfRange synType.Range text
+        |> Option.map (fun x -> "(" + x + ")")
+    | other ->
+        tryFindTextOfRange other.Range text
+
+    let typeArgsToString (text:string) (typeArgs:SynType list) =
+        let typeStrings = typeArgs |> List.choose (synTypeToString text)
+        if typeStrings.Length = typeArgs.Length
+        then typeStrings |> String.concat "," |> Some
+        else None

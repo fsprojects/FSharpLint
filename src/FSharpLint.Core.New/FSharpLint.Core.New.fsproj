@@ -26,7 +26,6 @@
     <Compile Include="Framework/FuzzyHintMatcher.fs" />
     <Compile Include="Framework/Analyser.fs" />
     <Compile Include="Framework\Rules.fs" />
-    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
@@ -36,6 +35,8 @@
     <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchOrClausesOnNewLine.fs" />
     <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchClauseIndentation.fs" />
     <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchExpressionIndentation.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
