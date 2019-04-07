@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
@@ -28,7 +28,6 @@
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
     <Compile Include="Rules/TestRedundantNewKeyword.fs" />
-    <Compile Include="Rules/TestFormattingRules.fs" />
     <Compile Include="Rules/TestConventionsRules.fs" />
   </ItemGroup>
 

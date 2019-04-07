@@ -22,6 +22,7 @@
     <Compile Include="Rules\Formatting\Spacing\ClassMemberSpacing.fs" />
     <Compile Include="Rules\Formatting\Spacing\ModuleDeclSpacing.fs" />
     <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
   </ItemGroup>
 

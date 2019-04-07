@@ -1,42 +1,12 @@
-﻿module TestFormattingRules
+module FSharpLint.Core.Tests.Rules.Formatting.UnionDefinitionIndentation
 
 open NUnit.Framework
-open FSharpLint.Rules.Formatting
-open FSharpLint.Framework.Configuration
-
-let typedItemSpacingConfig style =
-    { 
-        Settings = Map.ofList
-            [ 
-                ("Enabled", Enabled(true))
-                ("TypedItemStyle", TypedItemStyle(style))
-            ] 
-    }
-
-let config typedItemSpacingStyle = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
-
-    Map.ofList 
-        [ (AnalyserName, 
-            { Rules = Map.ofList 
-                [ ("TypedItemSpacing", typedItemSpacingConfig typedItemSpacingStyle)
-                  ("TupleCommaSpacing", ruleEnabled)
-                  ("TupleIndentation", ruleEnabled)
-                  ("TupleParentheses", ruleEnabled)
-                  ("TypePrefixing", ruleEnabled)
-                  ("ModuleDeclSpacing", ruleEnabled)
-                  ("ClassMemberSpacing", ruleEnabled)
-                  ("UnionDefinitionIndentation", ruleEnabled)
-                  ("PatternMatchClausesOnNewLine", ruleEnabled)
-                  ("PatternMatchOrClausesOnNewLine", ruleEnabled)
-                  ("PatternMatchClauseIndentation", ruleEnabled)
-                  ("PatternMatchExpressionIndentation", ruleEnabled) ]
-              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
+open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormatting() =
-    inherit TestRuleBase.TestRuleBase(analyser, config TypedItemStyle.NoSpaces)                
-
+type TestFormattingUnionDefinitionIndentation() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UnionDefinitionIndentation.rule)
+    
     [<Test>]
     member this.``Error for union definition with multiple cases on same line``() =
         this.Parse"""
