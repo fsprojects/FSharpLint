@@ -191,7 +191,6 @@ module Lint =
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)
           (Rules.RedundantNewKeyword.analyser, Rules.RedundantNewKeyword.AnalyserName)
-          (Rules.Formatting.analyser, Rules.Formatting.AnalyserName)
           (Rules.Conventions.analyser, Rules.Conventions.AnalyserName) ]
 
     module private Async =

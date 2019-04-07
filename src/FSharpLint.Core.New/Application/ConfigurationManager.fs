@@ -8,9 +8,18 @@ module ConfigurationManager =
     open Newtonsoft.Json.Linq
     open FSharpLint.Framework.Configuration
     open FSharpLint.Rules
-
+    
     type FormattingConfig =
-        { typedItemSpacing : TypedItemSpacing.Config option }
+        { typedItemSpacing : TypedItemSpacing.Config option
+          typePrefixing : bool option
+          unionDefinitionIndentation : bool option
+          tupleCommaSpacing : bool option
+          tupleIndentation : bool option
+          tupleParentheses : bool option
+          patternMatchClausesOnNewLine : bool option
+          patternMatchOrClausesOnNewLine : bool option
+          patternMatchClauseIndentation : bool option
+          patternMatchExpressionIndentation : bool option }
 
     type Configuration = 
         { ignoreFiles : string []
@@ -27,10 +36,24 @@ module ConfigurationManager =
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.DeserializeObject<Configuration> configText
         
+    let constructRuleIfEnabled rule = function
+        | Some true -> Some rule
+        | _ -> None
+        
     let flattenFormattingConfig (config : FormattingConfig) =
-        config.typedItemSpacing
-        |> Option.map TypedItemSpacing.rule
-        |> Option.toArray
+        [|
+            config.typedItemSpacing |> Option.map TypedItemSpacing.rule
+            config.typePrefixing |> constructRuleIfEnabled TypePrefixing.rule
+            config.unionDefinitionIndentation |> constructRuleIfEnabled UnionDefinitionIndentation.rule
+            config.tupleCommaSpacing |> constructRuleIfEnabled TupleCommaSpacing.rule
+            config.tupleIndentation |> constructRuleIfEnabled TupleIndentation.rule
+            config.tupleParentheses |> constructRuleIfEnabled TupleParentheses.rule
+            config.patternMatchClausesOnNewLine |> constructRuleIfEnabled PatternMatchClausesOnNewLine.rule
+            config.patternMatchOrClausesOnNewLine |> constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule
+            config.patternMatchClauseIndentation |> constructRuleIfEnabled PatternMatchClauseIndentation.rule
+            config.patternMatchExpressionIndentation |> constructRuleIfEnabled PatternMatchExpressionIndentation.rule
+        |]
+        |> Array.choose id
         
     let flattenConfig (config : Configuration) =
         config.formatting
