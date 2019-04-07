@@ -98,6 +98,7 @@ module ExpressionUtilities =
             |> Array.length)
         |> Option.defaultValue 0
 
+    /// Converts a AsynType to its string representation.
     let synTypeToString (text:string) = function
     | SynType.Tuple _ as synType ->
         tryFindTextOfRange synType.Range text
@@ -105,8 +106,25 @@ module ExpressionUtilities =
     | other ->
         tryFindTextOfRange other.Range text
 
+    /// Converts a list of type args to its string representation.
     let typeArgsToString (text:string) (typeArgs:SynType list) =
         let typeStrings = typeArgs |> List.choose (synTypeToString text)
         if typeStrings.Length = typeArgs.Length
         then typeStrings |> String.concat "," |> Some
         else None
+        
+    /// Counts the number of comment lines preceeding the given range of text.
+    let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
+        let range = mkRange "" startPos endPos
+        
+        tryFindTextOfRange range text
+        |> Option.map (fun preceedingText ->
+            let lines =
+                preceedingText.Split '\n'
+                |> Array.rev
+                |> Array.tail
+            lines
+            |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
+            |> Array.length)
+        |> Option.defaultValue 0
+   
