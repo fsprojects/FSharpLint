@@ -17,112 +17,6 @@ module Formatting =
     let private isRuleEnabled config ruleName =
         isRuleEnabled config AnalyserName ruleName |> Option.isSome
 
-    module private PatternMatchFormatting =
-
-        let getLeadingSpaces (args : AnalyserArgs) (range : range) =
-            let range = mkRange "" (mkPos range.StartLine 0) range.End
-            args.Info.TryFindTextOfRange(range)
-            |> Option.map (fun text ->
-                text.ToCharArray()
-                |> Array.takeWhile Char.IsWhiteSpace
-                |> Array.length)
-            |> Option.defaultValue 0
-
-        let checkPatternMatchClausesOnNewLine args (clauses:SynMatchClause list) isSuppressed =
-            let ruleName = "PatternMatchClausesOnNewLine"
-
-            let isEnabled = isRuleEnabled args.Info.Config ruleName
-
-            if isEnabled && isSuppressed ruleName |> not then
-                clauses
-                |> List.pairwise
-                |> List.iter (fun (clauseOne, clauseTwo) ->
-                    if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
-                        args.Info.Suggest
-                            { Range = clauseTwo.Range
-                              Message = Resources.GetString("RulesFormattingPatternMatchClausesOnNewLineError")
-                              SuggestedFix = None
-                              TypeChecks = [] })
-
-        let checkPatternMatchOrClausesOnNewLine args (clauses:SynMatchClause list) isSuppressed =
-            let ruleName = "PatternMatchOrClausesOnNewLine"
-
-            let isEnabled = isRuleEnabled args.Info.Config ruleName
-
-            if isEnabled && isSuppressed ruleName |> not then
-                clauses
-                |> List.collect (function
-                    | SynMatchClause.Clause (SynPat.Or (firstPat, secondPat, _), _, _, _, _) ->
-                        [firstPat; secondPat]
-                    | _ -> [])
-                |> List.pairwise
-                |> List.iter (fun (clauseOne, clauseTwo) ->
-                    if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
-                        args.Info.Suggest
-                            { Range = clauseTwo.Range
-                              Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
-                              SuggestedFix = None
-                              TypeChecks = [] })
-
-        let checkPatternMatchClauseIndentation args matchExprRange (clauses:SynMatchClause list) isLambda isSuppressed =
-            let ruleName = "PatternMatchClauseIndentation"
-
-            let isEnabled = isRuleEnabled args.Info.Config ruleName
-
-            if isEnabled && isSuppressed ruleName |> not then
-                let matchStartIndentation = getLeadingSpaces args matchExprRange
-                clauses
-                |> List.tryHead
-                |> Option.iter (fun firstClause ->
-                    let clauseIndentation = getLeadingSpaces args firstClause.Range
-                    if isLambda then
-                        if clauseIndentation <> matchStartIndentation + 4 then
-                          args.Info.Suggest
-                            { Range = firstClause.Range
-                              Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
-                              SuggestedFix = None
-                              TypeChecks = [] }
-                    elif clauseIndentation <> matchStartIndentation then
-                          args.Info.Suggest
-                            { Range = firstClause.Range
-                              Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
-                              SuggestedFix = None
-                              TypeChecks = [] })
-
-                clauses
-                |> List.map (fun clause -> (clause, getLeadingSpaces args clause.Range))
-                |> List.pairwise
-                |> List.iter (fun ((clauseOne, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
-                    if clauseOneSpaces <> clauseTwoSpaces then
-                        args.Info.Suggest
-                            { Range = clauseTwo.Range
-                              Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
-                              SuggestedFix = None
-                              TypeChecks = [] })
-
-        let checkPatternMatchExpressionIndentation args (clauses:SynMatchClause list) isSuppressed =
-            let ruleName = "PatternMatchExpressionIndentation"
-
-            let isEnabled = isRuleEnabled args.Info.Config ruleName
-
-            if isEnabled && isSuppressed ruleName |> not then
-                clauses
-                |> List.iter (fun clause ->
-                    let (SynMatchClause.Clause (pat, guard, expr, _, _)) = clause
-                    let clauseIndentation = getLeadingSpaces args clause.Range
-                    let exprIndentation = getLeadingSpaces args expr.Range
-                    let matchPatternEndLine =
-                        guard
-                        |> Option.map (fun expr -> expr.Range.EndLine)
-                        |> Option.defaultValue pat.Range.EndLine
-                    if expr.Range.StartLine <> matchPatternEndLine
-                    && exprIndentation <> clauseIndentation + 4 then
-                      args.Info.Suggest
-                        { Range = expr.Range
-                          Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
-                          SuggestedFix = None
-                          TypeChecks = [] })
-
     module private TypePrefixing =
 
         let checkTypePrefixing args range typeName typeArgs isPostfix isSuppressed =
@@ -324,26 +218,6 @@ module Formatting =
 
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with
-            | AstNode.Expression (SynExpr.Match (_, _, clauses, range))
-            | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range))
-            | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
-                let isLambda =
-                    match node with
-                    | AstNode.Expression (SynExpr.MatchLambda _) -> true
-                    | _ -> false
-
-                let isFunctionParameter =
-                    AbstractSyntaxArray.getBreadcrumbs 3 syntaxArray skipArray i
-                    |> List.exists (function
-                        | Expression (SynExpr.Lambda _ ) -> true
-                        | _ -> false)
-
-                // Ignore pattern matching in function parameters.
-                if not (isFunctionParameter) then
-                    PatternMatchFormatting.checkPatternMatchClausesOnNewLine args clauses (isSuppressed i)
-                    PatternMatchFormatting.checkPatternMatchOrClausesOnNewLine args clauses (isSuppressed i)
-                    PatternMatchFormatting.checkPatternMatchClauseIndentation args range clauses isLambda (isSuppressed i)
-                    PatternMatchFormatting.checkPatternMatchExpressionIndentation args clauses (isSuppressed i)
             | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
                 let typeArgs = typeArgsToString typeArgs
                 TypePrefixing.checkTypePrefixing args range typeName typeArgs isPostfix (isSuppressed i)

@@ -23,6 +23,7 @@ module Dictionary =
 
 module ExpressionUtilities =
 
+    open System
     open FSharp.Compiler
     open FSharp.Compiler.Ast
     open FSharp.Compiler.Range
@@ -87,3 +88,12 @@ module ExpressionUtilities =
         | Some(startIndex), Some(endIndex) -> 
             text.Substring(startIndex, endIndex - startIndex) |> Some
         | _ -> None
+        
+    let getLeadingSpaces (range:range) (text:string) =
+        let range = mkRange "" (mkPos range.StartLine 0) range.End
+        tryFindTextOfRange range text
+        |> Option.map (fun text ->
+            text.ToCharArray()
+            |> Array.takeWhile Char.IsWhiteSpace
+            |> Array.length)
+        |> Option.defaultValue 0
