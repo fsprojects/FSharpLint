@@ -7,7 +7,7 @@ type AstNodeRuleParams =
     { astNode : AstNode
       getParents : int -> AstNode list 
       fileContent : string }
-
+    
 type RuleWithParams<'Params> =
   { name : string
     identifier : string option

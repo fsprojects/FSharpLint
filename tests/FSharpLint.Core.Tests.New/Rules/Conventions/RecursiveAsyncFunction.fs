@@ -1,43 +1,11 @@
-﻿module TestConventionsRules
+module FSharpLint.Core.Tests.Rules.Formatting.RecursiveAsyncFunction
 
 open NUnit.Framework
-open FSharpLint.Rules.Conventions
-open FSharpLint.Framework.Configuration
+open FSharpLint.Rules
 
-let config = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
-
-    Map.ofList 
-        [ (AnalyserName, 
-            { Rules = Map.ofList 
-                [ ("TopLevelNamespace", ruleEnabled)
-                  ("RecursiveAsyncFunction", ruleEnabled) ]
-              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-             
- 
 [<TestFixture>]
-type TestConventions() =
-    inherit TestRuleBase.TestRuleBase(analyser, config)
-
-    [<Test>]
-    member this.``Error for top-level module``() = 
-        this.Parse """
-module Program
-
-let x = ()"""
-
-        Assert.IsTrue(this.ErrorExistsAt(2, 0))
-
-    [<Test>]
-    member this.``No error for top-level namespace``() = 
-        this.Parse """
-namespace Program
-
-module Module = 
-
-    let x = ()"""
-
-        Assert.IsTrue(this.NoErrorsExist)
+type TestConventionsRecursiveAsyncFunction() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RecursiveAsyncFunction.rule)
 
     [<Test>]
     member this.``Error for recursive async function ending in recursive do!``() = 
@@ -48,8 +16,7 @@ module X =
     let rec f x = async {
         let y = x + 1
         do! f y
-    }
-""", checkInput=true)
+    }""")
 
         Assert.IsTrue(this.ErrorExistsAt(7, 8))
 
@@ -62,8 +29,7 @@ module X =
     let rec f x = async {
         let y = x + 1
         return! f y
-    }
-""", checkInput=true)
+    }""")
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -77,8 +43,7 @@ module X =
         let f = (fun _ ->  async.Return ())
         let y = x + 1
         do! f y
-    }
-""", checkInput=true)
+    }""")
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -104,6 +69,6 @@ module X =
     }
 """
 
-        this.Parse(source, checkInput=true)
+        this.Parse(source)
         let result = this.ApplyQuickFix source
         Assert.AreEqual(expected, result)

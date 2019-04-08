@@ -40,6 +40,7 @@
     <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
+    <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
