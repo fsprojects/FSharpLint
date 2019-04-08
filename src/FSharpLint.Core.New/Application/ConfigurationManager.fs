@@ -9,17 +9,24 @@ module ConfigurationManager =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Rules
     
+    type RuleConfig<'Config> = {
+        enabled : bool
+        config : 'Config option
+    }
+    
+    type EnabledConfig = RuleConfig<unit>
+    
     type FormattingConfig =
-        { typedItemSpacing : TypedItemSpacing.Config option
-          typePrefixing : bool option
-          unionDefinitionIndentation : bool option
-          tupleCommaSpacing : bool option
-          tupleIndentation : bool option
-          tupleParentheses : bool option
-          patternMatchClausesOnNewLine : bool option
-          patternMatchOrClausesOnNewLine : bool option
-          patternMatchClauseIndentation : bool option
-          patternMatchExpressionIndentation : bool option }
+        { typedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
+          typePrefixing : EnabledConfig option
+          unionDefinitionIndentation : EnabledConfig option
+          tupleCommaSpacing : EnabledConfig option
+          tupleIndentation : EnabledConfig option
+          tupleParentheses : EnabledConfig option
+          patternMatchClausesOnNewLine : EnabledConfig option
+          patternMatchOrClausesOnNewLine : EnabledConfig option
+          patternMatchClauseIndentation : EnabledConfig option
+          patternMatchExpressionIndentation : EnabledConfig option }
 
     type Configuration = 
         { ignoreFiles : string []
@@ -36,22 +43,26 @@ module ConfigurationManager =
         settings.Converters.Add(Converters.StringEnumConverter())
         JsonConvert.DeserializeObject<Configuration> configText
         
-    let constructRuleIfEnabled rule = function
-        | Some true -> Some rule
-        | _ -> None
+    let constructRuleWithConfig rule ruleConfig =
+        if ruleConfig.enabled then
+            ruleConfig.config |> Option.map (fun config -> rule config)
+        else
+            None
+
+    let constructRuleIfEnabled rule ruleConfig = if ruleConfig.enabled then Some rule else None
         
     let flattenFormattingConfig (config : FormattingConfig) =
         [|
-            config.typedItemSpacing |> Option.map TypedItemSpacing.rule
-            config.typePrefixing |> constructRuleIfEnabled TypePrefixing.rule
-            config.unionDefinitionIndentation |> constructRuleIfEnabled UnionDefinitionIndentation.rule
-            config.tupleCommaSpacing |> constructRuleIfEnabled TupleCommaSpacing.rule
-            config.tupleIndentation |> constructRuleIfEnabled TupleIndentation.rule
-            config.tupleParentheses |> constructRuleIfEnabled TupleParentheses.rule
-            config.patternMatchClausesOnNewLine |> constructRuleIfEnabled PatternMatchClausesOnNewLine.rule
-            config.patternMatchOrClausesOnNewLine |> constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule
-            config.patternMatchClauseIndentation |> constructRuleIfEnabled PatternMatchClauseIndentation.rule
-            config.patternMatchExpressionIndentation |> constructRuleIfEnabled PatternMatchExpressionIndentation.rule
+            config.typedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
+            config.typePrefixing |> Option.bind (constructRuleIfEnabled TypePrefixing.rule)
+            config.unionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule)
+            config.tupleCommaSpacing |> Option.bind (constructRuleIfEnabled TupleCommaSpacing.rule)
+            config.tupleIndentation |> Option.bind (constructRuleIfEnabled TupleIndentation.rule)
+            config.tupleParentheses |> Option.bind (constructRuleIfEnabled TupleParentheses.rule)
+            config.patternMatchClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchClausesOnNewLine.rule)
+            config.patternMatchOrClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule)
+            config.patternMatchClauseIndentation |> Option.bind (constructRuleIfEnabled PatternMatchClauseIndentation.rule)
+            config.patternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
         |]
         |> Array.choose id
         
