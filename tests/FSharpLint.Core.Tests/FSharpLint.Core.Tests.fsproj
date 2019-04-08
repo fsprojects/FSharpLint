@@ -23,7 +23,6 @@
     <Compile Include="Rules/TestNumberOfItemsRules.fs" />
     <Compile Include="Rules/TestSourceLengthRules.fs" />
     <Compile Include="Rules/TestNestedStatementsRules.fs" />
-    <Compile Include="Rules/TestTypographyRules.fs" />
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />

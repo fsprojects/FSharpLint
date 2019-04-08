@@ -1,13 +1,12 @@
-﻿module TestIndentationRuleBase
+﻿module TestLineRuleBase
 
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
-open FSharpLint.Rules
 
 [<AbstractClass>]
-type TestIndentationRuleBase (rule:Rule) =
+type TestLineRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
     
     override this.Parse (input:string) =
@@ -19,19 +18,9 @@ type TestIndentationRuleBase (rule:Rule) =
         
         let rule =
             match rule with
-            | IndentationRule rule -> rule
-            | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
+            | LineRule rule -> rule
+            | _ -> failwithf "TestLineRuleBase only accepts LineRules"
             
-            
-        let mutable state = Map.empty
-        match parseResults.ParseTree with
-        | Some tree ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            syntaxArray
-            |> Array.iter (fun astNode -> state <- Indentation.ContextBuilder.builder state astNode.Actual)
-        | None ->
-            ()
-        
         input
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
@@ -40,5 +29,5 @@ type TestIndentationRuleBase (rule:Rule) =
                 lineNumber = lineNumber + 1
                 isLastLine = isLastLine
                 fileContent = input }
-            rule.ruleConfig.runner state lineRuleParams)
+            rule.ruleConfig.runner lineRuleParams)
         |> Array.iter (suggestionToWarning "" >> this.postSuggestion)

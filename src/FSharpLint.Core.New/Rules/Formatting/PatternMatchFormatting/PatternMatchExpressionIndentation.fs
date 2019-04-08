@@ -32,5 +32,5 @@ let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMa
 let rule =
     { name = "PatternMatchExpressionIndentation" 
       identifier = None
-      ruleConfig = { runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner } }
     |> AstNodeRule

@@ -99,6 +99,7 @@ module Lint =
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
     open FSharpLint.Framework
+    open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -218,9 +219,12 @@ module Lint =
         
         let enabledRules = flattenConfig lintInfo.Configuration
         let astNodeRules = enabledRules.astNodeRules
+        let lineRules = enabledRules.lineRules
         let indentationRule = enabledRules.indentationRule
-        let indentationRuleAstFolder = indentationRule |> Option.bind (fun rule -> rule.ruleConfig.astFolder)
+        let noTabCharactersRule = enabledRules.noTabCharactersRule
         let mutable indentationRuleState = Map.empty
+        let mutable noTabCharactersRuleState = List.empty
+        
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
@@ -234,21 +238,29 @@ module Lint =
                         { astNode = astNode.Actual
                           getParents = getParents
                           fileContent = fileInfo.Text }
-                    indentationRuleAstFolder
-                    |> Option.iter (fun astFolder -> indentationRuleState <- astFolder indentationRuleState astNode.Actual)
+                    indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
+                    noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
                     enabledRules.astNodeRules |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
-                
             
             // Collect suggestions for Line rules
             let lineSuggestions = 
                 fileInfo.Text
                 |> String.toLines
-                |> Array.choose (fun (line, lineNumber, isLastLine) ->
+                |> Array.collect (fun (line, lineNumber, isLastLine) ->
                     let lineParams =
                         { LineRuleParams.line = line
                           lineNumber = lineNumber
+                          isLastLine = isLastLine
                           fileContent = fileInfo.Text }
-                    indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner indentationRuleState lineParams))
+                    let indentationError = indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner indentationRuleState lineParams)
+                    let noTabCharactersError = noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner noTabCharactersRuleState lineParams)
+                    let lineErrors = lineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
+                    [|
+                        indentationError |> Option.toArray
+                        noTabCharactersError |> Option.toArray
+                        lineErrors |> Array.singleton
+                    |])
+                |> Array.concat
                 |> Array.concat
 
             [|

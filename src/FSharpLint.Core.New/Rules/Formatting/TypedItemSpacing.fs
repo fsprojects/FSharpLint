@@ -75,5 +75,5 @@ let runner (config : Config) (args : AstNodeRuleParams) =
 let rule config =
     { name = "TypedItemSpacing" 
       identifier = None
-      ruleConfig = { runner = runner config } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner config } }
     |> AstNodeRule

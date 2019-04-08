@@ -1,5 +1,6 @@
 ﻿module FSharpLint.Framework.Rules
 
+open FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Analyser
 
@@ -11,6 +12,7 @@ type AstNodeRuleParams =
 type LineRuleParams =
     { line : string
       lineNumber : int
+      isLastLine : bool
       fileContent : string }
 
 type RuleMetadata<'config> =
@@ -20,13 +22,15 @@ type RuleMetadata<'config> =
   }
 
 type AstNodeRuleConfig = { runner : AstNodeRuleParams -> LintSuggestion [] }
+type LineRuleConfig = { runner : LineRuleParams -> LintSuggestion [] }
 
-type LineRuleConfig<'Context> =
-  { astFolder : ('Context -> AstNode -> 'Context) option
-    runner : 'Context -> LineRuleParams -> LintSuggestion [] }
+type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> LintSuggestion [] }
   
-type IndentationRuleConfig = LineRuleConfig<Map<int,bool*int>>
+type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
+type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
 
 type Rule =
   | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
+  | LineRule of RuleMetadata<LineRuleConfig>
   | IndentationRule of RuleMetadata<IndentationRuleConfig>
+  | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>

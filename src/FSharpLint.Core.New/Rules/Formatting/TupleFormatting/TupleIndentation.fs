@@ -30,5 +30,5 @@ let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args check
 let rule =
     { name = "TupleIndentation" 
       identifier = None
-      ruleConfig = { runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner } }
     |> AstNodeRule

@@ -37,5 +37,5 @@ let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args check
 let rule =
     { name = "TupleCommaSpacing" 
       identifier = None
-      ruleConfig = { runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner } }
     |> AstNodeRule

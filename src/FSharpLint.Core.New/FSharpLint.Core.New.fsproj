@@ -42,6 +42,11 @@
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
+    <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
+    <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
+    <Compile Include="Rules\Typography\MaxLinesInFile.fs" />
+    <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
+    <Compile Include="Rules\Typography\NoTabCharacters.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />

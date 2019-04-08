@@ -1,4 +1,4 @@
-﻿module TestIndentationRuleBase
+﻿module TestNoTabCharactersRuleBase
 
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 [<AbstractClass>]
-type TestIndentationRuleBase (rule:Rule) =
+type TestNoTabCharactersRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
     
     override this.Parse (input:string) =
@@ -19,16 +19,15 @@ type TestIndentationRuleBase (rule:Rule) =
         
         let rule =
             match rule with
-            | IndentationRule rule -> rule
-            | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
+            | NoTabCharactersRule rule -> rule
+            | _ -> failwithf "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
             
             
-        let mutable state = Map.empty
+        let mutable state = List.empty
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            syntaxArray
-            |> Array.iter (fun astNode -> state <- Indentation.ContextBuilder.builder state astNode.Actual)
+            syntaxArray |> Array.iter (fun astNode -> state <- NoTabCharacters.ContextBuilder.builder state astNode.Actual)
         | None ->
             ()
         

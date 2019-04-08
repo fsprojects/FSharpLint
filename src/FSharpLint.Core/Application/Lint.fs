@@ -188,7 +188,6 @@ module Lint =
           (Rules.NumberOfItems.analyser, Rules.NumberOfItems.AnalyserName)
           (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)
           (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
-          (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)
           (Rules.RedundantNewKeyword.analyser, Rules.RedundantNewKeyword.AnalyserName) ]
 

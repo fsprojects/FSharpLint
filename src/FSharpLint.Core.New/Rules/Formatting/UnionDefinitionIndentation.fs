@@ -69,5 +69,5 @@ let runner args =
 let rule =
     { name = "UnionDefinitionIndentation" 
       identifier = None
-      ruleConfig = { runner = runner} }
+      ruleConfig = { AstNodeRuleConfig.runner = runner} }
     |> AstNodeRule

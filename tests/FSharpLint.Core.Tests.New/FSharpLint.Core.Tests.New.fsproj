@@ -13,6 +13,8 @@
     <Compile Include="Rules/TestRuleBase.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />
     <Compile Include="Rules\TestIndentationRule.fs" />
+    <Compile Include="Rules\TestNoTabCharactersRule.fs" />
+    <Compile Include="Rules\TestLineRule.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
@@ -27,6 +29,10 @@
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
+    <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
+    <Compile Include="Rules\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
+    <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
   </ItemGroup>
 
   <ItemGroup>

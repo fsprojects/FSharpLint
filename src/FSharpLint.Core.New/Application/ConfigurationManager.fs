@@ -33,7 +33,12 @@ module ConfigurationManager =
         { recursiveAsyncFunction : EnabledConfig option }
 
     type TypographyConfig =
-        { indentation : RuleConfig<Indentation.Config> option }   
+        { indentation : RuleConfig<Indentation.Config> option
+          maxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
+          trailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
+          maxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
+          trailingNewLineInFile : EnabledConfig option
+          noTabCharacters : EnabledConfig option }
     
     type Configuration = 
         { ignoreFiles : string []
@@ -84,11 +89,18 @@ module ConfigurationManager =
     let flattenTypographyConfig (config : TypographyConfig) =
         [|
             config.indentation |> Option.bind (constructRuleWithConfig Indentation.rule)
+            config.maxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule)
+            config.trailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule)
+            config.maxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule)
+            config.trailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
+            config.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
         |]
         |> Array.choose id       
         
     type LoadedRules =
         { astNodeRules : RuleMetadata<AstNodeRuleConfig> []
+          lineRules : RuleMetadata<LineRuleConfig> []
+          noTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
           indentationRule : RuleMetadata<IndentationRuleConfig> option }
         
     let flattenConfig (config : Configuration) =
@@ -100,14 +112,20 @@ module ConfigurationManager =
             |] |> Array.concat
             
         let astNodeRules = ResizeArray()
+        let lineRules = ResizeArray()
         let mutable indentationRule = None
+        let mutable noTabCharactersRule = None
         allRules
         |> Array.iter (function
             | AstNodeRule rule -> astNodeRules.Add rule
-            | IndentationRule rule -> indentationRule <- Some rule)
+            | LineRule rule -> lineRules.Add(rule)
+            | IndentationRule rule -> indentationRule <- Some rule
+            | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
         
         { LoadedRules.astNodeRules = astNodeRules.ToArray()
-          indentationRule = indentationRule }
+          lineRules = lineRules.ToArray()
+          indentationRule = indentationRule
+          noTabCharactersRule = noTabCharactersRule }
     
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
