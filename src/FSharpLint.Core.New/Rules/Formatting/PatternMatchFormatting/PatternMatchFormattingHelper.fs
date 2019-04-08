@@ -4,7 +4,7 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let isActualPatternMatch (args : AstNodeRuleParams) rule =
+let isActualPatternMatch (args:AstNodeRuleParams) rule =
     match args.astNode with
     | AstNode.Expression (SynExpr.Match (_, _, clauses, range))
     | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range))

@@ -4,7 +4,7 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let isActualTuple (args : AstNodeRuleParams) rule =
+let isActualTuple (args:AstNodeRuleParams) rule =
     match args.astNode with
     | AstNode.Expression (SynExpr.Tuple (_, tupleExprs, _, tupleRange)) ->
         let parentNode = args.getParents 1 |> List.tryHead

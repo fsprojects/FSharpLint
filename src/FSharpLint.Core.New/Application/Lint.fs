@@ -194,7 +194,7 @@ module Lint =
           LintWarning.Info = suggestion.Message
           LintWarning.Input = input
           LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
-
+    
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
@@ -217,12 +217,15 @@ module Lint =
             | None -> true
         
         let enabledRules = flattenConfig lintInfo.Configuration
-            
+        let astNodeRules = enabledRules.astNodeRules
+        let indentationRule = enabledRules.indentationRule
+        let indentationRuleAstFolder = indentationRule |> Option.bind (fun rule -> rule.ruleConfig.astFolder)
+        let mutable indentationRuleState = Map.empty
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let suggestions =
+            let astNodeSuggestions =
                 syntaxArray
                 |> Array.mapi (fun i astNode -> (i, astNode))
                 |> Array.collect (fun (i, astNode) ->
@@ -231,10 +234,30 @@ module Lint =
                         { astNode = astNode.Actual
                           getParents = getParents
                           fileContent = fileInfo.Text }
-                    enabledRules |> Array.collect (fun rule -> rule.runner astNodeParams))
+                    indentationRuleAstFolder
+                    |> Option.iter (fun astFolder -> indentationRuleState <- astFolder indentationRuleState astNode.Actual)
+                    enabledRules.astNodeRules |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
                 
-            suggestions |> Array.iter trySuggest
+            
+            // Collect suggestions for Line rules
+            let lineSuggestions = 
+                fileInfo.Text
+                |> String.toLines
+                |> Array.choose (fun (line, lineNumber, isLastLine) ->
+                    let lineParams =
+                        { LineRuleParams.line = line
+                          lineNumber = lineNumber
+                          fileContent = fileInfo.Text }
+                    indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner indentationRuleState lineParams))
+                |> Array.concat
 
+            [|
+                lineSuggestions
+                astNodeSuggestions
+            |]
+            |> Array.concat
+            |> Array.iter trySuggest
+            
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
                     let timeoutMs = 2000

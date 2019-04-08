@@ -23,7 +23,7 @@ let getUnionCaseStartColumn (text:string) (SynUnionCase.UnionCase (attrs, _, _, 
     | None ->
         range.StartColumn
 
-let checkUnionDefinitionIndentation args typeDefnRepr typeDefnStartColumn =
+let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDefnStartColumn =
     match typeDefnRepr with
     | SynTypeDefnRepr.Simple((SynTypeDefnSimpleRepr.Union (_, cases, _)), _) ->
         match cases with
@@ -69,4 +69,5 @@ let runner args =
 let rule =
     { name = "UnionDefinitionIndentation" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner} }
+    |> AstNodeRule

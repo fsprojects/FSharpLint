@@ -8,6 +8,7 @@ module ConfigurationManager =
     open Newtonsoft.Json.Linq
     open FSharpLint.Framework.Configuration
     open FSharpLint.Rules
+    open FSharpLint.Framework.Rules
     
     type RuleConfig<'Config> = {
         enabled : bool
@@ -27,10 +28,18 @@ module ConfigurationManager =
           patternMatchOrClausesOnNewLine : EnabledConfig option
           patternMatchClauseIndentation : EnabledConfig option
           patternMatchExpressionIndentation : EnabledConfig option }
+        
+    type ConventionsConfig =
+        { recursiveAsyncFunction : EnabledConfig option }
 
+    type TypographyConfig =
+        { indentation : RuleConfig<Indentation.Config> option }   
+    
     type Configuration = 
         { ignoreFiles : string []
-          formatting : FormattingConfig option }
+          formatting : FormattingConfig option
+          conventions : ConventionsConfig option
+          typography : TypographyConfig option }
 
     let mergeConfig (baseConfig : string) (overridingConfig : string) =
         let baseConfigJson = JObject.Parse baseConfig
@@ -48,7 +57,7 @@ module ConfigurationManager =
             ruleConfig.config |> Option.map (fun config -> rule config)
         else
             None
-
+         
     let constructRuleIfEnabled rule ruleConfig = if ruleConfig.enabled then Some rule else None
         
     let flattenFormattingConfig (config : FormattingConfig) =
@@ -66,11 +75,39 @@ module ConfigurationManager =
         |]
         |> Array.choose id
         
+    let flattenConventionsConfig (config : ConventionsConfig) =
+        [|
+            config.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
+        |]
+        |> Array.choose id
+        
+    let flattenTypographyConfig (config : TypographyConfig) =
+        [|
+            config.indentation |> Option.bind (constructRuleWithConfig Indentation.rule)
+        |]
+        |> Array.choose id       
+        
+    type LoadedRules =
+        { astNodeRules : RuleMetadata<AstNodeRuleConfig> []
+          indentationRule : RuleMetadata<IndentationRuleConfig> option }
+        
     let flattenConfig (config : Configuration) =
-        config.formatting
-        |> Option.map flattenFormattingConfig
-        |> Option.toArray
-        |> Array.concat    
+        let allRules =
+            [|
+                config.formatting |> Option.map flattenFormattingConfig |> Option.toArray |> Array.concat    
+                config.conventions |> Option.map flattenConventionsConfig |> Option.toArray |> Array.concat    
+                config.typography |> Option.map flattenTypographyConfig |> Option.toArray |> Array.concat
+            |] |> Array.concat
+            
+        let astNodeRules = ResizeArray()
+        let mutable indentationRule = None
+        allRules
+        |> Array.iter (function
+            | AstNodeRule rule -> astNodeRules.Add rule
+            | IndentationRule rule -> indentationRule <- Some rule)
+        
+        { LoadedRules.astNodeRules = astNodeRules.ToArray()
+          indentationRule = indentationRule }
     
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =

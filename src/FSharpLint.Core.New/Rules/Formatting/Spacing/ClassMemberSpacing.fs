@@ -9,7 +9,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
-let checkClassMemberSpacing args (members:SynMemberDefns) =
+let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
     members
     |> List.toArray
     |> Array.pairwise
@@ -47,4 +47,5 @@ let runner args =
 let rule =
     { name = "ClassMemberSpacing" 
       identifier = None
-      runner = runner }       
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule

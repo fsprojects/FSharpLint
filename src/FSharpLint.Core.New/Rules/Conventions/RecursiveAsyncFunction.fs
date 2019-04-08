@@ -29,7 +29,7 @@ let private getFunctionNameFromAsyncCompExprBinding = function
     | _ ->
         None
 
-let checkRecursiveAsyncFunction args (range:range) (doBangExpr:SynExpr) breadcrumbs =
+let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:range) (doBangExpr:SynExpr) breadcrumbs =
     let doTokenRange = mkRange "do!" (mkPos range.StartLine range.StartColumn) (mkPos range.StartLine (range.StartColumn + 3))
     match doBangExpr with
     | SynExpr.App (funcExpr=(SynExpr.Ident callerIdent)) ->
@@ -68,4 +68,5 @@ let runner args =
 let rule =
     { name = "RecursiveAsyncFunction" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule

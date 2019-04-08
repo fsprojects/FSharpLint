@@ -127,4 +127,31 @@ module ExpressionUtilities =
             |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
             |> Array.length)
         |> Option.defaultValue 0
-   
+ 
+module String =
+    
+    open System.IO
+    
+    let toLines input =
+        let lines = ResizeArray()
+        use reader = new StringReader(input)
+
+        let readLine () = 
+            match reader.ReadLine() with
+            | null -> None
+            | line -> Some line
+
+        let rec iterateLines currentLine i = 
+            match currentLine with
+            | Some line ->
+                let nextLine = readLine ()
+                let isLastLine = Option.isNone nextLine
+
+                lines.Add(line, i, isLastLine)
+
+                iterateLines nextLine (i + 1)
+            | None -> ()
+
+        iterateLines (readLine ()) 0
+        
+        lines.ToArray()

@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
-let checkTupleHasParentheses args _ range parentNode =
+let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     match parentNode with
     | Some (AstNode.Expression (SynExpr.Paren _)) ->
         Array.empty
@@ -29,4 +29,5 @@ let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args check
 let rule =
     { name = "TupleParentheses" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule

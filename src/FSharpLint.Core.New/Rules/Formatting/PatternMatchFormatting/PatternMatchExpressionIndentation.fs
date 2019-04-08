@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
-let check args _ (clauses:SynMatchClause list) _ =
+let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
     clauses
     |> List.toArray
     |> Array.choose (fun clause ->
@@ -32,4 +32,5 @@ let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMa
 let rule =
     { name = "PatternMatchExpressionIndentation" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule

@@ -8,7 +8,25 @@ type AstNodeRuleParams =
       getParents : int -> AstNode list 
       fileContent : string }
     
-type RuleWithParams<'Params> =
+type LineRuleParams =
+    { line : string
+      lineNumber : int
+      fileContent : string }
+
+type RuleMetadata<'config> =
   { name : string
     identifier : string option
-    runner : 'Params -> LintSuggestion [] }
+    ruleConfig : 'config
+  }
+
+type AstNodeRuleConfig = { runner : AstNodeRuleParams -> LintSuggestion [] }
+
+type LineRuleConfig<'Context> =
+  { astFolder : ('Context -> AstNode -> 'Context) option
+    runner : 'Context -> LineRuleParams -> LintSuggestion [] }
+  
+type IndentationRuleConfig = LineRuleConfig<Map<int,bool*int>>
+
+type Rule =
+  | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
+  | IndentationRule of RuleMetadata<IndentationRuleConfig>

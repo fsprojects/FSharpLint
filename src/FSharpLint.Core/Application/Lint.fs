@@ -190,8 +190,7 @@ module Lint =
           (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
           (Rules.Typography.analyser, Rules.Typography.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)
-          (Rules.RedundantNewKeyword.analyser, Rules.RedundantNewKeyword.AnalyserName)
-          (Rules.Conventions.analyser, Rules.Conventions.AnalyserName) ]
+          (Rules.RedundantNewKeyword.analyser, Rules.RedundantNewKeyword.AnalyserName) ]
 
     module private Async =
         let combine f x y = async {

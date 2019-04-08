@@ -6,7 +6,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Rules
 
 [<AbstractClass>]
-type TestAstNodeRuleBase (rule) =
+type TestAstNodeRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
     
     override this.Parse (input:string) =
@@ -15,6 +15,11 @@ type TestAstNodeRuleBase (rule) =
         let projectOptions, _ = checker.GetProjectOptionsFromScript("test.fsx", input) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         let parseResults = checker.ParseFile("test.fsx", input, parsingOptions) |> Async.RunSynchronously
+        let rule =
+            match rule with
+            | AstNodeRule rule -> rule
+            | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
+            
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
@@ -27,7 +32,7 @@ type TestAstNodeRuleBase (rule) =
                         { astNode = astNode.Actual
                           getParents = getParents
                           fileContent = input }
-                    rule.runner astNodeParams)
+                    rule.ruleConfig.runner astNodeParams)
             suggestions |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
         | None ->
             ()

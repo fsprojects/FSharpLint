@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
-let checkTypePrefixing args range typeName typeArgs isPostfix =
+let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfix =
     match typeName with
     | SynType.LongIdent lid ->
         match lid |> longIdentWithDotsToString with
@@ -68,4 +68,5 @@ let runner args =
 let rule =
     { name = "TypePrefixing" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule

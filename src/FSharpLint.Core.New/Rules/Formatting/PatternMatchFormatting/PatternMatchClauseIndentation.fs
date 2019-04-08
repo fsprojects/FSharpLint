@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
-let check args matchExprRange (clauses:SynMatchClause list) isLambda =
+let check (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) isLambda =
     let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.fileContent
     
     let indentationLevelError =
@@ -18,10 +18,10 @@ let check args matchExprRange (clauses:SynMatchClause list) isLambda =
             let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.fileContent
             if isLambda then
                 if clauseIndentation <> matchStartIndentation + 4 then
-                { Range = firstClause.Range
-                  Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
-                  SuggestedFix = None
-                  TypeChecks = [] } |> Some
+                    { Range = firstClause.Range
+                      Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
+                      SuggestedFix = None
+                      TypeChecks = [] } |> Some
                 else
                     None
             elif clauseIndentation <> matchStartIndentation then
@@ -57,4 +57,5 @@ let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMa
 let rule =
     { name = "PatternMatchClauseIndentation" 
       identifier = None
-      runner = runner }
+      ruleConfig = { runner = runner } }
+    |> AstNodeRule
