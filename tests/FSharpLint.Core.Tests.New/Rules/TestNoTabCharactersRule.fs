@@ -2,9 +2,9 @@
 
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
+open FSharpLint.Application.ConfigurationManager
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
-open FSharpLint.Rules
 
 [<AbstractClass>]
 type TestNoTabCharactersRuleBase (rule:Rule) =
@@ -22,22 +22,13 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
             | NoTabCharactersRule rule -> rule
             | _ -> failwithf "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
             
-            
-        let mutable state = List.empty
-        match parseResults.ParseTree with
-        | Some tree ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            syntaxArray |> Array.iter (fun astNode -> state <- NoTabCharacters.ContextBuilder.builder state astNode.Actual)
-        | None ->
-            ()
         
-        input
-        |> String.toLines
-        |> Array.collect (fun (line, lineNumber, isLastLine) ->
-            let lineRuleParams = {
-                LineRuleParams.line = line
-                lineNumber = lineNumber + 1
-                isLastLine = isLastLine
-                fileContent = input }
-            rule.ruleConfig.runner state lineRuleParams)
-        |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        match parseResults.ParseTree with
+        | Some tree -> 
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
+            let (_, context) = runAstNodeRules Array.empty input syntaxArray skipArray
+            let lineRules = { LineRules.indentationRule = None; noTabCharactersRule = Some rule; genericLineRules = [||] }
+         
+            runLineRules lineRules input context
+            |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        | None -> ()

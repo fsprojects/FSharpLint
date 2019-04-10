@@ -99,7 +99,6 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
-    open FSharpLint.Framework
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -191,7 +190,7 @@ module Lint =
             let! x = xAsync 
             return f x }
 
-    let suggestionToWarning (input:string) (suggestion:Analyser.LintSuggestion) =
+    let suggestionToWarning (input:string) (suggestion:Suggestion.LintSuggestion) =
         { LintWarning.Range = suggestion.Range
           LintWarning.Info = suggestion.Message
           LintWarning.Input = input
@@ -222,6 +221,7 @@ module Lint =
                       skipArray = skipArray
                       getParents = getParents
                       fileContent = fileContent }
+                // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
                 
@@ -234,18 +234,42 @@ module Lint =
               noTabCharactersRuleContext = noTabCharactersRuleState }
         
         (astNodeSuggestions, context)
-            
+        
+    let runLineRules (lineRules:LineRules) (fileContent:string) (context:Context) =
+        fileContent
+        |> String.toLines
+        |> Array.collect (fun (line, lineNumber, isLastLine) ->
+            let lineParams =
+                { LineRuleParams.line = line
+                  lineNumber = lineNumber + 1
+                  isLastLine = isLastLine
+                  fileContent = fileContent }
+
+            let indentationError = lineRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
+               
+            let noTabCharactersError = lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
+                
+            let lineErrors = lineRules.genericLineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
+
+            [|
+                indentationError |> Option.toArray
+                noTabCharactersError |> Option.toArray
+                lineErrors |> Array.singleton
+            |])
+        |> Array.concat
+        |> Array.concat
+        
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
 
-        let suggest (suggestion:Analyser.LintSuggestion) =
+        let suggest (suggestion:Suggestion.LintSuggestion) =
             let warning = suggestionToWarning fileInfo.Text suggestion
             lintInfo.ErrorReceived warning
             fileWarnings.Add warning
 
-        let trySuggest (suggestion:Analyser.LintSuggestion) =
+        let trySuggest (suggestion:Suggestion.LintSuggestion) =
             if suggestion.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
@@ -257,34 +281,13 @@ module Lint =
             | None -> true
         
         let enabledRules = flattenConfig lintInfo.Configuration
-        let lineRules = enabledRules.lineRules
         
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
             let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.Text syntaxArray skipArray
-            
-            // Collect suggestions for Line rules
-            let lineSuggestions = 
-                fileInfo.Text
-                |> String.toLines
-                |> Array.collect (fun (line, lineNumber, isLastLine) ->
-                    let lineParams =
-                        { LineRuleParams.line = line
-                          lineNumber = lineNumber
-                          isLastLine = isLastLine
-                          fileContent = fileInfo.Text }
-                    let indentationError = enabledRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
-                    let noTabCharactersError = enabledRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
-                    let lineErrors = lineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
-                    [|
-                        indentationError |> Option.toArray
-                        noTabCharactersError |> Option.toArray
-                        lineErrors |> Array.singleton
-                    |])
-                |> Array.concat
-                |> Array.concat
+            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.Text context
 
             [|
                 lineSuggestions
@@ -305,7 +308,7 @@ module Lint =
                         typeChecks 
                         |> List.reduce (Async.combine (&&))
 
-                    let typeCheckSuggestion (suggestion: Analyser.LintSuggestion) =
+                    let typeCheckSuggestion (suggestion: Suggestion.LintSuggestion) =
                         typeChecksSuccessful suggestion.TypeChecks 
                         |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
                         

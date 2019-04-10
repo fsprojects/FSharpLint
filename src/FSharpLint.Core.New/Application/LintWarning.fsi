@@ -30,4 +30,4 @@ module LintWarning =
           Input: string
 
           /// Suggested fix for the warning.
-          Fix: Analyser.SuggestedFix option}
+          Fix: Suggestion.SuggestedFix option}

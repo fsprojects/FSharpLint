@@ -3,7 +3,7 @@
 open FSharp.Compiler.Range
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 
 type AstNodeRuleParams =
     { astNode : AstNode

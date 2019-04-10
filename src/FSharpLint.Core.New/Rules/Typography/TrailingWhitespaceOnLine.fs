@@ -2,7 +2,7 @@ module FSharpLint.Rules.TrailingWhitespaceOnLine
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Range
 

@@ -127,7 +127,10 @@ module ExpressionUtilities =
             |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
             |> Array.length)
         |> Option.defaultValue 0
- 
+        
+    let rangeContainsOtherRange (containingRange:range) (range:range) =
+        range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
+        
 module String =
     
     open System.IO

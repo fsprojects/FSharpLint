@@ -1,7 +1,7 @@
 module FSharpLint.Rules.RecursiveAsyncFunction
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharpLint.Framework.Ast

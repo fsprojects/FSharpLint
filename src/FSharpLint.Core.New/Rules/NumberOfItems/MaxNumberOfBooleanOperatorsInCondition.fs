@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxNumberOfBooleanOperatorsInCondition
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules

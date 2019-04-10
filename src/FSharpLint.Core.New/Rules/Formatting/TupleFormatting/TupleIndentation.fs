@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper

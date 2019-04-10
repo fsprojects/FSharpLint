@@ -24,7 +24,8 @@
     <Compile Include="Framework/Resources.fs" />
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework/FuzzyHintMatcher.fs" />
-    <Compile Include="Framework/Analyser.fs" />
+    <Compile Include="Framework\Suppression.fs" />
+    <Compile Include="Framework\Analyser.fs" />
     <Compile Include="Framework\Rules.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />

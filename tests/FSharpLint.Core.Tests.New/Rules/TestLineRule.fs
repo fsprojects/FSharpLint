@@ -2,6 +2,7 @@
 
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
+open FSharpLint.Application.ConfigurationManager
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
 
@@ -21,13 +22,13 @@ type TestLineRuleBase (rule:Rule) =
             | LineRule rule -> rule
             | _ -> failwithf "TestLineRuleBase only accepts LineRules"
             
-        input
-        |> String.toLines
-        |> Array.collect (fun (line, lineNumber, isLastLine) ->
-            let lineRuleParams = {
-                LineRuleParams.line = line
-                lineNumber = lineNumber + 1
-                isLastLine = isLastLine
-                fileContent = input }
-            rule.ruleConfig.runner lineRuleParams)
-        |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        
+        match parseResults.ParseTree with
+        | Some tree -> 
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
+            let (_, context) = runAstNodeRules Array.empty input syntaxArray skipArray
+            let lineRules = { LineRules.indentationRule = None; noTabCharactersRule = None; genericLineRules = [|rule|] }
+         
+            runLineRules lineRules input context
+            |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        | None -> ()

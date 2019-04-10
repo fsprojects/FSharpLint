@@ -2,9 +2,9 @@
 
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
+open FSharpLint.Application.ConfigurationManager
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
-open FSharpLint.Rules
 
 [<AbstractClass>]
 type TestIndentationRuleBase (rule:Rule) =
@@ -22,23 +22,13 @@ type TestIndentationRuleBase (rule:Rule) =
             | IndentationRule rule -> rule
             | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
             
-            
-        let mutable state = Map.empty
-        match parseResults.ParseTree with
-        | Some tree ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            syntaxArray
-            |> Array.iter (fun astNode -> state <- Indentation.ContextBuilder.builder state astNode.Actual)
-        | None ->
-            ()
         
-        input
-        |> String.toLines
-        |> Array.collect (fun (line, lineNumber, isLastLine) ->
-            let lineRuleParams = {
-                LineRuleParams.line = line
-                lineNumber = lineNumber + 1
-                isLastLine = isLastLine
-                fileContent = input }
-            rule.ruleConfig.runner state lineRuleParams)
-        |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        match parseResults.ParseTree with
+        | Some tree -> 
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
+            let (_, context) = runAstNodeRules Array.empty input syntaxArray skipArray
+            let lineRules = { LineRules.indentationRule = Some rule; noTabCharactersRule = None; genericLineRules = [||] }
+         
+            runLineRules lineRules input context
+            |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+        | None -> ()

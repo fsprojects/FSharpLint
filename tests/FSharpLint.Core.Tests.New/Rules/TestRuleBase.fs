@@ -1,18 +1,11 @@
 ﻿module TestRuleBase
 
 open System
-open System.Diagnostics
 open System.Text
 open NUnit.Framework
-open FSharp.Compiler.Range
-open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
-open FSharpLint.Framework.Ast
-open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.ParseFile
-open TestUtils
+open FSharpLint.Framework.Suggestion
 
 [<AbstractClass>]
 type TestRuleBase () =

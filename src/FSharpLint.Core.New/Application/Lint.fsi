@@ -42,6 +42,7 @@ module ConfigurationManagement =
 module Lint =
 
     open System.Threading
+    open FSharpLint.Application.ConfigurationManager
     open FSharpLint.Framework
     open FSharpLint.Framework.Rules
     open FSharp.Compiler
@@ -128,12 +129,16 @@ module Lint =
         
     type Context =
         { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list }        
+          noTabCharactersRuleContext : (string * Range.range) list }
         
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Analyser.LintSuggestion [] * Context
+    /// Runs all rules which take a node of the AST as input.
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context
+    
+    /// Runs all rules which take a line of text as input.
+    val runLineRules : LineRules -> string -> Context -> Suggestion.LintSuggestion []
         
     /// Converts a lint suggestion to a warning with the given source text.
-    val suggestionToWarning : string -> Analyser.LintSuggestion -> LintWarning.Warning 
+    val suggestionToWarning : string -> Suggestion.LintSuggestion -> LintWarning.Warning 
         
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.

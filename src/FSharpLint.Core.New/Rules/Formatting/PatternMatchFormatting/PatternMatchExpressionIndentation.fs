@@ -3,7 +3,7 @@ module FSharpLint.Rules.PatternMatchExpressionIndentation
 open System
 open FSharp.Compiler.Ast
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper

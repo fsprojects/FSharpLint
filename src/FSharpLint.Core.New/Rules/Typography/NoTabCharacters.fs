@@ -2,7 +2,7 @@ module FSharpLint.Rules.NoTabCharacters
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
+open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
@@ -17,11 +17,8 @@ module ContextBuilder =
         | _ ->
             current
 
-let private rangeContainsOtherRange (containingRange:range) (range:range) =
-    range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
-
 let private isInLiteralString literalStrings range = 
-    literalStrings |> Seq.exists (fun (_, literalRange) -> rangeContainsOtherRange literalRange range)
+    literalStrings |> Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range)
 
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.line.IndexOf('\t')
