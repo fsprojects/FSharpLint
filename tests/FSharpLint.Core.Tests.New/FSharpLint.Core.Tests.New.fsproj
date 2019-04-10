@@ -33,6 +33,10 @@
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
     <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfMembers.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
   </ItemGroup>
 
   <ItemGroup>

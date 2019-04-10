@@ -30,6 +30,9 @@ type TestAstNodeRuleBase (rule:Rule) =
                     let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                     let astNodeParams =
                         { astNode = astNode.Actual
+                          nodeIndex = i
+                          syntaxArray = syntaxArray
+                          skipArray = skipArray
                           getParents = getParents
                           fileContent = input }
                     rule.ruleConfig.runner astNodeParams)

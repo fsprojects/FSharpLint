@@ -1,11 +1,15 @@
 ﻿module FSharpLint.Framework.Rules
 
 open FSharp.Compiler.Range
+open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Analyser
 
 type AstNodeRuleParams =
     { astNode : AstNode
+      nodeIndex : int
+      syntaxArray : AbstractSyntaxArray.Node []
+      skipArray : Skip []
       getParents : int -> AstNode list 
       fileContent : string }
     

@@ -47,6 +47,10 @@
     <Compile Include="Rules\Typography\MaxLinesInFile.fs" />
     <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfMembers.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />

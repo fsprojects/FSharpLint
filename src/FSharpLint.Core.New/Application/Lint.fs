@@ -236,6 +236,9 @@ module Lint =
                     let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                     let astNodeParams =
                         { astNode = astNode.Actual
+                          nodeIndex =  i
+                          syntaxArray = syntaxArray
+                          skipArray = skipArray
                           getParents = getParents
                           fileContent = fileInfo.Text }
                     indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
