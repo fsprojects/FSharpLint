@@ -23,19 +23,8 @@ type TestAstNodeRuleBase (rule:Rule) =
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let suggestions =
-                syntaxArray
-                |> Array.mapi (fun n astNode -> (n, astNode))
-                |> Array.collect (fun (i, astNode) ->
-                    let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
-                    let astNodeParams =
-                        { astNode = astNode.Actual
-                          nodeIndex = i
-                          syntaxArray = syntaxArray
-                          skipArray = skipArray
-                          getParents = getParents
-                          fileContent = input }
-                    rule.ruleConfig.runner astNodeParams)
+            let suggestions = runAstNodeRules (Array.singleton rule) input syntaxArray skipArray |> fst
+
             suggestions |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
         | None ->
             ()

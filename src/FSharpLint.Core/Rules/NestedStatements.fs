@@ -69,7 +69,7 @@ module NestedStatements =
                 j <- skipArray.[j].ParentIndex
 
         distance
-
+        
     let analyser (args: AnalyserArgs) : unit =
         let syntaxArray, skipArray = args.SyntaxArray, args.SkipArray
 

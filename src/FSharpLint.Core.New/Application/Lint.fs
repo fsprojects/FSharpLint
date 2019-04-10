@@ -93,6 +93,7 @@ module Lint =
     open System.IO
     open System.Runtime.InteropServices
     open System.Threading
+    open FSharp.Compiler
     open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
@@ -196,6 +197,44 @@ module Lint =
           LintWarning.Input = input
           LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
     
+    type Context =
+        { indentationRuleContext : Map<int,bool*int>
+          noTabCharactersRuleContext : (string * Range.range) list }
+    
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (fileContent:string) syntaxArray skipArray =
+        let mutable indentationRuleState = Map.empty
+        let mutable noTabCharactersRuleState = List.empty
+
+        let checkIfSuppressed i rule =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
+            |> AbstractSyntaxArray.isRuleSuppressed rule
+        
+        // Collect suggestions for AstNode rules, and build context for following rules.
+        let astNodeSuggestions =
+            syntaxArray
+            |> Array.mapi (fun i astNode -> (i, astNode))
+            |> Array.collect (fun (i, astNode) ->
+                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
+                let astNodeParams =
+                    { astNode = astNode.Actual
+                      nodeIndex =  i
+                      syntaxArray = syntaxArray
+                      skipArray = skipArray
+                      getParents = getParents
+                      fileContent = fileContent }
+                indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
+                noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
+                
+                rules
+                |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
+                |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
+        
+        let context =
+            { indentationRuleContext = indentationRuleState
+              noTabCharactersRuleContext = noTabCharactersRuleState }
+        
+        (astNodeSuggestions, context)
+            
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
@@ -218,32 +257,13 @@ module Lint =
             | None -> true
         
         let enabledRules = flattenConfig lintInfo.Configuration
-        let astNodeRules = enabledRules.astNodeRules
         let lineRules = enabledRules.lineRules
-        let indentationRule = enabledRules.indentationRule
-        let noTabCharactersRule = enabledRules.noTabCharactersRule
-        let mutable indentationRuleState = Map.empty
-        let mutable noTabCharactersRuleState = List.empty
         
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let astNodeSuggestions =
-                syntaxArray
-                |> Array.mapi (fun i astNode -> (i, astNode))
-                |> Array.collect (fun (i, astNode) ->
-                    let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
-                    let astNodeParams =
-                        { astNode = astNode.Actual
-                          nodeIndex =  i
-                          syntaxArray = syntaxArray
-                          skipArray = skipArray
-                          getParents = getParents
-                          fileContent = fileInfo.Text }
-                    indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
-                    noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
-                    enabledRules.astNodeRules |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.Text syntaxArray skipArray
             
             // Collect suggestions for Line rules
             let lineSuggestions = 
@@ -255,8 +275,8 @@ module Lint =
                           lineNumber = lineNumber
                           isLastLine = isLastLine
                           fileContent = fileInfo.Text }
-                    let indentationError = indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner indentationRuleState lineParams)
-                    let noTabCharactersError = noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner noTabCharactersRuleState lineParams)
+                    let indentationError = enabledRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
+                    let noTabCharactersError = enabledRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
                     let lineErrors = lineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
                     [|
                         indentationError |> Option.toArray

@@ -43,6 +43,8 @@ module Lint =
 
     open System.Threading
     open FSharpLint.Framework
+    open FSharpLint.Framework.Rules
+    open FSharp.Compiler
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
@@ -123,6 +125,12 @@ module Lint =
 
         member TryGetSuccess : byref<LintWarning.Warning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
+        
+    type Context =
+        { indentationRuleContext : Map<int,bool*int>
+          noTabCharactersRuleContext : (string * Range.range) list }        
+        
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Analyser.LintSuggestion [] * Context
         
     /// Converts a lint suggestion to a warning with the given source text.
     val suggestionToWarning : string -> Analyser.LintSuggestion -> LintWarning.Warning 
