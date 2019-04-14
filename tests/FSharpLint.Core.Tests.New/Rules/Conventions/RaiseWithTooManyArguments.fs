@@ -1,32 +1,12 @@
-﻿module TestRaiseWithTooManyArgumentsRules
+module FSharpLint.Core.Tests.Rules.Conventions.RaiseWithTooManyArguments
 
 open NUnit.Framework
-open FSharpLint.Rules.RaiseWithTooManyArguments
-open FSharpLint.Framework.Configuration
+open FSharpLint.Rules
 
-let config = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
-
-    Map.ofList 
-        [ (AnalyserName, 
-            { Rules = Map.ofList 
-                [ ("FailwithWithSingleArgument", ruleEnabled) 
-                  ("RaiseWithSingleArgument", ruleEnabled) 
-                  ("NullArgWithSingleArgument", ruleEnabled) 
-                  ("InvalidOpWithSingleArgument", ruleEnabled) 
-                  ("InvalidArgWithTwoArguments", ruleEnabled) 
-                  ("FailwithfWithArgumentsMatchingFormatString", ruleEnabled) ]
-              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-               
 [<TestFixture>]
-type TestRaiseWithTooManyArgumentsRules() =
-    inherit TestRuleBase.TestRuleBase(analyser, config)
-
-    [<Category("Performance")>]
-    [<Test>]
-    member this.``Performance of raise with too many args analyser``() = 
-        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
-
+type TestConventionsFailwithWithSingleArg() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithWithSingleArgument.rule)
+    
     [<Test>]
     member this.FailwithWithCorrectNumberOfArguments() = 
         this.Parse """
@@ -73,6 +53,10 @@ module Program
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
+[<TestFixture>]
+type TestConventionsRaiseWithSingleArg() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RaiseWithSingleArgument.rule)   
+    
     [<Test>]
     member this.RaiseWithCorrectArguments() = 
         this.Parse """
@@ -101,6 +85,10 @@ raise (System.ArgumentException("Divisor cannot be zero!")) "" """
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
+[<TestFixture>]
+type TestConventionsFailwithfWithArugmentMatchingFormatString() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithfWithArgumentsMatchingFormatString.rule)   
+    
     [<Test>]
     member this.FailwithfWithCorrectNumberOfArguments() = 
         this.Parse """
@@ -138,6 +126,10 @@ failwithf "%d %% %s" 4 "dog" 5 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
+[<TestFixture>]
+type TestConventionsNullArgWithSingleArg() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NullArgWithSingleArgument.rule)   
+    
     [<Test>]
     member this.NullArgWithCorrectNumberOfArguments() = 
         this.Parse """
@@ -166,6 +158,10 @@ nullArg "" "" """
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
+[<TestFixture>]
+type TestConventionsInvalidOpWithSingleArg() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidOpWithSingleArgument.rule)
+    
     [<Test>]
     member this.InvalidOpWithCorrectNumberOfArguments() = 
         this.Parse """
@@ -194,6 +190,10 @@ invalidOp "" "" """
 
         Assert.IsFalse(this.ErrorExistsOnLine(5))
 
+[<TestFixture>]
+type TestConventionsInvalidArgWithTwoArguments() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidArgWithTwoArguments.rule)
+    
     [<Test>]
     member this.InvalidArgWithCorrectNumberOfArguments() = 
         this.Parse """
@@ -220,4 +220,4 @@ module Program
 
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
+        Assert.IsFalse(this.ErrorExistsOnLine(5))   

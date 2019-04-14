@@ -43,6 +43,13 @@
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\NullArgWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidOpWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />

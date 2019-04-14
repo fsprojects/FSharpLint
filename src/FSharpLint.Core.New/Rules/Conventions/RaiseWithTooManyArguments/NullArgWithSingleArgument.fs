@@ -1,0 +1,11 @@
+module FSharpLint.Rules.NullArgWithSingleArgument
+
+open FSharpLint.Framework.Rules
+    
+let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "nullArg" 1 "RulesNullArgWithSingleArgument"
+
+let rule =
+    { name = "NullArgWithSingleArgument" 
+      identifier = None
+      ruleConfig = { AstNodeRuleConfig.runner = runner } }
+    |> AstNodeRule

@@ -30,7 +30,6 @@
     <Compile Include="Rules/NestedStatements.fs" />
     <Compile Include="Rules/FunctionReimplementation.fs" />
     <Compile Include="Rules/HintMatcher.fs" />
-    <Compile Include="Rules/RaiseWithTooManyArguments.fs" />
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
     <Compile Include="Application/LintWarning.fs" />
