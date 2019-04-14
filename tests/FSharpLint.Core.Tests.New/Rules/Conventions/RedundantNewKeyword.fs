@@ -1,23 +1,18 @@
-﻿module TestRedundantNewKeyword
+module FSharpLint.Core.Tests.Rules.Conventions.RedundantNewKeyword
 
 open NUnit.Framework
-open FSharpLint.Rules.RedundantNewKeyword
-open FSharpLint.Framework.Configuration
+open FSharpLint.Rules
 
-let config =
-    Map.ofList 
-        [ (AnalyserName, { Rules = Map.empty; Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
-              
 [<TestFixture>]
-type TestRedundantNewKeyword() =
-    inherit TestRuleBase.TestRuleBase(analyser, config)
+type TestConventionsRedundantNewKeyword() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RedundantNewKeyword.rule)
 
     [<Test>]
     member this.``Lint gives suggestion when new keyword is not required.``() = 
         this.Parse("""
 module Program
 
-let _ = new System.Version()""", checkInput = true)
+let _ = new System.Version()""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
@@ -27,7 +22,7 @@ let _ = new System.Version()""", checkInput = true)
 module Program
 
 [<System.Diagnostics.CodeAnalysis.SuppressMessage("RedundantNewKeyword", "*")>]
-let _ = new System.Version()""", checkInput = true)
+let _ = new System.Version()""")
 
         this.AssertNoWarnings()
 
@@ -36,7 +31,7 @@ let _ = new System.Version()""", checkInput = true)
         this.Parse("""
 module Program
 
-let _ = new System.IO.MemoryStream()""", checkInput = true)
+let _ = new System.IO.MemoryStream()""")
 
         this.AssertNoWarnings()
 
@@ -52,5 +47,5 @@ module Program
 
 let _ = System.Version()"""
  
-        this.Parse(source, checkInput = true)
+        this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)

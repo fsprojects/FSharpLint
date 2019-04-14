@@ -186,8 +186,7 @@ module Lint =
           (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
           (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)
           (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
-          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName)
-          (Rules.RedundantNewKeyword.analyser, Rules.RedundantNewKeyword.AnalyserName) ]
+          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 
     module private Async =
         let combine f x y = async {

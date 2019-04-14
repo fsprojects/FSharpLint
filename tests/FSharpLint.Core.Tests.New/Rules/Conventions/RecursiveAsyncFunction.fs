@@ -1,4 +1,4 @@
-module FSharpLint.Core.Tests.Rules.Formatting.RecursiveAsyncFunction
+module FSharpLint.Core.Tests.Rules.Conventions.RecursiveAsyncFunction
 
 open NUnit.Framework
 open FSharpLint.Rules

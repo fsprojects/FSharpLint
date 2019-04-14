@@ -24,7 +24,6 @@
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
     <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
-    <Compile Include="Rules/TestRedundantNewKeyword.fs" />
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />

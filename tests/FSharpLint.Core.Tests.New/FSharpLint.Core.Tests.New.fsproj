@@ -28,6 +28,7 @@
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
+    <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
