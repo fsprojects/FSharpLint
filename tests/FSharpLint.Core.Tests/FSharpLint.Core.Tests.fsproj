@@ -19,7 +19,6 @@
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
     <Compile Include="Rules/TestNameConventionRules.fs" />
-    <Compile Include="Rules/TestBindingRules.fs" />
     <Compile Include="Rules/TestSourceLengthRules.fs" />
     <Compile Include="Rules/TestNestedStatementsRules.fs" />
     <Compile Include="Rules/TestFunctionReimplementationRules.fs" />

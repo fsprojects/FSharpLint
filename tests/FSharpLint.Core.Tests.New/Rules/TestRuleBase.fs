@@ -13,8 +13,18 @@ type TestRuleBase () =
 
     abstract Parse : string -> unit
         
-    member __.postSuggestion (suggestion:LintWarning.Warning) =
-        suggestions.Add(suggestion)
+    member __.postSuggestion (suggestion:Suggestion.LintSuggestion) =
+        if not suggestion.TypeChecks.IsEmpty then
+            let successfulTypeCheck = 
+                suggestion.TypeChecks 
+                |> Async.Parallel 
+                |> Async.RunSynchronously
+                |> Array.reduce (&&)
+
+            if successfulTypeCheck then 
+                suggestions.Add(suggestion)
+        else
+            suggestions.Add(suggestion)
 
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions
@@ -47,15 +57,15 @@ type TestRuleBase () =
             suggestions
             |> Seq.map (fun s -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
                 s.Range.StartRange.StartLine s.Range.StartColumn 
-                s.Range.EndRange.EndLine s.Range.EndRange.EndColumn s.Info ))
+                s.Range.EndRange.EndLine s.Range.EndRange.EndColumn s.Message ))
             |> (fun x -> String.Join("; ", x))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
-        |> Seq.exists (fun s -> s.Info = message)
+        |> Seq.exists (fun s -> s.Message = message)
 
     member __.ErrorWithMessageExists(message) =
-        suggestions |> Seq.exists (fun s -> s.Info = message)
+        suggestions |> Seq.exists (fun s -> s.Message = message)
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
@@ -63,10 +73,10 @@ type TestRuleBase () =
     member this.ApplyQuickFix (source:string) =
         let firstSuggestedFix =
             suggestions 
-            |> Seq.choose (fun x -> x.Fix)
+            |> Seq.choose (fun x -> x.SuggestedFix)
             |> Seq.tryHead
 
-        match firstSuggestedFix with
+        match firstSuggestedFix |> Option.bind (fun x -> x.Value) with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source

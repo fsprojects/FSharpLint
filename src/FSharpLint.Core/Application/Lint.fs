@@ -181,8 +181,7 @@ module Lint =
           Configuration: Configuration.Configuration }
 
     let private analysers =
-        [ (Rules.Binding.analyser, Rules.Binding.AnalyserName)
-          (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
+        [ (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
           (Rules.RaiseWithTooManyArguments.analyser, Rules.RaiseWithTooManyArguments.AnalyserName)

@@ -200,7 +200,7 @@ module Lint =
         { indentationRuleContext : Map<int,bool*int>
           noTabCharactersRuleContext : (string * Range.range) list }
     
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (fileContent:string) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -220,7 +220,8 @@ module Lint =
                       syntaxArray = syntaxArray
                       skipArray = skipArray
                       getParents = getParents
-                      fileContent = fileContent }
+                      fileContent = fileContent
+                      checkInfo = typeCheckResults }
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
@@ -286,7 +287,7 @@ module Lint =
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.Text syntaxArray skipArray
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.Text syntaxArray skipArray
             let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.Text context
 
             [|

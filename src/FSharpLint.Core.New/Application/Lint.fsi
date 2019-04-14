@@ -46,6 +46,7 @@ module Lint =
     open FSharpLint.Framework
     open FSharpLint.Framework.Rules
     open FSharp.Compiler
+    open FSharp.Compiler.SourceCodeServices
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
@@ -132,7 +133,7 @@ module Lint =
           noTabCharactersRuleContext : (string * Range.range) list }
         
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context
     
     /// Runs all rules which take a line of text as input.
     val runLineRules : LineRules -> string -> Context -> Suggestion.LintSuggestion []

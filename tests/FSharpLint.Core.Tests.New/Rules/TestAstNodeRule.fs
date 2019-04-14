@@ -13,8 +13,7 @@ type TestAstNodeRuleBase (rule:Rule) =
         let checker = FSharpChecker.Create()
         
         let projectOptions, _ = checker.GetProjectOptionsFromScript("test.fsx", input) |> Async.RunSynchronously
-        let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
-        let parseResults = checker.ParseFile("test.fsx", input, parsingOptions) |> Async.RunSynchronously
+        let (parseResults, checkResults) = checker.ParseAndCheckFileInProject("test.fsx", 0, input, projectOptions) |> Async.RunSynchronously
         let rule =
             match rule with
             | AstNodeRule rule -> rule
@@ -22,9 +21,14 @@ type TestAstNodeRuleBase (rule:Rule) =
             
         match parseResults.ParseTree with
         | Some tree ->
+            let checkResult =
+                match checkResults with
+                | FSharpCheckFileAnswer.Succeeded result -> Some result
+                | FSharpCheckFileAnswer.Aborted _ -> None
+                
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let suggestions = runAstNodeRules (Array.singleton rule) input syntaxArray skipArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) checkResult input syntaxArray skipArray |> fst
 
-            suggestions |> Array.iter (suggestionToWarning "" >> this.postSuggestion)
+            suggestions |> Array.iter this.postSuggestion
         | None ->
             ()

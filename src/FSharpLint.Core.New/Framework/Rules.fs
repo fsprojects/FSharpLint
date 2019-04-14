@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Framework.Rules
 
 open FSharp.Compiler.Range
+open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Suggestion
@@ -11,7 +12,8 @@ type AstNodeRuleParams =
       syntaxArray : AbstractSyntaxArray.Node []
       skipArray : Skip []
       getParents : int -> AstNode list 
-      fileContent : string }
+      fileContent : string
+      checkInfo : FSharpCheckFileResults option }
     
 type LineRuleParams =
     { line : string
