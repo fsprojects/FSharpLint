@@ -7,5 +7,5 @@ let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "nullArg
 let rule =
     { name = "NullArgWithSingleArgument" 
       identifier = None
-      ruleConfig = { AstNodeRuleConfig.runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

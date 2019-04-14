@@ -234,6 +234,7 @@ module Lint =
             { indentationRuleContext = indentationRuleState
               noTabCharactersRuleContext = noTabCharactersRuleState }
         
+        rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
         (astNodeSuggestions, context)
         
     let runLineRules (lineRules:LineRules) (fileContent:string) (context:Context) =

@@ -183,7 +183,6 @@ module Lint =
     let private analysers =
         [ (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
           (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
-          (Rules.NestedStatements.analyser, Rules.NestedStatements.AnalyserName)
           (Rules.SourceLength.analyser, Rules.SourceLength.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 

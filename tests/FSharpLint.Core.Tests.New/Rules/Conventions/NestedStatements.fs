@@ -1,32 +1,13 @@
-﻿module TestNestedStatements
+module FSharpLint.Core.Tests.Rules.Conventions.NestedStatements
 
 open NUnit.Framework
+open FSharpLint.Rules
 open FSharpLint.Rules.NestedStatements
-open FSharpLint.Framework.Configuration
 
-let config = 
-    Map.ofList 
-        [ 
-            (AnalyserName, 
-                { 
-                    Rules = Map.ofList []
-                    Settings = Map.ofList 
-                        [ 
-                            ("Enabled", Enabled(true)) 
-                            ("Depth", Depth(5)) 
-                        ]
-                })
-            ]
- 
 [<TestFixture>]
-type TestNestedStatements() =
-    inherit TestRuleBase.TestRuleBase(analyser, config)
-
-    [<Category("Performance")>]
-    [<Test>]
-    member this.``Performance of nested statements analyser``() = 
-        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
-
+type TestConventionsNestedStatements() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NestedStatements.rule { Config.depth = 5 })
+ 
     [<Test>]
     member this.NestedTooDeep() = 
         this.Parse """

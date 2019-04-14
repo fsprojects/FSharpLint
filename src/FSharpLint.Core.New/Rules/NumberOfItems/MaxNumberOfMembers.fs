@@ -48,5 +48,5 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
 let rule config =
     { name = "MaxNumberOfMembers"
       identifier = None
-      ruleConfig = { AstNodeRuleConfig.runner = runner config } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

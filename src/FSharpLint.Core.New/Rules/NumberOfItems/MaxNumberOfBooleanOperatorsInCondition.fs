@@ -52,5 +52,5 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
 let rule config =
     { name = "MaxNumberOfBooleanOperatorsInCondition"
       identifier = None
-      ruleConfig = { AstNodeRuleConfig.runner = runner config } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

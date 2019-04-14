@@ -43,6 +43,7 @@
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
+    <Compile Include="Rules\Conventions\NestedStatements.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />

@@ -28,6 +28,7 @@ type TestAstNodeRuleBase (rule:Rule) =
                 
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult input syntaxArray skipArray |> fst
+            rule.ruleConfig.cleanup()
 
             suggestions |> Array.iter this.postSuggestion
         | None ->

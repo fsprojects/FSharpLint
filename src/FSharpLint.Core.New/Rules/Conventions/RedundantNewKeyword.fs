@@ -48,5 +48,5 @@ let runner args =
 let rule =
     { name = "RedundantNewKeyword" 
       identifier = None
-      ruleConfig = { AstNodeRuleConfig.runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

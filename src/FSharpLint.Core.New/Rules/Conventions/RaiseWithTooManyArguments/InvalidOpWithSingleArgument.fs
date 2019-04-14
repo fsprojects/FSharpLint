@@ -7,5 +7,5 @@ let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "invalid
 let rule =
     { name = "InvalidOpWithSingleArgument" 
       identifier = None
-      ruleConfig = { AstNodeRuleConfig.runner = runner } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

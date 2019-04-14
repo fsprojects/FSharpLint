@@ -27,7 +27,10 @@ type RuleMetadata<'config> =
     ruleConfig : 'config
   }
 
-type AstNodeRuleConfig = { runner : AstNodeRuleParams -> LintSuggestion [] }
+type AstNodeRuleConfig = {
+  runner : AstNodeRuleParams -> LintSuggestion []
+  cleanup : unit -> unit }
+
 type LineRuleConfig = { runner : LineRuleParams -> LintSuggestion [] }
 
 type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> LintSuggestion [] }
