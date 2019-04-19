@@ -64,6 +64,9 @@
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInEnum.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInUnion.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInClass.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\FunctionReimplementationHelper.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\ReimplementsFunction.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\CanBeReplacedWithComposition.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />

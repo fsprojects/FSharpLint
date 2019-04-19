@@ -31,6 +31,7 @@
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments.fs" />
     <Compile Include="Rules\Conventions\NestedStatements.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation.fs" />
     <Compile Include="Rules\Conventions\SourceLength.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />

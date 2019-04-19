@@ -181,8 +181,7 @@ module Lint =
           Configuration: Configuration.Configuration }
 
     let private analysers =
-        [ (Rules.FunctionReimplementation.analyser, Rules.FunctionReimplementation.AnalyserName)
-          (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
+        [ (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
           (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 
     module private Async =

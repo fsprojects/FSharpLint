@@ -26,7 +26,6 @@
     <Compile Include="Framework/Analyser.fs" />
     <!-- Rules -->
     <Compile Include="Rules/NameConventions.fs" />
-    <Compile Include="Rules/FunctionReimplementation.fs" />
     <Compile Include="Rules/HintMatcher.fs" />
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />

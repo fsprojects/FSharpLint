@@ -1,27 +1,11 @@
-﻿module TestFunctionReimplementationRules
+module FSharpLint.Core.Tests.Rules.Conventions.FunctionReimplementation
 
 open NUnit.Framework
-open FSharpLint.Rules.FunctionReimplementation
-open FSharpLint.Framework.Configuration
+open FSharpLint.Rules
 
-let config = 
-    let ruleEnabled = { Rule.Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }
-
-    Map.ofList 
-        [ (AnalyserName, 
-            { Rules = Map.ofList 
-                [ ("CanBeReplacedWithComposition", ruleEnabled) 
-                  ("ReimplementsFunction", ruleEnabled) ]
-              Settings = Map.ofList [ ("Enabled", Enabled(true)) ] }) ]
- 
 [<TestFixture>]
-type TestFunctionReimplementationRules() =
-    inherit TestRuleBase.TestRuleBase(analyser, config)
-
-    [<Category("Performance")>]
-    [<Test>]
-    member this.``Performance of function reimplementation analyser``() = 
-        Assert.Less(this.TimeAnalyser(100, defaultConfiguration), 20)
+type TestConventionsFunctionReimplementation() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ReimplementsFunction.rule)
 
     [<Test>]
     member this.LambdaReimplementingMultiplicationIssuesError() = 
@@ -106,8 +90,7 @@ module Program
 
 type Cat = | Meower of string
 
-let f = List.map (fun x -> Meower x) ["1";"2"]
-""", checkInput = true)
+let f = List.map (fun x -> Meower x) ["1";"2"]""")
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -123,8 +106,7 @@ type Duck(info:string) =
 let f = List.map (fun x -> Duck x) ["1";"2"]
 
 open System
-let f = List.map (fun x -> String x) ["1";"2"]
-""", checkInput = true)
+let f = List.map (fun x -> String x) ["1";"2"]""")
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -169,7 +151,47 @@ let f = fun x -> ceil x
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        
+    [<Test>]
+    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() = 
+        this.Parse """
+module Program
 
+let x = 6
+
+let f = fun a b _ -> a * b
+"""
+
+        this.AssertNoWarnings()
+        
+    [<Test>]
+    member this.LambdaWithUnitParameterDoesNotIssueError() = 
+        this.Parse """
+module Program
+
+let x = 6
+
+let f = fun () -> ceil x
+"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.LambdaWithWildcardParameterDoesNotIssueError() = 
+        this.Parse """
+module Program
+
+let x = 6
+
+let f = fun _ -> ceil x
+"""
+
+        this.AssertNoWarnings()
+
+[<TestFixture>]
+type TestConventionsCanBeReplacedWithComposition() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(CanBeReplacedWithComposition.rule)
+    
     [<Test>]
     member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
         this.Parse """
@@ -241,18 +263,6 @@ module Program
 let x = 6
 
 let f = fun _ -> ceil x
-"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
-    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() = 
-        this.Parse """
-module Program
-
-let x = 6
-
-let f = fun a b _ -> a * b
 """
 
         this.AssertNoWarnings()
