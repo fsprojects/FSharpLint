@@ -199,7 +199,7 @@ module Lint =
     type Context =
         { indentationRuleContext : Map<int,bool*int>
           noTabCharactersRuleContext : (string * Range.range) list }
-    
+        
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty

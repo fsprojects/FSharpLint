@@ -1,5 +1,6 @@
 ﻿module FSharpLint.Framework.Rules
 
+open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.AbstractSyntaxArray
@@ -27,10 +28,28 @@ type RuleMetadata<'config> =
     ruleConfig : 'config
   }
 
-type AstNodeRuleConfig = {
-  runner : AstNodeRuleParams -> LintSuggestion []
-  cleanup : unit -> unit }
+type AstNodeRuleConfig =
+  { runner : AstNodeRuleParams -> LintSuggestion []
+    cleanup : unit -> unit }
+  
+type NamingCase =
+    | PascalCase = 0
+    | CamelCase = 1
 
+type NamingUnderscores =
+    | None = 0
+    | AllowPrefix = 1
+
+type NamingConfig =
+    { naming : NamingCase option
+      underscores : NamingUnderscores option
+      prefix : string option
+      suffix : string option }
+    
+type NamingRuleConfig =
+    { config : NamingConfig
+      getIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
+    
 type LineRuleConfig = { runner : LineRuleParams -> LintSuggestion [] }
 
 type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> LintSuggestion [] }

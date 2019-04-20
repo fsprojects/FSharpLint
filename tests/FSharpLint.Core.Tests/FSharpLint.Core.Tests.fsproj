@@ -18,7 +18,6 @@
     <Compile Include="Framework/TestAnalyser.fs" />
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
-    <Compile Include="Rules/TestNameConventionRules.fs" />
     <Compile Include="Rules/TestHintMatcher.fs" />
   </ItemGroup>
 

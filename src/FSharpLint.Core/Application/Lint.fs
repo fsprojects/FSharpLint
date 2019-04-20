@@ -181,8 +181,7 @@ module Lint =
           Configuration: Configuration.Configuration }
 
     let private analysers =
-        [ (Rules.NameConventions.analyser, Rules.NameConventions.AnalyserName)
-          (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
+        [ (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
 
     module private Async =
         let combine f x y = async {

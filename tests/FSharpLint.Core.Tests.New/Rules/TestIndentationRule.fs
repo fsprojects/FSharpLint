@@ -10,10 +10,12 @@ open FSharpLint.Framework.Rules
 type TestIndentationRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
     
-    override this.Parse (input:string) =
+    override this.Parse (input:string, ?fileName:string) =
         let checker = FSharpChecker.Create()
         
-        let projectOptions, _ = checker.GetProjectOptionsFromScript("test.fsx", input) |> Async.RunSynchronously
+        let fileName = fileName |> Option.defaultValue "Test.fsx"
+        
+        let projectOptions, _ = checker.GetProjectOptionsFromScript(fileName, input) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         let parseResults = checker.ParseFile("test.fsx", input, parsingOptions) |> Async.RunSynchronously
         

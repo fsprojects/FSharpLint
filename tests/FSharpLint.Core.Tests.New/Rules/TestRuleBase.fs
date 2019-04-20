@@ -11,7 +11,7 @@ open FSharpLint.Framework.Suggestion
 type TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
-    abstract Parse : string -> unit
+    abstract Parse : string * ?fileName:string -> unit
         
     member __.postSuggestion (suggestion:Suggestion.LintSuggestion) =
         if not suggestion.TypeChecks.IsEmpty then
