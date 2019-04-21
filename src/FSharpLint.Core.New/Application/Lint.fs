@@ -99,6 +99,7 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
+    open FSharpLint.Framework.HintParser
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -216,6 +217,7 @@ module Lint =
                 let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                 let astNodeParams =
                     { astNode = astNode.Actual
+                      nodeHashcode = astNode.Hashcode
                       nodeIndex =  i
                       syntaxArray = syntaxArray
                       skipArray = skipArray

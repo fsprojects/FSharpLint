@@ -12,6 +12,7 @@
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />
+    <Compile Include="Rules\TestHintMatcherBase.fs" />
     <Compile Include="Rules\TestIndentationRule.fs" />
     <Compile Include="Rules\TestNoTabCharactersRule.fs" />
     <Compile Include="Rules\TestLineRule.fs" />
@@ -62,6 +63,7 @@
     <Compile Include="Rules\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
     <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Hints\HintMatcher.fs" />
   </ItemGroup>
 
   <ItemGroup>

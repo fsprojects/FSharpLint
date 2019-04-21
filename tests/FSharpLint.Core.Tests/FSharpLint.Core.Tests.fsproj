@@ -17,8 +17,6 @@
     <Compile Include="Framework/TestAbstractSyntaxArray.fs" />
     <Compile Include="Framework/TestAnalyser.fs" />
     <!-- Rules -->
-    <Compile Include="Rules/TestRuleBase.fs" />
-    <Compile Include="Rules/TestHintMatcher.fs" />
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />

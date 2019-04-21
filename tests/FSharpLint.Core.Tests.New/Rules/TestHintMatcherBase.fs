@@ -1,14 +1,38 @@
-﻿module TestAstNodeRuleBase
+﻿module TestHintMatcherBase
 
+open FParsec
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Application
 open FSharpLint.Framework
+open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.HintParser
+open FSharpLint.Framework.HintParser.MergeSyntaxTrees
 open FSharpLint.Framework.ParseFile
-open FSharpLint.Framework.Rules
+open FSharpLint.Rules
+
+open FSharpLint.Rules.HintMatcher
+
+let private generateHintConfig hints =
+    let parseHints hints =
+        let parseHint hint =
+            match CharParsers.run phint hint with
+            | FParsec.CharParsers.Success(hint, _, _) -> hint
+            | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
+
+        List.map (fun x -> { Hint = x; ParsedHint = parseHint x }) hints
+
+    parseHints hints
+    |> List.map (fun x -> x.ParsedHint)
+    |> MergeSyntaxTrees.mergeHints
 
 [<AbstractClass>]
-type TestAstNodeRuleBase (rule:Rule) =
+type TestHintMatcherBase () =
     inherit TestRuleBase.TestRuleBase()
+    
+    let mutable hintTrie = Edges.Empty
+    
+    member this.SetConfig (hints:string list) =
+        hintTrie <- generateHintConfig hints
     
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
         let checker = FSharpChecker.Create()
@@ -19,12 +43,12 @@ type TestAstNodeRuleBase (rule:Rule) =
                 ParseFile.parseSourceFile fileName input () checker
             | None ->
                 ParseFile.parseSource input () checker
-
+                
         let rule =
-            match rule with
-            | AstNodeRule rule -> rule
-            | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
-            
+            match HintMatcher.rule { hintTrie = hintTrie }with
+            | Rules.AstNodeRule rule -> rule
+            | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
+        
         match parseResults with
         | ParseFileResult.Success parseInfo ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
@@ -33,8 +57,6 @@ type TestAstNodeRuleBase (rule:Rule) =
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult input syntaxArray skipArray |> fst
-            rule.ruleConfig.cleanup()
-
             suggestions |> Array.iter this.postSuggestion
         | _ ->
             failwithf "Failed to parse"

@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 type TestNoTabCharactersRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
     
-    override this.Parse (input:string, ?fileName:string) =
+    override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
         let checker = FSharpChecker.Create()
         
         let fileName = fileName |> Option.defaultValue "Test.fsx"

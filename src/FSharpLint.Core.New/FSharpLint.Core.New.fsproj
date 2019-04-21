@@ -23,7 +23,6 @@
     <Compile Include="Framework/AbstractSyntaxArray.fs" />
     <Compile Include="Framework/Resources.fs" />
     <Compile Include="Framework/ParseFile.fs" />
-    <Compile Include="Framework/FuzzyHintMatcher.fs" />
     <Compile Include="Framework\Suppression.fs" />
     <Compile Include="Framework\Analyser.fs" />
     <Compile Include="Framework\Rules.fs" />
@@ -98,6 +97,8 @@
     <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
     <Compile Include="Rules\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Hints\HintsHelper.fs" />
+    <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />

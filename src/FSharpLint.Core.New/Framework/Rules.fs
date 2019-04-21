@@ -9,6 +9,7 @@ open FSharpLint.Framework.Suggestion
 
 type AstNodeRuleParams =
     { astNode : AstNode
+      nodeHashcode : int
       nodeIndex : int
       syntaxArray : AbstractSyntaxArray.Node []
       skipArray : Skip []

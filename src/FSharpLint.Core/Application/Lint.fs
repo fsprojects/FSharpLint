@@ -98,8 +98,8 @@ module Lint =
     open System.Runtime.InteropServices
     open System.Threading
     open FSharp.Compiler.SourceCodeServices
-    open FSharpLint
     open FSharpLint.Framework
+    open FSharpLint.Framework.Analyser
 
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -180,8 +180,7 @@ module Lint =
           ReportLinterProgress: ProjectProgress -> unit
           Configuration: Configuration.Configuration }
 
-    let private analysers =
-        [ (Rules.HintMatcher.analyser Rules.HintMatcher.getHintsFromConfig, Rules.HintMatcher.AnalyserName) ]
+    let private analysers = []
 
     module private Async =
         let combine f x y = async {
