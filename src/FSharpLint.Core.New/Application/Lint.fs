@@ -87,6 +87,8 @@ module ConfigurationManagement =
 [<AutoOpen>]
 module Lint =
 
+    open System.Diagnostics.CodeAnalysis
+    open System.Diagnostics.CodeAnalysis
     open System
     open System.Collections.Concurrent
     open System.Collections.Generic
@@ -99,7 +101,6 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
-    open FSharpLint.Framework.HintParser
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -199,11 +200,13 @@ module Lint =
     
     type Context =
         { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list }
+          noTabCharactersRuleContext : (string * Range.range) list
+          suppressions : (Ast.SuppressedMessage * Range.range) [] }
         
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
+        let suppressions = ResizeArray()
 
         let checkIfSuppressed i rule =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
@@ -227,6 +230,8 @@ module Lint =
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
+                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
+                |> List.iter suppressions.AddRange
                 
                 rules
                 |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
@@ -234,7 +239,8 @@ module Lint =
         
         let context =
             { indentationRuleContext = indentationRuleState
-              noTabCharactersRuleContext = noTabCharactersRuleState }
+              noTabCharactersRuleContext = noTabCharactersRuleState
+              suppressions = suppressions.ToArray() }
         
         rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
         (astNodeSuggestions, context)
@@ -245,14 +251,15 @@ module Lint =
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
             let lineParams =
                 { LineRuleParams.line = line
+                  suppressions = context.suppressions
                   lineNumber = lineNumber + 1
                   isLastLine = isLastLine
                   fileContent = fileContent }
 
             let indentationError = lineRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
-               
+
             let noTabCharactersError = lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
-                
+
             let lineErrors = lineRules.genericLineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
 
             [|

@@ -336,3 +336,10 @@ module AbstractSyntaxArray =
 
         suppressedRuleAttributes
         |> List.exists (List.exists isSuppressed)
+        
+    let isRuleSuppressedByRange suppressMessageAttributes ruleName range =
+        let isSuppressed (suppressedMessage:Ast.SuppressedMessage, suppressedMessageRange:range) =
+            (suppressedMessage.Rule = ruleName || suppressedMessage.Rule = SuppressRuleWildcard) &&
+            ExpressionUtilities.rangeContainsOtherRange suppressedMessageRange range
+
+        suppressMessageAttributes |> Seq.exists isSuppressed

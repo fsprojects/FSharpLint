@@ -5,6 +5,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
+open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -25,7 +26,8 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
 
     if indexOfTab >= 0 then
         let range = mkRange "" (mkPos args.lineNumber indexOfTab) (mkPos args.lineNumber (indexOfTab + 1))
-        if (isInLiteralString literalStrings range) |> not then
+        let isSuppressed = AbstractSyntaxArray.isRuleSuppressedByRange args.suppressions "NoTabCharacters" range
+        if (isSuppressed || isInLiteralString literalStrings range) |> not then
             { Range = range 
               Message = Resources.GetString("RulesTypographyTabCharacterError")
               SuggestedFix = None 

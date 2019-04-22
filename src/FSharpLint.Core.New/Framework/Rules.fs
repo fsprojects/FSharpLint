@@ -1,5 +1,6 @@
 ﻿module FSharpLint.Framework.Rules
 
+open System.Diagnostics.CodeAnalysis
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharp.Compiler.SourceCodeServices
@@ -20,6 +21,7 @@ type AstNodeRuleParams =
 type LineRuleParams =
     { line : string
       lineNumber : int
+      suppressions : (Ast.SuppressedMessage * range) []
       isLastLine : bool
       fileContent : string }
 

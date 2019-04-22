@@ -130,7 +130,8 @@ module Lint =
         
     type Context =
         { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list }
+          noTabCharactersRuleContext : (string * Range.range) list
+          suppressions : (Ast.SuppressedMessage * Range.range) [] }
         
     /// Runs all rules which take a node of the AST as input.
     val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context

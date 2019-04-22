@@ -34,7 +34,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "MemberNAmes" 
+    { name = "MemberNames" 
       identifier = None
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
