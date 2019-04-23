@@ -11,27 +11,102 @@
     <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>FSharpLint.Core</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
-    <Compile Include="Framework/Configuration.fs" />
-    <Compile Include="Framework/Ast.fs" />
-    <Compile Include="Framework/AstInfo.fs" />
-    <Compile Include="Framework/AbstractSyntaxArray.fs" />
+    <Compile Include="Framework\Analyser.fs" />
+    <Compile Include="Framework\Ast.fs" />
+    <Compile Include="Framework\AstInfo.fs" />
+    <Compile Include="Framework\AbstractSyntaxArray.fs" />
+    <Compile Include="Framework\Rules.fs" />
+    <Compile Include="Framework\Configuration.fs" />
     <Compile Include="Framework/Resources.fs" />
     <Compile Include="Framework/ParseFile.fs" />
-    <Compile Include="Framework/FuzzyHintMatcher.fs" />
-    <Compile Include="Framework/Analyser.fs" />
+    <Compile Include="Framework\Suppression.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchFormattingHelper.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchClausesOnNewLine.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchOrClausesOnNewLine.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchClauseIndentation.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchExpressionIndentation.fs" />
+    <Compile Include="Rules\Formatting\Spacing\ModuleDeclSpacing.fs" />
+    <Compile Include="Rules\Formatting\Spacing\ClassMemberSpacing.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\TypePrefixing.fs" />
+    <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
+    <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
+    <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
+    <Compile Include="Rules\Conventions\NestedStatements.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\NullArgWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidOpWithSingleArgument.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInValue.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInFunction.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMember.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInConstructor.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInProperty.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInModule.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInRecord.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInEnum.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInUnion.fs" />
+    <Compile Include="Rules\Conventions\SourceLength\MaxLinesInClass.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\FunctionReimplementationHelper.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\ReimplementsFunction.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation\CanBeReplacedWithComposition.fs" />
+    <Compile Include="Rules\Conventions\Naming\NamingHelper.fs" />
+    <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\TypeNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\RecordFieldNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\EnumCasesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\UnionCasesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ModuleNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\LiteralNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\NamespaceNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\MemberNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ParameterNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\MeasureTypeNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\PublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\NonPublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfMembers.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
+    <Compile Include="Rules\Conventions\Binding\BindingHelper.fs" />
+    <Compile Include="Rules\Conventions\Binding\FavourIgnoreOverLetWild.fs" />
+    <Compile Include="Rules\Conventions\Binding\WildcardNamedWithAsPattern.fs" />
+    <Compile Include="Rules\Conventions\Binding\UselessBinding.fs" />
+    <Compile Include="Rules\Conventions\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Typography\Indentation.fs" />
+    <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
+    <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
+    <Compile Include="Rules\Typography\MaxLinesInFile.fs" />
+    <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
+    <Compile Include="Rules\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\Hints\HintsHelper.fs" />
+    <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application/LintWarning.fsi" />
     <Compile Include="Application/LintWarning.fs" />
+    <Compile Include="Application\ConfigurationManager.fs" />
     <Compile Include="Application/Lint.fsi" />
-    <Compile Include="Application/Lint.fs" />
-    <Compile Include="Application/ConfigurationManager.fs" />
-    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint" />
+    <Compile Include="Application\Lint.fs" />
+    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json" />
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>

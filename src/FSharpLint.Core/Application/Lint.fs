@@ -7,6 +7,7 @@ module ConfigurationManagement =
 
     open System.IO
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Application.ConfigurationManager
 
     /// Reason for the linter failing.
     type ConfigFailure =
@@ -23,11 +24,7 @@ module ConfigurationManagement =
 
     /// Load a FSharpLint configuration file from the contents (string) of the file.
     let loadConfigurationFile configurationFileText =
-        configuration configurationFileText
-
-    /// Overrides a given FSharpLint configuration file with another.
-    let overrideConfigurationFile configurationToOverride configurationToOverrideWith =
-        overrideConfiguration configurationToOverride configurationToOverrideWith
+        parseConfig configurationFileText
 
     /// Overrides the default FSharpLint configuration.
     /// The default FSharpLint configuration contains all required elements, so
@@ -35,7 +32,7 @@ module ConfigurationManagement =
     /// If you're loading your own configuration you should make sure that it overrides the default
     /// configuration/overrides a configuration that has overriden the default configuration.
     let overrideDefaultConfiguration configurationToOverrideDefault =
-        overrideConfiguration defaultConfiguration configurationToOverrideDefault
+        mergeConfig defaultConfiguration configurationToOverrideDefault
 
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
@@ -63,8 +60,7 @@ module ConfigurationManagement =
                     try
                         let newConfig =
                             File.ReadAllText filename
-                            |> configuration
-                            |> (overrideConfiguration configToOveride)
+                            |> (mergeConfig configToOveride)
 
                         loadAllConfigs newConfig paths
                     with
@@ -75,7 +71,7 @@ module ConfigurationManagement =
                 else
                     loadAllConfigs configToOveride paths
             | [] ->
-                ConfigurationResult.Success(configToOveride)
+                ConfigurationResult.Success(parseConfig configToOveride)
 
         loadAllConfigs defaultConfig subdirectories
 
@@ -86,20 +82,26 @@ module ConfigurationManagement =
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     let loadConfigurationForProject projectFilePath =
         loadUserConfigFiles projectFilePath defaultConfiguration
-
+        
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
 module Lint =
 
+    open System.Diagnostics.CodeAnalysis
+    open System.Diagnostics.CodeAnalysis
     open System
     open System.Collections.Concurrent
     open System.Collections.Generic
     open System.IO
     open System.Runtime.InteropServices
     open System.Threading
+    open FSharp.Compiler
     open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework
-    open FSharpLint.Framework.Analyser
+    open FSharpLint.Framework.Configuration
+    open FSharpLint.Framework.Rules
+    open FSharpLint.Application.ConfigurationManager
+    open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
 
@@ -178,9 +180,7 @@ module Lint =
         { CancellationToken: CancellationToken option
           ErrorReceived: LintWarning.Warning -> unit
           ReportLinterProgress: ProjectProgress -> unit
-          Configuration: Configuration.Configuration }
-
-    let private analysers = []
+          Configuration: Configuration }
 
     module private Async =
         let combine f x y = async {
@@ -192,51 +192,121 @@ module Lint =
             let! x = xAsync 
             return f x }
 
+    let suggestionToWarning (input:string) (suggestion:Suggestion.LintSuggestion) =
+        { LintWarning.Range = suggestion.Range
+          LintWarning.Info = suggestion.Message
+          LintWarning.Input = input
+          LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
+    
+    type Context =
+        { indentationRuleContext : Map<int,bool*int>
+          noTabCharactersRuleContext : (string * Range.range) list
+          suppressions : (Ast.SuppressedMessage * Range.range) [] }
+        
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (fileContent:string) syntaxArray skipArray =
+        let mutable indentationRuleState = Map.empty
+        let mutable noTabCharactersRuleState = List.empty
+        let suppressions = ResizeArray()
+
+        let checkIfSuppressed i rule =
+            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
+            |> AbstractSyntaxArray.isRuleSuppressed rule
+        
+        // Collect suggestions for AstNode rules, and build context for following rules.
+        let astNodeSuggestions =
+            syntaxArray
+            |> Array.mapi (fun i astNode -> (i, astNode))
+            |> Array.collect (fun (i, astNode) ->
+                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
+                let astNodeParams =
+                    { astNode = astNode.Actual
+                      nodeHashcode = astNode.Hashcode
+                      nodeIndex =  i
+                      syntaxArray = syntaxArray
+                      skipArray = skipArray
+                      getParents = getParents
+                      fileContent = fileContent
+                      checkInfo = typeCheckResults }
+                // Build state for rules with context.
+                indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
+                noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
+                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
+                |> List.iter suppressions.AddRange
+                
+                rules
+                |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
+                |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
+        
+        let context =
+            { indentationRuleContext = indentationRuleState
+              noTabCharactersRuleContext = noTabCharactersRuleState
+              suppressions = suppressions.ToArray() }
+        
+        rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
+        (astNodeSuggestions, context)
+        
+    let runLineRules (lineRules:LineRules) (fileContent:string) (context:Context) =
+        fileContent
+        |> String.toLines
+        |> Array.collect (fun (line, lineNumber, isLastLine) ->
+            let lineParams =
+                { LineRuleParams.line = line
+                  suppressions = context.suppressions
+                  lineNumber = lineNumber + 1
+                  isLastLine = isLastLine
+                  fileContent = fileContent }
+
+            let indentationError = lineRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
+
+            let noTabCharactersError = lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
+
+            let lineErrors = lineRules.genericLineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
+
+            [|
+                indentationError |> Option.toArray
+                noTabCharactersError |> Option.toArray
+                lineErrors |> Array.singleton
+            |])
+        |> Array.concat
+        |> Array.concat
+        
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
 
-        let suggest (suggestion:Analyser.LintSuggestion) =
-            let warning = 
-                { LintWarning.Range = suggestion.Range
-                  LintWarning.Info = suggestion.Message
-                  LintWarning.Input = fileInfo.Text
-                  LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
+        let suggest (suggestion:Suggestion.LintSuggestion) =
+            let warning = suggestionToWarning fileInfo.Text suggestion
             lintInfo.ErrorReceived warning
             fileWarnings.Add warning
 
-        let trySuggest (suggestion:Analyser.LintSuggestion) =
+        let trySuggest (suggestion:Suggestion.LintSuggestion) =
             if suggestion.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
-        let analyserInfo =
-            { Analyser.Text = fileInfo.Text
-              Analyser.Config = lintInfo.Configuration
-              Analyser.Suggest = trySuggest }
-
         Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
-
-        let isAnalyserEnabled analyserName =
-            match Configuration.isAnalyserEnabled lintInfo.Configuration analyserName with
-            | Some(_) -> true | None -> false
 
         let cancelHasNotBeenRequested () =
             match lintInfo.CancellationToken with 
             | Some(x) -> not x.IsCancellationRequested 
             | None -> true
-
+        
+        let enabledRules = flattenConfig lintInfo.Configuration
+        
         try
-            let (array, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
-            for (analyser, analyserName) in analysers do
-                if isAnalyserEnabled analyserName && cancelHasNotBeenRequested () then
-                    analyser 
-                        { CheckFile = fileInfo.TypeCheckResults
-                          SyntaxArray = array
-                          SkipArray = skipArray
-                          Info = analyserInfo }
+            // Collect suggestions for AstNode rules
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.Text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.Text context
 
+            [|
+                lineSuggestions
+                astNodeSuggestions
+            |]
+            |> Array.concat
+            |> Array.iter trySuggest
+            
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
                     let timeoutMs = 2000
@@ -249,7 +319,7 @@ module Lint =
                         typeChecks 
                         |> List.reduce (Async.combine (&&))
 
-                    let typeCheckSuggestion (suggestion: Analyser.LintSuggestion) =
+                    let typeCheckSuggestion (suggestion: Suggestion.LintSuggestion) =
                         typeChecksSuccessful suggestion.TypeChecks 
                         |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
                         
@@ -344,7 +414,7 @@ module Lint =
             | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
             | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
         with
-        | Configuration.ConfigurationException(_) -> Failure(RunTimeConfigError)
+        | ConfigurationManager.ConfigurationException(_) -> Failure(RunTimeConfigError)
 
     let getFailedFiles = function
         | ParseFile.Failed(failure) -> Some(failure)
@@ -378,7 +448,7 @@ module Lint =
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
-          Configuration: Configuration.Configuration option
+          Configuration: Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option
@@ -424,10 +494,11 @@ module Lint =
                   ReportLinterProgress = projectProgress }
 
             let isIgnoredFile filePath =
-                match config.IgnoreFiles with
-                | Some({ Files = ignoreFiles }) ->
-                    Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles filePath
-                | None -> false
+                match config.ignoreFiles with
+                | [||] -> false
+                | ignoreFiles ->
+                    let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
+                    ConfigurationManager.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
 
             let parsedFiles =
                 files
@@ -476,7 +547,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> parseConfig
 
         let lintInformation =
             { Configuration = config
@@ -499,7 +570,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> parseConfig
 
         let checker = FSharpChecker.Create()
 
@@ -526,7 +597,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> parseConfig
 
         let lintInformation =
             { Configuration = config
@@ -549,7 +620,7 @@ module Lint =
         let config =
             match optionalParams.Configuration with
             | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
+            | None -> Configuration.defaultConfiguration |> parseConfig
 
         let checker = FSharpChecker.Create()
 

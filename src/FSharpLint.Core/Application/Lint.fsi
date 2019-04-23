@@ -6,6 +6,7 @@
 module ConfigurationManagement =
 
     open FSharpLint.Framework.Configuration
+    open FSharpLint.Application.ConfigurationManager
     
     type ConfigFailure =
         /// Failed to load a FSharpLint configuration file.
@@ -22,15 +23,12 @@ module ConfigurationManagement =
     /// Load a FSharpLint configuration file from the contents (string) of the file.
     val loadConfigurationFile : configurationFileText:string -> Configuration
 
-    /// Overrides a given FSharpLint configuration file with another.
-    val overrideConfigurationFile : configurationToOverride:Configuration -> configurationToOverrideWith:Configuration -> Configuration
-
     /// Overrides the default FSharpLint configuration.
     /// The default FSharpLint configuration contains all required elements, so
     /// by overriding it any missing required elements will be added to the returned configuration.
     /// If you're loading your own configuration you should make sure that it overrides the default 
     /// configuration/overrides a configuration that has overriden the default configuration.
-    val overrideDefaultConfiguration : configurationToOverrideDefault:Configuration -> Configuration
+    val overrideDefaultConfiguration : configurationToOverrideDefault:string -> string
 
     /// Loads the FSharpLint configuration for a project given the path to the `.fsproj` file.
     /// It picks up configurations in any directory between the root directory and the project's directory.
@@ -44,7 +42,11 @@ module ConfigurationManagement =
 module Lint =
 
     open System.Threading
+    open FSharpLint.Application.ConfigurationManager
     open FSharpLint.Framework
+    open FSharpLint.Framework.Rules
+    open FSharp.Compiler
+    open FSharp.Compiler.SourceCodeServices
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
@@ -69,7 +71,7 @@ module Lint =
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
-          Configuration: Configuration.Configuration option
+          Configuration: ConfigurationManager.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option 
@@ -125,6 +127,20 @@ module Lint =
 
         member TryGetSuccess : byref<LintWarning.Warning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
+        
+    type Context =
+        { indentationRuleContext : Map<int,bool*int>
+          noTabCharactersRuleContext : (string * Range.range) list
+          suppressions : (Ast.SuppressedMessage * Range.range) [] }
+        
+    /// Runs all rules which take a node of the AST as input.
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context
+    
+    /// Runs all rules which take a line of text as input.
+    val runLineRules : LineRules -> string -> Context -> Suggestion.LintSuggestion []
+        
+    /// Converts a lint suggestion to a warning with the given source text.
+    val suggestionToWarning : string -> Suggestion.LintSuggestion -> LintWarning.Warning 
         
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.

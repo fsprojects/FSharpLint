@@ -20,9 +20,10 @@ module Dictionary =
             dict.Remove(key) |> ignore
 
         dict.Add(key, value)
-
+        
 module ExpressionUtilities =
 
+    open System
     open FSharp.Compiler
     open FSharp.Compiler.Ast
     open FSharp.Compiler.Range
@@ -77,3 +78,83 @@ module ExpressionUtilities =
     /// Converts a LongIdentWithDots to a String.
     let longIdentWithDotsToString (lidwd:LongIdentWithDots) =
         lidwd.Lid |> longIdentToString
+        
+    /// Tries to find the source code within a given range.
+    let tryFindTextOfRange (range:range) (text:string) =
+        let startIndex = findPos range.Start text
+        let endIndex = findPos range.End text
+
+        match (startIndex, endIndex) with
+        | Some(startIndex), Some(endIndex) -> 
+            text.Substring(startIndex, endIndex - startIndex) |> Some
+        | _ -> None
+        
+    let getLeadingSpaces (range:range) (text:string) =
+        let range = mkRange "" (mkPos range.StartLine 0) range.End
+        tryFindTextOfRange range text
+        |> Option.map (fun text ->
+            text.ToCharArray()
+            |> Array.takeWhile Char.IsWhiteSpace
+            |> Array.length)
+        |> Option.defaultValue 0
+
+    /// Converts a AsynType to its string representation.
+    let synTypeToString (text:string) = function
+    | SynType.Tuple _ as synType ->
+        tryFindTextOfRange synType.Range text
+        |> Option.map (fun x -> "(" + x + ")")
+    | other ->
+        tryFindTextOfRange other.Range text
+
+    /// Converts a list of type args to its string representation.
+    let typeArgsToString (text:string) (typeArgs:SynType list) =
+        let typeStrings = typeArgs |> List.choose (synTypeToString text)
+        if typeStrings.Length = typeArgs.Length
+        then typeStrings |> String.concat "," |> Some
+        else None
+        
+    /// Counts the number of comment lines preceeding the given range of text.
+    let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
+        let range = mkRange "" startPos endPos
+        
+        tryFindTextOfRange range text
+        |> Option.map (fun preceedingText ->
+            let lines =
+                preceedingText.Split '\n'
+                |> Array.rev
+                |> Array.tail
+            lines
+            |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
+            |> Array.length)
+        |> Option.defaultValue 0
+        
+    let rangeContainsOtherRange (containingRange:range) (range:range) =
+        range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
+        
+module String =
+    
+    open System.IO
+    
+    let toLines input =
+        let lines = ResizeArray()
+        use reader = new StringReader(input)
+
+        let readLine () = 
+            match reader.ReadLine() with
+            | null -> None
+            | line -> Some line
+
+        let rec iterateLines currentLine i = 
+            match currentLine with
+            | Some line ->
+                let nextLine = readLine ()
+                let isLastLine = Option.isNone nextLine
+
+                lines.Add(line, i, isLastLine)
+
+                iterateLines nextLine (i + 1)
+            | None -> ()
+
+        iterateLines (readLine ()) 0
+        
+        lines.ToArray()

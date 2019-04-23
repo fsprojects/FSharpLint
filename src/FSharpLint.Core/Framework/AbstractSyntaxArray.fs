@@ -331,8 +331,15 @@ module AbstractSyntaxArray =
     [<Literal>]
     let SuppressRuleWildcard = "*"
 
-    let isRuleSuppressed analyserName ruleName suppressedRuleAttributes =
-        let isSuppressed (l, _) = l.Category = analyserName && (l.Rule = SuppressRuleWildcard || l.Rule = ruleName)
+    let isRuleSuppressed ruleName suppressedRuleAttributes =
+        let isSuppressed (l, _) = l.Rule = SuppressRuleWildcard || l.Rule = ruleName
 
         suppressedRuleAttributes
         |> List.exists (List.exists isSuppressed)
+        
+    let isRuleSuppressedByRange suppressMessageAttributes ruleName range =
+        let isSuppressed (suppressedMessage:Ast.SuppressedMessage, suppressedMessageRange:range) =
+            (suppressedMessage.Rule = ruleName || suppressedMessage.Rule = SuppressRuleWildcard) &&
+            ExpressionUtilities.rangeContainsOtherRange suppressedMessageRange range
+
+        suppressMessageAttributes |> Seq.exists isSuppressed

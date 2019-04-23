@@ -13,6 +13,7 @@
     <PackageType>DotNetCliTool</PackageType>
     <PackAsTool>true</PackAsTool>
     <AssemblyName>dotnet-fsharplint</AssemblyName>
+    <RootNamespace>FSharpLint.Console</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

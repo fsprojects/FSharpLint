@@ -71,11 +71,11 @@ module Tests =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
-            File.WriteAllText(projectPath </> "Settings.FSharpLint", "invalid config file contents")
+            File.WriteAllText(projectPath </> "fsharplint.json", "invalid config file contents")
 
             let output = dotnetFslint arguments
 
-            File.Delete(projectPath </> "Settings.FSharpLint")
+            File.Delete(projectPath </> "fsharplint.json")
 
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
