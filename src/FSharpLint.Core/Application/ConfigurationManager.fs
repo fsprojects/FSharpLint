@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Application.ConfigurationManager
 
 open System.IO
+open FSharp.Data
 open FSharp.Json
 open FSharpLint.Rules
 open FSharpLint.Framework
@@ -103,6 +104,13 @@ with
             this.tupleIndentation |> Option.bind (constructRuleIfEnabled TupleIndentation.rule)
             this.tupleParentheses |> Option.bind (constructRuleIfEnabled TupleParentheses.rule)
         |] |> Array.choose id
+        
+    member this.Override(overriding:TupleFormattingConfig) =
+        {
+            TupleFormattingConfig.tupleCommaSpacing = overriding.tupleCommaSpacing |> Option.orElse this.tupleCommaSpacing
+            tupleIndentation = overriding.tupleIndentation |> Option.orElse this.tupleIndentation
+            tupleParentheses = overriding.tupleParentheses |> Option.orElse this.tupleParentheses
+        }
 
 type PatternMatchFormattingConfig =
     { patternMatchClausesOnNewLine : EnabledConfig option
@@ -116,7 +124,15 @@ with
             this.patternMatchOrClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule)
             this.patternMatchClauseIndentation |> Option.bind (constructRuleIfEnabled PatternMatchClauseIndentation.rule)
             this.patternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
-        |] |> Array.choose id   
+        |] |> Array.choose id
+        
+    member this.Override(overriding:PatternMatchFormattingConfig) =
+        {
+            PatternMatchFormattingConfig.patternMatchClausesOnNewLine = overriding.patternMatchClausesOnNewLine |> Option.orElse this.patternMatchClausesOnNewLine
+            patternMatchOrClausesOnNewLine = overriding.patternMatchOrClausesOnNewLine |> Option.orElse this.patternMatchOrClausesOnNewLine
+            patternMatchClauseIndentation = overriding.patternMatchClauseIndentation |> Option.orElse this.patternMatchClauseIndentation
+            patternMatchExpressionIndentation = overriding.patternMatchExpressionIndentation |> Option.orElse this.patternMatchExpressionIndentation
+        }
     
 type FormattingConfig =
     { typedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
@@ -137,6 +153,17 @@ with
             this.tupleFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.patternMatchFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
         |] |> Array.concat
+        
+    member this.Override(overriding:FormattingConfig) =
+        {
+            FormattingConfig.typedItemSpacing = overriding.typedItemSpacing |> Option.orElse this.typedItemSpacing
+            typePrefixing = overriding.typePrefixing |> Option.orElse this.typePrefixing
+            unionDefinitionIndentation = overriding.unionDefinitionIndentation |> Option.orElse this.unionDefinitionIndentation
+            moduleDeclSpacing = overriding.moduleDeclSpacing |> Option.orElse this.moduleDeclSpacing
+            classMemberSpacing = overriding.classMemberSpacing |> Option.orElse this.classMemberSpacing
+            tupleFormatting = (this.tupleFormatting, overriding.tupleFormatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            patternMatchFormatting = (this.patternMatchFormatting, overriding.patternMatchFormatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+        }
 
 type RaiseWithTooManyArgsConfig =
     { raiseWithSingleArgument : EnabledConfig option
@@ -153,6 +180,15 @@ with
             this.invalidArgWithTwoArguments |> Option.bind (constructRuleIfEnabled InvalidArgWithTwoArguments.rule) |> Option.toArray
             this.failwithfWithArgumentsMatchingFormatString |> Option.bind (constructRuleIfEnabled FailwithfWithArgumentsMatchingFormatString.rule) |> Option.toArray
         |] |> Array.concat
+        
+    member this.Override(overriding:RaiseWithTooManyArgsConfig) =
+        {
+            RaiseWithTooManyArgsConfig.raiseWithSingleArgument = overriding.raiseWithSingleArgument |> Option.orElse this.raiseWithSingleArgument
+            nullArgWithSingleArgument = overriding.nullArgWithSingleArgument |> Option.orElse this.nullArgWithSingleArgument
+            invalidOpWithSingleArgument = overriding.invalidOpWithSingleArgument |> Option.orElse this.invalidOpWithSingleArgument
+            invalidArgWithTwoArguments = overriding.invalidArgWithTwoArguments |> Option.orElse this.invalidArgWithTwoArguments
+            failwithfWithArgumentsMatchingFormatString = overriding.failwithfWithArgumentsMatchingFormatString |> Option.orElse this.failwithfWithArgumentsMatchingFormatString
+        }
  
 type SourceLengthConfig =
     { maxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
@@ -183,6 +219,22 @@ with
             this.maxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.rule) |> Option.toArray
             this.maxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule) |> Option.toArray
         |] |> Array.concat
+        
+    member this.Override(overriding:SourceLengthConfig) =
+        {
+            SourceLengthConfig.maxLinesInLambdaFunction = overriding.maxLinesInLambdaFunction |> Option.orElse this.maxLinesInLambdaFunction
+            maxLinesInMatchLambdaFunction = overriding.maxLinesInMatchLambdaFunction |> Option.orElse this.maxLinesInMatchLambdaFunction
+            maxLinesInValue = overriding.maxLinesInValue |> Option.orElse this.maxLinesInValue
+            maxLinesInFunction = overriding.maxLinesInFunction |> Option.orElse this.maxLinesInFunction
+            maxLinesInMember = overriding.maxLinesInMember |> Option.orElse this.maxLinesInMember
+            maxLinesInConstructor = overriding.maxLinesInConstructor |> Option.orElse this.maxLinesInConstructor
+            maxLinesInProperty = overriding.maxLinesInProperty |> Option.orElse this.maxLinesInProperty
+            maxLinesInModule = overriding.maxLinesInModule |> Option.orElse this.maxLinesInModule
+            maxLinesInRecord = overriding.maxLinesInRecord |> Option.orElse this.maxLinesInRecord
+            maxLinesInEnum = overriding.maxLinesInEnum |> Option.orElse this.maxLinesInEnum
+            maxLinesInUnion = overriding.maxLinesInUnion |> Option.orElse this.maxLinesInUnion
+            maxLinesInClass = overriding.maxLinesInClass |> Option.orElse this.maxLinesInClass
+        }
 
 type NamesConfig =
     { interfaceNames : RuleConfig<NamingConfig> option
@@ -219,6 +271,25 @@ with
             this.publicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule) |> Option.toArray
             this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.rule) |> Option.toArray
         |] |> Array.concat
+        
+    member this.Override(overriding:NamesConfig) =
+        {
+            NamesConfig.interfaceNames = overriding.interfaceNames |> Option.orElse this.interfaceNames
+            exceptionNames = overriding.exceptionNames |> Option.orElse this.exceptionNames
+            typeNames = overriding.typeNames |> Option.orElse this.typeNames
+            recordFieldNames = overriding.recordFieldNames |> Option.orElse this.recordFieldNames
+            enumCasesNames = overriding.enumCasesNames |> Option.orElse this.enumCasesNames
+            unionCasesNames = overriding.unionCasesNames |> Option.orElse this.unionCasesNames
+            moduleNames = overriding.moduleNames |> Option.orElse this.moduleNames
+            literalNames = overriding.literalNames |> Option.orElse this.literalNames
+            namespaceNames = overriding.namespaceNames |> Option.orElse this.namespaceNames
+            memberNames = overriding.memberNames |> Option.orElse this.memberNames
+            parameterNames = overriding.parameterNames |> Option.orElse this.parameterNames
+            measureTypeNames = overriding.measureTypeNames |> Option.orElse this.measureTypeNames
+            activePatternNames = overriding.activePatternNames |> Option.orElse this.activePatternNames
+            publicValuesNames = overriding.publicValuesNames |> Option.orElse this.publicValuesNames
+            nonPublicValuesNames = overriding.nonPublicValuesNames |> Option.orElse this.nonPublicValuesNames
+        }
 
 type NumberOfItemsConfig =
     { maxNumberOfItemsInTuple : RuleConfig<MaxNumberOfItemsInTuple.Config> option 
@@ -233,6 +304,14 @@ type NumberOfItemsConfig =
             this.maxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule) |> Option.toArray   
             this.maxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule) |> Option.toArray   
          |] |> Array.concat
+         
+    member this.Override(overriding:NumberOfItemsConfig) =
+        {
+            NumberOfItemsConfig.maxNumberOfItemsInTuple = overriding.maxNumberOfItemsInTuple |> Option.orElse this.maxNumberOfItemsInTuple
+            maxNumberOfFunctionParameters = overriding.maxNumberOfFunctionParameters |> Option.orElse this.maxNumberOfFunctionParameters
+            maxNumberOfMembers = overriding.maxNumberOfMembers |> Option.orElse this.maxNumberOfMembers
+            maxNumberOfBooleanOperatorsInCondition = overriding.maxNumberOfBooleanOperatorsInCondition |> Option.orElse this.maxNumberOfBooleanOperatorsInCondition
+        }
 
 type BindingConfig =
     { favourIgnoreOverLetWild : EnabledConfig option 
@@ -247,6 +326,14 @@ type BindingConfig =
             this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
             this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
          |] |> Array.concat
+         
+    member this.Override(overriding:BindingConfig) =
+        {
+            BindingConfig.favourIgnoreOverLetWild = overriding.favourIgnoreOverLetWild |> Option.orElse this.favourIgnoreOverLetWild
+            wildcardNamedWithAsPattern = overriding.wildcardNamedWithAsPattern |> Option.orElse this.wildcardNamedWithAsPattern
+            uselessBinding = overriding.uselessBinding |> Option.orElse this.uselessBinding
+            tupleOfWildcards = overriding.tupleOfWildcards |> Option.orElse this.tupleOfWildcards
+        }
 
 type ConventionsConfig =
     { recursiveAsyncFunction : EnabledConfig option
@@ -270,7 +357,23 @@ with
             this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
         |] |> Array.concat
+        
+    member this.Override(overriding:ConventionsConfig) =
+        {
+            ConventionsConfig.recursiveAsyncFunction = overriding.recursiveAsyncFunction |> Option.orElse this.recursiveAsyncFunction
+            redundantNewKeyword = overriding.redundantNewKeyword |> Option.orElse this.redundantNewKeyword
+            nestedStatements = overriding.nestedStatements |> Option.orElse this.nestedStatements
+            reimplementsFunction = overriding.reimplementsFunction |> Option.orElse this.reimplementsFunction
+            canBeReplacedWithComposition = overriding.canBeReplacedWithComposition |> Option.orElse this.canBeReplacedWithComposition
+            raiseWithTooManyArgs = (this.raiseWithTooManyArgs, overriding.raiseWithTooManyArgs) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            sourceLength = (this.sourceLength, overriding.sourceLength) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            naming = (this.naming, overriding.naming) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            numberOfItems = (this.numberOfItems, overriding.numberOfItems) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            binding = (this.binding, overriding.binding) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+        }
     
 type TypographyConfig =
     { indentation : RuleConfig<Indentation.Config> option
@@ -290,6 +393,15 @@ with
             this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
          |] |> Array.concat
          
+    member this.Override(overriding:TypographyConfig) =
+        {
+            TypographyConfig.indentation = overriding.indentation |> Option.orElse this.indentation
+            maxCharactersOnLine = overriding.maxCharactersOnLine |> Option.orElse this.maxCharactersOnLine
+            trailingWhitespaceOnLine = overriding.trailingWhitespaceOnLine |> Option.orElse this.trailingWhitespaceOnLine
+            maxLinesInFile = overriding.maxLinesInFile |> Option.orElse this.maxLinesInFile
+            trailingNewLineInFile = overriding.trailingNewLineInFile |> Option.orElse this.trailingNewLineInFile
+            noTabCharacters = overriding.noTabCharacters |> Option.orElse this.noTabCharacters
+        }
 
 type Configuration = 
     { ignoreFiles : string []
@@ -297,15 +409,24 @@ type Configuration =
       conventions : ConventionsConfig option
       typography : TypographyConfig option
       hints : string [] }
+with
+    member this.Override(overriding:Configuration) =
+        {
+            Configuration.ignoreFiles = this.ignoreFiles |> Array.append overriding.ignoreFiles |> Array.distinct
+            formatting = (this.formatting, overriding.formatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            conventions = (this.conventions, overriding.conventions) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            typography = (this.typography, overriding.typography) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            hints = this.hints |> Array.append overriding.hints |> Array.distinct
+        }
 
-let mergeConfig (baseConfig : string) (overridingConfig : string) =
-    let baseConfigJson = Json.deserialize<Configuration> baseConfig
-    let overridingConfigJson = Json.deserialize<Configuration> overridingConfig
-    baseConfigJson.Merge(overridingConfig) // TODO: figure out merging
-    baseConfigJson.ToString()
+let mergeConfig (baseConfig : Configuration) (overridingConfig : Configuration) =
+    baseConfig.Override(overridingConfig)
 
 let parseConfig (configText : string) =
-    Json.deserialize<Configuration> configText
+    try
+        Json.deserialize<Configuration> configText
+    with
+    | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
      
 type LineRules =
     { genericLineRules : RuleMetadata<LineRuleConfig> []

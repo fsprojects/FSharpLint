@@ -28,7 +28,7 @@ module ConfigurationManagement =
     /// by overriding it any missing required elements will be added to the returned configuration.
     /// If you're loading your own configuration you should make sure that it overrides the default 
     /// configuration/overrides a configuration that has overriden the default configuration.
-    val overrideDefaultConfiguration : configurationToOverrideDefault:string -> string
+    val overrideDefaultConfiguration : configurationToOverrideDefault:Configuration -> Configuration
 
     /// Loads the FSharpLint configuration for a project given the path to the `.fsproj` file.
     /// It picks up configurations in any directory between the root directory and the project's directory.

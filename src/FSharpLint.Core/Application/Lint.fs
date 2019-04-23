@@ -6,6 +6,7 @@
 module ConfigurationManagement =
 
     open System.IO
+    open FSharp.Json
     open FSharpLint.Framework.Configuration
     open FSharpLint.Application.ConfigurationManager
 
@@ -32,7 +33,7 @@ module ConfigurationManagement =
     /// If you're loading your own configuration you should make sure that it overrides the default
     /// configuration/overrides a configuration that has overriden the default configuration.
     let overrideDefaultConfiguration configurationToOverrideDefault =
-        mergeConfig defaultConfiguration configurationToOverrideDefault
+        mergeConfig (parseConfig defaultConfiguration) configurationToOverrideDefault
 
     /// Gets all the parent directories of a given path - includes the original path directory too.
     let private getParentDirectories path =
@@ -51,8 +52,9 @@ module ConfigurationManagement =
     let private loadUserConfigFiles projectFilePath defaultConfig =
         let projectFileDirectory = Path.GetDirectoryName projectFilePath
         let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
+        let defaultConfig = Json.deserialize<Configuration> defaultConfig
 
-        let rec loadAllConfigs configToOveride = function
+        let rec loadAllConfigs (configToOveride:Configuration) = function
             | path::paths ->
                 let filename = Path.Combine(path, SettingsFileName)
 
@@ -60,18 +62,17 @@ module ConfigurationManagement =
                     try
                         let newConfig =
                             File.ReadAllText filename
+                            |> parseConfig
                             |> (mergeConfig configToOveride)
 
                         loadAllConfigs newConfig paths
                     with
                     | ConfigurationException(message) ->
                         ConfigurationResult.Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
-                    | :? System.Xml.XmlException as e ->
-                        ConfigurationResult.Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename e.Message))
                 else
                     loadAllConfigs configToOveride paths
             | [] ->
-                ConfigurationResult.Success(parseConfig configToOveride)
+                ConfigurationResult.Success(configToOveride)
 
         loadAllConfigs defaultConfig subdirectories
 

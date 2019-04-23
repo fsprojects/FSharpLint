@@ -261,14 +261,14 @@
         "maxCharactersOnLine": { 
             "enabled": false,
             "config": {
-                "maxCharacters": 120
+                "maxCharactersOnLine": 120
             } 
         },
         "trailingWhitespaceOnLine": { "enabled": false },
         "maxLinesInFile": { 
             "enabled": false,
             "config": {
-                "maxLines": 1000
+                "maxLinesInFile": 1000
             } 
         },
         "trailingNewLineInFile": { "enabled": false },
