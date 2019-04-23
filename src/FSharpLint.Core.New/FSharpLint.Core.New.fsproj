@@ -17,7 +17,7 @@
     <!-- Framework -->
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
-    <Compile Include="Framework/Configuration.fs" />
+    <Compile Include="Framework\Configuration.fs" />
     <Compile Include="Framework/Ast.fs" />
     <Compile Include="Framework/AstInfo.fs" />
     <Compile Include="Framework/AbstractSyntaxArray.fs" />
@@ -82,21 +82,21 @@
     <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />
     <Compile Include="Rules\Conventions\Naming\PublicValuesNames.fs" />
     <Compile Include="Rules\Conventions\Naming\NonPublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfMembers.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
+    <Compile Include="Rules\Conventions\Binding\BindingHelper.fs" />
+    <Compile Include="Rules\Conventions\Binding\FavourIgnoreOverLetWild.fs" />
+    <Compile Include="Rules\Conventions\Binding\WildcardNamedWithAsPattern.fs" />
+    <Compile Include="Rules\Conventions\Binding\UselessBinding.fs" />
+    <Compile Include="Rules\Conventions\Binding\TupleOfWildcards.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
     <Compile Include="Rules\Typography\MaxLinesInFile.fs" />
     <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
-    <Compile Include="Rules\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
-    <Compile Include="Rules\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
-    <Compile Include="Rules\NumberOfItems\MaxNumberOfMembers.fs" />
-    <Compile Include="Rules\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
-    <Compile Include="Rules\Binding\BindingHelper.fs" />
-    <Compile Include="Rules\Binding\FavourIgnoreOverLetWild.fs" />
-    <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
-    <Compile Include="Rules\Binding\UselessBinding.fs" />
-    <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
     <Compile Include="Rules\Hints\HintsHelper.fs" />
     <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Rules -->
