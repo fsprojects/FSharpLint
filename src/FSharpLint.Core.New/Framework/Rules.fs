@@ -1,6 +1,5 @@
 ﻿module FSharpLint.Framework.Rules
 
-open System.Diagnostics.CodeAnalysis
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
 open FSharp.Compiler.SourceCodeServices

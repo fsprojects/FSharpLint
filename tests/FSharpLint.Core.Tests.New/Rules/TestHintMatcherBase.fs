@@ -19,10 +19,9 @@ let private generateHintConfig hints =
             | FParsec.CharParsers.Success(hint, _, _) -> hint
             | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
 
-        List.map (fun x -> { Hint = x; ParsedHint = parseHint x }) hints
+        List.map parseHint hints
 
     parseHints hints
-    |> List.map (fun x -> x.ParsedHint)
     |> MergeSyntaxTrees.mergeHints
 
 [<AbstractClass>]

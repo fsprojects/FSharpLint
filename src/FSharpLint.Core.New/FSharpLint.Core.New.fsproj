@@ -17,15 +17,15 @@
     <!-- Framework -->
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
+    <Compile Include="Framework\Analyser.fs" />
+    <Compile Include="Framework\Ast.fs" />
+    <Compile Include="Framework\AstInfo.fs" />
+    <Compile Include="Framework\AbstractSyntaxArray.fs" />
+    <Compile Include="Framework\Rules.fs" />
     <Compile Include="Framework\Configuration.fs" />
-    <Compile Include="Framework/Ast.fs" />
-    <Compile Include="Framework/AstInfo.fs" />
-    <Compile Include="Framework/AbstractSyntaxArray.fs" />
     <Compile Include="Framework/Resources.fs" />
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework\Suppression.fs" />
-    <Compile Include="Framework\Analyser.fs" />
-    <Compile Include="Framework\Rules.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
@@ -111,6 +111,8 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="DefaultConfiguration.json" />
+  </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

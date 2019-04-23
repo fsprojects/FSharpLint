@@ -414,7 +414,7 @@ module Lint =
             | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
             | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
         with
-        | Configuration.ConfigurationException(_) -> Failure(RunTimeConfigError)
+        | ConfigurationManager.ConfigurationException(_) -> Failure(RunTimeConfigError)
 
     let getFailedFiles = function
         | ParseFile.Failed(failure) -> Some(failure)
@@ -498,7 +498,7 @@ module Lint =
                 | [||] -> false
                 | ignoreFiles ->
                     let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
-                    Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
+                    ConfigurationManager.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
 
             let parsedFiles =
                 files

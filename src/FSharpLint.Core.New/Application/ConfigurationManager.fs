@@ -1,14 +1,82 @@
 ﻿module FSharpLint.Application.ConfigurationManager
 
-open System.Collections.Generic
- open System.IO
- open Newtonsoft.Json
- open Newtonsoft.Json.Linq
- open FSharpLint.Rules
- open FSharpLint.Framework
- open FSharpLint.Framework.Configuration
- open FSharpLint.Framework.Rules
- open FSharpLint.Framework.HintParser
+open System.IO
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
+open FSharpLint.Rules
+open FSharpLint.Framework
+open FSharpLint.Framework.Rules
+open FSharpLint.Framework.HintParser
+
+exception ConfigurationException of string
+
+module IgnoreFiles =
+
+    open System
+    open System.Text.RegularExpressions
+
+    type IsDirectory = | IsDirectory of bool
+
+    [<NoComparison>]
+    type Ignore =
+        | Ignore of Regex list * IsDirectory
+        | Negate of Regex list * IsDirectory
+
+    let parseIgnorePath (path:string) =
+        let globToRegex glob =
+            Regex(
+                "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
+                RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
+
+        let isDirectory = path.EndsWith("/")
+
+        let getRegexSegments (path:string) =
+            path.Split([| '/' |], StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map globToRegex
+
+        if path.StartsWith("!") then
+            getRegexSegments (path.Substring(1))
+            |> Array.toList
+            |> fun segments -> Negate(segments, IsDirectory(isDirectory))
+        else
+            getRegexSegments (if path.StartsWith(@"\!") then path.Substring(1) else path)
+            |> Array.toList
+            |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
+
+    let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
+        let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) =
+            globSeqs |> List.choose (function
+                | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
+                | _ -> None)
+
+        let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs =
+            match remainingPath with
+            | [_] when isDirectory -> false
+            | currentSegment::remaining ->
+                let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+
+                let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
+
+                let aGlobWasCompletelyMatched = currentlyMatchingGlobs |> List.exists List.isEmpty
+
+                let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
+
+                if matched then true
+                else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
+            | [] -> false
+
+        doesGlobSeqMatchPathSeq path []
+
+    let shouldFileBeIgnored (ignorePaths:Ignore list) (filePath:string) =
+        let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList
+
+        ignorePaths |> List.fold (fun isCurrentlyIgnored ignoreGlob ->
+            match ignoreGlob with
+            | Ignore(glob, IsDirectory(isDirectory))
+                when not isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> true
+            | Negate(glob, IsDirectory(isDirectory))
+                when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
+            | _ -> isCurrentlyIgnored) false
 
 type RuleConfig<'Config> = {
     enabled : bool
@@ -189,7 +257,7 @@ type ConventionsConfig =
       canBeReplacedWithComposition : EnabledConfig option
       raiseWithTooManyArgs : RaiseWithTooManyArgsConfig option
       sourceLength : SourceLengthConfig option
-      namesConfig : NamesConfig option
+      naming : NamesConfig option
       numberOfItems : NumberOfItemsConfig option
       binding : BindingConfig option }
 with
@@ -202,7 +270,7 @@ with
             this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
             this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            this.namesConfig |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
         |] |> Array.concat
     
 type TypographyConfig =
@@ -241,7 +309,6 @@ let parseConfig (configText : string) =
     let settings = JsonSerializerSettings()
     settings.Converters.Add(Converters.StringEnumConverter())
     JsonConvert.DeserializeObject<Configuration> configText
-
      
 type LineRules =
     { genericLineRules : RuleMetadata<LineRuleConfig> []
@@ -249,8 +316,7 @@ type LineRules =
       indentationRule : RuleMetadata<IndentationRuleConfig> option }
     
 type LoadedRules =
-    { ignoreFiles : string []
-      astNodeRules : RuleMetadata<AstNodeRuleConfig> []
+    { astNodeRules : RuleMetadata<AstNodeRuleConfig> []
       lineRules : LineRules }
     
 let private parseHints (hints:string []) =
@@ -258,7 +324,7 @@ let private parseHints (hints:string []) =
         match FParsec.CharParsers.run HintParser.phint hint with
         | FParsec.CharParsers.Success(hint, _, _) -> hint
         | FParsec.CharParsers.Failure(error, _, _) ->
-            failwithf "Failed to parse hint '%s'" hint
+            raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
 
     hints
     |> Array.filter (System.String.IsNullOrWhiteSpace >> not)
@@ -286,64 +352,8 @@ let flattenConfig (config : Configuration) =
         | IndentationRule rule -> indentationRule <- Some rule
         | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
     
-    { LoadedRules.ignoreFiles = config.ignoreFiles
-      astNodeRules = astNodeRules.ToArray()
+    { LoadedRules.astNodeRules = astNodeRules.ToArray()
       lineRules =
           { genericLineRules = lineRules.ToArray()
             indentationRule = indentationRule
             noTabCharactersRule = noTabCharactersRule } }
-
-/// Gets all the parent directories of a given path - includes the original path directory too.
-let private getParentDirectories path =
-    let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
-        match directoryInfo with
-        | null -> parentDirectories
-        | _ -> getParentDirectories (directoryInfo.FullName::parentDirectories) directoryInfo.Parent
-
-    DirectoryInfo path |> getParentDirectories []
-
-[<Literal>]
-let SettingsFileName = "Settings.FSharpLint"
-
-/// Tries to load a config from disk.
-/// If it fails to load the config any exception will be swallowed and `None` returned.
-/// If the file does not exist `None` will be returned.
-let private tryLoadConfig filePath =
-    if File.Exists(filePath) then
-        try File.ReadAllText filePath |> Some
-        with _ -> None
-    else
-        None
-
-/// Loads and stores configurations in memory so that they can easily be modified
-/// and written back out to disk.
-/// Intended to allow for all the configuration files for all the projects in a solution
-/// to be grouped in a single place where they can be modified.
-type ConfigurationManager() =
-    let loadedConfigs = Dictionary<string, string>()
-
-    member __.LoadConfigurationForProject(projectFilePath) =
-        let getConfig (directory) =
-            let filePath = Path.Combine(directory, SettingsFileName)
-
-            if loadedConfigs.ContainsKey directory then None
-            else
-                match tryLoadConfig filePath with
-                | Some(config) -> Some(directory, config)
-                | None -> None
-
-        Path.GetDirectoryName projectFilePath
-        |> getParentDirectories
-        |> List.choose getConfig
-        |> List.iter loadedConfigs.Add
-
-    member __.GetConfigurationForProject(projectFilePath) =
-        let tryGetConfig dir =
-            match loadedConfigs.TryGetValue(dir) with
-            | true, config -> Some(config)
-            | false, _ -> None
-
-        Path.GetDirectoryName projectFilePath
-        |> getParentDirectories
-        |> List.choose tryGetConfig
-        |> List.fold mergeConfig defaultConfiguration
