@@ -427,6 +427,10 @@ let parseConfig (configText : string) =
         Json.deserialize<Configuration> configText
     with
     | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
+    
+let serializeConfig (config : Configuration) =
+    let jsonConfig = { JsonConfig.Default with serializeNone = Omit }
+    Json.serializeEx jsonConfig config
      
 type LineRules =
     { genericLineRules : RuleMetadata<LineRuleConfig> []

@@ -12,7 +12,7 @@
     let private basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".."
 #endif
 
-    let private performanceTestSourceFile = basePath </> "tests" </> "TypeChecker.fs"
+    let private performanceTestSourceFile = basePath </> "TypeChecker.fs"
 
     let generateAst source =
         let checker = FSharpChecker.Create()

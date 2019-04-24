@@ -8,6 +8,7 @@ module Configuration =
 
     open System.Reflection
     open FSharpLint.Framework
+    open FSharpLint.Application.ConfigurationManager
     open FSharp.Json
 
     [<Literal>]
@@ -40,6 +41,7 @@ module Configuration =
             use reader = new System.IO.StreamReader(stream)
 
             reader.ReadToEnd()
+            |> parseConfig
 
     /// Module to manage the loading and updating of configuration files.
     /// Keeps loaded configurations cached in memory so they can be quickly retrieved.
@@ -51,14 +53,14 @@ module Configuration =
         type Path = string list
 
         [<NoComparison>]
-        type GlobalConfig = { Path: Path; Name: string; Configuration: string option }
+        type GlobalConfig = { Path: Path; Name: string; Configuration: Configuration option }
 
         /// Keeps configuration files loaded for a list of paths so that
         /// they can be quickly retrieved and updated
         [<NoComparison>]
         type LoadedConfigs =
             { /// Cached configurations for each path.
-              LoadedConfigs: Map<Path, string option>
+              LoadedConfigs: Map<Path, Configuration option>
 
               /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
               /// for each full path. If you wanted to load the configurations for a solution
@@ -198,3 +200,57 @@ module Configuration =
                 List.tryFind (fun { Path = x } -> x = path) loadedConfigs.GlobalConfigs
                 |> Option.bind (fun x -> x.Configuration)
 
+        let private tryOverrideConfig (configToOverride:Configuration option) (config:Configuration option) =
+            match (configToOverride, config) with
+            | Some(configToOverride), Some(config) ->
+                Some(configToOverride.Override(config))
+            | Some(x), None
+            | None, Some(x) -> Some(x)
+            | None, None -> None
+            
+        let overrideConfiguration (configToOverride:Configuration) (config:Configuration) =
+            configToOverride.Override(config)
+
+        /// Gets the complete configuration file located at a given path.
+        /// "complete" configuration means that it has overridden any previous
+        /// configuration files.
+        let getConfig loadedConfigs path =
+            let (globalConfigs, pathWasAGlobalConfig) =
+                let rec takeUntilPathMatch built = function
+                | config::_ when config.Path = path -> (config::built, true)
+                | config::rest -> takeUntilPathMatch (config::built) rest
+                | [] -> (built, false)
+
+                takeUntilPathMatch [] loadedConfigs.GlobalConfigs
+                |> fun (configs, matchFound) -> (List.rev configs, matchFound)
+
+            let globalConfig =
+                globalConfigs
+                |> List.map (fun x -> x.Configuration)
+                |> List.fold tryOverrideConfig (Some defaultConfiguration)
+
+            if pathWasAGlobalConfig then globalConfig
+            else
+                getAllPaths path
+                |> List.fold (fun config path ->
+                    match loadedConfigs.LoadedConfigs.TryFind path with
+                    | Some(loadedConfig) -> tryOverrideConfig config loadedConfig
+                    | None -> config) globalConfig
+
+        /// Updates a configuration file at a given path.
+        let updateConfig loadedConfigs path config =
+            { loadedConfigs with
+                  LoadedConfigs =
+                    loadedConfigs.LoadedConfigs
+                    |> Map.map (fun key value -> if key = path then config else value)
+                  GlobalConfigs =
+                    loadedConfigs.GlobalConfigs
+                    |> List.map (fun globalConfig ->
+                        if globalConfig.Path = path then { globalConfig with Configuration = config }
+                        else globalConfig) }
+
+        /// Tries to normalise paths to a format that can be used as a path in <see cref="LoadedConfigs" />.
+        let normalisePath (path:string) =
+            Path.GetFullPath path
+            |> fun x -> x.Split([|Path.DirectorySeparatorChar|], StringSplitOptions.RemoveEmptyEntries)
+            |> Array.toList

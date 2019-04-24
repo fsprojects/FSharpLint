@@ -4,10 +4,7 @@
 module ParseFile = 
 
     open System.IO
-    open System.Reflection
     open FSharpLint.Framework
-    open FSharpLint.Framework.Configuration
-    open FSharp.Compiler
     open FSharp.Compiler.Ast
     open FSharp.Compiler.SourceCodeServices
     open Utilities

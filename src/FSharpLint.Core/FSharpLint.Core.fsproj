@@ -22,7 +22,6 @@
     <Compile Include="Framework\AstInfo.fs" />
     <Compile Include="Framework\AbstractSyntaxArray.fs" />
     <Compile Include="Framework\Rules.fs" />
-    <Compile Include="Framework\Configuration.fs" />
     <Compile Include="Framework/Resources.fs" />
     <Compile Include="Framework/ParseFile.fs" />
     <Compile Include="Framework\Suppression.fs" />
@@ -104,6 +103,7 @@
     <Compile Include="Application/LintWarning.fsi" />
     <Compile Include="Application/LintWarning.fs" />
     <Compile Include="Application\ConfigurationManager.fs" />
+    <Compile Include="Application\Configuration.fs" />
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json" />
