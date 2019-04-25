@@ -15,7 +15,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "ExceptionNames" 
-      identifier = None
+      identifier = Identifiers.ExceptionNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

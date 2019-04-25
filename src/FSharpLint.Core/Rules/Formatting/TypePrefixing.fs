@@ -67,6 +67,6 @@ let runner args =
 
 let rule =
     { name = "TypePrefixing" 
-      identifier = None
+      identifier = Identifiers.TypePrefixing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

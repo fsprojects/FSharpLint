@@ -67,6 +67,6 @@ let runner args =
     
 let rule =
     { name = "RecursiveAsyncFunction" 
-      identifier = None
+      identifier = Identifiers.RecursiveAsyncFunction
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

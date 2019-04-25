@@ -25,7 +25,7 @@ let private runner (args:AstNodeRuleParams) =
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
     { name = "WildcardNamedWithAsPattern"
-      identifier = None
+      identifier = Identifiers.WildcardNamedWithAsPattern
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule                
     

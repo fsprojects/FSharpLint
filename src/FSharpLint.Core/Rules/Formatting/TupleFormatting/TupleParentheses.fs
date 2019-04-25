@@ -28,6 +28,6 @@ let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args check
     
 let rule =
     { name = "TupleParentheses" 
-      identifier = None
+      identifier = Identifiers.TupleParentheses
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

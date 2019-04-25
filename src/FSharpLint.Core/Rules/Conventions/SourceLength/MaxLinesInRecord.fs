@@ -18,6 +18,6 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "MaxLinesInRecord"
-      identifier = None
+      identifier = Identifiers.MaxLinesInRecord
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

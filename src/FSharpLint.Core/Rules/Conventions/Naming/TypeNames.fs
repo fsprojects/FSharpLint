@@ -29,7 +29,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "TypeNames" 
-      identifier = None
+      identifier = Identifiers.TypeNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

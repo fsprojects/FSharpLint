@@ -46,6 +46,6 @@ let runner args =
         
 let rule =
     { name = "ClassMemberSpacing" 
-      identifier = None
+      identifier = Identifiers.ClassMemberSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

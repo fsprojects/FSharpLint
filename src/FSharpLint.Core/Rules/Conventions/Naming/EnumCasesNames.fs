@@ -13,7 +13,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "EnumCasesNames" 
-      identifier = None
+      identifier = Identifiers.EnumCasesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

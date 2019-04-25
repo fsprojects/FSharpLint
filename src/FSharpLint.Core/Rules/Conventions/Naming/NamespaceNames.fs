@@ -16,7 +16,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "NamespaceNames" 
-      identifier = None
+      identifier = Identifiers.NamespaceNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

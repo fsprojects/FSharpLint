@@ -39,6 +39,6 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
         
 let rule =
     { name = "NoTabCharacters"
-      identifier = None
+      identifier = Identifiers.NoTabCharacters
       ruleConfig = { runner = checkNoTabCharacters } }
     |> NoTabCharactersRule

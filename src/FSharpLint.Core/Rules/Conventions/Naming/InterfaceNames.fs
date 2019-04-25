@@ -29,7 +29,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "InterfaceNames" 
-      identifier = None
+      identifier = Identifiers.InterfaceNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

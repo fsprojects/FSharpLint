@@ -28,6 +28,6 @@ let checkMaxLinesInFile (config:Config) (args:LineRuleParams) =
 
 let rule config =
     { name = "MaxLinesInFile"
-      identifier = None
+      identifier = Identifiers.MaxLinesInFile
       ruleConfig = { LineRuleConfig.runner = checkMaxLinesInFile config } }
     |> LineRule

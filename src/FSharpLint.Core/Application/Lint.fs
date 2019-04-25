@@ -101,6 +101,7 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
+    open FSharpLint.Framework
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -235,7 +236,9 @@ module Lint =
                 
                 rules
                 |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
-                |> Array.collect (fun rule -> rule.ruleConfig.runner astNodeParams))
+                |> Array.collect (fun rule ->
+                    rule.ruleConfig.runner astNodeParams
+                    |> Array.map (Suggestion.addIdentifier rule.identifier)))
         
         let context =
             { indentationRuleContext = indentationRuleState
@@ -256,11 +259,23 @@ module Lint =
                   isLastLine = isLastLine
                   fileContent = fileContent }
 
-            let indentationError = lineRules.indentationRule |> Option.map (fun rule -> rule.ruleConfig.runner context.indentationRuleContext lineParams)
+            let indentationError =
+                lineRules.indentationRule
+                |> Option.map (fun rule ->
+                    rule.ruleConfig.runner context.indentationRuleContext lineParams
+                    |> Array.map (Suggestion.addIdentifier rule.identifier))
 
-            let noTabCharactersError = lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams)
+            let noTabCharactersError =
+                lineRules.noTabCharactersRule
+                |> Option.map (fun rule ->
+                    rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams
+                    |> Array.map (Suggestion.addIdentifier rule.identifier))
 
-            let lineErrors = lineRules.genericLineRules |> Array.collect (fun rule -> rule.ruleConfig.runner lineParams)
+            let lineErrors =
+                lineRules.genericLineRules
+                |> Array.collect (fun rule ->
+                    rule.ruleConfig.runner lineParams
+                    |> Array.map (Suggestion.addIdentifier rule.identifier))
 
             [|
                 indentationError |> Option.toArray

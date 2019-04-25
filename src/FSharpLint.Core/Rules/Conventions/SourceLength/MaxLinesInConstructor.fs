@@ -15,6 +15,6 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "MaxLinesInConstructor"
-      identifier = None
+      identifier = Identifiers.MaxLinesInConstructor
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

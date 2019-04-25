@@ -12,6 +12,6 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "MaxLinesInLambdaFunction"
-      identifier = None
+      identifier = Identifiers.MaxLinesInLambdaFunction
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

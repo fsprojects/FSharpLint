@@ -51,6 +51,6 @@ let runner (args:AstNodeRuleParams) =
     
 let rule =
     { name = "ReimplementsFunction" 
-      identifier = None
+      identifier = Identifiers.ReimplementsFunction
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

@@ -45,6 +45,6 @@ let runner args =
 
 let rule =
     { name = "ModuleDeclSpacing" 
-      identifier = None
+      identifier = Identifiers.ModuleDeclSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

@@ -693,6 +693,6 @@ let private cleanup () =
 
 let rule config =
     { name = "Hints"
-      identifier = None
+      identifier = Identifiers.Hints
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = cleanup } }
     |> AstNodeRule               

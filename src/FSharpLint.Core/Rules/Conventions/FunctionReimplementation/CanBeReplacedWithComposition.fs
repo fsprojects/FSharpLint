@@ -52,6 +52,6 @@ let runner (args:AstNodeRuleParams) =
     
 let rule =
     { name = "CanBeReplacedWithComposition" 
-      identifier = None
+      identifier = Identifiers.CanBeReplacedWithComposition
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

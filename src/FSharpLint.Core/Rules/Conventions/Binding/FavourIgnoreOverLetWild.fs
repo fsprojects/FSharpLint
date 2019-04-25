@@ -31,6 +31,6 @@ let private runner (args:AstNodeRuleParams) =
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
     { name = "FavourIgnoreOverLetWild"
-      identifier = None
+      identifier = Identifiers.FavourIgnoreOverLetWild
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule               

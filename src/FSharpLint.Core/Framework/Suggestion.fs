@@ -35,3 +35,6 @@ type LintSuggestion =
         match typeCheck with
         | Some(check) -> { this with TypeChecks = check::this.TypeChecks }
         | None -> this
+        
+let addIdentifier (identifier:string) (suggestion:LintSuggestion) =
+    { suggestion with Message = sprintf "%s: %s" identifier suggestion.Message }

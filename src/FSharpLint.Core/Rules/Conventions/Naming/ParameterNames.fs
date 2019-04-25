@@ -50,7 +50,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 
 let rule config =
     { name = "ParameterNames"
-      identifier = None
+      identifier = Identifiers.ParameterNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

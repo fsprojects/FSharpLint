@@ -26,7 +26,7 @@ type LineRuleParams =
 
 type RuleMetadata<'config> =
   { name : string
-    identifier : string option
+    identifier : string
     ruleConfig : 'config
   }
 

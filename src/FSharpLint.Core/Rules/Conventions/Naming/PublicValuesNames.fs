@@ -43,7 +43,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     
 let rule config =
     { name = "PublicValuesNames"
-      identifier = None
+      identifier = Identifiers.PublicValuesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

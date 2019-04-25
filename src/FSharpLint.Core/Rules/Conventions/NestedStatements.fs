@@ -135,7 +135,7 @@ let cleanup () =
         
 let rule config =
     { name = "NestedStatements" 
-      identifier = None
+      identifier = Identifiers.NestedStatements
       ruleConfig = { AstNodeRuleConfig.runner = runner config
                      cleanup = cleanup } }
     |> AstNodeRule

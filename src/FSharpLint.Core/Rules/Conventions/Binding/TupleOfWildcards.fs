@@ -54,7 +54,7 @@ let private runner (args:AstNodeRuleParams) =
     
 let rule =
     { name = "TupleOfWildcards"
-      identifier = None
+      identifier = Identifiers.TupleOfWildcards
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule                
           

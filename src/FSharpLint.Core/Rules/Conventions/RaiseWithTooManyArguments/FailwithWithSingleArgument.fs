@@ -6,6 +6,6 @@ let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "failwit
 
 let rule =
     { name = "FailwithWithSingleArgument" 
-      identifier = None
+      identifier = Identifiers.FailwithWithSingleArgument
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

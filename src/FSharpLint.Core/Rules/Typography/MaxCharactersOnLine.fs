@@ -29,6 +29,6 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
         
 let rule config =
     { name = "MaxCharactersOnLine"
-      identifier = None
+      identifier = Identifiers.MaxCharactersOnLine
       ruleConfig = { LineRuleConfig.runner = checkMaxCharactersOnLine config } }
     |> LineRule

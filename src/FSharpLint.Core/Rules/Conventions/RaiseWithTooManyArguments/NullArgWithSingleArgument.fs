@@ -6,6 +6,6 @@ let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "nullArg
 
 let rule =
     { name = "NullArgWithSingleArgument" 
-      identifier = None
+      identifier = Identifiers.NullArgWithSingleArgument
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

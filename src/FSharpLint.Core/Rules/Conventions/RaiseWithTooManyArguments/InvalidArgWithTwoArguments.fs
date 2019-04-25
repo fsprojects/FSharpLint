@@ -6,6 +6,6 @@ let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "invalid
 
 let rule =
     { name = "InvalidArgWithTwoArguments" 
-      identifier = None
+      identifier = Identifiers.InvalidOpWithSingleArgument
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

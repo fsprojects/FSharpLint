@@ -25,6 +25,6 @@ let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMa
         
 let rule =
     { name = "PatternMatchClausesOnNewLine" 
-      identifier = None
+      identifier = Identifiers.PatternMatchClausesOnNewLine
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

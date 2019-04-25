@@ -126,6 +126,6 @@ let runner config context args =
     
 let rule config =
     { name = "Indentation"
-      identifier = None
+      identifier = Identifiers.Indentation
       ruleConfig = { runner = runner config } }
     |> IndentationRule

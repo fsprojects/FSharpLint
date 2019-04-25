@@ -43,6 +43,6 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         
 let rule config =
     { name = "MaxNumberOfItemsInTuple"
-      identifier = None
+      identifier = Identifiers.MaxNumberOfItemsInTuple
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule

@@ -66,7 +66,7 @@ let private getIdentifiersWithIdText =
     
 let rule config =
     { name = "ActivePatternNames"
-      identifier = None
+      identifier = Identifiers.ActivePatternNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiersWithIdText } }
     |> toAstNodeRule
     |> AstNodeRule

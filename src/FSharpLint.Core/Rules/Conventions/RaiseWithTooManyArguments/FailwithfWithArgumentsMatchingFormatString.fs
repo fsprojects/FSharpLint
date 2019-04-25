@@ -27,6 +27,6 @@ let private runner (args:AstNodeRuleParams) =
 
 let rule =
     { name = "FailwithfWithArgumentsMatchingFormatString"
-      identifier = None
+      identifier = Identifiers.FailwithfWithArgumentsMatchingFormattingString
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule
