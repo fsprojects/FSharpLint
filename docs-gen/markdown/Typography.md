@@ -2,10 +2,6 @@
 
 Set of rules that analyse the text in a file.
 
-### Analyser Settings
-
-`Enabled` - A boolean property that can enable and disable this analyser. (Default false)
-
 ### Rules
 
 #### MaxLinesInFile
@@ -24,9 +20,9 @@ Refactor to extract code out into another file.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-`Lines` - An integer property that specifies the maximum number of lines allowed in a file. (Default 1000)
+`maxLinesInFile` - An integer property that specifies the maximum number of lines allowed in a file. (Default 1000)
 
 #### MaxCharactersOnLine
 
@@ -44,9 +40,9 @@ Break the line up into multiple lines.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default false)
+`enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-`Length` - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)
+`maxCharactersOnLine` - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)
 
 #### NoTabCharacters
 
@@ -64,7 +60,7 @@ Replace the tab with spaces.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### TrailingNewLineInFile
 
@@ -82,7 +78,7 @@ Remove any new lines at the end of a file.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### TrailingWhitespaceOnLine
 
@@ -100,10 +96,10 @@ Remove any whitespace from the end of the line.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-`NumberOfSpacesAllowed` - An integer property that specifies how many space characters are allowed on the end of a line. (Default 1)
+`numberOfSpacesAllowed` - An integer property that specifies how many space characters are allowed on the end of a line. (Default 1)
 
-`OneSpaceAllowedAfterOperator` - A boolean property that will allow a single space on the end of the line if it's preceded by an operator/symbol character. (Default true)
+`oneSpaceAllowedAfterOperator` - A boolean property that will allow a single space on the end of the line if it's preceded by an operator/symbol character. (Default true)
 
-`IgnoreBlankLines` - A boolean property that will ignore any lines that are made up of just whitespace. (Default true)
+`ignoreBlankLines` - A boolean property that will ignore any lines that are made up of just whitespace. (Default true)
