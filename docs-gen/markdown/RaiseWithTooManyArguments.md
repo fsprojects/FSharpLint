@@ -4,7 +4,7 @@
 
 ### Analyser Settings
 
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
+`enabled` - A boolean property that can enable and disable this analyser. (Default true)
 
 ### Rules
 
@@ -24,7 +24,7 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### FailwithWithSingleArgument
 
@@ -42,7 +42,7 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### NullArgWithSingleArgument
 
@@ -60,7 +60,7 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### InvalidOpWithSingleArgument
 
@@ -78,7 +78,7 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### FailwithfWithArgumentsMatchingFormatString
 
@@ -96,7 +96,7 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### InvalidArgWithTwoArguments
 
@@ -114,4 +114,4 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)

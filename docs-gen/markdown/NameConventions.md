@@ -1,10 +1,10 @@
-# NameConventions
+# Name Conventions
 
 Set of rules that analyse the naming of user defined elements within a program. The rules and their errors are based on the [F# Component Design Guidelines](http://fsharp.org/specs/component-design-guidelines/)
 
 ### Analyser Settings
 
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
+`enabled` - A boolean property that can enable and disable this analyser. (Default true)
 
 ### Rules
 
@@ -24,7 +24,7 @@ Remove the underscore from the identifier, for the example listed in the cause t
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### InterfaceNamesMustBeginWithI
 
@@ -42,7 +42,7 @@ Add `I` onto the beginning of the identifier, for the example listed in the caus
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### ExceptionNamesMustEndWithException
 
@@ -60,7 +60,7 @@ Add `Exception` onto the end of the identifier, for the example listed in the ca
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### TypeNamesMustBePascalCase
 
@@ -78,7 +78,7 @@ Change the name of the type to PascalCase e.g. `class Foo`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### RecordFieldNamesMustBePascalCase
 
@@ -96,7 +96,7 @@ Change the name of the field to PascalCase e.g. `type Cat = { Dog: int }`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### EnumCasesMustBePascalCase
 
@@ -114,7 +114,7 @@ Change the name of the enum case to PascalCase e.g. `type MyEnum = | EnumCase = 
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### ModuleNamesMustBePascalCase
 
@@ -132,7 +132,7 @@ Change the name of the module to PascalCase e.g. `module Dog`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### LiteralNamesMustBePascalCase
 
@@ -150,7 +150,7 @@ Change the literal value to PascalCase e.g. `let [<Literal>] Foo = 5`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### NamespaceNamesMustBePascalCase
 
@@ -168,7 +168,7 @@ Change the namespace to PascalCase e.g. `namespace Matt.Dog.Cat"`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### MemberNamesMustBePascalCase
 
@@ -186,7 +186,7 @@ Change the member to PascalCase e.g. `this.Member() = ()`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### ParameterMustBeCamelCase
 
@@ -204,7 +204,7 @@ Change the parameter to camelCase e.g. `let f fooBar = fooBar`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.
 
 #### NonPublicValuesCamelCase
 
@@ -234,4 +234,4 @@ Change the value's identifier to camelCase e.g.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule.
+`enabled` - A boolean property that can enable and disable this rule.

@@ -4,7 +4,7 @@ Set of rules that highlight lambda functions that can removed through eta reduct
 
 ### Analyser Settings
 
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
+`enabled` - A boolean property that can enable and disable this analyser. (Default true)
 
 ### Rules
 
@@ -30,7 +30,7 @@ Replace the lambda with the function that is being called.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
 #### CanBeReplacedWithComposition
 
@@ -53,4 +53,4 @@ Replace the lambda with function composition:
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
