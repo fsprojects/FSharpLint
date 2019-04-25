@@ -686,13 +686,12 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
     | true, trie -> Helper.Hints.checkTrie (args.nodeIndex + 1) trie args.syntaxArray args.skipArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
     | false, _ -> ()
     
-    suggestions.ToArray()
-    
-let private cleanup () =
+    let result = suggestions.ToArray()
     suggestions.Clear()
-
+    result
+    
 let rule config =
     { name = "Hints"
       identifier = Identifiers.Hints
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = cleanup } }
+      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule               
