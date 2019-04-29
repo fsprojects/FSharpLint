@@ -130,7 +130,7 @@ module Program =
 
     let private containsRequiredArguments arguments =
         let isArgumentSpecifyingWhatToLint = function 
-            | ProjectFile(_) | SingleFile(_) | Source(_) -> true 
+            | ProjectFile(_) | SingleFile(_) | Source(_) | ConvertConfig(_) -> true 
             | _ -> false
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint

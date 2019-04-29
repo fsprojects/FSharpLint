@@ -514,7 +514,7 @@ type TestConfiguration() =
     [<Test>]
     member this.``Config default XML config to JSON config``() =
         let xmlConfig =
-            TestContext.CurrentContext.TestDirectory + "\OldConfiguration.xml"
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "OldConfiguration.xml")
             |> File.ReadAllText
             
         let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
