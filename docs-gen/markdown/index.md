@@ -119,6 +119,10 @@ To override to turn off you'd set enabled to true in your own configuration file
       }
     }
 
+Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:
+
+    dotnet fsharplint -convert <path-to-xml> (output-path>
+
 #### Disabling rules within code
 
 To disable a rule for a single section of code the [SuppressMessageAttribute](http://msdn.microsoft.com/en-us/library/system.diagnostics.codeanalysis.suppressmessageattribute(v=vs.110).aspx) can be used. The attribute will not be included into the IL (as long as you don't have the `CODE_ANALYSIS` preprocessing symbol set).
