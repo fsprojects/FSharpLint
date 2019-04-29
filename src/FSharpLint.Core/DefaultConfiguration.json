@@ -228,19 +228,19 @@
             "maxNumberOfFunctionParameters": { 
                 "enabled": false,
                 "config": {
-                    "maxParameters": 5
+                    "maxItems": 5
                 }
             },
             "maxNumberOfMembers": {
                 "enabled": false,
                 "config": {
-                    "maxMembers": 32
+                    "maxItems": 32
                 }
             },
             "maxNumberOfBooleanOperatorsInCondition": {
                 "enabled": false,
                 "config": {
-                    "maxBooleanOperators": 4
+                    "maxItems": 4
                 }
             }
         },

@@ -7,10 +7,6 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-[<RequireQualifiedAccess>]
-type Config =
-    { maxParameters : int }
-
 let private validateFunction (maxParameters:int) (constructorArguments:SynConstructorArgs) =
     match constructorArguments with
     | SynConstructorArgs.Pats(parameters)
@@ -20,10 +16,10 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynConstr
         { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
     
-let private runner (config:Config) (args:AstNodeRuleParams) =
+let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
-        validateFunction config.maxParameters constructorArguments
+        validateFunction config.maxItems constructorArguments
     | _ -> Array.empty
     
 let rule config =

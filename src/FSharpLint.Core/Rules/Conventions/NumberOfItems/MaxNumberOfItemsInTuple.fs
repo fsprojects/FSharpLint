@@ -7,10 +7,6 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-[<RequireQualifiedAccess>]
-type Config =
-    { maxItems : int }
-    
 let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
     let rec isApplicationNode i =
         if i <= 0 then false
@@ -31,7 +27,7 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
     else
         Array.empty
         
-let runner (config:Config) (args:AstNodeRuleParams) =
+let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Expression (expression) ->
         match expression with

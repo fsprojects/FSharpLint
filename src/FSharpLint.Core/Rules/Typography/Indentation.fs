@@ -79,6 +79,7 @@ module ContextBuilder =
         |> List.fold (fun current (line, indentationOverride) ->
             Map.add line indentationOverride current) current
 
+[<RequireQualifiedAccess>]
 type Config = {
     numberOfIndentationSpaces : int
 }
@@ -120,7 +121,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) suppres
     else
         None
        
-let runner config context args =
+let runner (config:Config) context args =
     checkIndentation config.numberOfIndentationSpaces args.line args.lineNumber args.suppressions context
     |> Option.toArray
     

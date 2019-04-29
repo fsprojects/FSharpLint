@@ -7,10 +7,6 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-[<RequireQualifiedAccess>]
-type Config =
-    { maxMembers : int }
-
 let private getMembers (members:SynMemberDefn list) =
     let isPublic = function
         | Some(SynAccess.Public) | None -> true
@@ -39,10 +35,10 @@ let private validateType (maxMembers:int) members typeRepresentation =
     else
         Array.empty
         
-let private runner (config:Config) (args:AstNodeRuleParams) =
+let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
-        validateType config.maxMembers members typeRepresentation
+        validateType config.maxItems members typeRepresentation
     | _ -> Array.empty
     
 let rule config =

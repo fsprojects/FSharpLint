@@ -5,7 +5,7 @@ open FSharpLint.Rules
 
 [<TestFixture>]
 type TestMaxNumberOfFunctionParameters() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfFunctionParameters.rule { maxParameters = 5 })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfFunctionParameters.rule { maxItems = 5 })
     
     [<Test>]
     member this.SixParameters() = 

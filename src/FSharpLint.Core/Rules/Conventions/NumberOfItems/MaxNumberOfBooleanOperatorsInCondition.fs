@@ -7,10 +7,6 @@ open FSharp.Compiler.Ast
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-[<RequireQualifiedAccess>]
-type Config =
-    { maxBooleanOperators : int }
-    
 let private validateCondition (maxBooleanOperators:int) condition =
     let rec countBooleanOperators total = function
         | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
@@ -36,17 +32,17 @@ let private validateCondition (maxBooleanOperators:int) condition =
     else
         Array.empty
 
-let private runner (config:Config) (args:AstNodeRuleParams) =
+let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Expression(expression) ->
         match expression with
         | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
         | SynExpr.While(_, condition, _, _)
         | SynExpr.Assert(condition, _) ->
-            validateCondition config.maxBooleanOperators condition
+            validateCondition config.maxItems condition
         | _ -> Array.empty
     | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
-        validateCondition config.maxBooleanOperators whenExpr
+        validateCondition config.maxItems whenExpr
     | _ -> Array.empty
     
 let rule config =

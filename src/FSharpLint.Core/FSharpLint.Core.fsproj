@@ -82,6 +82,7 @@
     <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />
     <Compile Include="Rules\Conventions\Naming\PublicValuesNames.fs" />
     <Compile Include="Rules\Conventions\Naming\NonPublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\NumberOfItems\NumberOfItemsHelper.fs" />
     <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
     <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
     <Compile Include="Rules\Conventions\NumberOfItems\MaxNumberOfMembers.fs" />
@@ -105,6 +106,7 @@
     <Compile Include="Application/LintWarning.fs" />
     <Compile Include="Application\ConfigurationManager.fs" />
     <Compile Include="Application\Configuration.fs" />
+    <Compile Include="Application\XmlConfiguration.fs" />
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json" />

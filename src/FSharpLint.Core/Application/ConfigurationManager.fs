@@ -292,10 +292,10 @@ with
         }
 
 type NumberOfItemsConfig =
-    { maxNumberOfItemsInTuple : RuleConfig<MaxNumberOfItemsInTuple.Config> option 
-      maxNumberOfFunctionParameters : RuleConfig<MaxNumberOfFunctionParameters.Config> option 
-      maxNumberOfMembers : RuleConfig<MaxNumberOfMembers.Config> option 
-      maxNumberOfBooleanOperatorsInCondition : RuleConfig<MaxNumberOfBooleanOperatorsInCondition.Config> option }
+    { maxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.Config> option 
+      maxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option 
+      maxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option 
+      maxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option }
  with
     member this.Flatten() =
          [|

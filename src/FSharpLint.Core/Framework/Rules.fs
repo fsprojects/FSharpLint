@@ -41,6 +41,7 @@ type NamingCase =
 type NamingUnderscores =
     | None = 0
     | AllowPrefix = 1
+    | AllowAny = 2
 
 type NamingConfig =
     { naming : NamingCase option
