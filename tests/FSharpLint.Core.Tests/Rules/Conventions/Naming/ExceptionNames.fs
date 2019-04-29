@@ -20,7 +20,7 @@ module program
 exception MyError of string
 """
 
-        let error = "Consider changing `MyError` to PascalCase."
+        let error = "FL0037: Consider changing `MyError` to PascalCase."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -31,7 +31,7 @@ module program
 exception myError of string
 """
 
-        let error = "Consider changing `myError` to PascalCase."
+        let error = "FL0037: Consider changing `myError` to PascalCase."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -42,7 +42,7 @@ module program
 exception MyErrorException of string
 """
 
-        let error = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
+        let error = "FL0037: Consider changing `MyErrorException` to be suffixed with 'Exception'."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -53,7 +53,7 @@ module Program
 exception MyError of string
 """
 
-        let error = "Consider changing `MyError` to be suffixed with `Exception`."
+        let error = "FL0037: Consider changing `MyError` to be suffixed with `Exception`."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 

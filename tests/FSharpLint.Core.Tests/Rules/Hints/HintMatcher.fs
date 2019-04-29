@@ -630,7 +630,7 @@ module Goat
 do
     ignore 0""")
 
-        this.ErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.") |> Assert.IsTrue
+        this.ErrorWithMessageExists("FL0065: `0` might be able to be refactored into `FSharpLint.( + )`.") |> Assert.IsTrue
         
     [<Test>]
     member this.``Suggestion as a message presents correct error message.``() = 
@@ -642,7 +642,7 @@ module Goat
 do
     ()""")
 
-        this.ErrorWithMessageExists("`()`; suggestion: Message.") |> Assert.IsTrue
+        this.ErrorWithMessageExists("FL0065: `()`; suggestion: Message.") |> Assert.IsTrue
         
     [<Test>]
     member this.``Hints matches null in an expression correctly.``() = 
@@ -655,7 +655,7 @@ do
     let x = System.Collections.ArrayList()
     x = null |> ignore""")
 
-        this.ErrorWithMessageExists("`x = null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue
+        this.ErrorWithMessageExists("FL0065: `x = null`; suggestion: Use pattern matching to null check.") |> Assert.IsTrue
         
     /// Regression test for: http://codereview.stackexchange.com/questions/134296/f-function-to-concatenate-some-dsl-scripts-with-indentation#comment251110_134297
     [<Test>]

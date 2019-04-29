@@ -56,30 +56,3 @@ module TestApi =
             
             Assert.Less(result, 250)
             System.Console.WriteLine(sprintf "Average runtime of linter on parsed file: %d (milliseconds)."  result)
-            
-            
-        [<Category("Performance")>]
-        [<Test>]
-        member __.``test``() =
-            let text = """
-type IExampleInterface =
-   abstract member Print : unit -> unit
-
-[<EntryPoint>]
-let main argv =
-    let x = List.fold (+) 0 [1;2;3]
-    printfn "%d" x
-    0
-"""
-            let tree = text |> generateAst
-            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None }
-            
-
-            let result = lintParsedFile OptionalLintParameters.Default fileInfo sourceFile
-
-            
-            match result with
-            | LintResult.Success warnings ->
-                printfn "%O" warnings
-            | _ -> ()
-                
