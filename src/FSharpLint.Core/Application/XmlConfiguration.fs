@@ -261,26 +261,31 @@ let private tryLoadConfig filePath =
     else
         None
         
-let convertRuleWithConfig (config:Configuration.XmlConfiguration) (analyserName:string) (ruleName:string) buildConfig =
+let convertRuleWithConfig (config:Configuration.XmlConfiguration) (analyserName:string) (ruleName:string option) buildConfig =
     let isRuleEnabled (analyserEnabled:Configuration.Setting option) (ruleEnabled:Configuration.Setting option) =
         match (analyserEnabled, ruleEnabled) with
         | (Some (Configuration.Setting.Enabled true), Some (Configuration.Setting.Enabled rule))
         | (None, Some (Configuration.Setting.Enabled rule)) -> rule
+        | (None, None) -> true
         | _ -> false
         
     match Map.tryFind analyserName config.Analysers with
     | Some analyser ->
         let analyserEnabled = Map.tryFind "Enabled" analyser.Settings
-        match Map.tryFind ruleName analyser.Rules with
-        | Some rule ->
-            let ruleEnabled = Map.tryFind "Enabled" rule.Settings
-            Some { RuleConfig.enabled = isRuleEnabled analyserEnabled ruleEnabled; config = buildConfig rule.Settings }
+        match ruleName with
+        | Some ruleName ->
+            match Map.tryFind ruleName analyser.Rules with
+            | Some rule ->
+                let ruleEnabled = Map.tryFind "Enabled" rule.Settings
+                Some { RuleConfig.enabled = isRuleEnabled analyserEnabled ruleEnabled; config = buildConfig rule.Settings }
+            | None ->
+                None
         | None ->
-            None
+            Some { RuleConfig.enabled = isRuleEnabled analyserEnabled (Some (Configuration.Setting.Enabled true)); config = buildConfig analyser.Settings }
     | None ->
         None
         
-let convertRuleNoConfig (config:Configuration.XmlConfiguration) (analyserName:string) (ruleName:string) =
+let convertRuleNoConfig (config:Configuration.XmlConfiguration) (analyserName:string) (ruleName:string option) =
     convertRuleWithConfig config analyserName ruleName (fun _ -> None)
         
 let convertHints (config:Configuration.XmlConfiguration) =
@@ -313,24 +318,24 @@ let convertFormatting (config:Configuration.XmlConfiguration) =
                 Some { TypedItemSpacing.Config.typedItemStyle = convertedStyle }
             | _ -> None
                 
-        convertRuleWithConfig config formattingAnalyser "TypedItemSpacing" buildConfig
+        convertRuleWithConfig config formattingAnalyser (Some "TypedItemSpacing") buildConfig
         
     let convertTupleFormatting (config:Configuration.XmlConfiguration) =
-        { TupleFormattingConfig.tupleIndentation = convertRuleNoConfig config formattingAnalyser "TupleIndentation"
-          tupleCommaSpacing = convertRuleNoConfig config formattingAnalyser "TupleCommaSpacing"
-          tupleParentheses = convertRuleNoConfig config formattingAnalyser "TupleParentheses" } |> Some
+        { TupleFormattingConfig.tupleIndentation = convertRuleNoConfig config formattingAnalyser (Some "TupleIndentation")
+          tupleCommaSpacing = convertRuleNoConfig config formattingAnalyser (Some "TupleCommaSpacing")
+          tupleParentheses = convertRuleNoConfig config formattingAnalyser (Some "TupleParentheses") } |> Some
         
     let convertPatternMatchFormatting (config:Configuration.XmlConfiguration) =
-        { PatternMatchFormattingConfig.patternMatchClauseIndentation = convertRuleNoConfig config formattingAnalyser "PatternMatchClauseIndentation"
-          patternMatchClausesOnNewLine = convertRuleNoConfig config formattingAnalyser "PatternMatchClausesOnNewLine"
-          patternMatchOrClausesOnNewLine = convertRuleNoConfig config formattingAnalyser "PatternMatchOrClausesOnNewLine"
-          patternMatchExpressionIndentation =  convertRuleNoConfig config formattingAnalyser "PatternMatchExpressionIndentation" } |> Some
+        { PatternMatchFormattingConfig.patternMatchClauseIndentation = convertRuleNoConfig config formattingAnalyser (Some "PatternMatchClauseIndentation")
+          patternMatchClausesOnNewLine = convertRuleNoConfig config formattingAnalyser (Some "PatternMatchClausesOnNewLine")
+          patternMatchOrClausesOnNewLine = convertRuleNoConfig config formattingAnalyser (Some "PatternMatchOrClausesOnNewLine")
+          patternMatchExpressionIndentation =  convertRuleNoConfig config formattingAnalyser (Some "PatternMatchExpressionIndentation") } |> Some
     
     { FormattingConfig.typedItemSpacing = convertTypedItemSpacing config
-      typePrefixing = convertRuleNoConfig config formattingAnalyser "TypePrefixing"
-      unionDefinitionIndentation = convertRuleNoConfig config formattingAnalyser "UnionDefinitionIndentation"
-      moduleDeclSpacing = convertRuleNoConfig config formattingAnalyser "ModuleDeclSpacing"
-      classMemberSpacing = convertRuleNoConfig config formattingAnalyser "ClassMemberSpacing"
+      typePrefixing = convertRuleNoConfig config formattingAnalyser (Some "TypePrefixing")
+      unionDefinitionIndentation = convertRuleNoConfig config formattingAnalyser (Some "UnionDefinitionIndentation")
+      moduleDeclSpacing = convertRuleNoConfig config formattingAnalyser (Some "ModuleDeclSpacing")
+      classMemberSpacing = convertRuleNoConfig config formattingAnalyser (Some "ClassMemberSpacing")
       tupleFormatting = convertTupleFormatting config
       patternMatchFormatting = convertPatternMatchFormatting config } |> Some
     
@@ -342,15 +347,15 @@ let convertConventions (config:Configuration.XmlConfiguration) =
                   Some { NestedStatements.Config.depth = depth }
             | _ -> None
                 
-        convertRuleWithConfig config "NestedStatements" "NestedStatements" buildConfig
+        convertRuleWithConfig config "NestedStatements" None buildConfig
         
     let convertRaiseWithTooManyArgs (config:Configuration.XmlConfiguration) =
-        let raiseWithTooManyArgsAnalyser = "RaiseWithTooManyArgs"
-        { RaiseWithTooManyArgsConfig.raiseWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser "RaiseWithSingleArgument"
-          nullArgWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser "NullArgWithSingleArgument"
-          invalidOpWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser "InvalidOpWithSingleArgument"
-          invalidArgWithTwoArguments = convertRuleNoConfig config raiseWithTooManyArgsAnalyser "InvalidArgWithTwoArguments"
-          failwithfWithArgumentsMatchingFormatString = convertRuleNoConfig config raiseWithTooManyArgsAnalyser "FailwithfWithArgumentsMatchingFormatString" } |> Some
+        let raiseWithTooManyArgsAnalyser = "RaiseWithTooManyArguments"
+        { RaiseWithTooManyArgsConfig.raiseWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser (Some "RaiseWithSingleArgument")
+          nullArgWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser (Some "NullArgWithSingleArgument")
+          invalidOpWithSingleArgument = convertRuleNoConfig config raiseWithTooManyArgsAnalyser (Some "InvalidOpWithSingleArgument")
+          invalidArgWithTwoArguments = convertRuleNoConfig config raiseWithTooManyArgsAnalyser (Some "InvalidArgWithTwoArguments")
+          failwithfWithArgumentsMatchingFormatString = convertRuleNoConfig config raiseWithTooManyArgsAnalyser (Some "FailwithfWithArgumentsMatchingFormatString") } |> Some
         
     let convertSourceLength (config:Configuration.XmlConfiguration) =
         let convertSourceLengthConfig (ruleName:string) =
@@ -359,7 +364,7 @@ let convertConventions (config:Configuration.XmlConfiguration) =
                 | Some (Configuration.Setting.Lines lines) ->
                       Some { Helper.SourceLength.Config.maxLines = lines }
                 | _ -> None
-            convertRuleWithConfig config "SourceLength" ruleName buildConfig
+            convertRuleWithConfig config "SourceLength" (Some ruleName) buildConfig
             
         { SourceLengthConfig.maxLinesInLambdaFunction = convertSourceLengthConfig "MaxLinesInLambdaFunction"
           maxLinesInMatchLambdaFunction = convertSourceLengthConfig "MaxLinesInMatchLambdaFunction"
@@ -411,7 +416,7 @@ let convertConventions (config:Configuration.XmlConfiguration) =
                   prefix = prefix
                   suffix = suffix } |> Some
                         
-            convertRuleWithConfig config "NameConventions" ruleName buildConfig
+            convertRuleWithConfig config "NameConventions" (Some ruleName) buildConfig
             
         { NamesConfig.interfaceNames = convertNamingConfig "InterfaceNames"
           exceptionNames = convertNamingConfig "ExceptionNames"
@@ -436,7 +441,7 @@ let convertConventions (config:Configuration.XmlConfiguration) =
                 | Some (Configuration.Setting.MaxItems maxItems) ->
                       Some { Helper.NumberOfItems.Config.maxItems = maxItems }
                 | _ -> None
-            convertRuleWithConfig config "NumberOfItems" ruleName buildConfig
+            convertRuleWithConfig config "NumberOfItems" (Some ruleName) buildConfig
             
         { NumberOfItemsConfig.maxNumberOfItemsInTuple = convertMaxItemsConfig "MaxNumberOfItemsInTuple"
           maxNumberOfFunctionParameters = convertMaxItemsConfig "MaxNumberOfFunctionParameters"
@@ -445,16 +450,16 @@ let convertConventions (config:Configuration.XmlConfiguration) =
         
     let convertBinding (config:Configuration.XmlConfiguration) =
         let bindingAnalyser = "Binding"
-        { BindingConfig.favourIgnoreOverLetWild = convertRuleNoConfig config bindingAnalyser "FavourIgnoreOverLetWild"
-          wildcardNamedWithAsPattern = convertRuleNoConfig config bindingAnalyser "WildcardNamedWithAsParameter"
-          uselessBinding = convertRuleNoConfig config bindingAnalyser "UselessBinding"
-          tupleOfWildcards = convertRuleNoConfig config bindingAnalyser "TupleOfWildcards" } |> Some
+        { BindingConfig.favourIgnoreOverLetWild = convertRuleNoConfig config bindingAnalyser (Some "FavourIgnoreOverLetWild")
+          wildcardNamedWithAsPattern = convertRuleNoConfig config bindingAnalyser (Some "WildcardNamedWithAsPattern")
+          uselessBinding = convertRuleNoConfig config bindingAnalyser (Some "UselessBinding")
+          tupleOfWildcards = convertRuleNoConfig config bindingAnalyser (Some "TupleOfWildcards") } |> Some
 
-    { ConventionsConfig.recursiveAsyncFunction = convertRuleNoConfig config "Conventions" "RecursiveAsyncFunction"
-      redundantNewKeyword = convertRuleNoConfig config "RedundantNewKeyword" "RedundantNewKeyword"
+    { ConventionsConfig.recursiveAsyncFunction = convertRuleNoConfig config "Conventions" (Some "RecursiveAsyncFunction")
+      redundantNewKeyword = convertRuleNoConfig config "RedundantNewKeyword" None
       nestedStatements = convertNestedStatements config
-      reimplementsFunction = convertRuleNoConfig config "FunctionReimplementation" "ReimplementsFunction"
-      canBeReplacedWithComposition = convertRuleNoConfig config "FunctionReimplementation" "CanBeReplacedWithComposition"
+      reimplementsFunction = convertRuleNoConfig config "FunctionReimplementation" (Some "ReimplementsFunction")
+      canBeReplacedWithComposition = convertRuleNoConfig config "FunctionReimplementation" (Some "CanBeReplacedWithComposition")
       raiseWithTooManyArgs = convertRaiseWithTooManyArgs config
       sourceLength = convertSourceLength config
       naming = convertNaming config
@@ -470,7 +475,7 @@ let convertTypography (config:Configuration.XmlConfiguration) =
                   Some { Indentation.Config.numberOfIndentationSpaces = spaces }
             | _ -> None
             
-        convertRuleWithConfig config typographyAnalyser "Indentation" buildConfig
+        convertRuleWithConfig config typographyAnalyser (Some "Indentation") buildConfig
         
     let convertMaxCharactersOnLine (config:Configuration.XmlConfiguration) =
         let buildConfig settings =
@@ -479,7 +484,7 @@ let convertTypography (config:Configuration.XmlConfiguration) =
                   Some { MaxCharactersOnLine.Config.maxCharactersOnLine = length }
             | _ -> None
                 
-        convertRuleWithConfig config typographyAnalyser "MaxCharactersOnLine" buildConfig
+        convertRuleWithConfig config typographyAnalyser (Some "MaxCharactersOnLine") buildConfig
 
     let convertMaxLinesInFile (config:Configuration.XmlConfiguration) =
         let buildConfig settings =
@@ -488,7 +493,7 @@ let convertTypography (config:Configuration.XmlConfiguration) =
                   Some { MaxLinesInFile.Config.maxLinesInFile = lines }
             | _ -> None
                 
-        convertRuleWithConfig config typographyAnalyser "MaxLinesInFile" buildConfig
+        convertRuleWithConfig config typographyAnalyser (Some "MaxLinesInFile") buildConfig
         
     let convertTrailingWhitespaceOnLine (config:Configuration.XmlConfiguration) =
         let buildConfig settings =
@@ -511,19 +516,19 @@ let convertTypography (config:Configuration.XmlConfiguration) =
               TrailingWhitespaceOnLine.Config.oneSpaceAllowedAfterOperator = oneSpaceAllowedAfterOperator
               TrailingWhitespaceOnLine.Config.ignoreBlankLines = ignoreBlankLines } |> Some
 
-        convertRuleWithConfig config typographyAnalyser "TrailingWhitespaceOnLine" buildConfig   
+        convertRuleWithConfig config typographyAnalyser (Some "TrailingWhitespaceOnLine") buildConfig   
     
     {
         TypographyConfig.indentation = convertIndentation config
         maxCharactersOnLine = convertMaxCharactersOnLine config
         maxLinesInFile = convertMaxLinesInFile config
         trailingWhitespaceOnLine = convertTrailingWhitespaceOnLine config
-        trailingNewLineInFile = convertRuleNoConfig config typographyAnalyser "TrailingNewLineInFile"
-        noTabCharacters = convertRuleNoConfig config typographyAnalyser "NoTabCharacters"
+        trailingNewLineInFile = convertRuleNoConfig config typographyAnalyser (Some "TrailingNewLineInFile")
+        noTabCharacters = convertRuleNoConfig config typographyAnalyser (Some "NoTabCharacters")
     } |> Some
     
 /// Tries to convert an old-format XML config file to the new JSON format.
-let convertToJson (xmlFile:string) (outputFile:string) =
+let convertToJson (xmlFile:string) =
     let xmlConfig = Configuration.configuration xmlFile
     { Configuration.ignoreFiles = convertIgnoreFiles xmlConfig
       hints = convertHints xmlConfig

@@ -1,5 +1,7 @@
 ﻿module TestConfiguration
 
+open System.IO
+open FSharpLint.Application
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Application.ConfigurationManager
@@ -508,3 +510,13 @@ type TestConfiguration() =
         }           
         
         Assert.AreEqual(expectedConfig, overrideConfiguration configToOverride overridingConfig)
+
+    [<Test>]
+    member this.``Config default XML config to JSON config``() =
+        let xmlConfig =
+            TestContext.CurrentContext.TestDirectory + "\OldConfiguration.xml"
+            |> File.ReadAllText
+            
+        let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
+        
+        Assert.AreEqual(defaultConfiguration, convertedJsonConfig)

@@ -141,7 +141,12 @@
                     "underscores": "None"
                 }
             },
-            "recordFieldNames": { "enabled": false },
+            "recordFieldNames": { 
+              "enabled": false,
+              "config":  {
+                "naming": "PascalCase",
+                "underscores": "None"
+              }},
             "enumCasesNames": { 
                 "enabled": true,
                 "config": {
@@ -264,7 +269,13 @@
                 "maxCharactersOnLine": 120
             } 
         },
-        "trailingWhitespaceOnLine": { "enabled": false },
+        "trailingWhitespaceOnLine": { 
+          "enabled": false,
+          "config": {
+            "numberOfSpacesAllowed": 1,
+            "oneSpaceAllowedAfterOperator": true,
+            "ignoreBlankLines": true
+          }},
         "maxLinesInFile": { 
             "enabled": false,
             "config": {

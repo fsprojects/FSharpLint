@@ -84,9 +84,8 @@ module Program =
         
     let private convertConfig (xmlFile:string) (outputFile:string) =
         try
-            let jsonConfig =
-                XmlConfiguration.convertToJson xmlFile outputFile
-                |> ConfigurationManager.serializeConfig
+            let inputFile = File.ReadAllText xmlFile
+            let jsonConfig = XmlConfiguration.convertToJson inputFile |> ConfigurationManager.serializeConfig
             File.WriteAllText(outputFile, jsonConfig)
             Choice1Of2 ()
         with

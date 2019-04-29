@@ -80,5 +80,11 @@
     <ProjectReference Include="..\..\src\FSharpLint.Core\FSharpLint.Core.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="OldConfiguration.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
