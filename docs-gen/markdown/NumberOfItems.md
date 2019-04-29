@@ -2,13 +2,9 @@
 
 Set of rules that analyse the number of items in a segment of code, for example the number of members in a class.
 
-### Analyser Settings
-
-`enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### MaxNumberOfFunctionParameters
+#### MaxNumberOfFunctionParameters - FS0052
 
 ##### Cause
 
@@ -28,7 +24,7 @@ Reduce the number of function parameters, e.g. to fix the example in the "Cause"
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxItems` - An integer property that specifies the max number of function parameters. (Default 5)
 
-#### MaxNumberOfMembers
+#### MaxNumberOfMembers - FS0053
 
 ##### Cause
 
@@ -47,7 +43,7 @@ Reduce the number of members in the class, e.g. extract them out to another clas
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxItems` - An integer property that specifies the max number of members in a class. (Default 32)
 
-#### MaxNumberOfItemsInTuple
+#### MaxNumberOfItemsInTuple - FS0051
 
 ##### Cause
 
@@ -67,7 +63,7 @@ Reduce the number of items in the tuple, ideally replace the tuple with a record
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxItems` - An integer property that specifies the max number of items in a tuple. (Default 4)
 
-#### MaxNumberOfBooleanOperatorsInCondition
+#### MaxNumberOfBooleanOperatorsInCondition - FS0054
 
 ##### Cause
 

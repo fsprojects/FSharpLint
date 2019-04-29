@@ -2,13 +2,9 @@
 
 Set of rules that analyse the length of sections of code.
 
-### Analyser Settings
-
-`enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### MaxLinesInFunction
+#### MaxLinesInFunction - FS0025
 
 ##### Cause
 
@@ -27,7 +23,7 @@ Refactor to extract out code into smaller composable functions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a function. (Default 70)
 
-#### MaxLinesInLambdaFunction
+#### MaxLinesInLambdaFunction - FS0022
 
 ##### Cause
 
@@ -46,7 +42,7 @@ Consider using a named function rather than a lambda function.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a lambda function. (Default 7)
 
-#### MaxLinesInMatchLambdaFunction
+#### MaxLinesInMatchLambdaFunction - FS0023
 
 ##### Cause
 
@@ -65,7 +61,7 @@ Use active patterns to help reduce the number of matches/extract code out into c
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a match function. (Default 70)
 
-#### MaxLinesInValue
+#### MaxLinesInValue - FS0024
 
 ##### Cause
 
@@ -92,7 +88,7 @@ Refactor to extract out code into smaller composable functions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a value binding. (Default 70)
 
-#### MaxLinesInConstructor
+#### MaxLinesInConstructor - FS0027
 
 ##### Cause
 
@@ -111,7 +107,7 @@ Extract code out into private methods or functions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a class constructor. (Default 70)
 
-#### MaxLinesInMember
+#### MaxLinesInMember - FS0026
 
 ##### Cause
 
@@ -130,7 +126,7 @@ Extract code out into private methods or functions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a member. (Default 70)
 
-#### MaxLinesInProperty
+#### MaxLinesInProperty - FS0028
 
 ##### Cause
 
@@ -149,7 +145,7 @@ Extract code out into private methods or functions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a property. (Default 70)
 
-#### MaxLinesInClass
+#### MaxLinesInClass - FS0033
 
 ##### Cause
 
@@ -168,7 +164,7 @@ Extract code out into smaller composable classes.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a class. (Default 500)
 
-#### MaxLinesInEnum
+#### MaxLinesInEnum - FS0031
 
 ##### Cause
 
@@ -187,7 +183,7 @@ Extract code out into smaller enums.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a enum. (Default 500)
 
-#### MaxLinesInUnion
+#### MaxLinesInUnion - FS0032
 
 ##### Cause
 
@@ -206,7 +202,7 @@ Extract code out into smaller composed discriminated unions.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a discriminated union. (Default 500)
 
-#### MaxLinesInRecord
+#### MaxLinesInRecord - FS0030
 
 ##### Cause
 
@@ -225,7 +221,7 @@ Extract code out into smaller composed records.
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 `maxLines` - Maximum number of lines in a record. (Default 500)
 
-#### MaxLinesInModule
+#### MaxLinesInModule - FS0029
 
 ##### Cause
 

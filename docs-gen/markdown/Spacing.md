@@ -4,7 +4,7 @@ Rules related to code spacing.
 
 ### Rules
 
-#### Module Decl Spacing
+#### ModuleDeclSpacing - FS0008
 
 ##### Cause
 
@@ -22,7 +22,7 @@ Use 1 space between module declarations.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Class Member Spacing
+#### Class Member Spacing - FS0009
 
 ##### Cause
 

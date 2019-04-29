@@ -4,7 +4,7 @@ Rules related to tuple formatting.
 
 ### Rules
 
-#### TupleCommaSpacing
+#### TupleCommaSpacing - FS0001
 
 ##### Cause
 
@@ -22,7 +22,7 @@ Add a space after tuple commas.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Tuple Indentation
+#### Tuple Indentation - FS0002
 
 ##### Cause
 
@@ -40,7 +40,7 @@ Fix tuple indentation
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Tuple Parentheses
+#### Tuple Parentheses - FS0003
 
 ##### Cause
 
@@ -57,5 +57,3 @@ Add parentheses around tuple instantiation.
 ##### Rule Settings
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
-
-

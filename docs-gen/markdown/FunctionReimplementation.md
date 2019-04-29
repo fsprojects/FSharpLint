@@ -2,13 +2,9 @@
 
 Set of rules that highlight lambda functions that can removed through eta reduction.
 
-### Analyser Settings
-
-`enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### ReimplementsFunction
+#### ReimplementsFunction - FS0034
 
 ##### Cause
 
@@ -32,7 +28,7 @@ Replace the lambda with the function that is being called.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### CanBeReplacedWithComposition
+#### CanBeReplacedWithComposition - FS0035
 
 ##### Cause
 

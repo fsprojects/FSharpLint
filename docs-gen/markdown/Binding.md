@@ -2,13 +2,9 @@
 
 Set of rules that analyse possible mistakes when binding values.
 
-### Analyser Settings
-
-`enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### FavourIgnoreOverLetWild
+#### FavourIgnoreOverLetWild - FS0055
 
 ##### Cause
 
@@ -26,7 +22,7 @@ Pipe the value into the ignore function e.g. `Console.ReadLine() |> ignore`
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### UselessBinding
+#### UselessBinding - FS0057
 
 ##### Cause
 
@@ -44,7 +40,7 @@ Remove the binding.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### WildcardNamedWithAsPattern
+#### WildcardNamedWithAsPattern - FS0056
 
 ##### Cause
 
@@ -62,7 +58,7 @@ Replace the wildcard with the identifier the wildcard is currently being bound t
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### TupleOfWildcards
+#### TupleOfWildcards - FS0058
 
 ##### Cause
 

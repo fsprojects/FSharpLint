@@ -4,7 +4,7 @@ Rules related to pattern match formatting.
 
 ### Rules
 
-#### Pattern Match Clauses On New Line
+#### PatternMatchClausesOnNewLine - FS0004
 
 ##### Cause
 
@@ -22,7 +22,7 @@ Place each pattern match clause on its own line.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Pattern Match Or Clauses On New Line
+#### PatternMatchOrClausesOnNewLine - FS0005
 
 ##### Cause
 
@@ -40,7 +40,7 @@ Place each pattern match "or" clause on its own line.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Pattern Match Clause Indentation
+#### PatternMatchClauseIndentation - FS0006
 
 ##### Cause
 
@@ -58,7 +58,7 @@ Update pattern match clauses to have consistent indentation.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### Pattern Match Expression Indentation
+#### PatternMatchExpressionIndentation - FS0007
 
 ##### Cause
 
@@ -75,5 +75,3 @@ Update pattern match expressions to have consistent indentation.
 ##### Rule Settings
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
-
-

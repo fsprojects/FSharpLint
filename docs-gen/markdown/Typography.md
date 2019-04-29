@@ -4,7 +4,7 @@ Set of rules that analyse the text in a file.
 
 ### Rules
 
-#### MaxLinesInFile
+#### MaxLinesInFile - FS0062
 
 ##### Cause
 
@@ -24,7 +24,7 @@ Refactor to extract code out into another file.
 
 `maxLinesInFile` - An integer property that specifies the maximum number of lines allowed in a file. (Default 1000)
 
-#### MaxCharactersOnLine
+#### MaxCharactersOnLine - FS0060
 
 ##### Cause
 
@@ -44,7 +44,7 @@ Break the line up into multiple lines.
 
 `maxCharactersOnLine` - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)
 
-#### NoTabCharacters
+#### NoTabCharacters - FS0064
 
 ##### Cause
 
@@ -62,7 +62,7 @@ Replace the tab with spaces.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### TrailingNewLineInFile
+#### TrailingNewLineInFile - FS0063
 
 ##### Cause
 
@@ -80,7 +80,7 @@ Remove any new lines at the end of a file.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### TrailingWhitespaceOnLine
+#### TrailingWhitespaceOnLine - FS0061
 
 ##### Cause
 

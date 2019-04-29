@@ -9,7 +9,7 @@ Rules that check F# code formatting rules.
 
 ### Rules
 
-#### Typed Item Spacing
+#### Typed Item Spacing - FS0010
 
 ##### Cause
 
@@ -29,7 +29,7 @@ Update typed item to use configured spacing.
 
 `typedItemStyle` - style of type item spacing (`NoSpaces`, `SpaceAfter`, `SpacesAround`)
 
-#### Union Definition Indentation
+#### Union Definition Indentation - FS0012
 
 ##### Cause
 

@@ -12,7 +12,7 @@ Set of rules that check F# coding conventions.
 
 ### Rules
 
-#### RecursiveAsyncFunction
+#### RecursiveAsyncFunction - FS0013
 
 ##### Cause
 
@@ -31,7 +31,7 @@ Use `return!` instead of `do!`
 
 `enabled` - A boolean property that can enable and disable this rule. (Default false)
 
-#### RedundantNewKeyword
+#### RedundantNewKeyword - FS0014
 
 ##### Cause
 
@@ -49,7 +49,7 @@ Remove `new` keyword.
 
 `enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### NestedStatements
+#### NestedStatements - FS0015
 
 Single rule that checks code is not more deeply nested than a configurable depth.
 
