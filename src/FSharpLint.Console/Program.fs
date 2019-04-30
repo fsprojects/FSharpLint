@@ -2,8 +2,10 @@
 
 module Program =
 
+    open System.IO
     open System
     open FSharpLint.Framework
+    open FSharpLint.Application
     open FSharpLint.Application
 
     let private writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
@@ -22,9 +24,10 @@ module Program =
         writeLine str ConsoleColor.Red Console.Error
 
     let private help () =
-        writeInfoLine "-f <project.fsproj>        lint project"
-        writeInfoLine "-sf <file.fs>              lint single file"
-        writeInfoLine "-source 'let foo = 5'      lint source code"
+        writeInfoLine "-f <project.fsproj>                lint project"
+        writeInfoLine "-sf <file.fs>                      lint single file"
+        writeInfoLine "-source 'let foo = 5'              lint source code"
+        writeInfoLine "-convert <xmlConfig> <outputFile>  convert old XML config to JSON"
         
     let private parserProgress = function
         | Starting(file) ->
@@ -78,11 +81,21 @@ module Program =
               ReportLinterProgress = None }
 
         lintSource parseInfo source
+        
+    let private convertConfig (xmlFile:string) (outputFile:string) =
+        try
+            let inputFile = File.ReadAllText xmlFile
+            let jsonConfig = XmlConfiguration.convertToJson inputFile |> ConfigurationManager.serializeConfig
+            File.WriteAllText(outputFile, jsonConfig)
+            Choice1Of2 ()
+        with
+            | ex -> Choice2Of2 ex.Message
 
     type private Argument =
         | ProjectFile of string
         | SingleFile of string
         | Source of string
+        | ConvertConfig of string * string
         | UnexpectedArgument of string
 
         override this.ToString() =
@@ -90,6 +103,7 @@ module Program =
             | ProjectFile(f) -> "project " + f
             | SingleFile(f) -> "source file " + f
             | Source(_) -> "source code"
+            | ConvertConfig(xmlConfig, outputFile) -> "config " + xmlConfig + " " + outputFile
             | UnexpectedArgument(_) -> "unexpected argument"
 
     let private parseArguments arguments =
@@ -100,6 +114,8 @@ module Program =
                 parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
             | "-source" :: argument :: remainingArguments ->
                 parseArguments (Source(argument) :: parsedArguments) remainingArguments
+             | "-convert" :: xmlConfig :: outputFile :: remainingArguments ->
+                parseArguments (ConvertConfig(xmlConfig, outputFile) :: parsedArguments) remainingArguments               
             | [] -> parsedArguments
             | argument :: _ ->  [UnexpectedArgument(argument)]
 
@@ -114,7 +130,7 @@ module Program =
 
     let private containsRequiredArguments arguments =
         let isArgumentSpecifyingWhatToLint = function 
-            | ProjectFile(_) | SingleFile(_) | Source(_) -> true 
+            | ProjectFile(_) | SingleFile(_) | Source(_) | ConvertConfig(_) -> true 
             | _ -> false
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
@@ -123,6 +139,10 @@ module Program =
         | LintResult.Success(warnings) -> 
             String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
         | LintResult.Failure(failure) -> writeErrorLine failure.Description
+        
+    let private outputConversionResult xmlConfig outputFile = function
+        | Choice1Of2 _ -> (sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile) |> writeInfoLine
+        | Choice2Of2 err -> (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> writeErrorLine
         
     let private startWithArguments arguments =
         arguments
@@ -135,6 +155,7 @@ module Program =
                 | SingleFile(file) -> runLintOnFile file |> outputLintResult
                 | Source(source) -> runLintOnSource source |> outputLintResult
                 | ProjectFile(projectFile) -> runLintOnProject projectFile |> outputLintResult
+                | ConvertConfig(xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> outputConversionResult xmlConfig outputFile
                 | UnexpectedArgument(_) -> ()
             with
             | e -> 

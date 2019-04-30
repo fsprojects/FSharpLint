@@ -21,6 +21,8 @@ NUGET
       System.Security.Cryptography.Algorithms (>= 4.3) - restriction: || (== netcoreapp2.1) (== netstandard2.0)
       System.ValueTuple (>= 4.4) - restriction: || (== net461) (&& (== netcoreapp2.1) (>= net461)) (&& (== netstandard2.0) (>= net461))
     FSharp.Core (4.6.2)
+    FSharp.Json (0.3.5)
+      FSharp.Core (>= 4.3.4) - restriction: || (&& (== net461) (>= netstandard2.0)) (== netcoreapp2.1) (== netstandard2.0)
     Microsoft.CodeCoverage (15.9) - restriction: || (== net461) (== netcoreapp2.1) (&& (== netstandard2.0) (>= net45)) (&& (== netstandard2.0) (>= netcoreapp1.0))
     Microsoft.DotNet.InternalAbstractions (1.0) - restriction: || (&& (== net461) (>= netcoreapp1.0)) (== netcoreapp2.1) (&& (== netstandard2.0) (>= netcoreapp1.0))
       System.AppContext (>= 4.1) - restriction: || (&& (== net461) (< net451)) (== netcoreapp2.1) (== netstandard2.0)

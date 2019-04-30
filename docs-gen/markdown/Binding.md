@@ -2,13 +2,9 @@
 
 Set of rules that analyse possible mistakes when binding values.
 
-### Analyser Settings
-
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### FavourIgnoreOverLetWild
+#### FavourIgnoreOverLetWild - FS0055
 
 ##### Cause
 
@@ -24,9 +20,9 @@ Pipe the value into the ignore function e.g. `Console.ReadLine() |> ignore`
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### UselessBinding
+#### UselessBinding - FS0057
 
 ##### Cause
 
@@ -42,9 +38,9 @@ Remove the binding.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### WildcardNamedWithAsPattern
+#### WildcardNamedWithAsPattern - FS0056
 
 ##### Cause
 
@@ -60,9 +56,9 @@ Replace the wildcard with the identifier the wildcard is currently being bound t
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### TupleOfWildcards
+#### TupleOfWildcards - FS0058
 
 ##### Cause
 
@@ -78,4 +74,4 @@ Replace the tuple with a single wildcard e.g. the example in the cause could be 
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)

@@ -2,13 +2,9 @@
 
 `raise` [can be passed more than one argument](http://visualfsharp.codeplex.com/workitem/41), in code this is likely to be a mistake and these rules warn when this occurs.
 
-### Analyser Settings
-
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### RaiseWithSingleArgument
+#### RaiseWithSingleArgument - FS0017
 
 ##### Cause
 
@@ -24,9 +20,9 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### FailwithWithSingleArgument
+#### FailwithWithSingleArgument - FS0016
 
 ##### Cause
 
@@ -42,9 +38,9 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### NullArgWithSingleArgument
+#### NullArgWithSingleArgument - FS0018
 
 ##### Cause
 
@@ -60,9 +56,9 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### InvalidOpWithSingleArgument
+#### InvalidOpWithSingleArgument - FS0019
 
 ##### Cause
 
@@ -78,9 +74,9 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### FailwithfWithArgumentsMatchingFormatString
+#### FailwithfWithArgumentsMatchingFormatString - FS0021
 
 ##### Cause
 
@@ -96,9 +92,9 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
 
-#### InvalidArgWithTwoArguments
+#### InvalidArgWithTwoArguments - FS0020
 
 ##### Cause
 
@@ -114,4 +110,4 @@ Remove the extra arguments.
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)

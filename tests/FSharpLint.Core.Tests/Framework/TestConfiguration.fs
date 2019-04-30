@@ -1,9 +1,12 @@
 ﻿module TestConfiguration
 
+open System.IO
+open FSharpLint.Application
 open NUnit.Framework
-open FSharpLint.Framework.HintParser
+open FSharpLint.Rules
+open FSharpLint.Application.ConfigurationManager
 open FSharpLint.Framework.Configuration
-open Management
+open FSharpLint.Framework.Configuration.Management
 
 type System.String with
     member path.ToPlatformIndependentPath() =
@@ -11,19 +14,18 @@ type System.String with
 
     member this.RemoveWhitepsace() =
         System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
-
+        
 let emptyLoadedConfigs = { LoadedConfigs = Map.empty; PathsAdded = []; GlobalConfigs = [] }
-
-let dummyHint str =
-    { Hint = str; ParsedHint = { Match = HintExpr Expression.Wildcard; Suggestion = Message "" } }
-
-let configWithHints hints updateType =
-    let hints = Hints({ Hints = hints; Update = updateType })
-    { IgnoreFiles = None
-      Analysers = 
-        ["Hints", { Settings = ["Hints", hints] |> Map.ofList
-                    Rules = Map.empty }] |> Map.ofList }
-
+ 
+let configWithHints hints =
+     {
+        Configuration.formatting = None
+        conventions = None
+        typography = None
+        ignoreFiles = Array.empty
+        hints = hints
+    }
+ 
 [<TestFixture>]
 type TestConfiguration() =
     [<Test>]
@@ -107,123 +109,111 @@ type TestConfiguration() =
 
         IgnoreFiles.shouldFileBeIgnored ignorePaths path
         |> Assert.IsTrue
-
+        
     [<Test>]
-    member __.OverwriteMap() = 
-        let mapToBeOverwrited = [ (1,"1"); (2,"2"); (3,"3"); (4,"5") ] |> Map.ofList
+    member __.``Empty config writes correct JSON document`` () =
+        let config = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
+        
+        let resultJson = serializeConfig config
+        
+        let expectedJson =
+            """{
+    "ignoreFiles": [],
+    "hints": []
+}
+"""
 
-        let map = [ (2,"5"); (4,"1");  ] |> Map.ofList
-
-        let expectedMap = [ (1,"1"); (2,"5"); (3,"3"); (4,"1")  ] |> Map.ofList
-
-        Assert.AreEqual(expectedMap, overwriteMap mapToBeOverwrited map (fun _ x -> x))
-
+        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
+        
     [<Test>]
-    member __.``Empty config writes correct XML document``() = 
-        let config =
-            { IgnoreFiles = None
-              Analysers = Map.empty }
+    member __.``Config specifying files to ignore writes correct JSON document`` () =
+        let config = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = [| "assemblyinfo.*" |]
+            hints = Array.empty
+        }
+        
+        let resultJson = serializeConfig config
+        
+        let expectedJson =
+            """{
+    "ignoreFiles": ["assemblyinfo.*"],
+    "hints": []
+}
+"""
 
-        let doc = config.ToXmlDocument().ToString()
-
-        let expectedXml = 
-            """
-<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <Analysers />
-</FSharpLintSettings>"""
-
-        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
-
+        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
+        
     [<Test>]
-    member __.``Config specifying files to ignore writes correct XML document``() = 
-        let config =
-            { IgnoreFiles = Some({ Update = Add
-                                   Files = []
-                                   Content = "assemblyinfo.*"})
-              Analysers = Map.empty }
+    member __.``Config specifying rule writes correct JSON document`` () =
+        let config = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = Some { Indentation.Config.numberOfIndentationSpaces = 4 } }
+                       maxCharactersOnLine = None
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
+        
+        let resultJson = serializeConfig config
+        
+        let expectedJson =
+            """{
+    "ignoreFiles": [],
+    "typography": {
+        "indentation": {
+            "enabled": true,
+            "config": {
+                "numberOfIndentationSpaces": 4
+            }
+        }
+    },
+    "hints": []
+}
+"""
 
-        let doc = config.ToXmlDocument().ToString()
-
-        let expectedXml = 
-            """
-<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <IgnoreFiles Update="Add">
-        <![CDATA[
-          assemblyinfo.*
-        ]]>
-    </IgnoreFiles>
-    <Analysers />
-</FSharpLintSettings>"""
-
-        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
-
+        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
+        
     [<Test>]
-    member __.``Config specifying an analyser writes correct XML document``() = 
-        let rule = { Rule.Settings = [ ("Enabled", Enabled(true))  ] |> Map.ofList }
+    member __.``Config specifying hints writes correct JSON document`` () =
+        let config = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = Array.empty
+            hints =
+                [| "not (a =  b) ===> a <> b"
+                   "not (a <> b) ===> a = b" |]
+        }
+        
+        let resultJson = serializeConfig config
+        
+        let expectedJson =
+            """{
+    "ignoreFiles": [],
+    "hints": [
+        "not (a =  b) ===> a <> b",
+        "not (a <> b) ===> a = b"
+    ]
+}
+"""
 
-        let analyser =
-            { Settings = [ ("Enabled", Enabled(true))  ] |> Map.ofList
-              Rules = [ ("ReimplementsFunction", rule)  ] |> Map.ofList }
-
-        let config =
-            { IgnoreFiles = None
-              Analysers = [ ("FunctionReimplementation", analyser)  ] |> Map.ofList }
-
-        let doc = config.ToXmlDocument().ToString()
-
-        let expectedXml = 
-            """
-<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <Analysers>
-        <FunctionReimplementation>
-          <Rules>
-            <ReimplementsFunction>
-              <Enabled>True</Enabled>
-            </ReimplementsFunction>
-          </Rules>
-          <Enabled>True</Enabled>
-        </FunctionReimplementation>
-    </Analysers>
-</FSharpLintSettings>"""
-
-        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
-
-    [<Test>]
-    member __.``Config specifying hints writes correct XML document``() = 
-        let parsedHint = { Match = HintExpr Expression.Wildcard; Suggestion = Suggestion.Expr(Expression.Wildcard) }
-
-        let hints =
-            [ { Hint = "not (a =  b) ===> a <> b"; ParsedHint = parsedHint }
-              { Hint = "not (a <> b) ===> a = b"; ParsedHint = parsedHint } ]
-
-        let analyser =
-            { Settings = [ ("Hints", Hints({ Hints = hints; Update = Overwrite }))  ] |> Map.ofList
-              Rules = Map.empty }
-
-        let config =
-            { IgnoreFiles = None
-              Analysers = [ ("Hints", analyser)  ] |> Map.ofList }
-
-        let doc = config.ToXmlDocument().ToString()
-
-        let expectedXml = 
-            """
-<FSharpLintSettings xmlns="https://github.com/fsprojects/FSharpLint/blob/master/ConfigurationSchema.xsd">
-    <Analysers>
-        <Hints>
-            <Rules />
-            <Hints>
-                <![CDATA[
-                    not (a =  b) ===> a <> b
-                    not (a <> b) ===> a = b
-                ]]>
-            </Hints>
-        </Hints>
-    </Analysers>
-</FSharpLintSettings>"""
-
-        Assert.AreEqual(expectedXml.RemoveWhitepsace(), doc.RemoveWhitepsace())
-
+        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
+        
     [<Test>]
     member __.``Load two paths with same root with a common directory; loads expected tree.``() = 
         let expectedLoadedConfigs = 
@@ -374,11 +364,20 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Overridden global configuration returned when a global path has been added``() = 
-        let loadedConfig = 
-            { IgnoreFiles = None
-              Analysers = 
-                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                                 Rules = [] |> Map.ofList }] |> Map.ofList }
+        let loadedConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
+                       maxCharactersOnLine = None
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
 
         let loadedConfigs = 
             { LoadedConfigs = Map.empty
@@ -393,11 +392,20 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Overridden configuration returned when there is a path added``() = 
-        let loadedConfig = 
-            { IgnoreFiles = None
-              Analysers = 
-                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                                 Rules = [] |> Map.ofList }] |> Map.ofList }
+        let loadedConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
+                       maxCharactersOnLine = None
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
 
         let loadedConfigs = 
             { LoadedConfigs = [(["C:"], Some(loadedConfig))] |> Map.ofList
@@ -411,17 +419,36 @@ type TestConfiguration() =
         Assert.AreEqual(Some expectedConfig, config)
 
     [<Test>]
-    member __.``Overridden configuration overrides global config``() = 
-        let globalConfig = 
-            { IgnoreFiles = None
-              Analysers = 
-                ["Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                                 Rules = [] |> Map.ofList }] |> Map.ofList }
-        let loadedConfig = 
-            { IgnoreFiles = None
-              Analysers = 
-                ["Binding", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                              Rules = [] |> Map.ofList }] |> Map.ofList }
+    member __.``Overridden configuration overrides global config``() =
+        let globalConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
+                       maxCharactersOnLine = None
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
+
+        let loadedConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = None }
+                       maxCharactersOnLine = None
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
 
         let loadedConfigs = 
             { LoadedConfigs = [(["C:"], Some(loadedConfig))] |> Map.ofList
@@ -436,67 +463,60 @@ type TestConfiguration() =
         Assert.AreEqual(Some expectedConfig, config)
 
     [<Test>]
-    member __.``Overridden configuration with hints of update type 'Add' are added to existing hints``() = 
-        let initial = configWithHints [dummyHint "foo 1 ===> foo"] Overwrite
-        let updated = configWithHints [dummyHint "foo 2 ===> foo"] Add
-
-        let overridden = overrideConfiguration initial updated
-
-        let hintAnalyser = Map.find "Hints" overridden.Analysers
-        match Map.find "Hints" hintAnalyser.Settings with
-        | Hints(hints) -> 
-            let hints = hints.Hints |> List.map (fun x -> x.Hint)
-            Assert.AreEqual(Set.ofList ["foo 1 ===> foo"; "foo 2 ===> foo"], Set.ofList hints)
-        | _ -> Assert.Fail("Expected hints setting to be of hints type.")
+    member __.``Config override works correctly``() =
+        let configToOverride = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = None }
+                       maxCharactersOnLine = Some { RuleConfig.enabled = true; config = None }
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
+            
+        let overridingConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
+                       maxCharactersOnLine = Some { RuleConfig.enabled = false; config = None }
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }
+        
+        let expectedConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography =
+                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
+                       maxCharactersOnLine = Some { RuleConfig.enabled = false; config = None }
+                       trailingWhitespaceOnLine = None
+                       maxLinesInFile = None
+                       trailingNewLineInFile = None
+                       noTabCharacters = None
+                }
+            ignoreFiles = Array.empty
+            hints = Array.empty
+        }           
+        
+        Assert.AreEqual(expectedConfig, overrideConfiguration configToOverride overridingConfig)
 
     [<Test>]
-    member __.``Overridden configuration with hints of update type 'Overwrite' ovewrite existing hints``() = 
-        let initial = configWithHints [dummyHint "foo 1 ===> foo"] Overwrite
-        let updated = configWithHints [dummyHint "foo 2 ===> foo"] Overwrite
-
-        let overridden = overrideConfiguration initial updated
-
-        let hintAnalyser = Map.find "Hints" overridden.Analysers
-        match Map.find "Hints" hintAnalyser.Settings with
-        | Hints(hints) -> 
-            let hints = hints.Hints |> List.map (fun x -> x.Hint)
-            Assert.AreEqual(["foo 2 ===> foo"], hints)
-        | _ -> Assert.Fail("Expected hints setting to be of hints type.")
-
-    [<Test>]
-    member __.``Update config updates differences``() = 
-        let configFromAnalysers analysers =
-            { IgnoreFiles = None
-              Analysers = analysers }
+    member this.``Config default XML config to JSON config``() =
+        let xmlConfig =
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "OldConfiguration.xml")
+            |> File.ReadAllText
             
-        let partialConfigToUpdate = 
-            [ "Dog", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                       Rules = [] |> Map.ofList } ] 
-            |> Map.ofList 
-            |> configFromAnalysers
-            
-        let fullUpdatedConfig = 
-            [ "Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                              Rules = [] |> Map.ofList } 
-              "Dog", { Settings = [("Enabled", Enabled(true))] |> Map.ofList
-                       Rules = [("Woofs", { Rule.Settings = [("Enabled", Enabled(true))] |> Map.ofList })] |> Map.ofList } ] 
-            |> Map.ofList 
-            |> configFromAnalysers
-            
-        let fullConfigToUpdate = 
-            [ "Typography", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                              Rules = [] |> Map.ofList } 
-              "Dog", { Settings = [("Enabled", Enabled(false))] |> Map.ofList
-                       Rules = [] |> Map.ofList } ] 
-            |> Map.ofList 
-            |> configFromAnalysers
-
-        let updatedConfig = updateConfigMap fullUpdatedConfig fullConfigToUpdate partialConfigToUpdate
-            
-        let expectedConfig = 
-             [ "Dog", { Settings = [("Enabled", Enabled(true))] |> Map.ofList
-                        Rules = [("Woofs", { Rule.Settings = [("Enabled", Enabled(true))] |> Map.ofList })] |> Map.ofList } ] 
-            |> Map.ofList 
-            |> configFromAnalysers
-
-        Assert.AreEqual(expectedConfig, updatedConfig)
+        let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
+        
+        Assert.AreEqual(defaultConfiguration, convertedJsonConfig)

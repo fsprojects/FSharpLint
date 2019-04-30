@@ -1,4 +1,4 @@
-# Hints
+# Hints - FS0065
 
 ### Introduction
 
@@ -192,21 +192,13 @@ Currently to provide your own hints you have to overwrite the default hints with
 
 For example to make the lint tool run with just the two hints: `not (a =  b) ===> a <> b` and `not (a <> b) ===> a =  b`, you could use the following config file to override existing hints:
 
-    [lang=xml]
-    <?xml version="1.0" encoding="utf-8"?>
-    <FSharpLintSettings>
-        <Analysers>
-            <Hints>
-                <Hints>
-                  <![CDATA[
-                    not (a =  b) ===> a <> b
-                    not (a <> b) ===> a =  b
-                  ]]>
-                </Hints>
-                <Enabled>true</Enabled>
-            </Hints>
-        </Analysers>
-    </FSharpLintSettings>
+    [lang=json]
+    {
+      "hints": [
+        "not (a =  b) ===> a <> b",
+        "not (a <> b) ===> a =  b"
+      ]
+    }
 
 ### Flaws
 
@@ -219,7 +211,3 @@ For example to make the lint tool run with just the two hints: `not (a =  b) ===
 * Provide more informative parse errors.
 * Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.
 * Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements.
-
-### Analyser Settings
-
-`Enabled` - A boolean property that can enable and disable this analyser. (Default True)

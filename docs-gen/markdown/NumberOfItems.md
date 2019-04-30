@@ -2,17 +2,13 @@
 
 Set of rules that analyse the number of items in a segment of code, for example the number of members in a class.
 
-### Analyser Settings
-
-`Enabled` - A boolean property that can enable and disable this analyser. (Default true)
-
 ### Rules
 
-#### MaxNumberOfFunctionParameters
+#### MaxNumberOfFunctionParameters - FS0052
 
 ##### Cause
 
-A function contains more than a configurable number of parameters, for example if `MaxItems` was set to 5 (the default value)
+A function contains more than a configurable number of parameters, for example if `maxItems` was set to 5 (the default value)
 then the following condition would cause the error: `let findCat one two three four five six = 0`
 
 ##### Rationale
@@ -25,14 +21,14 @@ Reduce the number of function parameters, e.g. to fix the example in the "Cause"
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
-`MaxItems` - An integer property that specifies the max number of function parameters. (Default 5)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
+`maxItems` - An integer property that specifies the max number of function parameters. (Default 5)
 
-#### MaxNumberOfMembers
+#### MaxNumberOfMembers - FS0053
 
 ##### Cause
 
-A class contains more than a configurable number of members (`MaxItems`).
+A class contains more than a configurable number of members (`maxItems`).
 
 ##### Rationale
 
@@ -44,14 +40,14 @@ Reduce the number of members in the class, e.g. extract them out to another clas
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
-`MaxItems` - An integer property that specifies the max number of members in a class. (Default 32)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
+`maxItems` - An integer property that specifies the max number of members in a class. (Default 32)
 
-#### MaxNumberOfItemsInTuple
+#### MaxNumberOfItemsInTuple - FS0051
 
 ##### Cause
 
-A tuple contains more than a configurable number of items, for example if `MaxItems` was set to 4 (the default value)
+A tuple contains more than a configurable number of items, for example if `maxItems` was set to 4 (the default value)
 then the following statement would cause the error: `let tup = (1, 2, 3, 5, 6)`
 
 ##### Rationale
@@ -64,14 +60,14 @@ Reduce the number of items in the tuple, ideally replace the tuple with a record
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
-`MaxItems` - An integer property that specifies the max number of items in a tuple. (Default 4)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
+`maxItems` - An integer property that specifies the max number of items in a tuple. (Default 4)
 
-#### MaxNumberOfBooleanOperatorsInCondition
+#### MaxNumberOfBooleanOperatorsInCondition - FS0054
 
 ##### Cause
 
-A `while/if/assert/match when` condition contains more than a configurable number of boolean operators, for example if `MaxItems` was set to 4 (the default value)
+A `while/if/assert/match when` condition contains more than a configurable number of boolean operators, for example if `maxItems` was set to 4 (the default value)
 then the following condition would cause the error: `if x && y || q || r && t && w then`
 
 ##### Rationale
@@ -87,5 +83,5 @@ Reduce the number of boolean operators in the `while/if/assert/match when` condi
 
 ##### Rule Settings
 
-`Enabled` - A boolean property that can enable and disable this rule. (Default true)
-`MaxItems` - An integer property that specifies the max number of boolean operators in a condition. (Default 4)
+`enabled` - A boolean property that can enable and disable this rule. (Default true)
+`maxItems` - An integer property that specifies the max number of boolean operators in a condition. (Default 4)

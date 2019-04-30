@@ -1,30 +1,19 @@
 ﻿module TestRuleBase
 
 open System
-open System.Diagnostics
 open System.Text
 open NUnit.Framework
-open FSharp.Compiler.Range
-open FSharp.Compiler.SourceCodeServices
+open FSharpLint.Application
 open FSharpLint.Framework
-open FSharpLint.Framework.Analyser
-open FSharpLint.Framework.Ast
-open FSharpLint.Framework.Configuration
-open FSharpLint.Framework.ParseFile
-open TestUtils
-
-let emptyConfig =
-    { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
-      Analysers =
-          Map.ofList
-              [ ("", { Rules = Map.ofList [ ("", { Settings = Map.ofList [ ("", Enabled(true)) ] }) ]
-                       Settings = Map.ofList [] }) ] }
+open FSharpLint.Framework.Suggestion
 
 [<AbstractClass>]
-type TestRuleBase(analyser, ?analysers) =
+type TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
-    let postSuggestion (suggestion:Analyser.LintSuggestion) =
+    abstract Parse : string * ?fileName:string * ?checkFile:bool -> unit
+        
+    member __.postSuggestion (suggestion:Suggestion.LintSuggestion) =
         if not suggestion.TypeChecks.IsEmpty then
             let successfulTypeCheck = 
                 suggestion.TypeChecks 
@@ -36,77 +25,6 @@ type TestRuleBase(analyser, ?analysers) =
                 suggestions.Add(suggestion)
         else
             suggestions.Add(suggestion)
-
-    let config =
-        match analysers with
-        | Some(analysers) -> 
-            { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
-              Analysers = analysers }
-        | None -> emptyConfig
-
-    member __.TimeAnalyser(iterations, ?overrideConfig) =
-        let (tree, text) = getPerformanceTestInput ()
-
-        let (array, skipArray) = AbstractSyntaxArray.astToArray tree
-
-        let config = match overrideConfig with Some(overrideConfig) -> overrideConfig | None -> config
-
-        let analyserInfo =
-            { Config = config; Suggest = ignore; Text = text }
-
-        let stopwatch = Stopwatch.StartNew()
-        let times = ResizeArray()
-
-        for _ in 0..iterations do
-            stopwatch.Restart()
-
-            analyser 
-                { Info = analyserInfo
-                  CheckFile = None
-                  SyntaxArray = array
-                  SkipArray = skipArray }
-
-            stopwatch.Stop()
-
-            times.Add stopwatch.ElapsedMilliseconds
-
-        let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
-
-        System.Console.WriteLine(sprintf "Average runtime of analyser: %d (milliseconds)."  result)
-
-        result
-
-    member __.Parse(input:string, ?overrideAnalysers, ?checkInput, ?fileName): unit = 
-        let config =
-            match overrideAnalysers with
-            | Some(overrideAnalysers) -> 
-                { IgnoreFiles = Some({ Files = []; Update = Add; Content = "" })
-                  Analysers = overrideAnalysers }
-            | None -> config
-
-        let analyserInfo = 
-            { Config = config
-              Suggest = postSuggestion
-              Text = input }
-
-        let parseResults =
-            match fileName with
-            | Some(fileName) -> parseSourceFile fileName input config (FSharpChecker.Create())
-            | None -> parseSource input config (FSharpChecker.Create())
-        
-        match parseResults with
-        | Success(parseInfo) ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
-            analyser 
-                { Info = analyserInfo
-                  CheckFile = match checkInput with Some(true) -> parseInfo.TypeCheckResults | _ -> None
-                  SyntaxArray = syntaxArray
-                  SkipArray = skipArray }
-        | Failed(ParseFileFailure.AbortedTypeCheck) -> 
-            failwith "Failed to parse input - aborted type check."
-        | Failed(ParseFileFailure.FailedToParseFile(errors)) -> 
-            let failures = errors |> Array.map string |> String.concat "\n"
-            failwith ("Failed to parse input, failed with:\n" + failures)
 
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions

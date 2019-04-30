@@ -15,3 +15,4 @@ The console application is a wrapper around the linter, with a required argument
 | `-f <project_file_path>` | Lints an entire project. | `dotnet fsharplint -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"` |
 | `-sf <source_file_path>` | Lints a single file. | `dotnet fsharplint -sf "C:\FSharpProjectDirectory\Uploader.fsx"` |
 | `-source <source_string>` | Lints a string. | `dotnet fsharplint -source "let x = fun _ -> ()"` |
+| `-convert <xml_config_path> <output_path>` | Converts an old XML config to new JSON config format. | `dotnet fsharplint -convert "FSharpLint.Settings" "fsharplint.json"` |

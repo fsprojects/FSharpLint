@@ -1,35 +1,89 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <RootNamespace>FSharpLint.Core.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FSharpLint.Core\FSharpLint.Core.fsproj" />
     <Compile Include="TestUtils.fs" />
     <!-- Framework -->
-    <Compile Include="Framework/TestConfiguration.fs" />
-    <Compile Include="Framework/TestAstInfo.fs" />
-    <Compile Include="Framework/TestHintParser.fs" />
-    <Compile Include="Framework/TestAst.fs" />
-    <Compile Include="Framework/TestFuzzyHintMatcher.fs" />
-    <Compile Include="Framework/TestAbstractSyntaxArray.fs" />
-    <Compile Include="Framework/TestAnalyser.fs" />
     <!-- Rules -->
     <Compile Include="Rules/TestRuleBase.fs" />
-    <Compile Include="Rules/TestNameConventionRules.fs" />
-    <Compile Include="Rules/TestBindingRules.fs" />
-    <Compile Include="Rules/TestNumberOfItemsRules.fs" />
-    <Compile Include="Rules/TestSourceLengthRules.fs" />
-    <Compile Include="Rules/TestNestedStatementsRules.fs" />
-    <Compile Include="Rules/TestTypographyRules.fs" />
-    <Compile Include="Rules/TestFunctionReimplementationRules.fs" />
-    <Compile Include="Rules/TestHintMatcher.fs" />
-    <Compile Include="Rules/TestRaiseWithTooManyArgumentsRules.fs" />
-    <Compile Include="Rules/TestRedundantNewKeyword.fs" />
-    <Compile Include="Rules/TestFormattingRules.fs" />
-    <Compile Include="Rules/TestConventionsRules.fs" />
+    <Compile Include="Rules\TestAstNodeRule.fs" />
+    <Compile Include="Rules\TestHintMatcherBase.fs" />
+    <Compile Include="Rules\TestIndentationRule.fs" />
+    <Compile Include="Rules\TestNoTabCharactersRule.fs" />
+    <Compile Include="Rules\TestLineRule.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
+    <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchOrClausesOnNewLine.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchClauseIndentation.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchExpressionIndentation.fs" />
+    <Compile Include="Rules\Formatting\PatternMatchFormatting\PatternMatchClausesOnNewLine.fs" />
+    <Compile Include="Rules\Formatting\Spacing\ClassMemberSpacing.fs" />
+    <Compile Include="Rules\Formatting\Spacing\ModuleDeclSpacing.fs" />
+    <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
+    <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
+    <Compile Include="Rules\Formatting\TypePrefixing.fs" />
+    <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
+    <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments.fs" />
+    <Compile Include="Rules\Conventions\NestedStatements.fs" />
+    <Compile Include="Rules\Conventions\FunctionReimplementation.fs" />
+    <Compile Include="Rules\Conventions\SourceLength.fs" />
+    <Compile Include="Rules\Conventions\Naming\NamingHelpers.fs" />
+    <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\TypeNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\RecordFieldNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\EnumCasesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\UnionCasesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ModuleNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\LiteralNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\NamespaceNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\MemberNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ParameterNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\MeasureTypeNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\PublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\NonPublicValuesNames.fs" />
+    <Compile Include="Rules\Typography\Indentation.fs" />
+    <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
+    <Compile Include="Rules\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\Typography\TrailingNewLineInFile.fs" />
+    <Compile Include="Rules\Typography\TrailingWhitespaceOnLine.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfItemsInTuple.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfFunctionParameters.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfMembers.fs" />
+    <Compile Include="Rules\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
+    <Compile Include="Rules\Binding\FavourIgnoreOverLetWild.fs" />
+    <Compile Include="Rules\Binding\UselessBinding.fs" />
+    <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
+    <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Hints\HintMatcher.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Framework\TestConfiguration.fs" />
+    <Compile Include="Framework\TestAstInfo.fs" />
+    <Compile Include="Framework\TestHintParser.fs" />
+    <Compile Include="Framework\TestAst.fs" />
+    <Compile Include="Framework\TestFuzzyHintMatcher.fs" />
+    <Compile Include="Framework\TestAbstractSyntaxArray.fs" />
+    <Compile Include="Framework\TestExpressionUtilities.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Core\FSharpLint.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="OldConfiguration.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <Import Project="..\..\.paket\Paket.Restore.targets" />

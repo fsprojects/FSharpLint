@@ -2,6 +2,8 @@
 
 module Tests =
 
+    open FSharpLint.Application
+    open FSharpLint.Framework
     open System
     open System.Diagnostics
     open System.IO
@@ -51,15 +53,15 @@ module Tests =
 
     let expectedErrors =
         set [ 
-          "`not (a = b)` might be able to be refactored into `a <> b`."
-          "`not (a <> b)` might be able to be refactored into `a = b`."
-          "`fun x -> x` might be able to be refactored into `id`."
-          "`not true` might be able to be refactored into `false`."
-          "`not false` might be able to be refactored into `true`."
-          "`List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
-          "`a <> true` might be able to be refactored into `not a`."
-          "`x = null` might be able to be refactored into `isNull x`."
-          "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
+          "FL0065: `not (a = b)` might be able to be refactored into `a <> b`."
+          "FL0065: `not (a <> b)` might be able to be refactored into `a = b`."
+          "FL0065: `fun x -> x` might be able to be refactored into `id`."
+          "FL0065: `not true` might be able to be refactored into `false`."
+          "FL0065: `not false` might be able to be refactored into `true`."
+          "FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
+          "FL0065: `a <> true` might be able to be refactored into `not a`."
+          "FL0065: `x = null` might be able to be refactored into `isNull x`."
+          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
@@ -71,11 +73,11 @@ module Tests =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
-            File.WriteAllText(projectPath </> "Settings.FSharpLint", "invalid config file contents")
+            File.WriteAllText(projectPath </> "fsharplint.json", "invalid config file contents")
 
             let output = dotnetFslint arguments
 
-            File.Delete(projectPath </> "Settings.FSharpLint")
+            File.Delete(projectPath </> "fsharplint.json")
 
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
@@ -104,3 +106,23 @@ module Tests =
             Assert.AreEqual(expectedErrors, errors, 
                 "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+            
+        [<Test>]
+        member __.FunctionalTestConfigConversion() =
+            let xmlFile = TestContext.CurrentContext.TestDirectory </> "OldConfiguration.xml"
+            let outputFile = TestContext.CurrentContext.TestDirectory </> "convertedConfig.json"
+            let arguments = sprintf "-convert %s %s" xmlFile outputFile
+
+            let output = dotnetFslint arguments
+            
+            let expectedOutput = sprintf "Successfully converted config at '%s', saved to '%s'" xmlFile outputFile
+
+            // Check dotnet tool output.
+            Assert.AreEqual(expectedOutput.Trim(), output.Trim())
+            
+            // Check converted config contents.
+            let convertedConfig =
+                File.ReadAllText outputFile
+                |>  ConfigurationManager.parseConfig
+                
+            Assert.AreEqual(Configuration.defaultConfiguration, convertedConfig)
