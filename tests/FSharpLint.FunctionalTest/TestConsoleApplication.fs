@@ -125,4 +125,7 @@ module Tests =
                 File.ReadAllText outputFile
                 |>  ConfigurationManager.parseConfig
                 
-            Assert.AreEqual(Configuration.defaultConfiguration, convertedConfig)
+            let expectedConfig =
+                { Configuration.defaultConfiguration with hints = Configuration.defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
+                
+            Assert.AreEqual(expectedConfig, convertedConfig)

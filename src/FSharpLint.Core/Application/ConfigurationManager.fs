@@ -91,7 +91,18 @@ let constructRuleWithConfig rule ruleConfig =
     if ruleConfig.enabled then
         ruleConfig.config |> Option.map (fun config -> rule config)
     else
-        None   
+        None
+        
+let tryOverride currentConfig overridingConfig overrideFunction =
+    match currentConfig with
+    | Some currentConfig ->
+        match overridingConfig with
+        | Some overridingConfig ->
+            overrideFunction currentConfig overridingConfig |> Some
+        | None ->
+            Some currentConfig
+    | None ->
+        overridingConfig
 
 type TupleFormattingConfig =
     { tupleCommaSpacing : EnabledConfig option
@@ -161,8 +172,8 @@ with
             unionDefinitionIndentation = overriding.unionDefinitionIndentation |> Option.orElse this.unionDefinitionIndentation
             moduleDeclSpacing = overriding.moduleDeclSpacing |> Option.orElse this.moduleDeclSpacing
             classMemberSpacing = overriding.classMemberSpacing |> Option.orElse this.classMemberSpacing
-            tupleFormatting = (this.tupleFormatting, overriding.tupleFormatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            patternMatchFormatting = (this.patternMatchFormatting, overriding.patternMatchFormatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            tupleFormatting = tryOverride this.tupleFormatting overriding.tupleFormatting (fun current overriding -> current.Override(overriding))
+            patternMatchFormatting = tryOverride this.patternMatchFormatting overriding.patternMatchFormatting (fun current overriding -> current.Override(overriding))
         }
 
 type RaiseWithTooManyArgsConfig =
@@ -368,11 +379,11 @@ with
             nestedStatements = overriding.nestedStatements |> Option.orElse this.nestedStatements
             reimplementsFunction = overriding.reimplementsFunction |> Option.orElse this.reimplementsFunction
             canBeReplacedWithComposition = overriding.canBeReplacedWithComposition |> Option.orElse this.canBeReplacedWithComposition
-            raiseWithTooManyArgs = (this.raiseWithTooManyArgs, overriding.raiseWithTooManyArgs) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            sourceLength = (this.sourceLength, overriding.sourceLength) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            naming = (this.naming, overriding.naming) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            numberOfItems = (this.numberOfItems, overriding.numberOfItems) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            binding = (this.binding, overriding.binding) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            raiseWithTooManyArgs = tryOverride this.raiseWithTooManyArgs overriding.raiseWithTooManyArgs (fun current overriding -> current.Override(overriding))
+            sourceLength = tryOverride this.sourceLength overriding.sourceLength (fun current overriding -> current.Override(overriding))
+            naming = tryOverride this.naming overriding.naming (fun current overriding -> current.Override(overriding))
+            numberOfItems = tryOverride this.numberOfItems overriding.numberOfItems (fun current overriding -> current.Override(overriding))
+            binding = tryOverride this.binding overriding.binding (fun current overriding -> current.Override(overriding))
         }
     
 type TypographyConfig =
@@ -403,7 +414,7 @@ with
             noTabCharacters = overriding.noTabCharacters |> Option.orElse this.noTabCharacters
         }
         
-let private getDefaultHintList hints = hints |> Option.defaultValue [||]
+let private getOrEmptyList hints = hints |> Option.defaultValue [||]
         
 type HintConfig = {
     add : string [] option
@@ -412,13 +423,13 @@ type HintConfig = {
     member this.Override(overriding:HintConfig) =
         let newIgnore =
             overriding.ignore
-            |> getDefaultHintList
-            |> Array.append (this.ignore |> getDefaultHintList)
+            |> getOrEmptyList
+            |> Array.append (this.ignore |> getOrEmptyList)
             |> Array.distinct
         let newAdd =
             overriding.add
-            |> getDefaultHintList
-            |> Array.append (this.add |> getDefaultHintList)
+            |> getOrEmptyList
+            |> Array.append (this.add |> getOrEmptyList)
             |> Array.filter (fun hint -> not (Array.contains hint newIgnore))
             |> Array.distinct
         {
@@ -435,11 +446,11 @@ type Configuration =
 with
     member this.Override(overriding:Configuration) =
         {
-            Configuration.ignoreFiles = this.ignoreFiles |> Option.defaultValue [||] |> Array.append (Option.defaultValue [||] overriding.ignoreFiles) |> Array.distinct |> Some
-            formatting = (this.formatting, overriding.formatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            conventions = (this.conventions, overriding.conventions) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            typography = (this.typography, overriding.typography) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            hints = (this.hints, overriding.hints) ||> Option.map2 (fun current overriding -> current.Override(overriding))
+            Configuration.ignoreFiles = tryOverride this.ignoreFiles overriding.ignoreFiles (fun current overriding -> current |> Array.append overriding |> Array.distinct)
+            formatting = tryOverride this.formatting overriding.formatting (fun current overriding -> current.Override(overriding))
+            conventions = tryOverride this.conventions overriding.conventions (fun current overriding -> current.Override(overriding))
+            typography = tryOverride this.typography overriding.typography (fun current overriding -> current.Override(overriding))
+            hints = tryOverride this.hints overriding.hints (fun current overriding -> current.Override(overriding))
         }
 
 let mergeConfig (baseConfig : Configuration) (overridingConfig : Configuration) =
@@ -483,7 +494,7 @@ let flattenConfig (config : Configuration) =
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints (getDefaultHintList config.add) }) |> Option.toArray
+            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
         |] |> Array.concat
         
     let astNodeRules = ResizeArray()

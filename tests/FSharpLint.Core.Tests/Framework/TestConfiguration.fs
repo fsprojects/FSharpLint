@@ -458,7 +458,15 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config override works correctly``() =
         let configToOverride = {
-            Configuration.formatting = None
+            Configuration.formatting =
+                Some { FormattingConfig.typePrefixing = Some { RuleConfig.enabled = true; config = None }
+                       typedItemSpacing = None
+                       unionDefinitionIndentation = None
+                       moduleDeclSpacing = None
+                       classMemberSpacing = None
+                       tupleFormatting = None
+                       patternMatchFormatting = None
+                }
             conventions = None
             typography =
                 Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = None }
@@ -488,7 +496,15 @@ type TestConfiguration() =
         }
         
         let expectedConfig = {
-            Configuration.formatting = None
+            Configuration.formatting =
+                Some { FormattingConfig.typePrefixing = Some { RuleConfig.enabled = true; config = None }
+                       typedItemSpacing = None
+                       unionDefinitionIndentation = None
+                       moduleDeclSpacing = None
+                       classMemberSpacing = None
+                       tupleFormatting = None
+                       patternMatchFormatting = None
+                }
             conventions = None
             typography =
                 Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
@@ -500,7 +516,7 @@ type TestConfiguration() =
                 }
             ignoreFiles = None
             hints = None
-        }           
+        }
         
         Assert.AreEqual(expectedConfig, overrideConfiguration configToOverride overridingConfig)
 
@@ -512,7 +528,10 @@ type TestConfiguration() =
             
         let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
         
-        Assert.AreEqual(defaultConfiguration, convertedJsonConfig)
+        let expectedConfig =
+            { defaultConfiguration with hints = defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
+        
+        Assert.AreEqual(expectedConfig, convertedJsonConfig)
         
     [<Test>]
     member this.``Should be able to ignore hints``() =
@@ -544,6 +563,8 @@ type TestConfiguration() =
             hints =
                 { HintConfig.add = Some [|"x = false ===> (not x)"|]
                   ignore = Some [|"x = true ===> x"|] } |> Some
-        }           
+        }
         
-        Assert.AreEqual(expectedConfig, overrideConfiguration configToOverride overridingConfig)
+        let resultConfig = overrideConfiguration configToOverride overridingConfig
+        
+        Assert.AreEqual(expectedConfig, resultConfig)
