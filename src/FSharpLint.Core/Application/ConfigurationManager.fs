@@ -402,21 +402,44 @@ with
             trailingNewLineInFile = overriding.trailingNewLineInFile |> Option.orElse this.trailingNewLineInFile
             noTabCharacters = overriding.noTabCharacters |> Option.orElse this.noTabCharacters
         }
-
+        
+let private getDefaultHintList hints = hints |> Option.defaultValue [||]
+        
+type HintConfig = {
+    add : string [] option
+    ignore : string [] option
+} with
+    member this.Override(overriding:HintConfig) =
+        let newIgnore =
+            overriding.ignore
+            |> getDefaultHintList
+            |> Array.append (this.ignore |> getDefaultHintList)
+            |> Array.distinct
+        let newAdd =
+            overriding.add
+            |> getDefaultHintList
+            |> Array.append (this.add |> getDefaultHintList)
+            |> Array.filter (fun hint -> not (Array.contains hint newIgnore))
+            |> Array.distinct
+        {
+            HintConfig.add = Some newAdd
+            ignore = Some newIgnore
+        }
+        
 type Configuration = 
-    { ignoreFiles : string []
+    { ignoreFiles : string [] option
       formatting : FormattingConfig option
       conventions : ConventionsConfig option
       typography : TypographyConfig option
-      hints : string [] }
+      hints : HintConfig option }
 with
     member this.Override(overriding:Configuration) =
         {
-            Configuration.ignoreFiles = this.ignoreFiles |> Array.append overriding.ignoreFiles |> Array.distinct
+            Configuration.ignoreFiles = this.ignoreFiles |> Option.defaultValue [||] |> Array.append (Option.defaultValue [||] overriding.ignoreFiles) |> Array.distinct |> Some
             formatting = (this.formatting, overriding.formatting) ||> Option.map2 (fun current overriding -> current.Override(overriding))
             conventions = (this.conventions, overriding.conventions) ||> Option.map2 (fun current overriding -> current.Override(overriding))
             typography = (this.typography, overriding.typography) ||> Option.map2 (fun current overriding -> current.Override(overriding))
-            hints = this.hints |> Array.append overriding.hints |> Array.distinct
+            hints = (this.hints, overriding.hints) ||> Option.map2 (fun current overriding -> current.Override(overriding))
         }
 
 let mergeConfig (baseConfig : Configuration) (overridingConfig : Configuration) =
@@ -460,7 +483,7 @@ let flattenConfig (config : Configuration) =
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints config.hints } |> Array.singleton
+            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints (getDefaultHintList config.add) }) |> Option.toArray
         |] |> Array.concat
         
     let astNodeRules = ResizeArray()

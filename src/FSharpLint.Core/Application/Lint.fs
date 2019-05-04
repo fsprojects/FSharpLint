@@ -510,8 +510,9 @@ module Lint =
 
             let isIgnoredFile filePath =
                 match config.ignoreFiles with
-                | [||] -> false
-                | ignoreFiles ->
+                | None
+                | Some [||] -> false
+                | Some ignoreFiles ->
                     let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
                     ConfigurationManager.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
 
