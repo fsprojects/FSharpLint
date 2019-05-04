@@ -9,6 +9,7 @@ let config =
       underscores = Some NamingUnderscores.AllowPrefix
       prefix = None
       suffix = None }
+
 [<TestFixture>]
 type TestConventionsMemberNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MemberNames.rule config)
@@ -200,4 +201,17 @@ with
 """
 
         this.Parse source
-        this.AssertNoWarnings()       
+        this.AssertNoWarnings()
+        
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/327
+    [<Test>]
+    member this.``Memebers implementing interface should be ignored`` () =
+        let source = """
+type Foo() =
+    interface IDisposable with 
+        member x.dispose() = ()
+    member x.Bar() = ()
+"""
+
+        this.Parse source
+        this.AssertNoWarnings()
