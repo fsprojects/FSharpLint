@@ -16,10 +16,17 @@ let private getMemberIdents _ = function
         | Some ident -> ident |> Array.singleton
     | _ -> Array.empty
 
+let private isImplementingInterface parents =
+    parents
+    |> List.exists (function
+        | AstNode.MemberDefinition (SynMemberDefn.Interface _) -> true
+        | _ -> false)
+
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-        if not (isLiteral attributes) then
+        let parents = args.getParents 3
+        if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
             | Member | Property ->
                 getPatternIdents false getMemberIdents true pattern
