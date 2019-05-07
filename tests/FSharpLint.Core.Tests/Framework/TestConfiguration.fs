@@ -22,7 +22,7 @@ let configWithHints hints =
         Configuration.formatting = None
         conventions = None
         typography = None
-        ignoreFiles = Array.empty
+        ignoreFiles = None
         hints = hints
     }
  
@@ -116,18 +116,13 @@ type TestConfiguration() =
             Configuration.formatting = None
             conventions = None
             typography = None
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
         
         let resultJson = serializeConfig config
         
-        let expectedJson =
-            """{
-    "ignoreFiles": [],
-    "hints": []
-}
-"""
+        let expectedJson = "{}"
 
         Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
         
@@ -137,17 +132,15 @@ type TestConfiguration() =
             Configuration.formatting = None
             conventions = None
             typography = None
-            ignoreFiles = [| "assemblyinfo.*" |]
-            hints = Array.empty
+            ignoreFiles = Some [| "assemblyinfo.*" |]
+            hints = None
         }
         
         let resultJson = serializeConfig config
         
         let expectedJson =
             """{
-    "ignoreFiles": ["assemblyinfo.*"],
-    "hints": []
-}
+    "ignoreFiles": ["assemblyinfo.*"] }
 """
 
         Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
@@ -165,15 +158,14 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
         
         let resultJson = serializeConfig config
         
         let expectedJson =
             """{
-    "ignoreFiles": [],
     "typography": {
         "indentation": {
             "enabled": true,
@@ -181,8 +173,7 @@ type TestConfiguration() =
                 "numberOfIndentationSpaces": 4
             }
         }
-    },
-    "hints": []
+    }
 }
 """
 
@@ -194,21 +185,23 @@ type TestConfiguration() =
             Configuration.formatting = None
             conventions = None
             typography = None
-            ignoreFiles = Array.empty
+            ignoreFiles = None
             hints =
-                [| "not (a =  b) ===> a <> b"
-                   "not (a <> b) ===> a = b" |]
+                { HintConfig.add = Some [| "not (a =  b) ===> a <> b"; "not (a <> b) ===> a = b" |]
+                  ignore = Some [| "x = true ===> x" |] } |> Some
         }
         
         let resultJson = serializeConfig config
         
         let expectedJson =
             """{
-    "ignoreFiles": [],
-    "hints": [
-        "not (a =  b) ===> a <> b",
-        "not (a <> b) ===> a = b"
-    ]
+    "hints": {
+        "add": [
+            "not (a =  b) ===> a <> b",
+            "not (a <> b) ===> a = b"
+        ],
+        "ignore": ["x = true ===> x"]
+    }
 }
 """
 
@@ -375,8 +368,8 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
 
         let loadedConfigs = 
@@ -403,8 +396,8 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
 
         let loadedConfigs = 
@@ -431,8 +424,8 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
 
         let loadedConfig = {
@@ -446,8 +439,8 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
 
         let loadedConfigs = 
@@ -465,7 +458,15 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config override works correctly``() =
         let configToOverride = {
-            Configuration.formatting = None
+            Configuration.formatting =
+                Some { FormattingConfig.typePrefixing = Some { RuleConfig.enabled = true; config = None }
+                       typedItemSpacing = None
+                       unionDefinitionIndentation = None
+                       moduleDeclSpacing = None
+                       classMemberSpacing = None
+                       tupleFormatting = None
+                       patternMatchFormatting = None
+                }
             conventions = None
             typography =
                 Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = None }
@@ -475,8 +476,8 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
             
         let overridingConfig = {
@@ -490,12 +491,20 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
+            ignoreFiles = None
+            hints = None
         }
         
         let expectedConfig = {
-            Configuration.formatting = None
+            Configuration.formatting =
+                Some { FormattingConfig.typePrefixing = Some { RuleConfig.enabled = true; config = None }
+                       typedItemSpacing = None
+                       unionDefinitionIndentation = None
+                       moduleDeclSpacing = None
+                       classMemberSpacing = None
+                       tupleFormatting = None
+                       patternMatchFormatting = None
+                }
             conventions = None
             typography =
                 Some { TypographyConfig.indentation = Some { RuleConfig.enabled = false; config = None }
@@ -505,9 +514,9 @@ type TestConfiguration() =
                        trailingNewLineInFile = None
                        noTabCharacters = None
                 }
-            ignoreFiles = Array.empty
-            hints = Array.empty
-        }           
+            ignoreFiles = None
+            hints = None
+        }
         
         Assert.AreEqual(expectedConfig, overrideConfiguration configToOverride overridingConfig)
 
@@ -519,4 +528,43 @@ type TestConfiguration() =
             
         let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
         
-        Assert.AreEqual(defaultConfiguration, convertedJsonConfig)
+        let expectedConfig =
+            { defaultConfiguration with hints = defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
+        
+        Assert.AreEqual(expectedConfig, convertedJsonConfig)
+        
+    [<Test>]
+    member this.``Should be able to ignore hints``() =
+        let configToOverride = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = None
+            hints =
+                { HintConfig.add = Some [|"x = true ===> x"|]
+                  ignore = Some [||] } |> Some
+        }
+            
+        let overridingConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = None
+            hints =
+                { HintConfig.add = Some [|"x = false ===> (not x)"|]
+                  ignore = Some [|"x = true ===> x"|] } |> Some
+        }
+        
+        let expectedConfig = {
+            Configuration.formatting = None
+            conventions = None
+            typography = None
+            ignoreFiles = None
+            hints =
+                { HintConfig.add = Some [|"x = false ===> (not x)"|]
+                  ignore = Some [|"x = true ===> x"|] } |> Some
+        }
+        
+        let resultConfig = overrideConfiguration configToOverride overridingConfig
+        
+        Assert.AreEqual(expectedConfig, resultConfig)

@@ -188,16 +188,21 @@ This is incomplete - currently missing a few of the more detailed rules e.g. `ui
 
 ### Writing Your Own Hints
 
-Currently to provide your own hints you have to overwrite the default hints with your own using the `Hints `property inside of the `Hints` rule.
+You can add new hints to your config in the `hints` object. This config has two fields, `add` and `ignore`. `add` is used to add new hints, while `ignore` can be used to ignore hints
+added in previous configs (e.g. the default config).
 
-For example to make the lint tool run with just the two hints: `not (a =  b) ===> a <> b` and `not (a <> b) ===> a =  b`, you could use the following config file to override existing hints:
+For example to make the lint tool run with just the two hints: `not (a =  b) ===> a <> b` and `not (a <> b) ===> a =  b`, and also ignore the default hint `x = true ===> x`,
+you could use the following config file.
 
     [lang=json]
     {
-      "hints": [
-        "not (a =  b) ===> a <> b",
-        "not (a <> b) ===> a =  b"
-      ]
+      "hints": {
+        "add": [
+          "not (a =  b) ===> a <> b",
+          "not (a <> b) ===> a =  b"
+        ],
+        "ignore": [ "x = true ===> x" ]
+      }
     }
 
 ### Flaws

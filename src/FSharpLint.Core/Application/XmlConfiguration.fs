@@ -293,14 +293,13 @@ let convertHints (config:Configuration.XmlConfiguration) =
 
     match Map.tryFind "Hints" analyser.Settings with
     | Some(Configuration.Hints(hints)) ->
-        hints.Hints |> Array.ofList
+        Some { HintConfig.add = hints.Hints |> Array.ofList |> Some; ignore = None }
     | _ ->
-        Array.empty
+        None
         
 let convertIgnoreFiles (config:Configuration.XmlConfiguration) =
     config.IgnoreFiles
     |> Option.map (fun files -> files.Content |> Array.ofList)
-    |> Option.defaultValue [||]
     
 let convertFormatting (config:Configuration.XmlConfiguration) =
     let formattingAnalyser = "Formatting"
