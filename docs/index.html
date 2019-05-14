@@ -27,7 +27,7 @@
       <div class="row">
         <div class="span9" id="main">
           <h1>FSharpLint</h1>
-<p>FSharpLint is a lint tool for F#. It can be ran as a MSBuild task, or as a console application.</p>
+<p>FSharpLint is a lint tool for F#. It can be run as a dotnet tool, and also integrates with Ionide for VS Code.</p>
 <blockquote>
 <p>The term [lint] is now applied generically to tools that flag suspicious usage in software written in any computer language - <a href="http://en.wikipedia.org/wiki/Lint_(software)"><em>Wikipedia</em></a></p>
 </blockquote>
@@ -47,7 +47,7 @@
    <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="f">print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="t">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 4)" onmouseover="showTip(event, 'fs3', 4)" class="t">unit</span>
 
 [&lt;<span onmouseout="hideTip(event, 'fs4', 5)" onmouseover="showTip(event, 'fs4', 5)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">argv</span> <span class="o">=</span> 
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">argv</span> <span class="o">=</span>
     <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs9', 10)" onmouseover="showTip(event, 'fs9', 10)" class="f">fold</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs7', 11)" onmouseover="showTip(event, 'fs7', 11)" class="i">x</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">y</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs7', 13)" onmouseover="showTip(event, 'fs7', 13)" class="i">x</span> <span class="o">+</span> <span onmouseout="hideTip(event, 'fs10', 14)" onmouseover="showTip(event, 'fs10', 14)" class="i">y</span>) <span class="n">0</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
     <span onmouseout="hideTip(event, 'fs11', 15)" onmouseover="showTip(event, 'fs11', 15)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 16)" onmouseover="showTip(event, 'fs7', 16)" class="i">x</span>
     <span class="n">0</span>
@@ -69,18 +69,22 @@
 <span class="l">12: </span>
 <span class="l">13: </span>
 <span class="l">14: </span>
+<span class="l">15: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip"><code lang="error">Consider changing `ExampleInterface` to be prefixed with `I`.
+<td class="snippet"><pre class="fssnip"><code lang="error">
+
+FL0036: Consider changing `ExampleInterface` to be prefixed with `I`.
+Consider changing `ExampleInterface` to be prefixed with `I`.
 Error in file Program.fs on line 1 starting at column 5
 type ExampleInterface =
      ^
 
-Consider changing `print` to PascalCase.
+FL0045: Consider changing `print` to PascalCase.
 Error in file Program.fs on line 2 starting at column 19
    abstract member print : unit -&gt; unit
                    ^
 
-If `(+)` has no mutable arguments partially applied the lambda can be removed.
+FL0034: If `( + )` has no mutable arguments partially applied then the lambda can be removed.
 Error in file Program.fs on line 6 starting at column 23
     let x = List.fold (fun x y -&gt; x + y) 0 [1;2;3]
                        ^
@@ -99,7 +103,7 @@ Error in file Program.fs on line 6 starting at column 23
    <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs13', 18)" onmouseover="showTip(event, 'fs13', 18)" class="f">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 19)" onmouseover="showTip(event, 'fs3', 19)" class="t">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 20)" onmouseover="showTip(event, 'fs3', 20)" class="t">unit</span>
 
 [&lt;<span onmouseout="hideTip(event, 'fs4', 21)" onmouseover="showTip(event, 'fs4', 21)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 22)" onmouseover="showTip(event, 'fs5', 22)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 23)" onmouseover="showTip(event, 'fs6', 23)" class="i">argv</span> <span class="o">=</span> 
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 22)" onmouseover="showTip(event, 'fs5', 22)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 23)" onmouseover="showTip(event, 'fs6', 23)" class="i">argv</span> <span class="o">=</span>
     <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 24)" onmouseover="showTip(event, 'fs7', 24)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 25)" onmouseover="showTip(event, 'fs8', 25)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs9', 26)" onmouseover="showTip(event, 'fs9', 26)" class="f">fold</span> (<span class="o">+</span>) <span class="n">0</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
     <span onmouseout="hideTip(event, 'fs11', 27)" onmouseover="showTip(event, 'fs11', 27)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 28)" onmouseover="showTip(event, 'fs7', 28)" class="i">x</span>
     <span class="n">0</span>
@@ -112,7 +116,7 @@ Error in file Program.fs on line 6 starting at column 23
 <span class="l">3: </span>
 <span class="l">4: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip"><code lang="error">`List.fold (+) 0 x` might be able to be refactored to `List.sum x`.
+<td class="snippet"><pre class="fssnip"><code lang="error">FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`.
 Error in file Program.fs on line 6 starting at column 12
 let x = List.fold (+) 0 [1;2;3]
         ^
@@ -131,7 +135,7 @@ let x = List.fold (+) 0 [1;2;3]
    <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 30)" onmouseover="showTip(event, 'fs3', 30)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="i">unit</span>
 
 [&lt;<span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 33)" onmouseover="showTip(event, 'fs5', 33)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 34)" onmouseover="showTip(event, 'fs6', 34)" class="i">argv</span> <span class="o">=</span> 
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 33)" onmouseover="showTip(event, 'fs5', 33)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 34)" onmouseover="showTip(event, 'fs6', 34)" class="i">argv</span> <span class="o">=</span>
     <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 35)" onmouseover="showTip(event, 'fs7', 35)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 36)" onmouseover="showTip(event, 'fs8', 36)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs14', 37)" onmouseover="showTip(event, 'fs14', 37)" class="f">sum</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
     <span onmouseout="hideTip(event, 'fs11', 38)" onmouseover="showTip(event, 'fs11', 38)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 39)" onmouseover="showTip(event, 'fs7', 39)" class="i">x</span>
     <span class="n">0</span>
@@ -150,99 +154,86 @@ let x = List.fold (+) 0 [1;2;3]
 <li><a href="https://www.nuget.org/packages/FSharpLint.MSBuild">Deprecated MSBuild Task</a></li>
 <li><a href="https://www.nuget.org/packages/FSharpLint.Fake">Deprecated Fake Task</a></li>
 </ul>
-<h4>Analysers</h4>
+<h4>Rules</h4>
 <ul>
-<li><a href="Hints.html">Hints</a></li>
-<li><a href="NameConventions.html">NameConventions</a></li>
-<li><a href="SourceLength.html">SourceLength</a></li>
 <li><a href="Typography.html">Typography</a></li>
-<li><a href="NestedStatements.html">NestedStatements</a></li>
-<li><a href="NumberOfItems.html">NumberOfItems</a></li>
-<li><a href="FunctionReimplementation.html">FunctionReimplementation</a></li>
-<li><a href="Binding.html">Binding</a></li>
-<li><a href="RaiseWithTooManyArguments.html">RaiseWithTooManyArguments</a></li>
 </ul>
-<p>Rules are grouped into sets of rules called analysers, the reason for this is that it allows for easy configuration of multiple related rules. For example turning off all naming rules can be done by turning off just the analyser in the configuration.</p>
+<p>Rules are grouped based on what they address:</p>
+<ul>
+<li><a href="Formatting.html">Formatting</a> - code formatting (e.g. requiring tuple parentheses, spacing between class members, consistent pattern match expression indentation)</li>
+<li><a href="Conventions.html">Conventions</a> - code conventions (e.g. naming rules, function can be replaced with composition, max lines in function)</li>
+<li><a href="Typography.html">Typography</a> - (e.g. indentation, no tab characters, max lines in file)</li>
+</ul>
 <h4>Configuration Files</h4>
-<p>Configuration of the tool is done using xml with a purposely similar structure to <a href="http://stylecop.codeplex.com/">StyleCop</a>. Configuration files must be named: <code>Settings.FSharpLint</code>. A single xml file containing the default configuration for all rules is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Framework/DefaultConfiguration.FSharpLint">included inside of the software</a>.</p>
+<p>Configuration of the tool is done using JSON. Configuration files must be named: <code>fsharplint.json</code>. A single JSON file containing the default configuration for all rules is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Framework/DefaultConfiguration.json">included inside of the software</a>.</p>
 <p>The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was <code>C:\Files\SomeProjectBeingLinted</code>, then <code>C:\</code> would first be checked for a config file - if a config file is found then it would override the default config, then <code>C:\Files</code> would be checked - if a config file was found and a config file was also previously found in <code>C:\</code> then the config in <code>C:\Files</code> would override the one in <code>C:\</code> and so on.</p>
-<p>The configuration rules are overridden by redefining any properties of an analyser/rule that you want to override, for example if you wanted to turn off the function reimplementation analyser which has the default configuration of:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="k">&lt;</span><span class="i">FunctionReimplementation</span><span class="k">&gt;</span>
-  <span class="k">&lt;</span><span class="i">Enabled</span><span class="k">&gt;</span>True<span class="k">&lt;/</span><span class="i">Enabled</span><span class="k">&gt;</span>
-<span class="k">&lt;/</span><span class="i">FunctionReimplementation</span><span class="k">&gt;</span>
-</code></pre></td></tr></table>
-<p>To override to turn off you'd set enabled to false in your own configuration file as follows:</p>
+<p>The configuration rules are overridden by redefining any properties of an rule that you want to override, for example if you wanted to turn on the type prefixing rule which has the default configuration of:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
-<span class="l">8: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="prep">&lt;?</span>xml version=<span class="s">"1.0"</span> encoding=<span class="s">"utf-8"</span><span class="prep">?&gt;</span>
-<span class="k">&lt;</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
-  <span class="k">&lt;</span><span class="i">Analysers</span><span class="k">&gt;</span>
-    <span class="k">&lt;</span><span class="i">FunctionReimplementation</span><span class="k">&gt;</span>
-      <span class="k">&lt;</span><span class="i">Enabled</span><span class="k">&gt;</span>False<span class="k">&lt;/</span><span class="i">Enabled</span><span class="k">&gt;</span>
-    <span class="k">&lt;/</span><span class="i">FunctionReimplementation</span><span class="k">&gt;</span>
-  <span class="k">&lt;/</span><span class="i">Analysers</span><span class="k">&gt;</span>
-<span class="k">&lt;/</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
+<td class="snippet"><pre class="fssnip"><code lang="json">{
+  "formatting": {
+      "typePrefixing": { "enabled": false }
+  }
+}
 </code></pre></td></tr></table>
-<h4>Disabling rules and analysers within code</h4>
+<p>To override to turn off you'd set enabled to true in your own configuration file as follows:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip"><code lang="json">{
+  "formatting": {
+      "typePrefixing": { "enabled": true }
+  }
+}
+</code></pre></td></tr></table>
+<p>Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">dotnet</span> <span class="i">fsharplint</span> <span class="o">-</span><span class="i">convert</span> <span class="o">&lt;</span><span class="i">path</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="i">xml</span><span class="o">&gt;</span> (<span class="i">output</span><span class="o">-</span><span class="i">path</span><span class="o">&gt;</span>
+</code></pre></td>
+</tr>
+</table>
+<h4>Disabling rules within code</h4>
 <p>To disable a rule for a single section of code the <a href="http://msdn.microsoft.com/en-us/library/system.diagnostics.codeanalysis.suppressmessageattribute(v=vs.110).aspx">SuppressMessageAttribute</a> can be used. The attribute will not be included into the IL (as long as you don't have the <code>CODE_ANALYSIS</code> preprocessing symbol set).</p>
 <p>The attribute can be applied to let bindings, modules, types, and exceptions. Any lint warnings generated on or inside of what the attribute is applied to will be suppressed.</p>
 <h5>Category and CheckId</h5>
 <p>Only two properties in the attribute need to be set to suppress a rule, these are: <code>Category</code> and <code>CheckId</code>. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.</p>
-<p>Category is the name of the analyser containing the rule to be suppressed e.g. <code>NameConventions</code>.</p>
-<p>CheckId is the name of the rule to be suppressed, or <code>*</code> to suppress all rules in the analyser e.g. <code>InterfaceNamesMustBeginWithI</code>.</p>
+<p>Category is not used by FSharpLint, and can be set to anything.</p>
+<p>CheckId is the name of the rule to be suppressed, e.g. <code>InterfaceNamesMustBeginWithI</code>.</p>
 <h5>Example</h5>
 <p>The following code breaks the rule <code>NameConventions.InterfaceNamesMustBeginWithI</code>:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs15', 40)" onmouseover="showTip(event, 'fs15', 40)" class="t">Printable</span> <span class="o">=</span>
-    <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs16', 41)" onmouseover="showTip(event, 'fs16', 41)" class="f">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 42)" onmouseover="showTip(event, 'fs3', 42)" class="t">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 43)" onmouseover="showTip(event, 'fs3', 43)" class="t">unit</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">Printable</span> <span class="o">=</span>
+    <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 40)" onmouseover="showTip(event, 'fs3', 40)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 41)" onmouseover="showTip(event, 'fs3', 41)" class="i">unit</span>
 </code></pre></td>
 </tr>
 </table>
 <p>It will result in the warning: <code>Consider changing `Printable` to be prefixed with `I`.</code></p>
-<p>We can disable this rule with: <code>[&lt;System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNamesMustBeginWithI")&gt;]</code></p>
+<p>We can disable this rule with: <code>[&lt;System.Diagnostics.CodeAnalysis.SuppressMessage("*", "InterfaceNamesMustBeginWithI")&gt;]</code></p>
 <p>The following code has the <code>SuppressMessage</code> attribute applied to it, this code will generate no warning:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp">[&lt;<span class="i">SuppressMessage</span>(<span class="s">&quot;NameConventions&quot;</span>, <span class="s">&quot;InterfaceNamesMustBeginWithI&quot;</span>)&gt;]
-<span class="k">type</span> <span onmouseout="hideTip(event, 'fs15', 44)" onmouseover="showTip(event, 'fs15', 44)" class="i">Printable</span> <span class="o">=</span>
-    <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs16', 45)" onmouseover="showTip(event, 'fs16', 45)" class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 46)" onmouseover="showTip(event, 'fs3', 46)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 47)" onmouseover="showTip(event, 'fs3', 47)" class="i">unit</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp">[&lt;<span class="i">SuppressMessage</span>(<span class="s">&quot;*&quot;</span>, <span class="s">&quot;InterfaceNamesMustBeginWithI&quot;</span>)&gt;]
+<span class="k">type</span> <span class="i">Printable</span> <span class="o">=</span>
+    <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 42)" onmouseover="showTip(event, 'fs3', 42)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 43)" onmouseover="showTip(event, 'fs3', 43)" class="i">unit</span>
 </code></pre></td>
 </tr>
 </table>
 <h4>Ignoring Files</h4>
 <p>In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="o">&lt;</span><span class="i">IgnoreFiles</span> <span class="i">Update</span><span class="o">=</span><span class="s">&quot;Add&quot;</span><span class="o">&gt;</span>
-	<span class="o">&lt;!</span>[<span class="i">CDATA</span>[
-	  <span class="i">assemblyinfo</span><span class="o">.</span><span class="o">*</span>
-	]]<span class="o">&gt;</span>
-<span class="o">&lt;/</span><span class="i">IgnoreFiles</span><span class="o">&gt;</span>
-</code></pre></td>
-</tr>
-</table>
+<p>{ "ignoreFiles": ["assemblyinfo.*"] }</p>
 <ul>
-<li>The <code>Update</code> attribute can be set to <code>Add</code> or <code>Overwrite</code> (if the attribute does not exist it will default to <code>Overwrite</code>). <code>Add</code> will add the paths to existing paths, <code>Overwrite</code> will only use the paths you have specified.</li>
-<li>The paths must be separated by new lines.</li>
 <li>Directories in the path must be separated using <code>/</code></li>
 <li>If the path ends with a <code>/</code> then everything inside of a matching directory shall be excluded.</li>
 <li>If the path does not end with a <code>/</code> then all matching files are excluded.</li>
@@ -266,8 +257,6 @@ to lint a project/source file/source string.</p>
 <div class="tip" id="fs12">type IExampleInterface =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Print : unit -&gt; unit<br />&#160;&#160;end<br /><br />Full name: index.IExampleInterface</div>
 <div class="tip" id="fs13">abstract member IExampleInterface.Print : unit -&gt; unit<br /><br />Full name: index.IExampleInterface.Print</div>
 <div class="tip" id="fs14">val sum : list:&#39;T list -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Microsoft.FSharp.Collections.List.sum</div>
-<div class="tip" id="fs15">type Printable =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Print : unit -&gt; unit<br />&#160;&#160;end<br /><br />Full name: index.Printable</div>
-<div class="tip" id="fs16">abstract member Printable.Print : unit -&gt; unit<br /><br />Full name: index.Printable.Print</div>
 
         </div>
         <div class="span3">

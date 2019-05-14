@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>NestedStatements
+    <title>Conventions
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -26,7 +26,37 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1>NestedStatements</h1>
+          <h1>Conventions</h1>
+<p>Set of rules that check F# coding conventions.</p>
+<h2>Sub-groups</h2>
+<ul>
+<li><a href="NameConventions.html">Name Conventions</a></li>
+<li><a href="Binding.html">Binding</a></li>
+<li><a href="FunctionReimplementation.html">Function Reimplementation</a></li>
+<li><a href="NumberOfItems.html">Number of Items</a></li>
+<li><a href="SourceLength.html">Source Length</a></li>
+</ul>
+<h3>Rules</h3>
+<h4>RecursiveAsyncFunction - FS0013</h4>
+<h5>Cause</h5>
+<p>Recursive async function ending in <code>do!</code> instead of <code>return!</code> is unsafe.</p>
+<h5>Rationale</h5>
+<p>If you end your recursive function with <code>do!</code> instead of <code>return!</code>, the compiler
+cannot perform tail-call optimization.</p>
+<h5>How To Fix</h5>
+<p>Use <code>return!</code> instead of <code>do!</code></p>
+<h5>Rule Settings</h5>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
+<h4>RedundantNewKeyword - FS0014</h4>
+<h5>Cause</h5>
+<p>Using <code>new</code> to instantiate a type which does not implement <code>IDisposable</code>.</p>
+<h5>Rationale</h5>
+<p><code>new</code> is redundant for insantiating types which do not implement <code>IDisposable</code>.</p>
+<h5>How To Fix</h5>
+<p>Remove <code>new</code> keyword.</p>
+<h5>Rule Settings</h5>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>NestedStatements - FS0015</h4>
 <p>Single rule that checks code is not more deeply nested than a configurable depth.</p>
 <h5>Cause</h5>
 <p>A statement is nested deeper than a configurable depth, for example if <code>MaxItems</code> was set to 8 (the default) then the following code would cause an error:</p>
@@ -81,10 +111,10 @@
 </tr>
 </table>
 <h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Depth</code> - An integer property that specifies the max depth of a statement. (Default 8)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>depth</code> - An integer property that specifies the max depth of a statement. (Default 8)</p>
 
-          <div class="tip" id="fs1">val dog : unit<br /><br />Full name: NestedStatements.dog</div>
+          <div class="tip" id="fs1">val dog : unit<br /><br />Full name: Conventions.dog</div>
 
         </div>
         <div class="span3">

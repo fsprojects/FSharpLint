@@ -28,10 +28,8 @@
         <div class="span9" id="main">
           <h1>FunctionReimplementation</h1>
 <p>Set of rules that highlight lambda functions that can removed through eta reduction.</p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
 <h3>Rules</h3>
-<h4>ReimplementsFunction</h4>
+<h4>ReimplementsFunction - FS0034</h4>
 <h5>Cause</h5>
 <p>A lambda function does nothing other than call an existing function, two examples below:</p>
 <p><code>fun x y -&gt; x + y</code>
@@ -43,8 +41,8 @@
 <p><code>fun x y -&gt; x + y</code> is the same as <code>(+)</code>
 <code>fun x y -&gt; foo x y</code> is the same as <code>foo</code></p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>CanBeReplacedWithComposition</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>CanBeReplacedWithComposition - FS0035</h4>
 <h5>Cause</h5>
 <p>A lambda function applies a single argument to a chain of function calls, two examples below:</p>
 <p><code>fun x -&gt; not(isValid(x))</code>
@@ -55,7 +53,7 @@
 <p>Replace the lambda with function composition:</p>
 <p><code>fun x -&gt; not(isValid(x))</code> and <code>fun x -&gt; x |&gt; isValid |&gt; not</code> are the same as <code>isValid &gt;&gt; not</code></p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
 
           
         </div>
