@@ -1,3 +1,7 @@
+##### 0.11.1 - May 14 2019
+
+* Fix issue in loading default configuration
+
 ##### 0.11.0 - May 14 2019
 
 * Add ability to disable previously defined hints

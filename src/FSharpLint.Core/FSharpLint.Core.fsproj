@@ -109,7 +109,9 @@
     <Compile Include="Application\XmlConfiguration.fs" />
     <Compile Include="Application/Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
-    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json" />
+    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
