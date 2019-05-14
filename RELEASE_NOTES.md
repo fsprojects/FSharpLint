@@ -1,3 +1,10 @@
+##### 0.11.0 - May 14 2019
+
+* Add ability to disable previously defined hints
+* Ignore members implementing interface when checking member naming
+* Change config from XML to JSON
+* Refactor and redesign linter internals
+
 ##### 0.10.8 - April 1 2019
 
 * Fixed bug: https://github.com/fsprojects/FSharpLint/issues/323, by jgardella
