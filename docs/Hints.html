@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Hints
+    <title>Hints - FS0065
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -26,7 +26,7 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1>Hints</h1>
+          <h1>Hints - FS0065</h1>
 <h3>Introduction</h3>
 <p>The Hints analyser is inspired by <a href="https://github.com/ndmitchell/hlint">HLint</a>. The hints let users easily write their own rules which are matched against linted code and when matched produce a suggestion that the user provides as part of the hint.</p>
 <p>Every hint is formed of two parts: the match and the suggestion. Both the match and the suggestion are parsed the same way into ASTs, but they have two different purposes; the match AST is analysed against the code being linted looking for any expressions in the code that match the AST, and if there is a match then the suggestion AST is used to display a suggestion on how the code can be refactored.</p>
@@ -288,37 +288,29 @@ match = expression;
 hint = match, spaces, "===&gt;", spaces, suggestion;
 </code></pre></td></tr></table>
 <h3>Writing Your Own Hints</h3>
-<p>Currently to provide your own hints you have to overwrite the default hints with your own using the <code>Hints</code>property inside of the <code>Hints</code> rule.</p>
-<p>For example to make the lint tool run with just the two hints: <code>not (a =  b) ===&gt; a &lt;&gt; b</code> and <code>not (a &lt;&gt; b) ===&gt; a =  b</code>, you could use the following config file to override existing hints:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
-<span class="l"> 2: </span>
-<span class="l"> 3: </span>
-<span class="l"> 4: </span>
-<span class="l"> 5: </span>
-<span class="l"> 6: </span>
-<span class="l"> 7: </span>
-<span class="l"> 8: </span>
-<span class="l"> 9: </span>
-<span class="l">10: </span>
-<span class="l">11: </span>
-<span class="l">12: </span>
-<span class="l">13: </span>
-<span class="l">14: </span>
+<p>You can add new hints to your config in the <code>hints</code> object. This config has two fields, <code>add</code> and <code>ignore</code>. <code>add</code> is used to add new hints, while <code>ignore</code> can be used to ignore hints
+added in previous configs (e.g. the default config).</p>
+<p>For example to make the lint tool run with just the two hints: <code>not (a =  b) ===&gt; a &lt;&gt; b</code> and <code>not (a &lt;&gt; b) ===&gt; a =  b</code>, and also ignore the default hint <code>x = true ===&gt; x</code>,
+you could use the following config file.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="prep">&lt;?</span>xml version=<span class="s">"1.0"</span> encoding=<span class="s">"utf-8"</span><span class="prep">?&gt;</span>
-<span class="k">&lt;</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
-    <span class="k">&lt;</span><span class="i">Analysers</span><span class="k">&gt;</span>
-        <span class="k">&lt;</span><span class="i">Hints</span><span class="k">&gt;</span>
-            <span class="k">&lt;</span><span class="i">Hints</span><span class="k">&gt;</span>
-              <span class="k">&lt;!</span>[CDATA[
-                not (a =  b) ===<span class="k">&gt;</span> a <span class="k">&lt;&gt;</span> b
-                not (a <span class="k">&lt;&gt;</span> b) ===<span class="k">&gt;</span> a =  b
-              ]]<span class="k">&gt;</span>
-            <span class="k">&lt;/</span><span class="i">Hints</span><span class="k">&gt;</span>
-            <span class="k">&lt;</span><span class="i">Enabled</span><span class="k">&gt;</span>true<span class="k">&lt;/</span><span class="i">Enabled</span><span class="k">&gt;</span>
-        <span class="k">&lt;/</span><span class="i">Hints</span><span class="k">&gt;</span>
-    <span class="k">&lt;/</span><span class="i">Analysers</span><span class="k">&gt;</span>
-<span class="k">&lt;/</span><span class="i">FSharpLintSettings</span><span class="k">&gt;</span>
+<td class="snippet"><pre class="fssnip"><code lang="json">{
+  "hints": {
+    "add": [
+      "not (a =  b) ===&gt; a &lt;&gt; b",
+      "not (a &lt;&gt; b) ===&gt; a =  b"
+    ],
+    "ignore": [ "x = true ===&gt; x" ]
+  }
+}
 </code></pre></td></tr></table>
 <h3>Flaws</h3>
 <ul>
@@ -332,8 +324,6 @@ hint = match, spaces, "===&gt;", spaces, suggestion;
 <li>Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.</li>
 <li>Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements.</li>
 </ul>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default True)</p>
 
           <div class="tip" id="fs1">val not : value:bool -&gt; bool<br /><br />Full name: Microsoft.FSharp.Core.Operators.not</div>
 

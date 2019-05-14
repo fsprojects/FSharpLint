@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>NameConventions
+    <title>Name Conventions
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -26,147 +26,36 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1>NameConventions</h1>
-<p>Set of rules that analyse the naming of user defined elements within a program. The rules and their errors are based on the <a href="http://fsharp.org/specs/component-design-guidelines/">F# Component Design Guidelines</a></p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
+          <h1>Name Conventions</h1>
+<p>Set of rules that analyse the naming of user defined elements within a program.</p>
+<h2>Config</h2>
+<p>Each of these rules has the following available settings. Any of them can be left empty and they will not be checked.</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule.</p>
+<p><code>naming</code> - the expected case of the element (<code>PascalCase</code>, <code>CamelCase</code>)</p>
+<p><code>underscores</code> - if underscores are allowed in the element (<code>AllowPrefix</code>, <code>AllowAny</code>, <code>None</code>)</p>
+<p><code>prefix</code> - expected prefix for this element</p>
+<p><code>suffix</code> - expected suffix for this element</p>
 <h3>Rules</h3>
-<h4>IdentifiersMustNotContainUnderscores</h4>
-<h5>Cause</h5>
-<p>Any identifier contains an underscore in its name for example: <code>let goat_machine = 0</code></p>
-<h5>Rationale</h5>
-<p><em>"Historically, some F# libraries have used underscores in names. However, this is no longer widely accepted, partly because it clashes with .NET naming conventions. That said, some F# programmers use underscores heavily, partly for historical reasons, and tolerance and respect is important. However, be aware that the style is often disliked by others who have a choice about whether to use it."</em> - <a href="http://fsharp.org/specs/component-design-guidelines/">F# Component Design Guidelines</a></p>
-<h5>How To Fix</h5>
-<p>Remove the underscore from the identifier, for the example listed in the cause the fix would be to turn it into: <code>let goatMachine = 0</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>InterfaceNamesMustBeginWithI</h4>
-<h5>Cause</h5>
-<p>An identifier naming an interface not beginning with the letter <code>I</code> e.g. <code>type Printable = abstract member Print : unit -&gt; unit</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>IEnumerable</code></p>
-<h5>How To Fix</h5>
-<p>Add <code>I</code> onto the beginning of the identifier, for the example listed in the cause, the fix would be to turn it into: <code>type IPrintable = abstract member Print : unit -&gt; unit</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>ExceptionNamesMustEndWithException</h4>
-<h5>Cause</h5>
-<p>An identifier naming an exception not ending with the word <code>Exception</code> e.g. <code>exception Read of string</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>NullReferenceException</code></p>
-<h5>How To Fix</h5>
-<p>Add <code>Exception</code> onto the end of the identifier, for the example listed in the cause, the fix would be to turn it into: <code>exception ReadException of string</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>TypeNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The name of a type was not in PascalCase, for example this would fail: <code>class foo</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>LinkedList&lt;T&gt;</code></p>
-<h5>How To Fix</h5>
-<p>Change the name of the type to PascalCase e.g. <code>class Foo</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>RecordFieldNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The name of a field in a record was not in PascalCase, for example this would fail: <code>type Cat = { dog: int }</code></p>
-<h5>Rationale</h5>
-<p>Suggested in <a href="http://fsharp.org/specs/component-design-guidelines/">F# Component Design Guidelines</a>. A record field in C# will be a class property so it makes sense to have it be PascalCase as that's the convention for properties in .NET</p>
-<h5>How To Fix</h5>
-<p>Change the name of the field to PascalCase e.g. <code>type Cat = { Dog: int }</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>EnumCasesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The name of a case in an enum was not in PascalCase, for example this would fail: <code>type MyEnum = | enumCase = 1</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>DayOfWeek.Friday</code></p>
-<h5>How To Fix</h5>
-<p>Change the name of the enum case to PascalCase e.g. <code>type MyEnum = | EnumCase = 1</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>ModuleNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The name of a module was not in PascalCase, for example this would fail: <code>module dog</code></p>
-<h5>Rationale</h5>
-<p>F# convention. Also from C# an F# module will be represented as a static class, and the .NET convention for type names is PascalCase.</p>
-<h5>How To Fix</h5>
-<p>Change the name of the module to PascalCase e.g. <code>module Dog</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>LiteralNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The literal value was not in PascalCase, for example this would fail: <code>let [&lt;Literal&gt;] foo = 5</code></p>
-<h5>Rationale</h5>
-<p>There's a practical reason here, <a href="http://msdn.microsoft.com/en-us/library/dd233193.aspx">you won't be able to pattern match against literals beginning with a lowercase letter</a>.</p>
-<h5>How To Fix</h5>
-<p>Change the literal value to PascalCase e.g. <code>let [&lt;Literal&gt;] Foo = 5</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>NamespaceNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The namespace was not in PascalCase, for example this would fail: <code>namespace matt.dog.cat"</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>System.Collections.Generic</code></p>
-<h5>How To Fix</h5>
-<p>Change the namespace to PascalCase e.g. <code>namespace Matt.Dog.Cat"</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>MemberNamesMustBePascalCase</h4>
-<h5>Cause</h5>
-<p>The member was not in PascalCase, for example this would fail: <code>this.member() = ()</code></p>
-<h5>Rationale</h5>
-<p>.NET convention e.g. <code>this.ToString()</code></p>
-<h5>How To Fix</h5>
-<p>Change the member to PascalCase e.g. <code>this.Member() = ()</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>ParameterMustBeCamelCase</h4>
-<h5>Cause</h5>
-<p>The parameter in a function or method was not in camelCase, for example this would fail: <code>let f FooBar = FooBar</code></p>
-<h5>Rationale</h5>
-<p>Non public values should be camelCase, see <a href="#NonPublicValuesCamelCase">NonPublicValuesCamelCase</a>.</p>
-<h5>How To Fix</h5>
-<p>Change the parameter to camelCase e.g. <code>let f fooBar = fooBar</code></p>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
-<h4>NonPublicValuesCamelCase</h4>
-<h5>Cause</h5>
-<p>A function or value that is not externally accessible's identifier is not in camelCase, for example this would fail:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="f">f</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="i">x</span> <span class="o">=</span> 
-    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="i">Woof</span> <span class="o">=</span> <span class="n">4</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs2', 4)" onmouseover="showTip(event, 'fs2', 4)" class="i">x</span>
-    <span onmouseout="hideTip(event, 'fs3', 5)" onmouseover="showTip(event, 'fs3', 5)" class="i">Woof</span>
-</code></pre></td>
-</tr>
-</table>
-<h5>Rationale</h5>
-<p><em>"It is common and accepted F# style to use camelCase for all names bound as local variables or in pattern matches and function definitions. ... It is also common and accepted F# style to use camelCase for locally bound functions"</em> - <a href="http://fsharp.org/specs/component-design-guidelines/">F# Component Design Guidelines</a></p>
-<p>Rationale for public values being either PascalCase or CamelCase:</p>
-<p><em>"Do use either PascalCase or camelCase for public functions and values in F# modules. camelCase is generally used for public functions which are designed to be used unqualified (e.g. invalidArg), and for the “standard collection functions” (e.g. List.map). In both these cases, the function names act much like keywords in the language."</em> - <a href="http://fsharp.org/specs/component-design-guidelines/">F# Component Design Guidelines</a></p>
-<h5>How To Fix</h5>
-<p>Change the value's identifier to camelCase e.g.</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 6)" onmouseover="showTip(event, 'fs1', 6)" class="f">f</span> <span onmouseout="hideTip(event, 'fs2', 7)" onmouseover="showTip(event, 'fs2', 7)" class="i">x</span> <span class="o">=</span> 
-    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs4', 8)" onmouseover="showTip(event, 'fs4', 8)" class="i">woof</span> <span class="o">=</span> <span class="n">4</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs2', 9)" onmouseover="showTip(event, 'fs2', 9)" class="i">x</span>
-    <span onmouseout="hideTip(event, 'fs4', 10)" onmouseover="showTip(event, 'fs4', 10)" class="i">woof</span>
-</code></pre></td>
-</tr>
-</table>
-<h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule.</p>
+<p>Each of the following rules targets a different kind of element.</p>
+<ul>
+<li>InterfaceNames - FS0036</li>
+<li>ExceptionNames - FS0037</li>
+<li>TypeNames - FS0038</li>
+<li>RecordfieldNames - FS0039</li>
+<li>EnumCasesNames - FS0040</li>
+<li>UnionCasesNames - FS0041</li>
+<li>ModuleNames - FS0042</li>
+<li>LiteralNames - FS0043</li>
+<li>NamespaceNames - FS0044</li>
+<li>MemberNames - FS0045</li>
+<li>ParameterNames - FS0046</li>
+<li>MeasureTypeNames - FS0047</li>
+<li>ActivePatternNames - FS0048</li>
+<li>PublicValuesNames - FS0049</li>
+<li>NonPublicValuesNames - FS0050</li>
+</ul>
 
-          <div class="tip" id="fs1">val f : x:int -&gt; int<br /><br />Full name: NameConventions.f</div>
-<div class="tip" id="fs2">val x : int</div>
-<div class="tip" id="fs3">val Woof : int</div>
-<div class="tip" id="fs4">val woof : int</div>
-
+          
         </div>
         <div class="span3">
           <a href="index.html">

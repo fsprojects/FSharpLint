@@ -28,10 +28,8 @@
         <div class="span9" id="main">
           <h1>RaiseWithTooManyArguments</h1>
 <p><code>raise</code> <a href="http://visualfsharp.codeplex.com/workitem/41">can be passed more than one argument</a>, in code this is likely to be a mistake and these rules warn when this occurs.</p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
 <h3>Rules</h3>
-<h4>RaiseWithSingleArgument</h4>
+<h4>RaiseWithSingleArgument - FS0017</h4>
 <h5>Cause</h5>
 <p><code>raise</code> is passed more than one argument e.g. <code>raise (System.ArgumentException("Divisor cannot be zero.")) 5</code></p>
 <h5>Rationale</h5>
@@ -39,8 +37,8 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>FailwithWithSingleArgument</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>FailwithWithSingleArgument - FS0016</h4>
 <h5>Cause</h5>
 <p><code>failwith</code> is passed more than one argument e.g. <code>failwith "Divisor cannot be zero." 5</code></p>
 <h5>Rationale</h5>
@@ -48,8 +46,8 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>NullArgWithSingleArgument</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>NullArgWithSingleArgument - FS0018</h4>
 <h5>Cause</h5>
 <p><code>nullArg</code> is passed more than one argument e.g. <code>nullArg "Divisor cannot be zero." 5</code></p>
 <h5>Rationale</h5>
@@ -57,8 +55,8 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>InvalidOpWithSingleArgument</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>InvalidOpWithSingleArgument - FS0019</h4>
 <h5>Cause</h5>
 <p><code>invalidOp</code> is passed more than one argument e.g. <code>invalidOp "Divisor cannot be zero." 5</code></p>
 <h5>Rationale</h5>
@@ -66,8 +64,8 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>FailwithfWithArgumentsMatchingFormatString</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>FailwithfWithArgumentsMatchingFormatString - FS0021</h4>
 <h5>Cause</h5>
 <p><code>failwithf</code> is passed more arguments than the format string (first argument) species e.g. <code>failwithf "%d" 5 5</code></p>
 <h5>Rationale</h5>
@@ -75,8 +73,8 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>InvalidArgWithTwoArguments</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>InvalidArgWithTwoArguments - FS0020</h4>
 <h5>Cause</h5>
 <p><code>invalidArg</code> is passed more than two arguments e.g. <code>invalidArg "month" "Expected value between 1 and 12"</code></p>
 <h5>Rationale</h5>
@@ -84,7 +82,7 @@
 <h5>How To Fix</h5>
 <p>Remove the extra arguments.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
 
           
         </div>

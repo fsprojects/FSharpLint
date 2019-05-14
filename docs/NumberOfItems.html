@@ -28,44 +28,42 @@
         <div class="span9" id="main">
           <h1>NumberOfItems</h1>
 <p>Set of rules that analyse the number of items in a segment of code, for example the number of members in a class.</p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
 <h3>Rules</h3>
-<h4>MaxNumberOfFunctionParameters</h4>
+<h4>MaxNumberOfFunctionParameters - FS0052</h4>
 <h5>Cause</h5>
-<p>A function contains more than a configurable number of parameters, for example if <code>MaxItems</code> was set to 5 (the default value)
+<p>A function contains more than a configurable number of parameters, for example if <code>maxItems</code> was set to 5 (the default value)
 then the following condition would cause the error: <code>let findCat one two three four five six = 0</code></p>
 <h5>Rationale</h5>
 <p>Too many parameters make the function difficult to use.</p>
 <h5>How To Fix</h5>
 <p>Reduce the number of function parameters, e.g. to fix the example in the "Cause": <code>let findCat one two three four five = 0</code>. A good way to reduce the number of parameters is to group them using records.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>MaxItems</code> - An integer property that specifies the max number of function parameters. (Default 5)</p>
-<h4>MaxNumberOfMembers</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxItems</code> - An integer property that specifies the max number of function parameters. (Default 5)</p>
+<h4>MaxNumberOfMembers - FS0053</h4>
 <h5>Cause</h5>
-<p>A class contains more than a configurable number of members (<code>MaxItems</code>).</p>
+<p>A class contains more than a configurable number of members (<code>maxItems</code>).</p>
 <h5>Rationale</h5>
 <p>The class is likely to be doing too much and violating the single responsibility principle.</p>
 <h5>How To Fix</h5>
 <p>Reduce the number of members in the class, e.g. extract them out to another class.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>MaxItems</code> - An integer property that specifies the max number of members in a class. (Default 32)</p>
-<h4>MaxNumberOfItemsInTuple</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxItems</code> - An integer property that specifies the max number of members in a class. (Default 32)</p>
+<h4>MaxNumberOfItemsInTuple - FS0051</h4>
 <h5>Cause</h5>
-<p>A tuple contains more than a configurable number of items, for example if <code>MaxItems</code> was set to 4 (the default value)
+<p>A tuple contains more than a configurable number of items, for example if <code>maxItems</code> was set to 4 (the default value)
 then the following statement would cause the error: <code>let tup = (1, 2, 3, 5, 6)</code></p>
 <h5>Rationale</h5>
 <p>Tuple's items are not named, the more items there are the harder it is to work out what each is for.</p>
 <h5>How To Fix</h5>
 <p>Reduce the number of items in the tuple, ideally replace the tuple with a record.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>MaxItems</code> - An integer property that specifies the max number of items in a tuple. (Default 4)</p>
-<h4>MaxNumberOfBooleanOperatorsInCondition</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxItems</code> - An integer property that specifies the max number of items in a tuple. (Default 4)</p>
+<h4>MaxNumberOfBooleanOperatorsInCondition - FS0054</h4>
 <h5>Cause</h5>
-<p>A <code>while/if/assert/match when</code> condition contains more than a configurable number of boolean operators, for example if <code>MaxItems</code> was set to 4 (the default value)
+<p>A <code>while/if/assert/match when</code> condition contains more than a configurable number of boolean operators, for example if <code>maxItems</code> was set to 4 (the default value)
 then the following condition would cause the error: <code>if x &amp;&amp; y || q || r &amp;&amp; t &amp;&amp; w then</code></p>
 <h5>Rationale</h5>
 <p>Can make the control flow become diffcult to understand.</p>
@@ -80,8 +78,8 @@ then the following condition would cause the error: <code>if x &amp;&amp; y || q
 </tr>
 </table>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>MaxItems</code> - An integer property that specifies the max number of boolean operators in a condition. (Default 4)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxItems</code> - An integer property that specifies the max number of boolean operators in a condition. (Default 4)</p>
 
           <div class="tip" id="fs1">val catIsInBin : bool<br /><br />Full name: NumberOfItems.catIsInBin</div>
 

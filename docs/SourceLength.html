@@ -28,10 +28,8 @@
         <div class="span9" id="main">
           <h1>SourceLength</h1>
 <p>Set of rules that analyse the length of sections of code.</p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default true)</p>
 <h3>Rules</h3>
-<h4>MaxLinesInFunction</h4>
+<h4>MaxLinesInFunction - FS0025</h4>
 <h5>Cause</h5>
 <p>A function is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -39,9 +37,9 @@
 <h5>How To Fix</h5>
 <p>Refactor to extract out code into smaller composable functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a function. (Default 70)</p>
-<h4>MaxLinesInLambdaFunction</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a function. (Default 70)</p>
+<h4>MaxLinesInLambdaFunction - FS0022</h4>
 <h5>Cause</h5>
 <p>A lambda function is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -49,9 +47,9 @@
 <h5>How To Fix</h5>
 <p>Consider using a named function rather than a lambda function.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a lambda function. (Default 7)</p>
-<h4>MaxLinesInMatchLambdaFunction</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a lambda function. (Default 7)</p>
+<h4>MaxLinesInMatchLambdaFunction - FS0023</h4>
 <h5>Cause</h5>
 <p>A match function is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -59,9 +57,9 @@
 <h5>How To Fix</h5>
 <p>Use active patterns to help reduce the number of matches/extract code out into composable functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a match function. (Default 70)</p>
-<h4>MaxLinesInValue</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a match function. (Default 70)</p>
+<h4>MaxLinesInValue - FS0024</h4>
 <h5>Cause</h5>
 <p>A statement binded to a value is made up of more than a configurable number of lines.
 For example the following would break the rule when the maximum number of lines is set to 4:</p>
@@ -86,9 +84,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Refactor to extract out code into smaller composable functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a value binding. (Default 70)</p>
-<h4>MaxLinesInConstructor</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a value binding. (Default 70)</p>
+<h4>MaxLinesInConstructor - FS0027</h4>
 <h5>Cause</h5>
 <p>A class constructor is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -96,9 +94,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into private methods or functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a class constructor. (Default 70)</p>
-<h4>MaxLinesInMember</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a class constructor. (Default 70)</p>
+<h4>MaxLinesInMember - FS0026</h4>
 <h5>Cause</h5>
 <p>A member is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -106,9 +104,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into private methods or functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a member. (Default 70)</p>
-<h4>MaxLinesInProperty</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a member. (Default 70)</p>
+<h4>MaxLinesInProperty - FS0028</h4>
 <h5>Cause</h5>
 <p>A property is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -116,9 +114,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into private methods or functions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a property. (Default 70)</p>
-<h4>MaxLinesInClass</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a property. (Default 70)</p>
+<h4>MaxLinesInClass - FS0033</h4>
 <h5>Cause</h5>
 <p>A class is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -126,9 +124,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into smaller composable classes.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a class. (Default 500)</p>
-<h4>MaxLinesInEnum</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a class. (Default 500)</p>
+<h4>MaxLinesInEnum - FS0031</h4>
 <h5>Cause</h5>
 <p>An enum is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -136,9 +134,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into smaller enums.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a enum. (Default 500)</p>
-<h4>MaxLinesInUnion</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a enum. (Default 500)</p>
+<h4>MaxLinesInUnion - FS0032</h4>
 <h5>Cause</h5>
 <p>A discriminated union is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -146,9 +144,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into smaller composed discriminated unions.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a discriminated union. (Default 500)</p>
-<h4>MaxLinesInRecord</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a discriminated union. (Default 500)</p>
+<h4>MaxLinesInRecord - FS0030</h4>
 <h5>Cause</h5>
 <p>A record is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -156,9 +154,9 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into smaller composed records.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a record. (Default 500)</p>
-<h4>MaxLinesInModule</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a record. (Default 500)</p>
+<h4>MaxLinesInModule - FS0029</h4>
 <h5>Cause</h5>
 <p>A module is made up of more than a configurable number of lines.</p>
 <h5>Rationale</h5>
@@ -166,8 +164,8 @@ For example the following would break the rule when the maximum number of lines 
 <h5>How To Fix</h5>
 <p>Extract code out into smaller modules.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)
-<code>Lines</code> - Maximum number of lines in a module. (Default 1000)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)
+<code>maxLines</code> - Maximum number of lines in a module. (Default 1000)</p>
 
           <div class="tip" id="fs1">val value : int<br /><br />Full name: SourceLength.value</div>
 <div class="tip" id="fs2">val x : int</div>

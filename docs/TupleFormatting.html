@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Binding
+    <title>Tuple Formatting
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -26,45 +26,36 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1>Binding</h1>
-<p>Set of rules that analyse possible mistakes when binding values.</p>
+          <h1>Tuple Formatting</h1>
+<p>Rules related to tuple formatting.</p>
 <h3>Rules</h3>
-<h4>FavourIgnoreOverLetWild - FS0055</h4>
+<h4>TupleCommaSpacing - FS0001</h4>
 <h5>Cause</h5>
-<p>A value is binded to a wildcard e.g. <code>let _ = Console.ReadLine()</code></p>
+<p>Space missing after tuple comma.</p>
 <h5>Rationale</h5>
-<p>Using the ignore function makes it clear what is intended to happen, rather than something that may be a mistake.</p>
+<p>For readability, it helps to include a space after tuple commas.</p>
 <h5>How To Fix</h5>
-<p>Pipe the value into the ignore function e.g. <code>Console.ReadLine() |&gt; ignore</code></p>
+<p>Add a space after tuple commas.</p>
 <h5>Rule Settings</h5>
-<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>UselessBinding - FS0057</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
+<h4>Tuple Indentation - FS0002</h4>
 <h5>Cause</h5>
-<p>An identifier is binded to itself e.g. <code>let x = x</code></p>
+<p>Tuples which span several lines should have consistent indentation.</p>
 <h5>Rationale</h5>
-<p>Pointless statement likely to be an error.</p>
+<p>Readability.</p>
 <h5>How To Fix</h5>
-<p>Remove the binding.</p>
+<p>Fix tuple indentation</p>
 <h5>Rule Settings</h5>
-<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>WildcardNamedWithAsPattern - FS0056</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
+<h4>Tuple Parentheses - FS0003</h4>
 <h5>Cause</h5>
-<p>A wildcard is given a name using the as pattern e.g. <code>match something with | _ as x -&gt; x + y</code></p>
+<p>Missing parentheses around tuple instantiation.</p>
 <h5>Rationale</h5>
-<p>The wildcard and as pattern can be replaced with the identifier the value is to be bound to.</p>
+<p>Recommended by <a href="https://docs.microsoft.com/en-us/dotnet/fsharp/style-guide/formatting#formatting-tuples">Microsoft F# code formatting guide</a>.</p>
 <h5>How To Fix</h5>
-<p>Replace the wildcard with the identifier the wildcard is currently being bound to, e.g. change <code>match something with | _ as x -&gt; x + y</code> to <code>match something with | x -&gt; x + y</code></p>
+<p>Add parentheses around tuple instantiation.</p>
 <h5>Rule Settings</h5>
-<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>TupleOfWildcards - FS0058</h4>
-<h5>Cause</h5>
-<p>A constructor in a pattern has arguments that consist entirely of wildcards e.g. <code>SynPat.Paren(_, _)</code></p>
-<h5>Rationale</h5>
-<p>The tuple of wildcards can be replaced with a single wildcard.</p>
-<h5>How To Fix</h5>
-<p>Replace the tuple with a single wildcard e.g. the example in the cause could be turned into <code>SynPat.Paren(_)</code></p>
-<h5>Rule Settings</h5>
-<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
 
           
         </div>

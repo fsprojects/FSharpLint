@@ -28,10 +28,8 @@
         <div class="span9" id="main">
           <h1>Typography</h1>
 <p>Set of rules that analyse the text in a file.</p>
-<h3>Analyser Settings</h3>
-<p><code>Enabled</code> - A boolean property that can enable and disable this analyser. (Default false)</p>
 <h3>Rules</h3>
-<h4>MaxLinesInFile</h4>
+<h4>MaxLinesInFile - FS0062</h4>
 <h5>Cause</h5>
 <p>More than a configurable number of lines were found in a file.</p>
 <h5>Rationale</h5>
@@ -39,9 +37,9 @@
 <h5>How To Fix</h5>
 <p>Refactor to extract code out into another file.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<p><code>Lines</code> - An integer property that specifies the maximum number of lines allowed in a file. (Default 1000)</p>
-<h4>MaxCharactersOnLine</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<p><code>maxLinesInFile</code> - An integer property that specifies the maximum number of lines allowed in a file. (Default 1000)</p>
+<h4>MaxCharactersOnLine - FS0060</h4>
 <h5>Cause</h5>
 <p>More than a configurable number of characters were on a single line.</p>
 <h5>Rationale</h5>
@@ -49,9 +47,9 @@
 <h5>How To Fix</h5>
 <p>Break the line up into multiple lines.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
-<p><code>Length</code> - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)</p>
-<h4>NoTabCharacters</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default false)</p>
+<p><code>maxCharactersOnLine</code> - An integer property that specifies the maximum number of characters allowed on a line. (Default 120)</p>
+<h4>NoTabCharacters - FS0064</h4>
 <h5>Cause</h5>
 <p>A tab character was found in a file.</p>
 <h5>Rationale</h5>
@@ -59,8 +57,8 @@
 <h5>How To Fix</h5>
 <p>Replace the tab with spaces.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>TrailingNewLineInFile</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>TrailingNewLineInFile - FS0063</h4>
 <h5>Cause</h5>
 <p>A new line was found at the end of a file.</p>
 <h5>Rationale</h5>
@@ -68,8 +66,8 @@
 <h5>How To Fix</h5>
 <p>Remove any new lines at the end of a file.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<h4>TrailingWhitespaceOnLine</h4>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<h4>TrailingWhitespaceOnLine - FS0061</h4>
 <h5>Cause</h5>
 <p>Whitespace was found at the end of a line.</p>
 <h5>Rationale</h5>
@@ -77,10 +75,10 @@
 <h5>How To Fix</h5>
 <p>Remove any whitespace from the end of the line.</p>
 <h5>Rule Settings</h5>
-<p><code>Enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
-<p><code>NumberOfSpacesAllowed</code> - An integer property that specifies how many space characters are allowed on the end of a line. (Default 1)</p>
-<p><code>OneSpaceAllowedAfterOperator</code> - A boolean property that will allow a single space on the end of the line if it's preceded by an operator/symbol character. (Default true)</p>
-<p><code>IgnoreBlankLines</code> - A boolean property that will ignore any lines that are made up of just whitespace. (Default true)</p>
+<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<p><code>numberOfSpacesAllowed</code> - An integer property that specifies how many space characters are allowed on the end of a line. (Default 1)</p>
+<p><code>oneSpaceAllowedAfterOperator</code> - A boolean property that will allow a single space on the end of the line if it's preceded by an operator/symbol character. (Default true)</p>
+<p><code>ignoreBlankLines</code> - A boolean property that will ignore any lines that are made up of just whitespace. (Default true)</p>
 
           
         </div>
