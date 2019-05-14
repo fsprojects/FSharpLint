@@ -56,3 +56,16 @@ module TestApi =
             
             Assert.Less(result, 250)
             System.Console.WriteLine(sprintf "Average runtime of linter on parsed file: %d (milliseconds)."  result)
+
+        [<Test>]
+        member __.``Lint project``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+
+            let result = lintProject OptionalLintParameters.Default projectFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure _ ->
+                Assert.True(false)
