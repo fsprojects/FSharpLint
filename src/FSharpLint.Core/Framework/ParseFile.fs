@@ -1,12 +1,13 @@
 ﻿namespace FSharpLint.Framework
 
 /// Provides functionality to parse F# files using `FSharp.Compiler.Service`.
-module ParseFile = 
+module ParseFile =
 
     open System.IO
     open FSharpLint.Framework
     open FSharp.Compiler.Ast
     open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Text
     open Utilities
 
     /// Information for a file to be linted that is given to the analysers.
@@ -23,25 +24,26 @@ module ParseFile =
 
           /// Path to the file.
           File: string }
-          
+
     [<NoComparison>]
     type ParseFileFailure =
         | FailedToParseFile of FSharpErrorInfo []
         | AbortedTypeCheck
-        
+
     [<NoComparison>]
     type ParseFileResult<'t> =
         | Failed of ParseFileFailure
         | Success of 't
-        
+
     let private parse configuration file source (checker:FSharpChecker, options) =
-        let parseResults = 
-            checker.ParseFile(file, source, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
+        let sourceText = SourceText.ofString source
+        let parseResults =
+            checker.ParseFile(file, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
 
         let typeCheckFile () =
-            let results = 
-                checker.CheckFileInProject(parseResults, file, 0, source, options) 
+            let results =
+                checker.CheckFileInProject(parseResults, file, 0, sourceText, options)
                 |> Async.RunSynchronously
 
             match results with
@@ -49,16 +51,17 @@ module ParseFile =
             | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
 
         match parseResults.ParseTree with
-        | Some(parseTree) -> 
+        | Some(parseTree) ->
             match typeCheckFile() with
             | Success(typeCheckResults) ->
+
                 { Text = source
                   Ast = parseTree
                   TypeCheckResults = typeCheckResults
                   File = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
-        
+
     // See: https://github.com/fsharp/FSharp.Compiler.Service/issues/847.
     let private dotnetCoreReferences () =
         let fsharpCoreDir = Path.GetDirectoryName(typeof<FSharp.Collections.List<_>>.Assembly.Location)
@@ -75,7 +78,7 @@ module ParseFile =
           runtimeDir </> "System.Net.Requests.dll"
           runtimeDir </> "System.Runtime.Numerics.dll"
           runtimeDir </> "System.Threading.Tasks.dll"
-          
+
           typeof<System.Console>.Assembly.Location
           typeof<System.ComponentModel.DefaultValueAttribute>.Assembly.Location
           typeof<System.ComponentModel.PropertyChangedEventArgs>.Assembly.Location
@@ -88,21 +91,22 @@ module ParseFile =
         |> List.filter File.Exists
         |> List.distinctBy Path.GetFileName
         |> List.map (fun location -> "-r:" + location)
-        
-    let getProjectOptionsFromScript (checker:FSharpChecker) file source =
+
+    let getProjectOptionsFromScript (checker:FSharpChecker) file (source: string) =
+        let sourceText = SourceText.ofString source
         #if NETSTANDARD2_0
         let assumeDotNetFramework = false
         #else
         let assumeDotNetFramework = true
         #endif
 
-        let (options, _diagnostics) = 
-            checker.GetProjectOptionsFromScript(file, source, assumeDotNetFramework = assumeDotNetFramework) 
+        let (options, _diagnostics) =
+            checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework)
             |> Async.RunSynchronously
 
         let otherOptions =
             if assumeDotNetFramework then options.OtherOptions
-            else 
+            else
                 [| yield! options.OtherOptions |> Array.filter (fun x -> not (x.StartsWith("-r:")))
                    yield! dotnetCoreReferences() |]
 
@@ -116,14 +120,14 @@ module ParseFile =
             match projectOptions with
             | Some(existingOptions) -> existingOptions
             | None -> getProjectOptionsFromScript checker file source
-        
+
         parse configuration file source (checker, projectOptions)
-        
+
     /// Parses source code using `FSharp.Compiler.Service`.
-    let parseSourceFile fileName source configuration (checker:FSharpChecker) =        
+    let parseSourceFile fileName source configuration (checker:FSharpChecker) =
         let options = getProjectOptionsFromScript checker fileName source
 
         parse configuration fileName source (checker, options)
-        
-    let parseSource source configuration (checker:FSharpChecker) = 
+
+    let parseSource source configuration (checker:FSharpChecker) =
         parseSourceFile "test.fsx" source configuration checker
