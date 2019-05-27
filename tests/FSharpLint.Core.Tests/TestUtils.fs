@@ -2,6 +2,7 @@
 
     open System.IO
     open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.Text
     open NUnit.Framework
     open FSharpLint.Framework
     open Utilities
@@ -16,13 +17,14 @@
 
     let generateAst source =
         let checker = FSharpChecker.Create()
+        let sourceText = SourceText.ofString source
 
         let options = ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source
 
         let parseResults =
-            checker.ParseFile(performanceTestSourceFile, source, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
+            checker.ParseFile(performanceTestSourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
-        
+
         match parseResults.ParseTree with
         | Some(parseTree) -> parseTree
         | None -> failwith "Failed to parse file."
