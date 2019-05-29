@@ -1,3 +1,7 @@
+##### 0.12.0 - May 29 2019
+
+* Update `FSharp.Compiler.Service`
+
 ##### 0.11.1 - May 14 2019
 
 * Fix issue in loading default configuration
