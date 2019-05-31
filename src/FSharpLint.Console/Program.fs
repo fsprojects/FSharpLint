@@ -22,7 +22,7 @@ module Program =
         
     let private writeErrorLine (str:string) = 
         writeLine str ConsoleColor.Red Console.Error
-
+        
     let private help () =
         writeInfoLine "-f <project.fsproj>                lint project"
         writeInfoLine "-sf <file.fs>                      lint single file"
@@ -134,35 +134,45 @@ module Program =
             | _ -> false
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
-
-    let private outputLintResult = function
-        | LintResult.Success(warnings) -> 
-            String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
-        | LintResult.Failure(failure) -> writeErrorLine failure.Description
-        
-    let private outputConversionResult xmlConfig outputFile = function
-        | Choice1Of2 _ -> (sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile) |> writeInfoLine
-        | Choice2Of2 err -> (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> writeErrorLine
         
     let private startWithArguments arguments =
+        let mutable exitCode = 0
+
+        let handleError (str:string) =
+            writeErrorLine str
+            exitCode <- -1
+            
+        let handleLintResult = function
+            | LintResult.Success(warnings) -> 
+                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
+            | LintResult.Failure(failure) ->
+                handleError failure.Description
+            
+        let handleConversionResult xmlConfig outputFile = function
+            | Choice1Of2 _ ->
+                (sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile) |> writeInfoLine
+            | Choice2Of2 err ->
+                (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> handleError           
+        
         arguments
         |> List.iter (fun arg ->
             try
                 match arg with
                 | SingleFile(file) | ProjectFile(file) when not (IO.File.Exists file) ->
                     let formatString = Resources.GetString("ConsoleCouldNotFindFile")
-                    String.Format(formatString, file) |> writeErrorLine
-                | SingleFile(file) -> runLintOnFile file |> outputLintResult
-                | Source(source) -> runLintOnSource source |> outputLintResult
-                | ProjectFile(projectFile) -> runLintOnProject projectFile |> outputLintResult
-                | ConvertConfig(xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> outputConversionResult xmlConfig outputFile
+                    String.Format(formatString, file) |> handleError
+                | SingleFile(file) -> runLintOnFile file |> handleLintResult
+                | Source(source) -> runLintOnSource source |> handleLintResult
+                | ProjectFile(projectFile) -> runLintOnProject projectFile |> handleLintResult
+                | ConvertConfig(xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> handleConversionResult xmlConfig outputFile
                 | UnexpectedArgument(_) -> ()
             with
             | e -> 
                 "Lint failed while analysing " + string arg + "." + Environment.NewLine +
                     "Failed with: " + e.Message + Environment.NewLine + 
                     "Stack trace:" + e.StackTrace
-                |> writeErrorLine)
+                |> handleError)
+        exitCode
             
     [<EntryPoint>]
     let main argv =
@@ -177,4 +187,3 @@ module Program =
             -1
         else
             startWithArguments parsedArguments
-            0
