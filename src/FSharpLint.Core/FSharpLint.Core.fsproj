@@ -112,6 +112,9 @@
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>   
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
