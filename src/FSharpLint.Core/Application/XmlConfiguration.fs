@@ -14,6 +14,7 @@ open FSharpLint.Rules.TypedItemSpacing
 module Configuration =
 
     open System.Xml.Linq
+    open System.Reflection
 
     [<Literal>]
     let private SettingsFileName = "Settings.FSharpLint"
@@ -250,6 +251,120 @@ module Configuration =
             match config.ElementByLocalName("Analysers") with
             | Some(analysers) -> analysers.Elements() |> Seq.map parseAnalyser |> Map.ofSeq
             | None -> Map.empty }
+        
+     /// Load a FSharpLint configuration file from the contents (string) of the file.
+    let loadConfigurationFile configurationFileText =
+        configuration configurationFileText
+        
+    let overwriteMap (oldMap:Map<'a,'b>) (newMap:Map<'a,'b>) overwriteValue =
+        [ for keyValuePair in oldMap do
+            match Map.tryFind keyValuePair.Key newMap with
+            | Some(value) -> yield (keyValuePair.Key, overwriteValue keyValuePair.Value value)
+            | None -> yield (keyValuePair.Key, keyValuePair.Value) ] |> Map.ofList
+
+    let private overrideRuleSettings (oldSetting:Setting) (newSetting:Setting) = 
+        match oldSetting, newSetting with
+        | Hints(oldHints), Hints(newHints) ->
+            Hints({ Hints = List.append oldHints.Hints newHints.Hints })
+        | _ -> newSetting
+
+    let private overrideRule (oldRule:Rule) (newRule:Rule) : Rule =
+        { Settings = overwriteMap oldRule.Settings newRule.Settings overrideRuleSettings }
+
+    let private overrideAnalysers oldRules newRules =
+        { Rules = overwriteMap oldRules.Rules newRules.Rules overrideRule
+          Settings = overwriteMap oldRules.Settings newRules.Settings overrideRuleSettings }        
+        
+    /// <summary>
+    /// Loads a "higher precedence" configuration file. All the properties in the file we're loading overwrite
+    /// the same properties in our previous configuration with the new values, any properties that don't exist
+    /// in the previous configuration are added, and any properties that don't exist in the configuration being
+    /// loaded are left alone.
+    /// </summary>
+    /// <param name="file">Path of the configuration file that will override the existing configuration</param>
+    let overrideConfiguration configToOverride configToOverrideWith =
+        { IgnoreFiles =
+                match configToOverrideWith.IgnoreFiles with
+                | Some({ Content = ignoreFiles } as newIgnore) ->
+                    let combinedFiles =
+                        match configToOverride.IgnoreFiles with
+                        | Some (previousIgnore) ->
+                            newIgnore.Content @ previousIgnore.Content
+                        | None -> newIgnore.Content
+
+                    { IgnoreFiles.Content = combinedFiles } |> Some
+                | None ->
+                    configToOverride.IgnoreFiles
+          Analysers = overwriteMap configToOverride.Analysers configToOverrideWith.Analysers overrideAnalysers }
+
+    /// Overrides a given FSharpLint configuration file with another.
+    let overrideConfigurationFile configurationToOverride configurationToOverrideWith =
+        overrideConfiguration configurationToOverride configurationToOverrideWith
+
+    /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
+    /// This function loads and returns this default configuration.
+    let defaultConfiguration =
+        let assembly = typeof<Configuration>.GetTypeInfo().Assembly
+        let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+                         |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.FSharpLint", System.StringComparison.Ordinal))
+        use stream = assembly.GetManifestResourceStream(resourceName)
+        match stream with
+        | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
+        | stream ->
+            use reader = new System.IO.StreamReader(stream)
+
+            reader.ReadToEnd() |> configuration    
+    
+    /// Overrides the default FSharpLint configuration.
+    /// The default FSharpLint configuration contains all required elements, so
+    /// by overriding it any missing required elements will be added to the returned configuration.
+    /// If you're loading your own configuration you should make sure that it overrides the default
+    /// configuration/overrides a configuration that has overriden the default configuration.
+    let overrideDefaultConfiguration configurationToOverrideDefault =
+        overrideConfiguration defaultConfiguration configurationToOverrideDefault
+
+    /// Gets all the parent directories of a given path - includes the original path directory too.
+    let private getParentDirectories path =
+        let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
+            match directoryInfo with
+            | null -> parentDirectories
+            | _ -> getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
+
+        DirectoryInfo path |> getParentDirectories []
+
+    /// Overrides the default config with user defined config files.
+    /// The configs can be in any directory between the root directory and the projects directory.
+    /// The closer they are to the project directory the higher precedence they have.
+    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
+    /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
+    let tryLoadUserConfigFiles projectFilePath =
+        let mutable foundConfig = false
+        let projectFileDirectory = Path.GetDirectoryName projectFilePath
+        let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
+
+        let rec loadAllConfigs configToOveride = function
+            | path::paths ->
+                let filename = Path.Combine(path, SettingsFileName)
+
+                if File.Exists(filename) then
+                    try
+                        let newConfig =
+                            File.ReadAllText filename
+                            |> configuration
+                            |> (overrideConfiguration configToOveride)
+
+                        foundConfig <- true
+                        loadAllConfigs newConfig paths
+                    with
+                        | _ -> None
+                else
+                    loadAllConfigs configToOveride paths
+            | [] ->
+                Some configToOveride
+
+        let config = loadAllConfigs defaultConfiguration subdirectories
+        
+        if foundConfig then config else None
 
 /// Tries to load a config from disk.
 /// If it fails to load the config any exception will be swallowed and `None` returned.
@@ -534,3 +649,12 @@ let convertToJson (xmlFile:string) =
       formatting = convertFormatting xmlConfig
       conventions = convertConventions xmlConfig
       typography = convertTypography xmlConfig }
+    
+/// Tries to load the FSharpLint XML configuration for a project given the path to the `.fsproj` file.
+/// It picks up configurations in any directory between the root directory and the project's directory.
+/// The closer they are to the project directory the higher precedence they have.
+/// e.g. if the project directory is C:\User\Matt\Project then a config file found in
+/// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
+/// If no XML configs are found, returns None.
+let tryLoadConfigurationForProject projectFilePath =
+    Configuration.tryLoadUserConfigFiles projectFilePath   

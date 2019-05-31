@@ -534,6 +534,13 @@ type TestConfiguration() =
         Assert.AreEqual(expectedConfig, convertedJsonConfig)
         
     [<Test>]
+    member this.``Try load non-existent XML config``() =
+        let nonExistentConfigFile = Path.Combine(TestContext.CurrentContext.TestDirectory, "ProjectNoConfig.fsproj")
+        
+        let loadedConfig = XmlConfiguration.tryLoadConfigurationForProject nonExistentConfigFile
+        Assert.AreEqual(None, loadedConfig)
+        
+    [<Test>]
     member this.``Should be able to ignore hints``() =
         let configToOverride = {
             Configuration.formatting = None
