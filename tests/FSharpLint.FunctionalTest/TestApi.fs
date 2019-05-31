@@ -71,3 +71,16 @@ module TestApi =
                 Assert.AreEqual(9, warnings.Length)
             | LintResult.Failure _ ->
                 Assert.True(false)
+                
+        [<Test>]
+        member __.``Lint solution``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+
+            let result = lintSolution OptionalLintParameters.Default solutionFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure _ ->
+                Assert.True(false)               
