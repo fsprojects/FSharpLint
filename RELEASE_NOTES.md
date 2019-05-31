@@ -1,3 +1,10 @@
+##### 0.12.1 - May 31 2019
+
+* Implement linting of all projects in solution using `-sol` flag, or programmatically using `lintSolution` function
+* Return non-zero exit code if lint warnings exist
+* Fix bug in converting XML config with no hints defined
+* Add `XmlConfiguration.tryLoadConfigurationForProject` to support backwards compatability in external applications
+
 ##### 0.12.0 - May 29 2019
 
 * Update `FSharp.Compiler.Service`
