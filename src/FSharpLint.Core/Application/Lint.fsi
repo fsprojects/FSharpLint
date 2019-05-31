@@ -142,6 +142,9 @@ module Lint =
     /// Converts a lint suggestion to a warning with the given source text.
     val suggestionToWarning : string -> Suggestion.LintSuggestion -> LintWarning.Warning 
         
+    /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
+    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult       
+        
     /// Lints an entire F# project by retrieving the files from a given 
     /// path to the `.fsproj` file.
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult

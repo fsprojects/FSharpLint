@@ -6,7 +6,6 @@ module Program =
     open System
     open FSharpLint.Framework
     open FSharpLint.Application
-    open FSharpLint.Application
 
     let private writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
         let originalColour = Console.ForegroundColor
@@ -25,6 +24,7 @@ module Program =
         
     let private help () =
         writeInfoLine "-f <project.fsproj>                lint project"
+        writeInfoLine "-sol <solution.sln>                lint solution"
         writeInfoLine "-sf <file.fs>                      lint single file"
         writeInfoLine "-source 'let foo = 5'              lint source code"
         writeInfoLine "-convert <xmlConfig> <outputFile>  convert old XML config to JSON"
@@ -55,6 +55,15 @@ module Program =
               ReportLinterProgress = Some parserProgress }
 
         lintProject parseInfo projectFile
+        
+    let private runLintOnSolution solutionFile =
+        let parseInfo =
+            { CancellationToken = None
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress }
+
+        lintSolution parseInfo solutionFile       
 
     let private runLintOnFile pathToFile =
         let parseInfo =
@@ -93,6 +102,7 @@ module Program =
 
     type private Argument =
         | ProjectFile of string
+        | SolutionFile of string
         | SingleFile of string
         | Source of string
         | ConvertConfig of string * string
@@ -101,6 +111,7 @@ module Program =
         override this.ToString() =
             match this with
             | ProjectFile(f) -> "project " + f
+            | SolutionFile(f) -> "solution " + f
             | SingleFile(f) -> "source file " + f
             | Source(_) -> "source code"
             | ConvertConfig(xmlConfig, outputFile) -> "config " + xmlConfig + " " + outputFile
@@ -110,6 +121,8 @@ module Program =
         let rec parseArguments parsedArguments = function
             | "-f" :: argument :: remainingArguments -> 
                 parseArguments (ProjectFile(argument) :: parsedArguments) remainingArguments
+            | "-sol" :: argument :: remainingArguments -> 
+                parseArguments (SolutionFile(argument) :: parsedArguments) remainingArguments               
             | "-sf" :: argument :: remainingArguments ->
                 parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
             | "-source" :: argument :: remainingArguments ->
@@ -130,7 +143,7 @@ module Program =
 
     let private containsRequiredArguments arguments =
         let isArgumentSpecifyingWhatToLint = function 
-            | ProjectFile(_) | SingleFile(_) | Source(_) | ConvertConfig(_) -> true 
+            | ProjectFile(_) | SolutionFile(_) | SingleFile(_) | Source(_) | ConvertConfig(_) -> true 
             | _ -> false
 
         arguments |> List.exists isArgumentSpecifyingWhatToLint
@@ -158,13 +171,14 @@ module Program =
         |> List.iter (fun arg ->
             try
                 match arg with
-                | SingleFile(file) | ProjectFile(file) when not (IO.File.Exists file) ->
+                | SingleFile(file) | ProjectFile(file) | SolutionFile(file) when not (IO.File.Exists file) ->
                     let formatString = Resources.GetString("ConsoleCouldNotFindFile")
                     String.Format(formatString, file) |> handleError
                 | SingleFile(file) -> runLintOnFile file |> handleLintResult
                 | Source(source) -> runLintOnSource source |> handleLintResult
                 | ProjectFile(projectFile) -> runLintOnProject projectFile |> handleLintResult
                 | ConvertConfig(xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> handleConversionResult xmlConfig outputFile
+                | SolutionFile(solutionFile) -> runLintOnSolution solutionFile |> handleLintResult
                 | UnexpectedArgument(_) -> ()
             with
             | e -> 

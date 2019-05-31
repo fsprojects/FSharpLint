@@ -419,6 +419,9 @@ module Lint =
         | Result.Error r ->
             failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
 
+    let getProjectsFromSolution (solutionFilePath : string) =
+        Dotnet.ProjInfo.Inspect.getProjectInfos
+        
     let configFailureToLintFailure = function
         | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)
         | ConfigurationManagement.RunTimeConfigError -> RunTimeConfigError
@@ -486,7 +489,7 @@ module Lint =
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
           TypeCheckResults: FSharpCheckFileResults option }
-
+   
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let lintProject optionalParams projectFilePath =
@@ -550,6 +553,37 @@ module Lint =
             | Failure(x) -> LintResult.Failure(x)
         | Failure(x) -> LintResult.Failure(x)
 
+    /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
+    let lintSolution optionalParams solutionFilePath =
+        let solutionFolder = Path.GetDirectoryName solutionFilePath
+
+        let projectsInSolution =
+            File.ReadAllText(solutionFilePath)
+            |> String.toLines
+            |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project"))
+            |> Array.map (fun (s, _, _) ->
+                let endIndex = s.IndexOf(".fsproj") + 7
+                let startIndex = s.IndexOf(",") + 1
+                let projectPath = s.Substring(startIndex, endIndex - startIndex)
+                projectPath.Trim([|'"'; ' '|]))
+            |> Array.map (fun projectPath -> Path.Combine(solutionFolder, projectPath))
+        
+        let (successes, failures) =
+            projectsInSolution
+            |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath)
+            |> Array.fold (fun (successes, failures) result ->
+                match result with
+                | LintResult.Success warnings ->
+                    (List.append warnings successes, failures)
+                | LintResult.Failure err ->
+                    (successes, err :: failures)) ([], [])
+            
+        match failures with
+        | [] ->
+            LintResult.Success successes
+        | firstErr :: _ ->
+            LintResult.Failure firstErr
+    
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource optionalParams parsedFileInfo =
