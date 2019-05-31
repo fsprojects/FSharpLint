@@ -289,12 +289,16 @@ let convertRuleNoConfig (config:Configuration.XmlConfiguration) (analyserName:st
     convertRuleWithConfig config analyserName ruleName (fun _ -> None)
         
 let convertHints (config:Configuration.XmlConfiguration) =
-    let analyser = Map.find "Hints" config.Analysers
+    let analyser = Map.tryFind "Hints" config.Analysers
 
-    match Map.tryFind "Hints" analyser.Settings with
-    | Some(Configuration.Hints(hints)) ->
-        Some { HintConfig.add = hints.Hints |> Array.ofList |> Some; ignore = None }
-    | _ ->
+    match analyser with
+    | Some analyser ->
+        match Map.tryFind "Hints" analyser.Settings with
+        | Some(Configuration.Hints(hints)) ->
+            Some { HintConfig.add = hints.Hints |> Array.ofList |> Some; ignore = None }
+        | _ ->
+            None
+    | None ->
         None
         
 let convertIgnoreFiles (config:Configuration.XmlConfiguration) =
