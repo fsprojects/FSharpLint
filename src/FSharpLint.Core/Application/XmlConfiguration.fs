@@ -647,7 +647,7 @@ let convertTypography (config:Configuration.XmlConfiguration) =
 
 /// Tries to convert an old style XmlConfiguration to new JSON config.
 let convertToConfig xmlConfig =
-    { Configuration.ignoreFiles = convertIgnoreFiles xmlConfig
+    { ignoreFiles = convertIgnoreFiles xmlConfig
       hints = convertHints xmlConfig
       formatting = convertFormatting xmlConfig
       conventions = convertConventions xmlConfig
