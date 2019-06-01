@@ -22,20 +22,20 @@
 
 ##### 0.10.8 - April 1 2019
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/323, by jgardella
-* Update `FSharp.Compiler.Service`, by enricosada 
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/323,> by jgardella
+* Update `FSharp.Compiler.Service`, by enricosada
 
 ##### 0.10.7 - February 26 2019
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/304
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/304>
 
 ##### 0.10.6 - February 26 2019
 
-* Update `FSharp.Compiler.Service` 
+* Update `FSharp.Compiler.Service`
 
 ##### 0.10.5 - February 13 2019
 
-* Update `FSharp.Compiler.Service`, by baronfel 
+* Update `FSharp.Compiler.Service`, by baronfel
 
 ##### 0.10.4 - February 11 2019
 
@@ -67,8 +67,8 @@
 
 ##### 0.9.1-beta - February 22 2018
 
-* Fixed https://github.com/fsprojects/FSharpLint/issues/256 by [@SteveGilham](https://github.com/SteveGilham)
-* Fixed https://github.com/fsprojects/FSharpLint/issues/252 by [@SteveGilham](https://github.com/SteveGilham)
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/256> by [@SteveGilham](https://github.com/SteveGilham)
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/252> by [@SteveGilham](https://github.com/SteveGilham)
 
 ##### 0.9.0 - January 28 2018
 
@@ -80,7 +80,7 @@
 
 ##### 0.8.1 - October 10 2017
 
-* Fixed https://github.com/fsprojects/FSharpLint/issues/240
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/240>
 
 ##### 0.8.0 - September 05 2017
 
@@ -88,12 +88,12 @@
 
 ##### 0.7.7 - August 20 2017
 
-* Fixed https://github.com/fsprojects/FSharpLint/issues/237
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/237>
 
 ##### 0.7.6 - July 02 2017
 
-* Fixed https://github.com/fsprojects/FSharpLint/issues/229
-* Fixed https://github.com/fsprojects/FSharpLint/issues/227
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/229>
+* Fixed <https://github.com/fsprojects/FSharpLint/issues/227>
 * Updated `FSharp.Compiler.Service`
 
 ##### 0.7.5-beta - March 31 2017
@@ -137,7 +137,7 @@
 ##### 0.6.2-beta - January 21 2017
 
 * Added suggested fixes for naming rules.
-* New hint by [@smoothdeveloper](https://github.com/smoothdeveloper): https://github.com/fsprojects/FSharpLint/pull/207
+* New hint by [@smoothdeveloper](https://github.com/smoothdeveloper): <https://github.com/fsprojects/FSharpLint/pull/207>
 
 ##### 0.6.1-beta - January 17 2017
 
@@ -149,11 +149,11 @@
 
 ##### 0.4.12 - November 16 2016
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/191
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/191>
 
 ##### 0.4.11 - November 10 2016
 
-* Bug fixed by [@rexcfnghk](https://github.com/rexcfnghk): https://github.com/fsprojects/FSharpLint/issues/189
+* Bug fixed by [@rexcfnghk](https://github.com/rexcfnghk): <https://github.com/fsprojects/FSharpLint/issues/189>
 
 ##### 0.4.10 - October 24 2016
 
@@ -161,7 +161,7 @@
 
 ##### 0.4.9 - October 8 2016
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/184
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/184>
 
 ##### 0.4.8 - September 13 2016
 
@@ -174,7 +174,7 @@
 
 ##### 0.4.6 - August 21 2016
 
-* Bug fixed by [@Krzysztof-Cieslak](https://github.com/Krzysztof-Cieslak): https://github.com/fsprojects/FSharpLint/issues/172
+* Bug fixed by [@Krzysztof-Cieslak](https://github.com/Krzysztof-Cieslak): <https://github.com/fsprojects/FSharpLint/issues/172>
 
 ##### 0.4.5 - August 5 2016
 
@@ -217,22 +217,22 @@
 
 ##### 0.2.7 - September 27 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/126
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/125
-* Added feature - now able to write a message as a suggestion in hints: https://github.com/fsprojects/FSharpLint/issues/117
-* Added feature - nulls can now be matched against in hints: https://github.com/fsprojects/FSharpLint/commit/89050c3bc6020477b3b9d50a4ce541aa09b9a270
-* Fixed bug - lambda length warnings would be repeated for each argument: https://github.com/fsprojects/FSharpLint/commit/bc49dd6d58ebbbe8f2cdb4857e011fcaf14d9982
-* Enhancement - display operators as symbols in eta reduction suggestions: https://github.com/fsprojects/FSharpLint/commit/1b2f115e71b560ccf8019ef5f14df79f0fd62201
-* Enhancement - updated warning messages: https://github.com/fsprojects/FSharpLint/commit/49e579ca35de70902def6bb30835593140be7abd
-* Partially fixed bug (fixed when type checking enabled): https://github.com/fsprojects/FSharpLint/issues/113
-* Partially fixed bug (fixed when type checking enabled): https://github.com/fsprojects/FSharpLint/issues/109
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/126>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/125>
+* Added feature - now able to write a message as a suggestion in hints: <https://github.com/fsprojects/FSharpLint/issues/117>
+* Added feature - nulls can now be matched against in hints: <https://github.com/fsprojects/FSharpLint/commit/89050c3bc6020477b3b9d50a4ce541aa09b9a270>
+* Fixed bug - lambda length warnings would be repeated for each argument: <https://github.com/fsprojects/FSharpLint/commit/bc49dd6d58ebbbe8f2cdb4857e011fcaf14d9982>
+* Enhancement - display operators as symbols in eta reduction suggestions: <https://github.com/fsprojects/FSharpLint/commit/1b2f115e71b560ccf8019ef5f14df79f0fd62201>
+* Enhancement - updated warning messages: <https://github.com/fsprojects/FSharpLint/commit/49e579ca35de70902def6bb30835593140be7abd>
+* Partially fixed bug (fixed when type checking enabled): <https://github.com/fsprojects/FSharpLint/issues/113>
+* Partially fixed bug (fixed when type checking enabled): <https://github.com/fsprojects/FSharpLint/issues/109>
 * Configuration can now be written back to XML.
 * Configuration API updated to provide management of configuration files.
 
 ##### 0.2.6 - July 18 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/108
-* `Default` property now static: https://github.com/fsprojects/FSharpLint/pull/107
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/108>
+* `Default` property now static: <https://github.com/fsprojects/FSharpLint/pull/107>
 
 ##### 0.2.5 - July 7 2015
 
@@ -240,23 +240,23 @@
 
 ##### 0.2.4 - July 6 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/101
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/100
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/99
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/103
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/101>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/100>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/99>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/103>
 
 ##### 0.2.3 - July 2 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/98
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/98>
 
 ##### 0.2.2 - June 9 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/97 
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/97>
 * XmlDoc rules now configurable to apply to code with certain access levels e.g. private or public. Thanks goes to Jon Hamm for implementing this feature
 
 ##### 0.2.1 - May 31 2015
 
-* Included FSharp.Core 
+* Included FSharp.Core
 * Fixed bug where hints would accidentally match named parameters and property initialisers
 
 ##### 0.2.0 - May 31 2015
@@ -265,8 +265,8 @@
 * Type checking is now optional and off by default to speed up the linting.
 * More XML documentation rules have been added thanks to [jhamm](https://github.com/jhamm)
 * Files can now be ignored by specifying git ignore like globs in the configuration file.
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/78
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/90
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/78>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/90>
 
 ##### 0.1.16 - March 11 2015
 
@@ -278,26 +278,26 @@
 
 ##### 0.1.14 - January 18 2015
 
-* Added a new rule `CanBeReplacedWithComposition` to the `FSharpLint.FunctionReimplementation` analyser: http://fsprojects.github.io/FSharpLint/FSharpLint.FunctionReimplementation.html
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
+* Added a new rule `CanBeReplacedWithComposition` to the `FSharpLint.FunctionReimplementation` analyser: <http://fsprojects.github.io/FSharpLint/FSharpLint.FunctionReimplementation.html>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/63>
 
 ##### 0.1.13 - January 11 2015
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/63
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
-* Files can now be ignored via the .fsproj file: https://github.com/fsprojects/FSharpLint/issues/55
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/63>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/57>
+* Files can now be ignored via the .fsproj file: <https://github.com/fsprojects/FSharpLint/issues/55>
 * FAKE task now reports on how many files were linted and how many warnings were found.
 * FAKE task now includes more detailed information on failure.
 * FAKE task now includes an option to fail the build if any warnings are found.
 
 ##### 0.1.12 - December 16 2014
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/57
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/57>
 
 ##### 0.1.11 - November 23 2014
 
 * FSharp.Compiler.Service now included as a strongly named assembly.
-* TargetFrameworkVersion now taken from the project file: https://github.com/fsprojects/FSharpLint/issues/52
+* TargetFrameworkVersion now taken from the project file: <https://github.com/fsprojects/FSharpLint/issues/52>
 
 ##### 0.1.10 - November 19 2014
 
@@ -305,7 +305,7 @@
 
 ##### 0.1.9 - November 17 2014
 
-* Updated `FSharp.Compiler.Service` for compatibility with VisualFSharpPowerTools: https://github.com/fsprojects/FSharpLint/issues/51
+* Updated `FSharp.Compiler.Service` for compatibility with VisualFSharpPowerTools: <https://github.com/fsprojects/FSharpLint/issues/51>
 
 ##### 0.1.8 - November 15 2014
 
@@ -314,15 +314,15 @@
 ##### 0.1.7 - November 14 2014
 
 * Added support for SuppressMessageAttribute for the Typography analyser
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/48
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/47
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/48>
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/47>
 * Attempted to fix assembly resolution issues by including FParsec built against FSharp.Core 4.3.0.0
 * Added FAKE task to the nuget package
 
 ##### 0.1.6 - October 25 2014
 
 * Added `FSharpLint.Binding.TupleOfWildcards` rule
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/38
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/38>
 
 ##### 0.1.5 - October 24 2014
 
@@ -331,7 +331,7 @@
 
 ##### 0.1.4 - October 21 2014
 
-* Fixed bug: https://github.com/fsprojects/FSharpLint/issues/36
+* Fixed bug: <https://github.com/fsprojects/FSharpLint/issues/36>
 
 ##### 0.1.3 - October 16 2014
 
