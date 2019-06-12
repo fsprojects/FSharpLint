@@ -16,13 +16,13 @@ Please provide a description of the behavior you expect.
 
 ### Actual behavior
 
-Please provide a description of the actual behavior you observe. 
+Please provide a description of the actual behavior you observe.
 
 ### Known workarounds
 
 Please provide a description of any known workarounds.
 
-### Related information 
+### Related information
 
 * Operating system
 * Branch
