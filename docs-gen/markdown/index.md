@@ -97,7 +97,7 @@ Rules are grouped based on what they address:
 
 #### Configuration Files
 
-Configuration of the tool is done using JSON. Configuration files must be named: `fsharplint.json`. A single JSON file containing the default configuration for all rules is [included inside of the software](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Framework/DefaultConfiguration.json).
+Configuration of the tool is done using JSON. Configuration files must be named: `fsharplint.json`. A single JSON file containing the default configuration for all rules is [included inside of the software](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json).
 
 The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was `C:\Files\SomeProjectBeingLinted`, then `C:\` would first be checked for a config file - if a config file is found then it would override the default config, then `C:\Files` would be checked - if a config file was found and a config file was also previously found in `C:\` then the config in `C:\Files` would override the one in `C:\` and so on.
 
@@ -143,7 +143,7 @@ The following code breaks the rule `NameConventions.InterfaceNamesMustBeginWithI
 
     type Printable =
         abstract member Print : unit -> unit
-        
+
 It will result in the warning: ```Consider changing `Printable` to be prefixed with `I`.```
 
 We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("*", "InterfaceNamesMustBeginWithI")>]`
