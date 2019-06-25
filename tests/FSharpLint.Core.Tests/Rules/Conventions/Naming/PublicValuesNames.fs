@@ -58,4 +58,14 @@ type SingleCaseDU = SingleCaseDU of int
 
 let (SingleCaseDU myInt) = (SingleCaseDU 5)""")
         
-        this.AssertNoWarnings() 
+        this.AssertNoWarnings()
+        
+    [<Test>]
+    member this.``ActivePatternDoesNotGenerateWarning`` () =
+         this.Parse("""
+let (|Empty|_|) str =
+    match str with
+    | "" -> Some Empty
+    | _ -> None""")
+
+         this.AssertNoWarnings()       
