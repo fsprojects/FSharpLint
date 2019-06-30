@@ -6,7 +6,6 @@
 module ConfigurationManagement =
 
     open System.IO
-    open FSharp.Json
     open FSharpLint.Framework.Configuration
     open FSharpLint.Application.ConfigurationManager
 

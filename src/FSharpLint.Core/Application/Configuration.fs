@@ -9,7 +9,6 @@ module Configuration =
     open System.Reflection
     open FSharpLint.Framework
     open FSharpLint.Application.ConfigurationManager
-    open FSharp.Json
 
     [<Literal>]
     let SettingsFileName = "fsharplint.json"
