@@ -14,7 +14,7 @@ let stubBinding attributes =
                        SynBindingKind.NormalBinding,
                        false,
                        false,
-                       attributes,
+                       [ {Attributes = attributes; Range = range() } ], // inline list of SynAttributeList types
                        PreXmlDoc.PreXmlDocEmpty,
                        SynValData(None, SynValInfo.SynValInfo([], SynArgInfo.SynArgInfo([], false, None)), None),
                        SynPat.Wild(range()),

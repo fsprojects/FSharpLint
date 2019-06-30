@@ -42,7 +42,7 @@ type T =
         Assert.IsTrue(this.ErrorExistsAt(6, 10))
 
     [<Test>]
-    member this.``No error for correctly indented union defintion cases``() =
+    member this.``No error for correctly indented union definition cases``() =
         this.Parse"""
 module Program
 
@@ -54,7 +54,7 @@ type T =
         Assert.IsTrue(this.NoErrorsExist)
         
     [<Test>]
-    member this.``No error for correctly indented union defintion cases with attribute``() =
+    member this.``No error for correctly indented union definition cases with attribute``() =
         this.Parse"""
 module Program
 

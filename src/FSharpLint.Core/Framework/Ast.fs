@@ -42,6 +42,12 @@ module Ast =
         | Identifier of string list
         | File of ParsedInput
 
+    /// Concatenates the nested-list structure of `SynAttributes` into a `SynAttribute list` to keep other code
+    /// mostly unchanged.
+    let extractAttributes (attrs: SynAttributes) =
+        attrs
+        |> List.collect (fun attrList -> attrList.Attributes)
+
     /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
     let getSuppressMessageAttributes node =
         let tryGetArguments (attribute:SynAttribute) =
@@ -93,6 +99,7 @@ module Ast =
         | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, range))
         | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) ->
             attributes
+            |> extractAttributes
             |> List.choose tryGetSuppressMessageAttribute
             |> List.map (fun x -> (x, range))
         | _ -> []
@@ -254,10 +261,21 @@ module Ast =
         | SynType.AnonRecd (_, typeNames, _) ->
             typeNames |> List.revIter (snd >> typeNode >> add)
 
+    /// Concatenates the typed-or-untyped structure of `SynSimplePats` into a `SynSimplePat list` to keep other code
+    /// mostly unchanged.
+    let inline extractPatterns (simplePats: SynSimplePats) =
+        let rec loop pat acc =
+            match pat with
+            | SynSimplePats.SimplePats(patterns, _range) -> patterns @ acc
+            | SynSimplePats.Typed(patterns, _type, _range) -> loop patterns acc
+        loop simplePats []
+
     let inline private memberDefinitionChildren node add =
         match node with
         | SynMemberDefn.Member(binding, _) -> add <| bindingNode binding
-        | SynMemberDefn.ImplicitCtor(_, _, patterns, _, _) -> patterns |> List.revIter (simplePatternNode >> add)
+        | SynMemberDefn.ImplicitCtor(_, _, patterns, _, _) ->
+            let combinedPatterns = extractPatterns patterns
+            combinedPatterns |> List.revIter (simplePatternNode >> add)
         | SynMemberDefn.ImplicitInherit(synType, expression, _, _) ->
             add <| expressionNode expression
             add <| typeNode synType
