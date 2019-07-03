@@ -236,7 +236,9 @@ let isAttribute name (attributes:SynAttributes) =
         | Some(ident) -> ident.idText = fullName || ident.idText = name
         | None -> false
 
-    attributes |> List.exists attributeHasExpectedName
+    attributes
+    |> extractAttributes
+    |> List.exists attributeHasExpectedName
 
 let isLiteral = isAttribute "Literal"
 

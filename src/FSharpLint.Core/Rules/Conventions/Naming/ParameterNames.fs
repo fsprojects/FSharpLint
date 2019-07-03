@@ -29,6 +29,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         match memberDef with
         | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
             ctorArgs
+            |> extractPatterns
             |> List.toArray
             |> Array.choose (fun arg -> identFromSimplePat arg)
             |> Array.map (fun ident -> (ident, ident.idText, None))
