@@ -1,3 +1,10 @@
+##### 0.12.2 - July 3 2019
+
+* Add API to convert XmlConfiguration to new config type [@milbrandt]
+* Ignore active patterns in PublicValues naming conventions rule
+* Update FCS to 30.0 [@baronfel]
+* Use Newtonsoft.Json for config parsing
+
 ##### 0.12.1 - May 31 2019
 
 * Implement linting of all projects in solution using `-sol` flag, or programmatically using `lintSolution` function

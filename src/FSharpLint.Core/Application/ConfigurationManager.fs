@@ -1,8 +1,7 @@
 ﻿module FSharpLint.Application.ConfigurationManager
 
 open System.IO
-open FSharp.Data
-open FSharp.Json
+open Newtonsoft.Json
 open FSharpLint.Rules
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
@@ -10,6 +9,45 @@ open FSharpLint.Framework.HintParser
 
 exception ConfigurationException of string
 
+module FSharpJsonConverter =
+    open System
+    open Microsoft.FSharp.Reflection
+
+    type OptionConverter() =
+        inherit JsonConverter()
+        
+        override x.CanConvert(t) = 
+            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+
+        override x.WriteJson(writer, value, serializer) =
+            let value = 
+                if value = null then null
+                else 
+                    let _,fields = FSharpValue.GetUnionFields(value, value.GetType())
+                    fields.[0]  
+            serializer.Serialize(writer, value)
+
+        override x.ReadJson(reader, t, _, serializer) =        
+            let innerType = t.GetGenericArguments().[0]
+            let innerType = 
+                if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
+                else innerType        
+            let value = serializer.Deserialize(reader, innerType)
+            let cases = FSharpType.GetUnionCases(t)
+            if value = null then FSharpValue.MakeUnion(cases.[0], [||])
+            else FSharpValue.MakeUnion(cases.[1], [|value|])
+            
+    let private converters =
+        [|
+            OptionConverter() :> JsonConverter
+        |]
+            
+    let serializerSettings =
+        let settings = JsonSerializerSettings()
+        settings.NullValueHandling <- NullValueHandling.Ignore
+        settings.Converters <- converters
+        settings
+        
 module IgnoreFiles =
 
     open System
@@ -458,13 +496,12 @@ let mergeConfig (baseConfig : Configuration) (overridingConfig : Configuration) 
 
 let parseConfig (configText : string) =
     try
-        Json.deserialize<Configuration> configText
+        JsonConvert.DeserializeObject<Configuration>(configText, FSharpJsonConverter.serializerSettings)
     with
     | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
     
 let serializeConfig (config : Configuration) =
-    let jsonConfig = { JsonConfig.Default with serializeNone = Omit }
-    Json.serializeEx jsonConfig config
+    JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
      
 type LineRules =
     { genericLineRules : RuleMetadata<LineRuleConfig> []

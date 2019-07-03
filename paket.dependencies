@@ -9,7 +9,7 @@ nuget FSharp.Core ~> 4.6.2
 nuget nunit
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk
-nuget FSharp.Json
+nuget Newtonsoft.Json
 
 group Tools
 source https://api.nuget.org/v3/index.json
