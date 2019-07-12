@@ -559,7 +559,7 @@ module Lint =
         let projectsInSolution =
             File.ReadAllText(solutionFilePath)
             |> String.toLines
-            |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project"))
+            |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project") && s.Contains(".fsproj"))
             |> Array.map (fun (s, _, _) ->
                 let endIndex = s.IndexOf(".fsproj") + 7
                 let startIndex = s.IndexOf(",") + 1
