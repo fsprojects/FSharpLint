@@ -1,3 +1,7 @@
+##### 0.12.3 - August 15 2019
+
+* Update FCS to 31.0 [@baronfel]
+
 ##### 0.12.2 - July 3 2019
 
 * Add API to convert XmlConfiguration to new config type [@milbrandt]
