@@ -3,7 +3,7 @@ framework: net461, netstandard2.0, netcoreapp2.1
 storage: none
 
 nuget FParsec
-nuget FSharp.Compiler.Service ~> 31.0
+nuget FSharp.Compiler.Service ~> 32.0
 nuget Dotnet.ProjInfo ~> 0.31.0
 nuget FSharp.Core ~> 4.6.2
 nuget nunit

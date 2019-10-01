@@ -343,6 +343,10 @@ module Ast =
         | SynExpr.TraitCall(_, _, expression, _)
         | SynExpr.YieldOrReturn(_, expression, _)
         | SynExpr.YieldOrReturnFrom(_, expression, _) -> add <| expressionNode expression
+        | SynExpr.SequentialOrImplicitYield(_, expression1, expression2, ifNotExpression, _) ->
+            add <| expressionNode expression1
+            add <| expressionNode expression2
+            add <| expressionNode ifNotExpression
         | SynExpr.Quote(expression, _, expression1, _, _)
         | SynExpr.Sequential(_, _, expression, expression1, _)
         | SynExpr.NamedIndexedPropertySet(_, expression, expression1, _)
