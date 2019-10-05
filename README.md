@@ -1,6 +1,3 @@
-[![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/issue)](http://issuestats.com/github/fsprojects/FSharpLint)
-[![Issue Stats](http://issuestats.com/github/fsprojects/FSharpLint/badge/pr)](http://issuestats.com/github/fsprojects/FSharpLint)
-
 # FSharpLint
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
