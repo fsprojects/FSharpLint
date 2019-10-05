@@ -1,3 +1,7 @@
+##### 0.12.4 - October 5 2019
+
+* Update FCS to 32.0 [@Krzysztof-Cieslak]
+
 ##### 0.12.3 - August 15 2019
 
 * Update FCS to 31.0 [@baronfel]
