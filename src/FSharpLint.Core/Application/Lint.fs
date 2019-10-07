@@ -492,6 +492,7 @@ module Lint =
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let lintProject optionalParams projectFilePath =
+        let projectFilePath = Path.GetFullPath projectFilePath
         let lintWarnings = LinkedList<LintWarning.Warning>()
 
         let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
@@ -554,6 +555,7 @@ module Lint =
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
     let lintSolution optionalParams solutionFilePath =
+        let solutionFilePath = Path.GetFullPath solutionFilePath
         let solutionFolder = Path.GetDirectoryName solutionFilePath
 
         let projectsInSolution =

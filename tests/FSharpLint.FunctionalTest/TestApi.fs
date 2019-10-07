@@ -60,7 +60,7 @@ module TestApi =
             System.Console.WriteLine(sprintf "Average runtime of linter on parsed file: %d (milliseconds)."  result)
 
         [<Test>]
-        member __.``Lint project``() =
+        member __.``Lint project via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
 
@@ -71,9 +71,9 @@ module TestApi =
                 Assert.AreEqual(9, warnings.Length)
             | LintResult.Failure _ ->
                 Assert.True(false)
-                
+
         [<Test>]
-        member __.``Lint solution``() =
+        member __.``Lint solution via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
 
@@ -84,3 +84,36 @@ module TestApi =
                 Assert.AreEqual(9, warnings.Length)
             | LintResult.Failure _ ->
                 Assert.True(false)               
+                
+#if NETCOREAPP // GetRelativePath is netcore-only
+        [<Test>]
+        member __.``Lint project via relative path``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            
+            let relativePathToProjectFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), projectFile)
+
+            let result = lintProject OptionalLintParameters.Default relativePathToProjectFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure _ ->
+                Assert.True(false)
+            ()
+            
+        [<Test>]
+        member __.``Lint solution via relative path``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+
+            let relativePathToSolutionFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), solutionFile)
+            
+            let result = lintSolution OptionalLintParameters.Default relativePathToSolutionFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure _ ->
+                Assert.True(false)               
+#endif
