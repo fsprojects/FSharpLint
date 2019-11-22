@@ -20,7 +20,7 @@ type Test() =
     member val Five = 0 with get, set
     member val Six = 0 with get, set"""
 
-        Assert.IsTrue(this.ErrorExistsAt(10, 11))
+        Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
     [<Test>]
     member this.SixClassPropertiesSuppressed() = 
@@ -94,7 +94,7 @@ type Test() =
     member this.Five() = ()
     member this.Six() = ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(10, 11))
+        Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
     [<Test>]
     member this.SixClassMethodsLastPrivate() = 
