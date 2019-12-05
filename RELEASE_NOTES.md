@@ -1,3 +1,7 @@
+##### 0.12.6 - December 5 2019
+
+* Update FCS to 33.0 [@baronfel]
+
 ##### 0.12.5 - October 7 2019
 
 * Addressed issue: <https://github.com/fsprojects/FSharpLint/issues/367> [@jrr]
