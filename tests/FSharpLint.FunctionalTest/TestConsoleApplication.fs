@@ -61,11 +61,7 @@ module Tests =
           "FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
           "FL0065: `a <> true` might be able to be refactored into `not a`."
           "FL0065: `x = null` might be able to be refactored into `isNull x`."
-          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`."
-          "FL0001: Comma in tuple instantiation should be followed by single space."
-          "FL0003: Use parentheses for tuple instantiation."
-          "FL0059: Invalid indentation."
-          "FL0063: Found trailing whitespace line at end of file." ]
+          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
