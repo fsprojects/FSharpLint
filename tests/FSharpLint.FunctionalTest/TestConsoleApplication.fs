@@ -61,7 +61,11 @@ module Tests =
           "FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
           "FL0065: `a <> true` might be able to be refactored into `not a`."
           "FL0065: `x = null` might be able to be refactored into `isNull x`."
-          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
+          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`."
+          "FL0001: Comma in tuple instantiation should be followed by single space."
+          "FL0003: Use parentheses for tuple instantiation."
+          "FL0059: Invalid indentation."
+          "FL0063: Found trailing whitespace line at end of file." ]
         
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
@@ -106,6 +110,21 @@ module Tests =
             Assert.AreEqual(expectedErrors, errors, 
                 "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+            
+        [<Test>]
+        member __.FunctionalTestConsoleApplicationReleaseMode() = 
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let arguments = sprintf "-f %s -c Release" projectFile
+
+            let output = dotnetFslint arguments
+            let errors = getErrorsFromOutput output
+            
+            let expectedMissing = Set.difference expectedErrors errors
+            let notExpected = Set.difference errors expectedErrors
+
+            Assert.AreEqual(expectedErrors, errors, 
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")           
             
         [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() = 

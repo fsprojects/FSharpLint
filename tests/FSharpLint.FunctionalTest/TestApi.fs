@@ -68,7 +68,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
+                Assert.AreEqual(15, warnings.Length)
             | LintResult.Failure _ ->
                 Assert.True(false)
 
@@ -81,7 +81,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
+                Assert.AreEqual(15, warnings.Length)
             | LintResult.Failure _ ->
                 Assert.True(false)               
                 
