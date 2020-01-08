@@ -76,7 +76,9 @@ module Lint =
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option 
           
-          ReportLinterProgress: (ProjectProgress -> unit) option }
+          ReportLinterProgress: (ProjectProgress -> unit) option
+
+          ReleaseConfiguration : string option }
 
         static member Default: OptionalLintParameters
 

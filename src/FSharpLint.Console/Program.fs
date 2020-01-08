@@ -47,34 +47,16 @@ module Program =
         |> writeWarningLine
         String.replicate 80 "-" |> writeInfoLine
 
-    let private runLintOnProject projectFile =
-        let parseInfo =
-            { CancellationToken = None
-              ReceivedWarning = Some writeLintWarning
-              Configuration = None
-              ReportLinterProgress = Some parserProgress }
-
-        lintProject parseInfo projectFile
+    let private runLintOnProject lintParams projectFile =
+        lintProject lintParams projectFile
         
-    let private runLintOnSolution solutionFile =
-        let parseInfo =
-            { CancellationToken = None
-              ReceivedWarning = Some writeLintWarning
-              Configuration = None
-              ReportLinterProgress = Some parserProgress }
+    let private runLintOnSolution lintParams solutionFile =
+        lintSolution lintParams solutionFile
 
-        lintSolution parseInfo solutionFile       
+    let private runLintOnFile lintParams pathToFile =
+        lintFile lintParams pathToFile
 
-    let private runLintOnFile pathToFile =
-        let parseInfo =
-            { CancellationToken = None
-              ReceivedWarning = Some writeLintWarning
-              Configuration = None
-              ReportLinterProgress = Some parserProgress }
-
-        lintFile parseInfo pathToFile
-
-    let private runLintOnSource source =
+    let private runLintOnSource lintParams source =
         let getErrorMessage (range:FSharp.Compiler.Range.range) =
             let error = Resources.GetString("LintSourceError")
             String.Format(error, range.StartLine, range.StartColumn)
@@ -83,13 +65,9 @@ module Program =
             warning.Info + Environment.NewLine + LintWarning.warningInfoLine getErrorMessage warning.Range warning.Input
             |> writeWarningLine
 
-        let parseInfo =
-            { CancellationToken = None
-              ReceivedWarning = Some reportLintWarning
-              Configuration = None
-              ReportLinterProgress = None }
+        let lintParams = { lintParams with ReceivedWarning = Some reportLintWarning }
 
-        lintSource parseInfo source
+        lintSource lintParams source
         
     let private convertConfig (xmlFile:string) (outputFile:string) =
         try
@@ -106,6 +84,7 @@ module Program =
         | SingleFile of string
         | Source of string
         | ConvertConfig of string * string
+        | ReleaseConfig of string
         | UnexpectedArgument of string
 
         override this.ToString() =
@@ -115,6 +94,7 @@ module Program =
             | SingleFile(f) -> "source file " + f
             | Source(_) -> "source code"
             | ConvertConfig(xmlConfig, outputFile) -> "config " + xmlConfig + " " + outputFile
+            | ReleaseConfig (config) -> "releaseConfig " + config
             | UnexpectedArgument(_) -> "unexpected argument"
 
     let private parseArguments arguments =
@@ -127,8 +107,10 @@ module Program =
                 parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
             | "-source" :: argument :: remainingArguments ->
                 parseArguments (Source(argument) :: parsedArguments) remainingArguments
-             | "-convert" :: xmlConfig :: outputFile :: remainingArguments ->
-                parseArguments (ConvertConfig(xmlConfig, outputFile) :: parsedArguments) remainingArguments               
+            | "-convert" :: xmlConfig :: outputFile :: remainingArguments ->
+                parseArguments (ConvertConfig(xmlConfig, outputFile) :: parsedArguments) remainingArguments
+            | "-c" :: releaseConfig :: remainingArguments ->
+                parseArguments (ReleaseConfig (releaseConfig) :: parsedArguments) remainingArguments                              
             | [] -> parsedArguments
             | argument :: _ ->  [UnexpectedArgument(argument)]
 
@@ -167,6 +149,15 @@ module Program =
             | Choice2Of2 err ->
                 (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> handleError           
         
+        let releaseConfig = arguments |> List.tryPick (function | ReleaseConfig config -> Some config | _ -> None)
+        
+        let lintParams =
+            { CancellationToken = None
+              ReceivedWarning = Some writeLintWarning
+              Configuration = None
+              ReportLinterProgress = Some parserProgress
+              ReleaseConfiguration = releaseConfig }
+        
         arguments
         |> List.iter (fun arg ->
             try
@@ -174,11 +165,12 @@ module Program =
                 | SingleFile(file) | ProjectFile(file) | SolutionFile(file) when not (IO.File.Exists file) ->
                     let formatString = Resources.GetString("ConsoleCouldNotFindFile")
                     String.Format(formatString, file) |> handleError
-                | SingleFile(file) -> runLintOnFile file |> handleLintResult
-                | Source(source) -> runLintOnSource source |> handleLintResult
-                | ProjectFile(projectFile) -> runLintOnProject projectFile |> handleLintResult
+                | SingleFile(file) -> runLintOnFile lintParams file |> handleLintResult
+                | Source(source) -> runLintOnSource lintParams source |> handleLintResult
+                | ProjectFile(projectFile) -> runLintOnProject lintParams projectFile |> handleLintResult
                 | ConvertConfig(xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> handleConversionResult xmlConfig outputFile
-                | SolutionFile(solutionFile) -> runLintOnSolution solutionFile |> handleLintResult
+                | SolutionFile(solutionFile) -> runLintOnSolution lintParams solutionFile |> handleLintResult
+                | ReleaseConfig(_)
                 | UnexpectedArgument(_) -> ()
             with
             | e -> 

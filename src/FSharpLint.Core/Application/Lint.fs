@@ -1,4 +1,5 @@
 ﻿namespace FSharpLint.Application
+open Dotnet.ProjInfo.Inspect.MSBuild
 
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
@@ -374,8 +375,13 @@ module Lint =
 
         exitCode, (workingDir, exePath, args)
 
-    let getProjectFileInfo projectFilePath = 
+    let getProjectFileInfo (releaseConfig : string option) projectFilePath = 
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
+        
+        let msBuildParams =
+            releaseConfig
+            |> Option.map (fun config -> [MSbuildCli.Property("ConfigurationName", config)])
+            |> Option.defaultValue []
         
         let msBuildResults =
             let runCmd exePath args = runProcess projDir exePath (args |> String.concat " ")
@@ -456,7 +462,6 @@ module Lint =
             | Failure value -> failure <- value; true
             | _ -> false
 
-
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
     type OptionalLintParameters =
@@ -470,10 +475,12 @@ module Lint =
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (LintWarning.Warning -> unit) option
           
-          ReportLinterProgress: (ProjectProgress -> unit) option }
+          ReportLinterProgress: (ProjectProgress -> unit) option
+          
+          ReleaseConfiguration : string option }
 
         static member Default = 
-            { CancellationToken = None; Configuration = None; ReceivedWarning = None; ReportLinterProgress = None }
+            { CancellationToken = None; Configuration = None; ReceivedWarning = None; ReportLinterProgress = None; ReleaseConfiguration = None }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
@@ -545,7 +552,7 @@ module Lint =
             | Success(config) -> parseFilesInProject config files projectOptions
             | Failure(x) -> Failure(x)
 
-        match getProjectFileInfo projectFilePath with
+        match getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath with
         | Success(projectOptions) ->
             let compileFiles = projectOptions.SourceFiles |> Array.toList
             match loadConfigAndParseFilesInProject compileFiles projectOptions with

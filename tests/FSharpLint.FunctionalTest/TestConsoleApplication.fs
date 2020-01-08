@@ -108,6 +108,21 @@ module Tests =
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
             
         [<Test>]
+        member __.FunctionalTestConsoleApplicationReleaseMode() = 
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let arguments = sprintf "-f %s -c Release" projectFile
+
+            let output = dotnetFslint arguments
+            let errors = getErrorsFromOutput output
+            
+            let expectedMissing = Set.difference expectedErrors errors
+            let notExpected = Set.difference errors expectedErrors
+
+            Assert.AreEqual(expectedErrors, errors, 
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")           
+            
+        [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() = 
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
             let arguments = sprintf "-sol %s" solutionFile

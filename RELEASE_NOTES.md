@@ -1,3 +1,7 @@
+##### 0.12.7 - January 7 2020
+
+* Add `-c` flag for specifying MSBuild release configuration
+
 ##### 0.12.6 - December 5 2019
 
 * Update FCS to 33.0 [@baronfel]
