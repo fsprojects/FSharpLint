@@ -1,3 +1,7 @@
+##### 0.12.8 - January 13 2020
+
+* Pass release configuration to dotnet proj info
+
 ##### 0.12.7 - January 7 2020
 
 * Add `-c` flag for specifying MSBuild release configuration
