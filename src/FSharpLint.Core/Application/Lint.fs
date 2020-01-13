@@ -388,7 +388,7 @@ module Lint =
             let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
         
             projectFilePath
-            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] []
+            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] msBuildParams
             
         match msBuildResults with
         | Result.Ok [getFscArgsResult; getP2PRefsResult] ->
