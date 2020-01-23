@@ -1,3 +1,7 @@
+##### 0.12.10 - January 23 2020
+
+* Return non-zero error code when there are lint warnings
+
 ##### 0.12.9 - January 23 2020
 
 * Fix linting of solution in non-Windows systems
