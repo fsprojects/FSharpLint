@@ -140,6 +140,7 @@ module Program =
         let handleLintResult = function
             | LintResult.Success(warnings) -> 
                 String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
+                if not (List.isEmpty warnings) then exitCode <- -1
             | LintResult.Failure(failure) ->
                 handleError failure.Description
             
