@@ -1,3 +1,7 @@
+##### 0.12.9 - January 23 2020
+
+* Fix linting of solution in non-Windows systems
+
 ##### 0.12.8 - January 13 2020
 
 * Pass release configuration to dotnet proj info

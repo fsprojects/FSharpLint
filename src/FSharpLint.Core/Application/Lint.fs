@@ -401,7 +401,7 @@ module Lint =
                     option.TrimStart().StartsWith("-") |> not
                 
                 let compileFilesToAbsolutePath (f: string) =
-                    if Path.IsPathRooted f then 
+                    if Path.IsPathRooted f then
                         f 
                     else 
                         Path.Combine(projDir, f)
@@ -574,7 +574,13 @@ module Lint =
                 let startIndex = s.IndexOf(",") + 1
                 let projectPath = s.Substring(startIndex, endIndex - startIndex)
                 projectPath.Trim([|'"'; ' '|]))
-            |> Array.map (fun projectPath -> Path.Combine(solutionFolder, projectPath))
+            |> Array.map (fun projectPath ->
+                let projectPath = 
+                    if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
+                        projectPath
+                    else // For non-Windows, we need to convert the project path in the solution to Unix format.
+                        projectPath.Replace("\\", "/")
+                Path.Combine(solutionFolder, projectPath))
         
         let (successes, failures) =
             projectsInSolution
