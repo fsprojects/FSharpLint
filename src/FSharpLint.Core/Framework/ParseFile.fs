@@ -14,16 +14,16 @@ module ParseFile =
     [<NoEquality; NoComparison>]
     type FileParseInfo =
         { /// Contents of the file.
-          Text: string
+          text: string
 
           /// File represented as an AST.
-          Ast: ParsedInput
+          ast: ParsedInput
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharpCheckFileResults option
+          typeCheckResults: FSharpCheckFileResults option
 
           /// Path to the file.
-          File: string }
+          file: string }
 
     [<NoComparison>]
     type ParseFileFailure =
@@ -55,10 +55,10 @@ module ParseFile =
             match typeCheckFile() with
             | Success(typeCheckResults) ->
 
-                { Text = source
-                  Ast = parseTree
-                  TypeCheckResults = typeCheckResults
-                  File = file } |> Success
+                { text = source
+                  ast = parseTree
+                  typeCheckResults = typeCheckResults
+                  file = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 
@@ -92,7 +92,7 @@ module ParseFile =
         |> List.distinctBy Path.GetFileName
         |> List.map (fun location -> "-r:" + location)
 
-    let getProjectOptionsFromScript (checker:FSharpChecker) file (source: string) =
+    let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
         let sourceText = SourceText.ofString source
         #if NETSTANDARD2_0
         let assumeDotNetFramework = false

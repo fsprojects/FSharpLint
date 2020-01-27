@@ -40,14 +40,14 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
 
         findBindingIdentifier pattern
         |> Option.bind (fun bindingIdent -> matchingIdentifier bindingIdent expr)
-        |> Option.map (fun ident -> 
+        |> Option.map (fun ident ->
             { Range = range
               Message = Resources.GetString("RulesUselessBindingError")
               SuggestedFix = None
               TypeChecks = [checkNotMutable ident] })
         |> Option.toArray
     | _ -> Array.empty
-    
+
 let private runner (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
@@ -61,5 +61,5 @@ let rule =
     { name = "UselessBinding"
       identifier = Identifiers.UselessBinding
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
-    |> AstNodeRule                
-       
+    |> AstNodeRule
+

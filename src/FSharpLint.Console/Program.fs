@@ -17,6 +17,8 @@ type private FileType =
     | File = 3
     | Source = 4
 
+// Allowing underscores in union case names for proper Argu command line option formatting.
+// fsharplint:disable UnionCasesNames
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
@@ -40,6 +42,7 @@ with
             | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
             | Release_Config _ -> "Release config to use to parse files."
             | Lint_Config _ -> "Path to the config for the lint."
+// fsharplint:enable UnionCasesNames
 
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->

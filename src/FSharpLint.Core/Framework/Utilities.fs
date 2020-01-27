@@ -35,7 +35,7 @@ module ExpressionUtilities =
         | _ -> None
 
     let getSymbolFromIdent (checkFile:FSharpCheckFileResults option) expr =
-        match checkFile, expr with
+        match (checkFile, expr) with
         | Some(checkFile), Identifier(ident, range) ->
             let identNames = ident |> List.map (fun x -> x.idText)
 

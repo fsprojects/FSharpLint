@@ -27,10 +27,10 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
         else
             None)
 
-let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
-        
+let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
+
 let rule =
-    { name = "PatternMatchExpressionIndentation" 
+    { name = "PatternMatchExpressionIndentation"
       identifier = Identifiers.PatternMatchExpressionIndentation
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

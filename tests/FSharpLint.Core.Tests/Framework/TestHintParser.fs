@@ -20,25 +20,25 @@ type TestMergeSyntaxTrees() =
         match run phint "List.map id ===> id", run phint "List.map woof ===> woof" with
             | Success(hint, _, _), Success(hint2, _, _) -> 
                 let expectedEdges =
-                    { Lookup = 
+                    { lookup = 
                         [ (Utilities.hash2 SyntaxHintNode.Identifier "map", 
-                           { Edges = 
-                               { Lookup = 
+                           { edges = 
+                               { lookup = 
                                    [ (Utilities.hash2 SyntaxHintNode.Identifier "woof", 
-                                      { Edges = Edges.Empty
-                                        MatchedHint = [hint2] })
+                                      { edges = Edges.Empty
+                                        matchedHint = [hint2] })
                                      (Utilities.hash2 SyntaxHintNode.Identifier "id", 
-                                      { Edges = Edges.Empty
-                                        MatchedHint = [hint] }) ] |> toDictionary
-                                 AnyMatch = [] }
-                             MatchedHint = [] }) ] |> toDictionary
-                      AnyMatch = [] }
+                                      { edges = Edges.Empty
+                                        matchedHint = [hint] }) ] |> toDictionary
+                                 anyMatch = [] }
+                             matchedHint = [] }) ] |> toDictionary
+                      anyMatch = [] }
 
                 let expectedRoot = 
-                    { Lookup = 
+                    { lookup = 
                         [(Utilities.hash2 SyntaxHintNode.FuncApp 0, 
-                          { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
-                      AnyMatch = [] }
+                          { edges = expectedEdges; matchedHint = [] })] |> toDictionary
+                      anyMatch = [] }
                       
                 let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
 
@@ -522,8 +522,8 @@ type TestHintParser() =
     [<Test>]
     member __.XEqualsXHint() = 
         let expected = 
-            { Match = Expression.Variable('x') |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
+            { matchedNode = Expression.Variable('x') |> HintExpr
+              suggestion = Suggestion.Expr(Expression.Variable('x')) }
 
         match run phint "x ===> x" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -532,10 +532,10 @@ type TestHintParser() =
     [<Test>]
     member __.NotTrueIsFalseHint() = 
         let expected = 
-            { Match = Expression.FunctionApplication
+            { matchedNode = Expression.FunctionApplication
                   [ Expression.Identifier(["not"])
                     Expression.Constant(Bool(true)) ] |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Constant(Bool(false))) }
+              suggestion = Suggestion.Expr(Expression.Constant(Bool(false))) }
 
         match run phint "not true ===> false" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -544,12 +544,12 @@ type TestHintParser() =
     [<Test>]
     member __.FoldAddIntoSumHint() = 
         let expected = 
-            { Match = Expression.FunctionApplication
+            { matchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "fold"])
                           Expression.Identifier(["+"])
                           Expression.Constant(Int32(0))
                           Expression.Variable('x') ] |> HintExpr
-              Suggestion = Suggestion.Expr(
+              suggestion = Suggestion.Expr(
                                 Expression.FunctionApplication(
                                     [ Expression.Identifier(["List"; "sum"])
                                       Expression.Variable('x') ])) }
@@ -561,14 +561,14 @@ type TestHintParser() =
     [<Test>]
     member __.MapToSumIntoSumByHint() =
         let expected =
-            { Match = Expression.FunctionApplication
+            { matchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "sum"])
                           Expression.Parentheses(
                               Expression.FunctionApplication(
                                   [ Expression.Identifier(["List"; "map"])
                                     Expression.Variable('x')
                                     Expression.Variable('y') ])) ] |> HintExpr
-              Suggestion = Suggestion.Expr(
+              suggestion = Suggestion.Expr(
                                 Expression.FunctionApplication(
                                     [ Expression.Identifier(["List"; "sumBy"])
                                       Expression.Variable('x')
@@ -581,14 +581,14 @@ type TestHintParser() =
     [<Test>]
     member __.MapToAverageIntoAverageByHint() =
         let expected =
-            { Match = Expression.FunctionApplication
+            { matchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "average"])
                           Expression.Parentheses(
                               Expression.FunctionApplication(
                                   [ Expression.Identifier(["List"; "map"])
                                     Expression.Variable('x')
                                     Expression.Variable('y') ])) ] |> HintExpr
-              Suggestion = Suggestion.Expr(
+              suggestion = Suggestion.Expr(
                                 Expression.FunctionApplication(
                                     [ Expression.Identifier(["List"; "averageBy"])
                                       Expression.Variable('x')
@@ -601,16 +601,17 @@ type TestHintParser() =
     [<Test>]
     member __.TupleTakeAndSkipIntoSplitAtHint() =
         let expected =
-            { Match = Expression.Tuple(
-                        [ Expression.FunctionApplication(
-                             [ Expression.Identifier(["List"; "take"])
-                               Expression.Variable('x')
-                               Expression.Variable('y') ])
-                          Expression.FunctionApplication(
-                             [ Expression.Identifier(["List"; "skip"])
-                               Expression.Variable('x')
-                               Expression.Variable('y') ]) ]) |> HintExpr
-              Suggestion = Suggestion.Expr(
+            { matchedNode =
+                Expression.Tuple(
+                    [ Expression.FunctionApplication(
+                         [ Expression.Identifier(["List"; "take"])
+                           Expression.Variable('x')
+                           Expression.Variable('y') ])
+                      Expression.FunctionApplication(
+                         [ Expression.Identifier(["List"; "skip"])
+                           Expression.Variable('x')
+                           Expression.Variable('y') ]) ]) |> HintExpr
+              suggestion = Suggestion.Expr(
                                 Expression.FunctionApplication(
                                     [ Expression.Identifier(["List"; "splitAt"])
                                       Expression.Variable('x')
@@ -623,10 +624,10 @@ type TestHintParser() =
     [<Test>]
     member __.IdHint() = 
         let expected = 
-            { Match = Expression.Lambda
+            { matchedNode = Expression.Lambda
                 ([LambdaArg(Expression.LambdaArg(Expression.Variable('x')))], 
                  LambdaBody(Expression.LambdaBody(Expression.Variable('x')))) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
+              suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
 
         match run phint "fun x -> x ===> id" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -692,8 +693,8 @@ type TestHintParser() =
     [<Test>]
     member __.TupleHint() = 
         let expected = 
-            { Match = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
+            { matchedNode = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) |> HintExpr
+              suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
             
         match run phint "(x, y) ===> id" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -702,10 +703,11 @@ type TestHintParser() =
     [<Test>]
     member __.TupleInFunctionApplication() = 
         let expected = 
-            { Match = Expression.FunctionApplication(
-                            [ Expression.Identifier(["fst"])
-                              Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) ]) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
+            { matchedNode =
+                Expression.FunctionApplication(
+                    [ Expression.Identifier(["fst"])
+                      Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) ]) |> HintExpr
+              suggestion = Suggestion.Expr(Expression.Variable('x')) }
             
         match run phint "fst (x, y) ===> x" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -714,10 +716,10 @@ type TestHintParser() =
     [<Test>]
     member __.ListHint() = 
         let expected =
-            { Match = Expression.InfixOperator(Expression.Identifier(["::"]), 
+            { matchedNode = Expression.InfixOperator(Expression.Identifier(["::"]), 
                                                Expression.Variable('x'), 
                                                Expression.List([])) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.List([Expression.Variable('x')])) }
+              suggestion = Suggestion.Expr(Expression.List([Expression.Variable('x')])) }
             
         match run phint "x::[] ===> [x]" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -726,8 +728,8 @@ type TestHintParser() =
     [<Test>]
     member __.ArrayHint() = 
         let expected =
-            { Match = Expression.Array([Expression.Variable('x')]) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
+            { matchedNode = Expression.Array([Expression.Variable('x')]) |> HintExpr
+              suggestion = Suggestion.Expr(Expression.Variable('x')) }
             
         match run phint "[|x|] ===> x" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -736,11 +738,12 @@ type TestHintParser() =
     [<Test>]
     member __.IfStatementHint() =
         let expected =
-            { Match = Expression.If(
-                            Expression.Variable('x'),
-                            Expression.Constant(Constant.Bool(true)),
-                            Some(Expression.Else(Expression.Constant(Constant.Bool(false))))) |> HintExpr
-              Suggestion = Suggestion.Expr(Expression.Variable('x')) }
+            { matchedNode =
+                Expression.If(
+                    Expression.Variable('x'),
+                    Expression.Constant(Constant.Bool(true)),
+                    Some(Expression.Else(Expression.Constant(Constant.Bool(false))))) |> HintExpr
+              suggestion = Suggestion.Expr(Expression.Variable('x')) }
             
         match run phint "if x then true else false ===> x" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -749,13 +752,14 @@ type TestHintParser() =
     [<Test>]
     member __.MultipleFunctionApplicationsHint() = 
         let expected = 
-            { Match = Expression.FunctionApplication(
-                            [ Expression.Identifier(["List";"head"])
-                              Expression.Parentheses(
-                                  Expression.FunctionApplication(
-                                      [ Expression.Identifier(["List";"sort"])
-                                        Expression.Variable('x') ])) ]) |> HintExpr
-              Suggestion = Suggestion.Expr(
+            { matchedNode =
+                Expression.FunctionApplication(
+                    [ Expression.Identifier(["List";"head"])
+                      Expression.Parentheses(
+                          Expression.FunctionApplication(
+                              [ Expression.Identifier(["List";"sort"])
+                                Expression.Variable('x') ])) ]) |> HintExpr
+              suggestion = Suggestion.Expr(
                                 Expression.FunctionApplication(
                                     [ Expression.Identifier(["List";"min"])
                                       Expression.Variable('x') ])) }
@@ -767,8 +771,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Suggestion with literal string message parsed correctly.``() = 
         let expected = 
-            { Match = Expression.Constant(Constant.Unit) |> HintExpr
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Expression.Constant(Constant.Unit) |> HintExpr
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "() ===> m\"Message\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -777,8 +781,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Suggestion with verbatim literal string message parsed correctly.``() = 
         let expected = 
-            { Match = Expression.Constant(Constant.Unit) |> HintExpr
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Expression.Constant(Constant.Unit) |> HintExpr
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "() ===> m@\"Message\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -787,8 +791,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Suggestion with triple quoted string message parsed correctly.``() = 
         let expected = 
-            { Match = Expression.Constant(Constant.Unit) |> HintExpr
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Expression.Constant(Constant.Unit) |> HintExpr
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "() ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -797,8 +801,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Parses null inside expression as expected.``() = 
         let expected = 
-            { Match = Expression.Null |> HintExpr
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Expression.Null |> HintExpr
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "null ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -807,8 +811,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Parses null inside pattern as expected.``() = 
         let expected = 
-            { Match = Pattern.Null |> HintPat
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Pattern.Null |> HintPat
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "pattern: null ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -817,8 +821,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Parses boolean constant inside pattern as expected.``() = 
         let expected = 
-            { Match = Pattern.Constant(Constant.Bool(true)) |> HintPat
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Pattern.Constant(Constant.Bool(true)) |> HintPat
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "pattern: true ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -827,8 +831,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Parses cons inside pattern as expected.``() = 
         let expected = 
-            { Match = Pattern.Cons(Pattern.Constant(Constant.Bool(true)), Pattern.List([])) |> HintPat
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Pattern.Cons(Pattern.Constant(Constant.Bool(true)), Pattern.List([])) |> HintPat
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "pattern: true::[] ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)
@@ -837,8 +841,8 @@ type TestHintParser() =
     [<Test>]
     member __.``Parses or inside pattern as expected.``() = 
         let expected = 
-            { Match = Pattern.Or(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
-              Suggestion = Suggestion.Message("Message") }
+            { matchedNode = Pattern.Or(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
+              suggestion = Suggestion.Message("Message") }
 
         match run phint "pattern: true | false ===> m\"\"\"Message\"\"\"" with
         | Success(hint, _, _) -> Assert.AreEqual(expected, hint)

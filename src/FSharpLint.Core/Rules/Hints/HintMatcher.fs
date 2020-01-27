@@ -137,7 +137,7 @@ module private Precedence =
                 | _ -> None
             | hint -> ofHint hint
 
-        match hintPrecedence, parentPrecedence with
+        match (hintPrecedence, parentPrecedence) with
         | Some hint, Some parent -> hint >= parent
         | _ -> false
 
@@ -202,7 +202,7 @@ module private MatchExpression =
         | NoMatch
 
     let private (&&~) lhs rhs =
-        match lhs, rhs with
+        match (lhs, rhs) with
         | Match(asyncLhs), Match(asyncRhs) -> Match(asyncLhs @ asyncRhs)
         | _ -> NoMatch
 
@@ -222,7 +222,7 @@ module private MatchExpression =
                         match symbolUse with
                         | Some(symbolUse) ->
                             match symbolUse.Symbol with
-                            | :? FSharpParameter 
+                            | :? FSharpParameter
                             | :? FSharpField -> false
                             | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                             | _ -> true
@@ -290,7 +290,7 @@ module private MatchExpression =
             doExpressionsMatch expressions hintExprs arguments
         | _ -> NoMatch
 
-    and private doExpressionsMatch expressions hintExpressions (arguments: Arguments) =
+    and private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
         if List.length expressions = List.length hintExpressions then
             (expressions, hintExpressions)
             ||> List.map2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
@@ -313,7 +313,7 @@ module private MatchExpression =
 
     and matchLambda arguments =
         match (arguments.Expression, arguments.Hint) with
-        | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
+        | Lambda({ arguments = args; body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
             match matchLambdaArguments lambdaArgs args with
             | LambdaMatch.Match(lambdaArguments) ->
                 matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
@@ -569,9 +569,9 @@ module private FormatHint =
         |> String.concat " "
 
 let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVariables parentAstNode =
-    let matched = FormatHint.toString false None args matchedVariables None hint.Match
+    let matched = FormatHint.toString false None args matchedVariables None hint.matchedNode
 
-    match hint.Suggestion with
+    match hint.suggestion with
     | Suggestion.Expr(expr) ->
         let suggestion = FormatHint.toString false None args matchedVariables None (HintExpr expr)
         let errorFormatString = Resources.GetString("RulesHintRefactor")
@@ -642,7 +642,7 @@ let private suggestions = ResizeArray()
 
 let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
     let breadcrumbs = args.getParents MaxBreadcrumbs
-    match args.astNode, hint.Match with
+    match (args.astNode, hint.matchedNode) with
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
     | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
     | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern (pattern, hintPattern) ->
@@ -663,9 +663,9 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
                 hintError checks hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
                 |> suggestions.Add
 
-            match hint.Match, hint.Suggestion with
+            match (hint.matchedNode, hint.suggestion) with
             | SuggestingReplacementOfLambda ->
-                match breadcrumbs, expr.Range with
+                match (breadcrumbs, expr.Range) with
                 | RequiresCheck(index, methodIdent) ->
                     match args.checkInfo with
                     | Some checkFile ->
@@ -682,16 +682,16 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
 /// Any possible matches that are found will be given to the callback function `notify`,
 /// any matches found are not guaranteed and it's expected that the caller verify the match.
 let private runner (config:Config) (args:AstNodeRuleParams) =
-    match config.hintTrie.Lookup.TryGetValue args.nodeHashcode with
+    match config.hintTrie.lookup.TryGetValue args.nodeHashcode with
     | true, trie -> Helper.Hints.checkTrie (args.nodeIndex + 1) trie args.syntaxArray args.skipArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
     | false, _ -> ()
-    
+
     let result = suggestions.ToArray()
     suggestions.Clear()
     result
-    
+
 let rule config =
     { name = "Hints"
       identifier = Identifiers.Hints
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
-    |> AstNodeRule               
+    |> AstNodeRule

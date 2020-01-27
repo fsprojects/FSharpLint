@@ -57,16 +57,16 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:range) (doBangEx
               TypeChecks = [] } |> Some)
         |> List.toArray
     | _ -> Array.empty
-    
+
 let runner args =
     match args.astNode with
     | AstNode.Expression (SynExpr.DoBang (expr, range)) ->
         let parents = args.getParents 5
         checkRecursiveAsyncFunction args range expr parents
     | _ -> Array.empty
-    
+
 let rule =
-    { name = "RecursiveAsyncFunction" 
+    { name = "RecursiveAsyncFunction"
       identifier = Identifiers.RecursiveAsyncFunction
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

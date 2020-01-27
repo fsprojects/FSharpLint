@@ -72,8 +72,8 @@ module HintParser =
         | Message of string
 
     type Hint =
-        { Match: HintNode
-          Suggestion: Suggestion }
+        { matchedNode: HintNode
+          suggestion: Suggestion }
           
     /// Provides a way of creating a single list from any number of hint ASTs.
     /// Means we can simply iterate over a single list for each node in the F# tree
@@ -128,25 +128,25 @@ module HintParser =
  
         [<NoComparison>]
         type Node =
-            { Edges: Edges
-              MatchedHint: Hint list }
+            { edges: Edges
+              matchedHint: Hint list }
         and [<CustomEquality; NoComparison>] Edges = 
-            { Lookup: Dictionary<int, Node>
-              AnyMatch: (char option * Node) list }
+            { lookup: Dictionary<int, Node>
+              anyMatch: (char option * Node) list }
 
             override lhs.Equals(other) = 
                 match other with
                 | :? Edges as rhs -> 
                     let getList dict = Seq.toList dict |> List.map (fun (x:KeyValuePair<_, _>) -> (x.Key, x.Value))
 
-                    lhs.AnyMatch = rhs.AnyMatch && 
-                    lhs.Lookup.Count = rhs.Lookup.Count && 
-                    getList lhs.Lookup = getList rhs.Lookup
+                    lhs.anyMatch = rhs.anyMatch && 
+                    lhs.lookup.Count = rhs.lookup.Count && 
+                    getList lhs.lookup = getList rhs.lookup
                 | _ -> false
 
-            override this.GetHashCode() = hash (this.AnyMatch, hash this.Lookup)
+            override this.GetHashCode() = hash (this.anyMatch, hash this.lookup)
 
-            static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = [] }
+            static member Empty = { lookup = Dictionary<_, _>(); anyMatch = [] }
 
         let private getConstKey = function
             | Constant.Unit -> SyntaxHintNode.Unit
@@ -249,23 +249,23 @@ module HintParser =
             | HintPat(Pattern.Null) -> []
 
         let private getConstantHashCode = function
-            | Constant.Bool(x) -> hash x 
-            | Constant.Byte(x) -> hash x 
-            | Constant.Bytes(x) -> hash x 
-            | Constant.Char(x) -> hash x 
-            | Constant.Decimal(x) -> hash x 
-            | Constant.Double(x) -> hash x 
-            | Constant.Int16(x) -> hash x 
+            | Constant.Bool(x) -> hash x
+            | Constant.Byte(x) -> hash x
+            | Constant.Bytes(x) -> hash x
+            | Constant.Char(x) -> hash x
+            | Constant.Decimal(x) -> hash x
+            | Constant.Double(x) -> hash x
+            | Constant.Int16(x) -> hash x
             | Constant.Int32(x) -> hash x
-            | Constant.Int64(x) -> hash x 
-            | Constant.IntPtr(x) -> hash x 
-            | Constant.SByte(x) -> hash x 
-            | Constant.Single(x) -> hash x 
-            | Constant.String(x) -> hash x 
-            | Constant.UInt16(x) -> hash x 
-            | Constant.UInt32(x) -> hash x 
-            | Constant.UInt64(x) -> hash x 
-            | Constant.UIntPtr(x) -> hash x 
+            | Constant.Int64(x) -> hash x
+            | Constant.IntPtr(x) -> hash x
+            | Constant.SByte(x) -> hash x
+            | Constant.Single(x) -> hash x
+            | Constant.String(x) -> hash x
+            | Constant.UInt16(x) -> hash x
+            | Constant.UInt32(x) -> hash x
+            | Constant.UInt64(x) -> hash x
+            | Constant.UIntPtr(x) -> hash x
             | Constant.UserNum(x, y) -> hash (x, y) 
             | _ -> 0
 
@@ -275,7 +275,7 @@ module HintParser =
                 |> Seq.last
                 |> ExpressionUtilities.identAsCompiledOpName
                 |> hash
-            | _ -> 0                
+            | _ -> 0
 
         let rec private getHashCode node = 
             match node with
@@ -298,7 +298,7 @@ module HintParser =
                 for child in children do
                     depthFirstTraversal child (depth + 1)
  
-            depthFirstTraversal hint.Match 0
+            depthFirstTraversal hint.matchedNode 0
  
             (nodes |> Seq.toList, hint)
  
@@ -331,8 +331,8 @@ module HintParser =
                 let map = Dictionary<_, _>()
 
                 transposed
-                |> List.choose 
-                    (function 
+                |> List.choose
+                    (function
                     | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest) 
                     | EndOfHint(_) -> None)
                 |> List.filter (isAnyMatch >> not)
@@ -340,11 +340,11 @@ module HintParser =
                 |> Seq.iter (fun (hashcode, items) -> map.Add(hashcode, mergeHints (getHints items)))
 
                 let anyMatches = 
-                    transposed 
-                    |> List.choose 
-                        (function 
+                    transposed
+                    |> List.choose
+                        (function
                         | HintNode(expr, depth, rest) ->
-                            match getKey expr, expr with
+                            match (getKey expr, expr) with
                             | (SyntaxHintNode.Wildcard as key), HintExpr(Expression.Wildcard)
                             | (SyntaxHintNode.Wildcard as key), HintPat(Pattern.Wildcard)
                             | (SyntaxHintNode.Variable as key), HintExpr(Expression.Variable(_))
@@ -353,7 +353,7 @@ module HintParser =
                             | _ -> None
                         | EndOfHint(_) -> None)
                     |> Seq.groupBy (fun (_, expr, _, _) -> expr)
-                    |> Seq.choose  
+                    |> Seq.choose
                         (fun (expr, items) -> 
                             match expr with
                             | HintPat(Pattern.Wildcard)
@@ -363,8 +363,8 @@ module HintParser =
                             | _ -> None)
                     |> Seq.toList
 
-                { Lookup = map
-                  AnyMatch = anyMatches }
+                { lookup = map
+                  anyMatch = anyMatches }
             
             and mergeHints hints =
                 let transposed = transposeHead hints
@@ -373,14 +373,14 @@ module HintParser =
  
                 let matchedHints =
                     transposed
-                    |> Seq.choose 
-                        (function 
-                        | HintNode(_) -> None 
+                    |> Seq.choose
+                        (function
+                        | HintNode(_) -> None
                         | EndOfHint(hint) -> Some(hint))
                     |> Seq.toList
  
-                { Edges = edges
-                  MatchedHint = matchedHints }
+                { edges = edges
+                  matchedHint = matchedHints }
  
             let transposed = 
                 hints |> List.map hintToList |> transposeHead
@@ -405,7 +405,7 @@ module HintParser =
               '#';'^';'!';'?';'/';'.';':';',' ]
 
         let poperator: Parser<char list, unit> =
-            pfirstopchar 
+            pfirstopchar
             .>>. many (pischar opchars)
             |>> fun (x, rest) -> x::rest
 
@@ -437,7 +437,7 @@ module HintParser =
 
             choice
                 [ pidenttext
-                  skipString "``" 
+                  skipString "``"
                   >>. many1
                           (choice
                               [ attempt (pnotchar chars)
@@ -452,15 +452,15 @@ module HintParser =
         let private pidentorop: (CharStream<unit> -> Reply<char list>) =
             choice
                 [ attempt pident
-                  skipChar '(' 
+                  skipChar '('
                   .>> spaces
-                  >>. Operators.poperator 
+                  >>. Operators.poperator
                   .>> spaces
                   .>> skipChar ')' ]
 
         let plongidentorop: Parser<string list, unit> = 
             choice
-                [ attempt pident 
+                [ attempt pident
                   .>>. many (attempt (skipChar '.' >>. pident))
                   .>>. opt (skipChar '.' >>. pidentorop)
                   |>> fun ((startIdent, idents), operator) -> 
@@ -537,7 +537,7 @@ module HintParser =
             pchar '\n' <|> (skipChar '\r' >>. skipChar '\n' >>% '\n')
 
         let private pcharchar: (CharStream<unit> -> Reply<char>) =
-            choice 
+            choice
                 [ attempt psimplecharchar
                   attempt pescapechar
                   attempt ptrigraph
@@ -560,14 +560,14 @@ module HintParser =
                   skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]
 
         let pcharacter: Parser<Constant, unit> =
-            skipChar '\'' 
-            >>. pcharchar 
+            skipChar '\''
+            >>. pcharchar
             .>> pchar '\''
             |>> Char
 
         let pliteralstring: Parser<string, unit> =
-            skipChar '"' 
-            >>. many pstringchar 
+            skipChar '"'
+            >>. many pstringchar
             .>> skipChar '"'
             |>> charListToString
 
@@ -580,8 +580,8 @@ module HintParser =
                   pstring "\"\"" >>% '"' ]
 
         let pverbatimstring: Parser<string, unit> =
-            pstring "@\"" 
-            >>. many pverbatimstringchar 
+            pstring "@\""
+            >>. many pverbatimstringchar
             .>> pchar '"'
             |>> charListToString
 
@@ -592,26 +592,26 @@ module HintParser =
             pescapechar <|> psimplechar
 
         let pbytechar: Parser<Constant, unit> =
-            skipChar '\'' 
-            >>. psimpleorescapechar 
+            skipChar '\''
+            >>. psimpleorescapechar
             .>> skipString "'B"
             |>> (byte >> Byte)
 
         let pbytearray: Parser<Constant, unit> = 
-            skipChar '"' 
-            >>. many pstringchar 
+            skipChar '"'
+            >>. many pstringchar
             .>> skipString "\"B"
             |>> (charListToString >> System.Text.Encoding.UTF8.GetBytes >> Bytes)
 
         let pverbatimbytearray: Parser<Constant, unit> = 
-            skipString "@\"" 
-            >>. many pverbatimstringchar 
+            skipString "@\""
+            >>. many pverbatimstringchar
             .>> skipString "\"B"
             |>> (charListToString >> System.Text.Encoding.UTF8.GetBytes >> Bytes)
 
         let ptriplequotedstring: Parser<string, unit> =
-            skipString "\"\"\"" 
-            >>. many psimpleorescapechar 
+            skipString "\"\"\""
+            >>. many psimpleorescapechar
             .>> skipString "\"\"\""
             |>> charListToString
 
@@ -625,7 +625,7 @@ module HintParser =
             |> charListToString
 
         let private phexint: Parser<char list, unit> =
-            skipChar '0' 
+            skipChar '0'
             >>. (skipChar 'x' <|> skipChar 'X')
             >>. many1 hex
             |>> fun x -> '0'::'x'::x
@@ -651,12 +651,12 @@ module HintParser =
 
         let psbyte: Parser<Constant, unit> = 
             opt pminus
-            .>>. pint 
+            .>>. pint
             .>> skipChar 'y'
             |>> (minusString >> sbyte >> SByte)
 
         let pbyte: Parser<Constant, unit> = 
-            pint 
+            pint
             .>> skipString "uy"
             |>> (charListToString >> byte >> Byte)
 
@@ -666,12 +666,12 @@ module HintParser =
             |>> (minusString >> int16 >> Int16)
 
         let puint16: Parser<Constant, unit> = 
-            pint 
+            pint
             .>> skipString "us"
             |>> (charListToString >> uint16 >> UInt16)
 
         let puint32: Parser<Constant, unit> = 
-            pint 
+            pint
             .>> (skipString "u" <|> skipString "ul")
             |>> (charListToString >> uint32 >> UInt32)
 
@@ -681,24 +681,24 @@ module HintParser =
             |>> (minusString >> int64 >> nativeint >> IntPtr)
 
         let punativeint: Parser<Constant, unit> = 
-            pint 
+            pint
             .>> pstring "un"
             |>> (charListToString >> uint64 >> unativeint >> UIntPtr)
 
         let pint64: Parser<Constant, unit> = 
             opt pminus
-            .>>. pint 
+            .>>. pint
             .>> skipChar 'L'
             |>> (minusString >> int64 >> Int64)
 
         let puint64: Parser<Constant, unit> = 
-            pint 
+            pint
             .>> (skipString "UL" <|> skipString "uL")
             >>= (charListToString >> uint64 >> UInt64 >> preturn)
 
         let psingle: Parser<Constant, unit> =
-            opt pminus 
-            .>>. pfloat 
+            opt pminus
+            .>>. pfloat
             .>> (skipChar 'F' <|> skipChar 'f')
             |>> fun (minus, x) -> Single(if minus.IsSome then -float32(x) else float32(x))
 
@@ -719,24 +719,24 @@ module HintParser =
 
         let pbignum: Parser<Constant, unit> =
             opt pminus
-            .>>. pint 
+            .>>. pint
             .>>. anyOf ['Q'; 'R'; 'Z'; 'I'; 'N'; 'G']
             |>> fun (x, t) -> UserNum(bigint.Parse(minusString x), t)
 
         let pdecimal: Parser<Constant, unit> =
             let pdecimalint: Parser<Constant, unit> =
                 opt pminus
-                .>>. pint 
+                .>>. pint
                 .>> (skipChar 'M' <|> skipChar 'm')
                 |>> (minusString >> decimal >> Decimal)
 
             let pdecimalfloat: Parser<Constant, unit> =
                 opt pminus
-                .>>. pfloat 
+                .>>. pfloat
                 .>> (skipChar 'M' <|> skipChar 'm')
                 |>> fun (minus, x) -> Decimal(decimal (if minus.IsSome then -x else x))
 
-            choice 
+            choice
                 [ attempt pdecimalint
                   pdecimalfloat ]
 
@@ -747,7 +747,7 @@ module HintParser =
                   skipString "false" >>% Bool(false) ]
 
         let private punit: Parser<Constant, unit> = 
-            skipString "(" 
+            skipString "("
             >>. ((spaces >>. skipString ")") <|> skipString ")")
             >>% Unit
 
@@ -780,15 +780,15 @@ module HintParser =
     module CommonParsers =
 
         let pvariable: Parser<char, unit> = 
-            satisfy isLetter 
+            satisfy isLetter
             .>> notFollowedBy (satisfy isLetter)
 
         let ptuple (pparser:Parser<'a, unit>) : Parser<'a list, unit> = 
-            skipChar '(' 
+            skipChar '('
             >>. pparser
-            .>> skipChar ',' 
+            .>> skipChar ','
             .>>. sepEndBy1 pparser (skipChar ',')
-            .>> skipChar ')' 
+            .>> skipChar ')'
             |>> fun (func, rest) -> (func::rest)
 
         let plist (pparser:Parser<'a, unit>): Parser<'a list, unit> = 
@@ -836,7 +836,7 @@ module HintParser =
                 >>. plambdaarguments
 
             let plambdaend: Parser<Expression, unit> =
-                skipString "->" 
+                skipString "->"
                 >>. spaces
                 >>. pexpression
 
@@ -857,7 +857,7 @@ module HintParser =
         let parray = (CommonParsers.parray pexpression) |>> Expression.Array
 
         let papplication =
-            choice 
+            choice
                 [ attempt Constants.pconstant |>> Expression.Constant
                   attempt pvariable
                   attempt pwildcard
@@ -868,7 +868,7 @@ module HintParser =
                   attempt pparentheses ]
 
         let pfunctionapplication: Parser<Expression, unit> =
-            Identifiers.plongidentorop 
+            Identifiers.plongidentorop
             |>> Expression.Identifier
             .>> spaces
             .>>. sepEndBy1 papplication spaces
@@ -883,7 +883,7 @@ module HintParser =
 
         opp.TermParser <- 
             spaces >>.
-            choice 
+            choice
                 [ attempt pif
                   attempt (skipString "null" >>% Expression.Null)
                   attempt Constants.pconstant |>> Expression.Constant
@@ -924,16 +924,20 @@ module HintParser =
                 else
                     preturn ""
 
-            opp.AddOperator(PrefixOperator(prefix, remainingOpChars, precedence, true, (),
-                                                fun remOpChars expr ->
-                                                    if prefix = "&" then Expression.AddressOf(true, expr)
-                                                    else if prefix = "&&" then Expression.AddressOf(false, expr)
-                                                    else if prefix = "!" || prefix = "~" then
-                                                        let opIdent = Expression.Identifier [prefix + remOpChars]
-                                                        Expression.PrefixOperator(opIdent, expr)
-                                                    else
-                                                        let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
-                                                        Expression.PrefixOperator(opIdent, expr)))
+            let prefixOp =
+                PrefixOperator(
+                    prefix, remainingOpChars, precedence, true, (),
+                    fun remOpChars expr ->
+                        if prefix = "&" then Expression.AddressOf(true, expr)
+                        else if prefix = "&&" then Expression.AddressOf(false, expr)
+                        else if prefix = "!" || prefix = "~" then
+                            let opIdent = Expression.Identifier [prefix + remOpChars]
+                            Expression.PrefixOperator(opIdent, expr)
+                        else
+                            let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
+                            Expression.PrefixOperator(opIdent, expr))
+
+            opp.AddOperator(prefixOp)
 
         do
             addInfixOperator ":="  3 Associativity.Right
@@ -1005,7 +1009,7 @@ module HintParser =
 
         opp.TermParser <- 
             spaces >>.
-            choice 
+            choice
                 [ (skipString "null" >>% Pattern.Null)
                   Constants.pconstant |>> Pattern.Constant
                   pvariable |>> Pattern.Variable
@@ -1042,40 +1046,40 @@ module HintParser =
 
     let private psuggestion: Parser<Suggestion, Unit> =
         let pstring =
-            choice 
+            choice
                 [ StringAndCharacterLiterals.ptriplequotedstring
                   StringAndCharacterLiterals.pverbatimstring
                   StringAndCharacterLiterals.pliteralstring ]
 
-        choice 
+        choice
             [ attempt (pchar 'm' >>. pstring |>> Suggestion.Message)
               Expressions.pexpression |>> Suggestion.Expr ]
 
     let private phintcenter: Parser<unit, unit> = 
-        spaces 
+        spaces
         .>> skipString "===>"
         .>> spaces
 
     let pexpressionbasedhint =
         parse {
-            let! m = Expressions.pexpression 
+            let! m = Expressions.pexpression
 
             do! phintcenter
 
             let! s = psuggestion
 
-            return { Match = HintExpr m; Suggestion = s }
+            return { matchedNode = HintExpr m; suggestion = s }
         }
 
     let ppatternbasedhint =
         parse {
-            let! m = Patterns.ppattern 
+            let! m = Patterns.ppattern
 
             do! phintcenter
 
             let! s = psuggestion
 
-            return { Match = HintPat m; Suggestion = s }
+            return { matchedNode = HintPat m; suggestion = s }
         }
 
     let phint: Parser<Hint, unit> = 

@@ -87,7 +87,7 @@ module AstInfo =
     /// Operator identifiers can be made up of "op_" followed by a sequence of operators from this list.
     let operators = 
         [ "Greater"
-          "Less" 
+          "Less"
           "Plus"
           "Minus"
           "Multiply"

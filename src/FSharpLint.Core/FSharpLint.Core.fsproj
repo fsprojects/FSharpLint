@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    
+
     <Title>FSharpLint.Core</Title>
     <Description>API to programmatically run FSharpLint.</Description>
     <Authors>Matthew Mcveigh</Authors>
@@ -23,9 +23,10 @@
     <Compile Include="Framework\AstInfo.fs" />
     <Compile Include="Framework\AbstractSyntaxArray.fs" />
     <Compile Include="Framework\Rules.fs" />
-    <Compile Include="Framework/Resources.fs" />
-    <Compile Include="Framework/ParseFile.fs" />
+    <Compile Include="Framework\Resources.fs" />
+    <Compile Include="Framework\ParseFile.fs" />
     <Compile Include="Framework\Suppression.fs" />
+    <!-- Rules -->
     <Compile Include="Rules\Identifiers.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
@@ -101,15 +102,18 @@
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
     <Compile Include="Rules\Hints\HintsHelper.fs" />
     <Compile Include="Rules\Hints\HintMatcher.fs" />
-    <!-- Rules -->
     <!-- Application  -->
     <Compile Include="Application\Configuration.fs" />
-    <Compile Include="Application/Lint.fsi" />
+    <Compile Include="Application\LintWarning.fsi" />
+    <Compile Include="Application\LintWarning.fs" />
+    <Compile Include="Application\ConfigurationManager.fs" />
+    <Compile Include="Application\XmlConfiguration.fs" />
+    <Compile Include="Application\Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
-    <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json">
+    <EmbeddedResource Include="..\FSharpLint.Core\DefaultConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
+    <EmbeddedResource Include="..\FSharpLint.Core\Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

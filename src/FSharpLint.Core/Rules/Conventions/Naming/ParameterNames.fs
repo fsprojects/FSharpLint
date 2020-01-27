@@ -31,7 +31,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             ctorArgs
             |> extractPatterns
             |> List.toArray
-            |> Array.choose (fun arg -> identFromSimplePat arg)
+            |> Array.choose identFromSimplePat
             |> Array.map (fun ident -> (ident, ident.idText, None))
         | _ -> Array.empty
     | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->

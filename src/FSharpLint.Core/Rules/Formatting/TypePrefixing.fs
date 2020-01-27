@@ -54,7 +54,7 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
                 None
     | _ ->
         None
-        
+
 let runner args =
     match args.astNode with
     | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
@@ -66,7 +66,7 @@ let runner args =
 
 
 let rule =
-    { name = "TypePrefixing" 
+    { name = "TypePrefixing"
       identifier = Identifiers.TypePrefixing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

@@ -159,9 +159,9 @@ let a = not true"""
         let parsedFileInfo =
             match ParseFile.parseSource text (FSharpChecker.Create()) with
             | ParseFile.Success(parseFileInformation) ->
-                { Source = parseFileInformation.Text
-                  Ast = parseFileInformation.Ast
-                  TypeCheckResults = parseFileInformation.TypeCheckResults }
+                { Source = parseFileInformation.text
+                  Ast = parseFileInformation.ast
+                  TypeCheckResults = parseFileInformation.typeCheckResults }
             | ParseFile.Failed _ -> failwith "Failed to parse"
 
         let warnings =

@@ -27,5 +27,5 @@ let rule =
     { name = "WildcardNamedWithAsPattern"
       identifier = Identifiers.WildcardNamedWithAsPattern
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
-    |> AstNodeRule                
-    
+    |> AstNodeRule
+

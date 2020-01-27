@@ -216,11 +216,11 @@ module AbstractSyntaxArray =
     /// Contains information on the current node being visited.
     [<NoEquality; NoComparison>]
     type CurrentNode =
-        { Node: AstNode
-          ChildNodes: AstNode list
+        { node: AstNode
+          childNodes: AstNode list
 
           /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
-          Breadcrumbs: AstNode list }
+          breadcrumbs: AstNode list }
 
     let astToArray ast =
         let astRoot = File ast
@@ -281,7 +281,7 @@ module AbstractSyntaxArray =
 
         (nodes.ToArray(), skipArray)
 
-    let getBreadcrumbs maxBreadcrumbs (syntaxArray: Node []) (skipArray: Skip []) i =
+    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) (skipArray:Skip []) i =
         let rec getBreadcrumbs breadcrumbs i =
             if i = 0 then
                 let node = syntaxArray.[i].Actual

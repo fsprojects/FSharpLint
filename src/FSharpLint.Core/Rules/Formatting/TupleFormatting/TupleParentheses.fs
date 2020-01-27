@@ -24,10 +24,10 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
               TypeChecks = [] })
         |> Option.toArray
 
-let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses
-    
+let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses
+
 let rule =
-    { name = "TupleParentheses" 
+    { name = "TupleParentheses"
       identifier = Identifiers.TupleParentheses
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

@@ -21,16 +21,16 @@ let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (iden
 
     return
         match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) -> 
+        | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
             let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
             ctor.DeclaringEntity
-            |> Option.exists (fun ctorForType -> 
+            |> Option.exists (fun ctorForType ->
                 Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
         | Some(_) | None -> false }
 
 let private generateFix (text:string) range = lazy(
-    ExpressionUtilities.tryFindTextOfRange range text 
-    |> Option.map (fun fromText -> 
+    ExpressionUtilities.tryFindTextOfRange range text
+    |> Option.map (fun fromText ->
         let withoutLeadingWhitespace = fromText.TrimStart()
         let newKeywordRemoved = withoutLeadingWhitespace.Substring(3).TrimStart()
         { FromText = fromText; FromRange = range; ToText = newKeywordRemoved }))
@@ -44,9 +44,9 @@ let runner args =
           SuggestedFix = Some (generateFix args.fileContent range)
           TypeChecks = [doesNotImplementIDisposable checkInfo identifier] } |> Array.singleton
     | _ -> Array.empty
-    
+
 let rule =
-    { name = "RedundantNewKeyword" 
+    { name = "RedundantNewKeyword"
       identifier = Identifiers.RedundantNewKeyword
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

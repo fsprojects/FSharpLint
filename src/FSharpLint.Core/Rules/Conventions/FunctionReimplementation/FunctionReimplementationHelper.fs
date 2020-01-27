@@ -22,7 +22,7 @@ let checkLambda (args:AstNodeRuleParams) checker =
     | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
         match lambda with
         | Lambda(lambda, range) -> 
-            if (not << List.isEmpty) lambda.Arguments then
+            if (not << List.isEmpty) lambda.arguments then
                 checker args.fileContent lambda range
             else Array.empty
         | _ -> Array.empty

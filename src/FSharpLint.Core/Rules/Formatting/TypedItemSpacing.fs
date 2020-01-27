@@ -32,7 +32,7 @@ let private getTrailingSpaces (s:string) =
 
     (loop (s.Length - 1) 0)
 
-let private expectedSpacesFromConfig (typedItemStyle : TypedItemStyle) =
+let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     match typedItemStyle with
     | TypedItemStyle.NoSpaces -> (0, 0)
     | TypedItemStyle.SpaceAfter -> (0, 1)
@@ -40,7 +40,7 @@ let private expectedSpacesFromConfig (typedItemStyle : TypedItemStyle) =
     | _ -> (0, 0)
 
 /// Checks for correct spacing around colon of typed expression.
-let runner (config : Config) (args : AstNodeRuleParams) =
+let runner (config:Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
         let (expectedSpacesBefore, expectedSpacesAfter) =

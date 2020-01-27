@@ -13,7 +13,7 @@ let private (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
 
 let checkRaiseWithTooManyArgs (raiseType:string) (count:int) (ruleName:string) (args:AstNodeRuleParams) =
     match args.astNode with
-    | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr -> 
+    | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr ->
         match expr with
         | FuncApp(expressions, range) ->
             match expressions with

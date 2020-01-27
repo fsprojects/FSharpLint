@@ -21,7 +21,8 @@ let private checkTupleOfWildcards pattern identifier =
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
         let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
-        let refactorFrom, refactorTo = constructorString(List.length patterns), constructorString 1
+        let refactorFrom = constructorString (List.length patterns)
+        let refactorTo = (constructorString 1)
         let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
@@ -51,10 +52,9 @@ let private runner (args:AstNodeRuleParams) =
         else
             Array.empty
     | _ -> Array.empty
-    
+
 let rule =
     { name = "TupleOfWildcards"
       identifier = Identifiers.TupleOfWildcards
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
-    |> AstNodeRule                
-          
+    |> AstNodeRule

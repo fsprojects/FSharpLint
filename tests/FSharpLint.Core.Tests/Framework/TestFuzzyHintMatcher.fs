@@ -19,7 +19,7 @@ let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:Abstrac
     for i = 0 to syntaxArray.Length - 1 do
         let node = syntaxArray.[i]
         
-        match hintTrie.Lookup.TryGetValue node.Hashcode with
+        match hintTrie.lookup.TryGetValue node.Hashcode with
         | true, trie -> checkTrie (i + 1) trie syntaxArray skipArray (Dictionary<_, _>()) (notify i)
         | false, _ -> ()
 

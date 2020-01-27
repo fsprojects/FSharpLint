@@ -9,7 +9,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
-let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace = 
+let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
     match synModuleOrNamespace with
     | SynModuleOrNamespace (_, _, _, decls, _, _, _, _) ->
         decls
@@ -36,7 +36,7 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                   TypeChecks = [] } |> Some
             else
                 None)
-        
+
 let runner args =
     match args.astNode with
     | AstNode.ModuleOrNamespace synModuleOrNamespace ->
@@ -44,7 +44,7 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { name = "ModuleDeclSpacing" 
+    { name = "ModuleDeclSpacing"
       identifier = Identifiers.ModuleDeclSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

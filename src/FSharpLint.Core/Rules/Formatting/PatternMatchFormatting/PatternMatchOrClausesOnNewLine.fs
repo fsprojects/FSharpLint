@@ -25,10 +25,10 @@ let check args _ (clauses:SynMatchClause list) _ =
         else
             None)
 
-let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
-        
+let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
+
 let rule =
-    { name = "PatternMatchOrClausesOnNewLine" 
+    { name = "PatternMatchOrClausesOnNewLine"
       identifier = Identifiers.PatternMatchOrClausesOnNewLine
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

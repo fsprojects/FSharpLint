@@ -49,11 +49,11 @@ type TestHintMatcherBase () =
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
-                | _ -> parseInfo.TypeCheckResults
+                | _ -> parseInfo.typeCheckResults
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
             suggestions |> Array.iter this.postSuggestion
         | _ ->

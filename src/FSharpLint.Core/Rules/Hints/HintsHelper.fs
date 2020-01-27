@@ -4,8 +4,8 @@
 /// to eliminate as many cases where there'll never be a match as quickly as possible, so that the
 /// ast match is run against as few hints and ast nodes as possible.
 /// 
-/// The fuzzy match requires two structures to be computed before hand: an abstract syntax array 
-/// constructed from the ast, and a trie of hints. Both of these structures contain hash codes of the 
+/// The fuzzy match requires two structures to be computed before hand: an abstract syntax array
+/// constructed from the ast, and a trie of hints. Both of these structures contain hash codes of the
 /// nodes, the hash codes are expected to match when the nodes are equivalent. The matching is done using these
 /// hash codes so we end up with a trie of integers searching against an array of integers -
 /// which is pretty fast.
@@ -40,7 +40,7 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
 
 /// Compares the hint trie against a given location in the abstract syntax array.
 let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (boundVariables:Dictionary<_, _>) notify =
-    trie.MatchedHint |> List.iter notify
+    trie.matchedHint |> List.iter notify
 
     if i < nodeArray.Length then
         let node = nodeArray.[i]
@@ -49,15 +49,15 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
             // Skip the paren.
             checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
         else
-            match trie.Edges.Lookup.TryGetValue node.Hashcode with
+            match trie.edges.lookup.TryGetValue node.Hashcode with
             | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
             | false, _ -> ()
 
-        trie.Edges.AnyMatch 
+        trie.edges.anyMatch
         |> List.iter (fun (var, trie) -> 
-            match var with 
+            match var with
             | Some(var) -> 
-                match boundVariables.TryGetValue var with 
+                match boundVariables.TryGetValue var with
                 | true, varI when isMatch varI i nodeArray skipArray  -> 
                     checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
                 | false, _ -> 

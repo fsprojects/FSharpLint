@@ -202,7 +202,7 @@ module Lint =
             if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
-        Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
+        Starting(fileInfo.file) |> lintInfo.ReportLinterProgress
 
         let cancelHasNotBeenRequested () =
             match lintInfo.CancellationToken with
@@ -211,7 +211,7 @@ module Lint =
 
         let enabledRules = Configuration.flattenConfig lintInfo.Configuration
 
-        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
+        let lines = String.toLines fileInfo.text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let allRuleNames =
             [|
                 enabledRules.lineRules.indentationRule |> Option.map (fun rule -> rule.name) |> Option.toArray
@@ -222,11 +222,11 @@ module Lint =
         let suppressedRulesByLine = Suppression.getSuppressedRulesPerLine allRuleNames lines
 
         try
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.File fileInfo.Text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.typeCheckResults fileInfo.file fileInfo.text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.file fileInfo.text context
 
             [|
                 lineSuggestions
@@ -260,11 +260,11 @@ module Lint =
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
-        | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
+        | e -> Failed(fileInfo.file, e) |> lintInfo.ReportLinterProgress
 
-        ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
+        ReachedEnd(fileInfo.file, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
-    let private runProcess (workingDir: string) (exePath: string) (args: string) =
+    let private runProcess (workingDir:string) (exePath:string) (args:string) =
         let psi = System.Diagnostics.ProcessStartInfo()
         psi.FileName <- exePath
         psi.WorkingDirectory <- workingDir
@@ -287,7 +287,7 @@ module Lint =
 
         let exitCode = p.ExitCode
 
-        exitCode, (workingDir, exePath, args)
+        (exitCode, (workingDir, exePath, args))
 
     let getProjectFileInfo (releaseConfig : string option) (projectFilePath: string) =
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
@@ -305,9 +305,9 @@ module Lint =
             |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] msBuildParams
 
         match msBuildResults with
-        | Result.Ok [getFscArgsResult; getP2PRefsResult] ->
-            match getFscArgsResult, getP2PRefsResult with
-            | Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa), Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.ResolvedP2PRefs p2p) ->
+        | Result.Ok [getFscArgsResult] ->
+            match getFscArgsResult with
+            | Result.Ok (Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa) ->
 
                 let projDir = Path.GetDirectoryName projectFilePath
 
@@ -323,7 +323,7 @@ module Lint =
                 { ProjectFileName = projectFilePath
                   SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
                   OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
-                  ReferencedProjects = [||] //p2pProjects |> Array.ofList
+                  ReferencedProjects = [||]
                   IsIncompleteTypeCheckEnvironment = false
                   UseScriptResolutionRules = false
                   LoadTime = DateTime.Now
@@ -331,8 +331,11 @@ module Lint =
                   OriginalLoadReferences = []
                   ExtraProjectInfo = None
                   ProjectId = None
-                  Stamp = None } |> Success
-            | _ -> failwith "meow"
+                  Stamp = None }
+            | Result.Ok _ ->
+                failwithf "error getting FSC args from msbuild info"
+            | Result.Error error ->
+                failwithf "error getting FSC args from msbuild info, %A" error
         | Result.Ok r ->
             failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
         | Result.Error r ->
@@ -463,12 +466,10 @@ module Lint =
                     else
                         Failure (FailedToParseFilesInProject failedFiles)
 
-                match getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath with
-                | Success projectOptions ->
-                    let compileFiles = projectOptions.SourceFiles |> Array.toList
-                    match parseFilesInProject compileFiles projectOptions with
-                    | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
-                    | Failure x -> LintResult.Failure x
+                let projectOptions = getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath
+                let compileFiles = projectOptions.SourceFiles |> Array.toList
+                match parseFilesInProject compileFiles projectOptions with
+                | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
                 | Failure x -> LintResult.Failure x
             | Error err ->
                 RunTimeConfigError err
@@ -543,10 +544,10 @@ module Lint =
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
-                { ParseFile.Text = parsedFileInfo.Source
-                  ParseFile.Ast = parsedFileInfo.Ast
-                  ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
-                  ParseFile.File = "/home/user/Dog.Test.fsx" }
+                { ParseFile.text = parsedFileInfo.Source
+                  ParseFile.ast = parsedFileInfo.Ast
+                  ParseFile.typeCheckResults = parsedFileInfo.TypeCheckResults
+                  ParseFile.file = "/home/user/Dog.Test.fsx" }
 
             lint lintInformation parsedFileInfo
 
@@ -561,9 +562,9 @@ module Lint =
         match ParseFile.parseSource source checker with
         | ParseFile.Success(parseFileInformation) ->
             let parsedFileInfo =
-                { Source = parseFileInformation.Text
-                  Ast = parseFileInformation.Ast
-                  TypeCheckResults = parseFileInformation.TypeCheckResults }
+                { Source = parseFileInformation.text
+                  Ast = parseFileInformation.ast
+                  TypeCheckResults = parseFileInformation.typeCheckResults }
 
             lintParsedSource optionalParams parsedFileInfo
         | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
@@ -586,10 +587,10 @@ module Lint =
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
-                { ParseFile.Text = parsedFileInfo.Source
-                  ParseFile.Ast = parsedFileInfo.Ast
-                  ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
-                  ParseFile.File = filePath }
+                { ParseFile.text = parsedFileInfo.Source
+                  ParseFile.ast = parsedFileInfo.Ast
+                  ParseFile.typeCheckResults = parsedFileInfo.TypeCheckResults
+                  ParseFile.file = filePath }
 
             lint lintInformation parsedFileInfo
 
@@ -604,9 +605,9 @@ module Lint =
             match ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->
                 let parsedFileInfo =
-                    { Source = astFileParseInfo.Text
-                      Ast = astFileParseInfo.Ast
-                      TypeCheckResults = astFileParseInfo.TypeCheckResults }
+                    { Source = astFileParseInfo.text
+                      Ast = astFileParseInfo.ast
+                      TypeCheckResults = astFileParseInfo.typeCheckResults }
 
                 lintParsedFile optionalParams parsedFileInfo filePath
             | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)

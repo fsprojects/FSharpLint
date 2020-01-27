@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
-    let canBeReplacedWithFunctionComposition expression = 
+    let canBeReplacedWithFunctionComposition expression =
         let getLastElement = List.rev >> List.head
 
         let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) numFunctionCalls =
@@ -22,10 +22,10 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
             | FuncApp(exprs, _) ->
                 match List.map removeParens exprs with
                 | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues
-                        when appliedValuesAreConstants appliedValues -> 
+                        when appliedValuesAreConstants appliedValues ->
 
                     match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 -> 
+                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 ->
                         lastArgument.idText = lambdaArgument.idText
                     | SynExpr.App(_, false, _, _, _) as nextFunction ->
                         lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
@@ -33,14 +33,14 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
                 | _ -> false
             | _ -> false
 
-        match lambda.Arguments with
-        | [singleParameter] -> 
+        match lambda.arguments with
+        | [singleParameter] ->
             Helper.FunctionReimplementation.getLambdaParamIdent singleParameter
             |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
         | _ -> false
-        
-    if canBeReplacedWithFunctionComposition lambda.Body then
-        { Range = range 
+
+    if canBeReplacedWithFunctionComposition lambda.body then
+        { Range = range
           Message = Resources.GetString("RulesCanBeReplacedWithComposition")
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
@@ -49,9 +49,9 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
 
 let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaCannotBeReplacedWithComposition
-    
+
 let rule =
-    { name = "CanBeReplacedWithComposition" 
+    { name = "CanBeReplacedWithComposition"
       identifier = Identifiers.CanBeReplacedWithComposition
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

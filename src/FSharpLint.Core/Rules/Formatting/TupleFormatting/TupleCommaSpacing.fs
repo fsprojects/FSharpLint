@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 // Check for single space after commas in tuple.
-let checkTupleCommaSpacing (args : AstNodeRuleParams) (tupleExprs : SynExpr list) tupleRange _ =
+let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tupleRange _ =
     tupleExprs
     |> List.toArray
     |> Array.pairwise
@@ -31,11 +31,11 @@ let checkTupleCommaSpacing (args : AstNodeRuleParams) (tupleExprs : SynExpr list
               TypeChecks = [] } |> Some
         else
             None)
-    
-let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleCommaSpacing
-    
+
+let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleCommaSpacing
+
 let rule =
-    { name = "TupleCommaSpacing" 
+    { name = "TupleCommaSpacing"
       identifier = Identifiers.TupleCommaSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
     |> AstNodeRule

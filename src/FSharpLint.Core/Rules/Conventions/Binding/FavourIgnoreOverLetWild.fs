@@ -20,10 +20,10 @@ let private checkForBindingToAWildcard pattern range =
           TypeChecks = [] } |> Array.singleton
     else
         Array.empty
-              
+
 let private runner (args:AstNodeRuleParams) =
     match args.astNode with
-    | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
+    | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, _, range, _))
             when Helper.Binding.isLetBinding args.nodeIndex args.syntaxArray args.skipArray ->
         checkForBindingToAWildcard pattern range
     | _ -> Array.empty
@@ -33,4 +33,4 @@ let rule =
     { name = "FavourIgnoreOverLetWild"
       identifier = Identifiers.FavourIgnoreOverLetWild
       ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
-    |> AstNodeRule               
+    |> AstNodeRule
