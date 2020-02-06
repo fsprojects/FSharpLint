@@ -96,12 +96,16 @@ module ParseFile =
         let sourceText = SourceText.ofString source
         #if NETSTANDARD2_0
         let assumeDotNetFramework = false
+        let useSdkRefs = true
+        let targetProfile = "--targetProfile:netstandard"
         #else
         let assumeDotNetFramework = true
+        let useSdkRefs = false
+        let targetProfile = "--targetProfile:mscorlib"
         #endif
 
         let (options, _diagnostics) =
-            checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework)
+            checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework, useSdkRefs = useSdkRefs, otherFlags = [| targetProfile |])
             |> Async.RunSynchronously
 
         let otherOptions =

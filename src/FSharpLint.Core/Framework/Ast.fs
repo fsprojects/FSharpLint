@@ -386,7 +386,15 @@ module Ast =
             add <| expressionNode expression2
             add <| expressionNode expression1
             add <| expressionNode expression
-        | SynExpr.LetOrUseBang(_, _, _, pattern, expression, expression1, _)
+        | SynExpr.LetOrUseBang(_, _, _, pattern, rightHandSide, andBangs, leftHandSide, _) ->
+            add <| expressionNode rightHandSide
+            add <| expressionNode leftHandSide
+            // TODO: is the the correct way to handle the new `and!` syntax?
+            andBangs |> List.iter (fun (_, _, _, pattern, body, _) ->
+                add <| expressionNode body
+                add <| patternNode pattern
+            )
+            add <| patternNode pattern
         | SynExpr.ForEach(_, _, _, pattern, expression, expression1, _) ->
             add <| expressionNode expression1
             add <| expressionNode expression
