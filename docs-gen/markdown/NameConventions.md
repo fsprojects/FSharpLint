@@ -35,3 +35,14 @@ Each of the following rules targets a different kind of element.
 - ActivePatternNames - FS0048
 - PublicValuesNames - FS0049
 - NonPublicValuesNames - FS0050
+
+### Example
+
+Check the sample how to ignore the FS0050 warnings:
+
+        let willShowWarning () =
+        let WithWarning = None
+        [<System.Diagnostics.CodeAnalysis.SuppressMessage("*", "NonPublicValuesNames")>]
+        let NoWarning = None
+        NoWarning, WithWarning
+
