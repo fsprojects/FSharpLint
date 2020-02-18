@@ -73,7 +73,7 @@ let getNextLineSuppressionContext (allRules : Set<string>) (currentSuppressedRul
     | Some (EnableNextLine target) ->
         (currentSuppressedRules, Some (NextLineSuppression.EnableLine target))
     | Some (DisableNextLine target) ->
-         (currentSuppressedRules, Some (NextLineSuppression.EnableLine target))
+         (currentSuppressedRules, Some (NextLineSuppression.DisableLine target))
     | None -> (currentSuppressedRules, None)
 
 let getSuppressedRulesPerLine (allRules : Set<string>) (lines : string []) =

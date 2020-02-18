@@ -49,10 +49,56 @@ type TestSuppression() =
 
     [<Test>]
     member __.``suppression info is correctly converted to line suppression``() =
-        // TODO: text
         let text = """
+
+// fsharplint:disable
+
+// fsharplint:enable TypePrefixing TypedItemSpacing
+
+// fsharplint:enable
+
+// fsharplint:disable TypePrefixing TypedItemSpacing
+
+// fsharplint:disable
+
+// fsharplint:enable-next-line TypePrefixing TypedItemSpacing
+
+// fsharplint:enable-next-line
+
+// fsharplint:enable
+
+// fsharplint:disable-next-line
+
+// fsharplint:disable-next-line TypePrefixing TypedItemSpacing
+
 """
 
-        let allRules = Set.empty // TODO: get reference to all rule identifiers
+        let allRules = Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"]
         let lines = String.getLines text
-        Suppression.getSuppressedRulesPerLine allRules lines
+        let result = Suppression.getSuppressedRulesPerLine allRules lines
+        CollectionAssert.AreEquivalent(dict [|
+            (0, Set.empty)
+            (1, Set.empty)
+            (2, Set.empty)
+            (3, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (4, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (5, Set.ofList ["TupleCommaSpacing"])
+            (6, Set.ofList ["TupleCommaSpacing"])
+            (7, Set.empty)
+            (8, Set.empty)
+            (9, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
+            (10, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
+            (11, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (12, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (13, Set.ofList ["TupleCommaSpacing"])
+            (14, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (15, Set.empty)
+            (16, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (17, Set.empty)
+            (18, Set.empty)
+            (19, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (20, Set.empty)
+            (21, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
+            (22, Set.empty)
+        |], result)
+
