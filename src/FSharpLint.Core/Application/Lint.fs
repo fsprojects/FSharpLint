@@ -201,11 +201,6 @@ module Lint =
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
-        let suppressions = ResizeArray()
-
-        let checkIfSuppressed i rule =
-            AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
-            |> AbstractSyntaxArray.isRuleSuppressed rule
 
         // Collect suggestions for AstNode rules, and build context for following rules.
         let astNodeSuggestions =
@@ -225,19 +220,17 @@ module Lint =
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
-                AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
-                |> List.iter suppressions.AddRange
 
                 rules
-                |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
                 |> Array.collect (fun rule ->
                     rule.ruleConfig.runner astNodeParams
+                    |> Array.map (Suggestion.addIdentifier rule.identifier)))
+
                     |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent)))
 
         let context =
             { indentationRuleContext = indentationRuleState
-              noTabCharactersRuleContext = noTabCharactersRuleState
-              suppressions = suppressions.ToArray() }
+              noTabCharactersRuleContext = noTabCharactersRuleState }
 
         rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
         (astNodeSuggestions, context)

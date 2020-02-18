@@ -4,16 +4,7 @@
 /// so that each node can be visited by a list of visitors.
 module Ast =
 
-    open System.Collections.Generic
     open FSharp.Compiler.Ast
-
-    /// Represents a SuppressedMessageAttribute found in the AST.
-    type SuppressedMessage =
-        { /// Category property of the SuppressedMessageAttribute. (The name of the analyser to be suppressed).
-          Category: string
-
-          /// CheckId property of the SuppressedMessageAttribute. (The name of the rule to be suppressed).
-          Rule: string }
 
     /// Nodes in the AST to be visited.
     [<NoEquality; NoComparison>]
@@ -65,21 +56,13 @@ module Ast =
                             getPropertyIntiailiserValues category checkid tail
                     | _::tail ->
                         getPropertyIntiailiserValues category checkid tail
-                    | [] ->
-                        match category, checkid with
-                        | Some(category), Some(checkid) ->
-                            Some({ Category = category; Rule = checkid })
-                        | _ -> None
+                    | [] -> None
 
                 getPropertyIntiailiserValues None None arguments
 
             match attribute.ArgExpr with
             | SynExpr.Paren(SynExpr.Tuple(_, arguments, _, _), _, _, _) ->
-                match arguments with
-                | SynExpr.Const(SynConst.String(category, _), _)::SynExpr.Const(SynConst.String(checkid, _), _)::_ ->
-                    Some({ Category = category; Rule = checkid })
-                | _ ->
-                    tryGetArgumentsFromPropertyInitialisers arguments
+                tryGetArgumentsFromPropertyInitialisers arguments
             | _ -> None
 
         let tryGetSuppressMessageAttribute (attribute:SynAttribute) =

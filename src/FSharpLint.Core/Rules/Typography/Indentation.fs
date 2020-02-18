@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 let [<Literal>] RuleName = "Indentation"
 
 module ContextBuilder =
-    
+
     let private firstRangePerLine (ranges:range list) =
         List.foldBack
             (fun (range:range) map -> Map.add range.StartLine range map)
@@ -43,8 +43,8 @@ module ContextBuilder =
         | (first::others) ->
              let expectedIndentation = first.StartColumn
              others |> List.map (fun other -> (other.StartLine, (true, expectedIndentation)))
-        | _ -> []   
-    
+        | _ -> []
+
     let private indentationOverridesForNode (node:AstNode) =
         match node with
         | Expression(SynExpr.Record(recordFields=recordFields)) ->
@@ -72,8 +72,8 @@ module ContextBuilder =
             |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
             |> firstRangePerLine
             |> List.collect (createAbsoluteAndOffsetOverrides expectedIndentation)
-        | _ -> []   
-    
+        | _ -> []
+
     let builder current node =
         indentationOverridesForNode node
         |> List.fold (fun current (line, indentationOverride) ->
@@ -84,47 +84,43 @@ type Config = {
     numberOfIndentationSpaces : int
 }
 
-let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) suppressions (indentationOverrides:Map<int,bool*int>) =
+let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
     let numLeadingSpaces = line.Length - line.TrimStart().Length
     let range = mkRange "" (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
 
-    let isSuppressed = AbstractSyntaxArray.isRuleSuppressedByRange suppressions "Indentation" range
-    if not isSuppressed then
-        if indentationOverrides.ContainsKey lineNumber then
-            match indentationOverrides.[lineNumber] with
-            | (true, expectedIndentation) ->
-                if numLeadingSpaces <> expectedIndentation then
-                    let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                    { Range = range
-                      Message =  errorString
-                      SuggestedFix = None
-                      TypeChecks = [] } |> Some
-                else
-                    None
-            | (false, indentationOffset) ->
-                if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
-                    let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                    { Range = range
-                      Message =  String.Format(errorFormatString, expectedSpaces) 
-                      SuggestedFix = None
-                      TypeChecks = [] } |> Some
-                else
-                    None
-        elif numLeadingSpaces % expectedSpaces <> 0 then
-            let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
-            { Range = range
-              Message =  String.Format(errorFormatString, expectedSpaces) 
-              SuggestedFix = None
-              TypeChecks = [] } |> Some
-        else
-            None
+    if indentationOverrides.ContainsKey lineNumber then
+        match indentationOverrides.[lineNumber] with
+        | (true, expectedIndentation) ->
+            if numLeadingSpaces <> expectedIndentation then
+                let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                { Range = range
+                  Message =  errorString
+                  SuggestedFix = None
+                  TypeChecks = [] } |> Some
+            else
+                None
+        | (false, indentationOffset) ->
+            if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
+                let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                { Range = range
+                  Message =  String.Format(errorFormatString, expectedSpaces)
+                  SuggestedFix = None
+                  TypeChecks = [] } |> Some
+            else
+                None
+    elif numLeadingSpaces % expectedSpaces <> 0 then
+        let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
+        { Range = range
+          Message =  String.Format(errorFormatString, expectedSpaces)
+          SuggestedFix = None
+          TypeChecks = [] } |> Some
     else
         None
-       
+
 let runner (config:Config) context args =
-    checkIndentation config.numberOfIndentationSpaces args.line args.lineNumber args.suppressions context
+    checkIndentation config.numberOfIndentationSpaces args.line args.lineNumber context
     |> Option.toArray
-    
+
 let rule config =
     { name = "Indentation"
       identifier = Identifiers.Indentation

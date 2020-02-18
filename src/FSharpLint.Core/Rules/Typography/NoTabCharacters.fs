@@ -5,7 +5,6 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Ast
 open FSharp.Compiler.Range
-open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -13,12 +12,12 @@ module ContextBuilder =
 
     let builder current astNode =
         match astNode with
-        | Expression(SynExpr.Const(SynConst.String(value, _), range)) -> 
+        | Expression(SynExpr.Const(SynConst.String(value, _), range)) ->
             (value, range) :: current
         | _ ->
             current
 
-let private isInLiteralString literalStrings range = 
+let private isInLiteralString literalStrings range =
     literalStrings |> Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range)
 
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
@@ -26,17 +25,16 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
 
     if indexOfTab >= 0 then
         let range = mkRange "" (mkPos args.lineNumber indexOfTab) (mkPos args.lineNumber (indexOfTab + 1))
-        let isSuppressed = AbstractSyntaxArray.isRuleSuppressedByRange args.suppressions "NoTabCharacters" range
-        if (isSuppressed || isInLiteralString literalStrings range) |> not then
-            { Range = range 
+        if isInLiteralString literalStrings range |> not then
+            { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")
-              SuggestedFix = None 
+              SuggestedFix = None
               TypeChecks = [] } |> Array.singleton
         else
             Array.empty
     else
         Array.empty
-        
+
 let rule =
     { name = "NoTabCharacters"
       identifier = Identifiers.NoTabCharacters

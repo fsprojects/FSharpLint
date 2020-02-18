@@ -20,7 +20,6 @@ type AstNodeRuleParams =
 type LineRuleParams =
     { line : string
       lineNumber : int
-      suppressions : (Ast.SuppressedMessage * range) []
       isLastLine : bool
       fileContent : string }
 

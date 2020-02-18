@@ -5,7 +5,6 @@ module AbstractSyntaxArray =
     open System.Collections.Generic
     open System.Diagnostics
     open FSharp.Compiler.Ast
-    open FSharp.Compiler.Range
 
     open Ast
 
@@ -17,7 +16,7 @@ module AbstractSyntaxArray =
         | Unit = 5uy
         | AddressOf = 6uy
         | Paren = 7uy
-        
+
         | If = 10uy
         | Else = 11uy
 
@@ -29,7 +28,7 @@ module AbstractSyntaxArray =
         | Tuple = 31uy
 
         | Wildcard = 41uy
-            
+
         | ConstantBool = 51uy
         | ConstantByte = 52uy
         | ConstantChar = 53uy
@@ -47,7 +46,7 @@ module AbstractSyntaxArray =
         | ConstantUInt64 = 65uy
         | ConstantUIntPtr = 66uy
         | ConstantBytes = 67uy
-        
+
         | ModuleOrNamespace = 70uy
         | ModuleDeclaration = 71uy
         | Binding = 72uy
@@ -60,7 +59,7 @@ module AbstractSyntaxArray =
         | MemberDefinition = 80uy
         | ExceptionRepresentation = 81uy
         | TypeSimpleRepresentation = 82uy
-        
+
         | Cons = 101uy
         | And = 102uy
         | Or = 103uy
@@ -90,7 +89,7 @@ module AbstractSyntaxArray =
         | SynConst.UInt16s(_)
         | SynConst.UserNum(_)
         | SynConst.Measure(_) -> SyntaxNode.Other
-        
+
     let private astNodeToSyntaxNode = function
         | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
         | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
@@ -135,14 +134,14 @@ module AbstractSyntaxArray =
         | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
 
     [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
-    type Node(hashcode: int, actual: AstNode) = 
+    type Node(hashcode: int, actual: AstNode) =
         member __.Hashcode = hashcode
         member __.Actual = actual
 
         member private __.DebuggerDisplay = "AstNode: " + string actual
 
     [<Struct>]
-    type private PossibleSkip(skipPosition: int, depth: int) = 
+    type private PossibleSkip(skipPosition: int, depth: int) =
         member __.SkipPosition = skipPosition
         member __.Depth = depth
 
@@ -151,9 +150,9 @@ module AbstractSyntaxArray =
         | [ident] -> hash ident
         | _::rest -> getIdentHash rest
         | [] -> 0
-        
+
     /// Get hash code of an ast node to be used for the fuzzy match of hints against the ast.
-    let private getHashCode node = 
+    let private getHashCode node =
         match node with
         | Identifier(idents) -> getIdentHash idents
         | Pattern(SynPat.Const(SynConst.Bool(x), _))
@@ -195,21 +194,21 @@ module AbstractSyntaxArray =
         | _ -> 0
 
     [<Struct; NoEquality; NoComparison>]
-    type private StackedNode(node: Ast.Node, depth: int) = 
+    type private StackedNode(node: Ast.Node, depth: int) =
         member __.Node = node
         member __.Depth = depth
 
     [<Struct; DebuggerDisplay("{DebuggerDisplay,nq}")>]
-    type Skip(numberOfChildren: int, parentIndex: int) = 
+    type Skip(numberOfChildren: int, parentIndex: int) =
         member __.NumberOfChildren = numberOfChildren
         member __.ParentIndex = parentIndex
 
-        member private __.DebuggerDisplay = 
+        member private __.DebuggerDisplay =
             "Skip: NumberOfChildren=" + string numberOfChildren + ", ParentIndex=" + string parentIndex
 
     /// Keep index of position so skip array can be created in the correct order.
     [<Struct>]
-    type private TempSkip(numberOfChildren: int, parentIndex: int, index: int) = 
+    type private TempSkip(numberOfChildren: int, parentIndex: int, index: int) =
         member __.NumberOfChildren = numberOfChildren
         member __.Index = index
         member __.ParentIndex = parentIndex
@@ -221,24 +220,11 @@ module AbstractSyntaxArray =
           ChildNodes: AstNode list
 
           /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
-          Breadcrumbs: AstNode list
+          Breadcrumbs: AstNode list }
 
-          /// Suppressed message attributes that have been applied to the block of code 
-          /// the current node is within.
-          SuppressedMessages: (SuppressedMessage * range) list }
-
-        with
-            /// Has a given rule been suppressed by SuppressMessageAttribute?
-            member this.IsSuppressed(analyserName, ?rulename) =
-                let isAnalyserSuppressed (analyser, _) =
-                    analyser.Category = analyserName && 
-                    (Option.exists ((=) analyser.Rule) rulename || analyser.Rule = "*")
-
-                this.SuppressedMessages |> List.exists isAnalyserSuppressed
-        
     let astToArray ast =
         let astRoot = File ast
-    
+
         let nodes = List<_>()
         let left = Stack<_>()
         let possibleSkips = Stack<PossibleSkip>()
@@ -258,7 +244,7 @@ module AbstractSyntaxArray =
             let node = stackedNode.Node
             let astNode = node.AstNode
             let depth = stackedNode.Depth
-        
+
             tryAddPossibleSkips depth
 
             traverseNode astNode (fun node -> left.Push (StackedNode(node, depth + 1)))
@@ -277,11 +263,11 @@ module AbstractSyntaxArray =
 
             match astNodeToSyntaxNode astNode with
             | SyntaxNode.Other -> ()
-            | syntaxNode -> 
+            | syntaxNode ->
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
 
                 nodes.Add (Node(Utilities.hash2 syntaxNode (getHashCode astNode), astNode))
-        
+
         tryAddPossibleSkips 0
 
         let skipArray = Array.zeroCreate skips.Count
@@ -307,39 +293,5 @@ module AbstractSyntaxArray =
             else
                 breadcrumbs
 
-        if i = 0 then [] 
+        if i = 0 then []
         else getBreadcrumbs [] (skipArray.[i].ParentIndex) |> List.rev
-
-    let getSuppressMessageAttributes (syntaxArray: Node []) (skipArray: Skip []) i =
-        let rec getSuppressMessageAttributes breadcrumbs i =
-            if i = 0 then
-                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
-                if List.isEmpty node then breadcrumbs
-                else node::breadcrumbs
-            else if i < skipArray.Length then
-                let node = Ast.getSuppressMessageAttributes syntaxArray.[i].Actual
-                let parenti = skipArray.[i].ParentIndex
-                if List.isEmpty node then
-                    getSuppressMessageAttributes breadcrumbs parenti
-                else
-                    getSuppressMessageAttributes (node::breadcrumbs) parenti
-            else
-                breadcrumbs
-
-        getSuppressMessageAttributes [] i
-
-    [<Literal>]
-    let SuppressRuleWildcard = "*"
-
-    let isRuleSuppressed ruleName suppressedRuleAttributes =
-        let isSuppressed (l, _) = l.Rule = SuppressRuleWildcard || l.Rule = ruleName
-
-        suppressedRuleAttributes
-        |> List.exists (List.exists isSuppressed)
-        
-    let isRuleSuppressedByRange suppressMessageAttributes ruleName range =
-        let isSuppressed (suppressedMessage:Ast.SuppressedMessage, suppressedMessageRange:range) =
-            (suppressedMessage.Rule = ruleName || suppressedMessage.Rule = SuppressRuleWildcard) &&
-            ExpressionUtilities.rangeContainsOtherRange suppressedMessageRange range
-
-        suppressMessageAttributes |> Seq.exists isSuppressed
