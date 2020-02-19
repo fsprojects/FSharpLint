@@ -26,8 +26,7 @@ type LineRuleParams =
 type RuleMetadata<'config> =
   { name : string
     identifier : string
-    ruleConfig : 'config
-  }
+    ruleConfig : 'config }
 
 type AstNodeRuleConfig =
   { runner : AstNodeRuleParams -> WarningDetails []
@@ -64,3 +63,22 @@ type Rule =
   | LineRule of RuleMetadata<LineRuleConfig>
   | IndentationRule of RuleMetadata<IndentationRuleConfig>
   | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
+
+let detailsToSuggestion (ruleName:string) (ruleIdentifier:string) (details:SuggestionDetails) =
+    {
+        RuleName = ruleName
+        RuleIdentifier = ruleIdentifier
+        Details = details
+    }
+
+let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
+    rule.ruleConfig.runner config
+    |> Array.map (detailsToSuggestion rule.name rule.identifier)
+
+let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
+    rule.ruleConfig.runner context config
+    |> Array.map (detailsToSuggestion rule.name rule.identifier)
+
+let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
+    rule.ruleConfig.runner config
+    |> Array.map (detailsToSuggestion rule.name rule.identifier)

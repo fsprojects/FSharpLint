@@ -1,5 +1,7 @@
 ﻿namespace FSharpLint.Application
+
 open Dotnet.ProjInfo.Inspect.MSBuild
+open FSharpLint.Framework
 
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
@@ -87,8 +89,6 @@ module ConfigurationManagement =
 [<AutoOpen>]
 module Lint =
 
-    open System.Diagnostics.CodeAnalysis
-    open System.Diagnostics.CodeAnalysis
     open System
     open System.Collections.Concurrent
     open System.Collections.Generic
@@ -97,11 +97,8 @@ module Lint =
     open System.Threading
     open FSharp.Compiler
     open FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework
-    open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharpLint.Application.ConfigurationManager
-    open FSharpLint.Framework
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -221,10 +218,7 @@ module Lint =
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
 
-                rules
-                |> Array.collect (fun rule ->
-                    rule.ruleConfig.runner astNodeParams
-                    |> Array.map (Suggestion.addIdentifier rule.identifier)))
+                rules |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
 
                     |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent)))
 
@@ -248,21 +242,15 @@ module Lint =
 
             let indentationError =
                 lineRules.indentationRule
-                |> Option.map (fun rule ->
-                    rule.ruleConfig.runner context.indentationRuleContext lineParams
-                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.indentationRuleContext lineParams)
 
             let noTabCharactersError =
                 lineRules.noTabCharactersRule
-                |> Option.map (fun rule ->
-                    rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams
-                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.noTabCharactersRuleContext lineParams)
 
             let lineErrors =
                 lineRules.genericLineRules
-                |> Array.collect (fun rule ->
-                    rule.ruleConfig.runner lineParams
-                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
+                |> Array.collect (fun rule -> runLineRule rule lineParams)
 
             [|
                 indentationError |> Option.toArray
@@ -271,6 +259,14 @@ module Lint =
             |])
         |> Array.concat
         |> Array.concat
+
+    let isSuppressed (suppressedRulesByLine:IDictionary<int, Set<string>>) (suggestion:Suggestion.LintSuggestion) =
+        // Filter out any suggestion which has one of its lines suppressed.
+        [suggestion.Details.Range.StartLine..suggestion.Details.Range.EndLine]
+        |> List.exists (fun lineNum ->
+            match suppressedRulesByLine.TryGetValue(lineNum - 1) with
+            | (true, suppressedRules) -> Set.contains suggestion.RuleName suppressedRules
+            | (false, _) -> false)
 
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
@@ -294,6 +290,16 @@ module Lint =
 
         let enabledRules = flattenConfig lintInfo.Configuration
 
+        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, lineNum, _) -> (line, lineNum))
+        let allRuleNames =
+            [|
+                enabledRules.lineRules.indentationRule |> Option.map (fun rule -> rule.name) |> Option.toArray
+                enabledRules.lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.name) |> Option.toArray
+                enabledRules.lineRules.genericLineRules |> Array.map (fun rule -> rule.name)
+                enabledRules.astNodeRules |> Array.map (fun rule -> rule.name)
+            |] |> Array.concat |> Set.ofArray
+        let suppressedRulesByLine = Suppression.getSuppressedRulesPerLine allRuleNames lines
+
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
@@ -306,6 +312,7 @@ module Lint =
                 astNodeSuggestions
             |]
             |> Array.concat
+            |> Array.filter (isSuppressed suppressedRulesByLine >> not)
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then

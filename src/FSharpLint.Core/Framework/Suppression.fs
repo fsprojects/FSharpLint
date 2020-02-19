@@ -17,9 +17,9 @@ type SuppressionInfo =
     /// Represents a comment enabling linting rules for the next line.
     | EnableNextLine of SuppressionTarget
 
-let parseSuppressionInfo (lines : string []) =
+let parseSuppressionInfo (lines : (string * int) []) =
     lines
-    |> Array.mapi (fun lineNum line ->
+    |> Array.map (fun (line, lineNum) ->
         let trimmedLine = line.TrimStart()
         let matched = Regex.Match (trimmedLine, "^\/\/\s*fsharplint:([a-z\-]*)\s*(.*)$", RegexOptions.IgnoreCase)
         if matched.Success then
@@ -71,12 +71,12 @@ let getNextLineSuppressionContext (allRules : Set<string>) (currentSuppressedRul
     | Some (Disable (Rules rules)) ->
         (Set.union currentSuppressedRules rules, None)
     | Some (EnableNextLine target) ->
-        (currentSuppressedRules, Some (NextLineSuppression.EnableLine target))
+         (currentSuppressedRules, Some (NextLineSuppression.EnableLine target))
     | Some (DisableNextLine target) ->
-         (currentSuppressedRules, Some (NextLineSuppression.DisableLine target))
+        (currentSuppressedRules, Some (NextLineSuppression.DisableLine target))
     | None -> (currentSuppressedRules, None)
 
-let getSuppressedRulesPerLine (allRules : Set<string>) (lines : string []) =
+let getSuppressedRulesPerLine (allRules : Set<string>) (lines : (string * int) []) =
     parseSuppressionInfo lines
     |> Array.fold (fun ((currentSuppressedRules, nextLineSuppressions:NextLineSuppression option), agg) (lineNum, suppressionInfo) ->
         let currentLineSuppressions = getCurrentLineSuppressedRules allRules (currentSuppressedRules, nextLineSuppressions)

@@ -1,6 +1,8 @@
 module TestSuppression
 
 open FSharp.Compiler.AbstractIL.Internal.Library
+open FSharp.Compiler.SourceCodeServices
+open FSharpLint.Application
 open NUnit.Framework
 open FSharpLint.Framework
 open FSharpLint.Framework.Suppression
@@ -27,7 +29,7 @@ type TestSuppression() =
 
 // fsharplint:enable-next-line TypePrefixing TypedItemSpacing"""
 
-        let parseResult = Suppression.parseSuppressionInfo (String.getLines text)
+        let parseResult = Suppression.parseSuppressionInfo (FSharpLint.Framework.String.toLines text |> Array.map (fun (line, lineNum, _) -> (line, lineNum)))
         Assert.AreEqual([|
             (0, None)
             (1, Some (SuppressionInfo.Disable All))
@@ -74,7 +76,7 @@ type TestSuppression() =
 """
 
         let allRules = Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"]
-        let lines = String.getLines text
+        let lines = FSharpLint.Framework.String.toLines text |> Array.map (fun (line, lineNum, _) -> (line, lineNum))
         let result = Suppression.getSuppressedRulesPerLine allRules lines
         CollectionAssert.AreEquivalent(dict [|
             (0, Set.empty)
@@ -99,6 +101,39 @@ type TestSuppression() =
             (19, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
             (20, Set.empty)
             (21, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
-            (22, Set.empty)
         |], result)
+
+
+    [<Test>]
+    member __.``suppression comments work to suppress warnings``() =
+        let text = """
+// fsharplint:disable-next-line
+let x = not true
+
+// fsharplint:disable-next-line Hints
+let y = not true
+
+// fsharplint:disable
+
+
+let z = not true
+
+// fsharplint:enable
+
+let a = not true"""
+
+        let parsedFileInfo =
+            match ParseFile.parseSource text OptionalLintParameters.Default (FSharpChecker.Create()) with
+            | ParseFile.Success(parseFileInformation) ->
+                { Source = parseFileInformation.Text
+                  Ast = parseFileInformation.Ast
+                  TypeCheckResults = parseFileInformation.TypeCheckResults }
+            | ParseFile.Failed _ -> failwith "Failed to parse"
+
+        let warnings =
+            match Lint.lintParsedFile OptionalLintParameters.Default parsedFileInfo "" with
+            | LintResult.Success warnings -> warnings
+            | LintResult.Failure _ -> failwith "Failed to lint"
+        Assert.AreEqual(1, warnings.Length)
+        Assert.AreEqual(15, warnings.Head.Range.StartLine)
 
