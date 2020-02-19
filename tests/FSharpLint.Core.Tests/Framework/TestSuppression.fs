@@ -15,7 +15,7 @@ type TestSuppression() =
         let text = """
 // fsharplint:disable
 
-// fsharplint:enable
+(* fsharplint:enable *)
 
 // fsharplint:disable TypePrefixing TypedItemSpacing
 
@@ -27,9 +27,17 @@ type TestSuppression() =
 
 // fsharplint:enable-next-line
 
-// fsharplint:enable-next-line TypePrefixing TypedItemSpacing"""
+// fsharplint:enable-next-line TypePrefixing TypedItemSpacing
 
-        let parseResult = Suppression.parseSuppressionInfo (FSharpLint.Framework.String.toLines text |> Array.map (fun (line, lineNum, _) -> (line, lineNum)))
+// fsharplint:enable-line
+
+// fsharplint:disable-line
+
+// fsharplint:enable-line TypePrefixing TypedItemSpacing
+
+// fsharplint:disable-line TypePrefixing TypedItemSpacing"""
+
+        let parseResult = Suppression.parseSuppressionInfo (FSharpLint.Framework.String.toLines text |> Array.map (fun (line, _, _) -> line) |> Array.toList)
         Assert.AreEqual([|
             (0, None)
             (1, Some (SuppressionInfo.Disable All))
@@ -47,6 +55,14 @@ type TestSuppression() =
             (13, Some (SuppressionInfo.EnableNextLine All))
             (14, None)
             (15, Some (SuppressionInfo.EnableNextLine (Rules (Set.ofList ["TypePrefixing"; "TypedItemSpacing"]))))
+            (16, None)
+            (17, Some (SuppressionInfo.EnableLine All))
+            (18, None)
+            (19, Some (SuppressionInfo.DisableLine All))
+            (20, None)
+            (21, Some (SuppressionInfo.EnableLine (Rules (Set.ofList ["TypePrefixing"; "TypedItemSpacing"]))))
+            (22, None)
+            (23, Some (SuppressionInfo.DisableLine (Rules (Set.ofList ["TypePrefixing"; "TypedItemSpacing"]))))
         |], parseResult)
 
     [<Test>]
@@ -67,18 +83,24 @@ type TestSuppression() =
 
 // fsharplint:enable-next-line
 
+// fsharplint:enable-line TypePrefixing TypedItemSpacing
+
+// fsharplint:enable-line
+
 // fsharplint:enable
 
 // fsharplint:disable-next-line
 
 // fsharplint:disable-next-line TypePrefixing TypedItemSpacing
 
-"""
+// fsharplint:disable-line TypePrefixing TypedItemSpacing
+
+// fsharplint:disable-line"""
 
         let allRules = Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"]
-        let lines = FSharpLint.Framework.String.toLines text |> Array.map (fun (line, lineNum, _) -> (line, lineNum))
+        let lines = FSharpLint.Framework.String.toLines text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let result = Suppression.getSuppressedRulesPerLine allRules lines
-        CollectionAssert.AreEquivalent(dict [|
+        let expected = dict [|
             (0, Set.empty)
             (1, Set.empty)
             (2, Set.empty)
@@ -95,13 +117,22 @@ type TestSuppression() =
             (13, Set.ofList ["TupleCommaSpacing"])
             (14, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
             (15, Set.empty)
-            (16, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
-            (17, Set.empty)
+            (16, Set.ofList ["TupleCommaSpacing"])
+            (17, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
             (18, Set.empty)
             (19, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
-            (20, Set.empty)
-            (21, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
-        |], result)
+            (20, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (21, Set.empty)
+            (22, Set.empty)
+            (23, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+            (24, Set.empty)
+            (25, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
+            (26, Set.ofList ["TypePrefixing"; "TypedItemSpacing"])
+            (27, Set.empty)
+            (28, Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"])
+        |]
+
+        CollectionAssert.AreEquivalent(expected, result)
 
 
     [<Test>]
@@ -113,10 +144,13 @@ let x = not true
 // fsharplint:disable-next-line Hints
 let y = not true
 
+let a = not true // fsharplint:disable-line
+
 // fsharplint:disable
 
-
 let z = not true
+
+let a = not true // fsharplint:enable-line
 
 // fsharplint:enable
 
@@ -134,6 +168,7 @@ let a = not true"""
             match Lint.lintParsedFile OptionalLintParameters.Default parsedFileInfo "" with
             | LintResult.Success warnings -> warnings
             | LintResult.Failure _ -> failwith "Failed to lint"
-        Assert.AreEqual(1, warnings.Length)
-        Assert.AreEqual(15, warnings.Head.Range.StartLine)
+        Assert.AreEqual(2, warnings.Length)
+        Assert.AreEqual(14, warnings.[0].Range.StartLine)
+        Assert.AreEqual(18, warnings.[1].Range.StartLine)
 

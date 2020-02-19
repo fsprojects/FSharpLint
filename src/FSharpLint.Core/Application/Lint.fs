@@ -290,7 +290,7 @@ module Lint =
 
         let enabledRules = flattenConfig lintInfo.Configuration
 
-        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, lineNum, _) -> (line, lineNum))
+        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let allRuleNames =
             [|
                 enabledRules.lineRules.indentationRule |> Option.map (fun rule -> rule.name) |> Option.toArray
