@@ -21,8 +21,8 @@ module Tests =
         override this.ToString() =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
 
-    let dotnetFslint arguments =        
-        let binDir = 
+    let dotnetFslint arguments =
+        let binDir =
             #if DEBUG
                 "Debug"
             #else
@@ -45,31 +45,31 @@ module Tests =
         app.WaitForExit()
         output
 
-    let getErrorsFromOutput (output:string) = 
+    let getErrorsFromOutput (output:string) =
         let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
-        
+
         set [ for i in 1..splitOutput.Length - 1 do
                 if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
     let expectedErrors =
-        set [ 
-          "FL0065: `not (a = b)` might be able to be refactored into `a <> b`."
-          "FL0065: `not (a <> b)` might be able to be refactored into `a = b`."
-          "FL0065: `fun x -> x` might be able to be refactored into `id`."
-          "FL0065: `not true` might be able to be refactored into `false`."
-          "FL0065: `not false` might be able to be refactored into `true`."
-          "FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
-          "FL0065: `a <> true` might be able to be refactored into `not a`."
-          "FL0065: `x = null` might be able to be refactored into `isNull x`."
-          "FL0065: `List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
-        
+        set [
+          "`not (a = b)` might be able to be refactored into `a <> b`."
+          "`not (a <> b)` might be able to be refactored into `a = b`."
+          "`fun x -> x` might be able to be refactored into `id`."
+          "`not true` might be able to be refactored into `false`."
+          "`not false` might be able to be refactored into `true`."
+          "`List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`."
+          "`a <> true` might be able to be refactored into `not a`."
+          "`x = null` might be able to be refactored into `isNull x`."
+          "`List.head (List.sort x)` might be able to be refactored into `List.min x`." ]
+
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
         let projectPath =
             basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
 
         [<Test>]
-        member __.InvalidConfig() = 
+        member __.InvalidConfig() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
@@ -82,61 +82,61 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member __.UnableToFindProjectFile() = 
+        member __.UnableToFindProjectFile() =
             let projectFile = projectPath </> "iuniubi.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = dotnetFslint arguments
 
             Assert.IsTrue(
-                output.Contains(sprintf "Could not find the file: %s on disk" projectFile), 
+                output.Contains(sprintf "Could not find the file: %s on disk" projectFile),
                 sprintf "Output:\n%s" output)
 
         [<Test>]
-        member __.FunctionalTestConsoleApplication() = 
+        member __.FunctionalTestConsoleApplication() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s" projectFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
-            
+
             let expectedMissing = Set.difference expectedErrors errors
             let notExpected = Set.difference errors expectedErrors
 
-            Assert.AreEqual(expectedErrors, errors, 
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
+            Assert.AreEqual(expectedErrors, errors,
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
-            
+
         [<Test>]
-        member __.FunctionalTestConsoleApplicationReleaseMode() = 
+        member __.FunctionalTestConsoleApplicationReleaseMode() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
             let arguments = sprintf "-f %s -c Release" projectFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
-            
+
             let expectedMissing = Set.difference expectedErrors errors
             let notExpected = Set.difference errors expectedErrors
 
-            Assert.AreEqual(expectedErrors, errors, 
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")           
-            
+            Assert.AreEqual(expectedErrors, errors,
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+
         [<Test>]
-        member __.FunctionalTestConsoleApplicationSolution() = 
+        member __.FunctionalTestConsoleApplicationSolution() =
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
             let arguments = sprintf "-sol %s" solutionFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
-            
+
             let expectedMissing = Set.difference expectedErrors errors
             let notExpected = Set.difference errors expectedErrors
 
-            Assert.AreEqual(expectedErrors, errors, 
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" + 
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")           
-            
+            Assert.AreEqual(expectedErrors, errors,
+                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+
         [<Test>]
         member __.FunctionalTestConfigConversion() =
             let xmlFile = TestContext.CurrentContext.TestDirectory </> "OldConfiguration.xml"
@@ -144,18 +144,18 @@ module Tests =
             let arguments = sprintf "-convert %s %s" xmlFile outputFile
 
             let output = dotnetFslint arguments
-            
+
             let expectedOutput = sprintf "Successfully converted config at '%s', saved to '%s'" xmlFile outputFile
 
             // Check dotnet tool output.
             Assert.AreEqual(expectedOutput.Trim(), output.Trim())
-            
+
             // Check converted config contents.
             let convertedConfig =
                 File.ReadAllText outputFile
                 |>  ConfigurationManager.parseConfig
-                
+
             let expectedConfig =
                 { Configuration.defaultConfiguration with hints = Configuration.defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
-                
+
             Assert.AreEqual(expectedConfig, convertedConfig)

@@ -1,3 +1,7 @@
+##### 0.13.0 - February 20 2020
+
+* Add `-format` flag to specify output format (standard or MSBuild).
+
 ##### 0.12.10 - January 23 2020
 
 * Return non-zero error code when there are lint warnings
