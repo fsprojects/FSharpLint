@@ -20,7 +20,7 @@ type TestConventionsMemberNames() =
 module Program
   type MyClass2() as this =
     member this.PrintMessage() = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -39,7 +39,7 @@ module Program
 module Program
 type MyClass(x) =
     new() = MyClass(0)"""
-        
+
         this.AssertNoWarnings()
 
 
@@ -52,7 +52,7 @@ type MyClass(x) =
     let mutable rotAngle = 0.0
 
     member this.CenterX with get() = x and set xval = x <- xval"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -67,25 +67,13 @@ type MyClass(x) =
         Assert.IsTrue(this.ErrorExistsAt(6, 16))
 
     [<Test>]
-    member this.PropertyIsCamelCaseSuppressed() =
-        this.Parse """
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "MemberNames")>]
-  type Shape2D(x0 : float, y0 : float) =
-    let mutable x, y = x0, y0
-    let mutable rotAngle = 0.0
-
-    member this.centerX with get() = x and set xval = x <- xval"""
-    
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.AbstractMemberNameIsPascalCase() =
         this.Parse """
 module Program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -105,7 +93,7 @@ module Program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract Area : float with get"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -126,7 +114,7 @@ module Program
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
     default this.Rotate(angle) = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -139,7 +127,7 @@ module program
     default this.rotate(angle) = ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 17))
-        
+
     [<Test>]
     member this.TypeExtensionMethodIsPascalCase() =
         this.Parse """
@@ -150,7 +138,7 @@ type MyClass() =
 
 type MyClass with
     member this.Goat() = 200"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -165,7 +153,7 @@ type MyClass with
     member this.goat() = 200"""
 
         Assert.IsTrue(this.ErrorExistsAt(8, 16))
-       
+
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99
     /// (duplicated warning for underscore in identifier).
     [<Test>]
@@ -179,7 +167,7 @@ type Cat() =
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
         Assert.AreEqual(1, numberOfErrors)
-      
+
     [<Test>]
     member this.``When prefix of underscores is allowed expect no suggestions when the remaining member ident is PascalCase``() =
         this.Parse """
@@ -189,7 +177,7 @@ type Cat() =
     member x.__Print() = ()"""
 
         this.AssertNoWarnings()
-        
+
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/323
     [<Test>]
     member this.``Special op_ prefixed members do not cause errors`` () =
@@ -202,13 +190,13 @@ with
 
         this.Parse source
         this.AssertNoWarnings()
-        
+
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/327
     [<Test>]
     member this.``Memebers implementing interface should be ignored`` () =
         let source = """
 type Foo() =
-    interface IDisposable with 
+    interface IDisposable with
         member x.dispose() = ()
     member x.Bar() = ()
 """

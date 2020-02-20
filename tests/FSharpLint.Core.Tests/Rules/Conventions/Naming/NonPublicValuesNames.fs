@@ -33,22 +33,13 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
-    member this.PrivateTupleIsPascalCaseSuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesNames")>]
-  let private Cat, private dog = 1, 0"""
-  
-        this.AssertNoWarnings()
-        
-    [<Test>]
     member this.PrivateFunctionNameIsPascalCase() =
         this.Parse """
 module Program
   let private Main () = ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
-      
+
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
     [<Test>]
     member this.MnemonicWildcardInPatternMatch() =
@@ -79,7 +70,7 @@ module Program
   let main =
     match true with
     | dog -> ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -90,8 +81,8 @@ module Program
     match true with
     | _ as Dog -> ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 11))    
-    
+        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+
     [<Test>]
     member this.PatternMatchAsIsCamelCase() =
         this.Parse """
@@ -99,9 +90,9 @@ module Program
   let main =
     match true with
     | _ as dog -> ()"""
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.FunctionNameNestedInBindingIsPascalCase() =
         this.Parse """
@@ -119,7 +110,7 @@ module Program
   let main () =
     let bain () = ()
     ()"""
-        
+
         this.AssertNoWarnings()
     [<Test>]
     member this.CamelCaseLetBindingInType() =
@@ -130,7 +121,7 @@ type Dog() =
     let cat() = ()
 
     member this.Goat() = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -166,9 +157,9 @@ type Cat() =
   member this.ContainsBinding() =
     let goat = 0
     ()"""
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.LiteralPatternMatchExpectNoErrors() =
         this.Parse """
@@ -180,9 +171,9 @@ module Program
     match true with
     | Dog -> ()
     | _ -> ()"""
-        
+
         this.AssertNoWarnings()
-        
+
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/191
     [<Test>]
     member this.``Backticked let binding identifier not checked by name convention rules``() =
@@ -193,9 +184,9 @@ let foo () =
     let ``¯\_(ツ)_/¯`` = ignore
     ()
         """
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.``Lower case international characters recognised by camelCase rule``() =
         this.Parse """
@@ -205,9 +196,9 @@ let foo () =
     let żcieżka = 0
     ()
         """
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.FunctionParameterIsPascalCase() =
         this.Parse """
@@ -215,31 +206,31 @@ module Program
   let main Dog = ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 11))
-        
+
     [<Test>]
-    member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() = 
+    member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() =
         let source = """
 module Program
 
 let foo X = 0
 """
- 
+
         let expected = """
 module Program
 
 let foo x = 0
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-               
+
     [<Test>]
     member this.ForLoopIdentifierIsCamelCase() =
         this.Parse """
 module Program
 for i = 10 downto 1 do System.Console.Write(i)
 """
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -257,7 +248,7 @@ for I = 10 downto 1 do System.Console.Write(I)
 module Program
 for i in 1..10 do System.Console.Write(i)
 """
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -268,7 +259,7 @@ for I in 1..10 do System.Console.Write(I)
 """
 
         Assert.IsTrue(this.ErrorExistsAt(3, 4))
-        
+
     [<Test>]
     member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
         this.Parse("""
@@ -279,7 +270,7 @@ type SingleCaseDU = SingleCaseDU of int
 let (SingleCaseDU MyInt) = (SingleCaseDU 5)""")
 
         Assert.IsTrue(this.ErrorsExist)
-        
+
     [<Test>]
     member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
         this.Parse("""
@@ -294,4 +285,4 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU""")
 
         Assert.IsTrue(this.ErrorsExist)
-        
+

@@ -8,7 +8,7 @@ type TestConventionsFunctionReimplementation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ReimplementsFunction.rule)
 
     [<Test>]
-    member this.LambdaReimplementingMultiplicationIssuesError() = 
+    member this.LambdaReimplementingMultiplicationIssuesError() =
         this.Parse """
 module Program
 
@@ -18,7 +18,7 @@ let f = fun a b -> a * b
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.``Operator ident is displayed in error as an operator symbol.``() = 
+    member this.``Operator ident is displayed in error as an operator symbol.``() =
         this.Parse """
 module Program
 
@@ -29,7 +29,7 @@ let f = fun a b -> a * b
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/237
     [<Test>]
-    member this.``When there's a tuple pattern in the lambda eta contraction should not be recommended.``() = 
+    member this.``When there's a tuple pattern in the lambda eta contraction should not be recommended.``() =
         this.Parse """
 module Program
 
@@ -39,7 +39,7 @@ let f = List.map (fun (x,_) -> id x) []
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() = 
+    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() =
         let source = """
 module Program
 
@@ -56,7 +56,7 @@ let f = ( * )
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Lambda reimplementing long identifier function issues error``() = 
+    member this.``Lambda reimplementing long identifier function issues error``() =
         this.Parse """
 module Program
 
@@ -66,7 +66,7 @@ let f = fun a b -> List.map a b
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() = 
+    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() =
         let source = """
 module Program
 
@@ -84,7 +84,7 @@ let f = List.map
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
-    member this.``Lambda to DU constructor application should be suggested``() = 
+    member this.``Lambda to DU constructor application should be suggested``() =
         this.Parse("""
 module Program
 
@@ -96,7 +96,7 @@ let f = List.map (fun x -> Meower x) ["1";"2"]""")
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
-    member this.``Lambda to pointfree constructor application should be suggested if using F# 4 or above``() = 
+    member this.``Lambda to pointfree constructor application should be suggested if using F# 4 or above``() =
         this.Parse("""
 module Program
 
@@ -111,29 +111,7 @@ let f = List.map (fun x -> String x) ["1";"2"]""")
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
-    member this.LambdaReimplementingMultiplicationIssuesErrorSuppressed() = 
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "*")>]
-let f = fun a b -> a * b
-"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
-    member this.LambdaReimplementingMultiplicationIssuesErrorSuppressedWithRuleName() = 
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "ReimplementsFunction")>]
-let f = fun a b -> a * b
-"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
-    member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() = 
+    member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -143,7 +121,7 @@ let f = fun a b -> a * 1
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.LambdaReimplementingCeilingFunctionIssuesError() = 
+    member this.LambdaReimplementingCeilingFunctionIssuesError() =
         this.Parse """
 module Program
 
@@ -151,9 +129,9 @@ let f = fun x -> ceil x
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
-        
+
     [<Test>]
-    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() = 
+    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -163,9 +141,9 @@ let f = fun a b _ -> a * b
 """
 
         this.AssertNoWarnings()
-        
+
     [<Test>]
-    member this.LambdaWithUnitParameterDoesNotIssueError() = 
+    member this.LambdaWithUnitParameterDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -177,7 +155,7 @@ let f = fun () -> ceil x
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.LambdaWithWildcardParameterDoesNotIssueError() = 
+    member this.LambdaWithWildcardParameterDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -191,9 +169,9 @@ let f = fun _ -> ceil x
 [<TestFixture>]
 type TestConventionsCanBeReplacedWithComposition() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(CanBeReplacedWithComposition.rule)
-    
+
     [<Test>]
-    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() =
         this.Parse """
 module Program
 
@@ -203,18 +181,7 @@ let f = fun x -> tan(cos(tan x))
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.LambdaReplacableWithCompositionErrorSuppressedWithRuleName() = 
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("FunctionReimplementation", "CanBeReplacedWithComposition")>]
-let f = fun x -> tan(cos(tan x))
-"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
-    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() = 
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() =
         this.Parse """
 module Program
 
@@ -224,7 +191,7 @@ let f = fun x -> x |> tan |> cos |> tan
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.``Applying constants in chain issues composition suggestion``() = 
+    member this.``Applying constants in chain issues composition suggestion``() =
         this.Parse """
 module Program
 
@@ -234,7 +201,7 @@ let f = fun x -> x |> tan 0 |> cos |> tan
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.``Applying closed over identifier in chain will not issue composition suggestion``() = 
+    member this.``Applying closed over identifier in chain will not issue composition suggestion``() =
         this.Parse """
 module Program
 
@@ -244,7 +211,7 @@ let f = fun x -> x |> tan y |> cos |> tan
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.LambdaWithUnitParameterDoesNotIssueError() = 
+    member this.LambdaWithUnitParameterDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -256,7 +223,7 @@ let f = fun () -> ceil x
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.LambdaWithWildcardParameterDoesNotIssueError() = 
+    member this.LambdaWithWildcardParameterDoesNotIssueError() =
         this.Parse """
 module Program
 
@@ -269,7 +236,7 @@ let f = fun _ -> ceil x
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/130
     [<Test>]
-    member this.``No suggestion should be given for function composition when the lambda's parameter's property/field is accessed``() = 
+    member this.``No suggestion should be given for function composition when the lambda's parameter's property/field is accessed``() =
         this.Parse """
 module Program
 
@@ -282,20 +249,20 @@ let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
-    member this.``No suggestion should be given for function composition when an infix operator is in the expression``() = 
+    member this.``No suggestion should be given for function composition when an infix operator is in the expression``() =
         this.Parse """
 module Program
 
 let x = 6
 
-let f = (fun value -> state + (findCoefficient conversion.Coefficients key) * value) 
+let f = (fun value -> state + (findCoefficient conversion.Coefficients key) * value)
 """
 
         this.AssertNoWarnings()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
-    member this.``No suggestion should be given for function composition when lambda has multiple arguments``() = 
+    member this.``No suggestion should be given for function composition when lambda has multiple arguments``() =
         this.Parse """
 module Program
 

@@ -169,6 +169,6 @@ let a = not true"""
             | LintResult.Success warnings -> warnings
             | LintResult.Failure _ -> failwith "Failed to lint"
         Assert.AreEqual(2, warnings.Length)
-        Assert.AreEqual(14, warnings.[0].Range.StartLine)
-        Assert.AreEqual(18, warnings.[1].Range.StartLine)
+        Assert.AreEqual(14, warnings.[0].Details.Range.StartLine)
+        Assert.AreEqual(18, warnings.[1].Details.Range.StartLine)
 

@@ -6,20 +6,12 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestTypographyTabCharacterInFile() =
     inherit TestNoTabCharactersRuleBase.TestNoTabCharactersRuleBase(NoTabCharacters.rule)
-    
+
     [<Test>]
-    member this.TabCharacterInFile() = 
+    member this.TabCharacterInFile() =
         this.Parse "\t"
 
         Assert.IsTrue(this.ErrorExistsAt(1, 0))
-
-    [<Test>]
-    member this.TabCharacterInFileSuppressed() = 
-        this.Parse (sprintf """
-        [<SuppressMessage("Typography", "NoTabCharacters")>]
-        %slet foo = true""" "\t")
-
-        Assert.IsFalse(this.ErrorExistsAt(3, 8))
 
     [<Test>]
     member this.``Tab character in literal strings are not reported``() =

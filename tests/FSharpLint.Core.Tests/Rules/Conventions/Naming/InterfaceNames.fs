@@ -19,7 +19,7 @@ type TestConventionsInterfaceNames() =
 module Program
   type IPrintable =
     abstract member Print : unit -> unit"""
-        
+
         this.AssertNoWarnings()
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/100
@@ -30,7 +30,7 @@ module Program
 module Program
   type Printable =
     static member Print() = ()"""
-        
+
         this.AssertNoWarnings()
 
     /// Regression test for https://github.com/ionide/ionide-vscode-fsharp/issues/153
@@ -40,7 +40,7 @@ module Program
         this.Parse """
 module Program
   type Matrix = int[,]"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -59,19 +59,9 @@ module Program
   [<AbstractClass>]
   type Printable() =
     abstract member Print : unit -> unit"""
-        
+
         this.AssertNoWarnings()
 
-    [<Test>]
-    member this.InterfaceNameDoesNotBeginWithISuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "InterfaceNames")>]
-  type Printable =
-    abstract member Print : unit -> unit"""
-    
-        this.AssertNoWarnings()
-        
     [<Test>]
     member this.``Quick fix for prefixes adds missing prefix to identifier.``() =
         let source = """
@@ -79,12 +69,12 @@ module Program
   type Printable =
     abstract member Print : unit -> unit
 """
- 
+
         let expected = """
 module Program
   type IPrintable =
     abstract member Print : unit -> unit
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)

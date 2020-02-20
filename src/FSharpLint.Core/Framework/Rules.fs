@@ -14,6 +14,7 @@ type AstNodeRuleParams =
       syntaxArray : AbstractSyntaxArray.Node []
       skipArray : Skip []
       getParents : int -> AstNode list
+      filePath : string
       fileContent : string
       checkInfo : FSharpCheckFileResults option }
 
@@ -21,6 +22,7 @@ type LineRuleParams =
     { line : string
       lineNumber : int
       isLastLine : bool
+      filePath : string
       fileContent : string }
 
 type RuleMetadata<'config> =
@@ -64,21 +66,23 @@ type Rule =
   | IndentationRule of RuleMetadata<IndentationRuleConfig>
   | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
 
-let detailsToSuggestion (ruleName:string) (ruleIdentifier:string) (details:SuggestionDetails) =
+let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileContents:string) (details:WarningDetails) =
     {
+        LintWarning.RuleIdentifier = identifier
+        FilePath = filePath
         RuleName = ruleName
-        RuleIdentifier = ruleIdentifier
+        ErrorText = fileContents.Split('\n').[details.Range.StartLine - 1].TrimEnd('\r')
         Details = details
     }
 
 let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
     rule.ruleConfig.runner config
-    |> Array.map (detailsToSuggestion rule.name rule.identifier)
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
 
 let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
     rule.ruleConfig.runner context config
-    |> Array.map (detailsToSuggestion rule.name rule.identifier)
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
 
 let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
     rule.ruleConfig.runner config
-    |> Array.map (detailsToSuggestion rule.name rule.identifier)
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)

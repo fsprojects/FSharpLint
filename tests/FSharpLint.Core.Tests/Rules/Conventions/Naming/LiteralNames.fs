@@ -20,7 +20,7 @@ module Program
 
 [<Literal>]
 let Cat = 5"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -44,24 +44,13 @@ let (cat) = 5"""
         Assert.IsTrue(this.ErrorExistsAt(5, 5))
 
     [<Test>]
-    member this.LiteralIsCamelCaseSuppressed() =
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "LiteralNames")>]
-[<Literal>]
-let cat = 5"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.FullyQualifiedLiteralIsPascalCase() =
         this.Parse """
 module Program
 
 [<Microsoft.FSharp.Core.Literal>]
 let Cat = 5"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]

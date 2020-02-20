@@ -39,54 +39,6 @@ module Ast =
         attrs
         |> List.collect (fun attrList -> attrList.Attributes)
 
-    /// Gets any SuppressMessageAttributes that are applied to a given node in the AST.
-    let getSuppressMessageAttributes node =
-        let tryGetArguments (attribute:SynAttribute) =
-            let tryGetArgumentsFromPropertyInitialisers arguments =
-                let rec getPropertyIntiailiserValues category checkid = function
-                    | SynExpr.App(_,
-                                  _,
-                                  SynExpr.App(_, _, SynExpr.Ident(op), SynExpr.Ident(propName), _),
-                                  SynExpr.Const(SynConst.String(argValue, _), _), _)::tail when op.idText = "op_Equality" ->
-                        if propName.idText = "Category" then
-                            getPropertyIntiailiserValues (Some(argValue)) checkid tail
-                        else if propName.idText = "CheckId" then
-                            getPropertyIntiailiserValues category (Some(argValue)) tail
-                        else
-                            getPropertyIntiailiserValues category checkid tail
-                    | _::tail ->
-                        getPropertyIntiailiserValues category checkid tail
-                    | [] -> None
-
-                getPropertyIntiailiserValues None None arguments
-
-            match attribute.ArgExpr with
-            | SynExpr.Paren(SynExpr.Tuple(_, arguments, _, _), _, _, _) ->
-                tryGetArgumentsFromPropertyInitialisers arguments
-            | _ -> None
-
-        let tryGetSuppressMessageAttribute (attribute:SynAttribute) =
-            let attributeName =
-                attribute.TypeName.Lid
-                |> List.rev
-                |> List.head
-
-            if attributeName.idText = "SuppressMessage" || attributeName.idText = "SuppressMessageAttribute" then
-                tryGetArguments attribute
-            else None
-
-        match node with
-        | ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, attributes, _, range))
-        | Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, _, _, _, range, _))
-        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(attributes, _, _, _, _, range))
-        | ModuleDeclaration(SynModuleDecl.NestedModule(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, range))
-        | TypeDefinition(SynTypeDefn.TypeDefn(SynComponentInfo.ComponentInfo(attributes, _, _, _, _, _, _, _), _, _, range)) ->
-            attributes
-            |> extractAttributes
-            |> List.choose tryGetSuppressMessageAttribute
-            |> List.map (fun x -> (x, range))
-        | _ -> []
-
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function
         | SynExpr.Paren(x, _, _, _) -> removeParens x

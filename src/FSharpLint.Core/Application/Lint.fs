@@ -192,8 +192,7 @@ module Lint =
 
     type Context =
         { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list
-          suppressions : (Ast.SuppressedMessage * Range.range) [] }
+          noTabCharactersRuleContext : (string * Range.range) list }
 
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
@@ -212,15 +211,15 @@ module Lint =
                       syntaxArray = syntaxArray
                       skipArray = skipArray
                       getParents = getParents
+                      filePath = filePath
                       fileContent = fileContent
                       checkInfo = typeCheckResults }
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
 
-                rules |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
-
-                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent)))
+                rules
+                |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
 
         let context =
             { indentationRuleContext = indentationRuleState
@@ -235,9 +234,9 @@ module Lint =
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
             let lineParams =
                 { LineRuleParams.line = line
-                  suppressions = context.suppressions
                   lineNumber = lineNumber + 1
                   isLastLine = isLastLine
+                  filePath = filePath
                   fileContent = fileContent }
 
             let indentationError =
@@ -260,7 +259,7 @@ module Lint =
         |> Array.concat
         |> Array.concat
 
-    let isSuppressed (suppressedRulesByLine:IDictionary<int, Set<string>>) (suggestion:Suggestion.LintSuggestion) =
+    let isSuppressed (suppressedRulesByLine:IDictionary<int, Set<string>>) (suggestion:Suggestion.LintWarning) =
         // Filter out any suggestion which has one of its lines suppressed.
         [suggestion.Details.Range.StartLine..suggestion.Details.Range.EndLine]
         |> List.exists (fun lineNum ->

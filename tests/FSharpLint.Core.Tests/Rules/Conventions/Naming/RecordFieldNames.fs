@@ -18,7 +18,7 @@ type TestConventionsRecordFieldNames() =
         this.Parse """
 module Program
   type Record = { Dog: int }"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -26,15 +26,5 @@ module Program
         this.Parse """
 module Program
   type Record = { dog: int }"""
-        
+
         Assert.IsTrue(this.ErrorExistsAt(3, 18))
-
-    [<Test>]
-    member this.RecordFieldIsCamelCaseSuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "RecordFieldNames")>]
-  type Record = { dog: int }"""
-
-        this.AssertNoWarnings()
-

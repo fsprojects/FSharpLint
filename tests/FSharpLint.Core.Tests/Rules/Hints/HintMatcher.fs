@@ -151,18 +151,6 @@ let f = fun x -> x""")
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.MatchIdLambdaSuppressed() =
-        this.SetConfig(["fun x -> x ===> id"])
-
-        this.Parse("""
-module Goat
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("Hints", "*")>]
-let f = fun x -> x""")
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
-    [<Test>]
     member this.DontMatchIdLambda() =
         this.SetConfig(["fun x -> x ===> id"])
 
