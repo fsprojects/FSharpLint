@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{page-title}</title>
+    <title>RaiseWithSingleArgument (FL0017)
+</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="{project-author}">
+    <meta name="author" content="Matthew Mcveigh">
 
     <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
@@ -25,13 +26,33 @@
         <ul class="nav nav-pills pull-right">
           <li><a href="http://fsharp.org">fsharp.org</a></li>
         </ul>
-        <h3 class="muted"><a href="index.html">{project-name}</a></h3>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
       </div>
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          {document}
-          {tooltips}
+          <h1><a name="RaiseWithSingleArgument-FL0017" class="anchor" href="#RaiseWithSingleArgument-FL0017">RaiseWithSingleArgument (FL0017)</a></h1>
+<h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
+<p><code>raise</code> is passed more than one argument e.g. <code>raise (System.ArgumentException("Divisor cannot be zero.")) 5</code></p>
+<h2><a name="Rationale" class="anchor" href="#Rationale">Rationale</a></h2>
+<p><code>raise</code> being passed more than one argument (the exception to be thrown) is probably a mistake.</p>
+<h2><a name="How-To-Fix" class="anchor" href="#How-To-Fix">How To Fix</a></h2>
+<p>Remove the extra arguments.</p>
+<h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+    <span class="s">"raiseWithSingleArgument"</span>: { 
+        <span class="s">"enabled"</span>: <span class="k">true</span>
+    }
+}
+</code></pre></td></tr></table>
+
+          
         </div>
         <div class="span3">
           <a href="index.html">
@@ -41,7 +62,7 @@
           <ul class="nav nav-list" id="menu">
 
             <li class="nav-header">
-              {project-name}
+              FSharpLint
             </li>
 
             <li class="divider"></li>

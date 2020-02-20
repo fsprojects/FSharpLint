@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{page-title}</title>
+    <title>ConsoleApplication</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="{project-author}">
+    <meta name="author" content="Matthew Mcveigh">
 
     <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
@@ -25,13 +25,51 @@
         <ul class="nav nav-pills pull-right">
           <li><a href="http://fsharp.org">fsharp.org</a></li>
         </ul>
-        <h3 class="muted"><a href="index.html">{project-name}</a></h3>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
       </div>
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          {document}
-          {tooltips}
+          <h4><a name="Installing-the-Console-Application" class="anchor" href="#Installing-the-Console-Application">Installing the Console Application</a></h4>
+<p>The linter can be <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install">installed as a dotnet tool</a>.</p>
+<p>Install as a global tool: <code>dotnet tool install -g dotnet-fsharplint</code>.</p>
+<p>Install as tool to specific directory: <code>dotnet tool install --tool-path &lt;my_directory&gt; dotnet-fsharplint</code></p>
+<h4><a name="Running-the-Console-Application" class="anchor" href="#Running-the-Console-Application">Running the Console Application</a></h4>
+<p>The console application is a wrapper around the linter, with a required argument of: <code>-f</code>, <code>-sf</code>, or <code>-source</code>.</p>
+<table>
+<thead>
+<tr class="header">
+<th><p>Arguments</p></th>
+<th align="left"><p>Description</p></th>
+<th><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p><code>-f &lt;project_file_path&gt;</code></p></td>
+<td align="left"><p>Lints an entire project.</p></td>
+<td><p><code>dotnet fsharplint -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
+</tr>
+<tr class="even">
+<td><p><code>-sf &lt;source_file_path&gt;</code></p></td>
+<td align="left"><p>Lints a single file.</p></td>
+<td><p><code>dotnet fsharplint -sf "C:\FSharpProjectDirectory\Uploader.fsx"</code></p></td>
+</tr>
+<tr class="odd">
+<td><p><code>-source &lt;source_string&gt;</code></p></td>
+<td align="left"><p>Lints a string.</p></td>
+<td><p><code>dotnet fsharplint -source "let x = fun _ -&gt; ()"</code></p></td>
+</tr>
+<tr class="even">
+<td><p><code>-convert &lt;xml_config_path&gt; &lt;output_path&gt;</code></p></td>
+<td align="left"><p>Converts an old XML config to new JSON config format.</p></td>
+<td><p><code>dotnet fsharplint -convert "FSharpLint.Settings" "fsharplint.json"</code></p></td>
+</tr>
+</tbody>
+</table>
+
+
+          
         </div>
         <div class="span3">
           <a href="index.html">
@@ -41,7 +79,7 @@
           <ul class="nav nav-list" id="menu">
 
             <li class="nav-header">
-              {project-name}
+              FSharpLint
             </li>
 
             <li class="divider"></li>
