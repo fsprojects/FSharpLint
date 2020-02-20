@@ -82,7 +82,7 @@ module ConfigurationManagement =
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     let loadConfigurationForProject projectFilePath =
         loadUserConfigFiles projectFilePath defaultConfiguration
-        
+
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
 module Lint =
@@ -148,7 +148,7 @@ module Lint =
                     Resources.GetString("ConsoleRunTimeConfigError")
                 | FailedToParseFile(failure) ->
                     "Lint failed to parse a file. Failed with: " + getParseFailureReason failure
-                | FailedToParseFilesInProject(failures) -> 
+                | FailedToParseFilesInProject(failures) ->
                     let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
                     "Lint failed to parse files. Failed with: " + failureReasons
 
@@ -164,7 +164,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string * LintWarning.Warning list
+        | ReachedEnd of string * Suggestion.LintWarning list
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -179,32 +179,26 @@ module Lint =
     [<NoEquality; NoComparison>]
     type LintInfo =
         { CancellationToken: CancellationToken option
-          ErrorReceived: LintWarning.Warning -> unit
+          ErrorReceived: Suggestion.LintWarning -> unit
           ReportLinterProgress: ProjectProgress -> unit
           Configuration: Configuration }
 
     module private Async =
         let combine f x y = async {
-            let! x = x 
-            let! y = y 
+            let! x = x
+            let! y = y
             return f x y }
 
         let map f xAsync = async {
-            let! x = xAsync 
+            let! x = xAsync
             return f x }
 
-    let suggestionToWarning (input:string) (suggestion:Suggestion.LintSuggestion) =
-        { LintWarning.Range = suggestion.Range
-          LintWarning.Info = suggestion.Message
-          LintWarning.Input = input
-          LintWarning.Fix = suggestion.SuggestedFix |> Option.bind (fun x -> x.Value) }
-    
     type Context =
         { indentationRuleContext : Map<int,bool*int>
           noTabCharactersRuleContext : (string * Range.range) list
           suppressions : (Ast.SuppressedMessage * Range.range) [] }
-        
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (fileContent:string) syntaxArray skipArray =
+
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
         let suppressions = ResizeArray()
@@ -212,7 +206,7 @@ module Lint =
         let checkIfSuppressed i rule =
             AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
             |> AbstractSyntaxArray.isRuleSuppressed rule
-        
+
         // Collect suggestions for AstNode rules, and build context for following rules.
         let astNodeSuggestions =
             syntaxArray
@@ -233,22 +227,22 @@ module Lint =
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
                 AbstractSyntaxArray.getSuppressMessageAttributes syntaxArray skipArray i
                 |> List.iter suppressions.AddRange
-                
+
                 rules
                 |> Array.filter (fun rule -> not <| checkIfSuppressed i rule.name)
                 |> Array.collect (fun rule ->
                     rule.ruleConfig.runner astNodeParams
-                    |> Array.map (Suggestion.addIdentifier rule.identifier)))
-        
+                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent)))
+
         let context =
             { indentationRuleContext = indentationRuleState
               noTabCharactersRuleContext = noTabCharactersRuleState
               suppressions = suppressions.ToArray() }
-        
+
         rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
         (astNodeSuggestions, context)
-        
-    let runLineRules (lineRules:LineRules) (fileContent:string) (context:Context) =
+
+    let runLineRules (lineRules:LineRules) (filePath:string) (fileContent:string) (context:Context) =
         fileContent
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
@@ -263,19 +257,19 @@ module Lint =
                 lineRules.indentationRule
                 |> Option.map (fun rule ->
                     rule.ruleConfig.runner context.indentationRuleContext lineParams
-                    |> Array.map (Suggestion.addIdentifier rule.identifier))
+                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
 
             let noTabCharactersError =
                 lineRules.noTabCharactersRule
                 |> Option.map (fun rule ->
                     rule.ruleConfig.runner context.noTabCharactersRuleContext lineParams
-                    |> Array.map (Suggestion.addIdentifier rule.identifier))
+                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
 
             let lineErrors =
                 lineRules.genericLineRules
                 |> Array.collect (fun rule ->
                     rule.ruleConfig.runner lineParams
-                    |> Array.map (Suggestion.addIdentifier rule.identifier))
+                    |> Array.map (Suggestion.toWarning rule.identifier rule.name filePath fileContent))
 
             [|
                 indentationError |> Option.toArray
@@ -284,36 +278,35 @@ module Lint =
             |])
         |> Array.concat
         |> Array.concat
-        
+
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
 
-        let suggest (suggestion:Suggestion.LintSuggestion) =
-            let warning = suggestionToWarning fileInfo.Text suggestion
+        let suggest (warning:Suggestion.LintWarning) =
             lintInfo.ErrorReceived warning
             fileWarnings.Add warning
 
-        let trySuggest (suggestion:Suggestion.LintSuggestion) =
-            if suggestion.TypeChecks.IsEmpty then suggest suggestion
+        let trySuggest (suggestion:Suggestion.LintWarning) =
+            if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
         Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
         let cancelHasNotBeenRequested () =
-            match lintInfo.CancellationToken with 
-            | Some(x) -> not x.IsCancellationRequested 
+            match lintInfo.CancellationToken with
+            | Some(x) -> not x.IsCancellationRequested
             | None -> true
-        
+
         let enabledRules = flattenConfig lintInfo.Configuration
-        
+
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.Text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.Text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.File fileInfo.Text context
 
             [|
                 lineSuggestions
@@ -321,7 +314,7 @@ module Lint =
             |]
             |> Array.concat
             |> Array.iter trySuggest
-            
+
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
                     let timeoutMs = 2000
@@ -330,14 +323,14 @@ module Lint =
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
-                    let typeChecksSuccessful (typeChecks: Async<bool> list) = 
-                        typeChecks 
+                    let typeChecksSuccessful (typeChecks: Async<bool> list) =
+                        typeChecks
                         |> List.reduce (Async.combine (&&))
 
-                    let typeCheckSuggestion (suggestion: Suggestion.LintSuggestion) =
-                        typeChecksSuccessful suggestion.TypeChecks 
+                    let typeCheckSuggestion (suggestion: Suggestion.LintWarning) =
+                        typeChecksSuccessful suggestion.Details.TypeChecks
                         |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
-                        
+
                     suggestionsRequiringTypeChecks
                     |> Seq.map typeCheckSuggestion
                     |> Async.Parallel
@@ -359,7 +352,7 @@ module Lint =
         psi.Arguments <- args
         psi.CreateNoWindow <- true
         psi.UseShellExecute <- false
-        
+
         use p = new System.Diagnostics.Process()
         p.StartInfo <- psi
         let sbOut = System.Text.StringBuilder()
@@ -370,40 +363,40 @@ module Lint =
         p.BeginOutputReadLine()
         p.BeginErrorReadLine()
         p.WaitForExit()
-        
+
         let exitCode = p.ExitCode
 
         exitCode, (workingDir, exePath, args)
 
-    let getProjectFileInfo (releaseConfig : string option) projectFilePath = 
+    let getProjectFileInfo (releaseConfig : string option) projectFilePath =
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
-        
+
         let msBuildParams =
             releaseConfig
             |> Option.map (fun config -> [MSbuildCli.Property("ConfigurationName", config)])
             |> Option.defaultValue []
-        
+
         let msBuildResults =
             let runCmd exePath args = runProcess projDir exePath (args |> String.concat " ")
             let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
-        
+
             projectFilePath
             |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] msBuildParams
-            
+
         match msBuildResults with
         | Result.Ok [getFscArgsResult; getP2PRefsResult] ->
             match getFscArgsResult, getP2PRefsResult with
             | Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa), Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.ResolvedP2PRefs p2p) ->
-                
+
                 let projDir = Path.GetDirectoryName projectFilePath
 
                 let isSourceFile (option:string) =
                     option.TrimStart().StartsWith("-") |> not
-                
+
                 let compileFilesToAbsolutePath (f: string) =
                     if Path.IsPathRooted f then
-                        f 
-                    else 
+                        f
+                    else
                         Path.Combine(projDir, f)
 
                 { ProjectFileName = projectFilePath
@@ -426,7 +419,7 @@ module Lint =
 
     let getProjectsFromSolution (solutionFilePath : string) =
         Dotnet.ProjInfo.Inspect.getProjectInfos
-        
+
     let configFailureToLintFailure = function
         | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)
         | ConfigurationManagement.RunTimeConfigError -> RunTimeConfigError
@@ -450,10 +443,10 @@ module Lint =
     /// Result of running the linter.
     [<RequireQualifiedAccess; NoEquality; NoComparison>]
     type LintResult =
-        | Success of LintWarning.Warning list
+        | Success of Suggestion.LintWarning list
         | Failure of LintFailure
 
-        member self.TryGetSuccess([<Out>] success:byref<LintWarning.Warning list>) =
+        member self.TryGetSuccess([<Out>] success:byref<Suggestion.LintWarning list>) =
             match self with
             | Success value -> success <- value; true
             | _ -> false
@@ -473,13 +466,13 @@ module Lint =
           Configuration: Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (LintWarning.Warning -> unit) option
-          
+          ReceivedWarning: (Suggestion.LintWarning -> unit) option
+
           ReportLinterProgress: (ProjectProgress -> unit) option
-          
+
           ReleaseConfiguration : string option }
 
-        static member Default = 
+        static member Default =
             { CancellationToken = None; Configuration = None; ReceivedWarning = None; ReportLinterProgress = None; ReleaseConfiguration = None }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
@@ -495,16 +488,16 @@ module Lint =
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
           TypeCheckResults: FSharpCheckFileResults option }
-   
+
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let lintProject optionalParams projectFilePath =
         let projectFilePath = Path.GetFullPath projectFilePath
-        let lintWarnings = LinkedList<LintWarning.Warning>()
+        let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
         let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
 
-        let warningReceived (warning:LintWarning.Warning) =
+        let warningReceived (warning:Suggestion.LintWarning) =
             lintWarnings.AddLast warning |> ignore
 
             optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
@@ -575,13 +568,13 @@ module Lint =
                 let projectPath = s.Substring(startIndex, endIndex - startIndex)
                 projectPath.Trim([|'"'; ' '|]))
             |> Array.map (fun projectPath ->
-                let projectPath = 
+                let projectPath =
                     if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
                         projectPath
                     else // For non-Windows, we need to convert the project path in the solution to Unix format.
                         projectPath.Replace("\\", "/")
                 Path.Combine(solutionFolder, projectPath))
-        
+
         let (successes, failures) =
             projectsInSolution
             |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath)
@@ -591,19 +584,19 @@ module Lint =
                     (List.append warnings successes, failures)
                 | LintResult.Failure err ->
                     (successes, err :: failures)) ([], [])
-            
+
         match failures with
         | [] ->
             LintResult.Success successes
         | firstErr :: _ ->
             LintResult.Failure firstErr
-    
+
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource optionalParams parsedFileInfo =
-        let lintWarnings = LinkedList<LintWarning.Warning>()
+        let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
-        let warningReceived (warning:LintWarning.Warning) =
+        let warningReceived (warning:Suggestion.LintWarning) =
             lintWarnings.AddLast warning |> ignore
 
             optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
@@ -651,9 +644,9 @@ module Lint =
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     let lintParsedFile optionalParams parsedFileInfo filepath =
-        let lintWarnings = LinkedList<LintWarning.Warning>()
+        let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
-        let warningReceived (warning:LintWarning.Warning) =
+        let warningReceived (warning:Suggestion.LintWarning) =
             lintWarnings.AddLast warning |> ignore
 
             optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)

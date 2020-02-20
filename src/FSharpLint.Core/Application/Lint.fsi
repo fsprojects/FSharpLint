@@ -7,16 +7,16 @@ module ConfigurationManagement =
 
     open FSharpLint.Framework.Configuration
     open FSharpLint.Application.ConfigurationManager
-    
+
     type ConfigFailure =
         /// Failed to load a FSharpLint configuration file.
         | FailedToLoadConfig of string
 
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
         | RunTimeConfigError
-        
+
     [<RequireQualifiedAccess; NoComparison>]
-    type ConfigurationResult = 
+    type ConfigurationResult =
         | Success of Configuration
         | Failure of ConfigFailure
 
@@ -26,18 +26,18 @@ module ConfigurationManagement =
     /// Overrides the default FSharpLint configuration.
     /// The default FSharpLint configuration contains all required elements, so
     /// by overriding it any missing required elements will be added to the returned configuration.
-    /// If you're loading your own configuration you should make sure that it overrides the default 
+    /// If you're loading your own configuration you should make sure that it overrides the default
     /// configuration/overrides a configuration that has overriden the default configuration.
     val overrideDefaultConfiguration : configurationToOverrideDefault:Configuration -> Configuration
 
     /// Loads the FSharpLint configuration for a project given the path to the `.fsproj` file.
     /// It picks up configurations in any directory between the root directory and the project's directory.
     /// The closer they are to the project directory the higher precedence they have.
-    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in 
+    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
     val loadConfigurationForProject : projectFilePath:string -> ConfigurationResult
 
-/// Provides an API for running FSharpLint from within another application. 
+/// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
 module Lint =
 
@@ -55,7 +55,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string * LintWarning.Warning list
+        | ReachedEnd of string * Suggestion.LintWarning list
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -74,16 +74,16 @@ module Lint =
           Configuration: ConfigurationManager.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (LintWarning.Warning -> unit) option 
-          
+          ReceivedWarning: (Suggestion.LintWarning -> unit) option
+
           ReportLinterProgress: (ProjectProgress -> unit) option
 
           ReleaseConfiguration : string option }
 
         static member Default: OptionalLintParameters
 
-    /// If your application has already parsed the F# source files using `FSharp.Compiler.Services` 
-    /// you want to lint then this can be used to provide the parsed information to prevent the 
+    /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
+    /// you want to lint then this can be used to provide the parsed information to prevent the
     /// linter from parsing the file again.
     [<NoEquality; NoComparison>]
     type ParsedFileInformation =
@@ -95,7 +95,7 @@ module Lint =
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
           TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
-          
+
     type BuildFailure = | InvalidProjectFileMessage of string
 
     /// Reason for the linter failing.
@@ -120,47 +120,44 @@ module Lint =
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
 
         member Description: string
-        
+
     /// Result of running the linter.
     [<NoEquality; NoComparison; RequireQualifiedAccess>]
-    type LintResult = 
-        | Success of LintWarning.Warning list
+    type LintResult =
+        | Success of Suggestion.LintWarning list
         | Failure of LintFailure
 
-        member TryGetSuccess : byref<LintWarning.Warning list> -> bool
+        member TryGetSuccess : byref<Suggestion.LintWarning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
-        
+
     type Context =
         { indentationRuleContext : Map<int,bool*int>
           noTabCharactersRuleContext : (string * Range.range) list
           suppressions : (Ast.SuppressedMessage * Range.range) [] }
-        
+
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintSuggestion [] * Context
-    
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context
+
     /// Runs all rules which take a line of text as input.
-    val runLineRules : LineRules -> string -> Context -> Suggestion.LintSuggestion []
-        
-    /// Converts a lint suggestion to a warning with the given source text.
-    val suggestionToWarning : string -> Suggestion.LintSuggestion -> LintWarning.Warning 
-        
+    val runLineRules : LineRules -> string -> string -> Context -> Suggestion.LintWarning []
+
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult       
-        
-    /// Lints an entire F# project by retrieving the files from a given 
+    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult
+
+    /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult
 
     /// Lints F# source code.
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
 
-    /// Lints F# source code that has already been parsed using 
+    /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
     val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> LintResult
 
-    /// Lints an F# file that has already been parsed using 
-    /// `FSharp.Compiler.Services` in the calling application. 
+    /// Lints an F# file that has already been parsed using
+    /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedFile : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> filepath:string -> LintResult

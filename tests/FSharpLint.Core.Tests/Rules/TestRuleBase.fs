@@ -3,7 +3,6 @@
 open System
 open System.Text
 open NUnit.Framework
-open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 
@@ -12,35 +11,35 @@ type TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
     abstract Parse : string * ?fileName:string * ?checkFile:bool -> unit
-        
-    member __.postSuggestion (suggestion:Suggestion.LintSuggestion) =
-        if not suggestion.TypeChecks.IsEmpty then
-            let successfulTypeCheck = 
-                suggestion.TypeChecks 
-                |> Async.Parallel 
+
+    member __.postSuggestion (suggestion:Suggestion.LintWarning) =
+        if not suggestion.Details.TypeChecks.IsEmpty then
+            let successfulTypeCheck =
+                suggestion.Details.TypeChecks
+                |> Async.Parallel
                 |> Async.RunSynchronously
                 |> Array.reduce (&&)
 
-            if successfulTypeCheck then 
+            if successfulTypeCheck then
                 suggestions.Add(suggestion)
         else
             suggestions.Add(suggestion)
 
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions
-        |> Seq.exists (fun s -> s.Range.StartLine = startLine && s.Range.StartColumn = startColumn)
+        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
 
     member __.ErrorsAt(startLine, startColumn) =
         suggestions
-        |> Seq.filter (fun s -> s.Range.StartLine = startLine && s.Range.StartColumn = startColumn)
+        |> Seq.filter (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
 
     member __.ErrorExistsOnLine(startLine) =
         suggestions
-        |> Seq.exists (fun s -> s.Range.StartLine = startLine)
+        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
 
     member __.NoErrorExistsOnLine(startLine) =
         suggestions
-        |> Seq.exists (fun s -> s.Range.StartLine = startLine)
+        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
         |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
@@ -56,24 +55,24 @@ type TestRuleBase () =
         | _ ->
             suggestions
             |> Seq.map (fun s -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
-                s.Range.StartRange.StartLine s.Range.StartColumn 
-                s.Range.EndRange.EndLine s.Range.EndRange.EndColumn s.Message ))
+                s.Details.Range.StartRange.StartLine s.Details.Range.StartColumn
+                s.Details.Range.EndRange.EndLine s.Details.Range.EndRange.EndColumn s.Details.Message ))
             |> (fun x -> String.Join("; ", x))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
-        |> Seq.exists (fun s -> s.Message = message)
+        |> Seq.exists (fun s -> s.Details.Message = message)
 
     member __.ErrorWithMessageExists(message) =
-        suggestions |> Seq.exists (fun s -> s.Message = message)
+        suggestions |> Seq.exists (fun s -> s.Details.Message = message)
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
 
     member this.ApplyQuickFix (source:string) =
         let firstSuggestedFix =
-            suggestions 
-            |> Seq.choose (fun x -> x.SuggestedFix)
+            suggestions
+            |> Seq.choose (fun x -> x.Details.SuggestedFix)
             |> Seq.tryHead
 
         match firstSuggestedFix |> Option.bind (fun x -> x.Value) with
@@ -82,7 +81,7 @@ type TestRuleBase () =
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
 
             match startIndex, endIndex with
-            | Some(startIndex), Some(endIndex) -> 
+            | Some(startIndex), Some(endIndex) ->
                 (StringBuilder source)
                     .Remove(startIndex, endIndex - startIndex)
                     .Insert(startIndex, fix.ToText)
