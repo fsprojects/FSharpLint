@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TypedItemSpacing (FL0010)
+    <title>Rule Suppression
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -31,30 +31,38 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1><a name="TypedItemSpacing-FL0010" class="anchor" href="#TypedItemSpacing-FL0010">TypedItemSpacing (FL0010)</a></h1>
-<h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
-<p>Checks spacing around a typed item, e.g. <code>(number:int)</code>.</p>
-<h2><a name="Rationale" class="anchor" href="#Rationale">Rationale</a></h2>
-<p>Consistency and readability.</p>
-<h2><a name="How-To-Fix" class="anchor" href="#How-To-Fix">How To Fix</a></h2>
-<p>Update typed item to use configured spacing.</p>
-<h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
+          <h1><a name="Rule-Suppression" class="anchor" href="#Rule-Suppression">Rule Suppression</a></h1>
+<p>Rules can be suppressed within the code using structured comments. Specify the type of suppression you want to use, followed by the rules to suppress. If there are no rules provided, all rules will be suppressed. Note that the available pool of rules is based on the loaded configuration file; a rule which is disabled in the configuration file cannot be re-enabled using one of these comments.</p>
+<p>The following comments are available for use:</p>
+<ul>
+<li><code>// fsharplint:disable</code> disables all rules for the rest of the file</li>
+<li><code>// fsharplint:enable</code> enables all rules for the rest of the file</li>
+<li><code>// fsharplint:disable TypePrefixing Hints</code> disables the specified rules for the rest of the file</li>
+<li><code>// fsharplint:enable TypePrefixing Hints</code> enables the specified rules for the rest of the file</li>
+<li><code>// fsharplint:disable-next-line</code> disables all rules for the next line of the file</li>
+<li><code>// fsharplint:enable-next-line</code> enables all rules for the next line of the file</li>
+<li><code>// fsharplint:disable-next-line TypePrefixing Hints</code> disables the specified rules for the next line of the file</li>
+<li><code>// fsharplint:enable-next-line TypePrefixing Hints</code> enables the specified rules for the next line of the file</li>
+<li><code>// fsharplint:disable-line</code> disables all rules for the current line of the file</li>
+<li><code>// fsharplint:enable-line</code> enables all rules for the current line of the file</li>
+<li><code>// fsharplint:disable-line TypePrefixing Hints</code> disables the specified rules for the current line of the file</li>
+<li><code>// fsharplint:enable-next-line TypePrefixing Hints</code> enables the specified rules for the current line of the file</li>
+</ul>
+<p>Note that only one structured comment can be specified per line; any additional ones will be ignored.</p>
+<h2><a name="Example" class="anchor" href="#Example">Example</a></h2>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-<span class="l">6: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
-    <span class="s">"typedItemSpacing"</span>: { 
-        <span class="s">"enabled"</span>: <span class="k">false</span>,
-        <span class="s">"typedItemStyle"</span>: <span class="s">"NoSpaces"</span> <span class="c">// style of spacing (one of "NoSpaces", "SpaceAfter", "SpacesAround")</span>
-    }
-}
-</code></pre></td></tr></table>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable:next:line Hints</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="fn">not</span> <span class="k">true</span>
+</code></pre></td>
+</tr>
+</table>
+<p>This will not raise a warning, as the <code>Hints</code> rule is disabled for the next line.</p>
 
-          
+          <div class="tip" id="fs1">val x : bool</div>
+<div class="tip" id="fs2">val not : value:bool -&gt; bool</div>
+
         </div>
         <div class="span3">
           <a href="index.html">

@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>ConsoleApplication</title>
+    <title>Installing as dotnet tool
+</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
 
@@ -30,11 +31,11 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h4><a name="Installing-the-Console-Application" class="anchor" href="#Installing-the-Console-Application">Installing the Console Application</a></h4>
+          <h1><a name="Installing-as-dotnet-tool" class="anchor" href="#Installing-as-dotnet-tool">Installing as dotnet tool</a></h1>
 <p>The linter can be <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install">installed as a dotnet tool</a>.</p>
 <p>Install as a global tool: <code>dotnet tool install -g dotnet-fsharplint</code>.</p>
 <p>Install as tool to specific directory: <code>dotnet tool install --tool-path &lt;my_directory&gt; dotnet-fsharplint</code></p>
-<h4><a name="Running-the-Console-Application" class="anchor" href="#Running-the-Console-Application">Running the Console Application</a></h4>
+<h2><a name="Running-the-Console-Application" class="anchor" href="#Running-the-Console-Application">Running the Console Application</a></h2>
 <p>The console application is a wrapper around the linter, with a required argument of: <code>-f</code>, <code>-sf</code>, or <code>-source</code>.</p>
 <table>
 <thead>
@@ -64,6 +65,11 @@
 <td><p><code>-convert &lt;xml_config_path&gt; &lt;output_path&gt;</code></p></td>
 <td align="left"><p>Converts an old XML config to new JSON config format.</p></td>
 <td><p><code>dotnet fsharplint -convert "FSharpLint.Settings" "fsharplint.json"</code></p></td>
+</tr>
+<tr class="odd">
+<td><p><code>-format &lt;output_format&gt;</code></p></td>
+<td align="left"><p>Outupt format to use (either standard or msbuild)</p></td>
+<td><p><code>dotnet fsharplint -format msbuild -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
 </tr>
 </tbody>
 </table>
@@ -96,7 +102,11 @@
 
             <li><a href="Rules.html">Available Rules</a></li>
 
-            <li><a href="ConsoleApplication.html">Using the command line tool.</a></li>
+            <li><a href="Suppression.html">Rule Suppression</a></li>
+
+            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+
+            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
           </ul>
         </div>
       </div>

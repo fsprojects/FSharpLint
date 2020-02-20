@@ -76,18 +76,19 @@ On windows run `build.cmd` and on unix based systems run `build.sh`.
 
 #### Running The Tool
 
-The tool can be run from the command line as a dotnet tool:
+FSharpLint can be used in several ways:
 
-* [Running the command line tool](Console-Application.html).
-
-The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the time being it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:
-
-* [Deprecated MSBuild Task](https://www.nuget.org/packages/FSharpLint.MSBuild)
-* [Deprecated Fake Task](https://www.nuget.org/packages/FSharpLint.Fake)
+* [Running as dotnet tool from command line](ConsoleApplication.html).
+* [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
+* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](MSBuildTask.html).
 
 #### Rules
 
 See a full list of the available rules [here](Rules.html). Each rule has its own page with more information.
+
+#### Suppressing rules in code
+
+Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](Suppression.html) page for more information.
 
 #### Configuration Files
 
@@ -116,10 +117,6 @@ To override to turn off you'd set enabled to true in your own configuration file
 Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:
 
     dotnet fsharplint -convert <path-to-xml> (output-path>
-
-#### Suppressing rules in code
-
-Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](Suppression.html) page for more information.
 
 #### Ignoring Files
 

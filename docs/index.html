@@ -150,17 +150,16 @@ let x = List.fold (+) 0 [1;2;3]
 <h4><a name="Building-The-Tool" class="anchor" href="#Building-The-Tool">Building The Tool</a></h4>
 <p>On windows run <code>build.cmd</code> and on unix based systems run <code>build.sh</code>.</p>
 <h4><a name="Running-The-Tool" class="anchor" href="#Running-The-Tool">Running The Tool</a></h4>
-<p>The tool can be run from the command line as a dotnet tool:</p>
+<p>FSharpLint can be used in several ways:</p>
 <ul>
-<li><a href="Console-Application.html">Running the command line tool</a>.</li>
-</ul>
-<p>The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the time being it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:</p>
-<ul>
-<li><a href="https://www.nuget.org/packages/FSharpLint.MSBuild">Deprecated MSBuild Task</a></li>
-<li><a href="https://www.nuget.org/packages/FSharpLint.Fake">Deprecated Fake Task</a></li>
+<li><a href="ConsoleApplication.html">Running as dotnet tool from command line</a>.</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp">In VS Code using the Ionide-FSharp plugin</a>.</li>
+<li><a href="MSBuildTask.html">In other IDEs (Visual Studio, Rider) as an MSBuild Task</a>.</li>
 </ul>
 <h4><a name="Rules" class="anchor" href="#Rules">Rules</a></h4>
 <p>See a full list of the available rules <a href="Rules.html">here</a>. Each rule has its own page with more information.</p>
+<h4><a name="Suppressing-rules-in-code" class="anchor" href="#Suppressing-rules-in-code">Suppressing rules in code</a></h4>
+<p>Rules can be disabled within the code using structured comments. See the <a href="Suppression.html">Suppressing Warnings</a> page for more information.</p>
 <h4><a name="Configuration-Files" class="anchor" href="#Configuration-Files">Configuration Files</a></h4>
 <p>Configuration of the tool is done using JSON. Configuration files must be named: <code>fsharplint.json</code>. A single JSON file containing the default configuration for all rules is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json">included inside of the software</a>.</p>
 <p>The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was <code>C:\Files\SomeProjectBeingLinted</code>, then <code>C:\</code> would first be checked for a config file - if a config file is found then it would override the default config, then <code>C:\Files</code> would be checked - if a config file was found and a config file was also previously found in <code>C:\</code> then the config in <code>C:\Files</code> would override the one in <code>C:\</code> and so on.</p>
@@ -197,8 +196,6 @@ let x = List.fold (+) 0 [1;2;3]
 </code></pre></td>
 </tr>
 </table>
-<h4><a name="Suppressing-rules-in-code" class="anchor" href="#Suppressing-rules-in-code">Suppressing rules in code</a></h4>
-<p>Rules can be disabled within the code using structured comments. See the <a href="Suppression.html">Suppressing Warnings</a> page for more information.</p>
 <h4><a name="Ignoring-Files" class="anchor" href="#Ignoring-Files">Ignoring Files</a></h4>
 <p>In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:</p>
 <p>{ "ignoreFiles": ["assemblyinfo.*"] }</p>
@@ -251,7 +248,11 @@ to lint a project/source file/source string.</p>
 
             <li><a href="Rules.html">Available Rules</a></li>
 
-            <li><a href="ConsoleApplication.html">Using the command line tool.</a></li>
+            <li><a href="Suppression.html">Rule Suppression</a></li>
+
+            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+
+            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
           </ul>
         </div>
       </div>
