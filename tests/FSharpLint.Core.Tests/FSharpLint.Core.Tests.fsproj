@@ -70,10 +70,10 @@
     <Compile Include="Framework\TestConfiguration.fs" />
     <Compile Include="Framework\TestAstInfo.fs" />
     <Compile Include="Framework\TestHintParser.fs" />
-    <Compile Include="Framework\TestAst.fs" />
     <Compile Include="Framework\TestFuzzyHintMatcher.fs" />
     <Compile Include="Framework\TestAbstractSyntaxArray.fs" />
     <Compile Include="Framework\TestExpressionUtilities.fs" />
+    <Compile Include="Framework\TestSuppression.fs" />
   </ItemGroup>
 
   <ItemGroup>

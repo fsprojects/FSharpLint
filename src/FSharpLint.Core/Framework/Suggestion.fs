@@ -53,12 +53,3 @@ type LintWarning =
 
       /// Details for the warning.
       Details: WarningDetails }
-
-let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileContents:string) (details:WarningDetails) =
-    {
-        LintWarning.RuleIdentifier = identifier
-        FilePath = filePath
-        RuleName = ruleName
-        ErrorText = fileContents.Split('\n').[details.Range.StartLine - 1].TrimEnd('\r')
-        Details = details
-    }

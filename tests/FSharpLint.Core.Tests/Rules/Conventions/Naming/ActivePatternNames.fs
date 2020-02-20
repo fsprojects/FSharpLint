@@ -50,19 +50,6 @@ match 4 with
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
     [<Test>]
-    member this.ActivePatternContainsUnderscoreSuppressed() =
-        this.Parse """
-module Program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ActivePatternNames")>]
-let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
-
-match 4 with
-| Ev_en -> ()
-| Odd -> ()"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
         this.Parse """
 module Program

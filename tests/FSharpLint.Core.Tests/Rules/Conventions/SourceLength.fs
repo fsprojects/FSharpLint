@@ -5,14 +5,14 @@ open FSharpLint.Rules
 open FSharpLint.Rules.Helper.SourceLength
 
 let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.concat ""
- 
+
 let FunctionLength = 70
 [<TestFixture>]
 type TestMaxLinesInFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInFunction.rule { Config.maxLines = FunctionLength })
 
     [<Test>]
-    member this.FunctionTooManyLines() = 
+    member this.FunctionTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -20,20 +20,9 @@ let dog x =
     %s
     ()""" (generateNewLines FunctionLength))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-    
-    [<Test>]
-    member this.FunctionTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInFunction")>]
-let dog x =
-    %s
-    ()""" (generateNewLines FunctionLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-    
     [<Test>]
-    member this.FunctionNotTooManyLines() = 
+    member this.FunctionNotTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -48,7 +37,7 @@ type TestMaxLinesInLambdaFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInLambdaFunction.rule { Config.maxLines = LambdaFunctionLength })
 
     [<Test>]
-    member this.LambdaFunctionTooManyLines() = 
+    member this.LambdaFunctionTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -60,9 +49,9 @@ let dog = fun x ->
         | None -> ()
         """ (generateNewLines LambdaFunctionLength))
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
-    
+
     [<Test>]
-    member this.``Multiple arguments in a lamba should not be treated as separate lambdas.``() = 
+    member this.``Multiple arguments in a lamba should not be treated as separate lambdas.``() =
         this.Parse(sprintf """
 module Program
 
@@ -75,24 +64,9 @@ let dog = fun x y ->
         """ (generateNewLines LambdaFunctionLength))
 
         Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
-    
-    [<Test>]
-    member this.LambdaFunctionTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInLambdaFunction")>]
-let dog = fun x ->
-    match x with
-        | Some(x) ->
-            %s
-            ()
-        | None -> ()
-        """ (generateNewLines LambdaFunctionLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-    
     [<Test>]
-    member this.LambdaFunctionNotTooManyLines() = 
+    member this.LambdaFunctionNotTooManyLines() =
         this.Parse """
 module Program
 
@@ -108,9 +82,9 @@ let MatchLambdaFunctionLength = 70
 [<TestFixture>]
 type TestMaxLinesInMatchLambdaFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMatchLambdaFunction.rule { Config.maxLines = MatchLambdaFunctionLength })
-    
+
     [<Test>]
-    member this.MatchFunctionTooManyLines() = 
+    member this.MatchFunctionTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -120,22 +94,9 @@ let dog = function
     ()
 | None -> ()""" (generateNewLines MatchLambdaFunctionLength))
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
-    
-    [<Test>]
-    member this.MatchFunctionTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInMatchLambdaFunction")>]
-let dog = function
-| Some(x) ->
-    %s
-    ()
-| None -> ()""" (generateNewLines MatchLambdaFunctionLength))
-        Assert.IsFalse(this.ErrorExistsAt(5, 10))
-    
     [<Test>]
-    member this.MatchFunctionNotTooManyLines() = 
+    member this.MatchFunctionNotTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -145,14 +106,14 @@ let dog = function
     ()
 | None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5)))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
-    
+
 let ValueLength = 70
 [<TestFixture>]
 type TestMaxLinesInValue() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInValue.rule { Config.maxLines = ValueLength })
 
     [<Test>]
-    member this.ValueTooManyLines() = 
+    member this.ValueTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -160,20 +121,9 @@ let dog =
     %s
     ()""" (generateNewLines ValueLength))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-    
-    [<Test>]
-    member this.ValueTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInValue")>]
-let dog =
-    %s
-    ()""" (generateNewLines ValueLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-    
     [<Test>]
-    member this.ValueNotTooManyLines() = 
+    member this.ValueNotTooManyLines() =
         this.Parse(sprintf """
 module Program
 
@@ -188,30 +138,18 @@ type TestMaxLinesInConstructor() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInConstructor.rule { Config.maxLines = ConstructorLength })
 
     [<Test>]
-    member this.ConstructorTooManyLines() = 
+    member this.ConstructorTooManyLines() =
         this.Parse(sprintf """
 module Program
 type MyClass(x) =
-    new() = 
+    new() =
       %s
       MyClass(0)
       """ (generateNewLines ConstructorLength))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
-    
+
     [<Test>]
-    member this.ConstructorTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInConstructor")>]
-type MyClass(x) =
-    new() = 
-      %s
-      MyClass(0)
-      """ (generateNewLines ConstructorLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-    
-    [<Test>]
-    member this.ConstructorNotTooManyLines() = 
+    member this.ConstructorNotTooManyLines() =
         this.Parse """
 module Program
 type MyClass(x) =
@@ -228,40 +166,16 @@ let PropertyLength = 70
 [<TestFixture>]
 type TestMaxLinesInProperty() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInProperty.rule { Config.maxLines = PropertyLength })
-    
+
     [<Test>]
-    member this.PropertyTooManyLines() = 
-        this.Parse(sprintf """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInProperty")>]
-  type Class() =
-    let mutable value = 10
-    member this.Property1 with get() = 
-        %s
-        value""" (generateNewLines PropertyLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(6))
-    
-    [<Test>]
-    member this.PropertyTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
-  type Class() =
-    let mutable value = 10
-    member this.Property1 with get() = 
-        %s
-        value""" (generateNewLines PropertyLength))
-        Assert.IsTrue(this.ErrorExistsAt(5, 31))
-    
-    [<Test>]
-    member this.PropertyNotTooManyLines() = 
+    member this.PropertyNotTooManyLines() =
         this.Parse """
 module Program
   type Class() =
     let mutable value = 10
-    member this.Property1 with get() = 
+    member this.Property1 with get() =
         value"""
         Assert.IsFalse(this.ErrorExistsAt(5, 31))
-    
 
 let ClassLength = 500
 [<TestFixture>]
@@ -269,53 +183,33 @@ type TestMaxLinesInClass() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInClass.rule { Config.maxLines = ClassLength })
 
     [<Test>]
-    member this.ClassTooManyLines() = 
+    member this.ClassTooManyLines() =
         this.Parse(sprintf """
 module Program
   type MyClass2() as this =
     %s
     member this.PrintMessage() = ()""" (generateNewLines ClassLength))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-    
+
     [<Test>]
-    member this.ClassTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
-  type MyClass2() as this =
-    %s
-    member this.PrintMessage() = ()""" (generateNewLines ClassLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
-    
-    [<Test>]
-    member this.ClassNotTooManyLines() = 
+    member this.ClassNotTooManyLines() =
         this.Parse """
 module Program
   type MyClass2() as this =
     member this.PrintMessage() = ()"""
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
-        
+
     [<Test>]
-    member this.InterfaceTooManyLines() = 
+    member this.InterfaceTooManyLines() =
         this.Parse(sprintf """
 module Program
   type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateNewLines ClassLength))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-    
+
     [<Test>]
-    member this.InterfaceTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInClass")>]
-  type IPrintable =
-    %s
-    abstract member Print : unit -> unit""" (generateNewLines ClassLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
-    
-    [<Test>]
-    member this.InterfaceNotTooManyLines() = 
+    member this.InterfaceNotTooManyLines() =
         this.Parse """
 module Program
   type IPrintable =
@@ -327,37 +221,25 @@ let UnionLength = 500
 type TestMaxLinesInUnion() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInUnion.rule { Config.maxLines = UnionLength })
     // TODO: Add tests.
-    
+
 let RecordLength = 500
 [<TestFixture>]
 type TestMaxLinesInRecord() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInRecord.rule { Config.maxLines = RecordLength })
 
     [<Test>]
-    member this.RecordTooManyLines() = 
+    member this.RecordTooManyLines() =
         this.Parse(sprintf """
 module Program
-  type Record = 
+  type Record =
     {
-      %s 
-      dog: int 
+      %s
+      dog: int
     }""" (generateNewLines RecordLength))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-    
+
     [<Test>]
-    member this.RecordTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInRecord")>]
-  type Record = 
-    {
-      %s 
-      dog: int 
-    }""" (generateNewLines RecordLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
-    
-    [<Test>]
-    member this.RecordNotTooManyLines() = 
+    member this.RecordNotTooManyLines() =
         this.Parse """
 module Program
   type Record = { dog: int }"""
@@ -375,26 +257,16 @@ type TestMaxLinesInModule() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInModule.rule { Config.maxLines = ModuleLength })
 
     [<Test>]
-    member this.ModuleTooManyLines() = 
+    member this.ModuleTooManyLines() =
         this.Parse(sprintf """
 module Program
 %s
 // Some exception.
 exception SomeException of string""" (generateNewLines ModuleLength))
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
-    
+
     [<Test>]
-    member this.ModuleTooManyLinesSuppressed() = 
-        this.Parse(sprintf """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("SourceLength", "MaxLinesInModule")>]
-module Program
-%s
-// Some exception.
-exception SomeException of string""" (generateNewLines ModuleLength))
-        Assert.IsFalse(this.ErrorExistsOnLine(3))
-    
-    [<Test>]
-    member this.ModuleNotTooManyLines() = 
+    member this.ModuleNotTooManyLines() =
         this.Parse(sprintf """
 module Program
 %s

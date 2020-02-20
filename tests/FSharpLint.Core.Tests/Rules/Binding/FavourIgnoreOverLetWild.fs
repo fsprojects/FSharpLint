@@ -8,7 +8,7 @@ type TestBindingFavourIgnoreOverLetWild() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourIgnoreOverLetWild.rule)
 
     [<Test>]
-    member this.LetWildcardUnitValue() = 
+    member this.LetWildcardUnitValue() =
         this.Parse """
 module Program
 
@@ -17,28 +17,18 @@ let _ = ()"""
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
-    member this.LetWildcardUnitValueSuppressed() = 
+    member this.LetWildcardMultilaneStatementOfUnit() =
         this.Parse """
 module Program
 
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "FavourIgnoreOverLetWild")>]
-let _ = ()"""
-
-        Assert.IsFalse(this.ErrorsExist)
-
-    [<Test>]
-    member this.LetWildcardMultilaneStatementOfUnit() = 
-        this.Parse """
-module Program
-
-let (_) = 
+let (_) =
   let x = 4 + 4
   ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
-    member this.LetWildCardInParanUnitValue() = 
+    member this.LetWildCardInParanUnitValue() =
         this.Parse """
 module Program
 
@@ -47,7 +37,7 @@ let ((((_)))) = List.iter (fun x -> ()) []"""
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
-    member this.LetNonWildcardUnitValue() = 
+    member this.LetNonWildcardUnitValue() =
         this.Parse """
 module Program
 

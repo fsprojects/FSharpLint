@@ -58,16 +58,6 @@ exception MyError of string
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
     [<Test>]
-    member this.ExceptionDoesNotEndWithExceptionSuppressed() =
-        this.Parse """
-module Program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNames")>]
-exception MyError of string
-"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
         let source = """
 module Program

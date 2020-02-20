@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>EnumCasesNames (FL0040)
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Matthew Mcveigh">
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="/FSharpLint/content/style.css" />
+    <script type="text/javascript" src="/FSharpLint/content/tips.js"></script>
+
+	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+        </ul>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          <h1><a name="EnumCasesNames-FL0040" class="anchor" href="#EnumCasesNames-FL0040">EnumCasesNames (FL0040)</a></h1>
+<h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
+<p>Enum case naming does not match the specified config.</p>
+<h2><a name="Rationale" class="anchor" href="#Rationale">Rationale</a></h2>
+<p>Consistency aides readability.</p>
+<h2><a name="How-To-Fix" class="anchor" href="#How-To-Fix">How To Fix</a></h2>
+<p>Update the enum case's naming to be consistent with the rules you have specified</p>
+<h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
+<p>Note, any of the settings below can be omitted and will not be checked.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+<span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
+<span class="l">9: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+    <span class="s">"enumCasesNames"</span>: { 
+       <span class="s">"enabled"</span>: <span class="k">true</span>,
+       <span class="s">"naming"</span>: <span class="s">"PascalCase"</span>, <span class="c">// expected case of enum cases ("PascalCase" or "CamelCase")</span>
+       <span class="s">"underscores"</span>: <span class="s">"None"</span>, <span class="c">// if underscores are allowed for enum cases ("AllowPrefix", "AllowAny", or "None")</span>
+       <span class="s">"prefix"</span>: <span class="k">null</span>, <span class="c">// expected prefix for enum cases</span>
+       <span class="s">"suffix"</span>: <span class="k">null</span> <span class="c">// expected suffix for enum cases</span>
+    }
+}
+</code></pre></td></tr></table>
+
+          
+        </div>
+        <div class="span3">
+          <a href="index.html">
+            <img src="/FSharpLint/content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+          </a>
+
+          <ul class="nav nav-list" id="menu">
+
+            <li class="nav-header">
+              FSharpLint
+            </li>
+
+            <li class="divider"></li>
+
+            <li><a href="https://github.com/fsprojects/FSharpLint">Source Code on GitHub</a></li>
+            <li><a href="https://github.com/fsprojects/FSharpLint/tree/master/LICENSE">License (MIT)</a></li>
+            <li><a href="https://github.com/fsprojects/FSharpLint/tree/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <li class="nav-header">Documentation</li>
+
+            <li><a href="index.html">Introduction</a></li>
+
+            <li class="divider"></li>
+
+            <li><a href="Rules.html">Available Rules</a></li>
+
+            <li><a href="Suppression.html">Rule Suppression</a></li>
+
+            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+
+            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/fsprojects/FSharpLint"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>

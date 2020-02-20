@@ -35,6 +35,6 @@ type TestAstNodeRuleBase (rule:Rule) =
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
             rule.ruleConfig.cleanup()
 
-            suggestions |> Array.iter this.postSuggestion
+            suggestions |> Array.iter (fun suggestion -> this.postSuggestion suggestion)
         | _ ->
             failwithf "Failed to parse"

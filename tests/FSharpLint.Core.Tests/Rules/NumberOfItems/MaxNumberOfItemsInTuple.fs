@@ -8,7 +8,7 @@ type TestMaxNumberOfItemsInTuple() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfItemsInTuple.rule { maxItems = 5 })
 
     [<Test>]
-    member this.SixTupleItemsExpressionConstructor() = 
+    member this.SixTupleItemsExpressionConstructor() =
         this.Parse """
 module Program
 
@@ -24,14 +24,14 @@ let dog = Test(1,2,3,4,5,6)"""
     /// because in a lot of places the user won't have control over the definition
     /// of the function - the definition of a function should be where the lint is warning.
     [<Test>]
-    member this.``Tuple with too many items in a functiona application must never issue a warning.``() = 
+    member this.``Tuple with too many items in a functiona application must never issue a warning.``() =
         this.Parse """
 foo (1,2,3,4,5,6)"""
 
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.SixTupleItemsExpressionConstructorWithNew() = 
+    member this.SixTupleItemsExpressionConstructorWithNew() =
         this.Parse """
 module Program
 
@@ -43,7 +43,7 @@ let dog = new Test(1,2,3,4,5,6)"""
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.SixTupleItemsExpressionCallingMethod() = 
+    member this.SixTupleItemsExpressionCallingMethod() =
         this.Parse """
 module Program
 
@@ -54,11 +54,11 @@ let test = Test()
 
 let dog =
     test.One(1,2,3,4,5,6)"""
-    
+
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.SixTupleItemsExpression() = 
+    member this.SixTupleItemsExpression() =
         this.Parse """
 module Program
 
@@ -67,17 +67,7 @@ let foo = (1, 2, 3, 4, 5, 6)"""
         Assert.IsTrue(this.ErrorExistsAt(4, 26))
 
     [<Test>]
-    member this.SixTupleItemsExpressionSuppressed() = 
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfItemsInTuple")>]
-let foo = (1, 2, 3, 4, 5, 6)"""
-
-        this.AssertNoWarnings()
-
-    [<Test>]
-    member this.FiveTupleItemsExpression() = 
+    member this.FiveTupleItemsExpression() =
         this.Parse """
 module Program
 

@@ -19,7 +19,7 @@ type TestConventionsEnumCasesNames() =
 module Program
   type MyEnum =
     | EnumCase = 1"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -30,13 +30,3 @@ module Program
     | enumCase = 1"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 6))
-
-    [<Test>]
-    member this.EnumCaseIsCamelCaseSuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "EnumCasesNames")>]
-  type MyEnum =
-    | enumCase = 1"""
-
-        this.AssertNoWarnings()
