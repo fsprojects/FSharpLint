@@ -1,6 +1,7 @@
 ##### 0.13.1
 
 * Use structured comments for warning suppression
+* Use Argu library for command line argument parsing
 
 ##### 0.13.0 - February 20 2020
 

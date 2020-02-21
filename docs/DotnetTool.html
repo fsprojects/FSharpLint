@@ -32,44 +32,8 @@
 <p>Install as a global tool: <code>dotnet tool install -g dotnet-fsharplint</code>.</p>
 <p>Install as tool to specific directory: <code>dotnet tool install --tool-path &lt;my_directory&gt; dotnet-fsharplint</code></p>
 <h2><a name="Running-the-Console-Application" class="anchor" href="#Running-the-Console-Application">Running the Console Application</a></h2>
-<p>The console application is a wrapper around the linter, with a required argument of: <code>-f</code>, <code>-sf</code>, or <code>-source</code>.</p>
-<table>
-<thead>
-<tr class="header">
-<th><p>Arguments</p></th>
-<th align="left"><p>Description</p></th>
-<th><p>Example</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><p><code>-f &lt;project_file_path&gt;</code></p></td>
-<td align="left"><p>Lints an entire project.</p></td>
-<td><p><code>dotnet fsharplint -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
-</tr>
-<tr class="even">
-<td><p><code>-sf &lt;source_file_path&gt;</code></p></td>
-<td align="left"><p>Lints a single file.</p></td>
-<td><p><code>dotnet fsharplint -sf "C:\FSharpProjectDirectory\Uploader.fsx"</code></p></td>
-</tr>
-<tr class="odd">
-<td><p><code>-source &lt;source_string&gt;</code></p></td>
-<td align="left"><p>Lints a string.</p></td>
-<td><p><code>dotnet fsharplint -source "let x = fun _ -&gt; ()"</code></p></td>
-</tr>
-<tr class="even">
-<td><p><code>-convert &lt;xml_config_path&gt; &lt;output_path&gt;</code></p></td>
-<td align="left"><p>Converts an old XML config to new JSON config format.</p></td>
-<td><p><code>dotnet fsharplint -convert "FSharpLint.Settings" "fsharplint.json"</code></p></td>
-</tr>
-<tr class="odd">
-<td><p><code>-format &lt;output_format&gt;</code></p></td>
-<td align="left"><p>Outupt format to use (either standard or msbuild)</p></td>
-<td><p><code>dotnet fsharplint -format msbuild -f "C:\FSharpProjectDirectory\ProjectFile.fsproj"</code></p></td>
-</tr>
-</tbody>
-</table>
-
+<p>The console application is a wrapper around the linter. For basic usage, just run <code>dotnet fsharplint lint &lt;input&gt;</code>, where <code>input</code> can be an fsproj, sln, fs, fsx file, or a string of source code.</p>
+<p>Run <code>dotnet fsharplint --help</code> for full usage information.</p>
 
           
         </div>
