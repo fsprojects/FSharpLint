@@ -1,175 +1,166 @@
-﻿namespace FSharpLint.Console
+﻿module FSharpLint.Console.Program
 
-module Program =
+open Argu
+open System.IO
+open System
+open FSharp.Compiler.Range
+open FSharpLint.Framework
+open FSharpLint.Application
 
-    open System.IO
-    open System
-    open FSharp.Compiler.Range
-    open FSharpLint.Framework
-    open FSharpLint.Application
+/// Output format the linter will use.
+type OutputFormat =
+    | Standard = 1
+    | MSBuild = 2
 
-    type OutputFormat =
-        // Standard FSharpLint output
-        | Standard
-        // Output format which is parseable by MSBuild
-        | MSBuild
+/// File type the linter is running against.
+type FileType =
+    | Project = 1
+    | Solution = 2
+    | File = 3
+    | Source = 4
 
-    let mutable outputFormat = OutputFormat.Standard
-
-    let private highlightErrorText (range:range) (errorLine:string) =
-        let highlightColumnLine =
-            if String.length errorLine = 0 then "^"
-            else
-                errorLine
-                |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
-                |> Seq.reduce (+)
-        errorLine + Environment.NewLine + highlightColumnLine
-
-    let getErrorMessage (range:FSharp.Compiler.Range.range) =
-        let error = Resources.GetString("LintSourceError")
-        String.Format(error, range.StartLine, range.StartColumn)
-
-    let private writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
-        let originalColour = Console.ForegroundColor
-        Console.ForegroundColor <- color
-        writer.WriteLine str
-        Console.ForegroundColor <- originalColour
-
-    let private writeInfoLine (str:string) =
-        match outputFormat with
-        | Standard -> writeLine str ConsoleColor.White Console.Out
-        | MSBuild -> ()
-
-    let private writeWarningLine (warning:Suggestion.LintWarning) =
-        match outputFormat with
-        | Standard ->
-            let highlightedErrorText = highlightErrorText warning.Details.Range (getErrorMessage warning.Details.Range)
-            let str = warning.Details.Message + Environment.NewLine + highlightedErrorText + Environment.NewLine + warning.ErrorText
-            writeLine str ConsoleColor.Yellow Console.Out
-            String.replicate 80 "-" |> writeInfoLine
-        | MSBuild ->
-            sprintf "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
-                <| warning.FilePath
-                <| warning.Details.Range.StartLine
-                <| warning.Details.Range.StartColumn
-                <| warning.Details.Range.EndLine
-                <| warning.Details.Range.EndColumn
-                <| warning.RuleIdentifier
-                <| warning.Details.Message
-            |> Console.Out.WriteLine
-
-    let private writeErrorLine (str:string) =
-        match outputFormat with
-        | Standard -> writeLine str ConsoleColor.Red Console.Error
-        | MSBuild -> ()
-
-    let private help () =
-        writeInfoLine "-f <project.fsproj>                lint project"
-        writeInfoLine "-sol <solution.sln>                lint solution"
-        writeInfoLine "-sf <file.fs>                      lint single file"
-        writeInfoLine "-source 'let foo = 5'              lint source code"
-        writeInfoLine "-convert <xmlConfig> <outputFile>  convert old XML config to JSON"
-        writeInfoLine "-format                            output format (standard/msbuild)"
-
-    let private parserProgress = function
-        | Starting(file) ->
-            String.Format(Resources.GetString("ConsoleStartingFile"), file) |> writeInfoLine
-        | ReachedEnd(_, warnings) ->
-            String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> writeInfoLine
-        | Failed(file, parseException) ->
-            String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> writeErrorLine
-            "Exception Message:" + Environment.NewLine +
-                parseException.Message + Environment.NewLine +
-                "Exception Stack Trace:" + Environment.NewLine +
-                parseException.StackTrace + Environment.NewLine
-            |> writeErrorLine
-
-    let private runLintOnProject lintParams projectFile =
-        lintProject lintParams projectFile
-
-    let private runLintOnSolution lintParams solutionFile =
-        lintSolution lintParams solutionFile
-
-    let private runLintOnFile lintParams pathToFile =
-        lintFile lintParams pathToFile
-
-    let private runLintOnSource lintParams source =
-        let lintParams = { lintParams with ReceivedWarning = Some writeWarningLine }
-
-        lintSource lintParams source
-
-    let private convertConfig (xmlFile:string) (outputFile:string) =
-        try
-            let inputFile = File.ReadAllText xmlFile
-            let jsonConfig = XmlConfiguration.convertToJson inputFile |> ConfigurationManager.serializeConfig
-            File.WriteAllText(outputFile, jsonConfig)
-            Choice1Of2 ()
-        with
-            | ex -> Choice2Of2 ex.Message
-
-    type private Argument =
-        | ProjectFile of string
-        | SolutionFile of string
-        | SingleFile of string
-        | Source of string
-        | ConvertConfig of string * string
-        | ReleaseConfig of string
-        | OutputFormat of string
-        | UnexpectedArgument of string
-
-        override this.ToString() =
+type ToolArgs =
+    | [<CliPrefix(CliPrefix.None)>] Convert of ParseResults<ConvertArgs>
+    | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
+with
+    interface IArgParserTemplate with
+        member this.Usage =
             match this with
-            | ProjectFile(f) -> "project " + f
-            | SolutionFile(f) -> "solution " + f
-            | SingleFile(f) -> "source file " + f
-            | Source(_) -> "source code"
-            | ConvertConfig(xmlConfig, outputFile) -> "config " + xmlConfig + " " + outputFile
-            | ReleaseConfig (config) -> "releaseConfig " + config
-            | OutputFormat format -> "format " + format
-            | UnexpectedArgument(_) -> "unexpected argument"
+            | Convert _ -> "Converts an old-format XML config into a new format JSON config."
+            | Lint _ -> "Runs FSharpLint against a file or a collection of files."
 
-    let private parseArguments arguments =
-        let rec parseArguments parsedArguments = function
-            | "-f" :: argument :: remainingArguments ->
-                parseArguments (ProjectFile(argument) :: parsedArguments) remainingArguments
-            | "-sol" :: argument :: remainingArguments ->
-                parseArguments (SolutionFile(argument) :: parsedArguments) remainingArguments
-            | "-sf" :: argument :: remainingArguments ->
-                parseArguments (SingleFile(argument) :: parsedArguments) remainingArguments
-            | "-source" :: argument :: remainingArguments ->
-                parseArguments (Source(argument) :: parsedArguments) remainingArguments
-            | "-convert" :: xmlConfig :: outputFile :: remainingArguments ->
-                parseArguments (ConvertConfig(xmlConfig, outputFile) :: parsedArguments) remainingArguments
-            | "-c" :: releaseConfig :: remainingArguments ->
-                parseArguments (ReleaseConfig (releaseConfig) :: parsedArguments) remainingArguments
-            | "-format" :: outputFormat :: remainingArguments ->
-                parseArguments (OutputFormat outputFormat :: parsedArguments) remainingArguments
-            | [] -> parsedArguments
-            | argument :: _ ->  [UnexpectedArgument(argument)]
+and ConvertArgs =
+    | Old_Config of oldConfig:string
+    | [<MainCommand; Last>] New_Config of newConfig:string
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Old_Config _ -> "Path to the XML-style config to convert."
+            | New_Config _ -> "Path to the file where the JSON-style config will be written."
 
-        parseArguments [] arguments
+and LintArgs =
+    | [<MainCommand; Mandatory>] Target of target:string
+    | [<AltCommandLine("-c")>] Release_Config of releaseConfig:string
+    | File_Type of fileType:FileType
+    | Format of format:OutputFormat
+with
+    interface IArgParserTemplate with
+        member this.Usage =
+            match this with
+            | Target _ -> "Input to lint."
+            | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
+            | Release_Config _ -> "Release config to use to parse files."
+            | Format _ -> "Output format of the linter."
 
-    let private containsUnexpectedArgument arguments =
-        let isUnexpectedArgument = function
-            | UnexpectedArgument(_) -> true
-            | _ -> false
+let private highlightErrorText (range:range) (errorLine:string) =
+    let highlightColumnLine =
+        if String.length errorLine = 0 then "^"
+        else
+            errorLine
+            |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
+            |> Seq.reduce (+)
+    errorLine + Environment.NewLine + highlightColumnLine
 
-        arguments |> List.exists isUnexpectedArgument
+let getErrorMessage (range:FSharp.Compiler.Range.range) =
+    let error = Resources.GetString("LintSourceError")
+    String.Format(error, range.StartLine, range.StartColumn)
 
-    let private containsRequiredArguments arguments =
-        let isArgumentSpecifyingWhatToLint = function
-            | ProjectFile(_) | SolutionFile(_) | SingleFile(_) | Source(_) | ConvertConfig(_) -> true
-            | _ -> false
+let private writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
+    let originalColour = Console.ForegroundColor
+    Console.ForegroundColor <- color
+    writer.WriteLine str
+    Console.ForegroundColor <- originalColour
 
-        arguments |> List.exists isArgumentSpecifyingWhatToLint
+let mutable outputFormat = OutputFormat.Standard
 
-    let private startWithArguments arguments =
-        let mutable exitCode = 0
+let private writeInfoLine (str:string) =
+    match outputFormat with
+    | OutputFormat.MSBuild -> ()
+    | OutputFormat.Standard
+    | _ -> writeLine str ConsoleColor.White Console.Out
 
-        let handleError (str:string) =
-            writeErrorLine str
-            exitCode <- -1
+let private writeWarningLine (warning:Suggestion.LintWarning) =
+    match outputFormat with
+    | OutputFormat.MSBuild ->
+        sprintf "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
+            <| warning.FilePath
+            <| warning.Details.Range.StartLine
+            <| warning.Details.Range.StartColumn
+            <| warning.Details.Range.EndLine
+            <| warning.Details.Range.EndColumn
+            <| warning.RuleIdentifier
+            <| warning.Details.Message
+        |> Console.Out.WriteLine
+    | OutputFormat.Standard
+    | _ ->
+         let highlightedErrorText = highlightErrorText warning.Details.Range (getErrorMessage warning.Details.Range)
+         let str = warning.Details.Message + Environment.NewLine + highlightedErrorText + Environment.NewLine + warning.ErrorText
+         writeLine str ConsoleColor.Yellow Console.Out
+         String.replicate 80 "-" |> writeInfoLine
 
+let private writeErrorLine (str:string) =
+    match outputFormat with
+    | OutputFormat.MSBuild -> ()
+    | OutputFormat.Standard
+    | _ -> writeLine str ConsoleColor.Red Console.Error
+
+let private parserProgress = function
+    | Starting(file) ->
+        String.Format(Resources.GetString("ConsoleStartingFile"), file) |> writeInfoLine
+    | ReachedEnd(_, warnings) ->
+        String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> writeInfoLine
+    | Failed(file, parseException) ->
+        String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> writeErrorLine
+        "Exception Message:" + Environment.NewLine +
+            parseException.Message + Environment.NewLine +
+            "Exception Stack Trace:" + Environment.NewLine +
+            parseException.StackTrace + Environment.NewLine
+        |> writeErrorLine
+
+let private runLintOnProject lintParams projectFile =
+    lintProject lintParams projectFile
+
+let private runLintOnSolution lintParams solutionFile =
+    lintSolution lintParams solutionFile
+
+let private runLintOnFile lintParams pathToFile =
+    lintFile lintParams pathToFile
+
+let private runLintOnSource lintParams source =
+    let lintParams = { lintParams with ReceivedWarning = Some writeWarningLine }
+
+    lintSource lintParams source
+
+let private convertConfig (xmlFile:string) (outputFile:string) =
+    try
+        let inputFile = File.ReadAllText xmlFile
+        let jsonConfig = XmlConfiguration.convertToJson inputFile |> ConfigurationManager.serializeConfig
+        File.WriteAllText(outputFile, jsonConfig)
+        Choice1Of2 ()
+    with
+        | ex -> Choice2Of2 ex.Message
+
+/// Infers the file type of the target based on its file extension.
+let inferFileType (target:string) =
+    if target.EndsWith ".fs" || target.EndsWith ".fsx" then
+        FileType.File
+    else if target.EndsWith ".fsproj" then
+        FileType.Project
+    else if target.EndsWith ".sln" then
+        FileType.Solution
+    else
+        FileType.Source
+
+let private start (parser:ArgumentParser<ToolArgs>) (arguments:ParseResults<ToolArgs>) =
+    let mutable exitCode = 0
+
+    let handleError (str:string) =
+        writeErrorLine str
+        exitCode <- -1
+
+    match arguments.TryGetSubCommand() with
+    | Some (Lint lintArgs) ->
         let handleLintResult = function
             | LintResult.Success(warnings) ->
                 String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfoLine
@@ -177,13 +168,8 @@ module Program =
             | LintResult.Failure(failure) ->
                 handleError failure.Description
 
-        let handleConversionResult xmlConfig outputFile = function
-            | Choice1Of2 _ ->
-                (sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile) |> writeInfoLine
-            | Choice2Of2 err ->
-                (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> handleError
-
-        let releaseConfig = arguments |> List.tryPick (function | ReleaseConfig config -> Some config | _ -> None)
+        let releaseConfig = lintArgs.TryGetResult Release_Config
+        outputFormat <- lintArgs.TryGetResult Format |> Option.defaultValue OutputFormat.Standard
 
         let lintParams =
             { CancellationToken = None
@@ -192,47 +178,46 @@ module Program =
               ReportLinterProgress = Some parserProgress
               ReleaseConfiguration = releaseConfig }
 
-        // Set output mode.
-        arguments
-        |> List.iter (function
-                | OutputFormat "msbuild" -> outputFormat <- OutputFormat.MSBuild
-                | _ -> ())
+        let target = lintArgs.GetResult Target
+        let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
-        arguments
-        |> List.iter (fun arg ->
-            try
-                match arg with
-                | SingleFile file
-                | ProjectFile file
-                | SolutionFile file when not (IO.File.Exists file) ->
-                    let formatString = Resources.GetString("ConsoleCouldNotFindFile")
-                    String.Format(formatString, file) |> handleError
-                | SingleFile file -> runLintOnFile lintParams file |> handleLintResult
-                | Source source -> runLintOnSource lintParams source |> handleLintResult
-                | ProjectFile projectFile -> runLintOnProject lintParams projectFile |> handleLintResult
-                | ConvertConfig (xmlConfig, outputFile) -> convertConfig xmlConfig outputFile |> handleConversionResult xmlConfig outputFile
-                | SolutionFile solutionFile -> runLintOnSolution lintParams solutionFile |> handleLintResult
-                | OutputFormat _
-                | ReleaseConfig _
-                | UnexpectedArgument _ -> ()
-            with
-            | e ->
-                "Lint failed while analysing " + string arg + "." + Environment.NewLine +
-                    "Failed with: " + e.Message + Environment.NewLine +
-                    "Stack trace:" + e.StackTrace
-                |> handleError)
-        exitCode
+        try
+            let lintResult =
+                match fileType with
+                | FileType.File -> lintFile lintParams target
+                | FileType.Source -> lintSource lintParams target
+                | FileType.Solution -> lintSolution lintParams target
+                | FileType.Project
+                | _ -> lintProject lintParams target
+            handleLintResult lintResult
+        with
+        | e ->
+            let target = if fileType = FileType.Source then "source" else target
+            sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target e.Message e.StackTrace
+            |> handleError
+    | Some (Convert convertArgs) ->
+        let handleConversionResult xmlConfig outputFile = function
+            | Choice1Of2 _ ->
+                (sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile) |> writeInfoLine
+            | Choice2Of2 err ->
+                (sprintf "Failed to convert config at '%s', error: %s" xmlConfig err) |> handleError
 
-    [<EntryPoint>]
-    let main argv =
-        let parsedArguments = Array.toList argv |> parseArguments
+        match (convertArgs.TryGetResult Old_Config, convertArgs.TryGetResult New_Config) with
+        | (Some oldConfig, Some newConfig) ->
+            convertConfig oldConfig newConfig
+            |> handleConversionResult oldConfig newConfig
+        | _ ->
+            // TODO: conversion usage
+            ()
+    | None ->
+        printfn "%s" (parser.PrintUsage())
+        exitCode <- -1
 
-        let argumentAreInvalid =
-            containsUnexpectedArgument parsedArguments ||
-            not <| containsRequiredArguments parsedArguments
+    exitCode
 
-        if argumentAreInvalid then
-            help()
-            -1
-        else
-            startWithArguments parsedArguments
+[<EntryPoint>]
+let main argv =
+    let errorHandler = ProcessExiter(colorizer = function ErrorCode.HelpText -> None | _ -> Some ConsoleColor.Red)
+    let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
+    let results = parser.ParseCommandLine argv
+    start parser results
