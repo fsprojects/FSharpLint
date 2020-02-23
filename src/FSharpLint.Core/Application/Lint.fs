@@ -51,7 +51,7 @@ module ConfigurationManagement =
     /// The closer they are to the project directory the higher precedence they have.
     /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
     /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
-    let private loadUserConfigFiles projectFilePath defaultConfig =
+    let private loadUserConfigFiles (projectFilePath: string) defaultConfig =
         let projectFileDirectory = Path.GetDirectoryName projectFilePath
         let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
 
@@ -367,7 +367,7 @@ module Lint =
 
         exitCode, (workingDir, exePath, args)
 
-    let getProjectFileInfo (releaseConfig : string option) projectFilePath =
+    let getProjectFileInfo (releaseConfig : string option) (projectFilePath: string) =
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
 
         let msBuildParams =
