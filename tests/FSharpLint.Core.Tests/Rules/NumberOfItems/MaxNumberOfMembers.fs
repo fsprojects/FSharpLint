@@ -6,9 +6,9 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestMaxNumberOfMembers() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfMembers.rule { maxItems = 5 })
-    
+
     [<Test>]
-    member this.SixClassProperties() = 
+    member this.SixClassProperties() =
         this.Parse """
 module Program
 
@@ -23,23 +23,7 @@ type Test() =
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
     [<Test>]
-    member this.SixClassPropertiesSuppressed() = 
-        this.Parse """
-module Program
-
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NumberOfItems", "MaxNumberOfMembers")>]
-type Test() =
-    member val One = 0 with get, set
-    member val Two = 0 with get, set
-    member val Three = 0 with get, set
-    member val Four = 0 with get, set
-    member val Five = 0 with get, set
-    member val Six = 0 with get, set"""
-    
-        this.AssertNoWarnings()
-            
-    [<Test>]
-    member this.FiveClassProperties() = 
+    member this.FiveClassProperties() =
         this.Parse """
 module Program
 
@@ -49,11 +33,11 @@ type Test() =
     member val Three = 0 with get, set
     member val Four = 0 with get, set
     member val Five = 0 with get, set"""
-    
+
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.SixClassAbstractMethods() = 
+    member this.SixClassAbstractMethods() =
         this.Parse """
 module Program
 
@@ -68,7 +52,7 @@ type Test() =
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
     [<Test>]
-    member this.FiveClassAbstractMethods() = 
+    member this.FiveClassAbstractMethods() =
         this.Parse """
 module Program
 
@@ -78,11 +62,11 @@ type Test() =
     abstract member Three: unit -> unit
     abstract member Four: unit -> unit
     abstract member Five: unit -> unit"""
-    
+
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.SixClassMethods() = 
+    member this.SixClassMethods() =
         this.Parse """
 module Program
 
@@ -97,7 +81,7 @@ type Test() =
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
     [<Test>]
-    member this.SixClassMethodsLastPrivate() = 
+    member this.SixClassMethodsLastPrivate() =
         this.Parse """
 module Program
 
@@ -108,11 +92,11 @@ type Test() =
     member this.Four() = ()
     member this.Five() = ()
     private member this.Six() = ()"""
-    
+
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.FiveClassMethods() = 
+    member this.FiveClassMethods() =
         this.Parse """
 module Program
 
@@ -122,6 +106,5 @@ type Test() =
     member this.Three() = ()
     member this.Four() = ()
     member this.Five() = ()"""
-    
+
         this.AssertNoWarnings()
-   

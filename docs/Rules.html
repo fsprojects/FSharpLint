@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Rules
+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Matthew Mcveigh">
+
+    <script src="https://code.jquery.com/jquery-1.8.0.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="/FSharpLint/content/style.css" />
+    <script type="text/javascript" src="/FSharpLint/content/tips.js"></script>
+
+	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li><a href="http://fsharp.org">fsharp.org</a></li>
+        </ul>
+        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+      </div>
+      <hr />
+      <div class="row">
+        <div class="span9" id="main">
+          <h1><a name="Rules" class="anchor" href="#Rules">Rules</a></h1>
+<p>The following rules can be specified for linting.</p>
+<ul>
+<li><a href="rules/FL0001.html">TupleCommaSpacing (FL0001)</a></li>
+<li><a href="rules/FL0002.html">TupleIndentation (FL0002)</a></li>
+<li><a href="rules/FL0003.html">TupleParentheses (FL0003)</a></li>
+<li><a href="rules/FL0004.html">PatternMatchClausesOnNewLine (FL0004)</a></li>
+<li><a href="rules/FL0005.html">PatternMatchOrClausesOnNewLine (FL0005)</a></li>
+<li><a href="rules/FL0006.html">PatternMatchClauseIndentation (FL0006)</a></li>
+<li><a href="rules/FL0007.html">PatternMatchExpressionIndentation (FL0007)</a></li>
+<li><a href="rules/FL0008.html">ModuleDeclSpacing (FL0008)</a></li>
+<li><a href="rules/FL0009.html">ClassMemberSpacing (FL0009)</a></li>
+<li><a href="rules/FL0010.html">TypedItemSpacing (FL0010)</a></li>
+<li><a href="rules/FL0011.html">TypePrefixing (FL0011)</a></li>
+<li><a href="rules/FL0012.html">UnionDefinitionIndentation (FL0012)</a></li>
+<li><a href="rules/FL0013.html">RecursiveAsyncFunction (FL0013)</a></li>
+<li><a href="rules/FL0014.html">RedundantNewKeyword (FL0014)</a></li>
+<li><a href="rules/FL0015.html">NestedStatements (FL0015)</a></li>
+<li><a href="rules/FL0016.html">FailwithWithSingleArgument (FL0016)</a></li>
+<li><a href="rules/FL0017.html">RaiseWithSingleArgument (FL0017)</a></li>
+<li><a href="rules/FL0018.html">NullArgWithSingleArgument (FL0018)</a></li>
+<li><a href="rules/FL0019.html">InvalidOpWithSingleArgument (FL0019)</a></li>
+<li><a href="rules/FL0020.html">InvalidArgWithTwoArguments (FL0020)</a></li>
+<li><a href="rules/FL0021.html">FailwithfWithArgumentsMatchingFormattingString (FL0021)</a></li>
+<li><a href="rules/FL0022.html">MaxLinesInLambdaFunction (FL0022)</a></li>
+<li><a href="rules/FL0023.html">MaxLinesInMatchLambdaFunction (FL0023)</a></li>
+<li><a href="rules/FL0024.html">MaxLinesInValue (FL0024)</a></li>
+<li><a href="rules/FL0025.html">MaxLinesInFunction (FL0025)</a></li>
+<li><a href="rules/FL0026.html">MaxLinesInMember (FL0026)</a></li>
+<li><a href="rules/FL0027.html">MaxLinesInConstructor (FL0027)</a></li>
+<li><a href="rules/FL0028.html">MaxLinesInProperty (FL0028)</a></li>
+<li><a href="rules/FL0029.html">MaxLinesInModule (FL0029)</a></li>
+<li><a href="rules/FL0030.html">MaxLinesInRecord (FL0030)</a></li>
+<li><a href="rules/FL0031.html">MaxLinesInEnum (FL0031)</a></li>
+<li><a href="rules/FL0032.html">MaxLinesInUnion (FL0032)</a></li>
+<li><a href="rules/FL0033.html">MaxLinesInClass (FL0033)</a></li>
+<li><a href="rules/FL0034.html">ReimplementsFunction (FL0034)</a></li>
+<li><a href="rules/FL0035.html">CanBeReplacedWithComposition (FL0035)</a></li>
+<li><a href="rules/FL0036.html">InterfaceNames (FL0036)</a></li>
+<li><a href="rules/FL0037.html">ExceptionNames (FL0037)</a></li>
+<li><a href="rules/FL0038.html">TypeNames (FL0038)</a></li>
+<li><a href="rules/FL0039.html">RecordFieldNames (FL0039)</a></li>
+<li><a href="rules/FL0040.html">EnumCasesNames (FL0040)</a></li>
+<li><a href="rules/FL0041.html">UnionCasesNames (FL0041)</a></li>
+<li><a href="rules/FL0042.html">ModuleNames (FL0042)</a></li>
+<li><a href="rules/FL0043.html">LiteralNames (FL0043)</a></li>
+<li><a href="rules/FL0044.html">NamespaceNames (FL0044)</a></li>
+<li><a href="rules/FL0045.html">MemberNames (FL0045)</a></li>
+<li><a href="rules/FL0046.html">ParameterNames (FL0046)</a></li>
+<li><a href="rules/FL0047.html">MeasureTypeNames (FL0047)</a></li>
+<li><a href="rules/FL0048.html">ActivePatternNames (FL0048)</a></li>
+<li><a href="rules/FL0049.html">PublicValuesNames (FL0049)</a></li>
+<li><a href="rules/FL0050.html">NonPublicValuesNames (FL0050)</a></li>
+<li><a href="rules/FL0051.html">MaxNumberOfItemsInTuple (FL0051)</a></li>
+<li><a href="rules/FL0052.html">MaxNumberOfFunctionParameters (FL0052)</a></li>
+<li><a href="rules/FL0053.html">MaxNumberOfMembers (FL0053)</a></li>
+<li><a href="rules/FL0054.html">MaxNumberOfBooleanOperatorsInCondition (FL0054)</a></li>
+<li><a href="rules/FL0055.html">FavourIgnoreOverLetWild (FL0055)</a></li>
+<li><a href="rules/FL0056.html">WildcardNamedAsPattern (FL0056)</a></li>
+<li><a href="rules/FL0057.html">UselessBinding (FL0057)</a></li>
+<li><a href="rules/FL0058.html">TupleOfWildcards (FL0058)</a></li>
+<li><a href="rules/FL0059.html">Indentation (FL0059)</a></li>
+<li><a href="rules/FL0060.html">MaxCharactersOnLine (FL0060)</a></li>
+<li><a href="rules/FL0061.html">TrailingWhitespaceOnLine (FL0061)</a></li>
+<li><a href="rules/FL0062.html">MaxLinesInFile (FL0062)</a></li>
+<li><a href="rules/FL0063.html">TrailingNewLineInFile (FL0063)</a></li>
+<li><a href="rules/FL0064.html">NoTabCharacters (FL0064)</a></li>
+<li><a href="rules/FL0065.html">Hints (FL0065)</a></li>
+</ul>
+
+          
+        </div>
+        <div class="span3">
+          <a href="index.html">
+            <img src="/FSharpLint/content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+          </a>
+
+          <ul class="nav nav-list" id="menu">
+
+            <li class="nav-header">
+              FSharpLint
+            </li>
+
+            <li class="divider"></li>
+
+            <li><a href="https://github.com/fsprojects/FSharpLint">Source Code on GitHub</a></li>
+            <li><a href="https://github.com/fsprojects/FSharpLint/tree/master/LICENSE">License (MIT)</a></li>
+            <li><a href="https://github.com/fsprojects/FSharpLint/tree/master/RELEASE_NOTES.md">Release Notes</a></li>
+
+            <li class="nav-header">Documentation</li>
+
+            <li><a href="index.html">Introduction</a></li>
+
+            <li class="divider"></li>
+
+            <li><a href="Rules.html">Available Rules</a></li>
+
+            <li><a href="Suppression.html">Rule Suppression</a></li>
+
+            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+
+            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <a href="https://github.com/fsprojects/FSharpLint"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+  </body>
+  </html>

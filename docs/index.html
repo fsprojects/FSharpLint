@@ -11,8 +11,9 @@
     <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
     <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
 
-    <link type="text/css" rel="stylesheet" href="content/style.css" />
-    <script type="text/javascript" src="content/tips.js"></script>
+    <link type="text/css" rel="stylesheet" href="/FSharpLint/content/style.css" />
+    <script type="text/javascript" src="/FSharpLint/content/tips.js"></script>
+
 	<script type="text/javascript">$(function() { $("#main table.pre").wrap("<div class='code-wrapper'></div>"); });</script>
   </head>
   <body>
@@ -26,13 +27,13 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1>FSharpLint</h1>
+          <h1><a name="FSharpLint" class="anchor" href="#FSharpLint">FSharpLint</a></h1>
 <p>FSharpLint is a lint tool for F#. It can be run as a dotnet tool, and also integrates with Ionide for VS Code.</p>
 <blockquote>
 <p>The term [lint] is now applied generically to tools that flag suspicious usage in software written in any computer language - <a href="http://en.wikipedia.org/wiki/Lint_(software)"><em>Wikipedia</em></a></p>
 </blockquote>
-<p>Using a <code>.fsproj</code> (F# project) file the tool will analyse all of the F# implementation files in a project looking for code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.</p>
-<h4>Example Usage of the Tool</h4>
+<p>Using a <code>.fsproj</code> (F# project) or <code>.sln</code> (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.</p>
+<h4><a name="Example-Usage-of-the-Tool" class="anchor" href="#Example-Usage-of-the-Tool">Example Usage of the Tool</a></h4>
 <p>The following program:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
@@ -43,13 +44,13 @@
 <span class="l">7: </span>
 <span class="l">8: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="t">ExampleInterface</span> <span class="o">=</span>
-   <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="f">print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="t">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 4)" onmouseover="showTip(event, 'fs3', 4)" class="t">unit</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="if">ExampleInterface</span> <span class="o">=</span>
+   <span class="k">abstract</span> <span class="k">member</span> <span class="fn">print</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="rt">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs2', 3)" onmouseover="showTip(event, 'fs2', 3)" class="rt">unit</span>
 
-[&lt;<span onmouseout="hideTip(event, 'fs4', 5)" onmouseover="showTip(event, 'fs4', 5)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="i">argv</span> <span class="o">=</span>
-    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs9', 10)" onmouseover="showTip(event, 'fs9', 10)" class="f">fold</span> (<span class="k">fun</span> <span onmouseout="hideTip(event, 'fs7', 11)" onmouseover="showTip(event, 'fs7', 11)" class="i">x</span> <span onmouseout="hideTip(event, 'fs10', 12)" onmouseover="showTip(event, 'fs10', 12)" class="i">y</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs7', 13)" onmouseover="showTip(event, 'fs7', 13)" class="i">x</span> <span class="o">+</span> <span onmouseout="hideTip(event, 'fs10', 14)" onmouseover="showTip(event, 'fs10', 14)" class="i">y</span>) <span class="n">0</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
-    <span onmouseout="hideTip(event, 'fs11', 15)" onmouseover="showTip(event, 'fs11', 15)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 16)" onmouseover="showTip(event, 'fs7', 16)" class="i">x</span>
+<span class="pn">[&lt;</span><span onmouseout="hideTip(event, 'fs3', 4)" onmouseover="showTip(event, 'fs3', 4)" class="rt">EntryPoint</span><span class="pn">&gt;]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs4', 5)" onmouseover="showTip(event, 'fs4', 5)" class="fn">main</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="id">argv</span> <span class="o">=</span>
+    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 8)" onmouseover="showTip(event, 'fs7', 8)" class="m">List</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs8', 9)" onmouseover="showTip(event, 'fs8', 9)" class="id">fold</span> <span class="pn">(</span><span class="k">fun</span> <span onmouseout="hideTip(event, 'fs6', 10)" onmouseover="showTip(event, 'fs6', 10)" class="id">x</span> <span onmouseout="hideTip(event, 'fs9', 11)" onmouseover="showTip(event, 'fs9', 11)" class="id">y</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs6', 12)" onmouseover="showTip(event, 'fs6', 12)" class="id">x</span> <span class="o">+</span> <span onmouseout="hideTip(event, 'fs9', 13)" onmouseover="showTip(event, 'fs9', 13)" class="id">y</span><span class="pn">)</span> <span class="n">0</span> <span class="pn">[</span><span class="n">1</span><span class="pn">;</span><span class="n">2</span><span class="pn">;</span><span class="n">3</span><span class="pn">]</span>
+    <span onmouseout="hideTip(event, 'fs10', 14)" onmouseover="showTip(event, 'fs10', 14)" class="fn">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs6', 15)" onmouseover="showTip(event, 'fs6', 15)" class="id">x</span>
     <span class="n">0</span>
 </code></pre></td>
 </tr>
@@ -99,13 +100,13 @@ Error in file Program.fs on line 6 starting at column 23
 <span class="l">7: </span>
 <span class="l">8: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="t">IExampleInterface</span> <span class="o">=</span>
-   <span class="k">abstract</span> <span class="k">member</span> <span onmouseout="hideTip(event, 'fs13', 18)" onmouseover="showTip(event, 'fs13', 18)" class="f">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 19)" onmouseover="showTip(event, 'fs3', 19)" class="t">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 20)" onmouseover="showTip(event, 'fs3', 20)" class="t">unit</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs11', 16)" onmouseover="showTip(event, 'fs11', 16)" class="if">IExampleInterface</span> <span class="o">=</span>
+   <span class="k">abstract</span> <span class="k">member</span> <span class="fn">Print</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs2', 17)" onmouseover="showTip(event, 'fs2', 17)" class="rt">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs2', 18)" onmouseover="showTip(event, 'fs2', 18)" class="rt">unit</span>
 
-[&lt;<span onmouseout="hideTip(event, 'fs4', 21)" onmouseover="showTip(event, 'fs4', 21)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 22)" onmouseover="showTip(event, 'fs5', 22)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 23)" onmouseover="showTip(event, 'fs6', 23)" class="i">argv</span> <span class="o">=</span>
-    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 24)" onmouseover="showTip(event, 'fs7', 24)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 25)" onmouseover="showTip(event, 'fs8', 25)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs9', 26)" onmouseover="showTip(event, 'fs9', 26)" class="f">fold</span> (<span class="o">+</span>) <span class="n">0</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
-    <span onmouseout="hideTip(event, 'fs11', 27)" onmouseover="showTip(event, 'fs11', 27)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 28)" onmouseover="showTip(event, 'fs7', 28)" class="i">x</span>
+<span class="pn">[&lt;</span><span onmouseout="hideTip(event, 'fs3', 19)" onmouseover="showTip(event, 'fs3', 19)" class="rt">EntryPoint</span><span class="pn">&gt;]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs4', 20)" onmouseover="showTip(event, 'fs4', 20)" class="fn">main</span> <span onmouseout="hideTip(event, 'fs5', 21)" onmouseover="showTip(event, 'fs5', 21)" class="id">argv</span> <span class="o">=</span>
+    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 22)" onmouseover="showTip(event, 'fs6', 22)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 23)" onmouseover="showTip(event, 'fs7', 23)" class="m">List</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs8', 24)" onmouseover="showTip(event, 'fs8', 24)" class="id">fold</span> <span class="pn">(</span><span class="o">+</span><span class="pn">)</span> <span class="n">0</span> <span class="pn">[</span><span class="n">1</span><span class="pn">;</span><span class="n">2</span><span class="pn">;</span><span class="n">3</span><span class="pn">]</span>
+    <span onmouseout="hideTip(event, 'fs10', 25)" onmouseover="showTip(event, 'fs10', 25)" class="fn">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs6', 26)" onmouseover="showTip(event, 'fs6', 26)" class="id">x</span>
     <span class="n">0</span>
 </code></pre></td>
 </tr>
@@ -131,40 +132,31 @@ let x = List.fold (+) 0 [1;2;3]
 <span class="l">7: </span>
 <span class="l">8: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs12', 29)" onmouseover="showTip(event, 'fs12', 29)" class="i">IExampleInterface</span> <span class="o">=</span>
-   <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 30)" onmouseover="showTip(event, 'fs3', 30)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 31)" onmouseover="showTip(event, 'fs3', 31)" class="i">unit</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs11', 27)" onmouseover="showTip(event, 'fs11', 27)" class="id">IExampleInterface</span> <span class="o">=</span>
+   <span class="k">abstract</span> <span class="k">member</span> <span class="id">Print</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs2', 28)" onmouseover="showTip(event, 'fs2', 28)" class="id">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs2', 29)" onmouseover="showTip(event, 'fs2', 29)" class="id">unit</span>
 
-[&lt;<span onmouseout="hideTip(event, 'fs4', 32)" onmouseover="showTip(event, 'fs4', 32)" class="t">EntryPoint</span>&gt;]
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs5', 33)" onmouseover="showTip(event, 'fs5', 33)" class="f">main</span> <span onmouseout="hideTip(event, 'fs6', 34)" onmouseover="showTip(event, 'fs6', 34)" class="i">argv</span> <span class="o">=</span>
-    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs7', 35)" onmouseover="showTip(event, 'fs7', 35)" class="i">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs8', 36)" onmouseover="showTip(event, 'fs8', 36)" class="t">List</span><span class="o">.</span><span onmouseout="hideTip(event, 'fs14', 37)" onmouseover="showTip(event, 'fs14', 37)" class="f">sum</span> [<span class="n">1</span>;<span class="n">2</span>;<span class="n">3</span>]
-    <span onmouseout="hideTip(event, 'fs11', 38)" onmouseover="showTip(event, 'fs11', 38)" class="f">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs7', 39)" onmouseover="showTip(event, 'fs7', 39)" class="i">x</span>
+<span class="pn">[&lt;</span><span onmouseout="hideTip(event, 'fs3', 30)" onmouseover="showTip(event, 'fs3', 30)" class="rt">EntryPoint</span><span class="pn">&gt;]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs4', 31)" onmouseover="showTip(event, 'fs4', 31)" class="fn">main</span> <span onmouseout="hideTip(event, 'fs5', 32)" onmouseover="showTip(event, 'fs5', 32)" class="id">argv</span> <span class="o">=</span>
+    <span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 33)" onmouseover="showTip(event, 'fs6', 33)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 34)" onmouseover="showTip(event, 'fs7', 34)" class="m">List</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs12', 35)" onmouseover="showTip(event, 'fs12', 35)" class="id">sum</span> <span class="pn">[</span><span class="n">1</span><span class="pn">;</span><span class="n">2</span><span class="pn">;</span><span class="n">3</span><span class="pn">]</span>
+    <span onmouseout="hideTip(event, 'fs10', 36)" onmouseover="showTip(event, 'fs10', 36)" class="fn">printfn</span> <span class="s">&quot;</span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs6', 37)" onmouseover="showTip(event, 'fs6', 37)" class="id">x</span>
     <span class="n">0</span>
 </code></pre></td>
 </tr>
 </table>
-<h4>Building The Tool</h4>
+<h4><a name="Building-The-Tool" class="anchor" href="#Building-The-Tool">Building The Tool</a></h4>
 <p>On windows run <code>build.cmd</code> and on unix based systems run <code>build.sh</code>.</p>
-<h4>Running The Tool</h4>
-<p>The tool can be run from the command line as a dotnet tool:</p>
+<h4><a name="Running-The-Tool" class="anchor" href="#Running-The-Tool">Running The Tool</a></h4>
+<p>FSharpLint can be used in several ways:</p>
 <ul>
-<li><a href="Console-Application.html">Running the command line tool</a>.</li>
+<li><a href="ConsoleApplication.html">Running as dotnet tool from command line</a>.</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp">In VS Code using the Ionide-FSharp plugin</a>.</li>
+<li><a href="MSBuildTask.html">In other IDEs (Visual Studio, Rider) as an MSBuild Task</a>.</li>
 </ul>
-<p>The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the timebeing it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:</p>
-<ul>
-<li><a href="https://www.nuget.org/packages/FSharpLint.MSBuild">Deprecated MSBuild Task</a></li>
-<li><a href="https://www.nuget.org/packages/FSharpLint.Fake">Deprecated Fake Task</a></li>
-</ul>
-<h4>Rules</h4>
-<ul>
-<li><a href="Typography.html">Typography</a></li>
-</ul>
-<p>Rules are grouped based on what they address:</p>
-<ul>
-<li><a href="Formatting.html">Formatting</a> - code formatting (e.g. requiring tuple parentheses, spacing between class members, consistent pattern match expression indentation)</li>
-<li><a href="Conventions.html">Conventions</a> - code conventions (e.g. naming rules, function can be replaced with composition, max lines in function)</li>
-<li><a href="Typography.html">Typography</a> - (e.g. indentation, no tab characters, max lines in file)</li>
-</ul>
-<h4>Configuration Files</h4>
+<h4><a name="Rules" class="anchor" href="#Rules">Rules</a></h4>
+<p>See a full list of the available rules <a href="Rules.html">here</a>. Each rule has its own page with more information.</p>
+<h4><a name="Suppressing-rules-in-code" class="anchor" href="#Suppressing-rules-in-code">Suppressing rules in code</a></h4>
+<p>Rules can be disabled within the code using structured comments. See the <a href="Suppression.html">Suppressing Warnings</a> page for more information.</p>
+<h4><a name="Configuration-Files" class="anchor" href="#Configuration-Files">Configuration Files</a></h4>
 <p>Configuration of the tool is done using JSON. Configuration files must be named: <code>fsharplint.json</code>. A single JSON file containing the default configuration for all rules is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json">included inside of the software</a>.</p>
 <p>The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was <code>C:\Files\SomeProjectBeingLinted</code>, then <code>C:\</code> would first be checked for a config file - if a config file is found then it would override the default config, then <code>C:\Files</code> would be checked - if a config file was found and a config file was also previously found in <code>C:\</code> then the config in <code>C:\Files</code> would override the one in <code>C:\</code> and so on.</p>
 <p>The configuration rules are overridden by redefining any properties of an rule that you want to override, for example if you wanted to turn on the type prefixing rule which has the default configuration of:</p>
@@ -174,9 +166,9 @@ let x = List.fold (+) 0 [1;2;3]
 <span class="l">4: </span>
 <span class="l">5: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip"><code lang="json">{
-  "formatting": {
-      "typePrefixing": { "enabled": false }
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+  <span class="s">"formatting"</span>: {
+      <span class="s">"typePrefixing"</span>: { <span class="s">"enabled"</span>: <span class="k">false</span> }
   }
 }
 </code></pre></td></tr></table>
@@ -187,50 +179,20 @@ let x = List.fold (+) 0 [1;2;3]
 <span class="l">4: </span>
 <span class="l">5: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip"><code lang="json">{
-  "formatting": {
-      "typePrefixing": { "enabled": true }
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+  <span class="s">"formatting"</span>: {
+      <span class="s">"typePrefixing"</span>: { <span class="s">"enabled"</span>: <span class="k">true</span> }
   }
 }
 </code></pre></td></tr></table>
 <p>Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="i">dotnet</span> <span class="i">fsharplint</span> <span class="o">-</span><span class="i">convert</span> <span class="o">&lt;</span><span class="i">path</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="i">xml</span><span class="o">&gt;</span> (<span class="i">output</span><span class="o">-</span><span class="i">path</span><span class="o">&gt;</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="id">dotnet</span> <span class="id">fsharplint</span> <span class="o">-</span><span class="id">convert</span> <span class="o">&lt;</span><span class="id">path</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="id">xml</span><span class="pn">&gt;</span> <span class="pn">(</span><span class="id">output</span><span class="o">-</span><span class="id">path</span><span class="pn">&gt;</span>
 </code></pre></td>
 </tr>
 </table>
-<h4>Disabling rules within code</h4>
-<p>To disable a rule for a single section of code the <a href="http://msdn.microsoft.com/en-us/library/system.diagnostics.codeanalysis.suppressmessageattribute(v=vs.110).aspx">SuppressMessageAttribute</a> can be used. The attribute will not be included into the IL (as long as you don't have the <code>CODE_ANALYSIS</code> preprocessing symbol set).</p>
-<p>The attribute can be applied to let bindings, modules, types, and exceptions. Any lint warnings generated on or inside of what the attribute is applied to will be suppressed.</p>
-<h5>Category and CheckId</h5>
-<p>Only two properties in the attribute need to be set to suppress a rule, these are: <code>Category</code> and <code>CheckId</code>. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.</p>
-<p>Category is not used by FSharpLint, and can be set to anything.</p>
-<p>CheckId is the name of the rule to be suppressed, e.g. <code>InterfaceNamesMustBeginWithI</code>.</p>
-<h5>Example</h5>
-<p>The following code breaks the rule <code>NameConventions.InterfaceNamesMustBeginWithI</code>:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span class="i">Printable</span> <span class="o">=</span>
-    <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 40)" onmouseover="showTip(event, 'fs3', 40)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 41)" onmouseover="showTip(event, 'fs3', 41)" class="i">unit</span>
-</code></pre></td>
-</tr>
-</table>
-<p>It will result in the warning: <code>Consider changing `Printable` to be prefixed with `I`.</code></p>
-<p>We can disable this rule with: <code>[&lt;System.Diagnostics.CodeAnalysis.SuppressMessage("*", "InterfaceNamesMustBeginWithI")&gt;]</code></p>
-<p>The following code has the <code>SuppressMessage</code> attribute applied to it, this code will generate no warning:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp">[&lt;<span class="i">SuppressMessage</span>(<span class="s">&quot;*&quot;</span>, <span class="s">&quot;InterfaceNamesMustBeginWithI&quot;</span>)&gt;]
-<span class="k">type</span> <span class="i">Printable</span> <span class="o">=</span>
-    <span class="k">abstract</span> <span class="k">member</span> <span class="i">Print</span> <span class="o">:</span> <span onmouseout="hideTip(event, 'fs3', 42)" onmouseover="showTip(event, 'fs3', 42)" class="i">unit</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs3', 43)" onmouseover="showTip(event, 'fs3', 43)" class="i">unit</span>
-</code></pre></td>
-</tr>
-</table>
-<h4>Ignoring Files</h4>
+<h4><a name="Ignoring-Files" class="anchor" href="#Ignoring-Files">Ignoring Files</a></h4>
 <p>In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:</p>
 <p>{ "ignoreFiles": ["assemblyinfo.*"] }</p>
 <ul>
@@ -238,30 +200,28 @@ let x = List.fold (+) 0 [1;2;3]
 <li>If the path ends with a <code>/</code> then everything inside of a matching directory shall be excluded.</li>
 <li>If the path does not end with a <code>/</code> then all matching files are excluded.</li>
 </ul>
-<h4>Running Lint From An Application</h4>
+<h4><a name="Running-Lint-From-An-Application" class="anchor" href="#Running-Lint-From-An-Application">Running Lint From An Application</a></h4>
 <p>Install the <a href="https://www.nuget.org/packages/FSharpLint.Core/"><code>FSharp.Core</code> nuget package</a>.</p>
 <p>The namespace <code>FSharpLint.Application</code> contains a module named <code>Lint</code> which provides several functions
 to lint a project/source file/source string.</p>
 
-          <div class="tip" id="fs1">type ExampleInterface =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member print : unit -&gt; unit<br />&#160;&#160;end<br /><br />Full name: index.ExampleInterface</div>
-<div class="tip" id="fs2">abstract member ExampleInterface.print : unit -&gt; unit<br /><br />Full name: index.ExampleInterface.print</div>
-<div class="tip" id="fs3">type unit = Unit<br /><br />Full name: Microsoft.FSharp.Core.unit</div>
-<div class="tip" id="fs4">Multiple items<br />type EntryPointAttribute =<br />&#160;&#160;inherit Attribute<br />&#160;&#160;new : unit -&gt; EntryPointAttribute<br /><br />Full name: Microsoft.FSharp.Core.EntryPointAttribute<br /><br />--------------------<br />new : unit -&gt; EntryPointAttribute</div>
-<div class="tip" id="fs5">val main : argv:string [] -&gt; int<br /><br />Full name: index.main</div>
-<div class="tip" id="fs6">val argv : string []</div>
-<div class="tip" id="fs7">val x : int</div>
-<div class="tip" id="fs8">Multiple items<br />module List<br /><br />from Microsoft.FSharp.Collections<br /><br />--------------------<br />type List&lt;&#39;T&gt; =<br />&#160;&#160;| ( [] )<br />&#160;&#160;| ( :: ) of Head: &#39;T * Tail: &#39;T list<br />&#160;&#160;interface IEnumerable<br />&#160;&#160;interface IEnumerable&lt;&#39;T&gt;<br />&#160;&#160;member GetSlice : startIndex:int option * endIndex:int option -&gt; &#39;T list<br />&#160;&#160;member Head : &#39;T<br />&#160;&#160;member IsEmpty : bool<br />&#160;&#160;member Item : index:int -&gt; &#39;T with get<br />&#160;&#160;member Length : int<br />&#160;&#160;member Tail : &#39;T list<br />&#160;&#160;static member Cons : head:&#39;T * tail:&#39;T list -&gt; &#39;T list<br />&#160;&#160;static member Empty : &#39;T list<br /><br />Full name: Microsoft.FSharp.Collections.List&lt;_&gt;</div>
-<div class="tip" id="fs9">val fold : folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; list:&#39;T list -&gt; &#39;State<br /><br />Full name: Microsoft.FSharp.Collections.List.fold</div>
-<div class="tip" id="fs10">val y : int</div>
-<div class="tip" id="fs11">val printfn : format:Printf.TextWriterFormat&lt;&#39;T&gt; -&gt; &#39;T<br /><br />Full name: Microsoft.FSharp.Core.ExtraTopLevelOperators.printfn</div>
-<div class="tip" id="fs12">type IExampleInterface =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Print : unit -&gt; unit<br />&#160;&#160;end<br /><br />Full name: index.IExampleInterface</div>
-<div class="tip" id="fs13">abstract member IExampleInterface.Print : unit -&gt; unit<br /><br />Full name: index.IExampleInterface.Print</div>
-<div class="tip" id="fs14">val sum : list:&#39;T list -&gt; &#39;T (requires member ( + ) and member get_Zero)<br /><br />Full name: Microsoft.FSharp.Collections.List.sum</div>
+          <div class="tip" id="fs1">type ExampleInterface =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member print : unit -&gt; unit<br />&#160;&#160;end</div>
+<div class="tip" id="fs2">type unit = Unit</div>
+<div class="tip" id="fs3">Multiple items<br />type EntryPointAttribute =<br />&#160;&#160;inherit Attribute<br />&#160;&#160;new : unit -&gt; EntryPointAttribute<br /><br />--------------------<br />new : unit -&gt; EntryPointAttribute</div>
+<div class="tip" id="fs4">val main : argv:string [] -&gt; int</div>
+<div class="tip" id="fs5">val argv : string []</div>
+<div class="tip" id="fs6">val x : int</div>
+<div class="tip" id="fs7">Multiple items<br />module List<br /><br />from Microsoft.FSharp.Collections<br /><br />--------------------<br />type List&lt;&#39;T&gt; =<br />&#160;&#160;| ( [] )<br />&#160;&#160;| ( :: ) of Head: &#39;T * Tail: &#39;T list<br />&#160;&#160;&#160;&#160;interface IReadOnlyList&lt;&#39;T&gt;<br />&#160;&#160;&#160;&#160;interface IReadOnlyCollection&lt;&#39;T&gt;<br />&#160;&#160;&#160;&#160;interface IEnumerable<br />&#160;&#160;&#160;&#160;interface IEnumerable&lt;&#39;T&gt;<br />&#160;&#160;&#160;&#160;member GetSlice : startIndex:int option * endIndex:int option -&gt; &#39;T list<br />&#160;&#160;&#160;&#160;member Head : &#39;T<br />&#160;&#160;&#160;&#160;member IsEmpty : bool<br />&#160;&#160;&#160;&#160;member Item : index:int -&gt; &#39;T with get<br />&#160;&#160;&#160;&#160;member Length : int<br />&#160;&#160;&#160;&#160;member Tail : &#39;T list<br />&#160;&#160;&#160;&#160;...</div>
+<div class="tip" id="fs8">val fold : folder:(&#39;State -&gt; &#39;T -&gt; &#39;State) -&gt; state:&#39;State -&gt; list:&#39;T list -&gt; &#39;State</div>
+<div class="tip" id="fs9">val y : int</div>
+<div class="tip" id="fs10">val printfn : format:Printf.TextWriterFormat&lt;&#39;T&gt; -&gt; &#39;T</div>
+<div class="tip" id="fs11">type IExampleInterface =<br />&#160;&#160;interface<br />&#160;&#160;&#160;&#160;abstract member Print : unit -&gt; unit<br />&#160;&#160;end</div>
+<div class="tip" id="fs12">val sum : list:&#39;T list -&gt; &#39;T (requires member ( + ) and member get_Zero)</div>
 
         </div>
         <div class="span3">
           <a href="index.html">
-            <img src="content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
+            <img src="/FSharpLint/content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
           </a>
 
           <ul class="nav nav-list" id="menu">
@@ -282,14 +242,13 @@ to lint a project/source file/source string.</p>
 
             <li class="divider"></li>
 
-            <li><a href="Console-Application.html">Using the command line tool.</a></li>
+            <li><a href="Rules.html">Available Rules</a></li>
 
-            <li class="nav-header">Rules</li>
+            <li><a href="Suppression.html">Rule Suppression</a></li>
 
-            <li><a href="Hints.html">Hints</a></li>
-            <li><a href="Formatting.html">Formatting</a></li>
-            <li><a href="Conventions.html">Conventions</a></li>
-            <li><a href="Typography.html">Typography</a></li>
+            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+
+            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
           </ul>
         </div>
       </div>

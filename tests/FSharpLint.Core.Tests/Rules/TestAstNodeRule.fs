@@ -9,10 +9,10 @@ open FSharpLint.Framework.Rules
 [<AbstractClass>]
 type TestAstNodeRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
-    
+
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
         let checker = FSharpChecker.Create()
-        
+
         let parseResults =
             match fileName with
             | Some fileName ->
@@ -24,17 +24,17 @@ type TestAstNodeRuleBase (rule:Rule) =
             match rule with
             | AstNodeRule rule -> rule
             | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
-            
+
         match parseResults with
         | ParseFileResult.Success parseInfo ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
-            let checkResult = 
+            let checkResult =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) checkResult input syntaxArray skipArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
             rule.ruleConfig.cleanup()
 
-            suggestions |> Array.iter this.postSuggestion
+            suggestions |> Array.iter (fun suggestion -> this.postSuggestion suggestion)
         | _ ->
             failwithf "Failed to parse"

@@ -18,7 +18,7 @@ type TestConventionsTypeNames() =
         this.Parse """
 module Program
   type Cat = int"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -35,7 +35,7 @@ module Program
 module Program
   type MyClass2() as this =
     member this.PrintMessage() = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -48,22 +48,12 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
-    member this.ClassNameIsCamelCaseSuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "TypeNames")>]
-  type myClass2() as this =
-    member this.PrintMessage() = ()"""
-    
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.UnionNameIsPascalCase() =
         this.Parse """
 module Program
   type Union =
     | Some"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -80,7 +70,7 @@ module Program
         this.Parse """
 module Program
   type Record = { Dog: int }"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -90,13 +80,13 @@ module Program
   type record = { Dog: int }"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-        
+
     [<Test>]
     member this.DelegateNameIsPascalCase() =
         this.Parse """
 module Program
   type Delegate2 = delegate of int * int -> int"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -106,7 +96,7 @@ module program
   type delegate2 = delegate of int * int -> int"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-        
+
     [<Test>]
     member this.StructNameIsPascalCase() =
         this.Parse """
@@ -117,7 +107,7 @@ module Program
       val Y: float
       new(x: float, y: float) = { X = x; Y = y }
     end"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -132,7 +122,7 @@ module program
     end"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-       
+
     [<Test>]
     member this.TypeExtensionTypeIsCamelCase() =
         this.Parse """
@@ -156,9 +146,9 @@ type MyClass() =
 
 type MyClass with
     member this.Goat() = 200"""
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
         this.Parse ("""
@@ -168,9 +158,9 @@ type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
 let Dog = 6""")
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.``Upper case international characters recognised by PascalCase rule``() =
         this.Parse """
@@ -178,51 +168,51 @@ module Program
 
 type Ścieżka = Ścieżka of string
         """
-        
+
         this.AssertNoWarnings()
-       
-       
+
+
     [<Test>]
-    member this.``Quick fix for underscores with config of `None` when will remove prefixing underscores.``() = 
+    member this.``Quick fix for underscores with config of `None` when will remove prefixing underscores.``() =
         let source = """
 module Program
 
 type _Cat = | Foo
 """
- 
+
         let expected = """
 module Program
 
 type Cat = | Foo
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        
+
     [<Test>]
-    member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() = 
+    member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() =
         let source = """
 module Program
 
 type cat = | Foo
 """
- 
+
         let expected = """
 module Program
 
 type Cat = | Foo
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        
+
     [<Test>]
     member this.EnumNameIsPascalCase() =
         this.Parse """
 module Program
   type MyEnum =
     | EnumCase = 1"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -233,4 +223,4 @@ module Program
     | EnumCase = 1"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
-       
+

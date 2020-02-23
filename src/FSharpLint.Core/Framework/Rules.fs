@@ -13,27 +13,27 @@ type AstNodeRuleParams =
       nodeIndex : int
       syntaxArray : AbstractSyntaxArray.Node []
       skipArray : Skip []
-      getParents : int -> AstNode list 
+      getParents : int -> AstNode list
+      filePath : string
       fileContent : string
       checkInfo : FSharpCheckFileResults option }
-    
+
 type LineRuleParams =
     { line : string
       lineNumber : int
-      suppressions : (Ast.SuppressedMessage * range) []
       isLastLine : bool
+      filePath : string
       fileContent : string }
 
 type RuleMetadata<'config> =
   { name : string
     identifier : string
-    ruleConfig : 'config
-  }
+    ruleConfig : 'config }
 
 type AstNodeRuleConfig =
-  { runner : AstNodeRuleParams -> LintSuggestion []
+  { runner : AstNodeRuleParams -> WarningDetails []
     cleanup : unit -> unit }
-  
+
 type NamingCase =
     | PascalCase = 0
     | CamelCase = 1
@@ -48,15 +48,15 @@ type NamingConfig =
       underscores : NamingUnderscores option
       prefix : string option
       suffix : string option }
-    
+
 type NamingRuleConfig =
     { config : NamingConfig
       getIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
-    
-type LineRuleConfig = { runner : LineRuleParams -> LintSuggestion [] }
 
-type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> LintSuggestion [] }
-  
+type LineRuleConfig = { runner : LineRuleParams -> WarningDetails [] }
+
+type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> WarningDetails [] }
+
 type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
 type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
 
@@ -65,3 +65,24 @@ type Rule =
   | LineRule of RuleMetadata<LineRuleConfig>
   | IndentationRule of RuleMetadata<IndentationRuleConfig>
   | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
+
+let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileContents:string) (details:WarningDetails) =
+    {
+        LintWarning.RuleIdentifier = identifier
+        FilePath = filePath
+        RuleName = ruleName
+        ErrorText = fileContents.Split('\n').[details.Range.StartLine - 1].TrimEnd('\r')
+        Details = details
+    }
+
+let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
+    rule.ruleConfig.runner config
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
+
+let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
+    rule.ruleConfig.runner context config
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
+
+let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
+    rule.ruleConfig.runner config
+    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)

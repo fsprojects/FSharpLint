@@ -4,7 +4,7 @@ FSharpLint is a lint tool for F#. It can be run as a dotnet tool, and also integ
 
 > The term [lint] is now applied generically to tools that flag suspicious usage in software written in any computer language - [_Wikipedia_](http://en.wikipedia.org/wiki/Lint_(software))
 
-Using a `.fsproj` (F# project) file the tool will analyse all of the F# implementation files in a project looking for code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.
+Using a `.fsproj` (F# project) or `.sln` (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.
 
 #### Example Usage of the Tool
 
@@ -76,24 +76,19 @@ On windows run `build.cmd` and on unix based systems run `build.sh`.
 
 #### Running The Tool
 
-The tool can be run from the command line as a dotnet tool:
+FSharpLint can be used in several ways:
 
-* [Running the command line tool](Console-Application.html).
-
-The tool also used to have MSBuild and Fake tasks to run as part of a build. The MSBuild task was taking a large amount of effort to maintain with various dependency issues (i.e. an MSBuild task run under VS will first resolve assemblies via VS's app domain, and on top of this FSharp.Core seems to get shared between app domains), as a result for the timebeing it has been deprecated. It would be worth bringing these back but we should look at having them trigger the dotnet tool out of process rather than using the library. For reference the deprecated packages are:
-
-* [Deprecated MSBuild Task](https://www.nuget.org/packages/FSharpLint.MSBuild)
-* [Deprecated Fake Task](https://www.nuget.org/packages/FSharpLint.Fake)
+* [Running as dotnet tool from command line](ConsoleApplication.html).
+* [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
+* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](MSBuildTask.html).
 
 #### Rules
 
-* [Typography](Typography.html)
+See a full list of the available rules [here](Rules.html). Each rule has its own page with more information.
 
-Rules are grouped based on what they address:
+#### Suppressing rules in code
 
-* [Formatting](Formatting.html) - code formatting (e.g. requiring tuple parentheses, spacing between class members, consistent pattern match expression indentation)
-* [Conventions](Conventions.html) - code conventions (e.g. naming rules, function can be replaced with composition, max lines in function)
-* [Typography](Typography.html) - (e.g. indentation, no tab characters, max lines in file)
+Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](Suppression.html) page for more information.
 
 #### Configuration Files
 
@@ -103,7 +98,7 @@ The configuration files are loaded in a specific order, files loaded after anoth
 
 The configuration rules are overridden by redefining any properties of an rule that you want to override, for example if you wanted to turn on the type prefixing rule which has the default configuration of:
 
-	[lang=json]
+	[lang=javascript]
     {
       "formatting": {
           "typePrefixing": { "enabled": false }
@@ -112,7 +107,7 @@ The configuration rules are overridden by redefining any properties of an rule t
 
 To override to turn off you'd set enabled to true in your own configuration file as follows:
 
-	[lang=json]
+	[lang=javascript]
     {
       "formatting": {
           "typePrefixing": { "enabled": true }
@@ -122,37 +117,6 @@ To override to turn off you'd set enabled to true in your own configuration file
 Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:
 
     dotnet fsharplint -convert <path-to-xml> (output-path>
-
-#### Disabling rules within code
-
-To disable a rule for a single section of code the [SuppressMessageAttribute](http://msdn.microsoft.com/en-us/library/system.diagnostics.codeanalysis.suppressmessageattribute(v=vs.110).aspx) can be used. The attribute will not be included into the IL (as long as you don't have the `CODE_ANALYSIS` preprocessing symbol set).
-
-The attribute can be applied to let bindings, modules, types, and exceptions. Any lint warnings generated on or inside of what the attribute is applied to will be suppressed.
-
-##### Category and CheckId
-
-Only two properties in the attribute need to be set to suppress a rule, these are: `Category` and `CheckId`. The attribute has a constructor which takes these two as the arguments, and they can also be set through property initialisation in the default constructor.
-
-Category is not used by FSharpLint, and can be set to anything.
-
-CheckId is the name of the rule to be suppressed, e.g. `InterfaceNamesMustBeginWithI`.
-
-##### Example
-
-The following code breaks the rule `NameConventions.InterfaceNamesMustBeginWithI`:
-
-    type Printable =
-        abstract member Print : unit -> unit
-
-It will result in the warning: ```Consider changing `Printable` to be prefixed with `I`.```
-
-We can disable this rule with: `[<System.Diagnostics.CodeAnalysis.SuppressMessage("*", "InterfaceNamesMustBeginWithI")>]`
-
-The following code has the `SuppressMessage` attribute applied to it, this code will generate no warning:
-
-    [<SuppressMessage("*", "InterfaceNamesMustBeginWithI")>]
-    type Printable =
-        abstract member Print : unit -> unit
 
 #### Ignoring Files
 

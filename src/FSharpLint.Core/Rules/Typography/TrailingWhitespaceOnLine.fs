@@ -12,12 +12,12 @@ type Config =
       oneSpaceAllowedAfterOperator : bool
       ignoreBlankLines : bool }
 
-let private isSymbol character = 
-    let symbols = 
+let private isSymbol character =
+    let symbols =
         [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
           '#';'^';'!';'?';'/';'.';':';',';'(';')';'[';']';'{';'}' ]
 
-    symbols |> List.exists ((=) character) 
+    symbols |> List.exists ((=) character)
 
 let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
     match config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator with
@@ -27,10 +27,10 @@ let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
         let trimmedStr = str.TrimEnd()
 
         trimmedStr.Length = str.Length ||
-            (str.Length - trimmedStr.Length = 1 && 
+            (str.Length - trimmedStr.Length = 1 &&
                 trimmedStr.Length > 0 &&
                 isSymbol trimmedStr.[trimmedStr.Length - 1])
-    | _ -> 
+    | _ ->
         str.TrimEnd().Length = str.Length
 
 let private lengthOfWhitespaceOnEnd (str:string) = str.Length - str.TrimEnd().Length
@@ -39,7 +39,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     let line = args.line
     let lineNumber = args.lineNumber
     let ignoringBlankLinesAndIsBlankLine = config.ignoreBlankLines && System.String.IsNullOrWhiteSpace(line)
-        
+
     let stringEndsWithWhitespace =
         not ignoringBlankLinesAndIsBlankLine &&
         not <| doesStringNotEndWithWhitespace config line
@@ -47,14 +47,13 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     if stringEndsWithWhitespace then
         let whitespaceLength = lengthOfWhitespaceOnEnd line
         let range = mkRange "" (mkPos lineNumber (line.Length - whitespaceLength)) (mkPos lineNumber line.Length)
-        let isSuppressed = AbstractSyntaxArray.isRuleSuppressedByRange args.suppressions "TrailingWhitespaceOnLine" range
-        { Range = range 
+        { Range = range
           Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
     else
         Array.empty
-            
+
 let rule config =
     { name = "TrailingWhitespaceOnLine"
       identifier = Identifiers.TrailingWhitespaceOnLine

@@ -18,7 +18,7 @@ type TestConventionsModuleNames() =
         this.Parse """
 module Program
   let main = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -28,12 +28,3 @@ module program
   let main = ()"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 7))
-
-    [<Test>]
-    member this.ModuleNameIsCamelCaseSuppressed() =
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ModuleNames")>]
-module program
-  let main = ()"""
-
-        this.AssertNoWarnings()

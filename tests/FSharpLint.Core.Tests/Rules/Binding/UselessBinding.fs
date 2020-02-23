@@ -8,7 +8,7 @@ type TestBindingUselessBinding() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UselessBinding.rule)
 
     [<Test>]
-    member this.UselessBinding() = 
+    member this.UselessBinding() =
         this.Parse("""
 module Program
 
@@ -18,7 +18,7 @@ let a = a""")
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
-    member this.NotUselessBindingAsShadowingMutableWithImmutable() = 
+    member this.NotUselessBindingAsShadowingMutableWithImmutable() =
         this.Parse """
 module Program
 
@@ -28,7 +28,7 @@ let a = a"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.NotUselessBindingAsShadowingImmutableWithMutable() = 
+    member this.NotUselessBindingAsShadowingImmutableWithMutable() =
         this.Parse """
 module Program
 
@@ -38,18 +38,7 @@ let mutable a = a"""
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.UselessBindingSuppressed() = 
-        this.Parse """
-module Program
-
-let a = 10
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("Binding", "UselessBinding")>]
-let a = a"""
-
-        Assert.IsFalse(this.ErrorsExist)
-
-    [<Test>]
-    member this.UselessBindingWithParens() = 
+    member this.UselessBindingWithParens() =
         this.Parse("""
 module Program
 
@@ -61,14 +50,13 @@ let ((a)) = ((a))""")
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/101
     /// (a use binding will dispose the value so is not useless)
     [<Test>]
-    member this.UseBindingWithSameNameDoesNotCauseUselessBindingError() = 
+    member this.UseBindingWithSameNameDoesNotCauseUselessBindingError() =
         this.Parse("""
 module Program
 
 type Cat() =
-    static member CreateList(reader:TextReader) = 
+    static member CreateList(reader:TextReader) =
         use reader = reader
         reader.ReadToEnd()""")
-        
+
         Assert.IsFalse(this.ErrorsExist)
- 

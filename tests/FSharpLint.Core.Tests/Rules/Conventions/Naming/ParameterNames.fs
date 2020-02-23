@@ -14,20 +14,11 @@ type TestConventionsParameterNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ParameterNames.rule config)
 
     [<Test>]
-    member this.FunctionParameterIsPascalCaseSuppressed() =
-        this.Parse """
-module Program
-  [<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "NonPublicValuesNames")>]
-  let main Dog = ()"""
-  
-        this.AssertNoWarnings()
-
-    [<Test>]
     member this.FunctionParameterIsCamelCase() =
         this.Parse """
 module Program
   let main dog = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -45,16 +36,16 @@ module Program
 module Program
   type MyClass2(cats) as this =
     member this.PrintMessage() = ()"""
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.CompilerGeneratedArgumentName() =
         this.Parse """
 module Program
 (fun _ -> ())
 """
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -71,37 +62,37 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU""")
 
         this.AssertNoWarnings()
-        
+
     [<Test>]
-    member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() = 
+    member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() =
         let source = """
 module Program
 
 let __foo_bar = 0
 """
- 
+
         let expected = """
 module Program
 
 let __foobar = 0
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        
+
     [<Test>]
-    member this.``Quick fix for camel case takes into account underscore prefixes.``() = 
+    member this.``Quick fix for camel case takes into account underscore prefixes.``() =
         let source = """
 module Program
 
 let foo _X = 0
 """
- 
+
         let expected = """
 module Program
 
 let foo _x = 0
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)

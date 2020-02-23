@@ -6,9 +6,9 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestConventionsFailwithWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithWithSingleArgument.rule)
-    
+
     [<Test>]
-    member this.FailwithWithCorrectNumberOfArguments() = 
+    member this.FailwithWithCorrectNumberOfArguments() =
         this.Parse """
 module Program
 
@@ -17,7 +17,7 @@ failwith "" """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.FailwithWithExtraArgument() = 
+    member this.FailwithWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -26,17 +26,7 @@ failwith "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.FailwithWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "FailwithWithSingleArgument")>]
-module Program
-
-failwith "" "" """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
-    [<Test>]
-    member this.FailwithWithMultipleExtraArguments() = 
+    member this.FailwithWithMultipleExtraArguments() =
         this.Parse """
 module Program
 
@@ -45,7 +35,7 @@ failwith "" "" "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.FailwithWithExtraArgumentWithRightPipe() = 
+    member this.FailwithWithExtraArgumentWithRightPipe() =
         this.Parse """
 module Program
 
@@ -55,10 +45,10 @@ module Program
 
 [<TestFixture>]
 type TestConventionsRaiseWithSingleArg() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RaiseWithSingleArgument.rule)   
-    
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RaiseWithSingleArgument.rule)
+
     [<Test>]
-    member this.RaiseWithCorrectArguments() = 
+    member this.RaiseWithCorrectArguments() =
         this.Parse """
 module Program
 
@@ -67,7 +57,7 @@ raise (System.ArgumentException("Divisor cannot be zero!")) """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.RaiseWithExtraArgument() = 
+    member this.RaiseWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -75,22 +65,12 @@ raise (System.ArgumentException("Divisor cannot be zero!")) "" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
-    [<Test>]
-    member this.RaiseWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "RaiseWithSingleArgument")>]
-module Program
-
-raise (System.ArgumentException("Divisor cannot be zero!")) "" """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
 [<TestFixture>]
 type TestConventionsFailwithfWithArugmentMatchingFormatString() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithfWithArgumentsMatchingFormatString.rule)   
-    
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithfWithArgumentsMatchingFormatString.rule)
+
     [<Test>]
-    member this.FailwithfWithCorrectNumberOfArguments() = 
+    member this.FailwithfWithCorrectNumberOfArguments() =
         this.Parse """
 module Program
 
@@ -99,7 +79,7 @@ failwithf "%d %s" 4 "dog" """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.FailwithfWithExtraArgument() = 
+    member this.FailwithfWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -108,17 +88,7 @@ failwithf "%d %s" 4 "dog" 5 """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.FailwithfWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "FailwithfWithArgumentsMatchingFormatString")>]
-module Program
-
-failwithf "%d %s" 4 "dog" 5 """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
-    [<Test>]
-    member this.FailwithfWithEscapedFormatAndWithExtraArgument() = 
+    member this.FailwithfWithEscapedFormatAndWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -128,10 +98,10 @@ failwithf "%d %% %s" 4 "dog" 5 """
 
 [<TestFixture>]
 type TestConventionsNullArgWithSingleArg() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NullArgWithSingleArgument.rule)   
-    
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NullArgWithSingleArgument.rule)
+
     [<Test>]
-    member this.NullArgWithCorrectNumberOfArguments() = 
+    member this.NullArgWithCorrectNumberOfArguments() =
         this.Parse """
 module Program
 
@@ -140,7 +110,7 @@ nullArg "" """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.NullArgWithExtraArgument() = 
+    member this.NullArgWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -148,22 +118,12 @@ nullArg "" "" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
-    [<Test>]
-    member this.NullArgWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "NullArgWithSingleArgument")>]
-module Program
-
-nullArg "" "" """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
 [<TestFixture>]
 type TestConventionsInvalidOpWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidOpWithSingleArgument.rule)
-    
+
     [<Test>]
-    member this.InvalidOpWithCorrectNumberOfArguments() = 
+    member this.InvalidOpWithCorrectNumberOfArguments() =
         this.Parse """
 module Program
 
@@ -172,7 +132,7 @@ invalidOp "" """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.InvalidOpWithExtraArgument() = 
+    member this.InvalidOpWithExtraArgument() =
         this.Parse """
 module Program
 
@@ -180,22 +140,12 @@ invalidOp "" "" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
-    [<Test>]
-    member this.InvalidOpWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "InvalidOpWithSingleArgument")>]
-module Program
-
-invalidOp "" "" """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))
-
 [<TestFixture>]
 type TestConventionsInvalidArgWithTwoArguments() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidArgWithTwoArguments.rule)
-    
+
     [<Test>]
-    member this.InvalidArgWithCorrectNumberOfArguments() = 
+    member this.InvalidArgWithCorrectNumberOfArguments() =
         this.Parse """
 module Program
 
@@ -204,20 +154,10 @@ invalidArg "month" "Expected value to be between 1 and 12" """
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
     [<Test>]
-    member this.InvalidArgWithExtraArgument() = 
+    member this.InvalidArgWithExtraArgument() =
         this.Parse """
 module Program
 
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
-
-    [<Test>]
-    member this.InvalidArgWithExtraArgumentSuppressed() = 
-        this.Parse """
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("RaiseWithTooManyArguments", "InvalidArgWithTwoArguments")>]
-module Program
-
-invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
-
-        Assert.IsFalse(this.ErrorExistsOnLine(5))   

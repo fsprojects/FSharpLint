@@ -20,7 +20,7 @@ module program
 exception MyError of string
 """
 
-        let error = "FL0037: Consider changing `MyError` to PascalCase."
+        let error = "Consider changing `MyError` to PascalCase."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -31,7 +31,7 @@ module program
 exception myError of string
 """
 
-        let error = "FL0037: Consider changing `myError` to PascalCase."
+        let error = "Consider changing `myError` to PascalCase."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -42,7 +42,7 @@ module program
 exception MyErrorException of string
 """
 
-        let error = "FL0037: Consider changing `MyErrorException` to be suffixed with 'Exception'."
+        let error = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
 
         Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
 
@@ -53,19 +53,9 @@ module Program
 exception MyError of string
 """
 
-        let error = "FL0037: Consider changing `MyError` to be suffixed with `Exception`."
+        let error = "Consider changing `MyError` to be suffixed with `Exception`."
 
         Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
-
-    [<Test>]
-    member this.ExceptionDoesNotEndWithExceptionSuppressed() =
-        this.Parse """
-module Program
-[<System.Diagnostics.CodeAnalysis.SuppressMessage("NameConventions", "ExceptionNames")>]
-exception MyError of string
-"""
-
-        this.AssertNoWarnings()
 
     [<Test>]
     member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
@@ -73,11 +63,11 @@ exception MyError of string
 module Program
 exception Foo of string
 """
- 
+
         let expected = """
 module Program
 exception FooException of string
 """
- 
+
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
