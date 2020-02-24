@@ -1,7 +1,6 @@
 ﻿module FSharpLint.Console.Program
 
 open Argu
-open System.IO
 open System
 open FSharpLint.Framework
 open FSharpLint.Application
@@ -20,25 +19,13 @@ type private FileType =
 
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
-    | [<CliPrefix(CliPrefix.None)>] Convert of ParseResults<ConvertArgs>
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
             | Format _ -> "Output format of the linter."
-            | Convert _ -> "Converts an old-format XML config into a new format JSON config."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
-
-and private ConvertArgs =
-    | Old_Config of oldConfig:string
-    | [<MainCommand; Last>] New_Config of newConfig:string
-with
-    interface IArgParserTemplate with
-        member this.Usage =
-            match this with
-            | Old_Config _ -> "Path to the XML-style config to convert."
-            | New_Config _ -> "Path to the file where the JSON-style config will be written."
 
 and private LintArgs =
     | [<MainCommand; Mandatory>] Target of target:string
@@ -64,15 +51,6 @@ let private parserProgress (output:Output.IOutput) = function
             "Exception Stack Trace:" + Environment.NewLine +
             parseException.StackTrace + Environment.NewLine
         |> output.WriteError
-
-let private convertConfig (xmlFile:string) (outputFile:string) =
-    try
-        let inputFile = File.ReadAllText xmlFile
-        let jsonConfig = XmlConfiguration.convertToJson inputFile |> Configuration.serializeConfig
-        File.WriteAllText(outputFile, jsonConfig)
-        Choice1Of2 ()
-    with
-        | ex -> Choice2Of2 ex.Message
 
 /// Infers the file type of the target based on its file extension.
 let private inferFileType (target:string) =
@@ -136,18 +114,6 @@ let private start (arguments:ParseResults<ToolArgs>) =
             let target = if fileType = FileType.Source then "source" else target
             sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target e.Message e.StackTrace
             |> handleError
-    | Convert convertArgs ->
-        let handleConversionResult xmlConfig outputFile = function
-            | Choice1Of2 _ ->
-                sprintf "Successfully converted config at '%s', saved to '%s'" xmlConfig outputFile
-                |> output.WriteInfo
-            | Choice2Of2 err ->
-                sprintf "Failed to convert config at '%s', error: %s" xmlConfig err
-                |> handleError
-
-        let oldConfig = convertArgs.GetResult Old_Config
-        let newConfig = convertArgs.GetResult New_Config
-        convertConfig oldConfig newConfig |> handleConversionResult oldConfig newConfig
     | _ -> ()
 
     exitCode

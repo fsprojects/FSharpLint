@@ -202,23 +202,3 @@ type TestConfiguration() =
 """
 
         Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
-
-    [<Test>]
-    member this.``Config default XML config to JSON config``() =
-        let xmlConfig =
-            Path.Combine(TestContext.CurrentContext.TestDirectory, "OldConfiguration.xml")
-            |> File.ReadAllText
-
-        let convertedJsonConfig = XmlConfiguration.convertToJson xmlConfig
-
-        let expectedConfig =
-            { defaultConfiguration with hints = defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
-
-        Assert.AreEqual(expectedConfig, convertedJsonConfig)
-
-    [<Test>]
-    member this.``Try load non-existent XML config``() =
-        let nonExistentConfigFile = Path.Combine(TestContext.CurrentContext.TestDirectory, "ProjectNoConfig.fsproj")
-
-        let loadedConfig = XmlConfiguration.tryLoadConfigurationForProject nonExistentConfigFile
-        Assert.AreEqual(None, loadedConfig)
