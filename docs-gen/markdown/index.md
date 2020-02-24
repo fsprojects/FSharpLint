@@ -94,29 +94,7 @@ Rules can be disabled within the code using structured comments. See the [Suppre
 
 Configuration of the tool is done using JSON. Configuration files must be named: `fsharplint.json`. A single JSON file containing the default configuration for all rules is [included inside of the software](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json).
 
-The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was `C:\Files\SomeProjectBeingLinted`, then `C:\` would first be checked for a config file - if a config file is found then it would override the default config, then `C:\Files` would be checked - if a config file was found and a config file was also previously found in `C:\` then the config in `C:\Files` would override the one in `C:\` and so on.
-
-The configuration rules are overridden by redefining any properties of an rule that you want to override, for example if you wanted to turn on the type prefixing rule which has the default configuration of:
-
-	[lang=javascript]
-    {
-      "formatting": {
-          "typePrefixing": { "enabled": false }
-      }
-    }
-
-To override to turn off you'd set enabled to true in your own configuration file as follows:
-
-	[lang=javascript]
-    {
-      "formatting": {
-          "typePrefixing": { "enabled": true }
-      }
-    }
-
-Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:
-
-    dotnet fsharplint -convert <path-to-xml> (output-path>
+By default, FSharpLint will try to load the configuration from the file `./fsharplint.json`. You can override this to point to a different file, for example by using the `--lint-config` flag in the dotnet tool.
 
 #### Ignoring Files
 
