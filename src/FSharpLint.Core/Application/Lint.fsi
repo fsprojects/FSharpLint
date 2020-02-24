@@ -110,6 +110,9 @@ module Lint =
         /// Failed to load a FSharpLint configuration file.
         | FailedToLoadConfig of string
 
+        /// The specified file for linting could not be found.
+        | FailedToLoadFile of string
+
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
         | RunTimeConfigError
 

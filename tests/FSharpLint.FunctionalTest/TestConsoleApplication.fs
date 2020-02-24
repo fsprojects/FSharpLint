@@ -71,7 +71,7 @@ module Tests =
         [<Test>]
         member __.InvalidConfig() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
-            let arguments = sprintf "-f %s" projectFile
+            let arguments = sprintf "lint %s" projectFile
 
             File.WriteAllText(projectPath </> "fsharplint.json", "invalid config file contents")
 
@@ -84,7 +84,7 @@ module Tests =
         [<Test>]
         member __.UnableToFindProjectFile() =
             let projectFile = projectPath </> "iuniubi.fsproj"
-            let arguments = sprintf "-f %s" projectFile
+            let arguments = sprintf "lint %s" projectFile
 
             let output = dotnetFslint arguments
 
@@ -95,7 +95,7 @@ module Tests =
         [<Test>]
         member __.FunctionalTestConsoleApplication() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
-            let arguments = sprintf "-f %s" projectFile
+            let arguments = sprintf "lint %s" projectFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
@@ -110,7 +110,7 @@ module Tests =
         [<Test>]
         member __.FunctionalTestConsoleApplicationReleaseMode() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
-            let arguments = sprintf "-f %s -c Release" projectFile
+            let arguments = sprintf "lint %s -c Release" projectFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
@@ -125,7 +125,7 @@ module Tests =
         [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() =
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
-            let arguments = sprintf "-sol %s" solutionFile
+            let arguments = sprintf "lint %s" solutionFile
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
@@ -141,7 +141,7 @@ module Tests =
         member __.FunctionalTestConfigConversion() =
             let xmlFile = TestContext.CurrentContext.TestDirectory </> "OldConfiguration.xml"
             let outputFile = TestContext.CurrentContext.TestDirectory </> "convertedConfig.json"
-            let arguments = sprintf "-convert %s %s" xmlFile outputFile
+            let arguments = sprintf "convert --old-config %s %s" xmlFile outputFile
 
             let output = dotnetFslint arguments
 
