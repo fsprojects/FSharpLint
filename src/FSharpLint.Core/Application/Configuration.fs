@@ -377,22 +377,6 @@ let defaultConfiguration =
         reader.ReadToEnd()
         |> parseConfig
 
-/// Tries to parse the provided config text. If it cannot be parsed,
-/// returns the default configuration.
-let parseConfigOrDefault (configText : string) =
-    try
-        parseConfig configText
-    with
-    | ex -> defaultConfiguration
-
-/// Tries to parse the config at the provided path. If it cannot be loaded or parsed,
-/// returns the default configuration.
-let loadConfigOrDefault (configPath : string) =
-    try
-        loadConfig configPath
-    with
-    | ex -> defaultConfiguration
-
 let serializeConfig (config : Configuration) =
     JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
 

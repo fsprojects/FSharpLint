@@ -7,18 +7,6 @@ module ConfigurationManagement =
 
     open FSharpLint.Framework.Configuration
 
-    type ConfigFailure =
-        /// Failed to load a FSharpLint configuration file.
-        | FailedToLoadConfig of string
-
-        /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
-        | RunTimeConfigError
-
-    [<RequireQualifiedAccess; NoComparison>]
-    type ConfigurationResult =
-        | Success of Configuration
-        | Failure of ConfigFailure
-
     /// Load a FSharpLint configuration file from the contents (string) of the file.
     val loadConfigurationFile : configurationFileText:string -> Configuration
 
@@ -106,7 +94,7 @@ module Lint =
         | FailedToLoadFile of string
 
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
-        | RunTimeConfigError
+        | RunTimeConfigError of string
 
         /// `FSharp.Compiler.Services` failed when trying to parse a file.
         | FailedToParseFile of ParseFile.ParseFileFailure

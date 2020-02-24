@@ -70,15 +70,16 @@ module Tests =
         [<Test>]
         member __.InvalidConfig() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
-            let arguments = sprintf "lint %s" projectFile
+            let lintConfigPath = projectPath </> "fsharplint.json"
+            let arguments = sprintf "lint --lint-config %s %s" lintConfigPath projectFile
 
-            File.WriteAllText(projectPath </> "fsharplint.json", "invalid config file contents")
+            File.WriteAllText(lintConfigPath, "invalid config file contents")
 
             let output = dotnetFslint arguments
 
             File.Delete(projectPath </> "fsharplint.json")
 
-            Assert.IsTrue(output.Contains("Failed to load config file"), sprintf "Output:\n%s" output)
+            Assert.IsTrue(output.Contains("Failed while reading from config at run time"), sprintf "Output:\n%s" output)
 
         [<Test>]
         member __.UnableToFindProjectFile() =
