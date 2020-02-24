@@ -135,26 +135,3 @@ module Tests =
             Assert.AreEqual(expectedErrors, errors,
                 "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
-
-        [<Test>]
-        member __.FunctionalTestConfigConversion() =
-            let xmlFile = TestContext.CurrentContext.TestDirectory </> "OldConfiguration.xml"
-            let outputFile = TestContext.CurrentContext.TestDirectory </> "convertedConfig.json"
-            let arguments = sprintf "convert --old-config %s %s" xmlFile outputFile
-
-            let output = dotnetFslint arguments
-
-            let expectedOutput = sprintf "Successfully converted config at '%s', saved to '%s'" xmlFile outputFile
-
-            // Check dotnet tool output.
-            Assert.AreEqual(expectedOutput.Trim(), output.Trim())
-
-            // Check converted config contents.
-            let convertedConfig =
-                File.ReadAllText outputFile
-                |>  Configuration.parseConfig
-
-            let expectedConfig =
-                { Configuration.defaultConfiguration with hints = Configuration.defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }
-
-            Assert.AreEqual(expectedConfig, convertedConfig)

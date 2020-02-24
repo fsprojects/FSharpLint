@@ -38,9 +38,9 @@ type TestHintMatcherBase () =
         let parseResults =
             match fileName with
             | Some fileName ->
-                ParseFile.parseSourceFile fileName input () checker
+                ParseFile.parseSourceFile fileName input checker
             | None ->
-                ParseFile.parseSource input () checker
+                ParseFile.parseSource input checker
 
         let rule =
             match HintMatcher.rule { hintTrie = hintTrie }with

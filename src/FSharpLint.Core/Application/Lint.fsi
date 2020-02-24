@@ -22,25 +22,12 @@ module ConfigurationManagement =
     /// Load a FSharpLint configuration file from the contents (string) of the file.
     val loadConfigurationFile : configurationFileText:string -> Configuration
 
-    /// Overrides the default FSharpLint configuration.
-    /// The default FSharpLint configuration contains all required elements, so
-    /// by overriding it any missing required elements will be added to the returned configuration.
-    /// If you're loading your own configuration you should make sure that it overrides the default
-    /// configuration/overrides a configuration that has overriden the default configuration.
-    val overrideDefaultConfiguration : configurationToOverrideDefault:Configuration -> Configuration
-
-    /// Loads the FSharpLint configuration for a project given the path to the `.fsproj` file.
-    /// It picks up configurations in any directory between the root directory and the project's directory.
-    /// The closer they are to the project directory the higher precedence they have.
-    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
-    /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
-    val loadConfigurationForProject : projectFilePath:string -> ConfigurationResult
-
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
 module Lint =
 
     open System.Threading
+    open FSharpLint.Core
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
@@ -62,15 +49,21 @@ module Lint =
         /// Path of the F# file the progress information is for.
         member FilePath : unit -> string
 
+    type ConfigurationParam =
+        | Configuration of Configuration
+        | FromFile of configPath:string
+        | Default
+
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
     type OptionalLintParameters =
         { /// Cancels a lint in progress.
           CancellationToken: CancellationToken option
 
-          /// Provide your own FSharpLint configuration to the linter.
-          /// If not provided the default configuration will be used.
-          Configuration: Configuration.Configuration option
+          /// Lint configuration to use.
+          /// Can either specify a full configuration object, or a path to a file to load the configuration from.
+          /// You can also explicitly specify the default configuration.
+          Configuration: ConfigurationParam
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (Suggestion.LintWarning -> unit) option

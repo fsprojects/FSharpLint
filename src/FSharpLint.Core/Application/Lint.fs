@@ -1,15 +1,24 @@
 ﻿namespace FSharpLint.Application
 
+open System
+open System.Collections.Concurrent
+open System.Collections.Generic
+open System.IO
+open System.Runtime.InteropServices
+open System.Threading
+open FSharp.Compiler
+open FSharp.Compiler.SourceCodeServices
 open Dotnet.ProjInfo.Inspect.MSBuild
+open FSharpLint.Core
 open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
+open FSharpLint.Framework.Rules
+open FSharpLint.Rules
 
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
-/// the default configuration and overriding configurations.
+/// the default configuration.
 module ConfigurationManagement =
-
-    open System.IO
 
     /// Reason for the linter failing.
     type ConfigFailure =
@@ -24,82 +33,15 @@ module ConfigurationManagement =
         | Success of Configuration
         | Failure of ConfigFailure
 
-    /// Load a FSharpLint configuration file from the contents (string) of the file.
-    let loadConfigurationFile configurationFileText =
-        parseConfig configurationFileText
-
-    /// Overrides the default FSharpLint configuration.
-    /// The default FSharpLint configuration contains all required elements, so
-    /// by overriding it any missing required elements will be added to the returned configuration.
-    /// If you're loading your own configuration you should make sure that it overrides the default
-    /// configuration/overrides a configuration that has overriden the default configuration.
-    let overrideDefaultConfiguration configurationToOverrideDefault =
-        mergeConfig defaultConfiguration configurationToOverrideDefault
-
-    /// Gets all the parent directories of a given path - includes the original path directory too.
-    let private getParentDirectories path =
-        let rec getParentDirectories parentDirectories (directoryInfo:DirectoryInfo) =
-            match directoryInfo with
-            | null -> parentDirectories
-            | _ -> getParentDirectories (directoryInfo::parentDirectories) directoryInfo.Parent
-
-        DirectoryInfo path |> getParentDirectories []
-
-    /// Overrides the default config with user defined config files.
-    /// The configs can be in any directory between the root directory and the projects directory.
-    /// The closer they are to the project directory the higher precedence they have.
-    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
-    /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
-    let private loadUserConfigFiles (projectFilePath: string) defaultConfig =
-        let projectFileDirectory = Path.GetDirectoryName projectFilePath
-        let subdirectories = getParentDirectories projectFileDirectory |> List.map (fun x -> x.FullName)
-
-        let rec loadAllConfigs (configToOveride:Configuration) = function
-            | path::paths ->
-                let filename = Path.Combine(path, SettingsFileName)
-
-                if File.Exists(filename) then
-                    try
-                        let newConfig =
-                            File.ReadAllText filename
-                            |> parseConfig
-                            |> (mergeConfig configToOveride)
-
-                        loadAllConfigs newConfig paths
-                    with
-                    | ConfigurationException(message) ->
-                        ConfigurationResult.Failure(FailedToLoadConfig (sprintf "Failed to load config file %s: %s" filename message))
-                else
-                    loadAllConfigs configToOveride paths
-            | [] ->
-                ConfigurationResult.Success(configToOveride)
-
-        loadAllConfigs defaultConfig subdirectories
-
-    /// Loads the FSharpLint configuration for a project given the path to the `.fsproj` file.
-    /// It picks up configurations in any directory between the root directory and the project's directory.
-    /// The closer they are to the project directory the higher precedence they have.
-    /// e.g. if the project directory is C:\User\Matt\Project then a config file found in
-    /// C:\User\ will be loaded before and overridden by a config file found in C:\User\Matt\.
-    let loadConfigurationForProject projectFilePath =
-        loadUserConfigFiles projectFilePath defaultConfiguration
+    /// Load a FSharpLint configuration file given its contents.
+    let loadConfigurationFile (configText:string) =
+        parseConfig configText
 
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]
 module Lint =
 
-    open System
-    open System.Collections.Concurrent
-    open System.Collections.Generic
-    open System.IO
-    open System.Runtime.InteropServices
-    open System.Threading
-    open FSharp.Compiler
-    open FSharp.Compiler.SourceCodeServices
-    open FSharpLint.Framework.Rules
-    open FSharpLint.Rules
-
-    type BuildFailure = | InvalidProjectFileMessage of string
+    type BuildFailure = InvalidProjectFileMessage of string
 
     /// Reason for the linter failing.
     [<NoComparison>]
@@ -128,7 +70,7 @@ module Lint =
         member this.Description
             with get() =
                 let getParseFailureReason = function
-                    | ParseFile.FailedToParseFile(failures) ->
+                    | ParseFile.FailedToParseFile failures ->
                         let getFailureReason (x:FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
                             sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
@@ -168,7 +110,7 @@ module Lint =
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
-
+    with
         /// Path of the F# file the progress information is for.
         member this.FilePath() =
             match this with
@@ -182,16 +124,6 @@ module Lint =
           ErrorReceived: Suggestion.LintWarning -> unit
           ReportLinterProgress: ProjectProgress -> unit
           Configuration: Configuration.Configuration }
-
-    module private Async =
-        let combine f x y = async {
-            let! x = x
-            let! y = y
-            return f x y }
-
-        let map f xAsync = async {
-            let! x = xAsync
-            return f x }
 
     type Context =
         { indentationRuleContext : Map<int,bool*int>
@@ -419,27 +351,16 @@ module Lint =
         | Result.Error r ->
             failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
 
-    let getProjectsFromSolution (solutionFilePath : string) =
-        Dotnet.ProjInfo.Inspect.getProjectInfos
-
     let configFailureToLintFailure = function
-        | ConfigurationManagement.FailedToLoadConfig(f) -> FailedToLoadConfig(f)
+        | ConfigurationManagement.FailedToLoadConfig f -> FailedToLoadConfig f
         | ConfigurationManagement.RunTimeConfigError -> RunTimeConfigError
 
-    let loadConfigurationFilesForProject projectFilePath =
-        try
-            match ConfigurationManagement.loadConfigurationForProject projectFilePath with
-            | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
-            | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
-        with
-        | ConfigurationException _ -> Failure(RunTimeConfigError)
-
     let getFailedFiles = function
-        | ParseFile.Failed(failure) -> Some(failure)
+        | ParseFile.Failed failure -> Some failure
         | _ -> None
 
     let getParsedFiles = function
-        | ParseFile.Success(file) -> Some(file)
+        | ParseFile.Success file -> Some file
         | _ -> None
 
     /// Result of running the linter.
@@ -457,43 +378,58 @@ module Lint =
             | Failure value -> failure <- value; true
             | _ -> false
 
+    type ConfigurationParam =
+        | Configuration of Configuration
+        | FromFile of configPath:string
+        | Default
+
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
-    type OptionalLintParameters =
-        { /// Cancels a lint in progress.
-          CancellationToken: CancellationToken option
-
-          /// Provide your own FSharpLint configuration to the linter.
-          /// If not provided the default configuration will be used.
-          Configuration: Configuration.Configuration option
-
-          /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (Suggestion.LintWarning -> unit) option
-
-          ReportLinterProgress: (ProjectProgress -> unit) option
-
-          ReleaseConfiguration : string option }
-
-        static member Default =
-            { CancellationToken = None; Configuration = None; ReceivedWarning = None; ReportLinterProgress = None; ReleaseConfiguration = None }
+    type OptionalLintParameters = {
+        /// Cancels a lint in progress.
+        CancellationToken: CancellationToken option
+        /// Lint configuration to use.
+        /// Can either specify a full configuration object, or a path to a file to load the configuration from.
+        /// You can also explicitly specify the default configuration.
+        Configuration: ConfigurationParam
+        /// This function will be called every time the linter finds a broken rule.
+        ReceivedWarning: (Suggestion.LintWarning -> unit) option
+        /// This function will be called any time the linter progress changes for a project.
+        ReportLinterProgress: (ProjectProgress -> unit) option
+        /// The configuration under which the linter will try to perform parsing.
+        ReleaseConfiguration : string option
+    } with
+        static member Default = {
+            OptionalLintParameters.CancellationToken = None
+            Configuration = Default
+            ReceivedWarning = None
+            ReportLinterProgress = None
+            ReleaseConfiguration = None
+        }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
     /// linter from parsing the file again.
     [<NoEquality; NoComparison>]
-    type ParsedFileInformation =
-        { /// File represented as an AST.
-          Ast: FSharp.Compiler.Ast.ParsedInput
+    type ParsedFileInformation = {
+        /// File represented as an AST.
+        Ast: FSharp.Compiler.Ast.ParsedInput
+        /// Contents of the file.
+        Source: string
+        /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+        TypeCheckResults: FSharpCheckFileResults option
+    }
 
-          /// Contents of the file.
-          Source: string
-
-          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharpCheckFileResults option }
+    /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
+    let private getConfig (configParam:ConfigurationParam) =
+        match configParam with
+        | Configuration config -> config
+        | FromFile filePath -> Configuration.loadConfigOrDefault filePath
+        | Default -> Configuration.defaultConfiguration
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    let lintProject optionalParams projectFilePath =
+    let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) =
         if IO.File.Exists projectFilePath then
             let projectFilePath = Path.GetFullPath projectFilePath
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
@@ -507,7 +443,8 @@ module Lint =
 
             let checker = FSharpChecker.Create()
 
-            let parseFilesInProject config files projectOptions =
+            let parseFilesInProject files projectOptions =
+                let config = getConfig optionalParams.Configuration
                 let lintInformation =
                     { Configuration = config
                       CancellationToken = optionalParams.CancellationToken
@@ -515,17 +452,16 @@ module Lint =
                       ReportLinterProgress = projectProgress }
 
                 let isIgnoredFile filePath =
-                    match config.ignoreFiles with
-                    | None
-                    | Some [||] -> false
-                    | Some ignoreFiles ->
+                    config.ignoreFiles
+                    |> Option.map (fun ignoreFiles ->
                         let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
-                        Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
+                        Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
+                    |> Option.defaultValue false
 
                 let parsedFiles =
                     files
                     |> List.filter (not << isIgnoredFile)
-                    |> List.map (fun file -> ParseFile.parseFile file config checker (Some(projectOptions)))
+                    |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
 
                 let failedFiles = parsedFiles |> List.choose getFailedFiles
 
@@ -534,36 +470,29 @@ module Lint =
                     |> List.choose getParsedFiles
                     |> List.iter (lint lintInformation)
 
-                    Success()
+                    Success ()
                 else
-                    Failure(FailedToParseFilesInProject(failedFiles))
-
-            let loadConfigAndParseFilesInProject files projectOptions =
-                let config =
-                    match optionalParams.Configuration with
-                    | Some(userSuppliedConfig) -> Success userSuppliedConfig
-                    | None -> loadConfigurationFilesForProject projectFilePath
-
-                match config with
-                | Success(config) -> parseFilesInProject config files projectOptions
-                | Failure(x) -> Failure(x)
+                    Failure (FailedToParseFilesInProject failedFiles)
 
             match getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath with
-            | Success(projectOptions) ->
+            | Success projectOptions ->
                 let compileFiles = projectOptions.SourceFiles |> Array.toList
-                match loadConfigAndParseFilesInProject compileFiles projectOptions with
-                | Success() -> lintWarnings |> Seq.toList |> LintResult.Success
-                | Failure(x) -> LintResult.Failure(x)
-            | Failure(x) -> LintResult.Failure(x)
+                match parseFilesInProject compileFiles projectOptions with
+                | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
+                | Failure x -> LintResult.Failure x
+            | Failure x -> LintResult.Failure x
         else
             FailedToLoadFile projectFilePath
             |> LintResult.Failure
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    let lintSolution optionalParams solutionFilePath =
+    let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) =
         if IO.File.Exists solutionFilePath then
             let solutionFilePath = Path.GetFullPath solutionFilePath
             let solutionFolder = Path.GetDirectoryName solutionFilePath
+
+            // Pre-load configuration so it isn't reloaded for every project.
+            let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration (getConfig optionalParams.Configuration) }
 
             let projectsInSolution =
                 File.ReadAllText(solutionFilePath)
@@ -601,9 +530,7 @@ module Lint =
             FailedToLoadFile solutionFilePath
             |> LintResult.Failure
 
-
-    /// Lints F# source code that has already been parsed using
-    /// `FSharp.Compiler.Services` in the calling application.
+    /// Lints F# source code that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource optionalParams parsedFileInfo =
         let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
@@ -612,13 +539,8 @@ module Lint =
 
             optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
-        let config =
-            match optionalParams.Configuration with
-            | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
-
         let lintInformation =
-            { Configuration = config
+            { Configuration = getConfig optionalParams.Configuration
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
               ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
@@ -635,14 +557,9 @@ module Lint =
 
     /// Lints F# source code.
     let lintSource optionalParams source =
-        let config =
-            match optionalParams.Configuration with
-            | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
-
         let checker = FSharpChecker.Create()
 
-        match ParseFile.parseSource source config checker with
+        match ParseFile.parseSource source checker with
         | ParseFile.Success(parseFileInformation) ->
             let parsedFileInfo =
                 { Source = parseFileInformation.Text
@@ -650,11 +567,10 @@ module Lint =
                   TypeCheckResults = parseFileInformation.TypeCheckResults }
 
             lintParsedSource optionalParams parsedFileInfo
-        | ParseFile.Failed(failure) -> LintResult.Failure(FailedToParseFile(failure))
+        | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
 
-    /// Lints an F# file that has already been parsed using
-    /// `FSharp.Compiler.Services` in the calling application.
-    let lintParsedFile optionalParams parsedFileInfo filepath =
+    /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
+    let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
         let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
         let warningReceived (warning:Suggestion.LintWarning) =
@@ -662,13 +578,8 @@ module Lint =
 
             optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
-        let config =
-            match optionalParams.Configuration with
-            | Some(userSuppliedConfig) -> userSuppliedConfig
-            | None -> Configuration.defaultConfiguration
-
         let lintInformation =
-            { Configuration = config
+            { Configuration = getConfig optionalParams.Configuration
               CancellationToken = optionalParams.CancellationToken
               ErrorReceived = warningReceived
               ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
@@ -677,31 +588,26 @@ module Lint =
             { ParseFile.Text = parsedFileInfo.Source
               ParseFile.Ast = parsedFileInfo.Ast
               ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
-              ParseFile.File = filepath }
+              ParseFile.File = filePath }
 
         lint lintInformation parsedFileInfo
 
         lintWarnings |> Seq.toList |> LintResult.Success
 
     /// Lints an F# file from a given path to the `.fs` file.
-    let lintFile optionalParams filepath =
-        if IO.File.Exists filepath then
-            let config =
-                match optionalParams.Configuration with
-                | Some(userSuppliedConfig) -> userSuppliedConfig
-                | None -> Configuration.defaultConfiguration
-
+    let lintFile optionalParams filePath =
+        if IO.File.Exists filePath then
             let checker = FSharpChecker.Create()
 
-            match ParseFile.parseFile filepath config checker None with
-            | ParseFile.Success(astFileParseInfo) ->
+            match ParseFile.parseFile filePath checker None with
+            | ParseFile.Success astFileParseInfo ->
                 let parsedFileInfo =
                     { Source = astFileParseInfo.Text
                       Ast = astFileParseInfo.Ast
                       TypeCheckResults = astFileParseInfo.TypeCheckResults }
 
-                lintParsedFile optionalParams parsedFileInfo filepath
-            | ParseFile.Failed(failure) -> LintResult.Failure(FailedToParseFile(failure))
+                lintParsedFile optionalParams parsedFileInfo filePath
+            | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
         else
-            FailedToLoadFile filepath
+            FailedToLoadFile filePath
             |> LintResult.Failure

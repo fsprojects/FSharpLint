@@ -30,6 +30,7 @@ with
 and private LintArgs =
     | [<MainCommand; Mandatory>] Target of target:string
     | [<AltCommandLine("-c")>] Release_Config of releaseConfig:string
+    | [<AltCommandLine("-l")>] Lint_Config of lintConfig:string
     | File_Type of FileType
 with
     interface IArgParserTemplate with
@@ -38,6 +39,7 @@ with
             | Target _ -> "Input to lint."
             | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
             | Release_Config _ -> "Release config to use to parse files."
+            | Lint_Config _ -> "Path to the config for the lint."
 
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->
@@ -88,12 +90,19 @@ let private start (arguments:ParseResults<ToolArgs>) =
             | LintResult.Failure(failure) ->
                 handleError failure.Description
 
+        let lintConfig = lintArgs.TryGetResult Lint_Config
+
+        let configParam =
+            match lintConfig with
+            | Some configPath -> FromFile configPath
+            | None -> Default
+
         let releaseConfig = lintArgs.TryGetResult Release_Config
 
         let lintParams =
             { CancellationToken = None
               ReceivedWarning = Some output.WriteWarning
-              Configuration = None
+              Configuration = configParam
               ReportLinterProgress = Some (parserProgress output)
               ReleaseConfiguration = releaseConfig }
 

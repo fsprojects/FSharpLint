@@ -1,7 +1,5 @@
 ﻿module TestConfiguration
 
-open System.IO
-open FSharpLint.Application
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Framework.Configuration

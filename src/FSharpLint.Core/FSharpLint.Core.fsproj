@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->
+    <Compile Include="Prelude.fs" />
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
     <Compile Include="Framework\Suggestion.fs" />
@@ -108,9 +109,6 @@
     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
-     <EmbeddedResource Include="../FSharpLint.Core/DefaultConfiguration.FSharpLint">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>   
     <EmbeddedResource Include="../FSharpLint.Core/Text.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
