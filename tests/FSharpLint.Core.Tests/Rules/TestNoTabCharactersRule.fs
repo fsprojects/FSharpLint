@@ -3,8 +3,8 @@
 open FSharp.Compiler.SourceCodeServices
 open FSharp.Compiler.Text
 open FSharpLint.Application
-open FSharpLint.Application.ConfigurationManager
 open FSharpLint.Framework
+open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
 
 [<AbstractClass>]

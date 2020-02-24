@@ -6,7 +6,6 @@
 module ConfigurationManagement =
 
     open FSharpLint.Framework.Configuration
-    open FSharpLint.Application.ConfigurationManager
 
     type ConfigFailure =
         /// Failed to load a FSharpLint configuration file.
@@ -42,8 +41,8 @@ module ConfigurationManagement =
 module Lint =
 
     open System.Threading
-    open FSharpLint.Application.ConfigurationManager
     open FSharpLint.Framework
+    open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharp.Compiler
     open FSharp.Compiler.SourceCodeServices
@@ -71,7 +70,7 @@ module Lint =
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
-          Configuration: ConfigurationManager.Configuration option
+          Configuration: Configuration.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (Suggestion.LintWarning -> unit) option

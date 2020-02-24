@@ -2,7 +2,6 @@
 
 module Tests =
 
-    open FSharpLint.Application
     open FSharpLint.Framework
     open System
     open System.Diagnostics
@@ -153,7 +152,7 @@ module Tests =
             // Check converted config contents.
             let convertedConfig =
                 File.ReadAllText outputFile
-                |>  ConfigurationManager.parseConfig
+                |>  Configuration.parseConfig
 
             let expectedConfig =
                 { Configuration.defaultConfiguration with hints = Configuration.defaultConfiguration.hints |> Option.map (fun hintsConfig -> { hintsConfig with ignore = None }) }

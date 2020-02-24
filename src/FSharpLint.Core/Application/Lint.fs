@@ -2,6 +2,7 @@
 
 open Dotnet.ProjInfo.Inspect.MSBuild
 open FSharpLint.Framework
+open FSharpLint.Framework.Configuration
 
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
@@ -9,8 +10,6 @@ open FSharpLint.Framework
 module ConfigurationManagement =
 
     open System.IO
-    open FSharpLint.Framework.Configuration
-    open FSharpLint.Application.ConfigurationManager
 
     /// Reason for the linter failing.
     type ConfigFailure =
@@ -98,7 +97,6 @@ module Lint =
     open FSharp.Compiler
     open FSharp.Compiler.SourceCodeServices
     open FSharpLint.Framework.Rules
-    open FSharpLint.Application.ConfigurationManager
     open FSharpLint.Rules
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -183,7 +181,7 @@ module Lint =
         { CancellationToken: CancellationToken option
           ErrorReceived: Suggestion.LintWarning -> unit
           ReportLinterProgress: ProjectProgress -> unit
-          Configuration: Configuration }
+          Configuration: Configuration.Configuration }
 
     module private Async =
         let combine f x y = async {
@@ -233,7 +231,7 @@ module Lint =
         rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
         (astNodeSuggestions, context)
 
-    let runLineRules (lineRules:LineRules) (filePath:string) (fileContent:string) (context:Context) =
+    let runLineRules (lineRules:Configuration.LineRules) (filePath:string) (fileContent:string) (context:Context) =
         fileContent
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
@@ -292,7 +290,7 @@ module Lint =
             | Some(x) -> not x.IsCancellationRequested
             | None -> true
 
-        let enabledRules = flattenConfig lintInfo.Configuration
+        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
 
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let allRuleNames =
@@ -434,7 +432,7 @@ module Lint =
             | ConfigurationManagement.ConfigurationResult.Success(config) -> Success(config)
             | ConfigurationManagement.ConfigurationResult.Failure(x) -> Failure(configFailureToLintFailure x)
         with
-        | ConfigurationManager.ConfigurationException(_) -> Failure(RunTimeConfigError)
+        | ConfigurationException _ -> Failure(RunTimeConfigError)
 
     let getFailedFiles = function
         | ParseFile.Failed(failure) -> Some(failure)
@@ -467,7 +465,7 @@ module Lint =
 
           /// Provide your own FSharpLint configuration to the linter.
           /// If not provided the default configuration will be used.
-          Configuration: Configuration option
+          Configuration: Configuration.Configuration option
 
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (Suggestion.LintWarning -> unit) option
@@ -522,7 +520,7 @@ module Lint =
                     | Some [||] -> false
                     | Some ignoreFiles ->
                         let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
-                        ConfigurationManager.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
+                        Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath
 
                 let parsedFiles =
                     files

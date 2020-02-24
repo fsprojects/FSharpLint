@@ -102,7 +102,6 @@
     <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Rules -->
     <!-- Application  -->
-    <Compile Include="Application\ConfigurationManager.fs" />
     <Compile Include="Application\Configuration.fs" />
     <Compile Include="Application\XmlConfiguration.fs" />
     <Compile Include="Application/Lint.fsi" />

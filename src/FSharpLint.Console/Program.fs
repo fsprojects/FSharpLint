@@ -68,7 +68,7 @@ let private parserProgress (output:Output.IOutput) = function
 let private convertConfig (xmlFile:string) (outputFile:string) =
     try
         let inputFile = File.ReadAllText xmlFile
-        let jsonConfig = XmlConfiguration.convertToJson inputFile |> ConfigurationManager.serializeConfig
+        let jsonConfig = XmlConfiguration.convertToJson inputFile |> Configuration.serializeConfig
         File.WriteAllText(outputFile, jsonConfig)
         Choice1Of2 ()
     with

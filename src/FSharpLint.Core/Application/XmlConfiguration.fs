@@ -3,7 +3,7 @@ module FSharpLint.Application.XmlConfiguration
 
 open FSharpLint.Rules
 open System.IO
-open ConfigurationManager
+open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.TypedItemSpacing
 
