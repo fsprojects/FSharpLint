@@ -1,7 +1,7 @@
 # FSharpLint
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
-The tool is configurable via XML and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
+The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
 The project aims to let the user know of problems through [matching user defined hints](http://fsprojects.github.io/FSharpLint/Hints.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
@@ -9,11 +9,18 @@ The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to tr
 
 ![Example](http://i.imgur.com/D4c9g1m.png)
 
+## Usage
+
+FSharpLint can be used in several ways:
+
+* [Running as dotnet tool from command line](http://fsprojects.github.io/FSharpLint/ConsoleApplication.html).
+* [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
+* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](http://fsprojects.github.io/FSharpLint/MSBuildTask.html).
+* [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
+
 ## Documentation
 
-Each directory aims to contain a README.md file with a brief technical overview of the code.
-
-The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it.
+The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it, including a list of the [available rules](http://fsprojects.github.io/FSharpLint/Rules.html) for linting.
 
 ## Nuget Packages
 
