@@ -140,7 +140,8 @@ module ParseFile =
     let tokenizeLine (tokenizer:FSharpLineTokenizer) (line : string) initialState =
         let rec helper (state, tokens) =
             match tokenizer.ScanToken(state) with
-            | (Some tok, state) -> helper (state, (line.Substring(tok.LeftColumn, tok.FullMatchedLength), tok) :: tokens)
+            | (Some tok, state) ->
+                helper (state, (line.Substring(tok.LeftColumn, tok.RightColumn - tok.LeftColumn + 1), tok) :: tokens)
             | (None, state) -> (state, tokens)
 
         let (finalState, tokens) = helper (initialState, [])
