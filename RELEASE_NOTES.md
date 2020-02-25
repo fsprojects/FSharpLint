@@ -1,3 +1,7 @@
+##### 0.13.3 - February 25 2020
+
+* Fix for suppression comment parsing
+
 ##### 0.13.2 - February 25 2020
 
 * Remove support for multiple overriding configs
