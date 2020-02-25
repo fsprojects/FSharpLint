@@ -1,4 +1,9 @@
-##### 0.13.1
+##### 0.13.2 - February 25 2020
+
+* Remove support for multiple overriding configs
+* Update FCS to 34.0.1 [@baronfel]
+
+##### 0.13.1 - February 24 2020
 
 * Use structured comments for warning suppression
 * Use Argu library for command line argument parsing

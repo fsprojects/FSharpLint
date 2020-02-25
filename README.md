@@ -13,7 +13,7 @@ The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to tr
 
 FSharpLint can be used in several ways:
 
-* [Running as dotnet tool from command line](http://fsprojects.github.io/FSharpLint/ConsoleApplication.html).
+* [Running as dotnet tool from command line](http://fsprojects.github.io/FSharpLint/DotnetTool.html).
 * [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
 * [In other IDEs (Visual Studio, Rider) as an MSBuild Task](http://fsprojects.github.io/FSharpLint/MSBuildTask.html).
 * [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)

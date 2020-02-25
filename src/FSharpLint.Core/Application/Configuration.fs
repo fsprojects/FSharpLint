@@ -1,255 +1,429 @@
-﻿namespace FSharpLint.Framework    
+﻿/// Loads configuration file from JSON into an object.
+module FSharpLint.Framework.Configuration
 
-/// Loads configuration files from JSON into an object.
-/// When a configuration file has already been loaded, loading another one overwrites the existing configuration.
-/// The overwrite works by only changing existing properties with properties from the new file,
-/// so properties in the original configuration file not in the new configuration file will remain.
-module Configuration =
+open System.IO
+open System.Reflection
+open Newtonsoft.Json
+open FSharpLint.Framework
+open FSharpLint.Framework.Rules
+open FSharpLint.Framework.HintParser
+open FSharpLint.Rules
 
-    open System.Reflection
-    open FSharpLint.Framework
-    open FSharpLint.Application.ConfigurationManager
+[<Literal>]
+let SettingsFileName = "fsharplint.json"
 
-    [<Literal>]
-    let SettingsFileName = "fsharplint.json"
+exception ConfigurationException of string
 
-    /// Merges settings from `diff` and `partial` with settings from
-    /// `diff` taking precedence.
-    let private mergeSettings full diff partial =
-        full
-        |> Map.toList
-        |> List.choose (fun (key, _) ->
-            match Map.tryFind key diff with
-            | Some(value) -> Some(key, value)
-            | None ->
-                match Map.tryFind key partial with
-                | Some(value) -> Some(key, value)
-                | None -> None)
-        |> Map.ofList
+module FSharpJsonConverter =
+    open System
+    open Microsoft.FSharp.Reflection
 
-    /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
-    /// This function loads and returns this default configuration.
-    let defaultConfiguration =
-        let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
-        let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                         |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.json", System.StringComparison.Ordinal))
-        use stream = assembly.GetManifestResourceStream(resourceName)
-        match stream with
-        | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
-        | stream ->
-            use reader = new System.IO.StreamReader(stream)
+    type OptionConverter() =
+        inherit JsonConverter()
 
-            reader.ReadToEnd()
-            |> parseConfig
+        override x.CanConvert(t) =
+            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
 
-    /// Module to manage the loading and updating of configuration files.
-    /// Keeps loaded configurations cached in memory so they can be quickly retrieved.
-    module Management =
+        override x.WriteJson(writer, value, serializer) =
+            let value =
+                if value = null then null
+                else
+                    let _,fields = FSharpValue.GetUnionFields(value, value.GetType())
+                    fields.[0]
+            serializer.Serialize(writer, value)
 
-        open System
-        open System.IO
+        override x.ReadJson(reader, t, _, serializer) =
+            let innerType = t.GetGenericArguments().[0]
+            let innerType =
+                if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
+                else innerType
+            let value = serializer.Deserialize(reader, innerType)
+            let cases = FSharpType.GetUnionCases(t)
+            if value = null then FSharpValue.MakeUnion(cases.[0], [||])
+            else FSharpValue.MakeUnion(cases.[1], [|value|])
 
-        type Path = string list
+    let private converters =
+        [|
+            OptionConverter() :> JsonConverter
+        |]
 
-        [<NoComparison>]
-        type GlobalConfig = { Path: Path; Name: string; Configuration: Configuration option }
+    let serializerSettings =
+        let settings = JsonSerializerSettings()
+        settings.NullValueHandling <- NullValueHandling.Ignore
+        settings.Converters <- converters
+        settings
 
-        /// Keeps configuration files loaded for a list of paths so that
-        /// they can be quickly retrieved and updated
-        [<NoComparison>]
-        type LoadedConfigs =
-            { /// Cached configurations for each path.
-              LoadedConfigs: Map<Path, Configuration option>
+module IgnoreFiles =
 
-              /// Full paths added, there could be multiple <see cref="LoadedConfigs.LoadedConfigs" />
-              /// for each full path. If you wanted to load the configurations for a solution
-              /// this should be a list of absolute paths to the project directories.
-              PathsAdded: Path list
+    open System
+    open System.Text.RegularExpressions
 
-              /// Global configuration files in order of precedence.
-              /// All PathsAdded will override these files.
-              GlobalConfigs: GlobalConfig list }
+    type IsDirectory = | IsDirectory of bool
 
-            static member Empty = { LoadedConfigs = Map.empty; PathsAdded = []; GlobalConfigs = [] }
+    [<NoComparison>]
+    type Ignore =
+        | Ignore of Regex list * IsDirectory
+        | Negate of Regex list * IsDirectory
 
-        let private getAllPaths path =
-            let rec getAllPaths = function
-                | x::rest, currentPath, pathsFound ->
-                    let pathFound = currentPath@[x]
-                    getAllPaths (rest, pathFound, pathFound::pathsFound)
-                | [], _, pathsFound -> pathsFound
+    let parseIgnorePath (path:string) =
+        let globToRegex glob =
+            Regex(
+                "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
+                RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
 
-            getAllPaths (path, [], []) |> List.rev
+        let isDirectory = path.EndsWith("/")
 
-        /// Loads all configurations needed to form a complete configuration for a given path.
-        /// A `complete configuration` is one that has overridden every configuration file in ancestor directories.
-        let addPath tryLoadConfig loadedConfigs path =
-            let pathHasAlreadyBeenLoaded =
-                loadedConfigs.PathsAdded |> List.exists (fun x -> x = path)
+        let getRegexSegments (path:string) =
+            path.Split([| '/' |], StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map globToRegex
 
-            if pathHasAlreadyBeenLoaded then loadedConfigs
-            else
-                let paths = getAllPaths path
-
-                let rec updateLoadedConfigs loadedConfigs = function
-                | path::rest ->
-                    if loadedConfigs |> Map.containsKey path then
-                        updateLoadedConfigs loadedConfigs rest
-                    else
-                        let updatedLoadedConfigs =
-                            loadedConfigs |> Map.add path (tryLoadConfig path)
-
-                        updateLoadedConfigs updatedLoadedConfigs rest
-                | [] -> loadedConfigs
-
-                { loadedConfigs with
-                    PathsAdded = path::loadedConfigs.PathsAdded
-                    LoadedConfigs = updateLoadedConfigs loadedConfigs.LoadedConfigs paths }
-
-        let rec private listStartsWith = function
-        | (_, []) -> true
-        | (x::list, y::startsWithList) when x = y ->
-            listStartsWith (list, startsWithList)
-        | _ -> false
-
-        let private isPathPartOfAnyPaths path paths =
-            paths |> List.exists (fun x -> listStartsWith (x, path))
-
-        /// Removes a loaded path and all cached configurations that aren't used by any other paths.
-        let removePath loadedConfigs path =
-            let pathNeverLoaded =
-                loadedConfigs.PathsAdded |> List.exists (fun x -> x = path) |> not
-
-            if pathNeverLoaded then
-                loadedConfigs
-            else
-                let updatedPaths =
-                    loadedConfigs.PathsAdded |> List.filter (fun x -> x <> path)
-
-                let updatedConfigs =
-                    loadedConfigs.LoadedConfigs
-                    |> Map.filter (fun configPath _ ->
-                        isPathPartOfAnyPaths configPath updatedPaths)
-
-                { loadedConfigs with
-                    PathsAdded = updatedPaths
-                    LoadedConfigs = updatedConfigs }
-
-        /// With a given list of paths, any paths loaded not in the list will be removed
-        /// and any in the list but not loaded will be added.
-        let updatePaths tryLoadConfig loadedConfigs paths =
-            let existingPaths = Set.ofList loadedConfigs.PathsAdded
-            let newPaths = Set.ofList paths
-
-            let pathsToAdd = Set.difference newPaths existingPaths |> List.ofSeq
-
-            let pathsToRemove = Set.difference existingPaths newPaths |> List.ofSeq
-
-            let loadedConfigs = pathsToAdd |> List.fold (addPath tryLoadConfig) loadedConfigs
-            let loadedConfigs = pathsToRemove |> List.fold removePath loadedConfigs
-
-            loadedConfigs
-
-        let rec private transpose matrix =
-            match matrix with
-            | (col::cols)::rows ->
-                let first = List.map (function [] -> None | h::_ -> Some h) matrix
-                let rest = transpose (List.map (function [] -> [] | _::t -> t) matrix)
-                first :: rest
-            | _ -> []
-
-        /// Attempts to get a path that is common to all paths
-        /// that have been added to a node.
-        /// If a given preferred path is found to be a common path then
-        /// that path will always be returned, useful if you want to prefer
-        /// the solution directory for example.
-        let commonPath loadedConfigs preferredPath =
-            let commonPath =
-                transpose loadedConfigs.PathsAdded
-                |> Seq.takeWhile (function
-                    | (first::_) as segments -> List.forall ((=) first) segments
-                    | [] -> false)
-                |> Seq.toList
-                |> List.choose List.head
-
-            if List.isEmpty commonPath then None
-            else if listStartsWith (commonPath, preferredPath) then Some preferredPath
-            else Some commonPath
-
-        /// Tries to reload the configuration for all paths.
-        /// Call when the user has edited a configuration file on disk.
-        let refresh tryLoadConfig loadedConfigs =
-            { loadedConfigs with
-                  LoadedConfigs =
-                    loadedConfigs.LoadedConfigs
-                    |> Map.map (fun configPath _ -> tryLoadConfig configPath)
-                  GlobalConfigs =
-                    loadedConfigs.GlobalConfigs
-                    |> List.map (fun x -> { x with Configuration = tryLoadConfig x.Path }) }
-
-        /// Gets the configuration file located at a given path.
-        /// The configuration file returned may be incomplete as it
-        /// will not have overrided any previous configuration files.
-        let getPartialConfig loadedConfigs path =
-            let config = Map.tryFind path loadedConfigs.LoadedConfigs
-
-            match config with
-            | Some(Some(config)) -> Some(config)
-            | Some(None) | None ->
-                List.tryFind (fun { Path = x } -> x = path) loadedConfigs.GlobalConfigs
-                |> Option.bind (fun x -> x.Configuration)
-
-        let private tryOverrideConfig (configToOverride:Configuration option) (config:Configuration option) =
-            match (configToOverride, config) with
-            | Some(configToOverride), Some(config) ->
-                Some(configToOverride.Override(config))
-            | Some(x), None
-            | None, Some(x) -> Some(x)
-            | None, None -> None
-            
-        let overrideConfiguration (configToOverride:Configuration) (config:Configuration) =
-            configToOverride.Override(config)
-
-        /// Gets the complete configuration file located at a given path.
-        /// "complete" configuration means that it has overridden any previous
-        /// configuration files.
-        let getConfig loadedConfigs path =
-            let (globalConfigs, pathWasAGlobalConfig) =
-                let rec takeUntilPathMatch built = function
-                | config::_ when config.Path = path -> (config::built, true)
-                | config::rest -> takeUntilPathMatch (config::built) rest
-                | [] -> (built, false)
-
-                takeUntilPathMatch [] loadedConfigs.GlobalConfigs
-                |> fun (configs, matchFound) -> (List.rev configs, matchFound)
-
-            let globalConfig =
-                globalConfigs
-                |> List.map (fun x -> x.Configuration)
-                |> List.fold tryOverrideConfig (Some defaultConfiguration)
-
-            if pathWasAGlobalConfig then globalConfig
-            else
-                getAllPaths path
-                |> List.fold (fun config path ->
-                    match loadedConfigs.LoadedConfigs.TryFind path with
-                    | Some(loadedConfig) -> tryOverrideConfig config loadedConfig
-                    | None -> config) globalConfig
-
-        /// Updates a configuration file at a given path.
-        let updateConfig loadedConfigs path config =
-            { loadedConfigs with
-                  LoadedConfigs =
-                    loadedConfigs.LoadedConfigs
-                    |> Map.map (fun key value -> if key = path then config else value)
-                  GlobalConfigs =
-                    loadedConfigs.GlobalConfigs
-                    |> List.map (fun globalConfig ->
-                        if globalConfig.Path = path then { globalConfig with Configuration = config }
-                        else globalConfig) }
-
-        /// Tries to normalise paths to a format that can be used as a path in <see cref="LoadedConfigs" />.
-        let normalisePath (path:string) =
-            Path.GetFullPath path
-            |> fun x -> x.Split([|Path.DirectorySeparatorChar|], StringSplitOptions.RemoveEmptyEntries)
+        if path.StartsWith("!") then
+            getRegexSegments (path.Substring(1))
             |> Array.toList
+            |> fun segments -> Negate(segments, IsDirectory(isDirectory))
+        else
+            getRegexSegments (if path.StartsWith(@"\!") then path.Substring(1) else path)
+            |> Array.toList
+            |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
+
+    let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
+        let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) =
+            globSeqs |> List.choose (function
+                | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
+                | _ -> None)
+
+        let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs =
+            match remainingPath with
+            | [_] when isDirectory -> false
+            | currentSegment::remaining ->
+                let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+
+                let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
+
+                let aGlobWasCompletelyMatched = currentlyMatchingGlobs |> List.exists List.isEmpty
+
+                let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
+
+                if matched then true
+                else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
+            | [] -> false
+
+        doesGlobSeqMatchPathSeq path []
+
+    let shouldFileBeIgnored (ignorePaths:Ignore list) (filePath:string) =
+        let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList
+
+        ignorePaths |> List.fold (fun isCurrentlyIgnored ignoreGlob ->
+            match ignoreGlob with
+            | Ignore(glob, IsDirectory(isDirectory))
+                when not isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> true
+            | Negate(glob, IsDirectory(isDirectory))
+                when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
+            | _ -> isCurrentlyIgnored) false
+
+type RuleConfig<'Config> = {
+    enabled : bool
+    config : 'Config option
+}
+
+type EnabledConfig = RuleConfig<unit>
+
+let constructRuleIfEnabled rule ruleConfig = if ruleConfig.enabled then Some rule else None
+
+let constructRuleWithConfig rule ruleConfig =
+    if ruleConfig.enabled then
+        ruleConfig.config |> Option.map (fun config -> rule config)
+    else
+        None
+
+type TupleFormattingConfig =
+    { tupleCommaSpacing : EnabledConfig option
+      tupleIndentation : EnabledConfig option
+      tupleParentheses : EnabledConfig option }
+with
+    member this.Flatten() =
+        [|
+            this.tupleCommaSpacing |> Option.bind (constructRuleIfEnabled TupleCommaSpacing.rule)
+            this.tupleIndentation |> Option.bind (constructRuleIfEnabled TupleIndentation.rule)
+            this.tupleParentheses |> Option.bind (constructRuleIfEnabled TupleParentheses.rule)
+        |] |> Array.choose id
+
+type PatternMatchFormattingConfig =
+    { patternMatchClausesOnNewLine : EnabledConfig option
+      patternMatchOrClausesOnNewLine : EnabledConfig option
+      patternMatchClauseIndentation : EnabledConfig option
+      patternMatchExpressionIndentation : EnabledConfig option }
+with
+    member this.Flatten() =
+        [|
+            this.patternMatchClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchClausesOnNewLine.rule)
+            this.patternMatchOrClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule)
+            this.patternMatchClauseIndentation |> Option.bind (constructRuleIfEnabled PatternMatchClauseIndentation.rule)
+            this.patternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
+        |] |> Array.choose id
+
+type FormattingConfig =
+    { typedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
+      typePrefixing : EnabledConfig option
+      unionDefinitionIndentation : EnabledConfig option
+      moduleDeclSpacing : EnabledConfig option
+      classMemberSpacing : EnabledConfig option
+      tupleFormatting : TupleFormattingConfig option
+      patternMatchFormatting : PatternMatchFormattingConfig option }
+with
+    member this.Flatten() =
+        [|
+            this.typedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule) |> Option.toArray
+            this.typePrefixing |> Option.bind (constructRuleIfEnabled TypePrefixing.rule) |> Option.toArray
+            this.unionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule) |> Option.toArray
+            this.moduleDeclSpacing |> Option.bind (constructRuleIfEnabled ModuleDeclSpacing.rule) |> Option.toArray
+            this.classMemberSpacing |> Option.bind (constructRuleIfEnabled ClassMemberSpacing.rule) |> Option.toArray
+            this.tupleFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.patternMatchFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+        |] |> Array.concat
+
+type RaiseWithTooManyArgsConfig =
+    { raiseWithSingleArgument : EnabledConfig option
+      nullArgWithSingleArgument : EnabledConfig option
+      invalidOpWithSingleArgument : EnabledConfig option
+      invalidArgWithTwoArguments : EnabledConfig option
+      failwithfWithArgumentsMatchingFormatString : EnabledConfig option }
+with
+    member this.Flatten() =
+        [|
+            this.raiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule) |> Option.toArray
+            this.nullArgWithSingleArgument |> Option.bind (constructRuleIfEnabled NullArgWithSingleArgument.rule) |> Option.toArray
+            this.invalidOpWithSingleArgument |> Option.bind (constructRuleIfEnabled InvalidOpWithSingleArgument.rule) |> Option.toArray
+            this.invalidArgWithTwoArguments |> Option.bind (constructRuleIfEnabled InvalidArgWithTwoArguments.rule) |> Option.toArray
+            this.failwithfWithArgumentsMatchingFormatString |> Option.bind (constructRuleIfEnabled FailwithfWithArgumentsMatchingFormatString.rule) |> Option.toArray
+        |] |> Array.concat
+
+type SourceLengthConfig =
+    { maxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInMatchLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInValue : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInFunction : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInMember : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInConstructor : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInProperty : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInModule : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInRecord : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInEnum : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInUnion : RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInClass : RuleConfig<Helper.SourceLength.Config> option }
+with
+    member this.Flatten() =
+        [|
+            this.maxLinesInLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInLambdaFunction.rule) |> Option.toArray
+            this.maxLinesInMatchLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInMatchLambdaFunction.rule) |> Option.toArray
+            this.maxLinesInValue |> Option.bind (constructRuleWithConfig MaxLinesInValue.rule) |> Option.toArray
+            this.maxLinesInFunction |> Option.bind (constructRuleWithConfig MaxLinesInFunction.rule) |> Option.toArray
+            this.maxLinesInMember |> Option.bind (constructRuleWithConfig MaxLinesInMember.rule) |> Option.toArray
+            this.maxLinesInConstructor |> Option.bind (constructRuleWithConfig MaxLinesInConstructor.rule) |> Option.toArray
+            this.maxLinesInProperty |> Option.bind (constructRuleWithConfig MaxLinesInProperty.rule) |> Option.toArray
+            this.maxLinesInModule |> Option.bind (constructRuleWithConfig MaxLinesInModule.rule) |> Option.toArray
+            this.maxLinesInRecord |> Option.bind (constructRuleWithConfig MaxLinesInRecord.rule) |> Option.toArray
+            this.maxLinesInEnum |> Option.bind (constructRuleWithConfig MaxLinesInEnum.rule) |> Option.toArray
+            this.maxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.rule) |> Option.toArray
+            this.maxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule) |> Option.toArray
+        |] |> Array.concat
+
+type NamesConfig =
+    { interfaceNames : RuleConfig<NamingConfig> option
+      exceptionNames : RuleConfig<NamingConfig> option
+      typeNames : RuleConfig<NamingConfig> option
+      recordFieldNames : RuleConfig<NamingConfig> option
+      enumCasesNames : RuleConfig<NamingConfig> option
+      unionCasesNames : RuleConfig<NamingConfig> option
+      moduleNames : RuleConfig<NamingConfig> option
+      literalNames : RuleConfig<NamingConfig> option
+      namespaceNames : RuleConfig<NamingConfig> option
+      memberNames : RuleConfig<NamingConfig> option
+      parameterNames : RuleConfig<NamingConfig> option
+      measureTypeNames : RuleConfig<NamingConfig> option
+      activePatternNames : RuleConfig<NamingConfig> option
+      publicValuesNames : RuleConfig<NamingConfig> option
+      nonPublicValuesNames : RuleConfig<NamingConfig> option }
+with
+    member this.Flatten() =
+        [|
+            this.interfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.rule) |> Option.toArray
+            this.exceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.rule) |> Option.toArray
+            this.typeNames |> Option.bind (constructRuleWithConfig TypeNames.rule) |> Option.toArray
+            this.recordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.rule) |> Option.toArray
+            this.enumCasesNames |> Option.bind (constructRuleWithConfig EnumCasesNames.rule) |> Option.toArray
+            this.unionCasesNames |> Option.bind (constructRuleWithConfig UnionCasesNames.rule) |> Option.toArray
+            this.moduleNames |> Option.bind (constructRuleWithConfig ModuleNames.rule) |> Option.toArray
+            this.literalNames |> Option.bind (constructRuleWithConfig LiteralNames.rule) |> Option.toArray
+            this.namespaceNames |> Option.bind (constructRuleWithConfig NamespaceNames.rule) |> Option.toArray
+            this.memberNames |> Option.bind (constructRuleWithConfig MemberNames.rule) |> Option.toArray
+            this.parameterNames |> Option.bind (constructRuleWithConfig ParameterNames.rule) |> Option.toArray
+            this.measureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule) |> Option.toArray
+            this.activePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule) |> Option.toArray
+            this.publicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule) |> Option.toArray
+            this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.rule) |> Option.toArray
+        |] |> Array.concat
+
+type NumberOfItemsConfig =
+    { maxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option }
+ with
+    member this.Flatten() =
+         [|
+            this.maxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule) |> Option.toArray
+            this.maxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule) |> Option.toArray
+            this.maxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule) |> Option.toArray
+            this.maxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule) |> Option.toArray
+         |] |> Array.concat
+
+type BindingConfig =
+    { favourIgnoreOverLetWild : EnabledConfig option
+      wildcardNamedWithAsPattern : EnabledConfig option
+      uselessBinding : EnabledConfig option
+      tupleOfWildcards : EnabledConfig option }
+ with
+    member this.Flatten() =
+         [|
+            this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
+            this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
+            this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
+            this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
+         |] |> Array.concat
+
+type ConventionsConfig =
+    { recursiveAsyncFunction : EnabledConfig option
+      redundantNewKeyword : EnabledConfig option
+      nestedStatements : RuleConfig<NestedStatements.Config> option
+      reimplementsFunction : EnabledConfig option
+      canBeReplacedWithComposition : EnabledConfig option
+      raiseWithTooManyArgs : RaiseWithTooManyArgsConfig option
+      sourceLength : SourceLengthConfig option
+      naming : NamesConfig option
+      numberOfItems : NumberOfItemsConfig option
+      binding : BindingConfig option }
+with
+    member this.Flatten() =
+        [|
+            this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
+            this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
+            this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
+            this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
+            this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
+            this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+        |] |> Array.concat
+
+type TypographyConfig =
+    { indentation : RuleConfig<Indentation.Config> option
+      maxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
+      trailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
+      maxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
+      trailingNewLineInFile : EnabledConfig option
+      noTabCharacters : EnabledConfig option }
+with
+    member this.Flatten() =
+         [|
+            this.indentation |> Option.bind (constructRuleWithConfig Indentation.rule) |> Option.toArray
+            this.maxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule) |> Option.toArray
+            this.trailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule) |> Option.toArray
+            this.maxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule) |> Option.toArray
+            this.trailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule) |> Option.toArray
+            this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
+         |] |> Array.concat
+
+let private getOrEmptyList hints = hints |> Option.defaultValue [||]
+
+type HintConfig = {
+    add : string [] option
+    ignore : string [] option
+}
+
+type Configuration =
+    { ignoreFiles : string [] option
+      formatting : FormattingConfig option
+      conventions : ConventionsConfig option
+      typography : TypographyConfig option
+      hints : HintConfig option }
+
+/// Tries to parse the provided config text.
+let parseConfig (configText : string) =
+    try
+        JsonConvert.DeserializeObject<Configuration>(configText, FSharpJsonConverter.serializerSettings)
+    with
+    | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
+
+/// Tries to parse the config file at the provided path.
+let loadConfig (configPath : string) =
+    File.ReadAllText configPath
+    |> parseConfig
+
+/// A default configuration specifying every analyser and rule is included as a resource file in the framework.
+/// This function loads and returns this default configuration.
+let defaultConfiguration =
+    let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
+    let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
+                     |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.json", System.StringComparison.Ordinal))
+    use stream = assembly.GetManifestResourceStream(resourceName)
+    match stream with
+    | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
+    | stream ->
+        use reader = new System.IO.StreamReader(stream)
+
+        reader.ReadToEnd()
+        |> parseConfig
+
+let serializeConfig (config : Configuration) =
+    JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
+
+type LineRules =
+    { genericLineRules : RuleMetadata<LineRuleConfig> []
+      noTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
+      indentationRule : RuleMetadata<IndentationRuleConfig> option }
+
+type LoadedRules =
+    { astNodeRules : RuleMetadata<AstNodeRuleConfig> []
+      lineRules : LineRules }
+
+let private parseHints (hints:string []) =
+    let parseHint hint =
+        match FParsec.CharParsers.run HintParser.phint hint with
+        | FParsec.CharParsers.Success(hint, _, _) -> hint
+        | FParsec.CharParsers.Failure(error, _, _) ->
+            raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
+
+    hints
+    |> Array.filter (System.String.IsNullOrWhiteSpace >> not)
+    |> Array.map parseHint
+    |> Array.toList
+    |> MergeSyntaxTrees.mergeHints
+
+let flattenConfig (config : Configuration) =
+    let allRules =
+        [|
+            config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+        |] |> Array.concat
+
+    let astNodeRules = ResizeArray()
+    let lineRules = ResizeArray()
+    let mutable indentationRule = None
+    let mutable noTabCharactersRule = None
+    allRules
+    |> Array.iter (function
+        | AstNodeRule rule -> astNodeRules.Add rule
+        | LineRule rule -> lineRules.Add(rule)
+        | IndentationRule rule -> indentationRule <- Some rule
+        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
+
+    { LoadedRules.astNodeRules = astNodeRules.ToArray()
+      lineRules =
+          { genericLineRules = lineRules.ToArray()
+            indentationRule = indentationRule
+            noTabCharactersRule = noTabCharactersRule } }

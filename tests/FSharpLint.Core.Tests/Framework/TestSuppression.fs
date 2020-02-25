@@ -157,7 +157,7 @@ let a = not true // fsharplint:enable-line
 let a = not true"""
 
         let parsedFileInfo =
-            match ParseFile.parseSource text OptionalLintParameters.Default (FSharpChecker.Create()) with
+            match ParseFile.parseSource text (FSharpChecker.Create()) with
             | ParseFile.Success(parseFileInformation) ->
                 { Source = parseFileInformation.Text
                   Ast = parseFileInformation.Ast

@@ -35,7 +35,7 @@ module ParseFile =
         | Failed of ParseFileFailure
         | Success of 't
 
-    let private parse configuration file source (checker:FSharpChecker, options) =
+    let private parse file source (checker:FSharpChecker, options) =
         let sourceText = SourceText.ofString source
         let parseResults =
             checker.ParseFile(file, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
@@ -117,7 +117,7 @@ module ParseFile =
         { options with OtherOptions = otherOptions }
 
     /// Parses a file using `FSharp.Compiler.Service`.
-    let parseFile file configuration (checker:FSharpChecker) projectOptions =
+    let parseFile file (checker:FSharpChecker) projectOptions =
         let source = File.ReadAllText(file)
 
         let projectOptions =
@@ -125,16 +125,16 @@ module ParseFile =
             | Some(existingOptions) -> existingOptions
             | None -> getProjectOptionsFromScript checker file source
 
-        parse configuration file source (checker, projectOptions)
+        parse file source (checker, projectOptions)
 
     /// Parses source code using `FSharp.Compiler.Service`.
-    let parseSourceFile fileName source configuration (checker:FSharpChecker) =
+    let parseSourceFile fileName source (checker:FSharpChecker) =
         let options = getProjectOptionsFromScript checker fileName source
 
-        parse configuration fileName source (checker, options)
+        parse fileName source (checker, options)
 
-    let parseSource source configuration (checker:FSharpChecker) =
-        parseSourceFile "test.fsx" source configuration checker
+    let parseSource source (checker:FSharpChecker) =
+        parseSourceFile "test.fsx" source checker
 
     /// Tokenize a single line of F# code.
     let tokenizeLine (tokenizer:FSharpLineTokenizer) (line : string) initialState =

@@ -22,7 +22,7 @@
         <ul class="nav nav-pills pull-right">
           <li><a href="http://fsharp.org">fsharp.org</a></li>
         </ul>
-        <h3 class="muted"><a href="index.html">FSharpLint</a></h3>
+        <h3 class="muted"><a href="/FSharpLint/index.html">FSharpLint</a></h3>
       </div>
       <hr />
       <div class="row">
@@ -159,40 +159,7 @@ let x = List.fold (+) 0 [1;2;3]
 <p>Rules can be disabled within the code using structured comments. See the <a href="Suppression.html">Suppressing Warnings</a> page for more information.</p>
 <h4><a name="Configuration-Files" class="anchor" href="#Configuration-Files">Configuration Files</a></h4>
 <p>Configuration of the tool is done using JSON. Configuration files must be named: <code>fsharplint.json</code>. A single JSON file containing the default configuration for all rules is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json">included inside of the software</a>.</p>
-<p>The configuration files are loaded in a specific order, files loaded after another will override the previous file. The default configuration is loaded first, from there the tool checks each directory from the root to up to the project being linted's directory. For example if the path of the project being linted was <code>C:\Files\SomeProjectBeingLinted</code>, then <code>C:\</code> would first be checked for a config file - if a config file is found then it would override the default config, then <code>C:\Files</code> would be checked - if a config file was found and a config file was also previously found in <code>C:\</code> then the config in <code>C:\Files</code> would override the one in <code>C:\</code> and so on.</p>
-<p>The configuration rules are overridden by redefining any properties of an rule that you want to override, for example if you wanted to turn on the type prefixing rule which has the default configuration of:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
-  <span class="s">"formatting"</span>: {
-      <span class="s">"typePrefixing"</span>: { <span class="s">"enabled"</span>: <span class="k">false</span> }
-  }
-}
-</code></pre></td></tr></table>
-<p>To override to turn off you'd set enabled to true in your own configuration file as follows:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
-  <span class="s">"formatting"</span>: {
-      <span class="s">"typePrefixing"</span>: { <span class="s">"enabled"</span>: <span class="k">true</span> }
-  }
-}
-</code></pre></td></tr></table>
-<p>Previously, configuration was specified in XML format. You can automatically convert your XML config to the JSON format using the dotnet tool:</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-</pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="id">dotnet</span> <span class="id">fsharplint</span> <span class="o">-</span><span class="id">convert</span> <span class="o">&lt;</span><span class="id">path</span><span class="o">-</span><span class="k">to</span><span class="o">-</span><span class="id">xml</span><span class="pn">&gt;</span> <span class="pn">(</span><span class="id">output</span><span class="o">-</span><span class="id">path</span><span class="pn">&gt;</span>
-</code></pre></td>
-</tr>
-</table>
+<p>By default, FSharpLint will try to load the configuration from the file <code>./fsharplint.json</code>. You can override this to point to a different file, for example by using the <code>--lint-config</code> flag in the dotnet tool.</p>
 <h4><a name="Ignoring-Files" class="anchor" href="#Ignoring-Files">Ignoring Files</a></h4>
 <p>In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:</p>
 <p>{ "ignoreFiles": ["assemblyinfo.*"] }</p>
@@ -221,7 +188,7 @@ to lint a project/source file/source string.</p>
 
         </div>
         <div class="span3">
-          <a href="index.html">
+          <a href="/FSharpLint/index.html">
             <img src="/FSharpLint/content/img/logo.png" alt="FSharpLint project logo." style="margin:10px 0px 0px 20px;border-style:none;" />
           </a>
 
@@ -239,17 +206,17 @@ to lint a project/source file/source string.</p>
 
             <li class="nav-header">Documentation</li>
 
-            <li><a href="index.html">Introduction</a></li>
+            <li><a href="/FSharpLint/index.html">Introduction</a></li>
 
             <li class="divider"></li>
 
-            <li><a href="Rules.html">Available Rules</a></li>
+            <li><a href="/FSharpLint/Rules.html">Available Rules</a></li>
 
-            <li><a href="Suppression.html">Rule Suppression</a></li>
+            <li><a href="/FSharpLint/Suppression.html">Rule Suppression</a></li>
 
-            <li><a href="DotnetTool.html">Dotnet Tool</a></li>
+            <li><a href="/FSharpLint/DotnetTool.html">Dotnet Tool</a></li>
 
-            <li><a href="MSBuildTask.html">MSBuild Task</a></li>
+            <li><a href="/FSharpLint/MSBuildTask.html">MSBuild Task</a></li>
           </ul>
         </div>
       </div>
