@@ -6,7 +6,7 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestTypographyIndentation() =
     inherit TestIndentationRuleBase.TestIndentationRuleBase(Indentation.rule { numberOfIndentationSpaces = 4 })
-    
+
     [<Test>]
     member this.``Error for incorrect indentation``() =
         this.Parse """
@@ -148,4 +148,4 @@ let comparer =
               let reversed = rev s1 i
               reversed.CompareTo (rev s2) }"""
 
-        Assert.IsTrue(this.NoErrorsExist)   
+        Assert.IsTrue(this.NoErrorsExist)

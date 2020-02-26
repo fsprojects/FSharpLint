@@ -34,5 +34,5 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
             let lineRules = { LineRules.indentationRule = None; noTabCharactersRule = Some rule; genericLineRules = [||] }
 
             runLineRules lineRules fileName input context
-            |> Array.iter this.postSuggestion
+            |> Array.iter this.PostSuggestion
         | None -> ()

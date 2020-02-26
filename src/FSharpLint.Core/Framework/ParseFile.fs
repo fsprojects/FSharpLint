@@ -137,7 +137,7 @@ module ParseFile =
         parseSourceFile "test.fsx" source checker
 
     /// Tokenize a single line of F# code.
-    let tokenizeLine (tokenizer:FSharpLineTokenizer) (line : string) initialState =
+    let tokenizeLine (tokenizer:FSharpLineTokenizer) (line:string) initialState =
         let rec helper (state, tokens) =
             match tokenizer.ScanToken(state) with
             | (Some tok, state) ->

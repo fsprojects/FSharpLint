@@ -30,7 +30,7 @@ match 1 with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``Error for exception pattern match clauses at different indentation``() =
         this.Parse """
@@ -80,7 +80,7 @@ module Program
 """
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``No error for lambda pattern match clauses with no surrounding parentheses, same indentation``() =
         this.Parse"""
@@ -91,7 +91,7 @@ module Program
     | 2 -> false
 """
 
-        Assert.IsTrue(this.NoErrorsExist)       
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``Error for lambda pattern match clauses without level of indentation for clauses``() =
@@ -104,7 +104,7 @@ module Program
 """
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
-       
+
     [<Test>]
     member this.``No error for multi-line pattern match clauses with same indentation``() =
         this.Parse"""
@@ -118,11 +118,11 @@ match "x" with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
-      
-      
+
+
     [<Test>]
     member this.``No match clause indentation error for struct tuple deconstruction``() =
           this.Parse """fun struct(x, y) -> ()"""
-        
+
           Assert.IsTrue(this.NoErrorsExist)
 

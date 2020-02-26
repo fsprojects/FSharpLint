@@ -6,7 +6,7 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestFormattingPatternMatchClausesOnNewLine() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClausesOnNewLine.rule)
-    
+
         [<Test>]
     member this.``Error for pattern match clauses on same line``() =
         this.Parse("""
@@ -27,7 +27,7 @@ match 1 with
 | 2 -> 2""")
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``Error for exception match clauses on same line``() =
         this.Parse("""
@@ -51,5 +51,5 @@ with
 | :? System.DivideByZeroException -> 1
 | :? System.Exception -> 2 """)
 
-        Assert.IsTrue(this.NoErrorsExist)       
+        Assert.IsTrue(this.NoErrorsExist)
 

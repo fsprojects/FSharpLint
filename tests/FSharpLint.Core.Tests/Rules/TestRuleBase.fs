@@ -12,7 +12,7 @@ type TestRuleBase () =
 
     abstract Parse : string * ?fileName:string * ?checkFile:bool -> unit
 
-    member __.postSuggestion (suggestion:Suggestion.LintWarning) =
+    member __.PostSuggestion (suggestion:Suggestion.LintWarning) =
         if not suggestion.Details.TypeChecks.IsEmpty then
             let successfulTypeCheck =
                 suggestion.Details.TypeChecks
@@ -80,8 +80,8 @@ type TestRuleBase () =
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
 
-            match startIndex, endIndex with
-            | Some(startIndex), Some(endIndex) ->
+            match (startIndex, endIndex) with
+            | (Some(startIndex), Some(endIndex)) ->
                 (StringBuilder source)
                     .Remove(startIndex, endIndex - startIndex)
                     .Insert(startIndex, fix.ToText)

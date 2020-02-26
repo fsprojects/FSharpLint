@@ -15,7 +15,7 @@ let isActualPatternMatch (args:AstNodeRuleParams) rule =
             | _ -> false
 
         let isFunctionParameter =
-            args.getParents 3 
+            args.getParents 3
             |> List.exists (function
                 | Expression (SynExpr.Lambda _ ) -> true
                 | _ -> false)

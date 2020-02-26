@@ -1,4 +1,4 @@
-/// Loads configuration file from JSON into an object.
+﻿/// Loads configuration file from JSON into an object.
 module FSharpLint.Framework.Configuration
 
 open System
@@ -22,7 +22,7 @@ module FSharpJsonConverter =
         inherit JsonConverter()
 
         override x.CanConvert(t) =
-            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<option<_>>
+            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ option>
 
         override x.WriteJson(writer, value, serializer) =
             let value =
@@ -131,7 +131,7 @@ let constructRuleIfEnabled rule ruleConfig = if ruleConfig.enabled then Some rul
 
 let constructRuleWithConfig rule ruleConfig =
     if ruleConfig.enabled then
-        ruleConfig.config |> Option.map (fun config -> rule config)
+        ruleConfig.config |> Option.map rule
     else
         None
 
@@ -489,14 +489,14 @@ with
     }
 
 /// Tries to parse the provided config text.
-let parseConfig (configText : string) =
+let parseConfig (configText:string) =
     try
         JsonConvert.DeserializeObject<Configuration>(configText, FSharpJsonConverter.serializerSettings)
     with
     | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
 
 /// Tries to parse the config file at the provided path.
-let loadConfig (configPath : string) =
+let loadConfig (configPath:string) =
     File.ReadAllText configPath
     |> parseConfig
 
@@ -515,7 +515,7 @@ let defaultConfiguration =
         reader.ReadToEnd()
         |> parseConfig
 
-let serializeConfig (config : Configuration) =
+let serializeConfig (config:Configuration) =
     JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
 
 type LineRules =
@@ -541,7 +541,7 @@ let private parseHints (hints:string []) =
     |> Array.toList
     |> MergeSyntaxTrees.mergeHints
 
-let flattenConfig (config : Configuration) =
+let flattenConfig (config:Configuration) =
     let deprecatedAllRules =
         [|
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat

@@ -6,13 +6,13 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestFormattingClassMemberSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ClassMemberSpacing.rule)
-    
+
     [<Test>]
     member this.``Error for no space between class members``() =
         this.Parse """
 module Program
 
-type T = T of int with 
+type T = T of int with
     static member x = 1
     static member x = 2
 """
@@ -31,7 +31,7 @@ type T = T of int with
 """
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``No error for correct spacing between class members with comment``() =
         this.Parse """
@@ -53,7 +53,7 @@ type GenericOptions =
         ()
 """
 
-        Assert.IsTrue(this.NoErrorsExist)       
+        Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``Error for too much spacing between class members``() =
@@ -69,4 +69,4 @@ type T = T of int with
 """
 
         Assert.IsTrue(this.ErrorExistsAt(6, 0))
-   
+

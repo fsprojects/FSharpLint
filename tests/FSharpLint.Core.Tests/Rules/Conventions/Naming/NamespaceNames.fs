@@ -1,5 +1,7 @@
 module FSharpLint.Core.Tests.Rules.Conventions.NamespaceNames
 
+// fsharplint:disable TupleIndentation
+
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
@@ -17,7 +19,7 @@ type TestConventionsNamespaceNames() =
     member this.NamespaceIsPascalCase() =
         this.Parse """
 namespace Matt.Dog.Cat"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -26,7 +28,7 @@ namespace Matt.Dog.Cat"""
 namespace matt.dog.cat"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
-        
+
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/240
     [<Test>]
     member this.``Linter must not complain about naming of fsx file``() =
@@ -44,4 +46,4 @@ type MyClass2() as this =
   member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
 
         this.AssertNoWarnings()
-       
+

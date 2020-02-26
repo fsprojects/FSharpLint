@@ -244,11 +244,11 @@ module Lint =
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
-                    let typeChecksSuccessful (typeChecks: Async<bool> list) =
+                    let typeChecksSuccessful (typeChecks:Async<bool> list) =
                         typeChecks
                         |> List.reduce (Async.combine (&&))
 
-                    let typeCheckSuggestion (suggestion: Suggestion.LintWarning) =
+                    let typeCheckSuggestion (suggestion:Suggestion.LintWarning) =
                         typeChecksSuccessful suggestion.Details.TypeChecks
                         |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
 
@@ -289,7 +289,7 @@ module Lint =
 
         (exitCode, (workingDir, exePath, args))
 
-    let getProjectFileInfo (releaseConfig : string option) (projectFilePath: string) =
+    let getProjectFileInfo (releaseConfig:string option) (projectFilePath:string) =
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
 
         let msBuildParams =
@@ -314,7 +314,7 @@ module Lint =
                 let isSourceFile (option:string) =
                     option.TrimStart().StartsWith("-") |> not
 
-                let compileFilesToAbsolutePath (f: string) =
+                let compileFilesToAbsolutePath (f:string) =
                     if Path.IsPathRooted f then
                         f
                     else

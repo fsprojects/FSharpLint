@@ -20,7 +20,7 @@ let private isSymbol character =
     symbols |> List.exists ((=) character)
 
 let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
-    match config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator with
+    match (config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator) with
     | (numberOfSpacesAllowed, _) when numberOfSpacesAllowed > 0 ->
         str.Length - str.TrimEnd().Length <= numberOfSpacesAllowed
     | (_, isOneSpaceAllowedAfterOperator) when isOneSpaceAllowedAfterOperator ->

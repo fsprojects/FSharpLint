@@ -48,7 +48,7 @@ module TestApi =
             for _ in 0..iterations do
                 stopwatch.Restart()
 
-                let _ = lintParsedFile OptionalLintParameters.Default fileInfo sourceFile
+                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
 
                 stopwatch.Stop()
 
