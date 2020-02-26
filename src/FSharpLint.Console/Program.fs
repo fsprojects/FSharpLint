@@ -29,11 +29,14 @@ with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
 
+// TODO: investigate erroneous warning on this type definition
+// fsharplint:disable UnionDefinitionIndentation
 and private LintArgs =
     | [<MainCommand; Mandatory>] Target of target:string
     | [<AltCommandLine("-c")>] Release_Config of releaseConfig:string
     | [<AltCommandLine("-l")>] Lint_Config of lintConfig:string
     | File_Type of FileType
+// fsharplint:enable UnionDefinitionIndentation
 with
     interface IArgParserTemplate with
         member this.Usage =

@@ -14,16 +14,16 @@ module ParseFile =
     [<NoEquality; NoComparison>]
     type FileParseInfo =
         { /// Contents of the file.
-          text: string
+          Text: string
 
           /// File represented as an AST.
-          ast: ParsedInput
+          Ast: ParsedInput
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          typeCheckResults: FSharpCheckFileResults option
+          TypeCheckResults: FSharpCheckFileResults option
 
           /// Path to the file.
-          file: string }
+          File: string }
 
     [<NoComparison>]
     type ParseFileFailure =
@@ -55,10 +55,10 @@ module ParseFile =
             match typeCheckFile() with
             | Success(typeCheckResults) ->
 
-                { text = source
-                  ast = parseTree
-                  typeCheckResults = typeCheckResults
-                  file = file } |> Success
+                { Text = source
+                  Ast = parseTree
+                  TypeCheckResults = typeCheckResults
+                  File = file } |> Success
             | Failed(_) -> Failed(AbortedTypeCheck)
         | None -> Failed(FailedToParseFile(parseResults.Errors))
 

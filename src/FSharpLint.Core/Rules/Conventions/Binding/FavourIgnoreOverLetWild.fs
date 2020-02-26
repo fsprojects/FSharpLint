@@ -22,15 +22,15 @@ let private checkForBindingToAWildcard pattern range =
         Array.empty
 
 let private runner (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, _, range, _))
-            when Helper.Binding.isLetBinding args.nodeIndex args.syntaxArray args.skipArray ->
+            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray ->
         checkForBindingToAWildcard pattern range
     | _ -> Array.empty
 
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
-    { name = "FavourIgnoreOverLetWild"
-      identifier = Identifiers.FavourIgnoreOverLetWild
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "FavourIgnoreOverLetWild"
+      Identifier = Identifiers.FavourIgnoreOverLetWild
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

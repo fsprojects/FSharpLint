@@ -1,5 +1,7 @@
 ﻿namespace FSharpLint.FunctionalTest
 
+// fsharplint:disable TupleIndentation
+
 module Tests =
 
     open FSharpLint.Framework

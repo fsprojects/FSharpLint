@@ -37,16 +37,16 @@ let private generateFix (text:string) range = lazy(
 
 
 let runner args =
-    match (args.astNode, args.checkInfo) with
+    match (args.AstNode, args.CheckInfo) with
     | (AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo) ->
         { Range = range
           Message = Resources.GetString("RulesRedundantNewKeyword")
-          SuggestedFix = Some (generateFix args.fileContent range)
+          SuggestedFix = Some (generateFix args.FileContent range)
           TypeChecks = [doesNotImplementIDisposable checkInfo identifier] } |> Array.singleton
     | _ -> Array.empty
 
 let rule =
-    { name = "RedundantNewKeyword"
-      identifier = Identifiers.RedundantNewKeyword
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "RedundantNewKeyword"
+      Identifier = Identifiers.RedundantNewKeyword
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

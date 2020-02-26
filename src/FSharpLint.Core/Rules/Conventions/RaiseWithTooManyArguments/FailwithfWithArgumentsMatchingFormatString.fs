@@ -7,7 +7,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private runner (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression(SynExpr.App(_, false, _, _, _)) as expr ->
         match expr with
         | FuncApp(expressions, range) ->
@@ -26,7 +26,7 @@ let private runner (args:AstNodeRuleParams) =
 
 
 let rule =
-    { name = "FailwithfWithArgumentsMatchingFormatString"
-      identifier = Identifiers.FailwithfWithArgumentsMatchingFormattingString
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "FailwithfWithArgumentsMatchingFormatString"
+      Identifier = Identifiers.FailwithfWithArgumentsMatchingFormattingString
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

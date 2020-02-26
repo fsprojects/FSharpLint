@@ -31,7 +31,7 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
             let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
-            let lineRules = { LineRules.indentationRule = None; noTabCharactersRule = Some rule; genericLineRules = [||] }
+            let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = Some rule; GenericLineRules = [||] }
 
             runLineRules lineRules fileName input context
             |> Array.iter this.PostSuggestion

@@ -40,7 +40,7 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
 
 /// Compares the hint trie against a given location in the abstract syntax array.
 let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (boundVariables:Dictionary<_, _>) notify =
-    trie.matchedHint |> List.iter notify
+    trie.MatchedHint |> List.iter notify
 
     if i < nodeArray.Length then
         let node = nodeArray.[i]
@@ -49,11 +49,11 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
             // Skip the paren.
             checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
         else
-            match trie.edges.lookup.TryGetValue node.Hashcode with
+            match trie.Edges.Lookup.TryGetValue node.Hashcode with
             | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
             | false, _ -> ()
 
-        trie.edges.anyMatch
+        trie.Edges.AnyMatch
         |> List.iter (fun (var, trie) -> 
             match var with
             | Some(var) -> 

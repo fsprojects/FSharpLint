@@ -8,13 +8,17 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    { maxCharactersOnLine : int }
+    {
+        // fsharplint:disable RecordFieldNames
+        maxCharactersOnLine : int
+        // fsharplint:enable RecordFieldNames
+    }
 
 let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let maxCharacters = config.maxCharactersOnLine
-    let lineLength = String.length args.line
+    let lineLength = String.length args.Line
     if lineLength > maxCharacters then
-        let range = mkRange "" (mkPos args.lineNumber (maxCharacters + 1)) (mkPos args.lineNumber lineLength)
+        let range = mkRange "" (mkPos args.LineNumber (maxCharacters + 1)) (mkPos args.LineNumber lineLength)
         let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
         { Range = range
           Message = String.Format(errorFormatString, (maxCharacters + 1))
@@ -24,7 +28,7 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
         Array.empty
 
 let rule config =
-    { name = "MaxCharactersOnLine"
-      identifier = Identifiers.MaxCharactersOnLine
-      ruleConfig = { LineRuleConfig.runner = checkMaxCharactersOnLine config } }
+    { Name = "MaxCharactersOnLine"
+      Identifier = Identifiers.MaxCharactersOnLine
+      RuleConfig = { LineRuleConfig.Runner = checkMaxCharactersOnLine config } }
     |> LineRule

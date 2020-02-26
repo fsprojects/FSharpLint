@@ -27,15 +27,15 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
     | _ -> Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents false (getValueOrFunctionIdents args.checkInfo) false pattern
+        getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
     | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.syntaxArray args.skipArray args.nodeIndex
-                getPatternIdents isPublic (getValueOrFunctionIdents args.checkInfo) true pattern
+                let isPublic = isPublic args.SyntaxArray args.SkipArray args.NodeIndex
+                getPatternIdents isPublic (getValueOrFunctionIdents args.CheckInfo) true pattern
             | _ -> Array.empty
         else
             Array.empty
@@ -49,8 +49,8 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "NonPublicValuesNames"
-      identifier = Identifiers.NonPublicValuesNames
-      ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
+    { Name = "NonPublicValuesNames"
+      Identifier = Identifiers.NonPublicValuesNames
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

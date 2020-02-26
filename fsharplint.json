@@ -144,7 +144,7 @@
             "recordFieldNames": {
               "enabled": true,
               "config":  {
-                "naming": "CamelCase",
+                "naming": "PascalCase",
                 "underscores": "None"
               }},
             "enumCasesNames": {

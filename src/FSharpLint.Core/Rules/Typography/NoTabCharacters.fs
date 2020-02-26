@@ -21,10 +21,10 @@ let private isInLiteralString literalStrings range =
     literalStrings |> Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range)
 
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
-    let indexOfTab = args.line.IndexOf('\t')
+    let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = mkRange "" (mkPos args.lineNumber indexOfTab) (mkPos args.lineNumber (indexOfTab + 1))
+        let range = mkRange "" (mkPos args.LineNumber indexOfTab) (mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")
@@ -36,7 +36,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
         Array.empty
 
 let rule =
-    { name = "NoTabCharacters"
-      identifier = Identifiers.NoTabCharacters
-      ruleConfig = { runner = checkNoTabCharacters } }
+    { Name = "NoTabCharacters"
+      Identifier = Identifiers.NoTabCharacters
+      RuleConfig = { Runner = checkNoTabCharacters } }
     |> NoTabCharactersRule

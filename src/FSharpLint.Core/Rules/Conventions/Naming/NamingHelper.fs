@@ -107,7 +107,7 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
     let tryAddFix fix message = (message, fix identifier)
 
     let casingError =
-        match config.naming with
+        match config.Naming with
         | Some NamingCase.PascalCase ->
             pascalCaseRule idText
             |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
@@ -117,7 +117,7 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         | _ -> None
 
     let underscoresError =
-        match config.underscores with
+        match config.Underscores with
         | Some NamingUnderscores.None ->
             underscoreRule false idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
@@ -127,13 +127,13 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         | _ -> None
 
     let prefixError =
-        config.prefix
+        config.Prefix
         |> Option.bind (fun prefix ->
             prefixRule prefix idText
             |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix)))
 
     let suffixError =
-        config.suffix
+        config.Suffix
         |> Option.bind (fun suffix ->
             suffixRule suffix idText
             |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix)))
@@ -158,15 +158,15 @@ let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idTe
 
 let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
     let astNodeRunner (args:AstNodeRuleParams) =
-        namingRule.ruleConfig.getIdentifiersToCheck args
+        namingRule.RuleConfig.GetIdentifiersToCheck args
         |> Array.collect (fun (identifier, idText, typeCheck) ->
-            let suggestions = checkIdentifier namingRule.ruleConfig.config identifier idText
+            let suggestions = checkIdentifier namingRule.RuleConfig.Config identifier idText
             suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
 
     {
-        RuleMetadata.name = namingRule.name
-        identifier = namingRule.identifier
-        ruleConfig = { AstNodeRuleConfig.runner = astNodeRunner; cleanup = id }
+        RuleMetadata.Name = namingRule.Name
+        Identifier = namingRule.Identifier
+        RuleConfig = { AstNodeRuleConfig.Runner = astNodeRunner; Cleanup = id }
     }
 
 let addDefaults (identifiers:Ident []) =

@@ -13,7 +13,7 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     | Some (AstNode.Expression (SynExpr.Paren _)) ->
         Array.empty
     | _ ->
-        ExpressionUtilities.tryFindTextOfRange range args.fileContent
+        ExpressionUtilities.tryFindTextOfRange range args.FileContent
         |> Option.map (fun text ->
             let suggestedFix = lazy(
                 { FromRange = range; FromText = text; ToText = "(" + text + ")" }
@@ -27,7 +27,7 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses
 
 let rule =
-    { name = "TupleParentheses"
-      identifier = Identifiers.TupleParentheses
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "TupleParentheses"
+      Identifier = Identifiers.TupleParentheses
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

@@ -45,7 +45,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:range) (doBangEx
         |> List.filter ((=) callerIdent.idText)
         |> List.choose (fun _ ->
             let suggestedFix = lazy(
-                ExpressionUtilities.tryFindTextOfRange doTokenRange args.fileContent
+                ExpressionUtilities.tryFindTextOfRange doTokenRange args.FileContent
                 |> Option.map (fun fromText ->
                     { FromText = fromText
                       FromRange = doTokenRange
@@ -59,14 +59,14 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:range) (doBangEx
     | _ -> Array.empty
 
 let runner args =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression (SynExpr.DoBang (expr, range)) ->
-        let parents = args.getParents 5
+        let parents = args.GetParents 5
         checkRecursiveAsyncFunction args range expr parents
     | _ -> Array.empty
 
 let rule =
-    { name = "RecursiveAsyncFunction"
-      identifier = Identifiers.RecursiveAsyncFunction
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "RecursiveAsyncFunction"
+      Identifier = Identifiers.RecursiveAsyncFunction
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

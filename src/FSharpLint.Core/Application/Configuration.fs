@@ -26,7 +26,7 @@ module FSharpJsonConverter =
 
         override x.WriteJson(writer, value, serializer) =
             let value =
-                if value = null then null
+                if isNull value then null
                 else
                     let _,fields = FSharpValue.GetUnionFields(value, value.GetType())
                     fields.[0]
@@ -39,7 +39,7 @@ module FSharpJsonConverter =
                 else innerType
             let value = serializer.Deserialize(reader, innerType)
             let cases = FSharpType.GetUnionCases(t)
-            if value = null then FSharpValue.MakeUnion(cases.[0], [||])
+            if isNull value then FSharpValue.MakeUnion(cases.[0], [||])
             else FSharpValue.MakeUnion(cases.[1], [|value|])
 
     let private converters =
@@ -120,6 +120,8 @@ module IgnoreFiles =
                 when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
             | _ -> isCurrentlyIgnored) false
 
+// Non-standard record field naming for config serialization.
+// fsharplint:disable RecordFieldNames
 type RuleConfig<'Config> = {
     enabled : bool
     config : 'Config option
@@ -488,6 +490,8 @@ with
         NoTabCharacters = None
     }
 
+// fsharplint:enable RecordFieldNames
+
 /// Tries to parse the provided config text.
 let parseConfig (configText:string) =
     try
@@ -519,14 +523,14 @@ let serializeConfig (config:Configuration) =
     JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
 
 type LineRules =
-    { genericLineRules : RuleMetadata<LineRuleConfig> []
-      noTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
-      indentationRule : RuleMetadata<IndentationRuleConfig> option }
+    { GenericLineRules : RuleMetadata<LineRuleConfig> []
+      NoTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
+      IndentationRule : RuleMetadata<IndentationRuleConfig> option }
 
 type LoadedRules =
-    { astNodeRules : RuleMetadata<AstNodeRuleConfig> []
-      lineRules : LineRules
-      deprecatedRules : Rule [] }
+    { AstNodeRules : RuleMetadata<AstNodeRuleConfig> []
+      LineRules : LineRules
+      DeprecatedRules : Rule [] }
 
 let private parseHints (hints:string []) =
     let parseHint hint =
@@ -547,7 +551,7 @@ let flattenConfig (config:Configuration) =
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.hintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
         |] |> Array.concat
 
     let allRules =
@@ -623,19 +627,19 @@ let flattenConfig (config:Configuration) =
     let mutable noTabCharactersRule = None
     Array.append allRules deprecatedAllRules
     |> Array.distinctBy (function // Discard any deprecated rules which were define in a non-deprecated form.
-        | Rule.AstNodeRule rule -> rule.identifier
-        | Rule.LineRule rule -> rule.identifier
-        | Rule.IndentationRule rule -> rule.identifier
-        | Rule.NoTabCharactersRule rule -> rule.identifier)
+        | Rule.AstNodeRule rule -> rule.Identifier
+        | Rule.LineRule rule -> rule.Identifier
+        | Rule.IndentationRule rule -> rule.Identifier
+        | Rule.NoTabCharactersRule rule -> rule.Identifier)
     |> Array.iter (function
         | AstNodeRule rule -> astNodeRules.Add rule
         | LineRule rule -> lineRules.Add(rule)
         | IndentationRule rule -> indentationRule <- Some rule
         | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
 
-    { LoadedRules.astNodeRules = astNodeRules.ToArray()
-      lineRules =
-          { genericLineRules = lineRules.ToArray()
-            indentationRule = indentationRule
-            noTabCharactersRule = noTabCharactersRule }
-      deprecatedRules = deprecatedAllRules }
+    { LoadedRules.AstNodeRules = astNodeRules.ToArray()
+      LineRules =
+          { GenericLineRules = lineRules.ToArray()
+            IndentationRule = indentationRule
+            NoTabCharactersRule = noTabCharactersRule }
+      DeprecatedRules = deprecatedAllRules }

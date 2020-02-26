@@ -5,10 +5,10 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 let config =
-    { NamingConfig.naming = Some NamingCase.PascalCase
-      underscores = Some NamingUnderscores.None
-      prefix = None
-      suffix = None }
+    { NamingConfig.Naming = Some NamingCase.PascalCase
+      Underscores = Some NamingUnderscores.None
+      Prefix = None
+      Suffix = None }
 [<TestFixture>]
 type TestConventionsEnumCasesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(EnumCasesNames.rule config)

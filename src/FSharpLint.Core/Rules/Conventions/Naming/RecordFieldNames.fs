@@ -6,14 +6,14 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
         identifier |> Option.toArray
     | _ -> Array.empty
 
 let rule config =
-    { name = "RecordFieldNames"
-      identifier = Identifiers.RecordFieldNames
-      ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
+    { Name = "RecordFieldNames"
+      Identifier = Identifiers.RecordFieldNames
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

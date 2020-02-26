@@ -16,7 +16,7 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
         |> List.toArray
         |> Array.pairwise
         |> Array.choose (fun (declOne, declTwo) ->
-            let numPreceedingCommentLines = countPrecedingCommentLines args.fileContent declOne.Range.End declTwo.Range.Start
+            let numPreceedingCommentLines = countPrecedingCommentLines args.FileContent declOne.Range.End declTwo.Range.Start
             if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 + numPreceedingCommentLines then
                 let intermediateRange =
                     let startLine = declOne.Range.EndLine + 1
@@ -38,13 +38,13 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                 None)
 
 let runner args =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.ModuleOrNamespace synModuleOrNamespace ->
         checkModuleDeclSpacing args synModuleOrNamespace
     | _ -> Array.empty
 
 let rule =
-    { name = "ModuleDeclSpacing"
-      identifier = Identifiers.ModuleDeclSpacing
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "ModuleDeclSpacing"
+      Identifier = Identifiers.ModuleDeclSpacing
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

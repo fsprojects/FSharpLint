@@ -38,11 +38,11 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
           TypeChecks = [] }
 
     let argumentsAsIdentifiers =
-        lambda.arguments
+        lambda.Arguments
         |> List.map Helper.FunctionReimplementation.getLambdaParamIdent
         |> List.rev
 
-    isFunctionPointless lambda.body argumentsAsIdentifiers
+    isFunctionPointless lambda.Body argumentsAsIdentifiers
     |> Option.map generateError
     |> Option.toArray
 
@@ -50,7 +50,7 @@ let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaIsNotPointless
 
 let rule =
-    { name = "ReimplementsFunction"
-      identifier = Identifiers.ReimplementsFunction
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "ReimplementsFunction"
+      Identifier = Identifiers.ReimplementsFunction
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

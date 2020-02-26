@@ -5,10 +5,10 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 let config =
-    { NamingConfig.naming = Some NamingCase.PascalCase
-      underscores = Some NamingUnderscores.None
-      prefix = None
-      suffix = Some "Exception" }
+    { NamingConfig.Naming = Some NamingCase.PascalCase
+      Underscores = Some NamingUnderscores.None
+      Prefix = None
+      Suffix = Some "Exception" }
 [<TestFixture>]
 type TestConventionsExceptionNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ExceptionNames.rule config)

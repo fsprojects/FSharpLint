@@ -27,13 +27,13 @@ type TestAstNodeRuleBase (rule:Rule) =
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
-                | _ -> parseInfo.typeCheckResults
+                | _ -> parseInfo.TypeCheckResults
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
-            rule.ruleConfig.cleanup()
+            rule.RuleConfig.Cleanup()
 
             suggestions |> Array.iter this.PostSuggestion
         | _ ->

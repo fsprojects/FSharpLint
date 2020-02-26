@@ -17,15 +17,15 @@ let private checkForWildcardNamedWithAsPattern pattern =
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Pattern(SynPat.Named(SynPat.Wild(_), _, _, _, _) as pattern) ->
         checkForWildcardNamedWithAsPattern pattern
     | _ -> Array.empty
 
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
-    { name = "WildcardNamedWithAsPattern"
-      identifier = Identifiers.WildcardNamedWithAsPattern
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "WildcardNamedWithAsPattern"
+      Identifier = Identifiers.WildcardNamedWithAsPattern
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule
 

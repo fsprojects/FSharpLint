@@ -5,7 +5,7 @@ open FSharpLint.Framework.Rules
 let runner = Helper.RaiseWithTooManyArguments.checkRaiseWithTooManyArgs "invalidOp" 1 "RulesInvalidOpWithSingleArgument"
 
 let rule =
-    { name = "InvalidOpWithSingleArgument"
-      identifier = Identifiers.InvalidOpWithSingleArgument
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "InvalidOpWithSingleArgument"
+      Identifier = Identifiers.InvalidOpWithSingleArgument
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

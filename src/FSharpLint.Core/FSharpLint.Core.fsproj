@@ -104,10 +104,6 @@
     <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Application  -->
     <Compile Include="Application\Configuration.fs" />
-    <Compile Include="Application\LintWarning.fsi" />
-    <Compile Include="Application\LintWarning.fs" />
-    <Compile Include="Application\ConfigurationManager.fs" />
-    <Compile Include="Application\XmlConfiguration.fs" />
     <Compile Include="Application\Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
     <EmbeddedResource Include="..\FSharpLint.Core\DefaultConfiguration.json">

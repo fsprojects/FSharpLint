@@ -7,7 +7,11 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    { maxLines : int }
+    {
+        // fsharplint:disable RecordFieldNames
+        maxLines : int
+        // fsharplint:enable RecordFieldNames
+    }
 
 let private error name i actual =
     let errorFormatString = Resources.GetString("RulesSourceLengthError")

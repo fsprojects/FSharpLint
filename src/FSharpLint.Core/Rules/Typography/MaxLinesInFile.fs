@@ -8,7 +8,11 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    { maxLinesInFile : int }
+    {
+        // fsharplint:disable RecordFieldNames
+        maxLinesInFile : int
+        // fsharplint:enable RecordFieldNames
+    }
 
 let private checkNumberOfLinesInFile numberOfLines line maxLines =
     if numberOfLines > maxLines then
@@ -21,13 +25,13 @@ let private checkNumberOfLinesInFile numberOfLines line maxLines =
         Array.empty
 
 let checkMaxLinesInFile (config:Config) (args:LineRuleParams) =
-    if args.isLastLine then
-        checkNumberOfLinesInFile args.lineNumber args.line config.maxLinesInFile
+    if args.IsLastLine then
+        checkNumberOfLinesInFile args.LineNumber args.Line config.maxLinesInFile
     else
         Array.empty
 
 let rule config =
-    { name = "MaxLinesInFile"
-      identifier = Identifiers.MaxLinesInFile
-      ruleConfig = { LineRuleConfig.runner = checkMaxLinesInFile config } }
+    { Name = "MaxLinesInFile"
+      Identifier = Identifiers.MaxLinesInFile
+      RuleConfig = { LineRuleConfig.Runner = checkMaxLinesInFile config } }
     |> LineRule

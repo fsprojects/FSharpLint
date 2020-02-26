@@ -14,7 +14,7 @@ open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.Rules
 
 type Config =
-    { hintTrie : MergeSyntaxTrees.Edges }
+    { HintTrie : MergeSyntaxTrees.Edges }
 
 let rec private extractSimplePatterns = function
     | SynSimplePats.SimplePats(simplePatterns, _) ->
@@ -313,7 +313,7 @@ module private MatchExpression =
 
     and matchLambda arguments =
         match (arguments.Expression, arguments.Hint) with
-        | Lambda({ arguments = args; body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
+        | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
             match matchLambdaArguments lambdaArgs args with
             | LambdaMatch.Match(lambdaArguments) ->
                 matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
@@ -504,7 +504,7 @@ module private FormatHint =
             | HintExpr(Expression.Variable(varChar)) when replace ->
                 match matchedVariables.TryGetValue varChar with
                 | true, expr ->
-                    match ExpressionUtilities.tryFindTextOfRange expr.Range args.fileContent with
+                    match ExpressionUtilities.tryFindTextOfRange expr.Range args.FileContent with
                     | Some(replacement) -> replacement
                     | _ -> varChar.ToString()
                 | _ -> varChar.ToString()
@@ -569,9 +569,9 @@ module private FormatHint =
         |> String.concat " "
 
 let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVariables parentAstNode =
-    let matched = FormatHint.toString false None args matchedVariables None hint.matchedNode
+    let matched = FormatHint.toString false None args matchedVariables None hint.MatchedNode
 
-    match hint.suggestion with
+    match hint.Suggestion with
     | Suggestion.Expr(expr) ->
         let suggestion = FormatHint.toString false None args matchedVariables None (HintExpr expr)
         let errorFormatString = Resources.GetString("RulesHintRefactor")
@@ -580,7 +580,7 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
         let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
 
         let suggestedFix = lazy(
-            ExpressionUtilities.tryFindTextOfRange range args.fileContent
+            ExpressionUtilities.tryFindTextOfRange range args.FileContent
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText }))
 
         { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
@@ -641,8 +641,8 @@ let [<Literal>] private MaxBreadcrumbs = 6
 let private suggestions = ResizeArray()
 
 let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
-    let breadcrumbs = args.getParents MaxBreadcrumbs
-    match (args.astNode, hint.matchedNode) with
+    let breadcrumbs = args.GetParents MaxBreadcrumbs
+    match (args.AstNode, hint.MatchedNode) with
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
     | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
     | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern (pattern, hintPattern) ->
@@ -652,9 +652,9 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
         let arguments =
             { MatchExpression.LambdaArguments = Map.ofList []
               MatchExpression.MatchedVariables = Dictionary<_, _>()
-              MatchExpression.Expression = args.astNode
+              MatchExpression.Expression = args.AstNode
               MatchExpression.Hint = hintExpr
-              MatchExpression.FSharpCheckFileResults = args.checkInfo
+              MatchExpression.FSharpCheckFileResults = args.CheckInfo
               MatchExpression.Breadcrumbs = breadcrumbs }
 
         match MatchExpression.matchHintExpr arguments with
@@ -663,11 +663,11 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
                 hintError checks hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
                 |> suggestions.Add
 
-            match (hint.matchedNode, hint.suggestion) with
+            match (hint.MatchedNode, hint.Suggestion) with
             | SuggestingReplacementOfLambda ->
                 match (breadcrumbs, expr.Range) with
                 | RequiresCheck(index, methodIdent) ->
-                    match args.checkInfo with
+                    match args.CheckInfo with
                     | Some checkFile ->
                         let typeCheck = canReplaceLambdaWithFunction checkFile methodIdent index
                         suggest (typeCheck::typeChecks)
@@ -682,8 +682,8 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
 /// Any possible matches that are found will be given to the callback function `notify`,
 /// any matches found are not guaranteed and it's expected that the caller verify the match.
 let private runner (config:Config) (args:AstNodeRuleParams) =
-    match config.hintTrie.lookup.TryGetValue args.nodeHashcode with
-    | true, trie -> Helper.Hints.checkTrie (args.nodeIndex + 1) trie args.syntaxArray args.skipArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
+    match config.HintTrie.Lookup.TryGetValue args.NodeHashcode with
+    | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray args.SkipArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
     | false, _ -> ()
 
     let result = suggestions.ToArray()
@@ -691,7 +691,7 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
     result
 
 let rule config =
-    { name = "Hints"
-      identifier = Identifiers.Hints
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "Hints"
+      Identifier = Identifiers.Hints
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

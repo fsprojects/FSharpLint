@@ -29,7 +29,7 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleIndentation
 
 let rule =
-    { name = "TupleIndentation"
-      identifier = Identifiers.TupleIndentation
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "TupleIndentation"
+      Identifier = Identifiers.TupleIndentation
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

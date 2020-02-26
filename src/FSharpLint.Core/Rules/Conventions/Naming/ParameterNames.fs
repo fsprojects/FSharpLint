@@ -24,7 +24,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
     | _ -> Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
         | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
@@ -38,20 +38,20 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.syntaxArray args.skipArray args.nodeIndex
-                getPatternIdents isPublic (getValueOrFunctionIdents args.checkInfo) true pattern
+                let isPublic = isPublic args.SyntaxArray args.SkipArray args.NodeIndex
+                getPatternIdents isPublic (getValueOrFunctionIdents args.CheckInfo) true pattern
             | Member | Property ->
                 getPatternIdents false getMemberIdents true pattern
             | _ -> Array.empty
         else
             Array.empty
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents false (getValueOrFunctionIdents args.checkInfo) false pattern
+        getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
     | _ -> Array.empty
 
 let rule config =
-    { name = "ParameterNames"
-      identifier = Identifiers.ParameterNames
-      ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
+    { Name = "ParameterNames"
+      Identifier = Identifiers.ParameterNames
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

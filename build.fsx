@@ -20,11 +20,11 @@ let project = "FSharpLint"
 let release = ReleaseNotes.load "RELEASE_NOTES.md"
 Environment.setEnvironVar "Version" release.NugetVersion
 
-Target.create "Clean" (fun _ -> 
-    !! "src/*/bin" 
-    ++ "src/*/obj" 
-    ++ "tests/*/bin" 
-    ++ "tests/*/obj" 
+Target.create "Clean" (fun _ ->
+    !! "src/*/bin"
+    ++ "src/*/obj"
+    ++ "tests/*/bin"
+    ++ "tests/*/obj"
     |> Shell.cleanDirs)
 
 Target.create "Restore" (fun _ -> Paket.restore id)
@@ -34,9 +34,11 @@ Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
 
 Target.create "RunTests" (fun _ -> DotNet.test filterPerformanceTests "tests/FSharpLint.Core.Tests")
-Target.create "RunFunctionalTests" (fun _ -> DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest")
+Target.create "RunFunctionalTests" (fun _ ->
+  DotNet.restore id "tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.sln"
+  DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest")
 
-Target.create "Package" (fun _ ->        
+Target.create "Package" (fun _ ->
     let configure (c:DotNet.PackOptions) = { c with Configuration = DotNet.Release; OutputPath = Some "../../packaging" }
     DotNet.pack configure "src/FSharpLint.Core/FSharpLint.Core.fsproj"
     DotNet.pack configure "src/FSharpLint.Console/FSharpLint.Console.fsproj")
@@ -51,7 +53,7 @@ Target.create "Release" (fun _ ->
     Git.Branches.tag "" release.NugetVersion
     Git.Branches.pushTag "" "origin" release.NugetVersion)
 
-Target.create "GenerateDocs" (fun _ -> 
+Target.create "GenerateDocs" (fun _ ->
     Shell.cleanDir "docs"
 
     let projInfo =
@@ -74,15 +76,15 @@ Target.create "Default" ignore
 
 open Fake.Core.TargetOperators
 
-"Clean" 
+"Clean"
     ==> "Restore"
-    ==> "Build" 
+    ==> "Build"
     ==> "RunTests"
-    ==> "RunFunctionalTests" 
-    ==> "Package" 
-    ==> "GenerateDocs" 
+    ==> "RunFunctionalTests"
+    ==> "Package"
+    ==> "GenerateDocs"
     ==> "Default"
-    ==> "PublishPackages" 
+    ==> "PublishPackages"
     ==> "Release"
 
 Target.runOrDefault "Default"

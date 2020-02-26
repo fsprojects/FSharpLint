@@ -33,13 +33,13 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
                 | _ -> false
             | _ -> false
 
-        match lambda.arguments with
+        match lambda.Arguments with
         | [singleParameter] ->
             Helper.FunctionReimplementation.getLambdaParamIdent singleParameter
             |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
         | _ -> false
 
-    if canBeReplacedWithFunctionComposition lambda.body then
+    if canBeReplacedWithFunctionComposition lambda.Body then
         { Range = range
           Message = Resources.GetString("RulesCanBeReplacedWithComposition")
           SuggestedFix = None
@@ -51,7 +51,7 @@ let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaCannotBeReplacedWithComposition
 
 let rule =
-    { name = "CanBeReplacedWithComposition"
-      identifier = Identifiers.CanBeReplacedWithComposition
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "CanBeReplacedWithComposition"
+      Identifier = Identifiers.CanBeReplacedWithComposition
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

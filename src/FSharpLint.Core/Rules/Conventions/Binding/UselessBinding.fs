@@ -49,17 +49,17 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
-            when Helper.Binding.isLetBinding args.nodeIndex args.syntaxArray args.skipArray
+            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray
             && not isMutable ->
-        checkForUselessBinding args.checkInfo pattern expr range
+        checkForUselessBinding args.CheckInfo pattern expr range
     | _ ->
         Array.empty
 
 let rule =
-    { name = "UselessBinding"
-      identifier = Identifiers.UselessBinding
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "UselessBinding"
+      Identifier = Identifiers.UselessBinding
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule
 

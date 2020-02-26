@@ -43,17 +43,17 @@ type TestHintMatcherBase () =
                 ParseFile.parseSource input checker
 
         let rule =
-            match HintMatcher.rule { hintTrie = hintTrie }with
+            match HintMatcher.rule { HintTrie = hintTrie }with
             | Rules.AstNodeRule rule -> rule
             | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
-                | _ -> parseInfo.typeCheckResults
+                | _ -> parseInfo.TypeCheckResults
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
             suggestions |> Array.iter this.PostSuggestion
         | _ ->

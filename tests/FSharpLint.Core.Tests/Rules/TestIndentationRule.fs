@@ -31,7 +31,7 @@ type TestIndentationRuleBase (rule:Rule) =
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
             let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
-            let lineRules = { LineRules.indentationRule = Some rule; noTabCharactersRule = None; genericLineRules = [||] }
+            let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = [||] }
 
             runLineRules lineRules fileName input context
             |> Array.iter this.PostSuggestion

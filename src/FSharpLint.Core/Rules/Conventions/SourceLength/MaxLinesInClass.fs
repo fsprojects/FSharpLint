@@ -5,7 +5,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
         match repr with
         | SynTypeDefnRepr.ObjectModel(_) ->
@@ -14,7 +14,7 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "MaxLinesInClass"
-      identifier = Identifiers.MaxLinesInClass
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxLinesInClass"
+      Identifier = Identifiers.MaxLinesInClass
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

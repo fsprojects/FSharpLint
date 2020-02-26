@@ -113,8 +113,8 @@ module Lint =
           Configuration: Configuration.Configuration }
 
     type Context =
-        { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list }
+        { IndentationRuleContext : Map<int,bool*int>
+          NoTabCharactersRuleContext : (string * Range.range) list }
 
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
@@ -127,15 +127,15 @@ module Lint =
             |> Array.collect (fun (i, astNode) ->
                 let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                 let astNodeParams =
-                    { astNode = astNode.Actual
-                      nodeHashcode = astNode.Hashcode
-                      nodeIndex =  i
-                      syntaxArray = syntaxArray
-                      skipArray = skipArray
-                      getParents = getParents
-                      filePath = filePath
-                      fileContent = fileContent
-                      checkInfo = typeCheckResults }
+                    { AstNode = astNode.Actual
+                      NodeHashcode = astNode.Hashcode
+                      NodeIndex =  i
+                      SyntaxArray = syntaxArray
+                      SkipArray = skipArray
+                      GetParents = getParents
+                      FilePath = filePath
+                      FileContent = fileContent
+                      CheckInfo = typeCheckResults }
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
@@ -144,10 +144,10 @@ module Lint =
                 |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
 
         let context =
-            { indentationRuleContext = indentationRuleState
-              noTabCharactersRuleContext = noTabCharactersRuleState }
+            { IndentationRuleContext = indentationRuleState
+              NoTabCharactersRuleContext = noTabCharactersRuleState }
 
-        rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
+        rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
         (astNodeSuggestions, context)
 
     let runLineRules (lineRules:Configuration.LineRules) (filePath:string) (fileContent:string) (context:Context) =
@@ -155,22 +155,22 @@ module Lint =
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
             let lineParams =
-                { LineRuleParams.line = line
-                  lineNumber = lineNumber + 1
-                  isLastLine = isLastLine
-                  filePath = filePath
-                  fileContent = fileContent }
+                { LineRuleParams.Line = line
+                  LineNumber = lineNumber + 1
+                  IsLastLine = isLastLine
+                  FilePath = filePath
+                  FileContent = fileContent }
 
             let indentationError =
-                lineRules.indentationRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule context.indentationRuleContext lineParams)
+                lineRules.IndentationRule
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.IndentationRuleContext lineParams)
 
             let noTabCharactersError =
-                lineRules.noTabCharactersRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule context.noTabCharactersRuleContext lineParams)
+                lineRules.NoTabCharactersRule
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.NoTabCharactersRuleContext lineParams)
 
             let lineErrors =
-                lineRules.genericLineRules
+                lineRules.GenericLineRules
                 |> Array.collect (fun rule -> runLineRule rule lineParams)
 
             [|
@@ -202,7 +202,7 @@ module Lint =
             if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
-        Starting(fileInfo.file) |> lintInfo.ReportLinterProgress
+        Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
         let cancelHasNotBeenRequested () =
             match lintInfo.CancellationToken with
@@ -211,22 +211,22 @@ module Lint =
 
         let enabledRules = Configuration.flattenConfig lintInfo.Configuration
 
-        let lines = String.toLines fileInfo.text |> Array.map (fun (line, _, _) -> line) |> Array.toList
+        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let allRuleNames =
             [|
-                enabledRules.lineRules.indentationRule |> Option.map (fun rule -> rule.name) |> Option.toArray
-                enabledRules.lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.name) |> Option.toArray
-                enabledRules.lineRules.genericLineRules |> Array.map (fun rule -> rule.name)
-                enabledRules.astNodeRules |> Array.map (fun rule -> rule.name)
+                enabledRules.LineRules.IndentationRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
+                enabledRules.LineRules.NoTabCharactersRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
+                enabledRules.LineRules.GenericLineRules |> Array.map (fun rule -> rule.Name)
+                enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
         let suppressedRulesByLine = Suppression.getSuppressedRulesPerLine allRuleNames lines
 
         try
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.ast
+            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.typeCheckResults fileInfo.file fileInfo.text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.file fileInfo.text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.LineRules fileInfo.File fileInfo.Text context
 
             [|
                 lineSuggestions
@@ -260,9 +260,9 @@ module Lint =
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
-        | e -> Failed(fileInfo.file, e) |> lintInfo.ReportLinterProgress
+        | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
 
-        ReachedEnd(fileInfo.file, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
+        ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
     let private runProcess (workingDir:string) (exePath:string) (args:string) =
         let psi = System.Diagnostics.ProcessStartInfo()
@@ -496,9 +496,7 @@ module Lint =
                     |> Array.map (fun (s, _, _) ->
                         let endIndex = s.IndexOf(".fsproj") + 7
                         let startIndex = s.IndexOf(",") + 1
-                        let projectPath = s.Substring(startIndex, endIndex - startIndex)
-                        projectPath.Trim([|'"'; ' '|]))
-                    |> Array.map (fun projectPath ->
+                        let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
                         let projectPath =
                             if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
                                 projectPath
@@ -544,10 +542,10 @@ module Lint =
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
-                { ParseFile.text = parsedFileInfo.Source
-                  ParseFile.ast = parsedFileInfo.Ast
-                  ParseFile.typeCheckResults = parsedFileInfo.TypeCheckResults
-                  ParseFile.file = "/home/user/Dog.Test.fsx" }
+                { ParseFile.Text = parsedFileInfo.Source
+                  ParseFile.Ast = parsedFileInfo.Ast
+                  ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
+                  ParseFile.File = "/home/user/Dog.Test.fsx" }
 
             lint lintInformation parsedFileInfo
 
@@ -562,9 +560,9 @@ module Lint =
         match ParseFile.parseSource source checker with
         | ParseFile.Success(parseFileInformation) ->
             let parsedFileInfo =
-                { Source = parseFileInformation.text
-                  Ast = parseFileInformation.ast
-                  TypeCheckResults = parseFileInformation.typeCheckResults }
+                { Source = parseFileInformation.Text
+                  Ast = parseFileInformation.Ast
+                  TypeCheckResults = parseFileInformation.TypeCheckResults }
 
             lintParsedSource optionalParams parsedFileInfo
         | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
@@ -587,10 +585,10 @@ module Lint =
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
-                { ParseFile.text = parsedFileInfo.Source
-                  ParseFile.ast = parsedFileInfo.Ast
-                  ParseFile.typeCheckResults = parsedFileInfo.TypeCheckResults
-                  ParseFile.file = filePath }
+                { ParseFile.Text = parsedFileInfo.Source
+                  ParseFile.Ast = parsedFileInfo.Ast
+                  ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
+                  ParseFile.File = filePath }
 
             lint lintInformation parsedFileInfo
 
@@ -605,9 +603,9 @@ module Lint =
             match ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->
                 let parsedFileInfo =
-                    { Source = astFileParseInfo.text
-                      Ast = astFileParseInfo.ast
-                      TypeCheckResults = astFileParseInfo.typeCheckResults }
+                    { Source = astFileParseInfo.Text
+                      Ast = astFileParseInfo.Ast
+                      TypeCheckResults = astFileParseInfo.TypeCheckResults }
 
                 lintParsedFile optionalParams parsedFileInfo filePath
             | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)

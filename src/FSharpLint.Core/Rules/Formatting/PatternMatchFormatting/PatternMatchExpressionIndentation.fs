@@ -13,8 +13,8 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
     |> List.toArray
     |> Array.choose (fun clause ->
         let (SynMatchClause.Clause (pat, guard, expr, _, _)) = clause
-        let clauseIndentation = ExpressionUtilities.getLeadingSpaces clause.Range args.fileContent
-        let exprIndentation = ExpressionUtilities.getLeadingSpaces expr.Range args.fileContent
+        let clauseIndentation = ExpressionUtilities.getLeadingSpaces clause.Range args.FileContent
+        let exprIndentation = ExpressionUtilities.getLeadingSpaces expr.Range args.FileContent
         let matchPatternEndLine =
             guard
             |> Option.map (fun expr -> expr.Range.EndLine)
@@ -30,7 +30,7 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
 let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
 
 let rule =
-    { name = "PatternMatchExpressionIndentation"
-      identifier = Identifiers.PatternMatchExpressionIndentation
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "PatternMatchExpressionIndentation"
+      Identifier = Identifiers.PatternMatchExpressionIndentation
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule
