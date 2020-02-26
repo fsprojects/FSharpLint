@@ -9,7 +9,7 @@ open FSharpLint.Rules.Helper.Naming
 let private getMemberIdents _ = function
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
         match List.tryLast longIdent.Lid with
-        | Some(ident) when ident.idText.StartsWith "op_" -> 
+        | Some(ident) when ident.idText.StartsWith "op_" ->
             // Ignore members prefixed with op_, they are a special case used for operator overloading.
             Array.empty
         | None -> Array.empty
@@ -41,8 +41,15 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "MemberNames" 
+    { name = "MemberNames"
       identifier = Identifiers.MemberNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule
+
+let newRule (config:NewNamingConfig) =
+    rule
+        { NamingConfig.naming = config.Naming
+          underscores = config.Underscores
+          prefix = config.Prefix
+          suffix = config.Suffix }

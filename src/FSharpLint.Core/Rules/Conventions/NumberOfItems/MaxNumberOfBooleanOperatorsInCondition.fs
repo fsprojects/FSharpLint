@@ -44,9 +44,12 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
     | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
         validateCondition config.maxItems whenExpr
     | _ -> Array.empty
-    
+
 let rule config =
     { name = "MaxNumberOfBooleanOperatorsInCondition"
       identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule
+
+let newRule (config:Helper.NumberOfItems.NewConfig) =
+    rule { Helper.NumberOfItems.Config.maxItems = config.MaxItems }

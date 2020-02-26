@@ -84,6 +84,11 @@ type Config = {
     numberOfIndentationSpaces : int
 }
 
+[<RequireQualifiedAccess>]
+type NewConfig = {
+    NumberOfIndentationSpaces : int
+}
+
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
     let numLeadingSpaces = line.Length - line.TrimStart().Length
     let range = mkRange "" (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
@@ -126,3 +131,6 @@ let rule config =
       identifier = Identifiers.Indentation
       ruleConfig = { runner = runner config } }
     |> IndentationRule
+
+let newRule (config:NewConfig) =
+    rule { Config.numberOfIndentationSpaces = config.NumberOfIndentationSpaces }

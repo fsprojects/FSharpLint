@@ -16,6 +16,10 @@ type TypedItemStyle =
 type Config =
     { typedItemStyle : TypedItemStyle }
 
+[<RequireQualifiedAccess>]
+type NewConfig =
+    { TypedItemStyle : TypedItemStyle }
+
 let private getLeadingSpaces (s:string) =
     let rec loop i =
         if i < s.Length && s.[i] = ' '
@@ -46,7 +50,7 @@ let runner (config : Config) (args : AstNodeRuleParams) =
         let (expectedSpacesBefore, expectedSpacesAfter) =
             expectedSpacesFromConfig config.typedItemStyle
 
-        ExpressionUtilities.tryFindTextOfRange range args.fileContent 
+        ExpressionUtilities.tryFindTextOfRange range args.fileContent
         |> Option.bind (fun text ->
             match text.Split(':') with
             | [|otherText; typeText|] ->
@@ -71,9 +75,12 @@ let runner (config : Config) (args : AstNodeRuleParams) =
             | _ -> None)
         |> Option.toArray
     | _ -> [||]
-    
+
 let rule config =
-    { name = "TypedItemSpacing" 
+    { name = "TypedItemSpacing"
       identifier = Identifiers.TypedItemSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule
+
+let newRule (config:NewConfig) =
+    rule { Config.typedItemStyle = config.TypedItemStyle }

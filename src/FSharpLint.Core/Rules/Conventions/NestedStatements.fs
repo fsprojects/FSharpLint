@@ -13,6 +13,12 @@ type Config =
         depth : int
     }
 
+[<RequireQualifiedAccess>]
+type NewConfig =
+    {
+        Depth : int
+    }
+
 let private error (depth:int) =
     let errorFormatString = Resources.GetString("RulesNestedStatementsError")
     String.Format(errorFormatString, depth)
@@ -62,7 +68,7 @@ let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (sk
             j <- skipArray.[j].ParentIndex
 
     distance
-    
+
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
 /// e.g. lambda arg being a duplicate of the lamdba.
 let isMetaData args node i =
@@ -91,11 +97,11 @@ let decrementDepthToCommonParent args i j =
         if parent <> i && parent <> args.skipArray.[i].ParentIndex then
             // Decrement depth until we reach a common parent.
             depth <- depth - (distanceToCommonParent args.syntaxArray args.skipArray i j)
-   
+
 let mutable skipToIndex = None
-   
+
 let runner (config:Config) (args:AstNodeRuleParams) =
-    let skip = 
+    let skip =
         match skipToIndex with
         | Some skipTo when skipTo = args.nodeIndex ->
             skipToIndex <- None
@@ -116,7 +122,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                 let skipChildren = i + args.skipArray.[i].NumberOfChildren + 1
                 decrementDepthToCommonParent args i skipChildren
                 skipToIndex <- Some skipChildren
-                
+
                 getRange node
                 |> Option.map (fun range ->
                     { Range = range; Message = error config.depth; SuggestedFix = None; TypeChecks = [] })
@@ -128,14 +134,17 @@ let runner (config:Config) (args:AstNodeRuleParams) =
             Array.empty
     else
         Array.empty
-        
+
 let cleanup () =
     depth <- 0
     skipToIndex <- None
-        
+
 let rule config =
-    { name = "NestedStatements" 
+    { name = "NestedStatements"
       identifier = Identifiers.NestedStatements
       ruleConfig = { AstNodeRuleConfig.runner = runner config
                      cleanup = cleanup } }
     |> AstNodeRule
+
+let newRule (config:NewConfig) =
+    rule { Config.depth = config.Depth }

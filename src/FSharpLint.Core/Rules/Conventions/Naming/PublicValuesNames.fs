@@ -9,7 +9,7 @@ open FSharpLint.Rules.Helper.Naming
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
     let checkNotUnionCase ident =
         typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
-    
+
     let isNotActivePattern (ident:Ident) =
         ident.idText.StartsWith("|")
         |> not
@@ -44,10 +44,17 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         else
             Array.empty
     | _ -> Array.empty
-    
+
 let rule config =
     { name = "PublicValuesNames"
       identifier = Identifiers.PublicValuesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule
+
+let newRule (config:NewNamingConfig) =
+    rule
+        { NamingConfig.naming = config.Naming
+          underscores = config.Underscores
+          prefix = config.Prefix
+          suffix = config.Suffix }

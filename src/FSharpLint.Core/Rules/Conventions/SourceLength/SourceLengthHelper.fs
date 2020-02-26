@@ -9,6 +9,10 @@ open FSharp.Compiler.Range
 type Config =
     { maxLines : int }
 
+[<RequireQualifiedAccess>]
+type NewConfig =
+    { MaxLines : int }
+
 let private error name i actual =
     let errorFormatString = Resources.GetString("RulesSourceLengthError")
     String.Format(errorFormatString, name, i, actual)
@@ -22,6 +26,6 @@ let checkSourceLengthRule (config:Config) range errorName =
           Message = error errorName config.maxLines actualLines
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
-        
+
     else
         Array.empty

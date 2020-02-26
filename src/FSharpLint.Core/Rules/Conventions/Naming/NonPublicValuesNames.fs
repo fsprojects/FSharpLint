@@ -45,12 +45,19 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         match pattern with
         | SynPat.Named(_, identifier, isThis, _, _) when not isThis ->
             (identifier, identifier.idText, None) |> Array.singleton
-        | _ -> Array.empty       
+        | _ -> Array.empty
     | _ -> Array.empty
-    
+
 let rule config =
     { name = "NonPublicValuesNames"
       identifier = Identifiers.NonPublicValuesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
-    |> AstNodeRule 
+    |> AstNodeRule
+
+let newRule (config:NewNamingConfig) =
+    rule
+        { NamingConfig.naming = config.Naming
+          underscores = config.Underscores
+          prefix = config.Prefix
+          suffix = config.Suffix }

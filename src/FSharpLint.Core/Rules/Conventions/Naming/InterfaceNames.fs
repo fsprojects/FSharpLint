@@ -28,8 +28,15 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "InterfaceNames" 
+    { name = "InterfaceNames"
       identifier = Identifiers.InterfaceNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule
+
+let newRule (config:NewNamingConfig) =
+    rule
+        { NamingConfig.naming = config.Naming
+          underscores = config.Underscores
+          prefix = config.Prefix
+          suffix = config.Suffix }
