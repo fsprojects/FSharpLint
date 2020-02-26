@@ -302,7 +302,7 @@ module Lint =
             let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
 
             projectFilePath
-            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] msBuildParams
+            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs] msBuildParams
 
         match msBuildResults with
         | Result.Ok [getFscArgsResult] ->
@@ -337,9 +337,9 @@ module Lint =
             | Result.Error error ->
                 failwithf "error getting FSC args from msbuild info, %A" error
         | Result.Ok r ->
-            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
+            failwithf "error getting msbuild info: more info returned than expected %A" r
         | Result.Error r ->
-            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
+            failwithf "error getting msbuild info: %A" r
 
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
