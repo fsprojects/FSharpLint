@@ -50,6 +50,3 @@ let rule config =
       identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule
-
-let newRule (config:Helper.NumberOfItems.NewConfig) =
-    rule { Helper.NumberOfItems.Config.maxItems = config.MaxItems }

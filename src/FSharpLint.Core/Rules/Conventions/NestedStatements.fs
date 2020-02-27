@@ -13,12 +13,6 @@ type Config =
         depth : int
     }
 
-[<RequireQualifiedAccess>]
-type NewConfig =
-    {
-        Depth : int
-    }
-
 let private error (depth:int) =
     let errorFormatString = Resources.GetString("RulesNestedStatementsError")
     String.Format(errorFormatString, depth)
@@ -145,6 +139,3 @@ let rule config =
       ruleConfig = { AstNodeRuleConfig.runner = runner config
                      cleanup = cleanup } }
     |> AstNodeRule
-
-let newRule (config:NewConfig) =
-    rule { Config.depth = config.Depth }

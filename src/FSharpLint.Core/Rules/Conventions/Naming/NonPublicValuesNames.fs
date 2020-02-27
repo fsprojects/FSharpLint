@@ -54,10 +54,3 @@ let rule config =
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule
-
-let newRule (config:NewNamingConfig) =
-    rule
-        { NamingConfig.naming = config.Naming
-          underscores = config.Underscores
-          prefix = config.Prefix
-          suffix = config.Suffix }

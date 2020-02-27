@@ -16,10 +16,6 @@ type TypedItemStyle =
 type Config =
     { typedItemStyle : TypedItemStyle }
 
-[<RequireQualifiedAccess>]
-type NewConfig =
-    { TypedItemStyle : TypedItemStyle }
-
 let private getLeadingSpaces (s:string) =
     let rec loop i =
         if i < s.Length && s.[i] = ' '
@@ -81,6 +77,3 @@ let rule config =
       identifier = Identifiers.TypedItemSpacing
       ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
     |> AstNodeRule
-
-let newRule (config:NewConfig) =
-    rule { Config.typedItemStyle = config.TypedItemStyle }

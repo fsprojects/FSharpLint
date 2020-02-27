@@ -357,7 +357,7 @@ type Configuration =
       // Configs for rules.
       IgnoreFiles : string [] option
       Hints : string [] option
-      TypedItemSpacing : RuleConfig<TypedItemSpacing.NewConfig> option
+      TypedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
       TypePrefixing : EnabledConfig option
       UnionDefinitionIndentation : EnabledConfig option
       ModuleDeclSpacing : EnabledConfig option
@@ -371,7 +371,7 @@ type Configuration =
       PatternMatchExpressionIndentation : EnabledConfig option
       RecursiveAsyncFunction : EnabledConfig option
       RedundantNewKeyword : EnabledConfig option
-      NestedStatements : RuleConfig<NestedStatements.NewConfig> option
+      NestedStatements : RuleConfig<NestedStatements.Config> option
       ReimplementsFunction : EnabledConfig option
       CanBeReplacedWithComposition : EnabledConfig option
       RaiseWithSingleArgument : EnabledConfig option
@@ -379,45 +379,45 @@ type Configuration =
       InvalidOpWithSingleArgument : EnabledConfig option
       InvalidArgWithTwoArguments : EnabledConfig option
       FailwithfWithArgumentsMatchingFormatString : EnabledConfig option
-      MaxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInMatchLambdaFunction : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInValue : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInFunction : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInMember : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInConstructor : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInProperty : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInModule : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInRecord : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInEnum : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInUnion : RuleConfig<Helper.SourceLength.NewConfig> option
-      MaxLinesInClass : RuleConfig<Helper.SourceLength.NewConfig> option
-      InterfaceNames : RuleConfig<NewNamingConfig> option
-      ExceptionNames : RuleConfig<NewNamingConfig> option
-      TypeNames : RuleConfig<NewNamingConfig> option
-      RecordFieldNames : RuleConfig<NewNamingConfig> option
-      EnumCasesNames : RuleConfig<NewNamingConfig> option
-      UnionCasesNames : RuleConfig<NewNamingConfig> option
-      ModuleNames : RuleConfig<NewNamingConfig> option
-      LiteralNames : RuleConfig<NewNamingConfig> option
-      NamespaceNames : RuleConfig<NewNamingConfig> option
-      MemberNames : RuleConfig<NewNamingConfig> option
-      ParameterNames : RuleConfig<NewNamingConfig> option
-      MeasureTypeNames : RuleConfig<NewNamingConfig> option
-      ActivePatternNames : RuleConfig<NewNamingConfig> option
-      PublicValuesNames : RuleConfig<NewNamingConfig> option
-      NonPublicValuesNames : RuleConfig<NewNamingConfig> option
-      MaxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.NewConfig> option
-      MaxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.NewConfig> option
-      MaxNumberOfMembers : RuleConfig<Helper.NumberOfItems.NewConfig> option
-      MaxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.NewConfig> option
+      MaxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInMatchLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInValue : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInFunction : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInMember : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInConstructor : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInProperty : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInModule : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInRecord : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInEnum : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInUnion : RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInClass : RuleConfig<Helper.SourceLength.Config> option
+      InterfaceNames : RuleConfig<NamingConfig> option
+      ExceptionNames : RuleConfig<NamingConfig> option
+      TypeNames : RuleConfig<NamingConfig> option
+      RecordFieldNames : RuleConfig<NamingConfig> option
+      EnumCasesNames : RuleConfig<NamingConfig> option
+      UnionCasesNames : RuleConfig<NamingConfig> option
+      ModuleNames : RuleConfig<NamingConfig> option
+      LiteralNames : RuleConfig<NamingConfig> option
+      NamespaceNames : RuleConfig<NamingConfig> option
+      MemberNames : RuleConfig<NamingConfig> option
+      ParameterNames : RuleConfig<NamingConfig> option
+      MeasureTypeNames : RuleConfig<NamingConfig> option
+      ActivePatternNames : RuleConfig<NamingConfig> option
+      PublicValuesNames : RuleConfig<NamingConfig> option
+      NonPublicValuesNames : RuleConfig<NamingConfig> option
+      MaxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option
       FavourIgnoreOverLetWild : EnabledConfig option
       WildcardNamedWithAsPattern : EnabledConfig option
       UselessBinding : EnabledConfig option
       TupleOfWildcards : EnabledConfig option
-      Indentation : RuleConfig<Indentation.NewConfig> option
-      MaxCharactersOnLine : RuleConfig<MaxCharactersOnLine.NewConfig> option
-      TrailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.NewConfig> option
-      MaxLinesInFile : RuleConfig<MaxLinesInFile.NewConfig> option
+      Indentation : RuleConfig<Indentation.Config> option
+      MaxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
+      TrailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
+      MaxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
       TrailingNewLineInFile : EnabledConfig option
       NoTabCharacters : EnabledConfig option }
 with
@@ -559,7 +559,7 @@ let flattenConfig (config : Configuration) =
 
     let allRules =
         [|
-            config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.newRule)
+            config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
             config.TypePrefixing |> Option.bind (constructRuleIfEnabled TypePrefixing.rule)
             config.UnionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule)
             config.ModuleDeclSpacing |> Option.bind (constructRuleIfEnabled ModuleDeclSpacing.rule)
@@ -573,7 +573,7 @@ let flattenConfig (config : Configuration) =
             config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
-            config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.newRule)
+            config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
@@ -581,45 +581,45 @@ let flattenConfig (config : Configuration) =
             config.InvalidOpWithSingleArgument |> Option.bind (constructRuleIfEnabled InvalidOpWithSingleArgument.rule)
             config.InvalidArgWithTwoArguments |> Option.bind (constructRuleIfEnabled InvalidArgWithTwoArguments.rule)
             config.FailwithfWithArgumentsMatchingFormatString |> Option.bind (constructRuleIfEnabled FailwithfWithArgumentsMatchingFormatString.rule)
-            config.MaxLinesInLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInLambdaFunction.newRule)
-            config.MaxLinesInMatchLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInMatchLambdaFunction.newRule)
-            config.MaxLinesInValue |> Option.bind (constructRuleWithConfig MaxLinesInValue.newRule)
-            config.MaxLinesInFunction |> Option.bind (constructRuleWithConfig MaxLinesInFunction.newRule)
-            config.MaxLinesInMember |> Option.bind (constructRuleWithConfig MaxLinesInMember.newRule)
-            config.MaxLinesInConstructor |> Option.bind (constructRuleWithConfig MaxLinesInConstructor.newRule)
-            config.MaxLinesInProperty |> Option.bind (constructRuleWithConfig MaxLinesInProperty.newRule)
-            config.MaxLinesInModule |> Option.bind (constructRuleWithConfig MaxLinesInModule.newRule)
-            config.MaxLinesInRecord |> Option.bind (constructRuleWithConfig MaxLinesInRecord.newRule)
-            config.MaxLinesInEnum |> Option.bind (constructRuleWithConfig MaxLinesInEnum.newRule)
-            config.MaxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.newRule)
-            config.MaxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.newRule)
-            config.InterfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.newRule)
-            config.ExceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.newRule)
-            config.TypeNames |> Option.bind (constructRuleWithConfig TypeNames.newRule)
-            config.RecordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.newRule)
-            config.EnumCasesNames |> Option.bind (constructRuleWithConfig EnumCasesNames.newRule)
-            config.UnionCasesNames |> Option.bind (constructRuleWithConfig UnionCasesNames.newRule)
-            config.ModuleNames |> Option.bind (constructRuleWithConfig ModuleNames.newRule)
-            config.LiteralNames |> Option.bind (constructRuleWithConfig LiteralNames.newRule)
-            config.NamespaceNames |> Option.bind (constructRuleWithConfig NamespaceNames.newRule)
-            config.MemberNames |> Option.bind (constructRuleWithConfig MemberNames.newRule)
-            config.ParameterNames |> Option.bind (constructRuleWithConfig ParameterNames.newRule)
-            config.MeasureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.newRule)
-            config.ActivePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.newRule)
-            config.PublicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.newRule)
-            config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.newRule)
-            config.MaxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.newRule)
-            config.MaxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.newRule)
-            config.MaxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.newRule)
-            config.MaxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.newRule)
+            config.MaxLinesInLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInLambdaFunction.rule)
+            config.MaxLinesInMatchLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInMatchLambdaFunction.rule)
+            config.MaxLinesInValue |> Option.bind (constructRuleWithConfig MaxLinesInValue.rule)
+            config.MaxLinesInFunction |> Option.bind (constructRuleWithConfig MaxLinesInFunction.rule)
+            config.MaxLinesInMember |> Option.bind (constructRuleWithConfig MaxLinesInMember.rule)
+            config.MaxLinesInConstructor |> Option.bind (constructRuleWithConfig MaxLinesInConstructor.rule)
+            config.MaxLinesInProperty |> Option.bind (constructRuleWithConfig MaxLinesInProperty.rule)
+            config.MaxLinesInModule |> Option.bind (constructRuleWithConfig MaxLinesInModule.rule)
+            config.MaxLinesInRecord |> Option.bind (constructRuleWithConfig MaxLinesInRecord.rule)
+            config.MaxLinesInEnum |> Option.bind (constructRuleWithConfig MaxLinesInEnum.rule)
+            config.MaxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.rule)
+            config.MaxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule)
+            config.InterfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.rule)
+            config.ExceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.rule)
+            config.TypeNames |> Option.bind (constructRuleWithConfig TypeNames.rule)
+            config.RecordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.rule)
+            config.EnumCasesNames |> Option.bind (constructRuleWithConfig EnumCasesNames.rule)
+            config.UnionCasesNames |> Option.bind (constructRuleWithConfig UnionCasesNames.rule)
+            config.ModuleNames |> Option.bind (constructRuleWithConfig ModuleNames.rule)
+            config.LiteralNames |> Option.bind (constructRuleWithConfig LiteralNames.rule)
+            config.NamespaceNames |> Option.bind (constructRuleWithConfig NamespaceNames.rule)
+            config.MemberNames |> Option.bind (constructRuleWithConfig MemberNames.rule)
+            config.ParameterNames |> Option.bind (constructRuleWithConfig ParameterNames.rule)
+            config.MeasureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule)
+            config.ActivePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule)
+            config.PublicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule)
+            config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.rule)
+            config.MaxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule)
+            config.MaxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule)
+            config.MaxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule)
+            config.MaxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule)
             config.FavourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule)
             config.WildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule)
             config.UselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule)
             config.TupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule)
-            config.Indentation |> Option.bind (constructRuleWithConfig Indentation.newRule)
-            config.MaxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.newRule)
-            config.TrailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.newRule)
-            config.MaxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.newRule)
+            config.Indentation |> Option.bind (constructRuleWithConfig Indentation.rule)
+            config.MaxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule)
+            config.TrailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule)
+            config.MaxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule)
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
         |] |> Array.choose id

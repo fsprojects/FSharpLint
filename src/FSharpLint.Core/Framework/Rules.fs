@@ -49,12 +49,6 @@ type NamingConfig =
       prefix : string option
       suffix : string option }
 
-type NewNamingConfig =
-    { Naming : NamingCase option
-      Underscores : NamingUnderscores option
-      Prefix : string option
-      Suffix : string option }
-
 type NamingRuleConfig =
     { config : NamingConfig
       getIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }

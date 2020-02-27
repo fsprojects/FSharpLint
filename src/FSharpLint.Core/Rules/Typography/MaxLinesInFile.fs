@@ -10,10 +10,6 @@ open FSharp.Compiler.Range
 type Config =
     { maxLinesInFile : int }
 
-[<RequireQualifiedAccess>]
-type NewConfig =
-    { MaxLinesInFile : int }
-
 let private checkNumberOfLinesInFile numberOfLines line maxLines =
     if numberOfLines > maxLines then
         let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
@@ -35,5 +31,3 @@ let rule config =
       identifier = Identifiers.MaxLinesInFile
       ruleConfig = { LineRuleConfig.runner = checkMaxLinesInFile config } }
     |> LineRule
-
-let newRule (config:NewConfig) = rule { Config.maxLinesInFile = config.MaxLinesInFile }

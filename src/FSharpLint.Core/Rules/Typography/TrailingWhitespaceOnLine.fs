@@ -12,12 +12,6 @@ type Config =
       oneSpaceAllowedAfterOperator : bool
       ignoreBlankLines : bool }
 
-[<RequireQualifiedAccess>]
-type NewConfig =
-     { NumberOfSpacesAllowed : int
-       OneSpaceAllowedAfterOperator : bool
-       IgnoreBlankLines : bool }
-
 let private isSymbol character =
     let symbols =
         [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
@@ -65,9 +59,3 @@ let rule config =
       identifier = Identifiers.TrailingWhitespaceOnLine
       ruleConfig = { LineRuleConfig.runner = checkTrailingWhitespaceOnLine config } }
     |> LineRule
-
-let newRule (config:NewConfig) =
-    rule
-        { Config.numberOfSpacesAllowed = config.NumberOfSpacesAllowed
-          Config.ignoreBlankLines = config.IgnoreBlankLines
-          Config.oneSpaceAllowedAfterOperator = config.OneSpaceAllowedAfterOperator }
