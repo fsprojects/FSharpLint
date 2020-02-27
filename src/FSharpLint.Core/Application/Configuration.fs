@@ -344,19 +344,14 @@ type HintConfig = {
 
 type Configuration =
     { // Deprecated grouped configs. TODO: remove in next major release
-      /// DEPRECATED, use IgnoreFiles.
-      ignoreFiles : string [] option
-      /// DEPRECATED, use Hints.
-      hints : HintConfig option
       /// DEPRECATED, provide formatting rules at root level.
       formatting : FormattingConfig option
       /// DEPRECATED, provide conventions rules at root level.
       conventions : ConventionsConfig option
       /// DEPRECATED, provide typography rules at root level.
       typography : TypographyConfig option
-      // Configs for rules.
-      IgnoreFiles : string [] option
-      Hints : string [] option
+      ignoreFiles : string [] option
+      hints : HintConfig option
       TypedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
       TypePrefixing : EnabledConfig option
       UnionDefinitionIndentation : EnabledConfig option
@@ -428,8 +423,6 @@ with
         conventions = None
         typography = None
         // Configs for rules.
-        IgnoreFiles = None
-        Hints = None
         TypedItemSpacing = None
         TypePrefixing = None
         UnionDefinitionIndentation = None
