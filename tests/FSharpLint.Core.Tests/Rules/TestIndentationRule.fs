@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 type TestIndentationRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
+    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create()
         let sourceText = SourceText.ofString input
 
@@ -26,13 +26,14 @@ type TestIndentationRuleBase (rule:Rule) =
             | IndentationRule rule -> rule
             | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
 
+        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
-            let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = [||] }
+            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input syntaxArray skipArray
+            let lineRules = { LineRules.IndentationRule = Some rule; noTabCharactersRule = None; genericLineRules = [||] }
 
-            runLineRules lineRules fileName input context
+            runLineRules lineRules globalConfig fileName input context
             |> Array.iter this.PostSuggestion
         | None -> ()

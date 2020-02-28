@@ -7,6 +7,16 @@ open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Suggestion
 
+type GlobalRuleConfig =
+    {
+        numIndentationSpaces : int
+    }
+with
+    static member Default =
+        {
+            GlobalRuleConfig.numIndentationSpaces = 4
+        }
+
 type AstNodeRuleParams =
     { AstNode : AstNode
       NodeHashcode : int
@@ -16,14 +26,16 @@ type AstNodeRuleParams =
       GetParents : int -> AstNode list
       FilePath : string
       FileContent : string
-      CheckInfo : FSharpCheckFileResults option }
+      CheckInfo : FSharpCheckFileResults option
+      GlobalConfig : GlobalRuleConfig }
 
 type LineRuleParams =
     { Line : string
       LineNumber : int
       IsLastLine : bool
       FilePath : string
-      FileContent : string }
+      FileContent : string
+      GlobalConfig : GlobalRuleConfig }
 
 type RuleMetadata<'config> =
   { Name : string

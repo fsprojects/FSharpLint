@@ -118,10 +118,10 @@ module Lint =
           NoTabCharactersRuleContext : (string * Range.range) list }
 
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> FSharpCheckFileResults option -> string -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context
 
     /// Runs all rules which take a line of text as input.
-    val runLineRules : LineRules -> string -> string -> Context -> Suggestion.LintWarning []
+    val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> Context -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult

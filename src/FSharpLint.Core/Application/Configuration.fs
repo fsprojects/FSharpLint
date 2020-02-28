@@ -320,7 +320,7 @@ with
         |] |> Array.concat
 
 type TypographyConfig =
-    { indentation : RuleConfig<Indentation.Config> option
+    { indentation : EnabledConfig option
       maxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
       trailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
       maxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
@@ -344,8 +344,14 @@ type HintConfig = {
     ignore : string [] option
 }
 
+type GlobalConfig = {
+    numIndentationSpaces : int option
+}
+
 type Configuration =
-    { // Deprecated grouped configs. TODO: remove in next major release
+    { ``global`` : GlobalConfig option
+      ignoreFiles : string [] option
+      // Deprecated grouped configs. TODO: remove in next major release
       /// DEPRECATED, provide formatting rules at root level.
       formatting : FormattingConfig option
       /// DEPRECATED, provide conventions rules at root level.
@@ -419,6 +425,7 @@ type Configuration =
       NoTabCharacters : EnabledConfig option }
 with
     static member Zero = {
+        ``global`` = None
         ignoreFiles = None
         hints = None
         formatting = None
@@ -528,9 +535,16 @@ type LineRules =
       IndentationRule : RuleMetadata<IndentationRuleConfig> option }
 
 type LoadedRules =
-    { AstNodeRules : RuleMetadata<AstNodeRuleConfig> []
-      LineRules : LineRules
+    { globalConfig : Rules.GlobalRuleConfig
+      astNodeRules : RuleMetadata<AstNodeRuleConfig> []
+      lineRules : LineRules
       DeprecatedRules : Rule [] }
+
+let getGlobalConfig (globalConfig:GlobalConfig option) =
+    globalConfig
+    |> Option.map (fun globalConfig -> {
+        Rules.GlobalRuleConfig.numIndentationSpaces = globalConfig.numIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.numIndentationSpaces
+    }) |> Option.defaultValue Rules.GlobalRuleConfig.Default
 
 let private parseHints (hints:string []) =
     let parseHint hint =
@@ -637,9 +651,10 @@ let flattenConfig (config:Configuration) =
         | IndentationRule rule -> indentationRule <- Some rule
         | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
 
-    { LoadedRules.AstNodeRules = astNodeRules.ToArray()
-      LineRules =
-          { GenericLineRules = lineRules.ToArray()
-            IndentationRule = indentationRule
-            NoTabCharactersRule = noTabCharactersRule }
-      DeprecatedRules = deprecatedAllRules }
+    { LoadedRules.globalConfig = getGlobalConfig config.``global``
+      DeprecatedRules = deprecatedAllRules
+      astNodeRules = astNodeRules.ToArray()
+      lineRules =
+          { genericLineRules = lineRules.ToArray()
+            indentationRule = indentationRule
+            noTabCharactersRule = noTabCharactersRule } }

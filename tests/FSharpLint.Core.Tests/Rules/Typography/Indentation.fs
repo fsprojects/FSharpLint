@@ -5,7 +5,7 @@ open FSharpLint.Rules
 
 [<TestFixture>]
 type TestTypographyIndentation() =
-    inherit TestIndentationRuleBase.TestIndentationRuleBase(Indentation.rule { numberOfIndentationSpaces = 4 })
+    inherit TestIndentationRuleBase.TestIndentationRuleBase(Indentation.rule)
 
     [<Test>]
     member this.``Error for incorrect indentation``() =
