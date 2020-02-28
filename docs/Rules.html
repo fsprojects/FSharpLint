@@ -28,6 +28,17 @@
       <div class="row">
         <div class="span9" id="main">
           <h1><a name="Rules" class="anchor" href="#Rules">Rules</a></h1>
+<h2><a name="Global-Configuration" class="anchor" href="#Global-Configuration">Global Configuration</a></h2>
+<p>In addition to the configuration available for each rule, there are some settings which are defined globally to maintain consistency across
+multiple rules. These are defind in the <code>globals</code> object in the base of the configuration file. The rule pages below point out any global
+setting that each rule depends on. The config is as follows, but can be completely omitted to use defaults:</p>
+<p>[lang=javascript]
+{
+"globals": {
+"numIndentationSpaces": 4 // number of spaces used for indentation
+}
+}</p>
+<h2><a name="Rule-Lists" class="anchor" href="#Rule-Lists">Rule Lists</a></h2>
 <p>The following rules can be specified for linting.</p>
 <ul>
 <li><a href="rules/FL0001.html">TupleCommaSpacing (FL0001)</a></li>

@@ -350,7 +350,6 @@ type GlobalConfig = {
 
 type Configuration =
     { ``global`` : GlobalConfig option
-      ignoreFiles : string [] option
       // Deprecated grouped configs. TODO: remove in next major release
       /// DEPRECATED, provide formatting rules at root level.
       formatting : FormattingConfig option
@@ -417,7 +416,7 @@ type Configuration =
       WildcardNamedWithAsPattern : EnabledConfig option
       UselessBinding : EnabledConfig option
       TupleOfWildcards : EnabledConfig option
-      Indentation : RuleConfig<Indentation.Config> option
+      Indentation : EnabledConfig option
       MaxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
       TrailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
       MaxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
@@ -535,9 +534,9 @@ type LineRules =
       IndentationRule : RuleMetadata<IndentationRuleConfig> option }
 
 type LoadedRules =
-    { globalConfig : Rules.GlobalRuleConfig
-      astNodeRules : RuleMetadata<AstNodeRuleConfig> []
-      lineRules : LineRules
+    { GlobalConfig : Rules.GlobalRuleConfig
+      AstNodeRules : RuleMetadata<AstNodeRuleConfig> []
+      LineRules : LineRules
       DeprecatedRules : Rule [] }
 
 let getGlobalConfig (globalConfig:GlobalConfig option) =
@@ -627,7 +626,7 @@ let flattenConfig (config:Configuration) =
             config.WildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule)
             config.UselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule)
             config.TupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule)
-            config.Indentation |> Option.bind (constructRuleWithConfig Indentation.rule)
+            config.Indentation |> Option.bind (constructRuleIfEnabled Indentation.rule)
             config.MaxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule)
             config.TrailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule)
             config.MaxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule)
@@ -651,10 +650,10 @@ let flattenConfig (config:Configuration) =
         | IndentationRule rule -> indentationRule <- Some rule
         | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
 
-    { LoadedRules.globalConfig = getGlobalConfig config.``global``
+    { LoadedRules.GlobalConfig = getGlobalConfig config.``global``
       DeprecatedRules = deprecatedAllRules
-      astNodeRules = astNodeRules.ToArray()
-      lineRules =
-          { genericLineRules = lineRules.ToArray()
-            indentationRule = indentationRule
-            noTabCharactersRule = noTabCharactersRule } }
+      AstNodeRules = astNodeRules.ToArray()
+      LineRules =
+          { GenericLineRules = lineRules.ToArray()
+            IndentationRule = indentationRule
+            NoTabCharactersRule = noTabCharactersRule } }

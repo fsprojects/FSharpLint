@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 type TestLineRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig : GlobalRuleConfig) =
+    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create()
         let sourceText = SourceText.ofString input
 
@@ -33,8 +33,8 @@ type TestLineRuleBase (rule:Rule) =
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
             let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input syntaxArray skipArray
-            let lineRules = { LineRules.IndentationRule = None; noTabCharactersRule = None; genericLineRules = [|rule|] }
+            let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = None; GenericLineRules = [|rule|] }
 
             runLineRules lineRules globalConfig fileName input context
-            |> Array.iter this.postSuggestion
+            |> Array.iter this.PostSuggestion
         | None -> ()

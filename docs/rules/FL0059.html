@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Running as MSBuildTask
+    <title>Indentation (FL0059)
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -27,27 +27,27 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1><a name="Running-as-MSBuildTask" class="anchor" href="#Running-as-MSBuildTask">Running as MSBuildTask</a></h1>
-<p>FSharpLint can be run as an MSBuild task; this will result in lint warnings showing up in your IDE (Visual Studio/Rider).</p>
-<p>To set this up, first <a href="DotnetTool">install the FSharpLint dotnet tool</a>.</p>
-<p>Then, you can add the following to any of your projects to run linting after build completion for that project:</p>
+          <h1><a name="Indentation-FL0059" class="anchor" href="#Indentation-FL0059">Indentation (FL0059)</a></h1>
+<h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
+<p>Inconsistent indentation in file.</p>
+<h2><a name="Rationale" class="anchor" href="#Rationale">Rationale</a></h2>
+<p>Readability.</p>
+<h2><a name="How-To-Fix" class="anchor" href="#How-To-Fix">How To Fix</a></h2>
+<p>Update file to use consistent amount of spaces for indentation.</p>
+<h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
+<p>Uses the <code>numIndentationSpaces</code> global setting.</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
 <span class="l">3: </span>
 <span class="l">4: </span>
 <span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="k">&lt;</span><span class="i">Target</span> <span class="o">Name</span><span class="k">="FSharpLint"</span> <span class="o">AfterTargets</span><span class="k">="AfterBuild"</span><span class="k">&gt;</span>
- <span class="k">&lt;</span><span class="i">Exec</span>
-   <span class="o">Command</span><span class="k">="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"</span>
-   <span class="o">ConsoleToMsBuild</span><span class="k">="true"</span>
-   <span class="o">IgnoreExitCode</span><span class="k">="true"</span>
- <span class="k">/&gt;</span>
-<span class="k">&lt;/</span><span class="i">Target</span><span class="k">&gt;</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+    <span class="s">"indentation"</span>: {
+        <span class="s">"enabled"</span>: <span class="k">false</span>
+    }
+}
 </code></pre></td></tr></table>
-<p>If you would like to enable linting for all projects, you can add the above target to either a <code>Directory.Build.props</code> or <code>Directory.Build.targets</code> file in the root of your repository. This will add the target to all files. See <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019">here</a> for more info</p>
 
           
         </div>

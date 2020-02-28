@@ -113,11 +113,11 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         None
 
 let runner context args =
-    checkIndentation args.globalConfig.numIndentationSpaces args.line args.lineNumber context
+    checkIndentation args.GlobalConfig.numIndentationSpaces args.Line args.LineNumber context
     |> Option.toArray
 
 let rule =
-    { name = "Indentation"
-      identifier = Identifiers.Indentation
-      ruleConfig = { runner = runner } }
+    { Name = "Indentation"
+      Identifier = Identifiers.Indentation
+      RuleConfig = { Runner = runner } }
     |> IndentationRule

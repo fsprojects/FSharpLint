@@ -2,7 +2,7 @@
 
 FSharpLint can be run as an MSBuild task; this will result in lint warnings showing up in your IDE (Visual Studio/Rider).
 
-To set this up, first [install the FSharpLint dotnet tool](ConsoleApplication).
+To set this up, first [install the FSharpLint dotnet tool](DotnetTool).
 
 Then, you can add the following to any of your projects to run linting after build completion for that project:
 

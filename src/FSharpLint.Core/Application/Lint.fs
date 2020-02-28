@@ -116,7 +116,7 @@ module Lint =
         { IndentationRuleContext : Map<int,bool*int>
           NoTabCharactersRuleContext : (string * Range.range) list }
 
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig : Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -151,7 +151,7 @@ module Lint =
         rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
         (astNodeSuggestions, context)
 
-    let runLineRules (lineRules:Configuration.LineRules) (globalConfig : Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (context:Context) =
+    let runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (context:Context) =
         fileContent
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
