@@ -329,7 +329,7 @@ type TypographyConfig =
 with
     member this.Flatten() =
          [|
-            this.indentation |> Option.bind (constructRuleWithConfig Indentation.rule) |> Option.toArray
+            this.indentation |> Option.bind (constructRuleIfEnabled Indentation.rule) |> Option.toArray
             this.maxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule) |> Option.toArray
             this.trailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule) |> Option.toArray
             this.maxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule) |> Option.toArray
