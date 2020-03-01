@@ -12,7 +12,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "UnionCasesNames" 
+    { name = "UnionCasesNames"
       identifier = Identifiers.UnionCasesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule

@@ -12,13 +12,8 @@ type System.String with
         System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
 
 let configWithHints hints =
-     {
-        Configuration.formatting = None
-        conventions = None
-        typography = None
-        ignoreFiles = None
-        hints = hints
-    }
+     { Configuration.Zero with hints = hints }
+
 
 [<TestFixture>]
 type TestConfiguration() =
@@ -106,15 +101,7 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Empty config writes correct JSON document`` () =
-        let config = {
-            Configuration.formatting = None
-            conventions = None
-            typography = None
-            ignoreFiles = None
-            hints = None
-        }
-
-        let resultJson = serializeConfig config
+        let resultJson = serializeConfig Configuration.Zero
 
         let expectedJson = "{}"
 
@@ -122,13 +109,7 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Config specifying files to ignore writes correct JSON document`` () =
-        let config = {
-            Configuration.formatting = None
-            conventions = None
-            typography = None
-            ignoreFiles = Some [| "assemblyinfo.*" |]
-            hints = None
-        }
+        let config = { Configuration.Zero with ignoreFiles = Some [| "assemblyinfo.*" |] }
 
         let resultJson = serializeConfig config
 
@@ -142,19 +123,16 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config specifying rule writes correct JSON document`` () =
         let config = {
-            Configuration.formatting = None
-            conventions = None
-            typography =
-                Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = Some { Indentation.Config.numberOfIndentationSpaces = 4 } }
-                       maxCharactersOnLine = None
-                       trailingWhitespaceOnLine = None
-                       maxLinesInFile = None
-                       trailingNewLineInFile = None
-                       noTabCharacters = None
-                }
-            ignoreFiles = None
-            hints = None
-        }
+            Configuration.Zero with
+                typography =
+                    Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = Some { Indentation.Config.numberOfIndentationSpaces = 4 } }
+                           maxCharactersOnLine = None
+                           trailingWhitespaceOnLine = None
+                           maxLinesInFile = None
+                           trailingNewLineInFile = None
+                           noTabCharacters = None
+                    }
+            }
 
         let resultJson = serializeConfig config
 
@@ -176,14 +154,11 @@ type TestConfiguration() =
     [<Test>]
     member __.``Config specifying hints writes correct JSON document`` () =
         let config = {
-            Configuration.formatting = None
-            conventions = None
-            typography = None
-            ignoreFiles = None
-            hints =
-                { HintConfig.add = Some [| "not (a =  b) ===> a <> b"; "not (a <> b) ===> a = b" |]
-                  ignore = Some [| "x = true ===> x" |] } |> Some
-        }
+            Configuration.Zero with
+                hints =
+                    { HintConfig.add = Some [| "not (a =  b) ===> a <> b"; "not (a <> b) ===> a = b" |]
+                      ignore = Some [| "x = true ===> x" |] } |> Some
+            }
 
         let resultJson = serializeConfig config
 

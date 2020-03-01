@@ -26,7 +26,7 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
         { Range = items.[maxItems].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     else
         Array.empty
-        
+
 let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.astNode with
     | AstNode.Expression (expression) ->
@@ -36,7 +36,7 @@ let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
         | _ -> Array.empty
     | _ ->
         Array.empty
-        
+
 let rule config =
     { name = "MaxNumberOfItemsInTuple"
       identifier = Identifiers.MaxNumberOfItemsInTuple

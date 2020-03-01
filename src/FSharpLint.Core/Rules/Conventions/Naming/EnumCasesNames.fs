@@ -12,7 +12,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "EnumCasesNames" 
+    { name = "EnumCasesNames"
       identifier = Identifiers.EnumCasesNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule

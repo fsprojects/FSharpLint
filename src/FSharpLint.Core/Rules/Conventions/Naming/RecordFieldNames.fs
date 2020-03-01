@@ -12,7 +12,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "RecordFieldNames" 
+    { name = "RecordFieldNames"
       identifier = Identifiers.RecordFieldNames
       ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule

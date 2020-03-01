@@ -57,13 +57,13 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         else
             Array.empty
     | _ -> Array.empty
-    
+
 let private getIdentifiersWithIdText =
     getIdentifiers
     >> Array.collect (fun identifier ->
         activePatternIdentifiers identifier
         |> Array.map (fun idText -> (identifier, idText, None)))
-    
+
 let rule config =
     { name = "ActivePatternNames"
       identifier = Identifiers.ActivePatternNames

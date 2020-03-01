@@ -22,6 +22,6 @@ let checkSourceLengthRule (config:Config) range errorName =
           Message = error errorName config.maxLines actualLines
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
-        
+
     else
         Array.empty
