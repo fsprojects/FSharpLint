@@ -39,7 +39,13 @@ Target.create "RunFunctionalTests" (fun _ ->
   DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest")
 
 Target.create "Package" (fun _ ->
-    let configure (c:DotNet.PackOptions) = { c with Configuration = DotNet.Release; OutputPath = Some "../../packaging" }
+    // TODO: fix pack warning on deprecated licenseUrl param
+    let cliArgs = { MSBuild.CliArguments.Create() with NoWarn = Some ["NU5125"] }
+    let configure (c:DotNet.PackOptions) =
+      { c with
+          Configuration = DotNet.Release
+          OutputPath = Some "../../packaging"
+          MSBuildParams = cliArgs }
     DotNet.pack configure "src/FSharpLint.Core/FSharpLint.Core.fsproj"
     DotNet.pack configure "src/FSharpLint.Console/FSharpLint.Console.fsproj")
 

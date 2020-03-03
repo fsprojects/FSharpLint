@@ -25,7 +25,7 @@ type StandardOutput () =
                 errorLine
                 |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
                 |> Seq.reduce (+)
-        errorLine + Environment.NewLine + highlightColumnLine
+        getErrorMessage range + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
         let originalColour = Console.ForegroundColor
