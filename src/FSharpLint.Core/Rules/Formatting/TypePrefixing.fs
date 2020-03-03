@@ -23,7 +23,7 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
             then
                 let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
                 let suggestedFix = lazy(
-                    (ExpressionUtilities.tryFindTextOfRange range args.fileContent, typeArgs)
+                    (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
                 { Range = range
                   Message =  String.Format(errorFormatString, typeName)
@@ -34,7 +34,7 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
         | "array" ->
             // Prefer special postfix (e.g. int []).
             let suggestedFix = lazy(
-                (ExpressionUtilities.tryFindTextOfRange range args.fileContent, typeArgs)
+                (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
             { Range = range
               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
@@ -44,7 +44,7 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
             // Prefer prefix.
             if isPostfix then
                 let suggestedFix = lazy(
-                    (ExpressionUtilities.tryFindTextOfRange range args.fileContent, typeArgs)
+                    (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
                 { Range = range
                   Message = Resources.GetString("RulesFormattingGenericPrefixError")
@@ -54,11 +54,11 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
                 None
     | _ ->
         None
-        
+
 let runner args =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
-        let typeArgs = typeArgsToString args.fileContent typeArgs
+        let typeArgs = typeArgsToString args.FileContent typeArgs
         checkTypePrefixing args range typeName typeArgs isPostfix
         |> Option.toArray
     | _ ->
@@ -66,7 +66,7 @@ let runner args =
 
 
 let rule =
-    { name = "TypePrefixing" 
-      identifier = Identifiers.TypePrefixing
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "TypePrefixing"
+      Identifier = Identifiers.TypePrefixing
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

@@ -43,7 +43,7 @@ type TestHintMatcherBase () =
                 ParseFile.parseSource input checker
 
         let rule =
-            match HintMatcher.rule { hintTrie = hintTrie }with
+            match HintMatcher.rule { HintTrie = hintTrie }with
             | Rules.AstNodeRule rule -> rule
             | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
 
@@ -55,6 +55,6 @@ type TestHintMatcherBase () =
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
             let suggestions = runAstNodeRules (Array.singleton rule) checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
-            suggestions |> Array.iter this.postSuggestion
+            suggestions |> Array.iter this.PostSuggestion
         | _ ->
             failwithf "Failed to parse"

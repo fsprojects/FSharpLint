@@ -1,5 +1,7 @@
 module FSharpLint.Core.Tests.Rules.Hints.HintMatcher
 
+// fsharplint:disable TupleIndentation
+
 open NUnit.Framework
 
 [<TestFixture>]

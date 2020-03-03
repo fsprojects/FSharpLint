@@ -10,7 +10,9 @@ open FSharpLint.Framework.Rules
 [<RequireQualifiedAccess>]
 type Config =
     {
+        // fsharplint:disable RecordFieldNames
         depth : int
+        // fsharplint:enable RecordFieldNames
     }
 
 let private error (depth:int) =
@@ -66,18 +68,18 @@ let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (sk
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
 /// e.g. lambda arg being a duplicate of the lamdba.
 let isMetaData args node i =
-    let parentIndex = args.skipArray.[i].ParentIndex
+    let parentIndex = args.SkipArray.[i].ParentIndex
     if parentIndex = i then false
     else
-        Object.ReferenceEquals(node, args.syntaxArray.[parentIndex].Actual)
+        Object.ReferenceEquals(node, args.SyntaxArray.[parentIndex].Actual)
 
 let isElseIf args node i =
     match node with
     | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-        let parentIndex = args.skipArray.[i].ParentIndex
+        let parentIndex = args.SkipArray.[i].ParentIndex
         if parentIndex = i then false
         else
-            match args.syntaxArray.[parentIndex].Actual with
+            match args.SyntaxArray.[parentIndex].Actual with
             | AstNode.Expression(SynExpr.IfThenElse(_, _, Some(_), _, _, _, _)) -> true
             | _ -> false
     | _ -> false
@@ -85,19 +87,19 @@ let isElseIf args node i =
 let mutable depth = 0
 
 let decrementDepthToCommonParent args i j =
-    if j < args.syntaxArray.Length then
+    if j < args.SyntaxArray.Length then
         // If next node in array is not a sibling or child of the current node.
-        let parent = args.skipArray.[j].ParentIndex
-        if parent <> i && parent <> args.skipArray.[i].ParentIndex then
+        let parent = args.SkipArray.[j].ParentIndex
+        if parent <> i && parent <> args.SkipArray.[i].ParentIndex then
             // Decrement depth until we reach a common parent.
-            depth <- depth - (distanceToCommonParent args.syntaxArray args.skipArray i j)
+            depth <- depth - (distanceToCommonParent args.SyntaxArray args.SkipArray i j)
 
 let mutable skipToIndex = None
 
 let runner (config:Config) (args:AstNodeRuleParams) =
     let skip =
         match skipToIndex with
-        | Some skipTo when skipTo = args.nodeIndex ->
+        | Some skipTo when skipTo = args.NodeIndex ->
             skipToIndex <- None
             false
         | None ->
@@ -106,14 +108,14 @@ let runner (config:Config) (args:AstNodeRuleParams) =
             true
 
     if not skip then
-        let i = args.nodeIndex
-        let node = args.astNode
+        let i = args.NodeIndex
+        let node = args.AstNode
         decrementDepthToCommonParent args i (i + 1)
 
         if areChildrenNested node && not <| isMetaData args node i && not <| isElseIf args node i then
             if depth >= config.depth then
                 // Skip children as we've had an error containing them.
-                let skipChildren = i + args.skipArray.[i].NumberOfChildren + 1
+                let skipChildren = i + args.SkipArray.[i].NumberOfChildren + 1
                 decrementDepthToCommonParent args i skipChildren
                 skipToIndex <- Some skipChildren
 
@@ -134,8 +136,8 @@ let cleanup () =
     skipToIndex <- None
 
 let rule config =
-    { name = "NestedStatements"
-      identifier = Identifiers.NestedStatements
-      ruleConfig = { AstNodeRuleConfig.runner = runner config
-                     cleanup = cleanup } }
+    { Name = "NestedStatements"
+      Identifier = Identifiers.NestedStatements
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config
+                     Cleanup = cleanup } }
     |> AstNodeRule

@@ -9,13 +9,13 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let check (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) isLambda =
-    let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.fileContent
-    
+    let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.FileContent
+
     let indentationLevelError =
         clauses
         |> List.tryHead
         |> Option.bind (fun firstClause ->
-            let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.fileContent
+            let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
             if isLambda then
                 if clauseIndentation <> matchStartIndentation + 4 then
                     { Range = firstClause.Range
@@ -35,7 +35,7 @@ let check (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) 
     let consistentIndentationErrors =
         clauses
         |> List.toArray
-        |> Array.map (fun clause -> (clause, ExpressionUtilities.getLeadingSpaces clause.Range args.fileContent))
+        |> Array.map (fun clause -> (clause, ExpressionUtilities.getLeadingSpaces clause.Range args.FileContent))
         |> Array.pairwise
         |> Array.choose (fun ((clauseOne, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
             if clauseOneSpaces <> clauseTwoSpaces then
@@ -45,17 +45,17 @@ let check (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) 
                   TypeChecks = [] } |> Some
             else
                 None)
-    
+
     [|
         indentationLevelError |> Option.toArray
         consistentIndentationErrors
     |]
     |> Array.concat
 
-let runner (args : AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
-        
+let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
+
 let rule =
-    { name = "PatternMatchClauseIndentation" 
-      identifier = Identifiers.PatternMatchClauseIndentation
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "PatternMatchClauseIndentation"
+      Identifier = Identifiers.PatternMatchClauseIndentation
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

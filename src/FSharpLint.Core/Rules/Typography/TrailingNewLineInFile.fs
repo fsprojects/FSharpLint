@@ -7,8 +7,8 @@ open FSharpLint.Framework.Rules
 open FSharp.Compiler.Range
 
 let checkTrailingNewLineInFile (args:LineRuleParams) =
-    if args.isLastLine && args.fileContent.EndsWith("\n") then
-        let numberOfLinesIncludingTrailingNewLine = args.lineNumber + 1
+    if args.IsLastLine && args.FileContent.EndsWith("\n") then
+        let numberOfLinesIncludingTrailingNewLine = args.LineNumber + 1
         let pos = mkPos numberOfLinesIncludingTrailingNewLine 0
         { Range = mkRange "" pos pos
           Message = Resources.GetString("RulesTypographyTrailingLineError")
@@ -18,7 +18,7 @@ let checkTrailingNewLineInFile (args:LineRuleParams) =
         Array.empty
 
 let rule =
-    { name = "TrailingNewLineInFile"
-      identifier = Identifiers.TrailingNewLineInFile
-      ruleConfig = { LineRuleConfig.runner = checkTrailingNewLineInFile } }
+    { Name = "TrailingNewLineInFile"
+      Identifier = Identifiers.TrailingNewLineInFile
+      RuleConfig = { LineRuleConfig.Runner = checkTrailingNewLineInFile } }
     |> LineRule

@@ -25,7 +25,7 @@ type StandardOutput () =
                 errorLine
                 |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
                 |> Seq.reduce (+)
-        errorLine + Environment.NewLine + highlightColumnLine
+        getErrorMessage range + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
         let originalColour = Console.ForegroundColor
@@ -36,8 +36,8 @@ type StandardOutput () =
     interface IOutput with
         member __.WriteInfo (info:string) = writeLine info ConsoleColor.White Console.Out
         member this.WriteWarning (warning:Suggestion.LintWarning) =
-            let highlightedErrorText = highlightErrorText warning.Details.Range (getErrorMessage warning.Details.Range)
-            let str = warning.Details.Message + Environment.NewLine + highlightedErrorText + Environment.NewLine + warning.ErrorText
+            let highlightedErrorText = highlightErrorText warning.Details.Range warning.ErrorText
+            let str = warning.Details.Message + Environment.NewLine + highlightedErrorText
             writeLine str ConsoleColor.Yellow Console.Out
             String.replicate 80 "-" |> (this :> IOutput).WriteInfo
         member __.WriteError (error:string) =  writeLine error ConsoleColor.Red Console.Error

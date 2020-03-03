@@ -21,7 +21,7 @@ type SuppressionInfo =
     /// Represents a comment disabling linting rules for the next line.
     | DisableNextLine of SuppressionTarget
 
-let parseSuppressionInfo (lines : string list) =
+let parseSuppressionInfo (lines:string list) =
     ParseFile.tokenizeLines lines
     |> List.map (fun (lineNum, tokens) ->
         ParseFile.collectLineComments tokens
@@ -57,7 +57,7 @@ type private LineSuppression =
     | DisableLine of SuppressionTarget
 
 /// Gets rules suppressed for the current line.
-let private getCurrentLineSuppressedRules (allRules : Set<string>) (currentSuppressedRules:Set<string>, currentLineSuppression:LineSuppression option, nextLineSuppression:LineSuppression option) =
+let private getCurrentLineSuppressedRules (allRules:Set<string>) (currentSuppressedRules:Set<string>, currentLineSuppression:LineSuppression option, nextLineSuppression:LineSuppression option) =
     match (currentLineSuppression, nextLineSuppression) with
     // Current line suppression overrides next line suppressions.
     | (Some (EnableLine All), _) ->
@@ -81,7 +81,7 @@ let private getCurrentLineSuppressedRules (allRules : Set<string>) (currentSuppr
         currentSuppressedRules
 
 /// Gets suppression information for the current line based on the current line's suppression info comments.
-let private getCurrentLineSuppressionContext (suppressionInfo : SuppressionInfo option) =
+let private getCurrentLineSuppressionContext (suppressionInfo:SuppressionInfo option) =
     match suppressionInfo with
     | Some (SuppressionInfo.EnableLine target) ->
         Some (LineSuppression.EnableLine target)
@@ -90,7 +90,7 @@ let private getCurrentLineSuppressionContext (suppressionInfo : SuppressionInfo 
     | _ -> None
 
 /// Gets suppression information for the next line based on the current line's suppression info comments.
-let private getNextLineSuppressionContext (allRules : Set<string>) (currentSuppressedRules : Set<string>) (suppressionInfo : SuppressionInfo option) =
+let private getNextLineSuppressionContext (allRules:Set<string>) (currentSuppressedRules:Set<string>) (suppressionInfo:SuppressionInfo option) =
     match suppressionInfo with
     | Some (Enable All) ->
         (Set.empty, None)
@@ -109,7 +109,7 @@ let private getNextLineSuppressionContext (allRules : Set<string>) (currentSuppr
     | None -> (currentSuppressedRules, None)
 
 /// Creates a dictionary from line number to a set of rules which are suppressed for that line.
-let getSuppressedRulesPerLine (allRules : Set<string>) (lines : string list) =
+let getSuppressedRulesPerLine (allRules:Set<string>) (lines:string list) =
     parseSuppressionInfo lines
     |> List.fold (fun ((currentSuppressedRules, nextLineSuppression:LineSuppression option), agg) (lineNum, suppressionInfo) ->
         let currentLineSuppression = getCurrentLineSuppressionContext suppressionInfo

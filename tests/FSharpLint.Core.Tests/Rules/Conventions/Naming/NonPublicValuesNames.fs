@@ -5,10 +5,10 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 let config =
-    { NamingConfig.naming = Some NamingCase.CamelCase
-      underscores = Some NamingUnderscores.AllowPrefix
-      prefix = None
-      suffix = None }
+    { NamingConfig.Naming = Some NamingCase.CamelCase
+      Underscores = Some NamingUnderscores.AllowPrefix
+      Prefix = None
+      Suffix = None }
 [<TestFixture>]
 type TestConventionsNonPublicValuesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NonPublicValuesNames.rule config)

@@ -31,8 +31,8 @@ type TestLineRuleBase (rule:Rule) =
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
             let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
-            let lineRules = { LineRules.indentationRule = None; noTabCharactersRule = None; genericLineRules = [|rule|] }
+            let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = None; GenericLineRules = [|rule|] }
 
             runLineRules lineRules fileName input context
-            |> Array.iter this.postSuggestion
+            |> Array.iter this.PostSuggestion
         | None -> ()

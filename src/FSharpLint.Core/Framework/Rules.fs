@@ -8,31 +8,31 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Suggestion
 
 type AstNodeRuleParams =
-    { astNode : AstNode
-      nodeHashcode : int
-      nodeIndex : int
-      syntaxArray : AbstractSyntaxArray.Node []
-      skipArray : Skip []
-      getParents : int -> AstNode list
-      filePath : string
-      fileContent : string
-      checkInfo : FSharpCheckFileResults option }
+    { AstNode : AstNode
+      NodeHashcode : int
+      NodeIndex : int
+      SyntaxArray : AbstractSyntaxArray.Node []
+      SkipArray : Skip []
+      GetParents : int -> AstNode list
+      FilePath : string
+      FileContent : string
+      CheckInfo : FSharpCheckFileResults option }
 
 type LineRuleParams =
-    { line : string
-      lineNumber : int
-      isLastLine : bool
-      filePath : string
-      fileContent : string }
+    { Line : string
+      LineNumber : int
+      IsLastLine : bool
+      FilePath : string
+      FileContent : string }
 
 type RuleMetadata<'config> =
-  { name : string
-    identifier : string
-    ruleConfig : 'config }
+  { Name : string
+    Identifier : string
+    RuleConfig : 'config }
 
 type AstNodeRuleConfig =
-  { runner : AstNodeRuleParams -> WarningDetails []
-    cleanup : unit -> unit }
+  { Runner : AstNodeRuleParams -> WarningDetails []
+    Cleanup : unit -> unit }
 
 type NamingCase =
     | PascalCase = 0
@@ -44,27 +44,27 @@ type NamingUnderscores =
     | AllowAny = 2
 
 type NamingConfig =
-    { naming : NamingCase option
-      underscores : NamingUnderscores option
-      prefix : string option
-      suffix : string option }
+    { Naming : NamingCase option
+      Underscores : NamingUnderscores option
+      Prefix : string option
+      Suffix : string option }
 
 type NamingRuleConfig =
-    { config : NamingConfig
-      getIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
+    { Config : NamingConfig
+      GetIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
 
-type LineRuleConfig = { runner : LineRuleParams -> WarningDetails [] }
+type LineRuleConfig = { Runner : LineRuleParams -> WarningDetails [] }
 
-type LineRuleConfigWithContext<'Context> = { runner : 'Context -> LineRuleParams -> WarningDetails [] }
+type LineRuleConfigWithContext<'Context> = { Runner : 'Context -> LineRuleParams -> WarningDetails [] }
 
 type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
 type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
 
 type Rule =
-  | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
-  | LineRule of RuleMetadata<LineRuleConfig>
-  | IndentationRule of RuleMetadata<IndentationRuleConfig>
-  | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
+    | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
+    | LineRule of RuleMetadata<LineRuleConfig>
+    | IndentationRule of RuleMetadata<IndentationRuleConfig>
+    | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
 
 let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileContents:string) (details:WarningDetails) =
     {
@@ -76,13 +76,13 @@ let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileConte
     }
 
 let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
-    rule.ruleConfig.runner config
-    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
+    rule.RuleConfig.Runner config
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)
 
 let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
-    rule.ruleConfig.runner context config
-    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
+    rule.RuleConfig.Runner context config
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)
 
 let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
-    rule.ruleConfig.runner config
-    |> Array.map (toWarning rule.identifier rule.name config.filePath config.fileContent)
+    rule.RuleConfig.Runner config
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)

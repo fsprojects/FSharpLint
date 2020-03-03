@@ -37,6 +37,6 @@
             | Some(result) -> result
             | None ->
                 let text = performanceTestSourceFile |> File.ReadAllText
-                let result = generateAst text, text
+                let result = (generateAst text, text)
                 memoizedResult := Some(result)
                 result

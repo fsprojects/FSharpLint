@@ -8,7 +8,7 @@ open FSharp.Compiler.PrettyNaming
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private validateLambdaIsNotPointless (text:string) lambda range =        
+let private validateLambdaIsNotPointless (text:string) lambda range =
     let rec isFunctionPointless expression = function
         | Some(parameter:Ident) :: parameters ->
             match expression with
@@ -17,14 +17,14 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
                     isFunctionPointless expression parameters
             | _ -> None
         | None :: _ -> None
-        | [] -> 
+        | [] ->
             match expression with
             | ExpressionUtilities.Identifier(ident, _) -> Some(ident)
             | _ -> None
 
     let generateError (identifier:LongIdent) =
-        let identifier = 
-            identifier 
+        let identifier =
+            identifier
             |> List.map (fun x -> DemangleOperatorName x.idText)
             |> String.concat "."
 
@@ -48,9 +48,9 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
 
 let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaIsNotPointless
-    
+
 let rule =
-    { name = "ReimplementsFunction" 
-      identifier = Identifiers.ReimplementsFunction
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "ReimplementsFunction"
+      Identifier = Identifiers.ReimplementsFunction
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

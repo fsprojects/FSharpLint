@@ -14,7 +14,11 @@ type TypedItemStyle =
 
 [<RequireQualifiedAccess>]
 type Config =
-    { typedItemStyle : TypedItemStyle }
+    {
+        // fsharplint:disable RecordFieldNames
+        typedItemStyle : TypedItemStyle
+        // fsharplint:enable RecordFieldNames
+    }
 
 let private getLeadingSpaces (s:string) =
     let rec loop i =
@@ -32,7 +36,7 @@ let private getTrailingSpaces (s:string) =
 
     (loop (s.Length - 1) 0)
 
-let private expectedSpacesFromConfig (typedItemStyle : TypedItemStyle) =
+let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     match typedItemStyle with
     | TypedItemStyle.NoSpaces -> (0, 0)
     | TypedItemStyle.SpaceAfter -> (0, 1)
@@ -40,13 +44,13 @@ let private expectedSpacesFromConfig (typedItemStyle : TypedItemStyle) =
     | _ -> (0, 0)
 
 /// Checks for correct spacing around colon of typed expression.
-let runner (config : Config) (args : AstNodeRuleParams) =
-    match args.astNode with
+let runner (config:Config) (args:AstNodeRuleParams) =
+    match args.AstNode with
     | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
         let (expectedSpacesBefore, expectedSpacesAfter) =
             expectedSpacesFromConfig config.typedItemStyle
 
-        ExpressionUtilities.tryFindTextOfRange range args.fileContent
+        ExpressionUtilities.tryFindTextOfRange range args.FileContent
         |> Option.bind (fun text ->
             match text.Split(':') with
             | [|otherText; typeText|] ->
@@ -73,7 +77,7 @@ let runner (config : Config) (args : AstNodeRuleParams) =
     | _ -> [||]
 
 let rule config =
-    { name = "TypedItemSpacing"
-      identifier = Identifiers.TypedItemSpacing
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "TypedItemSpacing"
+      Identifier = Identifiers.TypedItemSpacing
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

@@ -45,7 +45,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                           TypeChecks = [] } |> Some
                     else
                         None)
-                
+
             [|
                 indentationLevelError |> Option.toArray
                 consistentIndentationErrors
@@ -54,14 +54,14 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
     | _ -> Array.empty
 
 let runner args =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->
         checkUnionDefinitionIndentation args repr defnRange.StartColumn
     | _ ->
         Array.empty
-        
+
 let rule =
-    { name = "UnionDefinitionIndentation" 
-      identifier = Identifiers.UnionDefinitionIndentation
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "UnionDefinitionIndentation"
+      Identifier = Identifiers.UnionDefinitionIndentation
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

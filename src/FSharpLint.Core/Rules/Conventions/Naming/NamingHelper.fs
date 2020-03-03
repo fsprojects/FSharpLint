@@ -11,21 +11,21 @@ open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.SourceCodeServices
 
 module QuickFixes =
-    let removeAllUnderscores (ident: Ident) = lazy(
+    let removeAllUnderscores (ident:Ident) = lazy(
         let toText = ident.idText.Replace("_", "")
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
-    let removeNonPrefixingUnderscores (ident: Ident) = lazy(
+    let removeNonPrefixingUnderscores (ident:Ident) = lazy(
         let prefixingUnderscores =
             ident.idText |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
 
         let toText = prefixingUnderscores + ident.idText.Replace("_", "")
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
-    let addPrefix prefix (ident: Ident) = lazy(
+    let addPrefix prefix (ident:Ident) = lazy(
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText })
 
-    let addSuffix suffix (ident: Ident) = lazy(
+    let addSuffix suffix (ident:Ident) = lazy(
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = ident.idText + suffix })
 
     let private mapFirstChar map (str:string) =
@@ -38,11 +38,11 @@ module QuickFixes =
             prefix + firstChar + rest
         else ""
 
-    let toPascalCase (ident: Ident) = lazy(
+    let toPascalCase (ident:Ident) = lazy(
         let pascalCaseIdent = ident.idText |> mapFirstChar Char.ToUpper
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = pascalCaseIdent })
 
-    let toCamelCase (ident: Ident) = lazy(
+    let toCamelCase (ident:Ident) = lazy(
         let camelCaseIdent = ident.idText |> mapFirstChar Char.ToLower
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
 
@@ -105,9 +105,9 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         String.Format(Resources.GetString errorName, idText, additional)
 
     let tryAddFix fix message = (message, fix identifier)
-    
+
     let casingError =
-        match config.naming with
+        match config.Naming with
         | Some NamingCase.PascalCase ->
             pascalCaseRule idText
             |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
@@ -116,8 +116,8 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
             |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
         | _ -> None
 
-    let underscoresError = 
-        match config.underscores with
+    let underscoresError =
+        match config.Underscores with
         | Some NamingUnderscores.None ->
             underscoreRule false idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
@@ -126,18 +126,18 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
         | _ -> None
 
-    let prefixError = 
-        config.prefix
+    let prefixError =
+        config.Prefix
         |> Option.bind (fun prefix ->
             prefixRule prefix idText
             |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix)))
 
     let suffixError =
-        config.suffix
+        config.Suffix
         |> Option.bind (fun suffix ->
             suffixRule suffix idText
             |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix)))
-    
+
     [|
         casingError
         underscoresError
@@ -156,19 +156,19 @@ let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idTe
     else
         Array.empty
 
-let toAstNodeRule (namingRule : RuleMetadata<NamingRuleConfig>) =
+let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
     let astNodeRunner (args:AstNodeRuleParams) =
-        namingRule.ruleConfig.getIdentifiersToCheck args
+        namingRule.RuleConfig.GetIdentifiersToCheck args
         |> Array.collect (fun (identifier, idText, typeCheck) ->
-            let suggestions = checkIdentifier namingRule.ruleConfig.config identifier idText
+            let suggestions = checkIdentifier namingRule.RuleConfig.Config identifier idText
             suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
 
     {
-        RuleMetadata.name = namingRule.name
-        identifier = namingRule.identifier
-        ruleConfig = { AstNodeRuleConfig.runner = astNodeRunner; cleanup = id }
+        RuleMetadata.Name = namingRule.Name
+        Identifier = namingRule.Identifier
+        RuleConfig = { AstNodeRuleConfig.Runner = astNodeRunner; Cleanup = id }
     }
-    
+
 let addDefaults (identifiers:Ident []) =
     identifiers
     |> Array.map (fun ident -> (ident, ident.idText, None))
@@ -180,7 +180,7 @@ let activePatternIdentifiers (identifier:Ident) =
     identifier.idText.Split('|')
     |> Seq.toArray
     |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
-   
+
 let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i =
     let isSynAccessPublic = function
         | Some(SynAccess.Public) | None -> true
@@ -274,8 +274,8 @@ let isInterface typeDef =
 let checkIfPublic isCurrentlyPublic = function
     | Some(SynAccess.Public) | None -> isCurrentlyPublic
     | Some(SynAccess.Internal | SynAccess.Private) -> false
-    
-let isModule (moduleKind: SynModuleOrNamespaceKind) =
+
+let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
         | AnonModule
         | NamedModule -> true
@@ -291,7 +291,7 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
     // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
     // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
     isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
-   
+
 let rec getPatternIdents isPublic getIdents argsAreParameters pattern =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
@@ -344,7 +344,7 @@ let rec getPatternIdents isPublic getIdents argsAreParameters pattern =
     | SynPat.Wild(_)
     | SynPat.OptionalVal(_)
     | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> Array.empty
-    
+
 let rec identFromSimplePat = function
     | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
     | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p

@@ -5,10 +5,10 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 let config =
-    { NamingConfig.naming = None
-      underscores = Some NamingUnderscores.AllowPrefix
-      prefix = None
-      suffix = None }
+    { NamingConfig.Naming = None
+      Underscores = Some NamingUnderscores.AllowPrefix
+      Prefix = None
+      Suffix = None }
 [<TestFixture>]
 type TestConventionsPublicValuesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PublicValuesNames.rule config)
@@ -20,7 +20,7 @@ type TestConventionsPublicValuesNames() =
 module Program
 
     let (Cat, _) = 1, 0"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -29,7 +29,7 @@ module Program
 module Program
   let main =
     let (cat, _) = 1, 0"""
-        
+
         this.AssertNoWarnings()
 
     /// A public binding let binding identifier may be pascal case or upper case.
@@ -38,7 +38,7 @@ module Program
         this.Parse """
 module Program
   let Main () = ()"""
-        
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -46,7 +46,7 @@ module Program
         this.Parse """
 module Program
   let main () = ()"""
-  
+
         this.AssertNoWarnings()
 
     [<Test>]
@@ -57,9 +57,9 @@ module Program
 type SingleCaseDU = SingleCaseDU of int
 
 let (SingleCaseDU myInt) = (SingleCaseDU 5)""")
-        
+
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.``ActivePatternDoesNotGenerateWarning`` () =
          this.Parse("""
@@ -68,4 +68,4 @@ let (|Empty|_|) str =
     | "" -> Some Empty
     | _ -> None""")
 
-         this.AssertNoWarnings()       
+         this.AssertNoWarnings()

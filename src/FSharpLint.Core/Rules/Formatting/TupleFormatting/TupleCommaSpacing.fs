@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 // Check for single space after commas in tuple.
-let checkTupleCommaSpacing (args : AstNodeRuleParams) (tupleExprs : SynExpr list) tupleRange _ =
+let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tupleRange _ =
     tupleExprs
     |> List.toArray
     |> Array.pairwise
@@ -18,7 +18,7 @@ let checkTupleCommaSpacing (args : AstNodeRuleParams) (tupleExprs : SynExpr list
         if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
             let commaRange = mkRange "" expr.Range.End nextExpr.Range.Start
             let suggestedFix =
-                ExpressionUtilities.tryFindTextOfRange commaRange args.fileContent
+                ExpressionUtilities.tryFindTextOfRange commaRange args.FileContent
                 |> Option.map (fun commaText ->
                     lazy(
                         { FromRange = commaRange
@@ -31,11 +31,11 @@ let checkTupleCommaSpacing (args : AstNodeRuleParams) (tupleExprs : SynExpr list
               TypeChecks = [] } |> Some
         else
             None)
-    
-let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleCommaSpacing
-    
+
+let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleCommaSpacing
+
 let rule =
-    { name = "TupleCommaSpacing" 
-      identifier = Identifiers.TupleCommaSpacing
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "TupleCommaSpacing"
+      Identifier = Identifiers.TupleCommaSpacing
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

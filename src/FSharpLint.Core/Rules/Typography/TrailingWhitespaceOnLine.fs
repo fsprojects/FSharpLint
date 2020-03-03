@@ -8,9 +8,13 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    { numberOfSpacesAllowed : int
-      oneSpaceAllowedAfterOperator : bool
-      ignoreBlankLines : bool }
+    {
+        // fsharplint:disable RecordFieldNames
+        numberOfSpacesAllowed : int
+        oneSpaceAllowedAfterOperator : bool
+        ignoreBlankLines : bool
+        // fsharplint:enable RecordFieldNames
+    }
 
 let private isSymbol character =
     let symbols =
@@ -20,7 +24,7 @@ let private isSymbol character =
     symbols |> List.exists ((=) character)
 
 let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
-    match config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator with
+    match (config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator) with
     | (numberOfSpacesAllowed, _) when numberOfSpacesAllowed > 0 ->
         str.Length - str.TrimEnd().Length <= numberOfSpacesAllowed
     | (_, isOneSpaceAllowedAfterOperator) when isOneSpaceAllowedAfterOperator ->
@@ -36,8 +40,8 @@ let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
 let private lengthOfWhitespaceOnEnd (str:string) = str.Length - str.TrimEnd().Length
 
 let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
-    let line = args.line
-    let lineNumber = args.lineNumber
+    let line = args.Line
+    let lineNumber = args.LineNumber
     let ignoringBlankLinesAndIsBlankLine = config.ignoreBlankLines && System.String.IsNullOrWhiteSpace(line)
 
     let stringEndsWithWhitespace =
@@ -55,7 +59,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
         Array.empty
 
 let rule config =
-    { name = "TrailingWhitespaceOnLine"
-      identifier = Identifiers.TrailingWhitespaceOnLine
-      ruleConfig = { LineRuleConfig.runner = checkTrailingWhitespaceOnLine config } }
+    { Name = "TrailingWhitespaceOnLine"
+      Identifier = Identifiers.TrailingWhitespaceOnLine
+      RuleConfig = { LineRuleConfig.Runner = checkTrailingWhitespaceOnLine config } }
     |> LineRule

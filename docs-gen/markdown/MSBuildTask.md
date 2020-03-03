@@ -9,10 +9,10 @@ Then, you can add the following to any of your projects to run linting after bui
     [lang=xml]
     <Target Name="FSharpLint" AfterTargets="AfterBuild">
      <Exec
-       Command="dotnet fsharplint -format msbuild -f $(MSBuildProjectFullPath)"
+       Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
        ConsoleToMsBuild="true"
        IgnoreExitCode="true"
      />
     </Target>
 
-If you would like to enable linting for all projects, you can add the above target to either a `Directory.Build.props` or `Directory.Build.target` file in the root of your repository. This will add the target to all files. See [here](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019) for more info
+If you would like to enable linting for all projects, you can add the above target to either a `Directory.Build.props` or `Directory.Build.targets` file in the root of your repository. This will add the target to all files. See [here](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019) for more info

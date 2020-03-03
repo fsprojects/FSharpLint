@@ -17,13 +17,13 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynConstr
     | _ -> Array.empty
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
         validateFunction config.maxItems constructorArguments
     | _ -> Array.empty
 
 let rule config =
-    { name = "MaxNumberOfFunctionParameters"
-      identifier = Identifiers.MaxNumberOfFunctionParameters
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxNumberOfFunctionParameters"
+      Identifier = Identifiers.MaxNumberOfFunctionParameters
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

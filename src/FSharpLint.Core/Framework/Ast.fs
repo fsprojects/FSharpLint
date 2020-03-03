@@ -35,7 +35,7 @@ module Ast =
 
     /// Concatenates the nested-list structure of `SynAttributes` into a `SynAttribute list` to keep other code
     /// mostly unchanged.
-    let extractAttributes (attrs: SynAttributes) =
+    let extractAttributes (attrs:SynAttributes) =
         attrs
         |> List.collect (fun attrList -> attrList.Attributes)
 
@@ -198,7 +198,7 @@ module Ast =
 
     /// Concatenates the typed-or-untyped structure of `SynSimplePats` into a `SynSimplePat list` to keep other code
     /// mostly unchanged.
-    let inline extractPatterns (simplePats: SynSimplePats) =
+    let inline extractPatterns (simplePats:SynSimplePats) =
         let rec loop pat acc =
             match pat with
             | SynSimplePats.SimplePats(patterns, _range) -> patterns @ acc

@@ -6,7 +6,7 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestFormattingUnionDefinitionIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UnionDefinitionIndentation.rule)
-    
+
     [<Test>]
     member this.``Error for union definition with multiple cases on same line``() =
         this.Parse"""
@@ -22,8 +22,8 @@ type T = T1 of int | T2 of int
         this.Parse"""
 module Program
 
-type T = 
-| T1 of int 
+type T =
+| T1 of int
 | T2 of int
 """
 
@@ -34,8 +34,8 @@ type T =
         this.Parse"""
 module Program
 
-type T = 
-    | T1 of int 
+type T =
+    | T1 of int
         | T2 of int
 """
 
@@ -46,13 +46,13 @@ type T =
         this.Parse"""
 module Program
 
-type T = 
-    | T1 of int 
+type T =
+    | T1 of int
     | T2 of int
 """
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``No error for correctly indented union definition cases with attribute``() =
         this.Parse"""
@@ -63,8 +63,8 @@ type Option =
     | CustomClass of string
 """
 
-        Assert.IsTrue(this.NoErrorsExist)       
-        
+        Assert.IsTrue(this.NoErrorsExist)
+
     [<Test>]
     member this.``No error for correctly indented union defintion cases with attribute and strange spacing``() =
         this.Parse"""
@@ -75,4 +75,4 @@ type Option =
     | CustomClass of string
 """
 
-        Assert.IsTrue(this.NoErrorsExist)       
+        Assert.IsTrue(this.NoErrorsExist)

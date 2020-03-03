@@ -4,8 +4,8 @@
 /// to eliminate as many cases where there'll never be a match as quickly as possible, so that the
 /// ast match is run against as few hints and ast nodes as possible.
 /// 
-/// The fuzzy match requires two structures to be computed before hand: an abstract syntax array 
-/// constructed from the ast, and a trie of hints. Both of these structures contain hash codes of the 
+/// The fuzzy match requires two structures to be computed before hand: an abstract syntax array
+/// constructed from the ast, and a trie of hints. Both of these structures contain hash codes of the
 /// nodes, the hash codes are expected to match when the nodes are equivalent. The matching is done using these
 /// hash codes so we end up with a trie of integers searching against an array of integers -
 /// which is pretty fast.
@@ -53,11 +53,11 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
             | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
             | false, _ -> ()
 
-        trie.Edges.AnyMatch 
+        trie.Edges.AnyMatch
         |> List.iter (fun (var, trie) -> 
-            match var with 
+            match var with
             | Some(var) -> 
-                match boundVariables.TryGetValue var with 
+                match boundVariables.TryGetValue var with
                 | true, varI when isMatch varI i nodeArray skipArray  -> 
                     checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
                 | false, _ -> 

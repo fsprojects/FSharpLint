@@ -5,7 +5,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let isActualPatternMatch (args:AstNodeRuleParams) rule =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression (SynExpr.Match (_, _, clauses, range))
     | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range))
     | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
@@ -15,7 +15,7 @@ let isActualPatternMatch (args:AstNodeRuleParams) rule =
             | _ -> false
 
         let isFunctionParameter =
-            args.getParents 3 
+            args.GetParents 3
             |> List.exists (function
                 | Expression (SynExpr.Lambda _ ) -> true
                 | _ -> false)

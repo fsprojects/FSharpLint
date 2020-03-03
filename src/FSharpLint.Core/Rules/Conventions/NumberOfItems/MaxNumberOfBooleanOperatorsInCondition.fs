@@ -33,7 +33,7 @@ let private validateCondition (maxBooleanOperators:int) condition =
         Array.empty
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression(expression) ->
         match expression with
         | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
@@ -46,7 +46,7 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
     | _ -> Array.empty
 
 let rule config =
-    { name = "MaxNumberOfBooleanOperatorsInCondition"
-      identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxNumberOfBooleanOperatorsInCondition"
+      Identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

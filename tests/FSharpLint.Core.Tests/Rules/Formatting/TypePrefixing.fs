@@ -6,7 +6,7 @@ open FSharpLint.Rules
 [<TestFixture>]
 type TestFormattingTypePrefixing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule)
-    
+
     [<Test>]
     member this.``Error for F# List type prefix syntax``() =
         this.Parse """
@@ -118,7 +118,7 @@ type X = Generic<int>
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
-    member this.``Quickfix for F# List type``() = 
+    member this.``Quickfix for F# List type``() =
         let source = """
 module Program
 
@@ -135,7 +135,7 @@ type T = int list
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Quickfix for F# Option type``() = 
+    member this.``Quickfix for F# Option type``() =
         let source = """
 module Program
 
@@ -152,7 +152,7 @@ type T = int option
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Quickfix for F# Ref type``() = 
+    member this.``Quickfix for F# Ref type``() =
         let source = """
 module Program
 
@@ -169,7 +169,7 @@ type T = int ref
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Quickfix for F# array type from prefix syntax``() = 
+    member this.``Quickfix for F# array type from prefix syntax``() =
         let source = """
 module Program
 
@@ -186,7 +186,7 @@ type T = int []
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Quickfix for F# array type from standard postfix syntax``() = 
+    member this.``Quickfix for F# array type from standard postfix syntax``() =
         let source = """
 module Program
 
@@ -201,9 +201,9 @@ type T = int []
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        
+
     [<Test>]
-    member this.``Quickfix for F# array tuple type from standard postfix syntax``() = 
+    member this.``Quickfix for F# array tuple type from standard postfix syntax``() =
         let source = """
 module Program
 
@@ -217,10 +217,10 @@ type T = (int * int) []
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)       
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Quickfix for generic type``() = 
+    member this.``Quickfix for generic type``() =
         let source = """
 module Program
 

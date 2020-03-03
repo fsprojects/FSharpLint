@@ -113,8 +113,8 @@ module Lint =
           Configuration: Configuration.Configuration }
 
     type Context =
-        { indentationRuleContext : Map<int,bool*int>
-          noTabCharactersRuleContext : (string * Range.range) list }
+        { IndentationRuleContext : Map<int,bool*int>
+          NoTabCharactersRuleContext : (string * Range.range) list }
 
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
@@ -127,15 +127,15 @@ module Lint =
             |> Array.collect (fun (i, astNode) ->
                 let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
                 let astNodeParams =
-                    { astNode = astNode.Actual
-                      nodeHashcode = astNode.Hashcode
-                      nodeIndex =  i
-                      syntaxArray = syntaxArray
-                      skipArray = skipArray
-                      getParents = getParents
-                      filePath = filePath
-                      fileContent = fileContent
-                      checkInfo = typeCheckResults }
+                    { AstNode = astNode.Actual
+                      NodeHashcode = astNode.Hashcode
+                      NodeIndex =  i
+                      SyntaxArray = syntaxArray
+                      SkipArray = skipArray
+                      GetParents = getParents
+                      FilePath = filePath
+                      FileContent = fileContent
+                      CheckInfo = typeCheckResults }
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
@@ -144,10 +144,10 @@ module Lint =
                 |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
 
         let context =
-            { indentationRuleContext = indentationRuleState
-              noTabCharactersRuleContext = noTabCharactersRuleState }
+            { IndentationRuleContext = indentationRuleState
+              NoTabCharactersRuleContext = noTabCharactersRuleState }
 
-        rules |> Array.iter (fun rule -> rule.ruleConfig.cleanup())
+        rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
         (astNodeSuggestions, context)
 
     let runLineRules (lineRules:Configuration.LineRules) (filePath:string) (fileContent:string) (context:Context) =
@@ -155,22 +155,22 @@ module Lint =
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
             let lineParams =
-                { LineRuleParams.line = line
-                  lineNumber = lineNumber + 1
-                  isLastLine = isLastLine
-                  filePath = filePath
-                  fileContent = fileContent }
+                { LineRuleParams.Line = line
+                  LineNumber = lineNumber + 1
+                  IsLastLine = isLastLine
+                  FilePath = filePath
+                  FileContent = fileContent }
 
             let indentationError =
-                lineRules.indentationRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule context.indentationRuleContext lineParams)
+                lineRules.IndentationRule
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.IndentationRuleContext lineParams)
 
             let noTabCharactersError =
-                lineRules.noTabCharactersRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule context.noTabCharactersRuleContext lineParams)
+                lineRules.NoTabCharactersRule
+                |> Option.map (fun rule -> runLineRuleWithContext rule context.NoTabCharactersRuleContext lineParams)
 
             let lineErrors =
-                lineRules.genericLineRules
+                lineRules.GenericLineRules
                 |> Array.collect (fun rule -> runLineRule rule lineParams)
 
             [|
@@ -214,10 +214,10 @@ module Lint =
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
         let allRuleNames =
             [|
-                enabledRules.lineRules.indentationRule |> Option.map (fun rule -> rule.name) |> Option.toArray
-                enabledRules.lineRules.noTabCharactersRule |> Option.map (fun rule -> rule.name) |> Option.toArray
-                enabledRules.lineRules.genericLineRules |> Array.map (fun rule -> rule.name)
-                enabledRules.astNodeRules |> Array.map (fun rule -> rule.name)
+                enabledRules.LineRules.IndentationRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
+                enabledRules.LineRules.NoTabCharactersRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
+                enabledRules.LineRules.GenericLineRules |> Array.map (fun rule -> rule.Name)
+                enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
         let suppressedRulesByLine = Suppression.getSuppressedRulesPerLine allRuleNames lines
 
@@ -225,8 +225,8 @@ module Lint =
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.astNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.lineRules fileInfo.File fileInfo.Text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.LineRules fileInfo.File fileInfo.Text context
 
             [|
                 lineSuggestions
@@ -244,11 +244,11 @@ module Lint =
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
-                    let typeChecksSuccessful (typeChecks: Async<bool> list) =
+                    let typeChecksSuccessful (typeChecks:Async<bool> list) =
                         typeChecks
                         |> List.reduce (Async.combine (&&))
 
-                    let typeCheckSuggestion (suggestion: Suggestion.LintWarning) =
+                    let typeCheckSuggestion (suggestion:Suggestion.LintWarning) =
                         typeChecksSuccessful suggestion.Details.TypeChecks
                         |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
 
@@ -264,7 +264,7 @@ module Lint =
 
         ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
-    let private runProcess (workingDir: string) (exePath: string) (args: string) =
+    let private runProcess (workingDir:string) (exePath:string) (args:string) =
         let psi = System.Diagnostics.ProcessStartInfo()
         psi.FileName <- exePath
         psi.WorkingDirectory <- workingDir
@@ -287,9 +287,9 @@ module Lint =
 
         let exitCode = p.ExitCode
 
-        exitCode, (workingDir, exePath, args)
+        (exitCode, (workingDir, exePath, args))
 
-    let getProjectFileInfo (releaseConfig : string option) (projectFilePath: string) =
+    let getProjectFileInfo (releaseConfig:string option) (projectFilePath:string) =
         let projDir = System.IO.Path.GetDirectoryName projectFilePath
 
         let msBuildParams =
@@ -302,19 +302,19 @@ module Lint =
             let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
 
             projectFilePath
-            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs; Dotnet.ProjInfo.Inspect.getResolvedP2PRefs] msBuildParams
+            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs] msBuildParams
 
         match msBuildResults with
-        | Result.Ok [getFscArgsResult; getP2PRefsResult] ->
-            match getFscArgsResult, getP2PRefsResult with
-            | Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa), Result.Ok(Dotnet.ProjInfo.Inspect.GetResult.ResolvedP2PRefs p2p) ->
+        | Result.Ok [getFscArgsResult] ->
+            match getFscArgsResult with
+            | Result.Ok (Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa) ->
 
                 let projDir = Path.GetDirectoryName projectFilePath
 
                 let isSourceFile (option:string) =
                     option.TrimStart().StartsWith("-") |> not
 
-                let compileFilesToAbsolutePath (f: string) =
+                let compileFilesToAbsolutePath (f:string) =
                     if Path.IsPathRooted f then
                         f
                     else
@@ -323,7 +323,7 @@ module Lint =
                 { ProjectFileName = projectFilePath
                   SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
                   OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
-                  ReferencedProjects = [||] //p2pProjects |> Array.ofList
+                  ReferencedProjects = [||]
                   IsIncompleteTypeCheckEnvironment = false
                   UseScriptResolutionRules = false
                   LoadTime = DateTime.Now
@@ -331,12 +331,15 @@ module Lint =
                   OriginalLoadReferences = []
                   ExtraProjectInfo = None
                   ProjectId = None
-                  Stamp = None } |> Success
-            | _ -> failwith "meow"
+                  Stamp = None }
+            | Result.Ok _ ->
+                failwithf "error getting FSC args from msbuild info"
+            | Result.Error error ->
+                failwithf "error getting FSC args from msbuild info, %A" error
         | Result.Ok r ->
-            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
+            failwithf "error getting msbuild info: more info returned than expected %A" r
         | Result.Error r ->
-            failwithf "error getting msbuild info: internal error, more info returned than expected %A" r
+            failwithf "error getting msbuild info: %A" r
 
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
@@ -463,12 +466,10 @@ module Lint =
                     else
                         Failure (FailedToParseFilesInProject failedFiles)
 
-                match getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath with
-                | Success projectOptions ->
-                    let compileFiles = projectOptions.SourceFiles |> Array.toList
-                    match parseFilesInProject compileFiles projectOptions with
-                    | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
-                    | Failure x -> LintResult.Failure x
+                let projectOptions = getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath
+                let compileFiles = projectOptions.SourceFiles |> Array.toList
+                match parseFilesInProject compileFiles projectOptions with
+                | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
                 | Failure x -> LintResult.Failure x
             | Error err ->
                 RunTimeConfigError err
@@ -495,9 +496,7 @@ module Lint =
                     |> Array.map (fun (s, _, _) ->
                         let endIndex = s.IndexOf(".fsproj") + 7
                         let startIndex = s.IndexOf(",") + 1
-                        let projectPath = s.Substring(startIndex, endIndex - startIndex)
-                        projectPath.Trim([|'"'; ' '|]))
-                    |> Array.map (fun projectPath ->
+                        let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
                         let projectPath =
                             if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
                                 projectPath

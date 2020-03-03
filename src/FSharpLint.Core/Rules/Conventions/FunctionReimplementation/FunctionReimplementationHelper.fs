@@ -18,12 +18,12 @@ let rec getLambdaParamIdent = function
         getLambdaParamIdent simplePatterns
 
 let checkLambda (args:AstNodeRuleParams) checker =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
         match lambda with
         | Lambda(lambda, range) -> 
             if (not << List.isEmpty) lambda.Arguments then
-                checker args.fileContent lambda range
+                checker args.FileContent lambda range
             else Array.empty
         | _ -> Array.empty
     | _ -> Array.empty

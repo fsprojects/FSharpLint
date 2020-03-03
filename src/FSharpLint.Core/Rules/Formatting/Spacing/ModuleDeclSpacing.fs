@@ -9,14 +9,14 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
-let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace = 
+let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
     match synModuleOrNamespace with
     | SynModuleOrNamespace (_, _, _, decls, _, _, _, _) ->
         decls
         |> List.toArray
         |> Array.pairwise
         |> Array.choose (fun (declOne, declTwo) ->
-            let numPreceedingCommentLines = countPrecedingCommentLines args.fileContent declOne.Range.End declTwo.Range.Start
+            let numPreceedingCommentLines = countPrecedingCommentLines args.FileContent declOne.Range.End declTwo.Range.Start
             if declTwo.Range.StartLine <> declOne.Range.EndLine + 3 + numPreceedingCommentLines then
                 let intermediateRange =
                     let startLine = declOne.Range.EndLine + 1
@@ -36,15 +36,15 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                   TypeChecks = [] } |> Some
             else
                 None)
-        
+
 let runner args =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.ModuleOrNamespace synModuleOrNamespace ->
         checkModuleDeclSpacing args synModuleOrNamespace
     | _ -> Array.empty
 
 let rule =
-    { name = "ModuleDeclSpacing" 
-      identifier = Identifiers.ModuleDeclSpacing
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "ModuleDeclSpacing"
+      Identifier = Identifiers.ModuleDeclSpacing
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

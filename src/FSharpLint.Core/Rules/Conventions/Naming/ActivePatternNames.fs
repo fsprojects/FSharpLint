@@ -26,7 +26,7 @@ let private getValueOrFunctionIdents isPublic pattern =
     | _ -> Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) ->
         let isNotTypeExtension =
             match typeDef with
@@ -51,7 +51,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.syntaxArray args.skipArray args.nodeIndex
+                let isPublic = isPublic args.SyntaxArray args.SkipArray args.NodeIndex
                 getPatternIdents isPublic getValueOrFunctionIdents true pattern
             | _ -> Array.empty
         else
@@ -65,8 +65,8 @@ let private getIdentifiersWithIdText =
         |> Array.map (fun idText -> (identifier, idText, None)))
 
 let rule config =
-    { name = "ActivePatternNames"
-      identifier = Identifiers.ActivePatternNames
-      ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiersWithIdText } }
+    { Name = "ActivePatternNames"
+      Identifier = Identifiers.ActivePatternNames
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiersWithIdText } }
     |> toAstNodeRule
     |> AstNodeRule

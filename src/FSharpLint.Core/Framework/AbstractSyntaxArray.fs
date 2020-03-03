@@ -281,7 +281,7 @@ module AbstractSyntaxArray =
 
         (nodes.ToArray(), skipArray)
 
-    let getBreadcrumbs maxBreadcrumbs (syntaxArray: Node []) (skipArray: Skip []) i =
+    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) (skipArray:Skip []) i =
         let rec getBreadcrumbs breadcrumbs i =
             if i = 0 then
                 let node = syntaxArray.[i].Actual

@@ -1,0 +1,10 @@
+<Project ToolsVersion="15.0">
+  <Target Name="FSharpLint"
+          AfterTargets="AfterBuild"
+          Condition="$(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject'">
+   <Exec
+     Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
+     ConsoleToMsBuild="true"
+     IgnoreExitCode="true" />
+  </Target>
+</Project>

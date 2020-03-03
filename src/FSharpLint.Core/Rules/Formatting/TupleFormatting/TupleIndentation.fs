@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 // Check that tuple items on separate lines have consistent indentation.
-let checkTupleIndentation _ (tupleExprs : SynExpr list) _ _ =
+let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
     tupleExprs
     |> List.toArray
     |> Array.groupBy (fun expr -> expr.Range.StartLine)
@@ -25,11 +25,11 @@ let checkTupleIndentation _ (tupleExprs : SynExpr list) _ _ =
              TypeChecks = [] } |> Some
         else
             None)
-    
-let runner (args : AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleIndentation
-    
+
+let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleIndentation
+
 let rule =
-    { name = "TupleIndentation" 
-      identifier = Identifiers.TupleIndentation
-      ruleConfig = { AstNodeRuleConfig.runner = runner; cleanup = ignore } }
+    { Name = "TupleIndentation"
+      Identifier = Identifiers.TupleIndentation
+      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

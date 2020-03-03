@@ -1,4 +1,8 @@
 module FSharpLint.Rules.Helper.NumberOfItems
 
 [<RequireQualifiedAccess>]
-type Config = { maxItems : int }
+type Config = {
+    // fsharplint:disable RecordFieldNames
+    maxItems : int
+    // fsharplint:enable RecordFieldNames
+}

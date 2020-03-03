@@ -23,9 +23,9 @@ let private isImplementingInterface parents =
         | _ -> false)
 
 let private getIdentifiers (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-        let parents = args.getParents 3
+        let parents = args.GetParents 3
         if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
             | Member | Property ->
@@ -41,8 +41,8 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "MemberNames"
-      identifier = Identifiers.MemberNames
-      ruleConfig = { NamingRuleConfig.config = config; getIdentifiersToCheck = getIdentifiers >> addDefaults } }
+    { Name = "MemberNames"
+      Identifier = Identifiers.MemberNames
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
     |> toAstNodeRule
     |> AstNodeRule

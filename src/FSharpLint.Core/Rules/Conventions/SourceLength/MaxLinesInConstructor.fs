@@ -6,7 +6,7 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, valData, _, _, _, _, _) as binding) ->
        match identifierTypeFromValData valData with
        | Constructor -> Helper.SourceLength.checkSourceLengthRule config binding.RangeOfBindingAndRhs "Constructor"
@@ -14,7 +14,7 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { name = "MaxLinesInConstructor"
-      identifier = Identifiers.MaxLinesInConstructor
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxLinesInConstructor"
+      Identifier = Identifiers.MaxLinesInConstructor
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

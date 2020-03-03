@@ -28,17 +28,17 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
         Array.empty
 
 let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.Expression (expression) ->
         match expression with
-        | SynExpr.Tuple(_, expressions, _, _) when not <| isInApplication args.syntaxArray args.skipArray args.nodeIndex ->
+        | SynExpr.Tuple(_, expressions, _, _) when not <| isInApplication args.SyntaxArray args.SkipArray args.NodeIndex ->
             validateTuple config.maxItems expressions
         | _ -> Array.empty
     | _ ->
         Array.empty
 
 let rule config =
-    { name = "MaxNumberOfItemsInTuple"
-      identifier = Identifiers.MaxNumberOfItemsInTuple
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxNumberOfItemsInTuple"
+      Identifier = Identifiers.MaxNumberOfItemsInTuple
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule

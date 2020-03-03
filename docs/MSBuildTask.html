@@ -41,13 +41,13 @@
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="xml"><span class="k">&lt;</span><span class="i">Target</span> <span class="o">Name</span><span class="k">="FSharpLint"</span> <span class="o">AfterTargets</span><span class="k">="AfterBuild"</span><span class="k">&gt;</span>
  <span class="k">&lt;</span><span class="i">Exec</span>
-   <span class="o">Command</span><span class="k">="dotnet fsharplint -format msbuild -f $(MSBuildProjectFullPath)"</span>
+   <span class="o">Command</span><span class="k">="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"</span>
    <span class="o">ConsoleToMsBuild</span><span class="k">="true"</span>
    <span class="o">IgnoreExitCode</span><span class="k">="true"</span>
  <span class="k">/&gt;</span>
 <span class="k">&lt;/</span><span class="i">Target</span><span class="k">&gt;</span>
 </code></pre></td></tr></table>
-<p>If you would like to enable linting for all projects, you can add the above target to either a <code>Directory.Build.props</code> or <code>Directory.Build.target</code> file in the root of your repository. This will add the target to all files. See <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019">here</a> for more info</p>
+<p>If you would like to enable linting for all projects, you can add the above target to either a <code>Directory.Build.props</code> or <code>Directory.Build.targets</code> file in the root of your repository. This will add the target to all files. See <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019">here</a> for more info</p>
 
           
         </div>

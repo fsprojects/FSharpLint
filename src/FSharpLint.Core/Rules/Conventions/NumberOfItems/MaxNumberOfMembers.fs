@@ -36,13 +36,13 @@ let private validateType (maxMembers:int) members typeRepresentation =
         Array.empty
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
-    match args.astNode with
+    match args.AstNode with
     | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
         validateType config.maxItems members typeRepresentation
     | _ -> Array.empty
 
 let rule config =
-    { name = "MaxNumberOfMembers"
-      identifier = Identifiers.MaxNumberOfMembers
-      ruleConfig = { AstNodeRuleConfig.runner = runner config; cleanup = ignore } }
+    { Name = "MaxNumberOfMembers"
+      Identifier = Identifiers.MaxNumberOfMembers
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
     |> AstNodeRule
