@@ -1,5 +1,20 @@
 # Rules
 
+## Global Configuration
+
+In addition to the configuration available for each rule, there are some settings which are defined globally to maintain consistency across
+multiple rules. These are defind in the `globals` object in the base of the configuration file. The rule pages below point out any global
+setting that each rule depends on. The config is as follows, but can be completely omitted to use defaults:
+
+  [lang=javascript]
+    {
+      "globals": {
+        "numIndentationSpaces": 4 // number of spaces used for indentation
+      }
+    }
+
+## Rule Lists
+
 The following rules can be specified for linting.
 
 - [TupleCommaSpacing (FL0001)](rules/FL0001.html)
@@ -67,3 +82,4 @@ The following rules can be specified for linting.
 - [TrailingNewLineInFile (FL0063)](rules/FL0063.html)
 - [NoTabCharacters (FL0064)](rules/FL0064.html)
 - [Hints (FL0065)](rules/FL0065.html)
+

@@ -79,14 +79,6 @@ module ContextBuilder =
         |> List.fold (fun current (line, indentationOverride) ->
             Map.add line indentationOverride current) current
 
-[<RequireQualifiedAccess>]
-type Config =
-    {
-        // fsharplint:disable RecordFieldNames
-        numberOfIndentationSpaces : int
-        // fsharplint:enable RecordFieldNames
-    }
-
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
     let numLeadingSpaces = line.Length - line.TrimStart().Length
     let range = mkRange "" (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
@@ -120,12 +112,12 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
     else
         None
 
-let runner (config:Config) context args =
-    checkIndentation config.numberOfIndentationSpaces args.Line args.LineNumber context
+let runner context args =
+    checkIndentation args.GlobalConfig.numIndentationSpaces args.Line args.LineNumber context
     |> Option.toArray
 
-let rule config =
+let rule =
     { Name = "Indentation"
       Identifier = Identifiers.Indentation
-      RuleConfig = { Runner = runner config } }
+      RuleConfig = { Runner = runner } }
     |> IndentationRule

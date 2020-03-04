@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 type TestLineRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
+    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create()
         let sourceText = SourceText.ofString input
 
@@ -20,6 +20,8 @@ type TestLineRuleBase (rule:Rule) =
         let projectOptions, _ = checker.GetProjectOptionsFromScript(fileName, sourceText) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         let parseResults = checker.ParseFile("test.fsx", sourceText, parsingOptions) |> Async.RunSynchronously
+
+        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
         let rule =
             match rule with
@@ -30,9 +32,9 @@ type TestLineRuleBase (rule:Rule) =
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
+            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input syntaxArray skipArray
             let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = None; GenericLineRules = [|rule|] }
 
-            runLineRules lineRules fileName input context
+            runLineRules lineRules globalConfig fileName input context
             |> Array.iter this.PostSuggestion
         | None -> ()

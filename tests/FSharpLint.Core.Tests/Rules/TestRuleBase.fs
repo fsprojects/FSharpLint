@@ -4,13 +4,14 @@ open System
 open System.Text
 open NUnit.Framework
 open FSharpLint.Framework
+open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Suggestion
 
 [<AbstractClass>]
 type TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
-    abstract Parse : string * ?fileName:string * ?checkFile:bool -> unit
+    abstract Parse : string * ?fileName:string * ?checkFile:bool * ?globalConfig:GlobalRuleConfig -> unit
 
     member __.PostSuggestion (suggestion:Suggestion.LintWarning) =
         if not suggestion.Details.TypeChecks.IsEmpty then

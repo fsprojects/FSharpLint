@@ -116,7 +116,7 @@ module Lint =
         { IndentationRuleContext : Map<int,bool*int>
           NoTabCharactersRuleContext : (string * Range.range) list }
 
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -135,7 +135,8 @@ module Lint =
                       GetParents = getParents
                       FilePath = filePath
                       FileContent = fileContent
-                      CheckInfo = typeCheckResults }
+                      CheckInfo = typeCheckResults
+                      GlobalConfig = globalConfig }
                 // Build state for rules with context.
                 indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
                 noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
@@ -150,7 +151,7 @@ module Lint =
         rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
         (astNodeSuggestions, context)
 
-    let runLineRules (lineRules:Configuration.LineRules) (filePath:string) (fileContent:string) (context:Context) =
+    let runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (context:Context) =
         fileContent
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
@@ -159,7 +160,8 @@ module Lint =
                   LineNumber = lineNumber + 1
                   IsLastLine = isLastLine
                   FilePath = filePath
-                  FileContent = fileContent }
+                  FileContent = fileContent
+                  GlobalConfig =  globalConfig }
 
             let indentationError =
                 lineRules.IndentationRule
@@ -225,8 +227,8 @@ module Lint =
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.LineRules fileInfo.File fileInfo.Text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text context
 
             [|
                 lineSuggestions

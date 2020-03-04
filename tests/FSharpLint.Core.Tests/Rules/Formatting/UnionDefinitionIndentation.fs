@@ -54,6 +54,21 @@ type T =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for correctly indented union definition cases in multi-type declaration``() =
+        this.Parse"""
+module Program
+
+type T =
+    | T1 of int
+    | T2 of int
+and V =
+    | V1 of int
+    | V2 of int
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for correctly indented union definition cases with attribute``() =
         this.Parse"""
 module Program

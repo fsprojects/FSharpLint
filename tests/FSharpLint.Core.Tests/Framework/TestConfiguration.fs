@@ -125,8 +125,8 @@ type TestConfiguration() =
         let config = {
             Configuration.Zero with
                 typography =
-                    Some { TypographyConfig.indentation = Some { RuleConfig.enabled = true; config = Some { Indentation.Config.numberOfIndentationSpaces = 4 } }
-                           maxCharactersOnLine = None
+                    Some { TypographyConfig.maxCharactersOnLine = Some { RuleConfig.enabled = true; config = Some { MaxCharactersOnLine.Config.maxCharactersOnLine = 4 } }
+                           indentation = None
                            trailingWhitespaceOnLine = None
                            maxLinesInFile = None
                            trailingNewLineInFile = None
@@ -139,10 +139,10 @@ type TestConfiguration() =
         let expectedJson =
             """{
     "typography": {
-        "indentation": {
+        "maxCharactersOnLine": {
             "enabled": true,
             "config": {
-                "numberOfIndentationSpaces": 4
+                "maxCharactersOnLine": 4
             }
         }
     }

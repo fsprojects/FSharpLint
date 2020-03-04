@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 type TestNoTabCharactersRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool) =
+    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create()
         let sourceText = SourceText.ofString input
 
@@ -26,13 +26,14 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
             | NoTabCharactersRule rule -> rule
             | _ -> failwithf "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
 
+        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty None fileName input syntaxArray skipArray
+            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input syntaxArray skipArray
             let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = Some rule; GenericLineRules = [||] }
 
-            runLineRules lineRules fileName input context
+            runLineRules lineRules globalConfig fileName input context
             |> Array.iter this.PostSuggestion
         | None -> ()

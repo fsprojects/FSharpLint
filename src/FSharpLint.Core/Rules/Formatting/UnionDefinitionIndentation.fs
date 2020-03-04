@@ -2,14 +2,12 @@ module FSharpLint.Rules.UnionDefinitionIndentation
 
 open System
 open FSharp.Compiler.Ast
-open FSharp.Compiler.Range
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
-open FSharpLint.Framework.ExpressionUtilities
 
-let getUnionCaseStartColumn (SynUnionCase.UnionCase (attrs, name, _, _, _, range)) =
+let getUnionCaseStartColumn (SynUnionCase.UnionCase (attrs, _, _, _, _, range)) =
     match attrs |> List.tryHead with
     | Some attr ->
         // startcolumn of the attributes now includes the `[<` starter sigil, so we can just use it!
@@ -25,7 +23,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
         | [_] -> Array.empty
         | firstCase :: _ ->
             let indentationLevelError =
-                if getUnionCaseStartColumn firstCase <> typeDefnStartColumn + 1 then
+                if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
                     { Range = firstCase.Range
                       Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
                       SuggestedFix = None
@@ -55,8 +53,11 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
 
 let runner args =
     match args.AstNode with
-    | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->
-        checkUnionDefinitionIndentation args repr defnRange.StartColumn
+    | AstNode.ModuleDeclaration (SynModuleDecl.Types (typeDefns, typesRange)) ->
+        typeDefns
+        |> List.toArray
+        |> Array.collect (fun (SynTypeDefn.TypeDefn (_, repr, _, _)) ->
+            checkUnionDefinitionIndentation args repr typesRange.StartColumn)
     | _ ->
         Array.empty
 
