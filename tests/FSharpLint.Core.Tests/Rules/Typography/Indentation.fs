@@ -96,6 +96,19 @@ let pascalsTriangle =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for multi-line tuple``() =
+        this.Parse """
+module P
+
+let pascalsTriangle =
+    (1,
+     2,
+     3)"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+
+    [<Test>]
     member this.``No error for correct list member indentation``() =
         this.Parse """
 module P

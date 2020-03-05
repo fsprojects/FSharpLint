@@ -52,17 +52,22 @@ module ContextBuilder =
              |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
              |> firstRangePerLine
              |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.Record(recordFields=recordFields)) ->
+        | Expression (SynExpr.Tuple (_, exprs, _, _)) ->
+            exprs
+             |> List.map (fun expr -> expr.Range)
+             |> firstRangePerLine
+             |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Expression (SynExpr.Record(recordFields=recordFields)) ->
             recordFields
             |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
+        | Expression (SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
             extractSeqExprItems expr
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
+        | Expression (SynExpr.ArrayOrList(exprs=exprs)) ->
             exprs
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
