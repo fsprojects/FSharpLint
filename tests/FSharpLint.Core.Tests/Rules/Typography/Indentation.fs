@@ -50,6 +50,15 @@ let rainbow =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for correct record field indentation in type definition``() =
+        this.Parse """
+type T =
+    { X : int
+      Y : string }"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for correct record field indentation with multiple fields per line``() =
         this.Parse """
 module P

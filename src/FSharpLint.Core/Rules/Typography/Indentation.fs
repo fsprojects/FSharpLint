@@ -47,6 +47,11 @@ module ContextBuilder =
 
     let private indentationOverridesForNode (node:AstNode) =
         match node with
+        | TypeDefinition (SynTypeDefn.TypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _, _)) ->
+             fields
+             |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
+             |> firstRangePerLine
+             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression(SynExpr.Record(recordFields=recordFields)) ->
             recordFields
             |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
