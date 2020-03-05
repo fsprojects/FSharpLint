@@ -73,7 +73,8 @@ module ContextBuilder =
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
-            when ident.idText = "op_PipeRight" ->
+            when ident.idText = "op_PipeRight"
+            && outerArg.Range.EndLine <> innerArg.Range.StartLine ->
             let expectedIndentation = innerArg.Range.StartColumn
             createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
         | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->

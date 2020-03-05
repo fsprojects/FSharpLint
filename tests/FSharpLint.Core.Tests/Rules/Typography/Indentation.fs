@@ -133,6 +133,15 @@ let res = 1
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for pipeline on same line``() =
+        this.Parse """
+module P
+
+let res = 1 |> add 2"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for standard pipeline indentation``() =
         this.Parse """
 module P
