@@ -133,6 +133,27 @@ let res = 1
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for exceptional composition indentation``() =
+        this.Parse """
+module P
+
+let res = add 2
+          >> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional infix indentation``() =
+        this.Parse """
+module P
+
+let res = 1
+          + 2
+          + 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for pipeline on same line``() =
         this.Parse """
 module P
