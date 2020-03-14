@@ -147,9 +147,6 @@
   <data name="ConsoleRunTimeConfigError" xml:space="preserve">
     <value>Failed while reading from config at run time, error: {0}.</value>
   </data>
-  <data name="LintError" xml:space="preserve">
-    <value>Error in file {0} on line {1} starting at column {2}</value>
-  </data>
   <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
     <value>`failwithf` has more arguments than were found in its format string, these further arguments will be ignored by the compiler.</value>
   </data>
