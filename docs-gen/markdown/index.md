@@ -78,7 +78,7 @@ On windows run `build.cmd` and on unix based systems run `build.sh`.
 
 FSharpLint can be used in several ways:
 
-* [Running as dotnet tool from command line](ConsoleApplication.html).
+* [Running as dotnet tool from command line](DotnetTool.html).
 * [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
 * [In other IDEs (Visual Studio, Rider) as an MSBuild Task](MSBuildTask.html).
 * [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)

@@ -274,7 +274,7 @@ argument-variable = letter;
 
 argument-wildcard = "_";
 
-lambda-arguments = [{(argument-variable | argument-wildcard), spaces1}], 
+lambda-arguments = [{(argument-variable | argument-wildcard), spaces1}],
                         (argument-variable | argument-wildcard), [spaces]
 
 lambda = "fun", spaces1, lambda-arguments, "-&gt;", spaces, expression;

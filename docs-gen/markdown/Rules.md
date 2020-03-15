@@ -6,7 +6,7 @@ In addition to the configuration available for each rule, there are some setting
 multiple rules. These are defind in the `globals` object in the base of the configuration file. The rule pages below point out any global
 setting that each rule depends on. The config is as follows, but can be completely omitted to use defaults:
 
-  [lang=javascript]
+    [lang=javascript]
     {
       "globals": {
         "numIndentationSpaces": 4 // number of spaces used for indentation
