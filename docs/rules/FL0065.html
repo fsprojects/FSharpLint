@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Hints (FS0065)
+    <title>Hints (FL0065)
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -27,12 +27,12 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1><a name="Hints-FS0065" class="anchor" href="#Hints-FS0065">Hints (FS0065)</a></h1>
-<h3><a name="Introduction" class="anchor" href="#Introduction">Introduction</a></h3>
+          <h1><a name="Hints-FL0065" class="anchor" href="#Hints-FL0065">Hints (FL0065)</a></h1>
+<h2><a name="Introduction" class="anchor" href="#Introduction">Introduction</a></h2>
 <p>The Hints analyser is inspired by <a href="https://github.com/ndmitchell/hlint">HLint</a>. The hints let users easily write their own rules which are matched against linted code and when matched produce a suggestion that the user provides as part of the hint.</p>
 <p>Every hint is formed of two parts: the match and the suggestion. Both the match and the suggestion are parsed the same way into ASTs, but they have two different purposes; the match AST is analysed against the code being linted looking for any expressions in the code that match the AST, and if there is a match then the suggestion AST is used to display a suggestion on how the code can be refactored.</p>
-<h3><a name="Matching" class="anchor" href="#Matching">Matching</a></h3>
-<h5><a name="Match-Any-Expression" class="anchor" href="#Match-Any-Expression">Match Any Expression</a></h5>
+<h2><a name="Matching" class="anchor" href="#Matching">Matching</a></h2>
+<h3><a name="Match-Any-Expression" class="anchor" href="#Match-Any-Expression">Match Any Expression</a></h3>
 <p>Any F# expression can be matched by a variable or wildcard.</p>
 <ul>
 <li>A variable is represented by a single letter e.g. <code>x</code></li>
@@ -58,7 +58,7 @@
 </pre></td>
 <td class="snippet"><pre class="fssnip"><code lang="hint">not (a &gt;= b) ===&gt; a &lt;  b
 </code></pre></td></tr></table>
-<h5><a name="Match-An-Identifier" class="anchor" href="#Match-An-Identifier">Match An Identifier</a></h5>
+<h3><a name="Match-An-Identifier" class="anchor" href="#Match-An-Identifier">Match An Identifier</a></h3>
 <p>Identifiers in F# code can be matched by using the same identifier in the hint. It's important to note that since single characters are used to represent variables in hints the identifier must be at least 2 characters long.</p>
 <p>For example the following rule uses identifiers:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
@@ -66,7 +66,7 @@
 <td class="snippet"><pre class="fssnip"><code lang="hint">List.fold (+) 0 ===&gt; List.sum
 </code></pre></td></tr></table>
 <p><code>List.fold</code> in the hint will match the same identifier in the code. So if <code>List.fold</code> is found anywhere in the F# code being analysed with <code>(+)</code> and <code>0</code> applied to it then the rule will be matched.</p>
-<h5><a name="Match-Literal-Constants" class="anchor" href="#Match-Literal-Constants">Match Literal Constants</a></h5>
+<h3><a name="Match-Literal-Constants" class="anchor" href="#Match-Literal-Constants">Match Literal Constants</a></h3>
 <p>Literal constants can be used to match literal constants in the code, the constants in hints are the same format as constants in F#, so for example if you wanted to match <code>0x4b</code> you could use <code>0x4b</code> in the hint.</p>
 <p>Example:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
@@ -74,7 +74,7 @@
 <td class="snippet"><pre class="fssnip"><code lang="hint">not true ===&gt; false
 </code></pre></td></tr></table>
 <p>In the example above the boolean literal <code>true</code> is used to match any F# code where <code>true</code> is applied to the <code>not</code> identifier.</p>
-<h5><a name="Match-Function-Application-and-Operators" class="anchor" href="#Match-Function-Application-and-Operators">Match Function Application and Operators</a></h5>
+<h3><a name="Match-Function-Application-and-Operators" class="anchor" href="#Match-Function-Application-and-Operators">Match Function Application and Operators</a></h3>
 <p>Matching function application, prefix operators, and infix operators in hints are all done in the same way as how you'd write it in F# e.g.</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
 <span class="l">2: </span>
@@ -86,7 +86,7 @@
 </code></pre></td></tr></table>
 <p>The first rule above matches <code>true</code> (boolean literal) applied to the function <code>not</code>, the second matches two literal integers (both <code>4</code>) applied to the <code>+</code> binary operator, and the third matches an expression applied to the <code>~</code> prefix operator.</p>
 <p>Read the below section titled "Order Of Operations" for specifying the order of application in a hint.</p>
-<h5><a name="Match-Lambda-Functions" class="anchor" href="#Match-Lambda-Functions">Match Lambda Functions</a></h5>
+<h3><a name="Match-Lambda-Functions" class="anchor" href="#Match-Lambda-Functions">Match Lambda Functions</a></h3>
 <p>Lambda functions can be matched using the syntax <code>fun args -&gt; ()</code> e.g. <code>fun x y -&gt; x + y</code>.</p>
 <p>The arguments may be either wildcards (<code>_</code>) or 'variables' (a single character). The 'variable' arguments have a particular use: they match a lambda that has that argument as an identifier, and then if that 'variable' is used in the body of the lambda in the hint then it will match the argument's identifier in the body of the code.</p>
 <p>For example:</p>
@@ -95,7 +95,7 @@
 <td class="snippet"><pre class="fssnip"><code lang="hint">fun x -&gt; x ===&gt; id
 </code></pre></td></tr></table>
 <p>The above hint will match a lambda that has a single argument which is an identifier and returns that identifier. <code>fun val -&gt; val</code> would be matched, whereas <code>fun val -&gt; ()</code> would not be matched - to match this you could use the hint: <code>fun _ -&gt; ()</code>.</p>
-<h5><a name="Order-Of-Operations" class="anchor" href="#Order-Of-Operations">Order Of Operations</a></h5>
+<h3><a name="Order-Of-Operations" class="anchor" href="#Order-Of-Operations">Order Of Operations</a></h3>
 <p>Generic order of operations can be specified using parentheses. They're described as 'generic' because using parentheses in a hint will also take into account the following operators: <code>|&gt;</code>, <code>||&gt;</code>, <code>|||&gt;</code>, <code>&lt;|</code>, <code>&lt;||</code>, and <code>&lt;|||</code> which are often used to specificy the order of function application.</p>
 <p>Below uses parentheses to match <code>x</code> applied to <code>not</code> and the result of that application applied to <code>someFunc</code>.</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
@@ -110,7 +110,7 @@
 </tr>
 </table>
 <p>The same code written as a rule <code>not x |&gt; someFunc</code> will match the above, but it is matching against the operator so it will not match <code>someFunc (not x)</code>. However the rule <code>someFunc (not x)</code> will match both.</p>
-<h3><a name="EBNF-of-a-Hint" class="anchor" href="#EBNF-of-a-Hint">EBNF of a Hint</a></h3>
+<h2><a name="EBNF-of-a-Hint" class="anchor" href="#EBNF-of-a-Hint">EBNF of a Hint</a></h2>
 <p>This is incomplete - currently missing a few of the more detailed rules e.g. <code>uint32</code> and <code>infix-operator</code>, for these I'd recommend looking them up in the EBNF for F# as that's what they will be based upon.</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
 <span class="l"> 2: </span>
@@ -288,7 +288,7 @@ match = expression;
 
 hint = match, spaces, "===&gt;", spaces, suggestion;
 </code></pre></td></tr></table>
-<h3><a name="Writing-Your-Own-Hints" class="anchor" href="#Writing-Your-Own-Hints">Writing Your Own Hints</a></h3>
+<h2><a name="Writing-Your-Own-Hints" class="anchor" href="#Writing-Your-Own-Hints">Writing Your Own Hints</a></h2>
 <p>You can add new hints to your config in the <code>hints</code> object. This config has two fields, <code>add</code> and <code>ignore</code>. <code>add</code> is used to add new hints, while <code>ignore</code> can be used to ignore hints
 added in previous configs (e.g. the default config).</p>
 <p>For example to make the lint tool run with just the two hints: <code>not (a =  b) ===&gt; a &lt;&gt; b</code> and <code>not (a &lt;&gt; b) ===&gt; a =  b</code>, and also ignore the default hint <code>x = true ===&gt; x</code>,
@@ -313,13 +313,13 @@ you could use the following config file.</p>
   }
 }
 </code></pre></td></tr></table>
-<h3><a name="Flaws" class="anchor" href="#Flaws">Flaws</a></h3>
+<h2><a name="Flaws" class="anchor" href="#Flaws">Flaws</a></h2>
 <ul>
 <li><code>===&gt;</code> is used to split the hints into parts, a hint cannot match this valid F# operator.</li>
 <li>Single letter identifiers are used as variables inside a hint, so attempting to match an identifier that is a single letter is not going to work.</li>
-<li>Operators beginning with <code>.</code> e.g. <code>.*</code> will have incorrect precedence and as such should not currently be used in hints.</li>
+<li>Operators beginning with <code>.</code> (e.g. <code>.*</code>) will have incorrect precedence and as such should not currently be used in hints.</li>
 </ul>
-<h3><a name="Future-Intentions" class="anchor" href="#Future-Intentions">Future Intentions</a></h3>
+<h2><a name="Future-Intentions" class="anchor" href="#Future-Intentions">Future Intentions</a></h2>
 <ul>
 <li>Provide more informative parse errors.</li>
 <li>Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.</li>

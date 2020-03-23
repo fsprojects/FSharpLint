@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>TupleOfWildcards (FS0058)
+    <title>TupleOfWildcards (FL0058)
 </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Matthew Mcveigh">
@@ -27,7 +27,7 @@
       <hr />
       <div class="row">
         <div class="span9" id="main">
-          <h1><a name="TupleOfWildcards-FS0058" class="anchor" href="#TupleOfWildcards-FS0058">TupleOfWildcards (FS0058)</a></h1>
+          <h1><a name="TupleOfWildcards-FL0058" class="anchor" href="#TupleOfWildcards-FL0058">TupleOfWildcards (FL0058)</a></h1>
 <h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
 <p>A constructor in a pattern has arguments that consist entirely of wildcards e.g. <code>SynPat.Paren(_, _)</code></p>
 <h2><a name="Rationale" class="anchor" href="#Rationale">Rationale</a></h2>
@@ -35,7 +35,18 @@
 <h2><a name="How-To-Fix" class="anchor" href="#How-To-Fix">How To Fix</a></h2>
 <p>Replace the tuple with a single wildcard e.g. the example in the cause could be turned into <code>SynPat.Paren(_)</code></p>
 <h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
-<p><code>enabled</code> - A boolean property that can enable and disable this rule. (Default true)</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+    <span class="s">"TupleOfWildcards"</span>: {
+        <span class="s">"enabled"</span>: <span class="k">true</span>
+    }
+}
+</code></pre></td></tr></table>
 
           
         </div>
