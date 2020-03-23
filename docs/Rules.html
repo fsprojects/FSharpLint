@@ -32,12 +32,18 @@
 <p>In addition to the configuration available for each rule, there are some settings which are defined globally to maintain consistency across
 multiple rules. These are defind in the <code>globals</code> object in the base of the configuration file. The rule pages below point out any global
 setting that each rule depends on. The config is as follows, but can be completely omitted to use defaults:</p>
-<p>[lang=javascript]
-{
-"globals": {
-"numIndentationSpaces": 4 // number of spaces used for indentation
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
+  <span class="s">"globals"</span>: {
+    <span class="s">"numIndentationSpaces"</span>: <span class="n">4</span> <span class="c">// number of spaces used for indentation</span>
+  }
 }
-}</p>
+</code></pre></td></tr></table>
 <h2><a name="Rule-Lists" class="anchor" href="#Rule-Lists">Rule Lists</a></h2>
 <p>The following rules can be specified for linting.</p>
 <ul>
