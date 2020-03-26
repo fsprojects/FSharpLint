@@ -3,7 +3,7 @@ module FSharpLint.Rules.HintMatcher
 open System
 open System.Collections.Generic
 open System.Diagnostics
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.PrettyNaming
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework

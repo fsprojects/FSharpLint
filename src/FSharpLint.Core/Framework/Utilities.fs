@@ -25,7 +25,7 @@ module ExpressionUtilities =
 
     open System
     open FSharp.Compiler
-    open FSharp.Compiler.Ast
+    open FSharp.Compiler.SyntaxTree
     open FSharp.Compiler.Range
     open FSharp.Compiler.SourceCodeServices
 

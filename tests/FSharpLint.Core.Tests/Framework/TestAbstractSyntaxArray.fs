@@ -5,7 +5,7 @@ open System.Diagnostics
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.Range
 open FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Reflection

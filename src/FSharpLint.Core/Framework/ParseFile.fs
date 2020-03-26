@@ -5,7 +5,7 @@ module ParseFile =
 
     open System.IO
     open FSharpLint.Framework
-    open FSharp.Compiler.Ast
+    open FSharp.Compiler.SyntaxTree
     open FSharp.Compiler.SourceCodeServices
     open FSharp.Compiler.Text
     open Utilities

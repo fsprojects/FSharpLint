@@ -1,7 +1,7 @@
 module FSharpLint.Rules.PatternMatchOrClausesOnNewLine
 
 open System
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast

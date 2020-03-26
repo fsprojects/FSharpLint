@@ -1,6 +1,6 @@
 module FSharpLint.Rules.TypeNames
 
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming

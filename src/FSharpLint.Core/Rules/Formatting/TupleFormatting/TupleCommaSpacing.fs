@@ -1,7 +1,7 @@
 module FSharpLint.Rules.TupleCommaSpacing
 
 open System
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.Range
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

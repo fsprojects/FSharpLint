@@ -1,6 +1,6 @@
 module FSharpLint.Rules.ActivePatternNames
 
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules

@@ -1,7 +1,7 @@
 module FSharpLint.Rules.Helper.Naming
 
 open System
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.Range
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
@@ -299,16 +299,16 @@ let rec getPatternIdents isPublic getIdents argsAreParameters pattern =
 
         let hasNoArgs =
             match args with
-            | SynConstructorArgs.NamePatPairs(pats, _) -> pats.IsEmpty
-            | SynConstructorArgs.Pats(pats) -> pats.IsEmpty
+            | SynArgPats.NamePatPairs(pats, _) -> pats.IsEmpty
+            | SynArgPats.Pats(pats) -> pats.IsEmpty
 
         let argSuggestions =
             match args with
-            | SynConstructorArgs.NamePatPairs(pats, _) ->
+            | SynArgPats.NamePatPairs(pats, _) ->
                 pats
                 |> List.toArray
                 |> Array.collect (snd >> getPatternIdents false getIdents false)
-            | SynConstructorArgs.Pats(pats) ->
+            | SynArgPats.Pats(pats) ->
                 pats
                 |> List.toArray
                 |> Array.collect (getPatternIdents false getIdents false)

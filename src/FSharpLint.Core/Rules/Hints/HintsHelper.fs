@@ -12,7 +12,7 @@
 module FSharpLint.Rules.Helper.Hints
 
 open System.Collections.Generic
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.HintParser

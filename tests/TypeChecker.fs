@@ -18,7 +18,7 @@ open Microsoft.FSharp.Compiler.AbstractIL.Diagnostics
 open Microsoft.FSharp.Compiler 
 open Microsoft.FSharp.Compiler.Range
 open Microsoft.FSharp.Compiler.Rational
-open Microsoft.FSharp.Compiler.Ast
+open Microsoft.FSharp.Compiler.AbstractSyntax
 open Microsoft.FSharp.Compiler.ErrorLogger
 open Microsoft.FSharp.Compiler.Tast
 open Microsoft.FSharp.Compiler.Tastops
@@ -2381,7 +2381,7 @@ module BindingNormalization =
             // of available items, to the point that you can't even define a function with the same name as an existing union case. 
             match pat with 
             | SynPat.FromParseError(p,_) -> normPattern p
-            | SynPat.LongIdent (LongIdentWithDots(longId,_), toolId, tyargs, SynConstructorArgs.Pats args, vis, m) ->
+            | SynPat.LongIdent (LongIdentWithDots(longId,_), toolId, tyargs, SynArgPats.Pats args, vis, m) ->
                 let typars = (match tyargs with None -> inferredTyparDecls | Some typars -> typars)
                 match memberFlagsOpt with 
                 | None ->                
@@ -4801,17 +4801,17 @@ and TcPat warnOnUpper cenv env topValInfo vFlags (tpenv,names,takenNames) ty pat
         if isSome tyargs then errorR(Error(FSComp.SR.tcInvalidTypeArgumentUsage(),m))
         let warnOnUpperForId = 
             match args with
-            | SynConstructorArgs.Pats [] -> warnOnUpper
+            | SynArgPats.Pats [] -> warnOnUpper
             | _ -> AllIdsOK
         begin match ResolvePatternLongIdent cenv.tcSink cenv.nameResolver warnOnUpperForId false m ad env.eNameResEnv TypeNameResolutionInfo.Default longId with
         | Item.NewDef id -> 
             match args with 
-            | SynConstructorArgs.Pats [] 
-            | SynConstructorArgs.NamePatPairs ([], _)-> TcPat warnOnUpperForId cenv env topValInfo vFlags (tpenv,names,takenNames) ty (mkSynPatVar vis id)
+            | SynArgPats.Pats [] 
+            | SynArgPats.NamePatPairs ([], _)-> TcPat warnOnUpperForId cenv env topValInfo vFlags (tpenv,names,takenNames) ty (mkSynPatVar vis id)
             | _ -> error (UndefinedName(0,FSComp.SR.undefinedNamePatternDiscriminator,id,[]))
 
         | Item.ActivePatternCase(APElemRef(apinfo,vref,idx)) as item -> 
-            let args = match args with SynConstructorArgs.Pats args -> args | _ -> failwith "impossible"
+            let args = match args with SynArgPats.Pats args -> args | _ -> failwith "impossible"
             // TOTAL/PARTIAL ACTIVE PATTERNS 
             let vexp, _, _, tinst, _ = TcVal true cenv env tpenv vref None m
             let vexp = MakeApplicableExprWithFlex cenv env vexp
@@ -4843,7 +4843,7 @@ and TcPat warnOnUpper cenv env topValInfo vFlags (tpenv,names,takenNames) ty pat
                 | SynPat.Named (SynPat.Wild _,id,_,None,_) -> SynExpr.Ident(id)
                 | SynPat.Typed (p,cty,m) -> SynExpr.Typed (convSynPatToSynExpr p,cty,m)
                 | SynPat.LongIdent (LongIdentWithDots(longId,dotms) as lidwd,_,_tyargs,args,None,m) -> 
-                    let args = match args with SynConstructorArgs.Pats args -> args  | _ -> failwith "impossible: active patterns can be used only with SynConstructorArgs.Pats"
+                    let args = match args with SynArgPats.Pats args -> args  | _ -> failwith "impossible: active patterns can be used only with SynArgPats.Pats"
                     let e =
                         if dotms.Length = longId.Length then
                             let e = SynExpr.LongIdent(false,LongIdentWithDots(longId, List.take (dotms.Length - 1) dotms),None,m)
@@ -4885,8 +4885,8 @@ and TcPat warnOnUpper cenv env topValInfo vFlags (tpenv,names,takenNames) ty pat
 
             let args =
                 match args with
-                | SynConstructorArgs.Pats args -> args
-                | SynConstructorArgs.NamePatPairs (pairs, m) ->
+                | SynArgPats.Pats args -> args
+                | SynArgPats.NamePatPairs (pairs, m) ->
                     // rewrite patterns from the form (name-N = pat-N...) to (..._, pat-N, _...)
                     // so type T = Case of name : int * value : int
                     // | Case(value = v)
@@ -14776,7 +14776,7 @@ module TcTypeDeclarations = begin
                         let attribs = attribs |> List.filter (fun a -> match a.Target with Some t when t.idText = "field" -> true | _ -> false)
                         let mLetPortion = synExpr.Range
                         let fldId = ident (CompilerGeneratedName id.idText, mLetPortion)
-                        let headPat = SynPat.LongIdent (LongIdentWithDots([fldId],[]),None,Some noInferredTypars, SynConstructorArgs.Pats [],None,mLetPortion)
+                        let headPat = SynPat.LongIdent (LongIdentWithDots([fldId],[]),None,Some noInferredTypars, SynArgPats.Pats [],None,mLetPortion)
                         let retInfo = match tyOpt with None -> None | Some ty -> Some (SynReturnInfo((ty,SynInfo.unnamedRetVal),ty.Range))
                         let isMutable = 
                             match propKind with 
@@ -14803,7 +14803,7 @@ module TcTypeDeclarations = begin
                         let attribs = attribs |> List.filter (fun a -> match a.Target with Some t when t.idText = "field" -> false | _ -> true)
                         let fldId = ident (CompilerGeneratedName id.idText, mMemberPortion)
                         let headPatIds = if isStatic then [id] else [ident ("__",mMemberPortion);id]
-                        let headPat = SynPat.LongIdent (LongIdentWithDots(headPatIds,[]),None,Some noInferredTypars, SynConstructorArgs.Pats [],None,mMemberPortion)
+                        let headPat = SynPat.LongIdent (LongIdentWithDots(headPatIds,[]),None,Some noInferredTypars, SynArgPats.Pats [],None,mMemberPortion)
 
                         match propKind,mGetSetOpt with 
                         | MemberKind.PropertySet,Some m -> errorR(Error(FSComp.SR.parsMutableOnAutoPropertyShouldBeGetSetNotJustSet(),m))
@@ -14827,7 +14827,7 @@ module TcTypeDeclarations = begin
                             | MemberKind.PropertyGetSet -> 
                                 let setter = 
                                     let vId = ident("v",mMemberPortion)
-                                    let headPat = SynPat.LongIdent (LongIdentWithDots(headPatIds,[]),None,Some noInferredTypars, SynConstructorArgs.Pats [mkSynPatVar None vId],None,mMemberPortion)
+                                    let headPat = SynPat.LongIdent (LongIdentWithDots(headPatIds,[]),None,Some noInferredTypars, SynArgPats.Pats [mkSynPatVar None vId],None,mMemberPortion)
                                     let rhsExpr = mkSynAssign (SynExpr.Ident fldId) (SynExpr.Ident vId)
                                     //let retInfo = match tyOpt with None -> None | Some ty -> Some (SynReturnInfo((ty,SynInfo.unnamedRetVal),ty.Range))
                                     let binding = mkSynBinding (xmlDoc,headPat) (access,false,false,mMemberPortion,NoSequencePointAtInvisibleBinding,None,rhsExpr,rhsExpr.Range,[],[],Some (memberFlags MemberKind.PropertySet))
