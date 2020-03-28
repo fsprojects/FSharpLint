@@ -243,10 +243,7 @@
     "UselessBinding": { "enabled": true },
     "TupleOfWildcards": { "enabled": true },
     "Indentation": {
-        "enabled": false,
-        "config": {
-            "numberOfIndentationSpaces": 4
-        }
+        "enabled": false
     },
     "MaxCharactersOnLine": {
         "enabled": false,
