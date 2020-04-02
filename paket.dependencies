@@ -15,6 +15,5 @@ nuget Newtonsoft.Json
 group Tools
 source https://api.nuget.org/v3/index.json
 
-nuget fake-cli
 nuget FSharp.Formatting
 nuget FSharp.Formatting.CommandTool
