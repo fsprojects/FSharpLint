@@ -8,7 +8,6 @@ nuget Fake.Tools.Git
 nuget Fake.Core.ReleaseNotes
 nuget Fake.Core.Target //"
 
-open System
 open Fake.Core
 open Fake.DotNet
 open Fake.IO
@@ -27,7 +26,7 @@ Target.create "Clean" (fun _ ->
     ++ "tests/*/obj"
     |> Shell.cleanDirs)
 
-Target.create "Restore" (fun _ -> Paket.restore id)
+Target.create "Restore" (fun _ -> DotNet.exec id "paket" "restore" |> ignore)
 
 Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
 
