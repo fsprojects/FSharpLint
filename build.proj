@@ -6,10 +6,6 @@
     <DotnetCliToolTargetFramework>netcoreapp2.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-fake" Version="5.18.3" />
-  </ItemGroup>
-
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>

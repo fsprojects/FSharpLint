@@ -182,6 +182,7 @@ tools/
 packaging/api/lib
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintFakeTaskTest/
 tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintMSBuildTaskTest/
+.paket/
 /paket-files/
 
 DesignTimeBuild/
