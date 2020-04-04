@@ -1,7 +1,7 @@
 @echo off
 cls
 
-# Restore the tool NuGet packages
+rem Restore the tool NuGet packages
 dotnet tool restore
 
 dotnet restore build.proj --verbosity n
