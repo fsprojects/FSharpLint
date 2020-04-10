@@ -1,5 +1,4 @@
 source https://api.nuget.org/v3/index.json
-source /Users/chethusk/oss/fcs/artifacts/bin/fcs/Release
 framework: netstandard2.0, netcoreapp2.1
 storage: none
 
