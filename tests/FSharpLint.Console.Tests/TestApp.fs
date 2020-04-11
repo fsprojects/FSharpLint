@@ -26,7 +26,7 @@ module Tests =
     [<TestFixture>]
     type TestConsoleApplication() =
         [<Test>]
-        member __.``Pass in valid config file to disable rule, disables rule as expected.``() =
+        member __.``Lint source without any config, rule enabled in default config is triggered for given source.``() =
             use stdout = new StringWriter()
             Console.SetOut(stdout)
 
@@ -44,7 +44,7 @@ module Tests =
             Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
             
         [<Test>]
-        member __.``Pass in valid config file to dideesgsable rule, disables rule as expected.``() =
+        member __.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
             use stdout = new StringWriter()
             Console.SetOut(stdout)
 
