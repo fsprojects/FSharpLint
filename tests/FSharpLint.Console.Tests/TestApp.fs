@@ -22,32 +22,32 @@ module Tests =
         interface System.IDisposable with 
             member __.Dispose() = 
                 File.Delete(filename)
+
+    let main input =
+        use stdout = new StringWriter()
+        let existing = Console.Out
+        Console.SetOut(stdout)
+        let returnCode = FSharpLint.Console.Program.main input
+        Console.SetOut(existing)
+        (returnCode, getErrorsFromOutput <| stdout.ToString())
           
     [<TestFixture>]
     type TestConsoleApplication() =
         [<Test>]
         member __.``Lint source without any config, rule enabled in default config is triggered for given source.``() =
-            use stdout = new StringWriter()
-            Console.SetOut(stdout)
-
             let input = """
             type Signature =
                 abstract member Encoded : string
                 abstract member PathName : string
                         """
 
-            let returnCode = FSharpLint.Console.Program.main [| "lint"; input |]
+            let (returnCode, errors) = main [| "lint"; input |]
             
             Assert.AreEqual(-1, returnCode)
-            
-            let errors = getErrorsFromOutput <| stdout.ToString()
             Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
             
         [<Test>]
         member __.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
-            use stdout = new StringWriter()
-            Console.SetOut(stdout)
-
             use config = new TemporaryConfig("""
             {
                 "InterfaceNames": {
@@ -62,5 +62,7 @@ module Tests =
                 abstract member PathName : string
             """
 
-            let returnCode = FSharpLint.Console.Program.main [| "lint"; "--lint-config"; config.FileName; input |]
+            let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+            
             Assert.AreEqual(0, returnCode)
+            Assert.AreEqual(set [], errors)
