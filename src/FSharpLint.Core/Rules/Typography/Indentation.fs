@@ -2,7 +2,7 @@ module FSharpLint.Rules.Indentation
 
 open System
 open FSharpLint.Framework
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.Range
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast

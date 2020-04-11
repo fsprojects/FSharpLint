@@ -2,7 +2,7 @@ module FSharpLint.Rules.FailwithfWithArgumentsMatchingFormatString
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 

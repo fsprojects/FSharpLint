@@ -1,7 +1,7 @@
 module FSharpLint.Rules.Helper.Binding
 
 open FSharpLint.Framework
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 
 let isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =

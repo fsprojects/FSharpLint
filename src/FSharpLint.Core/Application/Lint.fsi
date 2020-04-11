@@ -68,7 +68,7 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation =
         { /// File represented as an AST.
-          Ast: FSharp.Compiler.Ast.ParsedInput
+          Ast: FSharp.Compiler.SyntaxTree.ParsedInput
 
           /// Contents of the file.
           Source: string

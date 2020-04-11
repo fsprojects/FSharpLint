@@ -20,7 +20,7 @@ namespace FSharpLint.Rules
 module XmlDocumentation =
     
     open System
-    open Microsoft.FSharp.Compiler.Ast
+    open Microsoft.FSharp.Compiler.AbstractSyntax
     open FSharpLint.Framework
     open FSharpLint.Framework.Analyser
     open FSharpLint.Framework.Ast

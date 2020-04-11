@@ -3,7 +3,7 @@ module FSharpLint.Rules.NoTabCharacters
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Ast
+open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.Range
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
