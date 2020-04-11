@@ -1,3 +1,7 @@
+##### 0.14.0 - April 11 2020
+
+* Update FCS to 35 [@baronfel]
+
 ##### 0.13.3 - February 25 2020
 
 * Fix for suppression comment parsing
