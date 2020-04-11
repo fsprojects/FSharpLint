@@ -1,18 +1,21 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{40C2798B-7078-4D4F-BD37-195240CB827B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1CD44876-BCDC-4C93-9DC2-C45244BD62AE}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{AC24094C-4AB5-4A6B-8430-3D21EF788AEC}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Console", "src\FSharpLint.Console\FSharpLint.Console.fsproj", "{AC24094C-4AB5-4A6B-8430-3D21EF788AEC}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Core", "src\FSharpLint.Core\FSharpLint.Core.fsproj", "{7691E4E4-EC5B-4751-9578-109258A3B1DA}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Core", "src\FSharpLint.Core\FSharpLint.Core.fsproj", "{7691E4E4-EC5B-4751-9578-109258A3B1DA}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Core.Tests", "tests\FSharpLint.Core.Tests\FSharpLint.Core.Tests.fsproj", "{E51042D9-CE14-4373-AE1E-FEB78FE23F40}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Core.Tests", "tests\FSharpLint.Core.Tests\FSharpLint.Core.Tests.fsproj", "{E51042D9-CE14-4373-AE1E-FEB78FE23F40}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest", "tests\FSharpLint.FunctionalTest\FSharpLint.FunctionalTest.fsproj", "{0DE70980-49E9-4613-84D4-FCF6ACABA5EE}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.FunctionalTest", "tests\FSharpLint.FunctionalTest\FSharpLint.FunctionalTest.fsproj", "{0DE70980-49E9-4613-84D4-FCF6ACABA5EE}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Console.Tests", "tests\FSharpLint.Console.Tests\FSharpLint.Console.Tests.fsproj", "{73AD322D-2E3F-45C4-8DB2-179571DECCD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +75,18 @@ Global
 		{0DE70980-49E9-4613-84D4-FCF6ACABA5EE}.Release|x64.Build.0 = Release|Any CPU
 		{0DE70980-49E9-4613-84D4-FCF6ACABA5EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{0DE70980-49E9-4613-84D4-FCF6ACABA5EE}.Release|x86.Build.0 = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|x64.Build.0 = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Debug|x86.Build.0 = Debug|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x64.ActiveCfg = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x64.Build.0 = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x86.ActiveCfg = Release|Any CPU
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +96,7 @@ Global
 		{7691E4E4-EC5B-4751-9578-109258A3B1DA} = {40C2798B-7078-4D4F-BD37-195240CB827B}
 		{E51042D9-CE14-4373-AE1E-FEB78FE23F40} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
 		{0DE70980-49E9-4613-84D4-FCF6ACABA5EE} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
+		{73AD322D-2E3F-45C4-8DB2-179571DECCD0} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B54B4B7D-F019-48A3-BB5B-635B68FE41C3}
