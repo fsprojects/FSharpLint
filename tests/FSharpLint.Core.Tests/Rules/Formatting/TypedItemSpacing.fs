@@ -6,7 +6,7 @@ open FSharpLint.Rules.TypedItemSpacing
 
 [<TestFixture>]
 type TestFormattingTypedItemSpaceAfter() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.typedItemStyle = TypedItemStyle.SpaceAfter })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.SpaceAfter })
     
     [<Test>]
     member this.``No error for typed pattern with space after colon``() =
@@ -41,7 +41,7 @@ type TestFormattingTypedItemSpaceAfter() =
 
 [<TestFixture>]
 type TestFormattingTypedItemSpacesAround() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.typedItemStyle = TypedItemStyle.SpacesAround })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.SpacesAround })
 
     [<Test>]
     member this.``No error for typed pattern with spaces around colon``() = 
@@ -104,7 +104,7 @@ let (x : int) = 1"""
               
 [<TestFixture>]
 type TestFormattingTypedItemNoSpaces() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.typedItemStyle = TypedItemStyle.NoSpaces })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.NoSpaces })
 
     [<Test>]
     member this.``No error for typed pattern with no spaces around colon``() = 

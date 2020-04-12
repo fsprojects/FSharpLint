@@ -8,13 +8,9 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    {
-        // fsharplint:disable RecordFieldNames
-        numberOfSpacesAllowed : int
-        oneSpaceAllowedAfterOperator : bool
-        ignoreBlankLines : bool
-        // fsharplint:enable RecordFieldNames
-    }
+    { NumberOfSpacesAllowed : int
+      OneSpaceAllowedAfterOperator : bool
+      IgnoreBlankLines : bool }
 
 let private isSymbol character =
     let symbols =
@@ -24,7 +20,7 @@ let private isSymbol character =
     symbols |> List.exists ((=) character)
 
 let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
-    match (config.numberOfSpacesAllowed, config.oneSpaceAllowedAfterOperator) with
+    match (config.NumberOfSpacesAllowed, config.OneSpaceAllowedAfterOperator) with
     | (numberOfSpacesAllowed, _) when numberOfSpacesAllowed > 0 ->
         str.Length - str.TrimEnd().Length <= numberOfSpacesAllowed
     | (_, isOneSpaceAllowedAfterOperator) when isOneSpaceAllowedAfterOperator ->
@@ -42,7 +38,7 @@ let private lengthOfWhitespaceOnEnd (str:string) = str.Length - str.TrimEnd().Le
 let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     let line = args.Line
     let lineNumber = args.LineNumber
-    let ignoringBlankLinesAndIsBlankLine = config.ignoreBlankLines && System.String.IsNullOrWhiteSpace(line)
+    let ignoringBlankLinesAndIsBlankLine = config.IgnoreBlankLines && System.String.IsNullOrWhiteSpace(line)
 
     let stringEndsWithWhitespace =
         not ignoringBlankLinesAndIsBlankLine &&

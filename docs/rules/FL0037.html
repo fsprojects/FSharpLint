@@ -36,26 +36,34 @@
 <p>Update the exception's naming to be consistent with the rules you have specified</p>
 <h2><a name="Rule-Settings" class="anchor" href="#Rule-Settings">Rule Settings</a></h2>
 <p>Note, any of the settings below can be omitted and will not be checked.</p>
-<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
-<span class="l">3: </span>
-<span class="l">4: </span>
-<span class="l">5: </span>
-<span class="l">6: </span>
-<span class="l">7: </span>
-<span class="l">8: </span>
-<span class="l">9: </span>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
+<span class="l"> 2: </span>
+<span class="l"> 3: </span>
+<span class="l"> 4: </span>
+<span class="l"> 5: </span>
+<span class="l"> 6: </span>
+<span class="l"> 7: </span>
+<span class="l"> 8: </span>
+<span class="l"> 9: </span>
+<span class="l">10: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
     <span class="s">"exceptionNames"</span>: { 
-       <span class="s">"enabled"</span>: <span class="k">true</span>,
-       <span class="s">"naming"</span>: <span class="s">"PascalCase"</span>, <span class="c">// expected case of exceptions ("PascalCase" or "CamelCase")</span>
-       <span class="s">"underscores"</span>: <span class="s">"None"</span>, <span class="c">// if underscores are allowed for exceptions ("AllowPrefix", "AllowAny", or "None")</span>
-       <span class="s">"prefix"</span>: <span class="k">null</span>, <span class="c">// expected prefix for exceptions</span>
-       <span class="s">"suffix"</span>: <span class="s">"Exception"</span> <span class="c">// expected suffix for exceptions</span>
+        <span class="s">"enabled"</span>: <span class="k">true</span>,
+        <span class="s">"config"</span>: {
+            <span class="s">"naming"</span>: <span class="s">"PascalCase"</span>,
+            <span class="s">"underscores"</span>: <span class="s">"None"</span>,
+            <span class="s">"suffix"</span>: <span class="s">"Exception"</span>
+        }
     }
 }
 </code></pre></td></tr></table>
+<ul>
+<li><em>naming</em> - expected casing of the identifiers ("PascalCase" or "CamelCase")</li>
+<li><em>underscores</em> - if underscores are allowed in the identifiers ("AllowPrefix", "AllowAny", or "None")</li>
+<li><em>prefix</em> - prefix string expected on the front of the identifiers.</li>
+<li><em>suffix</em> - suffix string expected on the end of the identifiers.</li>
+</ul>
 
           
         </div>

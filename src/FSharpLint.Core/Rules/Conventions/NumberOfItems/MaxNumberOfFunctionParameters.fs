@@ -19,7 +19,7 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Pattern(SynPat.LongIdent(_, _, _, constructorArguments, _, _)) ->
-        validateFunction config.maxItems constructorArguments
+        validateFunction config.MaxItems constructorArguments
     | _ -> Array.empty
 
 let rule config =
