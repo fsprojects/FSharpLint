@@ -39,10 +39,10 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
         | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
         | SynExpr.While(_, condition, _, _)
         | SynExpr.Assert(condition, _) ->
-            validateCondition config.maxItems condition
+            validateCondition config.MaxItems condition
         | _ -> Array.empty
     | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
-        validateCondition config.maxItems whenExpr
+        validateCondition config.MaxItems whenExpr
     | _ -> Array.empty
 
 let rule config =

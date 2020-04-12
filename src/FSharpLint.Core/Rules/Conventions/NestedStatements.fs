@@ -8,12 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 [<RequireQualifiedAccess>]
-type Config =
-    {
-        // fsharplint:disable RecordFieldNames
-        depth : int
-        // fsharplint:enable RecordFieldNames
-    }
+type Config = { Depth : int }
 
 let private error (depth:int) =
     let errorFormatString = Resources.GetString("RulesNestedStatementsError")
@@ -113,7 +108,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         decrementDepthToCommonParent args i (i + 1)
 
         if areChildrenNested node && not <| isMetaData args node i && not <| isElseIf args node i then
-            if depth >= config.depth then
+            if depth >= config.Depth then
                 // Skip children as we've had an error containing them.
                 let skipChildren = i + args.SkipArray.[i].NumberOfChildren + 1
                 decrementDepthToCommonParent args i skipChildren
@@ -121,7 +116,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
                 getRange node
                 |> Option.map (fun range ->
-                    { Range = range; Message = error config.depth; SuggestedFix = None; TypeChecks = [] })
+                    { Range = range; Message = error config.Depth; SuggestedFix = None; TypeChecks = [] })
                 |> Option.toArray
             else
                 depth <- depth + 1

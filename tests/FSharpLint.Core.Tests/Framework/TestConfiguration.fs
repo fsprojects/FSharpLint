@@ -1,18 +1,14 @@
 ﻿module TestConfiguration
 
 open NUnit.Framework
-open FSharpLint.Rules
 open FSharpLint.Framework.Configuration
 
 type System.String with
     member path.ToPlatformIndependentPath() =
         path.Replace('\\', System.IO.Path.DirectorySeparatorChar)
 
-    member this.RemoveWhitepsace() =
-        System.Text.RegularExpressions.Regex.Replace(this, @"\s+", "")
-
 let configWithHints hints =
-     { Configuration.Zero with hints = hints }
+     { Configuration.Zero with Hints = hints }
 
 
 [<TestFixture>]
@@ -100,78 +96,18 @@ type TestConfiguration() =
         |> Assert.IsTrue
 
     [<Test>]
-    member __.``Empty config writes correct JSON document`` () =
-        let resultJson = serializeConfig Configuration.Zero
+    member __.``Camel case JSON config correctly parsed into expected config records`` () =
+        let expectedConfig = 
+            { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
 
-        let expectedJson = "{}"
 
-        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
-
-    [<Test>]
-    member __.``Config specifying files to ignore writes correct JSON document`` () =
-        let config = { Configuration.Zero with ignoreFiles = Some [| "assemblyinfo.*" |] }
-
-        let resultJson = serializeConfig config
-
-        let expectedJson =
+        let config =
             """{
-    "ignoreFiles": ["assemblyinfo.*"] }
-"""
-
-        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
-
-    [<Test>]
-    member __.``Config specifying rule writes correct JSON document`` () =
-        let config = {
-            Configuration.Zero with
-                typography =
-                    Some { TypographyConfig.maxCharactersOnLine = Some { RuleConfig.enabled = true; config = Some { MaxCharactersOnLine.Config.maxCharactersOnLine = 4 } }
-                           indentation = None
-                           trailingWhitespaceOnLine = None
-                           maxLinesInFile = None
-                           trailingNewLineInFile = None
-                           noTabCharacters = None
-                    }
-            }
-
-        let resultJson = serializeConfig config
-
-        let expectedJson =
-            """{
-    "typography": {
-        "maxCharactersOnLine": {
-            "enabled": true,
-            "config": {
-                "maxCharactersOnLine": 4
-            }
-        }
+    "noTabCharacters": {
+        "enabled": true
     }
 }
 """
+        let actualConfig = parseConfig config
 
-        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
-
-    [<Test>]
-    member __.``Config specifying hints writes correct JSON document`` () =
-        let config = {
-            Configuration.Zero with
-                hints =
-                    { HintConfig.add = Some [| "not (a =  b) ===> a <> b"; "not (a <> b) ===> a = b" |]
-                      ignore = Some [| "x = true ===> x" |] } |> Some
-            }
-
-        let resultJson = serializeConfig config
-
-        let expectedJson =
-            """{
-    "hints": {
-        "add": [
-            "not (a =  b) ===> a <> b",
-            "not (a <> b) ===> a = b"
-        ],
-        "ignore": ["x = true ===> x"]
-    }
-}
-"""
-
-        Assert.AreEqual(expectedJson.RemoveWhitepsace(), resultJson.RemoveWhitepsace())
+        Assert.AreEqual(expectedConfig.NoTabCharacters, actualConfig.NoTabCharacters)

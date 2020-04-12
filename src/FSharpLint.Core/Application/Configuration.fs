@@ -123,17 +123,17 @@ module IgnoreFiles =
 // Non-standard record field naming for config serialization.
 // fsharplint:disable RecordFieldNames
 type RuleConfig<'Config> = {
-    enabled : bool
-    config : 'Config option
+    Enabled : bool
+    Config : 'Config option
 }
 
 type EnabledConfig = RuleConfig<unit>
 
-let constructRuleIfEnabled rule ruleConfig = if ruleConfig.enabled then Some rule else None
+let constructRuleIfEnabled rule ruleConfig = if ruleConfig.Enabled then Some rule else None
 
 let constructRuleWithConfig rule ruleConfig =
-    if ruleConfig.enabled then
-        ruleConfig.config |> Option.map rule
+    if ruleConfig.Enabled then
+        ruleConfig.Config |> Option.map rule
     else
         None
 
@@ -349,7 +349,7 @@ type GlobalConfig = {
 }
 
 type Configuration =
-    { ``global`` : GlobalConfig option
+    { Global : GlobalConfig option
       // Deprecated grouped configs. TODO: remove in next major release
       /// DEPRECATED, provide formatting rules at root level.
       formatting : FormattingConfig option
@@ -358,7 +358,7 @@ type Configuration =
       /// DEPRECATED, provide typography rules at root level.
       typography : TypographyConfig option
       ignoreFiles : string [] option
-      hints : HintConfig option
+      Hints : HintConfig option
       TypedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
       TypePrefixing : EnabledConfig option
       UnionDefinitionIndentation : EnabledConfig option
@@ -424,9 +424,9 @@ type Configuration =
       NoTabCharacters : EnabledConfig option }
 with
     static member Zero = {
-        ``global`` = None
+        Global = None
         ignoreFiles = None
-        hints = None
+        Hints = None
         formatting = None
         conventions = None
         typography = None
@@ -525,9 +525,6 @@ let defaultConfiguration =
         reader.ReadToEnd()
         |> parseConfig
 
-let serializeConfig (config:Configuration) =
-    JsonConvert.SerializeObject(config, FSharpJsonConverter.serializerSettings)
-
 type LineRules =
     { GenericLineRules : RuleMetadata<LineRuleConfig> []
       NoTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
@@ -564,7 +561,7 @@ let flattenConfig (config:Configuration) =
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            config.hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+            config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
         |] |> Array.concat
 
     let allRules =
@@ -650,7 +647,7 @@ let flattenConfig (config:Configuration) =
         | IndentationRule rule -> indentationRule <- Some rule
         | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
 
-    { LoadedRules.GlobalConfig = getGlobalConfig config.``global``
+    { LoadedRules.GlobalConfig = getGlobalConfig config.Global
       DeprecatedRules = deprecatedAllRules
       AstNodeRules = astNodeRules.ToArray()
       LineRules =

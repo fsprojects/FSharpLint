@@ -7,15 +7,10 @@ open FSharpLint.Framework.Rules
 open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
-type Config =
-    {
-        // fsharplint:disable RecordFieldNames
-        maxCharactersOnLine : int
-        // fsharplint:enable RecordFieldNames
-    }
+type Config = { MaxCharactersOnLine : int }
 
 let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
-    let maxCharacters = config.maxCharactersOnLine
+    let maxCharacters = config.MaxCharactersOnLine
     let lineLength = String.length args.Line
     if lineLength > maxCharacters then
         let range = mkRange "" (mkPos args.LineNumber (maxCharacters + 1)) (mkPos args.LineNumber lineLength)

@@ -13,12 +13,7 @@ type TypedItemStyle =
     | SpacesAround = 2
 
 [<RequireQualifiedAccess>]
-type Config =
-    {
-        // fsharplint:disable RecordFieldNames
-        typedItemStyle : TypedItemStyle
-        // fsharplint:enable RecordFieldNames
-    }
+type Config = { TypedItemStyle : TypedItemStyle }
 
 let private getLeadingSpaces (s:string) =
     let rec loop i =
@@ -48,7 +43,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
         let (expectedSpacesBefore, expectedSpacesAfter) =
-            expectedSpacesFromConfig config.typedItemStyle
+            expectedSpacesFromConfig config.TypedItemStyle
 
         ExpressionUtilities.tryFindTextOfRange range args.FileContent
         |> Option.bind (fun text ->

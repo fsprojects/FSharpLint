@@ -32,7 +32,7 @@ let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     | AstNode.Expression (expression) ->
         match expression with
         | SynExpr.Tuple(_, expressions, _, _) when not <| isInApplication args.SyntaxArray args.SkipArray args.NodeIndex ->
-            validateTuple config.maxItems expressions
+            validateTuple config.MaxItems expressions
         | _ -> Array.empty
     | _ ->
         Array.empty
