@@ -266,7 +266,7 @@
         }
     },
     "trailingNewLineInFile": { "enabled": false },
-    "toTabCharacters": { "enabled": true },
+    "noTabCharacters": { "enabled": true },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
