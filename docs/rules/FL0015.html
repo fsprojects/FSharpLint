@@ -30,7 +30,7 @@
           <h1><a name="NestedStatements-FL0015" class="anchor" href="#NestedStatements-FL0015">NestedStatements (FL0015)</a></h1>
 <p>Single rule that checks code is not more deeply nested than a configurable depth.</p>
 <h2><a name="Cause" class="anchor" href="#Cause">Cause</a></h2>
-<p>A statement is nested deeper than a configurable depth, for example if <code>MaxItems</code> was set to 8 (the default) then the following code would cause an error:</p>
+<p>A statement is nested deeper than a configurable depth, for example if <code>depth</code> was set to 8 (the default) then the following code would cause an error:</p>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l"> 1: </span>
 <span class="l"> 2: </span>
 <span class="l"> 3: </span>
@@ -88,11 +88,15 @@
 <span class="l">4: </span>
 <span class="l">5: </span>
 <span class="l">6: </span>
+<span class="l">7: </span>
+<span class="l">8: </span>
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
     <span class="s">"nestedStatements"</span>: { 
-        <span class="s">"enabled"</span>: <span class="k">true</span>,
-        <span class="s">"depth"</span>: <span class="n">18</span>
+        <span class="s">"enabled"</span>: <span class="k">false</span>,
+        <span class="s">"config"</span>: {
+            <span class="s">"depth"</span>: <span class="n">8</span>
+        }
     }
 }
 </code></pre></td></tr></table>

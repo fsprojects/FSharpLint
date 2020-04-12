@@ -48,14 +48,20 @@
 </pre></td>
 <td class="snippet"><pre class="fssnip highlighted"><code lang="javascript">{
     <span class="s">"memberNames"</span>: { 
-       <span class="s">"enabled"</span>: <span class="k">true</span>,
-       <span class="s">"naming"</span>: <span class="s">"PascalCase"</span>, <span class="c">// expected case of members ("PascalCase" or "CamelCase")</span>
-       <span class="s">"underscores"</span>: <span class="s">"AllowPrefix"</span>, <span class="c">// if underscores are allowed for members ("AllowPrefix", "AllowAny", or "None")</span>
-       <span class="s">"prefix"</span>: <span class="k">null</span>, <span class="c">// expected prefix for members</span>
-       <span class="s">"suffix"</span>: <span class="k">null</span> <span class="c">// expected suffix for members</span>
+        <span class="s">"enabled"</span>: <span class="k">true</span>,
+        <span class="s">"config"</span>: {
+            <span class="s">"naming"</span>: <span class="s">"PascalCase"</span>,
+            <span class="s">"underscores"</span>: <span class="s">"AllowPrefix"</span>
+        }
     }
 }
 </code></pre></td></tr></table>
+<ul>
+<li><em>naming</em> - expected casing of the identifiers ("PascalCase" or "CamelCase")</li>
+<li><em>underscores</em> - if underscores are allowed in the identifiers ("AllowPrefix", "AllowAny", or "None")</li>
+<li><em>prefix</em> - prefix string expected on the front of the identifiers.</li>
+<li><em>suffix</em> - suffix string expected on the end of the identifiers.</li>
+</ul>
 
           
         </div>
