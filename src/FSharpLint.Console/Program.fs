@@ -74,7 +74,7 @@ let private inferFileType (target:string) =
 let private start (arguments:ParseResults<ToolArgs>) =
     let mutable exitCode = 0
 
-    let (output:Output.IOutput) =
+    let output =
         match arguments.TryGetResult Format with
         | Some OutputFormat.MSBuild -> Output.MSBuildOutput() :> Output.IOutput
         | Some OutputFormat.Standard
