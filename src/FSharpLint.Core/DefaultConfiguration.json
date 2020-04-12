@@ -1,115 +1,115 @@
 {
-    "IgnoreFiles": [
+    "ignoreFiles": [
         "assemblyinfo.*"
     ],
     "global": {
         "numIndentationSpaces": 4
     },
-    "TypedItemSpacing": {
+    "typedItemSpacing": {
         "enabled": false,
         "config": {
             "typedItemStyle": "NoSpaces"
         }
     },
-    "TypePrefixing": { "enabled": false },
-    "UnionDefinitionIndentation": { "enabled": false },
-    "ModuleDeclSpacing": { "enabled": false },
-    "ClassMemberSpacing": { "enabled": false },
-    "TupleCommaSpacing": { "enabled": false },
-    "TupleIndentation": { "enabled": false },
-    "TupleParentheses": { "enabled": false },
-    "PatternMatchClausesOnNewLine": { "enabled": false },
-    "PatternMatchOrClausesOnNewLine": { "enabled": false },
-    "PatternMatchClauseIndentation": { "enabled": false },
-    "PatternMatchExpressionIndentation": { "enabled": false },
-    "RecursiveAsyncFunction": { "enabled": false },
-    "RedundantNewKeyword": { "enabled": true },
-    "NestedStatements": {
+    "typePrefixing": { "enabled": false },
+    "unionDefinitionIndentation": { "enabled": false },
+    "moduleDeclSpacing": { "enabled": false },
+    "classMemberSpacing": { "enabled": false },
+    "tupleCommaSpacing": { "enabled": false },
+    "tupleIndentation": { "enabled": false },
+    "tupleParentheses": { "enabled": false },
+    "patternMatchClausesOnNewLine": { "enabled": false },
+    "patternMatchOrClausesOnNewLine": { "enabled": false },
+    "patternMatchClauseIndentation": { "enabled": false },
+    "patternMatchExpressionIndentation": { "enabled": false },
+    "recursiveAsyncFunction": { "enabled": false },
+    "redundantNewKeyword": { "enabled": true },
+    "nestedStatements": {
         "enabled": false,
         "config": {
             "depth": 8
         }
     },
-    "ReimplementsFunction": { "enabled": true },
-    "CanBeReplacedWithComposition": { "enabled": true },
-    "RaiseWithSingleArgument": { "enabled": true },
-    "NullArgWithSingleArgument": { "enabled": true },
-    "InvalidOpWithSingleArgument": { "enabled": true },
-    "InvalidArgWithTwoArguments": { "enabled": true },
-    "FailwithfWithArgumentsMatchingFormatString": { "enabled": true },
-    "MaxLinesInLambdaFunction": {
+    "reimplementsFunction": { "enabled": true },
+    "canBeReplacedWithComposition": { "enabled": true },
+    "raiseWithSingleArgument": { "enabled": true },
+    "nullArgWithSingleArgument": { "enabled": true },
+    "invalidOpWithSingleArgument": { "enabled": true },
+    "invalidArgWithTwoArguments": { "enabled": true },
+    "failwithfWithArgumentsMatchingFormatString": { "enabled": true },
+    "maxLinesInLambdaFunction": {
         "enabled": false,
         "config": {
             "maxLines": 7
         }
     },
-    "MaxLinesInMatchLambdaFunction": {
+    "maxLinesInMatchLambdaFunction": {
         "enabled": false,
         "config": {
             "maxLines": 100
         }
     },
-    "MaxLinesInValue": {
+    "maxLinesInValue": {
         "enabled": false,
         "config": {
             "maxLines": 100
         }
     },
-    "MaxLinesInFunction": {
+    "maxLinesInFunction": {
         "enabled": false,
         "config": {
             "maxLines": 100
         }
     },
-    "MaxLinesInMember": {
+    "maxLinesInMember": {
         "enabled": false,
         "config": {
             "maxLines": 100
         }
     },
-    "MaxLinesInConstructor": {
+    "maxLinesInConstructor": {
         "enabled": false,
         "config": {
             "maxLines": 100
         }
     },
-    "MaxLinesInProperty": {
+    "maxLinesInProperty": {
         "enabled": false,
         "config": {
             "maxLines": 70
         }
     },
-    "MaxLinesInModule": {
+    "maxLinesInModule": {
         "enabled": false,
         "config": {
             "maxLines": 1000
         }
     },
-    "MaxLinesInRecord": {
+    "maxLinesInRecord": {
         "enabled": false,
         "config": {
             "maxLines": 500
         }
     },
-    "MaxLinesInEnum": {
+    "maxLinesInEnum": {
         "enabled": false,
         "config": {
             "maxLines": 500
         }
     },
-    "MaxLinesInUnion": {
+    "maxLinesInUnion": {
         "enabled": false,
         "config": {
             "maxLines": 500
         }
     },
-    "MaxLinesInClass": {
+    "maxLinesInClass": {
         "enabled": false,
         "config": {
             "maxLines": 500
         }
     },
-    "InterfaceNames": {
+    "interfaceNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
@@ -117,7 +117,7 @@
             "prefix": "I"
         }
     },
-    "ExceptionNames": {
+    "exceptionNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
@@ -125,133 +125,133 @@
             "suffix": "Exception"
         }
     },
-    "TypeNames": {
+    "typeNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "RecordFieldNames": {
+    "recordFieldNames": {
         "enabled": false,
         "config":  {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "EnumCasesNames": {
+    "enumCasesNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "UnionCasesNames": {
+    "unionCasesNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "ModuleNames": {
+    "moduleNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "LiteralNames": {
+    "literalNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "NamespaceNames": {
+    "namespaceNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "MemberNames": {
+    "memberNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "AllowPrefix"
         }
     },
-    "ParameterNames": {
+    "parameterNames": {
         "enabled": true,
         "config": {
             "naming": "CamelCase",
             "underscores": "AllowPrefix"
         }
     },
-    "MeasureTypeNames": {
+    "measureTypeNames": {
         "enabled": true,
         "config": {
             "underscores": "None"
         }
     },
-    "ActivePatternNames": {
+    "activePatternNames": {
         "enabled": true,
         "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
     },
-    "PublicValuesNames": {
+    "publicValuesNames": {
         "enabled": true,
         "config": {
             "underscores": "AllowPrefix"
         }
     },
-    "NonPublicValuesNames": {
+    "nonPublicValuesNames": {
         "enabled": true,
         "config": {
             "naming": "CamelCase",
             "underscores": "AllowPrefix"
         }
     },
-    "MaxNumberOfItemsInTuple": {
+    "maxNumberOfItemsInTuple": {
         "enabled": false,
         "config": {
             "maxItems": 4
         }
     },
-    "MaxNumberOfFunctionParameters": {
+    "maxNumberOfFunctionParameters": {
         "enabled": false,
         "config": {
             "maxItems": 5
         }
     },
-    "MaxNumberOfMembers": {
+    "maxNumberOfMembers": {
         "enabled": false,
         "config": {
             "maxItems": 32
         }
     },
-    "MaxNumberOfBooleanOperatorsInCondition": {
+    "maxNumberOfBooleanOperatorsInCondition": {
         "enabled": false,
         "config": {
             "maxItems": 4
         }
     },
-    "FavourIgnoreOverLetWild": { "enabled": true },
-    "WildcardNamedWithAsPattern": { "enabled": true },
-    "UselessBinding": { "enabled": true },
-    "TupleOfWildcards": { "enabled": true },
-    "Indentation": {
+    "favourIgnoreOverLetWild": { "enabled": true },
+    "wildcardNamedWithAsPattern": { "enabled": true },
+    "uselessBinding": { "enabled": true },
+    "tupleOfWildcards": { "enabled": true },
+    "indentation": {
         "enabled": false
     },
-    "MaxCharactersOnLine": {
+    "maxCharactersOnLine": {
         "enabled": false,
         "config": {
             "maxCharactersOnLine": 120
         }
     },
-    "TrailingWhitespaceOnLine": {
+    "trailingWhitespaceOnLine": {
         "enabled": false,
         "config": {
             "numberOfSpacesAllowed": 1,
@@ -259,15 +259,15 @@
             "ignoreBlankLines": true
         }
     },
-    "MaxLinesInFile": {
+    "maxLinesInFile": {
         "enabled": false,
         "config": {
             "maxLinesInFile": 1000
         }
     },
-    "TrailingNewLineInFile": { "enabled": false },
-    "NoTabCharacters": { "enabled": true },
-    "Hints": {
+    "trailingNewLineInFile": { "enabled": false },
+    "toTabCharacters": { "enabled": true },
+    "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
             "not (a <> b) ===> a =  b",
