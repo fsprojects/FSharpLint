@@ -377,6 +377,7 @@ type Configuration =
       ReimplementsFunction : EnabledConfig option
       CanBeReplacedWithComposition : EnabledConfig option
       RaiseWithSingleArgument : EnabledConfig option
+      FailwithWithSingleArgument : EnabledConfig option
       NullArgWithSingleArgument : EnabledConfig option
       InvalidOpWithSingleArgument : EnabledConfig option
       InvalidArgWithTwoArguments : EnabledConfig option
@@ -448,6 +449,7 @@ with
         NestedStatements = None
         ReimplementsFunction = None
         CanBeReplacedWithComposition = None
+        FailwithWithSingleArgument = None
         RaiseWithSingleArgument = None
         NullArgWithSingleArgument = None
         InvalidOpWithSingleArgument = None
@@ -584,6 +586,7 @@ let flattenConfig (config:Configuration) =
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
+            config.FailwithWithSingleArgument |> Option.bind (constructRuleIfEnabled FailwithWithSingleArgument.rule)
             config.NullArgWithSingleArgument |> Option.bind (constructRuleIfEnabled NullArgWithSingleArgument.rule)
             config.InvalidOpWithSingleArgument |> Option.bind (constructRuleIfEnabled InvalidOpWithSingleArgument.rule)
             config.InvalidArgWithTwoArguments |> Option.bind (constructRuleIfEnabled InvalidArgWithTwoArguments.rule)

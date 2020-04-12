@@ -25,9 +25,11 @@ let main input =
     use stdout = new StringWriter()
     let existing = Console.Out
     Console.SetOut(stdout)
-    let returnCode = FSharpLint.Console.Program.main input
-    Console.SetOut(existing)
-    (returnCode, getErrorsFromOutput <| stdout.ToString())
+    try
+        let returnCode = FSharpLint.Console.Program.main input
+        (returnCode, getErrorsFromOutput <| stdout.ToString())
+    finally
+        Console.SetOut(existing)
           
 [<TestFixture>]
 type TestConsoleApplication() =
