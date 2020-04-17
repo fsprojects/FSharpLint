@@ -45,7 +45,7 @@ Target.create "Package" (fun _ ->
     let configure (c:DotNet.PackOptions) =
       { c with
           Configuration = DotNet.Release
-          OutputPath = Some "../../packaging"
+          OutputPath = Some "packaging"
           MSBuildParams = cliArgs }
     DotNet.pack configure "src/FSharpLint.Core/FSharpLint.Core.fsproj"
     DotNet.pack configure "src/FSharpLint.Console/FSharpLint.Console.fsproj")
