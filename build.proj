@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <DotnetCliToolTargetFramework>netcoreapp2.1</DotnetCliToolTargetFramework>
+    <DotnetCliToolTargetFramework>netcoreapp3.1</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />

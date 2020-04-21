@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <IsPackable>false</IsPackable>
     <RootNamespace>FSharpLint.Core.Tests</RootNamespace>
   </PropertyGroup>
@@ -10,7 +10,7 @@
     <Compile Include="TestUtils.fs" />
     <!-- Framework -->
     <!-- Rules -->
-    <Compile Include="Rules/TestRuleBase.fs" />
+    <Compile Include="Rules\TestRuleBase.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />
     <Compile Include="Rules\TestHintMatcherBase.fs" />
     <Compile Include="Rules\TestIndentationRule.fs" />
