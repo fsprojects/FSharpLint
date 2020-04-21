@@ -164,7 +164,7 @@ NUGET
       System.Reflection.Primitives (>= 4.3)
       System.Runtime (>= 4.3)
     System.Reflection.Emit (4.7)
-      System.Reflection.Emit.ILGeneration (>= 4.7) - restriction: || (&& (== netcoreapp2.1) (< netcoreapp2.0)) (&& (== netcoreapp2.1) (< netstandard1.1)) (&& (== netcoreapp2.1) (< netstandard2.0)) (&& (== netcoreapp2.1) (>= uap10.1)) (== netstandard2.0)
+      System.Reflection.Emit.ILGeneration (>= 4.7) - restriction: || (&& (== netcoreapp2.1) (>= dnxcore50)) (&& (== netcoreapp2.1) (< netcoreapp2.0)) (&& (== netcoreapp2.1) (< netstandard1.1)) (&& (== netcoreapp2.1) (< netstandard2.0)) (&& (== netcoreapp2.1) (>= uap10.1)) (== netstandard2.0)
     System.Reflection.Emit.ILGeneration (4.7) - restriction: || (&& (== netcoreapp2.1) (>= dnxcore50)) (&& (== netcoreapp2.1) (< netcoreapp2.0)) (&& (== netcoreapp2.1) (< netstandard1.1)) (&& (== netcoreapp2.1) (< netstandard2.0)) (&& (== netcoreapp2.1) (>= uap10.1)) (== netstandard2.0)
     System.Reflection.Extensions (4.3) - restriction: || (== netcoreapp2.1) (&& (== netstandard2.0) (>= netcoreapp2.1))
       Microsoft.NETCore.Platforms (>= 1.1)
@@ -292,6 +292,19 @@ NUGET
       System.Xml.ReaderWriter (>= 4.3)
       System.Xml.XmlDocument (>= 4.3)
       System.Xml.XPath (>= 4.3)
+  remote: /Users/chethusk/oss/fcs/artifacts/bin/fcs/Release
+    FSharp.Compiler.Service (35.0.0)
+      FSharp.Core (>= 4.6.2)
+      System.Buffers (>= 4.5)
+      System.Collections.Immutable (>= 1.5)
+      System.Diagnostics.Process (>= 4.1)
+      System.Diagnostics.TraceSource (>= 4.0)
+      System.Memory (>= 4.5.3)
+      System.Reflection.Emit (>= 4.3)
+      System.Reflection.Metadata (>= 1.6)
+      System.Reflection.TypeExtensions (>= 4.3)
+      System.Runtime.Loader (>= 4.0)
+      System.Security.Cryptography.Algorithms (>= 4.3)
 
 GROUP Tools
 NUGET
