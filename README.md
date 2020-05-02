@@ -32,7 +32,7 @@ Package | Version
 ## Build Status
 
 Mono 4.0.2 | .NET Core 3.1
----------- | --------
+---------- | -------------
 [![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint) | [![.NET CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
 
 ## Licensing
