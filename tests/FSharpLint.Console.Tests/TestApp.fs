@@ -10,15 +10,15 @@ let getErrorsFromOutput (output:string) =
     set [ for i in 1..splitOutput.Length - 1 do
             if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
-type TemporaryFile(config, extension) = 
+type TemporaryFile(config, extension) =
     let filename = Path.ChangeExtension(Path.GetTempFileName(), extension)
     do
         File.WriteAllText(filename, config)
- 
+
     member __.FileName = filename
- 
-    interface System.IDisposable with 
-        member __.Dispose() = 
+
+    interface System.IDisposable with
+        member __.Dispose() =
             File.Delete(filename)
 
 let main input =
@@ -30,19 +30,20 @@ let main input =
         (returnCode, getErrorsFromOutput <| stdout.ToString())
     finally
         Console.SetOut(existing)
-          
+
 [<TestFixture>]
 type TestConsoleApplication() =
     [<Test>]
     member __.``Lint file, expected rules are triggered.``() =
-        use input = new TemporaryFile("""
+        let config = """
         type Signature =
             abstract member Encoded : string
             abstract member PathName : string
-        """, "fs")
+        """
+        use input = new TemporaryFile(config, "fs")
 
         let (returnCode, errors) = main [| "lint"; input.FileName |]
-            
+
         Assert.AreEqual(-1, returnCode)
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
@@ -55,19 +56,20 @@ type TestConsoleApplication() =
         """
 
         let (returnCode, errors) = main [| "lint"; input |]
-            
+
         Assert.AreEqual(-1, returnCode)
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
-            
+
     [<Test>]
     member __.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
-        use config = new TemporaryFile("""
+        let config = """
         {
             "InterfaceNames": {
                 "enabled": false
             }
         }
-        """, "json")
+        """
+        use config = new TemporaryFile(config, "json")
 
         let input = """
         type Signature =
@@ -76,6 +78,6 @@ type TestConsoleApplication() =
         """
 
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
-            
+
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(set [], errors)
