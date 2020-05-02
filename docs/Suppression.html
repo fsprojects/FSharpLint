@@ -38,11 +38,15 @@
 </ul>
 <p>Only one structured comment can be specified per line; any additional ones will be ignored.</p>
 <h3><a name="Disabling-Specific-Rules" class="anchor" href="#Disabling-Specific-Rules">Disabling Specific Rules</a></h3>
-<p>The disable comments allow for specific rules to be disabled by specifying the rules whitespace separated at the end of the comment, for example:
-<em> <code>// fsharplint:disable TypePrefixing Hints</code> disables the rules <code>TypePrefixing</code> and <code>Hints</code>.
-</em> <code>// fsharplint:disable-next-line TypePrefixing</code> disables the rule <code>TypePrefixing</code>.</p>
-<p>If no rules a specified then all rules are disabled, for example
-* <code>// fsharplint:disable</code> disables all rules.</p>
+<p>The disable comments allow for specific rules to be disabled by specifying the rules whitespace separated at the end of the comment, for example:</p>
+<ul>
+<li><code>// fsharplint:disable TypePrefixing Hints</code> disables the rules <code>TypePrefixing</code> and <code>Hints</code>.</li>
+<li><code>// fsharplint:disable-next-line TypePrefixing</code> disables the rule <code>TypePrefixing</code>.</li>
+</ul>
+<p>If no rules a specified then all rules are disabled, for example:</p>
+<ul>
+<li><code>// fsharplint:disable</code> disables all rules.</li>
+</ul>
 <h2><a name="Examples" class="anchor" href="#Examples">Examples</a></h2>
 <h3><a name="Disable-Entire-File" class="anchor" href="#Disable-Entire-File">Disable Entire File</a></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>

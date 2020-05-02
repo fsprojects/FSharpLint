@@ -14,11 +14,13 @@ Only one structured comment can be specified per line; any additional ones will 
 ### Disabling Specific Rules
 
 The disable comments allow for specific rules to be disabled by specifying the rules whitespace separated at the end of the comment, for example: 
-* `// fsharplint:disable TypePrefixing Hints` disables the rules `TypePrefixing` and `Hints`.
-* `// fsharplint:disable-next-line TypePrefixing` disables the rule `TypePrefixing`.
 
-If no rules a specified then all rules are disabled, for example 
-* `// fsharplint:disable` disables all rules.
+- `// fsharplint:disable TypePrefixing Hints` disables the rules `TypePrefixing` and `Hints`.
+- `// fsharplint:disable-next-line TypePrefixing` disables the rule `TypePrefixing`.
+
+If no rules a specified then all rules are disabled, for example:
+
+- `// fsharplint:disable` disables all rules.
 
 ## Examples
 
