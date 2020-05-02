@@ -28,36 +28,105 @@
       <div class="row">
         <div class="span9" id="main">
           <h1><a name="Rule-Suppression" class="anchor" href="#Rule-Suppression">Rule Suppression</a></h1>
-<p>Rules can be suppressed within the code using structured comments. Specify the type of suppression you want to use, followed by the rules to suppress. If there are no rules provided, all rules will be suppressed. Note that the available pool of rules is based on the loaded configuration file; a rule which is disabled in the configuration file cannot be re-enabled using one of these comments.</p>
+<p>The linter's rules can be suppressed using structured comments.</p>
 <p>The following comments are available for use:</p>
 <ul>
-<li><code>// fsharplint:disable</code> disables all rules for the rest of the file</li>
-<li><code>// fsharplint:enable</code> enables all rules for the rest of the file</li>
-<li><code>// fsharplint:disable TypePrefixing Hints</code> disables the specified rules for the rest of the file</li>
-<li><code>// fsharplint:enable TypePrefixing Hints</code> enables the specified rules for the rest of the file</li>
-<li><code>// fsharplint:disable-next-line</code> disables all rules for the next line of the file</li>
-<li><code>// fsharplint:enable-next-line</code> enables all rules for the next line of the file</li>
-<li><code>// fsharplint:disable-next-line TypePrefixing Hints</code> disables the specified rules for the next line of the file</li>
-<li><code>// fsharplint:enable-next-line TypePrefixing Hints</code> enables the specified rules for the next line of the file</li>
-<li><code>// fsharplint:disable-line</code> disables all rules for the current line of the file</li>
-<li><code>// fsharplint:enable-line</code> enables all rules for the current line of the file</li>
-<li><code>// fsharplint:disable-line TypePrefixing Hints</code> disables the specified rules for the current line of the file</li>
-<li><code>// fsharplint:enable-next-line TypePrefixing Hints</code> enables the specified rules for the current line of the file</li>
+<li><code>// fsharplint:disable</code> disables rules for all lines following the comment.</li>
+<li><code>// fsharplint:enable</code> re-enables all disabled rules.</li>
+<li><code>// fsharplint:disable-next-line</code> disables rules for the next line.</li>
+<li><code>// fsharplint:disable-line</code> disables rules for the current line.</li>
 </ul>
-<p>Note that only one structured comment can be specified per line; any additional ones will be ignored.</p>
-<h2><a name="Example" class="anchor" href="#Example">Example</a></h2>
+<p>Only one structured comment can be specified per line; any additional ones will be ignored.</p>
+<h3><a name="Disabling-Specific-Rules" class="anchor" href="#Disabling-Specific-Rules">Disabling Specific Rules</a></h3>
+<p>The disable comments allow for specific rules to be disabled by specifying the rules whitespace separated at the end of the comment, for example:
+<em> <code>// fsharplint:disable TypePrefixing Hints</code> disables the rules <code>TypePrefixing</code> and <code>Hints</code>.
+</em> <code>// fsharplint:disable-next-line TypePrefixing</code> disables the rule <code>TypePrefixing</code>.</p>
+<p>If no rules a specified then all rules are disabled, for example
+* <code>// fsharplint:disable</code> disables all rules.</p>
+<h2><a name="Examples" class="anchor" href="#Examples">Examples</a></h2>
+<h3><a name="Disable-Entire-File" class="anchor" href="#Disable-Entire-File">Disable Entire File</a></h3>
 <table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
-<span class="l">2: </span>
 </pre></td>
-<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable:next:line Hints</span>
-<span class="k">let</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="fn">not</span> <span class="k">true</span>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable</span>
 </code></pre></td>
 </tr>
 </table>
-<p>This will not raise a warning, as the <code>Hints</code> rule is disabled for the next line.</p>
+<p>Precede the file with the comment above.</p>
+<h3><a name="Disable-Section-of-the-File" class="anchor" href="#Disable-Section-of-the-File">Disable Section of the File</a></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable RecordFieldNames</span>
+<span class="k">type</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="rt">MyType</span> <span class="o">=</span>
+    <span class="pn">{</span> <span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="id">xyz</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="rt">string</span>
+      <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="id">foo</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs3', 5)" onmouseover="showTip(event, 'fs3', 5)" class="rt">string</span> <span class="pn">}</span>
+<span class="c">// fsharplint:enable</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables the <code>RecordFieldNames</code> rule between the disable and enable comments.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+<span class="l">3: </span>
+<span class="l">4: </span>
+<span class="l">5: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable</span>
+<span class="k">type</span> <span onmouseout="hideTip(event, 'fs5', 6)" onmouseover="showTip(event, 'fs5', 6)" class="rt">sometype</span> <span class="o">=</span>
+    <span class="pn">{</span> <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="id">xyz</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs3', 8)" onmouseover="showTip(event, 'fs3', 8)" class="rt">string</span>
+      <span onmouseout="hideTip(event, 'fs7', 9)" onmouseover="showTip(event, 'fs7', 9)" class="id">foo</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs3', 10)" onmouseover="showTip(event, 'fs3', 10)" class="rt">string</span> <span class="pn">}</span>
+<span class="c">// fsharplint:enable</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables all rules between the disable and enable comments.</p>
+<h3><a name="Disable-Next-Line" class="anchor" href="#Disable-Next-Line">Disable Next Line</a></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable-next-line Hints</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 11)" onmouseover="showTip(event, 'fs8', 11)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 12)" onmouseover="showTip(event, 'fs9', 12)" class="fn">not</span> <span class="k">true</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables the <code>Hints</code> rule for the next line.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+<span class="l">2: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// fsharplint:disable-next-line</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 13)" onmouseover="showTip(event, 'fs8', 13)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 14)" onmouseover="showTip(event, 'fs9', 14)" class="fn">not</span> <span class="k">true</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables all rules for the next line.</p>
+<h3><a name="Disable-Current-Line" class="anchor" href="#Disable-Current-Line">Disable Current Line</a></h3>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 15)" onmouseover="showTip(event, 'fs8', 15)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 16)" onmouseover="showTip(event, 'fs9', 16)" class="fn">not</span> <span class="k">true</span> <span class="c">// fsharplint:disable-line Hints</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables the <code>Hints</code> rule for the current line.</p>
+<table class="pre"><tr><td class="lines"><pre class="fssnip"><span class="l">1: </span>
+</pre></td>
+<td class="snippet"><pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 17)" onmouseover="showTip(event, 'fs8', 17)" class="id">x</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs9', 18)" onmouseover="showTip(event, 'fs9', 18)" class="fn">not</span> <span class="k">true</span> <span class="c">// fsharplint:disable-line</span>
+</code></pre></td>
+</tr>
+</table>
+<p>Disables all rules for the current line.</p>
 
-          <div class="tip" id="fs1">val x : bool</div>
-<div class="tip" id="fs2">val not : value:bool -&gt; bool</div>
+          <div class="tip" id="fs1">type MyType =<br />&#160;&#160;{xyz: string;<br />&#160;&#160;&#160;foo: string;}</div>
+<div class="tip" id="fs2">MyType.xyz: string</div>
+<div class="tip" id="fs3">Multiple items<br />val string : value:&#39;T -&gt; string<br /><br />--------------------<br />type string = System.String</div>
+<div class="tip" id="fs4">MyType.foo: string</div>
+<div class="tip" id="fs5">type sometype =<br />&#160;&#160;{xyz: string;<br />&#160;&#160;&#160;foo: string;}</div>
+<div class="tip" id="fs6">sometype.xyz: string</div>
+<div class="tip" id="fs7">sometype.foo: string</div>
+<div class="tip" id="fs8">val x : bool</div>
+<div class="tip" id="fs9">val not : value:bool -&gt; bool</div>
 
         </div>
         <div class="span3">
