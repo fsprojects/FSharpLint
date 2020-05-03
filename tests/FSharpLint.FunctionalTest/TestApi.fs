@@ -73,6 +73,19 @@ module TestApi =
                 Assert.True(false)
 
         [<Test>]
+        member __.``Lint multi-target project``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj"
+
+            let result = lintProject OptionalLintParameters.Default projectFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure _ ->
+                Assert.True(false)
+
+        [<Test>]
         member __.``Lint solution via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
