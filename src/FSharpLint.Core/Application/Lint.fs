@@ -183,14 +183,6 @@ module Lint =
         |> Array.concat
         |> Array.concat
 
-    let isSuppressed (suppressedRulesByLine:IDictionary<int, Set<string>>) (suggestion:Suggestion.LintWarning) =
-        // Filter out any suggestion which has one of its lines suppressed.
-        [suggestion.Details.Range.StartLine..suggestion.Details.Range.EndLine]
-        |> List.exists (fun lineNum ->
-            match suppressedRulesByLine.TryGetValue(lineNum - 1) with
-            | (true, suppressedRules) -> Set.contains suggestion.RuleName suppressedRules
-            | (false, _) -> false)
-
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
@@ -221,7 +213,8 @@ module Lint =
                 enabledRules.LineRules.GenericLineRules |> Array.map (fun rule -> rule.Name)
                 enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
-        let suppressedRulesByLine = Suppression.getSuppressedRulesPerLine allRuleNames lines
+
+        let supressionInfo = Suppression.parseSuppressionInfo allRuleNames lines
 
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
@@ -230,12 +223,11 @@ module Lint =
             let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
             let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text context
 
-            [|
-                lineSuggestions
-                astNodeSuggestions
-            |]
+            [| lineSuggestions; astNodeSuggestions |]
             |> Array.concat
-            |> Array.filter (isSuppressed suppressedRulesByLine >> not)
+            |> Array.filter (fun warning -> 
+                let line = warning.Details.Range.StartLine
+                Suppression.isSupressed warning.RuleName line supressionInfo |> not)
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then
