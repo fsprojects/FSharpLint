@@ -10,12 +10,12 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
         match unionCase with
         | SynUnionCase.UnionCase(_, identifier, _, _, _, _) ->
-            identifier |> Array.singleton
+            (identifier, identifier.idText, None) |> Array.singleton
     | _ -> Array.empty
 
 let rule config =
     { Name = "ExceptionNames"
       Identifier = Identifiers.ExceptionNames
-      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

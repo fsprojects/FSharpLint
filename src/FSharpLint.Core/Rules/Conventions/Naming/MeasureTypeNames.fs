@@ -19,7 +19,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
                 match List.tryLast identifier with
                 | Some typeIdentifier ->
                     if isMeasureType attrs then
-                        typeIdentifier |> Array.singleton
+                        (typeIdentifier, typeIdentifier.idText, None) |> Array.singleton
                     else
                         Array.empty
                 | _ -> Array.empty
@@ -30,6 +30,6 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 let rule config =
     { Name = "MeasureTypeNames"
       Identifier = Identifiers.MeasureTypeNames
-      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

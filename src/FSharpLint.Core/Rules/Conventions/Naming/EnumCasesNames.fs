@@ -8,12 +8,12 @@ open FSharpLint.Rules.Helper.Naming
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.EnumCase(SynEnumCase.EnumCase(_, identifier, _, _, _)) ->
-        identifier |> Array.singleton
+        (identifier, identifier.idText, None) |> Array.singleton
     | _ -> Array.empty
 
 let rule config =
     { Name = "EnumCasesNames"
       Identifier = Identifiers.EnumCasesNames
-      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

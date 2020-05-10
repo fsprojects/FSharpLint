@@ -169,10 +169,6 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
         RuleConfig = { AstNodeRuleConfig.Runner = astNodeRunner; Cleanup = id }
     }
 
-let addDefaults (identifiers:Ident []) =
-    identifiers
-    |> Array.map (fun ident -> (ident, ident.idText, None))
-
 let isActivePattern (identifier:Ident) =
     FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
 
