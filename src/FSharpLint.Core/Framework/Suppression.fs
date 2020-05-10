@@ -1,120 +1,82 @@
 module FSharpLint.Framework.Suppression
 
+open System
 open System.Text.RegularExpressions
 
-type SuppressionTarget =
-    | All
-    | Rules of rules : Set<string>
-
-/// Represents suppression information found in a comment.
+/// Represents rule suppression information.
 type SuppressionInfo =
-    /// Represents a comment enabling linting rules for the rest of the file.
-    | Enable of SuppressionTarget
-    /// Represents a comment disabling linting rules for the rest of the file.
-    | Disable of SuppressionTarget
-    /// Represents a comment enabling linting rules for the current line.
-    | EnableLine of SuppressionTarget
-    /// Represents a comment disabling linting rules for the current line.
-    | DisableLine of SuppressionTarget
-    /// Represents a comment enabling linting rules for the next line.
-    | EnableNextLine of SuppressionTarget
-    /// Represents a comment disabling linting rules for the next line.
-    | DisableNextLine of SuppressionTarget
+    /// Re-enables rules for the rest of the file.
+    | Enable of Set<String>
+    /// Disables rules for the rest of the file.
+    | Disable of Set<String>
+    /// Disables rules for a single line.
+    | DisableLine of Set<String>
 
-let parseSuppressionInfo (lines:string list) =
-    ParseFile.tokenizeLines lines
-    |> List.map (fun (lineNum, tokens) ->
-        ParseFile.collectLineComments tokens
-        |> List.tryHead // We just look at the first comment on the line.
-        |> Option.map (fun comment ->
-            let matched = Regex.Match (comment, ".*fsharplint:([a-z\-]*)\s*(.*)$", RegexOptions.IgnoreCase)
-            if matched.Success then
-                let suppressionTarget =
-                    if matched.Groups.Count = 3 then
-                        let target = matched.Groups.[2].Value
-                        if target = "" then
-                            All
+/// Specifies the suppressions for an individual line.
+type LineSuppression = { Line: int; Suppressions: SuppressionInfo list }
+
+/// Extracts rule names from a whitespace separated string of rule names.
+let private extractRules (rules:Set<String>) (str:string) =
+    let (splitOnWhitespace:char[]) = null
+    let entries = 
+        str.Split(splitOnWhitespace, StringSplitOptions.RemoveEmptyEntries)
+        |> Seq.map (fun entry -> entry.ToLowerInvariant())
+        |> Seq.filter (fun entry -> rules.Contains(entry))
+        |> Set.ofSeq
+
+    // If no rules set, then all rules are applied.
+    if Seq.isEmpty entries then rules else entries
+
+/// Parses a given file to find lines containing rule suppressions.
+let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
+    let rules = rules |> Set.map (fun rule -> rule.ToLowerInvariant())
+
+    lines
+    |> List.mapi (fun lineNum line -> (lineNum + 1, line))
+    |> List.filter (fun (_, line) -> line.Contains("fsharplint:"))
+    |> List.choose (fun (lineNum, line) ->
+        let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
+        if matched.Success then
+            let suppressionTarget =
+                if matched.Groups.Count = 3 then
+                    extractRules rules matched.Groups.[2].Value
+                else
+                    rules
+            match matched.Groups.[1].Value with
+            | "enable" -> Some (lineNum, Enable suppressionTarget)
+            | "disable" -> Some (lineNum, Disable suppressionTarget)
+            | "disable-line" -> Some (lineNum, DisableLine suppressionTarget)
+            | "disable-next-line" -> Some (lineNum + 1, DisableLine suppressionTarget)
+            | _ -> None
+        else None)
+    |> List.groupBy (fun (line, _) -> line)
+    |> List.map (fun (line, suppressions) -> 
+        { Line = line
+          Suppressions = suppressions |> List.map snd })
+
+/// Check if a rule is suppressed for a given line.
+/// Given line suppressions must be in order by line - see parseSuppressionInfo.
+let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list) =
+    if List.isEmpty lineSuppressions then
+        false
+    else
+        let rule = rule.ToLowerInvariant()
+
+        let disabledRules =
+            lineSuppressions
+            |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
+            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) -> 
+                lineSuppression.Suppressions |> List.fold (fun (disabledRules:Set<String>) suppression ->
+                    match suppression with
+                    | Enable(rules) -> 
+                        Set.difference disabledRules rules
+                    | Disable(rules) -> 
+                        Set.union disabledRules rules
+                    | DisableLine(rules) -> 
+                        if line = lineSuppression.Line then
+                            Set.union disabledRules rules
                         else
-                            Rules (target.Split([|' '|]) |> Set.ofArray)
-                    else
-                        All
-                match matched.Groups.[1].Value with
-                | "enable" -> (lineNum, Some (Enable suppressionTarget))
-                | "disable" -> (lineNum, Some (Disable suppressionTarget))
-                | "enable-line" -> (lineNum, Some (EnableLine suppressionTarget))
-                | "disable-line" -> (lineNum, Some (DisableLine suppressionTarget))
-                | "enable-next-line" -> (lineNum, Some (EnableNextLine suppressionTarget))
-                | "disable-next-line" -> (lineNum, Some (DisableNextLine suppressionTarget))
-                | _ ->
-                    // TODO: print warning
-                    (lineNum, None)
-            else
-                (lineNum, None))
-        |> Option.defaultValue (lineNum, None))
+                            disabledRules
+                ) disabledRules) Set.empty
 
-type private LineSuppression =
-    | EnableLine of SuppressionTarget
-    | DisableLine of SuppressionTarget
-
-/// Gets rules suppressed for the current line.
-let private getCurrentLineSuppressedRules (allRules:Set<string>) (currentSuppressedRules:Set<string>, currentLineSuppression:LineSuppression option, nextLineSuppression:LineSuppression option) =
-    match (currentLineSuppression, nextLineSuppression) with
-    // Current line suppression overrides next line suppressions.
-    | (Some (EnableLine All), _) ->
-        Set.empty
-    | (Some (DisableLine All), _) ->
-        allRules
-    | (Some (EnableLine (Rules rules)), _) ->
-        Set.difference currentSuppressedRules rules
-    | (Some (DisableLine (Rules rules)), _) ->
-        Set.union currentSuppressedRules rules
-    // No current line suppressions set, so use any provided next line suppression.
-    | (None, Some (EnableLine All)) ->
-        Set.empty
-    | (None, Some (DisableLine All)) ->
-        allRules
-    | (None, Some (EnableLine (Rules rules))) ->
-        Set.difference currentSuppressedRules rules
-    | (None, Some (DisableLine (Rules rules))) ->
-        Set.union currentSuppressedRules rules
-    | (None, None) ->
-        currentSuppressedRules
-
-/// Gets suppression information for the current line based on the current line's suppression info comments.
-let private getCurrentLineSuppressionContext (suppressionInfo:SuppressionInfo option) =
-    match suppressionInfo with
-    | Some (SuppressionInfo.EnableLine target) ->
-        Some (LineSuppression.EnableLine target)
-    | Some (SuppressionInfo.DisableLine target) ->
-        Some (LineSuppression.DisableLine target)
-    | _ -> None
-
-/// Gets suppression information for the next line based on the current line's suppression info comments.
-let private getNextLineSuppressionContext (allRules:Set<string>) (currentSuppressedRules:Set<string>) (suppressionInfo:SuppressionInfo option) =
-    match suppressionInfo with
-    | Some (Enable All) ->
-        (Set.empty, None)
-    | Some (Enable (Rules rules)) ->
-        (Set.difference currentSuppressedRules rules, None)
-    | Some (Disable All) ->
-        (allRules, None)
-    | Some (Disable (Rules rules)) ->
-        (Set.union currentSuppressedRules rules, None)
-    | Some (EnableNextLine target) ->
-         (currentSuppressedRules, Some (LineSuppression.EnableLine target))
-    | Some (DisableNextLine target) ->
-        (currentSuppressedRules, Some (LineSuppression.DisableLine target))
-    | Some (SuppressionInfo.EnableLine _)
-    | Some (SuppressionInfo.DisableLine _)
-    | None -> (currentSuppressedRules, None)
-
-/// Creates a dictionary from line number to a set of rules which are suppressed for that line.
-let getSuppressedRulesPerLine (allRules:Set<string>) (lines:string list) =
-    parseSuppressionInfo lines
-    |> List.fold (fun ((currentSuppressedRules, nextLineSuppression:LineSuppression option), agg) (lineNum, suppressionInfo) ->
-        let currentLineSuppression = getCurrentLineSuppressionContext suppressionInfo
-        let currentLineSuppressedRules = getCurrentLineSuppressedRules allRules (currentSuppressedRules, currentLineSuppression, nextLineSuppression)
-        let (nextLineSuppressedRules, nextLineSuppressionContext) = getNextLineSuppressionContext allRules currentSuppressedRules suppressionInfo
-        ((nextLineSuppressedRules, nextLineSuppressionContext), (lineNum, currentLineSuppressedRules) :: agg)) ((Set.empty, None), [])
-    |> snd
-    |> dict
+        disabledRules.Contains(rule)

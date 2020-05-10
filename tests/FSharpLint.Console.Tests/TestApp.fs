@@ -80,4 +80,18 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
         Assert.AreEqual(0, returnCode)
-        Assert.AreEqual(set [], errors)
+        Assert.AreEqual(Set.empty, errors)
+        
+    [<Test>]
+    member __.``Lint source with error suppressed, no error is given.``() =
+        let input = """
+        // fsharplint:disable-next-line
+        type Signature =
+            abstract member Encoded : string
+            abstract member PathName : string
+        """
+        
+        let (returnCode, errors) = main [| "lint"; input |]
+        
+        Assert.AreEqual(0, returnCode)
+        Assert.AreEqual(Set.empty, errors)
