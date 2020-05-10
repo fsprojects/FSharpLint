@@ -227,7 +227,7 @@ module Lint =
             |> Array.concat
             |> Array.filter (fun warning -> 
                 let line = warning.Details.Range.StartLine
-                Suppression.isSupressed warning.RuleName line suppressionInfo |> not)
+                Suppression.isSuppressed warning.RuleName line suppressionInfo |> not)
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then
