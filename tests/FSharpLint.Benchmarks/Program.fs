@@ -5,6 +5,7 @@ open BenchmarkDotNet.Running
 open FSharp.Compiler.SourceCodeServices
 open FSharp.Compiler.Text
 open FSharpLint.Application.Lint
+open FSharpLint.Framework
 
 [<EtwProfiler>] // Switch to EventPipeProfiler (cross-platform) after updating to .NET core 3.x
 type FSharpLintBenchmark () =

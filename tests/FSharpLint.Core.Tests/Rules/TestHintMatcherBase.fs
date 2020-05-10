@@ -57,7 +57,7 @@ type TestHintMatcherBase () =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray skipArray |> fst
             suggestions |> Array.iter this.PostSuggestion
         | _ ->
             failwithf "Failed to parse"
