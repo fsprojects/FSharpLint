@@ -18,7 +18,7 @@ type LineSuppression = { Line: int; Suppressions: SuppressionInfo list }
 /// Extracts rule names from a whitespace separated string of rule names.
 let private extractRules (rules:Set<String>) (str:string) =
     let (splitOnWhitespace:char[]) = null
-    let entries = 
+    let entries =
         str.Split(splitOnWhitespace, StringSplitOptions.RemoveEmptyEntries)
         |> Seq.map (fun entry -> entry.ToLowerInvariant())
         |> Seq.filter (fun entry -> rules.Contains(entry))
@@ -50,7 +50,7 @@ let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
             | _ -> None
         else None)
     |> List.groupBy (fun (line, _) -> line)
-    |> List.map (fun (line, suppressions) -> 
+    |> List.map (fun (line, suppressions) ->
         { Line = line
           Suppressions = suppressions |> List.map snd })
 
@@ -65,14 +65,14 @@ let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list
         let disabledRules =
             lineSuppressions
             |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
-            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) -> 
+            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) ->
                 lineSuppression.Suppressions |> List.fold (fun (disabledRules:Set<String>) suppression ->
                     match suppression with
-                    | Enable(rules) -> 
+                    | Enable(rules) ->
                         Set.difference disabledRules rules
-                    | Disable(rules) -> 
+                    | Disable(rules) ->
                         Set.union disabledRules rules
-                    | DisableLine(rules) -> 
+                    | DisableLine(rules) ->
                         if line = lineSuppression.Line then
                             Set.union disabledRules rules
                         else

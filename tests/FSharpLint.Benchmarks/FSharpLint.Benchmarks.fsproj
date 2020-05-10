@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Benchmark.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
