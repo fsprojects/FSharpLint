@@ -12,8 +12,8 @@ type SuppressionInfo =
     /// Disables rules for a single line.
     | DisableLine of Set<String>
 
-/// Specifies the supressions for an individual lines.
-type LineSupressions = { Line: int; Supressions: SuppressionInfo list }
+/// Specifies the suppressions for an individual line.
+type LineSuppression = { Line: int; Suppressions: SuppressionInfo list }
 
 /// Extracts rule names from a whitespace separated string of rule names.
 let private extractRules (rules:Set<String>) (str:string) =
@@ -50,30 +50,30 @@ let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
             | _ -> None
         else None)
     |> List.groupBy (fun (line, _) -> line)
-    |> List.map (fun (line, supressions) -> 
+    |> List.map (fun (line, suppressions) -> 
         { Line = line
-          Supressions = supressions |> List.map snd })
+          Suppressions = suppressions |> List.map snd })
 
-/// Check if a rule is supressed for a given line.
-/// Given line supressions must be in order by line - see parseSuppressionInfo.
-let isSupressed (rule:String) (line:int) (lineSupressions:LineSupressions list) =
-    if List.isEmpty lineSupressions then
+/// Check if a rule is suppressed for a given line.
+/// Given line suppressions must be in order by line - see parseSuppressionInfo.
+let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list) =
+    if List.isEmpty lineSuppressions then
         false
     else
         let rule = rule.ToLowerInvariant()
 
         let disabledRules =
-            lineSupressions
+            lineSuppressions
             |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
-            |> List.fold (fun (disabledRules:Set<String>) (lineSupression:LineSupressions) -> 
-                lineSupression.Supressions |> List.fold (fun (disabledRules:Set<String>) supression ->
-                    match supression with
+            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) -> 
+                lineSuppression.Suppressions |> List.fold (fun (disabledRules:Set<String>) suppression ->
+                    match suppression with
                     | Enable(rules) -> 
                         Set.difference disabledRules rules
                     | Disable(rules) -> 
                         Set.union disabledRules rules
                     | DisableLine(rules) -> 
-                        if line = lineSupression.Line then
+                        if line = lineSuppression.Line then
                             Set.union disabledRules rules
                         else
                             disabledRules

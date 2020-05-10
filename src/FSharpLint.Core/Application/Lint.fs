@@ -214,7 +214,7 @@ module Lint =
                 enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
 
-        let supressionInfo = Suppression.parseSuppressionInfo allRuleNames lines
+        let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames lines
 
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
@@ -227,7 +227,7 @@ module Lint =
             |> Array.concat
             |> Array.filter (fun warning -> 
                 let line = warning.Details.Range.StartLine
-                Suppression.isSupressed warning.RuleName line supressionInfo |> not)
+                Suppression.isSupressed warning.RuleName line suppressionInfo |> not)
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then

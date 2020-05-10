@@ -11,7 +11,7 @@ let lines text =
 [<TestFixture>]
 type TestSuppression() =
     [<Test>]
-    member __.``Disable next line with rules specified supresses as expected``() =
+    member __.``Disable next line with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-next-line TypePrefixing TypedItemSpacing
 
@@ -20,16 +20,16 @@ type TestSuppression() =
 
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
         
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
 
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 4 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 4 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 4 suppressionInfo)
 
     [<Test>]
-    member __.``Disable next line with no rules specified supresses as expected``() =
+    member __.``Disable next line with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-next-line
 
@@ -38,16 +38,16 @@ type TestSuppression() =
 
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
             
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
 
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 4 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 4 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 4 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 4 suppressionInfo)
 
     [<Test>]
-    member __.``Disable current line with rules specified supresses as expected``() =
+    member __.``Disable current line with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-line TypePrefixing TypedItemSpacing
 
@@ -55,16 +55,16 @@ type TestSuppression() =
 
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
         
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 2 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 2 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 2 suppressionInfo)
 
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
         
     [<Test>]
-    member __.``Disable current line with no rules specified supresses as expected``() =
+    member __.``Disable current line with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-line
         
@@ -72,16 +72,16 @@ type TestSuppression() =
         
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
                 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TupleCommaSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TupleCommaSpacing" 2 suppressionInfo)
         
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
         
     [<Test>]
-    member __.``Disable and re-renable with no rules specified supresses as expected``() =
+    member __.``Disable and re-renable with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable
 
@@ -92,19 +92,19 @@ type TestSuppression() =
         
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
                 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TupleCommaSpacing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TupleCommaSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
         
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 5 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 5 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
         
     [<Test>]
-    member __.``Disable and re-renable with rules specified supresses as expected``() =
+    member __.``Disable and re-renable with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing  TypedItemSpacing
 
@@ -115,19 +115,19 @@ type TestSuppression() =
         
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
                 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 2 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 2 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 2 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 2 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
         
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 5 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 5 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 5 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
         
     [<Test>]
-    member __.``Disable line within disable section supresses as expected``() =
+    member __.``Disable line within disable section suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing  
 
@@ -138,20 +138,20 @@ type TestSuppression() =
         
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
                 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 5 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 5 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 5 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 5 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
         
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 6 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 6 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 6 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 6 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 6 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 6 suppressionInfo)
         
     [<Test>]
-    member __.``Disable within disable section supresses as expected``() =
+    member __.``Disable within disable section suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing  
 
@@ -163,14 +163,14 @@ type TestSuppression() =
         
         let suppressionInfo = Suppression.parseSuppressionInfo rules text
                 
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 3 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 3 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 3 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
         
-        Assert.IsTrue(Suppression.isSupressed "TypePrefixing" 5 suppressionInfo)
-        Assert.IsTrue(Suppression.isSupressed "TypedItemSpacing" 5 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 5 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypePrefixing" 5 suppressionInfo)
+        Assert.IsTrue(Suppression.isSuppressed "TypedItemSpacing" 5 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
                 
-        Assert.IsFalse(Suppression.isSupressed "TypePrefixing" 7 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TypedItemSpacing" 7 suppressionInfo)
-        Assert.IsFalse(Suppression.isSupressed "TupleCommaSpacing" 7 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypePrefixing" 7 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TypedItemSpacing" 7 suppressionInfo)
+        Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 7 suppressionInfo)
