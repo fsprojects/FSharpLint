@@ -37,9 +37,5 @@ type Benchmark () =
         ({ Ast = tree; Source = text; TypeCheckResults = None }, String.getLines text |> Array.toList)
 
     [<Benchmark>]
-    member this.ParseSuppressionInfo () =
-        Suppression.parseSuppressionInfo lines |> ignore
-
-    [<Benchmark>]
     member this.LintParsedFile () =
         lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
