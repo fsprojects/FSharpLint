@@ -301,14 +301,14 @@ module private MatchExpression =
     and private matchIf arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
-          Expression.If(hintCond, hintExpr, None) ->
-            arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
-            (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr)
+            Expression.If(hintCond, hintExpr, None) ->
+                arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
+                (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr)
         | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)),
-          Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) ->
-            arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
-            (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr) &&~
-            (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
+            Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) ->
+                arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
+                (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr) &&~
+                (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
         | _ -> NoMatch
 
     and matchLambda arguments =

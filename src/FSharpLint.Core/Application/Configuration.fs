@@ -270,14 +270,14 @@ type NumberOfItemsConfig =
       maxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option
       maxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option
       maxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option }
- with
+with
     member this.Flatten() =
-         [|
+        [|
             this.maxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule) |> Option.toArray
             this.maxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule) |> Option.toArray
             this.maxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule) |> Option.toArray
             this.maxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule) |> Option.toArray
-         |] |> Array.concat
+        |] |> Array.concat
 
 type BindingConfig =
     { favourIgnoreOverLetWild : EnabledConfig option
@@ -286,12 +286,12 @@ type BindingConfig =
       tupleOfWildcards : EnabledConfig option }
  with
     member this.Flatten() =
-         [|
-            this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
-            this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
-            this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
-            this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
-         |] |> Array.concat
+        [|
+           this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
+           this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
+           this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
+           this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
+        |] |> Array.concat
 
 type ConventionsConfig =
     { recursiveAsyncFunction : EnabledConfig option

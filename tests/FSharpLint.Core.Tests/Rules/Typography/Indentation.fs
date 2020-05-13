@@ -50,6 +50,15 @@ let rainbow =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for correct record field indentation in type definition``() =
+        this.Parse """
+type T =
+    { X : int
+      Y : string }"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for correct record field indentation with multiple fields per line``() =
         this.Parse """
 module P
@@ -87,6 +96,19 @@ let pascalsTriangle =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for multi-line tuple``() =
+        this.Parse """
+module P
+
+let pascalsTriangle =
+    (1,
+     2,
+     3)"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+
+    [<Test>]
     member this.``No error for correct list member indentation``() =
         this.Parse """
 module P
@@ -107,6 +129,36 @@ module P
 let res = 1
           |> add 2
           |> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional composition indentation``() =
+        this.Parse """
+module P
+
+let res = add 2
+          >> sub 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional infix indentation``() =
+        this.Parse """
+module P
+
+let res = 1
+          + 2
+          + 3"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for pipeline on same line``() =
+        this.Parse """
+module P
+
+let res = 1 |> add 2"""
 
         Assert.IsTrue(this.NoErrorsExist)
 

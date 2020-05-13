@@ -47,23 +47,33 @@ module ContextBuilder =
 
     let private indentationOverridesForNode (node:AstNode) =
         match node with
-        | Expression(SynExpr.Record(recordFields=recordFields)) ->
+        | TypeDefinition (SynTypeDefn.TypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _, _)) ->
+             fields
+             |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
+             |> firstRangePerLine
+             |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Expression (SynExpr.Tuple (_, exprs, _, _)) ->
+            exprs
+             |> List.map (fun expr -> expr.Range)
+             |> firstRangePerLine
+             |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Expression (SynExpr.Record(recordFields=recordFields)) ->
             recordFields
             |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
+        | Expression (SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
             extractSeqExprItems expr
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.ArrayOrList(exprs=exprs)) ->
+        | Expression (SynExpr.ArrayOrList(exprs=exprs)) ->
             exprs
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.App(funcExpr=(SynExpr.App(funcExpr=SynExpr.Ident(ident); argExpr=innerArg)); argExpr=outerArg))
-            when ident.idText = "op_PipeRight" ->
+        | Expression(SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg)); argExpr=outerArg))
+            when isInfix && outerArg.Range.EndLine <> innerArg.Range.StartLine ->
             let expectedIndentation = innerArg.Range.StartColumn
             createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
         | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->

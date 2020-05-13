@@ -7,7 +7,7 @@ To set this up, first [install the FSharpLint dotnet tool](DotnetTool).
 Then, you can add the following to any of your projects to run linting after build completion for that project:
 
     [lang=xml]
-    <Target Name="FSharpLint" AfterTargets="AfterBuild">
+    <Target Name="FSharpLint" AfterTargets="BeforeBuild">
      <Exec
        Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
        ConsoleToMsBuild="true"
