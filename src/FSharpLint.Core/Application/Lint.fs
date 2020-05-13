@@ -116,7 +116,7 @@ module Lint =
         { IndentationRuleContext : Map<int,bool*int>
           NoTabCharactersRuleContext : (string * Range.range) list }
 
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -135,6 +135,7 @@ module Lint =
                       GetParents = getParents
                       FilePath = filePath
                       FileContent = fileContent
+                      Lines = lines
                       CheckInfo = typeCheckResults
                       GlobalConfig = globalConfig }
                 // Build state for rules with context.
@@ -151,7 +152,7 @@ module Lint =
         rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
         (astNodeSuggestions, context)
 
-    let runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (context:Context) =
+    let runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (lines:string []) (context:Context) =
         fileContent
         |> String.toLines
         |> Array.collect (fun (line, lineNumber, isLastLine) ->
@@ -161,6 +162,7 @@ module Lint =
                   IsLastLine = isLastLine
                   FilePath = filePath
                   FileContent = fileContent
+                  Lines = lines
                   GlobalConfig =  globalConfig }
 
             let indentationError =
@@ -205,7 +207,7 @@ module Lint =
 
         let enabledRules = Configuration.flattenConfig lintInfo.Configuration
 
-        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line) |> Array.toList
+        let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line)
         let allRuleNames =
             [|
                 enabledRules.LineRules.IndentationRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
@@ -214,18 +216,18 @@ module Lint =
                 enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
 
-        let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames lines
+        let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames (Array.toList lines)
 
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text syntaxArray skipArray
-            let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text context
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text lines syntaxArray skipArray
+            let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text lines context
 
             [| lineSuggestions; astNodeSuggestions |]
             |> Array.concat
-            |> Array.filter (fun warning -> 
+            |> Array.filter (fun warning ->
                 let line = warning.Details.Range.StartLine
                 Suppression.isSuppressed warning.RuleName line suppressionInfo |> not)
             |> Array.iter trySuggest

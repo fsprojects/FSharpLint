@@ -34,7 +34,7 @@ type TestAstNodeRuleBase (rule:Rule) =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input syntaxArray skipArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split("\n")) syntaxArray skipArray |> fst
             rule.RuleConfig.Cleanup()
 
             suggestions |> Array.iter this.PostSuggestion

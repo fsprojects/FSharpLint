@@ -17,9 +17,11 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             match componentInfo with
             | SynComponentInfo.ComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
                 match List.tryLast identifier with
-                | Some(typeIdentifier) ->
+                | Some _ ->
                     if not (isMeasureType attrs) && not (isInterface typeDef) then
-                        identifier |> List.toArray
+                        identifier
+                        |> List.map (fun identifier -> (identifier, identifier.idText, None))
+                        |> List.toArray
                     else
                         Array.empty
                 | _ -> Array.empty
@@ -30,6 +32,6 @@ let private getIdentifiers (args:AstNodeRuleParams) =
 let rule config =
     { Name = "TypeNames"
       Identifier = Identifiers.TypeNames
-      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

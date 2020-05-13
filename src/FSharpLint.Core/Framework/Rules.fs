@@ -29,6 +29,7 @@ type AstNodeRuleParams =
       GetParents : int -> AstNode list
       FilePath : string
       FileContent : string
+      Lines : string []
       CheckInfo : FSharpCheckFileResults option
       GlobalConfig : GlobalRuleConfig }
 
@@ -38,6 +39,7 @@ type LineRuleParams =
       IsLastLine : bool
       FilePath : string
       FileContent : string
+      Lines : string []
       GlobalConfig : GlobalRuleConfig }
 
 type RuleMetadata<'config> =
@@ -81,23 +83,23 @@ type Rule =
     | IndentationRule of RuleMetadata<IndentationRuleConfig>
     | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
 
-let toWarning (identifier:string) (ruleName:string) (filePath:string) (fileContents:string) (details:WarningDetails) =
+let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details:WarningDetails) =
     {
         LintWarning.RuleIdentifier = identifier
         FilePath = filePath
         RuleName = ruleName
-        ErrorText = fileContents.Split('\n').[details.Range.StartLine - 1].TrimEnd('\r')
+        ErrorText = lines.[details.Range.StartLine - 1].TrimEnd('\r')
         Details = details
     }
 
 let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
     rule.RuleConfig.Runner context config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.FileContent)
+    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)

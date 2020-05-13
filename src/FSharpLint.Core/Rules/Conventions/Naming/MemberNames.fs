@@ -13,7 +13,7 @@ let private getMemberIdents _ = function
             // Ignore members prefixed with op_, they are a special case used for operator overloading.
             Array.empty
         | None -> Array.empty
-        | Some ident -> ident |> Array.singleton
+        | Some ident -> (ident, ident.idText, None) |> Array.singleton
     | _ -> Array.empty
 
 let private isImplementingInterface parents =
@@ -24,7 +24,7 @@ let private isImplementingInterface parents =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         let parents = args.GetParents 3
         if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
@@ -36,13 +36,13 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
         | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
-            identifier |> Array.singleton
+            (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty
 
 let rule config =
     { Name = "MemberNames"
       Identifier = Identifiers.MemberNames
-      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers >> addDefaults } }
+      RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule

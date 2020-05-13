@@ -3,6 +3,8 @@ framework: netstandard2.0, netcoreapp3.1, netcoreapp2.1
 storage: none
 
 nuget Argu
+nuget BenchmarkDotNet
+nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
 nuget FSharp.Compiler.Service ~> 35.0
 nuget Dotnet.ProjInfo ~> 0.31.0

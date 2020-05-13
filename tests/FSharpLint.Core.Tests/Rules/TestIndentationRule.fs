@@ -28,12 +28,14 @@ type TestIndentationRuleBase (rule:Rule) =
 
         let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
+        let lines = input.Split "\n"
+
         match parseResults.ParseTree with
         | Some tree ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input syntaxArray skipArray
+            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray skipArray
             let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = [||] }
 
-            runLineRules lineRules globalConfig fileName input context
+            runLineRules lineRules globalConfig fileName input lines context
             |> Array.iter this.PostSuggestion
         | None -> ()

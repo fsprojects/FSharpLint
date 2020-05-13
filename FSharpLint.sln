@@ -17,6 +17,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.FunctionalTest",
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Console.Tests", "tests\FSharpLint.Console.Tests\FSharpLint.Console.Tests.fsproj", "{73AD322D-2E3F-45C4-8DB2-179571DECCD0}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Benchmarks", "tests\FSharpLint.Benchmarks\FSharpLint.Benchmarks.fsproj", "{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x64.Build.0 = Release|Any CPU
 		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x86.ActiveCfg = Release|Any CPU
 		{73AD322D-2E3F-45C4-8DB2-179571DECCD0}.Release|x86.Build.0 = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|x64.Build.0 = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Debug|x86.Build.0 = Debug|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|x64.ActiveCfg = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|x64.Build.0 = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|x86.ActiveCfg = Release|Any CPU
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +111,7 @@ Global
 		{E51042D9-CE14-4373-AE1E-FEB78FE23F40} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
 		{0DE70980-49E9-4613-84D4-FCF6ACABA5EE} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
 		{73AD322D-2E3F-45C4-8DB2-179571DECCD0} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
+		{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0} = {1CD44876-BCDC-4C93-9DC2-C45244BD62AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B54B4B7D-F019-48A3-BB5B-635B68FE41C3}
