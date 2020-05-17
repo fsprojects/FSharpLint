@@ -44,7 +44,7 @@ module Lint =
 
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
-    type OptionalLintParameters =
+    type LintParameters =
         { /// Cancels a lint in progress.
           CancellationToken: CancellationToken option
 
@@ -60,7 +60,7 @@ module Lint =
 
           ReleaseConfiguration : string option }
 
-        static member Default: OptionalLintParameters
+        static member Default: LintParameters
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
@@ -81,15 +81,6 @@ module Lint =
     /// Reason for the linter failing.
     [<NoComparison>]
     type LintFailure =
-        /// Project file path did not exist on the local filesystem.
-        | ProjectFileCouldNotBeFound of string
-
-        /// Received exception when trying to get the list of F# file from the project file.
-        | MSBuildFailedToLoadProjectFile of string * BuildFailure
-
-        /// Failed to load a FSharpLint configuration file.
-        | FailedToLoadConfig of string
-
         /// The specified file for linting could not be found.
         | FailedToLoadFile of string
 
@@ -124,22 +115,22 @@ module Lint =
     val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> string [] -> Context -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult
+    val lintSolution : optionalParams:LintParameters -> solutionFilePath:string -> LintResult
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult
+    val lintProject : optionalParams:LintParameters -> projectFilePath:string -> LintResult
 
     /// Lints F# source code.
-    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
+    val lintSource : optionalParams:LintParameters -> source:string -> LintResult
 
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
-    val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
+    val lintParsedSource : optionalParams:LintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> LintResult
+    val lintFile : optionalParams:LintParameters -> filepath:string -> LintResult
 
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
-    val lintParsedFile : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> filepath:string -> LintResult
+    val lintParsedFile : optionalParams:LintParameters -> parsedFileInfo:ParsedFileInformation -> filepath:string -> LintResult

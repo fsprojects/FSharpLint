@@ -38,4 +38,4 @@ type Benchmark () =
 
     [<Benchmark>]
     member this.LintParsedFile () =
-        lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
+        lintParsedFile LintParameters.Default fileInfo sourceFile |> ignore

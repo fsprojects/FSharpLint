@@ -8,7 +8,6 @@ open System.Runtime.InteropServices
 open System.Threading
 open FSharp.Compiler
 open FSharp.Compiler.SourceCodeServices
-open Dotnet.ProjInfo.Inspect.MSBuild
 open FSharpLint.Core
 open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
@@ -33,15 +32,6 @@ module Lint =
     /// Reason for the linter failing.
     [<NoComparison>]
     type LintFailure =
-        /// Project file path did not exist on the local filesystem.
-        | ProjectFileCouldNotBeFound of string
-
-        /// Received exception when trying to get the list of F# file from the project file.
-        | MSBuildFailedToLoadProjectFile of string * BuildFailure
-
-        /// Failed to load a FSharpLint configuration file.
-        | FailedToLoadConfig of string
-
         /// The specified file for linting could not be found.
         | FailedToLoadFile of string
 
@@ -65,14 +55,8 @@ module Lint =
                     | ParseFile.AbortedTypeCheck -> "Aborted type check."
 
                 match this with
-                | ProjectFileCouldNotBeFound projectPath ->
-                    String.Format(Resources.GetString("ConsoleProjectFileCouldNotBeFound"), projectPath)
-                | MSBuildFailedToLoadProjectFile (projectPath, InvalidProjectFileMessage(message)) ->
-                    String.Format(Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile"), projectPath, message)
                 | FailedToLoadFile filepath ->
                     String.Format(Resources.GetString("ConsoleCouldNotFindFile"), filepath)
-                | FailedToLoadConfig message ->
-                    String.Format(Resources.GetString("ConsoleFailedToLoadConfig"), message)
                 | RunTimeConfigError error ->
                     String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error)
                 | FailedToParseFile failure ->
@@ -260,83 +244,6 @@ module Lint =
 
         ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
-    let private runProcess (workingDir:string) (exePath:string) (args:string) =
-        let psi = System.Diagnostics.ProcessStartInfo()
-        psi.FileName <- exePath
-        psi.WorkingDirectory <- workingDir
-        psi.RedirectStandardOutput <- true
-        psi.RedirectStandardError <- true
-        psi.Arguments <- args
-        psi.CreateNoWindow <- true
-        psi.UseShellExecute <- false
-
-        use p = new System.Diagnostics.Process()
-        p.StartInfo <- psi
-        let sbOut = System.Text.StringBuilder()
-        p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore)
-        let sbErr = System.Text.StringBuilder()
-        p.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore)
-        p.Start() |> ignore
-        p.BeginOutputReadLine()
-        p.BeginErrorReadLine()
-        p.WaitForExit()
-
-        let exitCode = p.ExitCode
-
-        (exitCode, (workingDir, exePath, args))
-
-    let getProjectFileInfo (releaseConfig:string option) (projectFilePath:string) =
-        let projDir = System.IO.Path.GetDirectoryName projectFilePath
-
-        let msBuildParams =
-            releaseConfig
-            |> Option.map (fun config -> [MSbuildCli.Property("ConfigurationName", config)])
-            |> Option.defaultValue []
-
-        let msBuildResults =
-            let runCmd exePath args = runProcess projDir exePath (args |> String.concat " ")
-            let msbuildExec = Dotnet.ProjInfo.Inspect.dotnetMsbuild runCmd
-
-            projectFilePath
-            |> Dotnet.ProjInfo.Inspect.getProjectInfos ignore msbuildExec [Dotnet.ProjInfo.Inspect.getFscArgs] msBuildParams
-
-        match msBuildResults with
-        | Result.Ok [getFscArgsResult] ->
-            match getFscArgsResult with
-            | Result.Ok (Dotnet.ProjInfo.Inspect.GetResult.FscArgs fa) ->
-
-                let projDir = Path.GetDirectoryName projectFilePath
-
-                let isSourceFile (option:string) =
-                    option.TrimStart().StartsWith("-") |> not
-
-                let compileFilesToAbsolutePath (f:string) =
-                    if Path.IsPathRooted f then
-                        f
-                    else
-                        Path.Combine(projDir, f)
-
-                { ProjectFileName = projectFilePath
-                  SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
-                  OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
-                  ReferencedProjects = [||]
-                  IsIncompleteTypeCheckEnvironment = false
-                  UseScriptResolutionRules = false
-                  LoadTime = DateTime.Now
-                  UnresolvedReferences = None
-                  OriginalLoadReferences = []
-                  ExtraProjectInfo = None
-                  ProjectId = None
-                  Stamp = None }
-            | Result.Ok _ ->
-                failwithf "error getting FSC args from msbuild info"
-            | Result.Error error ->
-                failwithf "error getting FSC args from msbuild info, %A" error
-        | Result.Ok r ->
-            failwithf "error getting msbuild info: more info returned than expected %A" r
-        | Result.Error r ->
-            failwithf "error getting msbuild info: %A" r
-
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
         | _ -> None
@@ -365,9 +272,9 @@ module Lint =
         | FromFile of configPath:string
         | Default
 
-    /// Optional parameters that can be provided to the linter.
+    /// Parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
-    type OptionalLintParameters = {
+    type LintParameters = {
         /// Cancels a lint in progress.
         CancellationToken: CancellationToken option
         /// Lint configuration to use.
@@ -382,7 +289,7 @@ module Lint =
         ReleaseConfiguration : string option
     } with
         static member Default = {
-            OptionalLintParameters.CancellationToken = None
+            LintParameters.CancellationToken = None
             Configuration = Default
             ReceivedWarning = None
             ReportLinterProgress = None
@@ -416,7 +323,7 @@ module Lint =
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) =
+    let lintProject (optionalParams:LintParameters) (projectFilePath:string) =
         if IO.File.Exists projectFilePath then
             let projectFilePath = Path.GetFullPath projectFilePath
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
@@ -462,7 +369,7 @@ module Lint =
                     else
                         Failure (FailedToParseFilesInProject failedFiles)
 
-                let projectOptions = getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath
+                let projectOptions = ProjectLoader.getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath
                 let compileFiles = projectOptions.SourceFiles |> Array.toList
                 match parseFilesInProject compileFiles projectOptions with
                 | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
@@ -475,7 +382,7 @@ module Lint =
             |> LintResult.Failure
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) =
+    let lintSolution (optionalParams:LintParameters) (solutionFilePath:string) =
         if IO.File.Exists solutionFilePath then
             let solutionFilePath = Path.GetFullPath solutionFilePath
             let solutionFolder = Path.GetDirectoryName solutionFilePath
@@ -564,7 +471,7 @@ module Lint =
         | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
 
     /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
-    let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
+    let lintParsedFile (optionalParams:LintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
         match getConfig optionalParams.Configuration with
         | Ok config ->
             let lintWarnings = LinkedList<Suggestion.LintWarning>()

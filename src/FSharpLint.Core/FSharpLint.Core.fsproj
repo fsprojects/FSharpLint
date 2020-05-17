@@ -27,6 +27,7 @@
     <Compile Include="Framework\Resources.fs" />
     <Compile Include="Framework\ParseFile.fs" />
     <Compile Include="Framework\Suppression.fs" />
+    <Compile Include="Framework\ProjectLoader.fs" />
     <!-- Rules -->
     <Compile Include="Rules\Identifiers.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
