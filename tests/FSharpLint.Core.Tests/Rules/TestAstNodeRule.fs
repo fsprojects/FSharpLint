@@ -16,7 +16,7 @@ type TestAstNodeRuleBase (rule:Rule) =
         let parseResults =
             match fileName with
             | Some fileName ->
-                ParseFile.parseSourceFile fileName input checker
+                ParseFile.parseSource input checker
             | None ->
                 ParseFile.parseSource input checker
 
@@ -28,15 +28,15 @@ type TestAstNodeRuleBase (rule:Rule) =
         let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
         match parseResults with
-        | ParseFileResult.Success parseInfo ->
+        | Ok parseInfo ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split("\n")) syntaxArray skipArray |> fst
+            let suggestions = LintRunner.runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split("\n")) syntaxArray skipArray |> fst
             rule.RuleConfig.Cleanup()
 
             suggestions |> Array.iter this.PostSuggestion
-        | _ ->
+        | Error _ ->
             failwithf "Failed to parse"

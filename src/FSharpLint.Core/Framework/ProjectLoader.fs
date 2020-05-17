@@ -2,6 +2,7 @@ module FSharpLint.Framework.ProjectLoader
 
 open System
 open System.IO
+open System.Runtime.InteropServices
 open FSharp.Compiler.SourceCodeServices
 open Dotnet.ProjInfo.Inspect.MSBuild
 
@@ -82,3 +83,26 @@ let getProjectFileInfo (releaseConfig:string option) (projectFilePath:string) =
     | Result.Error r ->
         failwithf "error getting msbuild info: %A" r
 
+let getProjectFiles (releaseConfiguration:string option) (projectFilePath:string) =
+    let projectFilePath = Path.GetFullPath projectFilePath
+    let projectOptions = getProjectFileInfo releaseConfiguration projectFilePath
+    projectOptions.SourceFiles |> Array.toList
+
+let getProjectsFromSolution (solutionFilePath:string) =
+     let solutionFilePath = Path.GetFullPath solutionFilePath
+     let solutionFolder = Path.GetDirectoryName solutionFilePath
+
+     File.ReadAllText(solutionFilePath)
+     |> String.toLines
+     |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project") && s.Contains(".fsproj"))
+     |> Array.map (fun (s, _, _) ->
+         let endIndex = s.IndexOf(".fsproj") + 7
+         let startIndex = s.IndexOf(",") + 1
+         let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
+         let projectPath =
+             if Runtime.InteropServices.RuntimeInformation.IsOSPlatform OSPlatform.Windows then
+                 projectPath
+             else // For non-Windows, we need to convert the project path in the solution to Unix format.
+                 projectPath.Replace("\\", "/")
+         Path.Combine(solutionFolder, projectPath))
+     |> Array.toList

@@ -24,7 +24,7 @@ module Lint =
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
-    type ProjectProgress =
+    type LintProgress =
         /// Started parsing a file (file path).
         | Starting of string
 
@@ -33,9 +33,6 @@ module Lint =
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
-
-        /// Path of the F# file the progress information is for.
-        member FilePath : unit -> string
 
     type ConfigurationParam =
         | Configuration of Configuration
@@ -56,7 +53,7 @@ module Lint =
           /// This function will be called every time the linter finds a broken rule.
           ReceivedWarning: (Suggestion.LintWarning -> unit) option
 
-          ReportLinterProgress: (ProjectProgress -> unit) option
+          ReportLinterProgress: (LintProgress -> unit) option
 
           ReleaseConfiguration : string option }
 
@@ -74,9 +71,10 @@ module Lint =
           Source: string
 
           /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
+          TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
 
-    type BuildFailure = | InvalidProjectFileMessage of string
+          /// Optional path to file for source.
+          FilePath : string option }
 
     /// Reason for the linter failing.
     [<NoComparison>]
@@ -87,50 +85,20 @@ module Lint =
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
         | RunTimeConfigError of string
 
-        /// `FSharp.Compiler.Services` failed when trying to parse a file.
-        | FailedToParseFile of ParseFile.ParseFileFailure
-
-        /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
-        | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
-
-        member Description: string
-
-    /// Result of running the linter.
-    [<NoEquality; NoComparison; RequireQualifiedAccess>]
-    type LintResult =
-        | Success of Suggestion.LintWarning list
-        | Failure of LintFailure
-
-        member TryGetSuccess : byref<Suggestion.LintWarning list> -> bool
-        member TryGetFailure : byref<LintFailure> -> bool
-
-    type Context =
-        { IndentationRuleContext : Map<int,bool*int>
-          NoTabCharactersRuleContext : (string * Range.range) list }
-
-    /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> string [] -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context
-
-    /// Runs all rules which take a line of text as input.
-    val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> string [] -> Context -> Suggestion.LintWarning []
+        /// `FSharp.Compiler.Services` failed when trying to parse one or more files.
+        | FailedToParseFiles of ParseFile.ParseFileFailure list
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    val lintSolution : optionalParams:LintParameters -> solutionFilePath:string -> LintResult
+    val lintSolution : optionalParams:LintParameters -> solutionFilePath:string -> Result<Suggestion.LintWarning list, LintFailure>
 
-    /// Lints an entire F# project by retrieving the files from a given
-    /// path to the `.fsproj` file.
-    val lintProject : optionalParams:LintParameters -> projectFilePath:string -> LintResult
+    /// Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
+    val lintProject : optionalParams:LintParameters -> projectFilePath:string -> Result<Suggestion.LintWarning list, LintFailure>
 
     /// Lints F# source code.
-    val lintSource : optionalParams:LintParameters -> source:string -> LintResult
+    val lintSource : optionalParams:LintParameters -> source:string -> Result<Suggestion.LintWarning list, LintFailure>
 
-    /// Lints F# source code that has already been parsed using
-    /// `FSharp.Compiler.Services` in the calling application.
-    val lintParsedSource : optionalParams:LintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
+    /// Lints F# source code that has already been parsed using `FSharp.Compiler.Services` in the calling application.
+    val lintParsedSource : optionalParams:LintParameters -> parsedFileInfo:ParsedFileInformation -> Result<Suggestion.LintWarning list, LintFailure>
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:LintParameters -> filepath:string -> LintResult
-
-    /// Lints an F# file that has already been parsed using
-    /// `FSharp.Compiler.Services` in the calling application.
-    val lintParsedFile : optionalParams:LintParameters -> parsedFileInfo:ParsedFileInformation -> filepath:string -> LintResult
+    val lintFile : optionalParams:LintParameters -> filepath:string -> Result<Suggestion.LintWarning list, LintFailure>

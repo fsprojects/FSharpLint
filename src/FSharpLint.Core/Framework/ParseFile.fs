@@ -30,11 +30,6 @@ module ParseFile =
         | FailedToParseFile of FSharpErrorInfo []
         | AbortedTypeCheck
 
-    [<NoComparison>]
-    type ParseFileResult<'t> =
-        | Failed of ParseFileFailure
-        | Success of 't
-
     let private parse file source (checker:FSharpChecker, options) =
         let sourceText = SourceText.ofString source
         let parseResults =
@@ -47,20 +42,20 @@ module ParseFile =
                 |> Async.RunSynchronously
 
             match results with
-            | FSharpCheckFileAnswer.Succeeded(x) -> Success(Some(x))
-            | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
+            | FSharpCheckFileAnswer.Succeeded x -> Ok x
+            | FSharpCheckFileAnswer.Aborted -> Error AbortedTypeCheck
 
         match parseResults.ParseTree with
-        | Some(parseTree) ->
+        | Some parseTree ->
             match typeCheckFile() with
-            | Success(typeCheckResults) ->
+            | Ok typeCheckResults ->
 
                 { Text = source
                   Ast = parseTree
-                  TypeCheckResults = typeCheckResults
-                  File = file } |> Success
-            | Failed(_) -> Failed(AbortedTypeCheck)
-        | None -> Failed(FailedToParseFile(parseResults.Errors))
+                  TypeCheckResults = Some typeCheckResults
+                  File = file } |> Ok
+            | Error _ -> Error AbortedTypeCheck
+        | None -> Error (FailedToParseFile parseResults.Errors)
 
     // See: https://github.com/fsharp/FSharp.Compiler.Service/issues/847.
     let private dotnetCoreReferences () =
@@ -117,21 +112,18 @@ module ParseFile =
         { options with OtherOptions = otherOptions }
 
     /// Parses a file using `FSharp.Compiler.Service`.
-    let parseFile file (checker:FSharpChecker) projectOptions =
-        let source = File.ReadAllText(file)
+    let parseFile filePath (checker:FSharpChecker) projectOptions =
+        let source = File.ReadAllText(filePath)
 
         let projectOptions =
             match projectOptions with
-            | Some(existingOptions) -> existingOptions
-            | None -> getProjectOptionsFromScript checker file source
+            | Some existingOptions -> existingOptions
+            | None -> getProjectOptionsFromScript checker filePath source
 
-        parse file source (checker, projectOptions)
+        parse filePath source (checker, projectOptions)
 
     /// Parses source code using `FSharp.Compiler.Service`.
-    let parseSourceFile fileName source (checker:FSharpChecker) =
-        let options = getProjectOptionsFromScript checker fileName source
+    let parseSource (source:string) (checker:FSharpChecker) =
+        let options = getProjectOptionsFromScript checker "<src>" source
+        parse "<src>" source (checker, options)
 
-        parse fileName source (checker, options)
-
-    let parseSource source (checker:FSharpChecker) =
-        parseSourceFile "test.fsx" source checker

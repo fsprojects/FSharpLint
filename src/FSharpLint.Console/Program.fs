@@ -71,6 +71,14 @@ let private inferFileType (target:string) =
     else
         FileType.Source
 
+let private getParseFailureReason = function
+    | ParseFile.FailedToParseFile failures ->
+        let getFailureReason (x:FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
+            sprintf "failed to parse file %s, message: %s" x.FileName x.Message
+
+        String.Join(", ", failures |> Array.map getFailureReason)
+    | ParseFile.AbortedTypeCheck -> "Aborted type check."
+
 let private start (arguments:ParseResults<ToolArgs>) =
     let mutable exitCode = 0
 
@@ -89,12 +97,20 @@ let private start (arguments:ParseResults<ToolArgs>) =
     | Lint lintArgs ->
 
         let handleLintResult = function
-            | LintResult.Success(warnings) ->
+            | Ok warnings ->
                 String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
                 |> output.WriteInfo
                 if not (List.isEmpty warnings) then exitCode <- -1
-            | LintResult.Failure(failure) ->
-                handleError failure.Description
+            | Error (FailedToLoadFile filePath) ->
+                String.Format(Resources.GetString("ConsoleCouldNotFindFile"), filePath)
+                |> handleError
+            | Error (RunTimeConfigError error) ->
+                String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error)
+                |> handleError
+            | Error (FailedToParseFiles failures) ->
+                let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
+                "Lint failed to parse files. Failed with: " + failureReasons
+                |> handleError
 
         let lintConfig = lintArgs.TryGetResult Lint_Config
 

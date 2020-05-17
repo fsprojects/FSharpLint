@@ -1,15 +1,13 @@
 ﻿module TestHintMatcherBase
 
-open FParsec
 open FSharp.Compiler.SourceCodeServices
+open FParsec
 open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.HintParser.MergeSyntaxTrees
-open FSharpLint.Framework.ParseFile
-open FSharpLint.Rules
-
 open FSharpLint.Framework.Rules
+open FSharpLint.Rules
 open FSharpLint.Rules.HintMatcher
 
 let private generateHintConfig hints =
@@ -39,7 +37,7 @@ type TestHintMatcherBase () =
         let parseResults =
             match fileName with
             | Some fileName ->
-                ParseFile.parseSourceFile fileName input checker
+                ParseFile.parseSource input checker
             | None ->
                 ParseFile.parseSource input checker
 
@@ -51,13 +49,13 @@ type TestHintMatcherBase () =
         let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
 
         match parseResults with
-        | ParseFileResult.Success parseInfo ->
+        | Result.Ok parseInfo ->
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray skipArray |> fst
+            let suggestions = LintRunner.runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray skipArray |> fst
             suggestions |> Array.iter this.PostSuggestion
-        | _ ->
+        | Result.Error _ ->
             failwithf "Failed to parse"

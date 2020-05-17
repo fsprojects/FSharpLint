@@ -31,11 +31,11 @@ type Benchmark () =
     let basePath = ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".."
     let sourceFile = basePath </> "TypeChecker.fs"
 
-    let (fileInfo, lines) =
+    let (fileInfo, _) =
         let text = File.ReadAllText sourceFile
         let tree = generateAst text sourceFile
-        ({ Ast = tree; Source = text; TypeCheckResults = None }, String.getLines text |> Array.toList)
+        ({ Ast = tree; Source = text; TypeCheckResults = None; FilePath = Some sourceFile }, String.getLines text |> Array.toList)
 
     [<Benchmark>]
     member this.LintParsedFile () =
-        lintParsedFile LintParameters.Default fileInfo sourceFile |> ignore
+        lintParsedSource LintParameters.Default fileInfo |> ignore

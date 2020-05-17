@@ -106,6 +106,7 @@
     <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Application  -->
     <Compile Include="Application\Configuration.fs" />
+    <Compile Include="Application\LintRunner.fs" />
     <Compile Include="Application\Lint.fsi" />
     <Compile Include="Application\Lint.fs" />
     <EmbeddedResource Include="..\FSharpLint.Core\DefaultConfiguration.json">

@@ -38,7 +38,7 @@ module TestApi =
         member __.``Performance of linting an existing file``() =
             let text = File.ReadAllText sourceFile
             let tree = text |> generateAst
-            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None }
+            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None; FilePath = None }
 
             let stopwatch = Stopwatch.StartNew()
             let times = ResizeArray()
@@ -48,7 +48,7 @@ module TestApi =
             for _ in 0..iterations do
                 stopwatch.Restart()
 
-                lintParsedFile LintParameters.Default fileInfo sourceFile |> ignore
+                lintParsedSource LintParameters.Default fileInfo |> ignore
 
                 stopwatch.Stop()
 
@@ -67,9 +67,9 @@ module TestApi =
             let result = lintProject LintParameters.Default projectFile
 
             match result with
-            | LintResult.Success warnings ->
+            | Ok warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
+            | Error _ ->
                 Assert.True(false)
 
         [<Test>]
@@ -80,9 +80,9 @@ module TestApi =
             let result = lintSolution LintParameters.Default solutionFile
 
             match result with
-            | LintResult.Success warnings ->
+            | Ok warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
+            | Error _ ->
                 Assert.True(false)
 
         [<Test>]
@@ -93,9 +93,9 @@ module TestApi =
             let result = lintSolution { LintParameters.Default with ReleaseConfiguration = Some "Release" } solutionFile
 
             match result with
-            | LintResult.Success warnings ->
+            | Ok warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
+            | Error _ ->
                 Assert.True(false)
 
 #if NETCOREAPP // GetRelativePath is netcore-only
@@ -109,9 +109,9 @@ module TestApi =
             let result = lintProject LintParameters.Default relativePathToProjectFile
 
             match result with
-            | LintResult.Success warnings ->
+            | Ok warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
+            | Error _ ->
                 Assert.True(false)
             ()
 
@@ -125,8 +125,8 @@ module TestApi =
             let result = lintSolution LintParameters.Default relativePathToSolutionFile
 
             match result with
-            | LintResult.Success warnings ->
+            | Ok warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
+            | Error _ ->
                 Assert.True(false)
 #endif
