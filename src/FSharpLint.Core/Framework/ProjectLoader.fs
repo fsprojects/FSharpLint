@@ -86,7 +86,7 @@ let getProjectFileInfo (releaseConfig:string option) (projectFilePath:string) =
 let getProjectFiles (releaseConfiguration:string option) (projectFilePath:string) =
     let projectFilePath = Path.GetFullPath projectFilePath
     let projectOptions = getProjectFileInfo releaseConfiguration projectFilePath
-    projectOptions.SourceFiles |> Array.toList
+    (projectOptions.SourceFiles |> Array.toList, projectOptions)
 
 let getProjectsFromSolution (solutionFilePath:string) =
      let solutionFilePath = Path.GetFullPath solutionFilePath

@@ -38,5 +38,5 @@ type TestAstNodeRuleBase (rule:Rule) =
             rule.RuleConfig.Cleanup()
 
             suggestions |> Array.iter this.PostSuggestion
-        | Error _ ->
-            failwithf "Failed to parse"
+        | Error e ->
+            failwithf "Failed to parse, %O" e

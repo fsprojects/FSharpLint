@@ -13,7 +13,7 @@ type SuppressionInfo =
     | DisableLine of Set<String>
 
 /// Specifies the suppressions for an individual line.
-type LineSuppression = { Line: int; Suppressions: SuppressionInfo list }
+type LineSuppression = { Line: int; Suppressions: SuppressionInfo [] }
 
 /// Extracts rule names from a whitespace separated string of rule names.
 let private extractRules (rules:Set<String>) (str:string) =
@@ -28,13 +28,13 @@ let private extractRules (rules:Set<String>) (str:string) =
     if Seq.isEmpty entries then rules else entries
 
 /// Parses a given file to find lines containing rule suppressions.
-let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
+let parseSuppressionInfo (rules:Set<String>) (lines:string []) =
     let rules = rules |> Set.map (fun rule -> rule.ToLowerInvariant())
 
     lines
-    |> List.mapi (fun lineNum line -> (lineNum + 1, line))
-    |> List.filter (fun (_, line) -> line.Contains("fsharplint:"))
-    |> List.choose (fun (lineNum, line) ->
+    |> Array.mapi (fun lineNum line -> (lineNum + 1, line))
+    |> Array.filter (fun (_, line) -> line.Contains("fsharplint:"))
+    |> Array.choose (fun (lineNum, line) ->
         let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
         if matched.Success then
             let suppressionTarget =
@@ -49,30 +49,30 @@ let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
             | "disable-next-line" -> Some (lineNum + 1, DisableLine suppressionTarget)
             | _ -> None
         else None)
-    |> List.groupBy (fun (line, _) -> line)
-    |> List.map (fun (line, suppressions) ->
+    |> Array.groupBy (fun (line, _) -> line)
+    |> Array.map (fun (line, suppressions) ->
         { Line = line
-          Suppressions = suppressions |> List.map snd })
+          Suppressions = suppressions |> Array.map snd })
 
 /// Check if a rule is suppressed for a given line.
 /// Given line suppressions must be in order by line - see parseSuppressionInfo.
-let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list) =
-    if List.isEmpty lineSuppressions then
+let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression []) =
+    if Array.isEmpty lineSuppressions then
         false
     else
         let rule = rule.ToLowerInvariant()
 
         let disabledRules =
             lineSuppressions
-            |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
-            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) ->
-                lineSuppression.Suppressions |> List.fold (fun (disabledRules:Set<String>) suppression ->
+            |> Array.takeWhile (fun lineSupression -> lineSupression.Line <= line)
+            |> Array.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) ->
+                lineSuppression.Suppressions |> Array.fold (fun (disabledRules:Set<String>) suppression ->
                     match suppression with
-                    | Enable(rules) ->
+                    | Enable rules ->
                         Set.difference disabledRules rules
-                    | Disable(rules) ->
+                    | Disable rules ->
                         Set.union disabledRules rules
-                    | DisableLine(rules) ->
+                    | DisableLine rules ->
                         if line = lineSuppression.Line then
                             Set.union disabledRules rules
                         else

@@ -67,7 +67,7 @@ module Lint =
             if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
-        Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
+        Starting fileInfo.File |> lintInfo.ReportLinterProgress
 
         let cancelHasNotBeenRequested () =
             match lintInfo.CancellationToken with
@@ -85,7 +85,7 @@ module Lint =
                 enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
             |] |> Array.concat |> Set.ofArray
 
-        let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames (Array.toList lines)
+        let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames lines
 
         try
             let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
@@ -105,7 +105,7 @@ module Lint =
                 let runSynchronously work =
                     let timeoutMs = 2000
                     match lintInfo.CancellationToken with
-                    | Some(cancellationToken) -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
+                    | Some cancellationToken -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
@@ -207,10 +207,10 @@ module Lint =
     let lintProject (lintParams:LintParameters) (projectFilePath:string) =
         if IO.File.Exists projectFilePath then
             let checker = FSharpChecker.Create()
-            let projectFiles = ProjectLoader.getProjectFiles lintParams.ReleaseConfiguration projectFilePath
+            let (projectFiles, projectOptions) = ProjectLoader.getProjectFiles lintParams.ReleaseConfiguration projectFilePath
             let (parsedFiles, errors) =
                 projectFiles
-                |> List.map (fun filePath -> ParseFile.parseFile filePath checker None)
+                |> List.map (ParseFile.parseFile checker (Some projectOptions))
                 |> List.partitionChoices
 
             if List.isEmpty errors then
@@ -227,8 +227,10 @@ module Lint =
 
             let (parsedFiles, errors) =
                 ProjectLoader.getProjectsFromSolution solutionFilePath
-                |> List.collect (ProjectLoader.getProjectFiles lintParams.ReleaseConfiguration)
-                |> List.map (fun filePath -> ParseFile.parseFile filePath checker None)
+                |> List.collect (fun projectPath ->
+                    let (projectFiles, projectOptions) = ProjectLoader.getProjectFiles lintParams.ReleaseConfiguration projectPath
+                    projectFiles
+                    |> List.map (ParseFile.parseFile checker (Some projectOptions)))
                 |> List.partitionChoices
 
             if List.isEmpty errors then
@@ -244,7 +246,7 @@ module Lint =
             { ParseFile.Text = parsedFileInfo.Source
               ParseFile.Ast = parsedFileInfo.Ast
               ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
-              ParseFile.File = parsedFileInfo.FilePath |> Option.defaultValue "<src>" }
+              ParseFile.File = parsedFileInfo.FilePath |> Option.defaultValue "src.fs" }
 
         lintFiles lintParams [parsedFileInfo]
 
@@ -259,7 +261,7 @@ module Lint =
                 FileParseInfo.Text = parseFileInformation.Text
                 Ast = parseFileInformation.Ast
                 TypeCheckResults = parseFileInformation.TypeCheckResults
-                File = "<src>"
+                File = "src.fs"
             }
             lintFiles lintParams [parsedFileInfo])
 
@@ -268,7 +270,7 @@ module Lint =
         if IO.File.Exists filePath then
             let checker = FSharpChecker.Create()
 
-            ParseFile.parseFile filePath checker None
+            ParseFile.parseFile checker None filePath
             |> Result.mapError (List.singleton >> FailedToParseFiles)
             |> Result.bind (fun astFileParseInfo ->
                 let parsedFileInfo = {
