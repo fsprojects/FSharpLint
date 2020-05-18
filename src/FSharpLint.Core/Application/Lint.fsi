@@ -28,6 +28,9 @@ module Lint =
         /// Started parsing a file (file path).
         | Starting of string
 
+        /// Individual lint warning received for a file.
+        | ReceivedWarning of Suggestion.LintWarning
+
         /// Finished parsing a file (file path).
         | ReachedEnd of string * Suggestion.LintWarning list
 
@@ -35,8 +38,13 @@ module Lint =
         | Failed of string * System.Exception
 
     type ConfigurationParam =
+        /// Explicit Configuration object to use.
         | Configuration of Configuration
+
+        // Load configuration from provided file.
         | FromFile of configPath:string
+
+        // Use default configuration.
         | Default
 
     /// Optional parameters that can be provided to the linter.
@@ -49,9 +57,6 @@ module Lint =
           /// Can either specify a full configuration object, or a path to a file to load the configuration from.
           /// You can also explicitly specify the default configuration.
           Configuration: ConfigurationParam
-
-          /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (Suggestion.LintWarning -> unit) option
 
           ReportLinterProgress: (LintProgress -> unit) option
 

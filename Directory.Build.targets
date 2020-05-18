@@ -1,6 +1,6 @@
 <Project ToolsVersion="15.0">
   <Target Name="FSharpLint"
-          AfterTargets="AfterBuild"
+          AfterTargets="BeforeBuild"
           Condition="$(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject'
                     And $(MSBuildProjectName) != 'FSharpLint.Console'">
    <Exec

@@ -41,6 +41,9 @@ module Lint =
         /// Started parsing a file (file path).
         | Starting of string
 
+        /// Individual lint warning received for a file.
+        | ReceivedWarning of Suggestion.LintWarning
+
         /// Finished parsing a file (file path).
         | ReachedEnd of string * Suggestion.LintWarning list
 
@@ -50,7 +53,6 @@ module Lint =
     [<NoEquality; NoComparison>]
     type LintInfo =
         { CancellationToken: CancellationToken option
-          ErrorReceived: Suggestion.LintWarning -> unit
           ReportLinterProgress: LintProgress -> unit
           Configuration: Configuration.Configuration }
 
@@ -60,7 +62,7 @@ module Lint =
         let fileWarnings = ResizeArray()
 
         let suggest (warning:Suggestion.LintWarning) =
-            lintInfo.ErrorReceived warning
+            lintInfo.ReportLinterProgress (LintWarning warning)
             fileWarnings.Add warning
 
         let trySuggest (suggestion:Suggestion.LintWarning) =
@@ -145,9 +147,7 @@ module Lint =
         /// Can either specify a full configuration object, or a path to a file to load the configuration from.
         /// You can also explicitly specify the default configuration.
         Configuration: ConfigurationParam
-        /// This function will be called every time the linter finds a broken rule.
-        ReceivedWarning: (Suggestion.LintWarning -> unit) option
-        /// This function will be called any time the linter progress changes for a project.
+        /// This function will be called any time the linter makes progress.
         ReportLinterProgress: (LintProgress -> unit) option
         /// The configuration under which the linter will try to perform parsing.
         ReleaseConfiguration : string option
@@ -155,7 +155,6 @@ module Lint =
         static member Default = {
             LintParameters.CancellationToken = None
             Configuration = Default
-            ReceivedWarning = None
             ReportLinterProgress = None
             ReleaseConfiguration = None
         }
@@ -200,7 +199,6 @@ module Lint =
                 lint
                     { Configuration = config
                       CancellationToken = lintParams.CancellationToken
-                      ErrorReceived = lintParams.ReceivedWarning |> Option.defaultValue ignore
                       ReportLinterProgress = Option.defaultValue ignore lintParams.ReportLinterProgress } fileInfo))
 
     /// Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.

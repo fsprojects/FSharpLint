@@ -50,6 +50,8 @@ with
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->
         String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
+    | LintWarning warning ->
+        output.WriteWarning warning
     | ReachedEnd (_, warnings) ->
         String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
     | Failed (file, parseException) ->
@@ -123,7 +125,6 @@ let private start (arguments:ParseResults<ToolArgs>) =
 
         let lintParams =
             { CancellationToken = None
-              ReceivedWarning = Some output.WriteWarning
               Configuration = configParam
               ReportLinterProgress = Some (parserProgress output)
               ReleaseConfiguration = releaseConfig }
