@@ -11,7 +11,7 @@ Then, you can add the following to any of your projects to run linting after bui
      <Exec
        Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
        ConsoleToMsBuild="true"
-       IgnoreExitCode="true"
+       IgnoreExitCode="false"
      />
     </Target>
 

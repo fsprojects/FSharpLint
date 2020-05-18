@@ -2,7 +2,8 @@
   <Target Name="FSharpLint"
           AfterTargets="BeforeBuild"
           Condition="$(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject'
-                    And $(MSBuildProjectName) != 'FSharpLint.Console'">
+                    And $(MSBuildProjectName) != 'FSharpLint.Console'
+                    And $(MSBuildProjectName) != 'FSharpLint.Console.Tests'">
    <Exec
      Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
      ConsoleToMsBuild="true"
