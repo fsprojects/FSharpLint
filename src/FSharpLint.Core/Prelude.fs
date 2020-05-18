@@ -13,6 +13,14 @@ module Prelude =
             let! x = xAsync
             return f x }
 
+    module Result =
+
+        /// Converts an option to a Result, using the provided `error` value
+        /// as the Error case of the option is None.
+        let ofOption (error:'Err) = function
+            | Some value -> Ok value
+            | None -> Error error
+
     module List =
 
         /// Partitions a list of Results into two lists where the first contains all

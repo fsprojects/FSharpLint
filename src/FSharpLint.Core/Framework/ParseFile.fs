@@ -2,6 +2,7 @@
 module FSharpLint.Framework.ParseFile
 
 open System.IO
+open FSharpLint.Core
 open FSharpLint.Framework
 open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.SourceCodeServices
@@ -44,17 +45,16 @@ let private parse file source (checker:FSharpChecker, options) =
         | FSharpCheckFileAnswer.Succeeded x -> Ok x
         | FSharpCheckFileAnswer.Aborted -> Error AbortedTypeCheck
 
-    match parseResults.ParseTree with
-    | Some parseTree ->
-        match typeCheckFile() with
-        | Ok typeCheckResults ->
-
+    parseResults.ParseTree
+    |> Result.ofOption (FailedToParseFile parseResults.Errors)
+    |> Result.bind (fun parseTree ->
+        typeCheckFile ()
+        |> Result.map (fun typeCheckResults ->
             { Text = source
               Ast = parseTree
               TypeCheckResults = Some typeCheckResults
-              File = file } |> Ok
-        | Error _ -> Error AbortedTypeCheck
-    | None -> Error (FailedToParseFile parseResults.Errors)
+              File = file })
+        |> Result.mapError (fun _ -> AbortedTypeCheck))
 
 // See: https://github.com/fsharp/FSharp.Compiler.Service/issues/847.
 let private dotnetCoreReferences () =

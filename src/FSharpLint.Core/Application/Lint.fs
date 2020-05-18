@@ -195,7 +195,7 @@ module Lint =
                 |> List.map IgnoreFiles.parseIgnorePath
 
             fileInfos
-            |> List.filter (fun fileInfo -> Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles fileInfo.File)
+            |> List.filter (fun fileInfo -> not (Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles fileInfo.File))
             |> List.collect (fun fileInfo ->
                 lint
                     { Configuration = config

@@ -6,7 +6,7 @@ open FSharpLint.Framework
 let rules = Set.ofList ["TypePrefixing"; "TypedItemSpacing"; "TupleCommaSpacing"]
 
 let lines text =
-    FSharpLint.Framework.String.toLines text |> Array.map (fun (line, _, _) -> line) |> Array.toList
+    FSharpLint.Framework.String.toLines text |> Array.map (fun (line, _, _) -> line)
 
 [<TestFixture>]
 type TestSuppression() =
