@@ -44,37 +44,38 @@ module Lint =
 
     /// Optional parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
-    type OptionalLintParameters =
-        { /// Cancels a lint in progress.
-          CancellationToken: CancellationToken option
+    type OptionalLintParameters = {
+        /// Cancels a lint in progress.
+        CancellationToken: CancellationToken option
 
-          /// Lint configuration to use.
-          /// Can either specify a full configuration object, or a path to a file to load the configuration from.
-          /// You can also explicitly specify the default configuration.
-          Configuration: ConfigurationParam
+        /// Lint configuration to use.
+        /// Can either specify a full configuration object, or a path to a file to load the configuration from.
+        /// You can also explicitly specify the default configuration.
+        Configuration: ConfigurationParam
 
-          /// This function will be called every time the linter finds a broken rule.
-          ReceivedWarning: (Suggestion.LintWarning -> unit) option
+        /// This function will be called every time the linter finds a broken rule.
+        ReceivedWarning: (Suggestion.LintWarning -> unit) option
 
-          ReportLinterProgress: (ProjectProgress -> unit) option
+        ReportLinterProgress: (ProjectProgress -> unit) option
 
-          ReleaseConfiguration : string option }
-
+        ReleaseConfiguration : string option
+    } with
         static member Default: OptionalLintParameters
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
     /// you want to lint then this can be used to provide the parsed information to prevent the
     /// linter from parsing the file again.
     [<NoEquality; NoComparison>]
-    type ParsedFileInformation =
-        { /// File represented as an AST.
-          Ast: FSharp.Compiler.SyntaxTree.ParsedInput
+    type ParsedFileInformation = {
+        /// File represented as an AST.
+        Ast: FSharp.Compiler.SyntaxTree.ParsedInput
 
-          /// Contents of the file.
-          Source: string
+        /// Contents of the file.
+        Source: string
 
-          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option }
+        /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+        TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
+    }
 
     type BuildFailure = | InvalidProjectFileMessage of string
 

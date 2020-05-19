@@ -11,4 +11,3 @@ let isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:Abstract
         | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _)) -> true
         | _ -> false
     else false
- 

@@ -252,7 +252,7 @@ module Lint =
                     |> Seq.map typeCheckSuggestion
                     |> Async.Parallel
                     |> runSynchronously
-                    |> Array.iter (function Some(suggestion) -> suggest suggestion | None -> ())
+                    |> Array.iter (function Some suggestion -> suggest suggestion | None -> ())
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
@@ -316,22 +316,20 @@ module Lint =
                     else
                         Path.Combine(projDir, f)
 
-                Ok {
-                      ProjectFileName = projectFilePath
-                      SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
-                      OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
-                      ReferencedProjects = [||]
-                      IsIncompleteTypeCheckEnvironment = false
-                      UseScriptResolutionRules = false
-                      LoadTime = DateTime.Now
-                      UnresolvedReferences = None
-                      OriginalLoadReferences = []
-                      ExtraProjectInfo = None
-                      ProjectId = None
-                      Stamp = None
-                  }
+                Ok { ProjectFileName = projectFilePath
+                     SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
+                     OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
+                     ReferencedProjects = [||]
+                     IsIncompleteTypeCheckEnvironment = false
+                     UseScriptResolutionRules = false
+                     LoadTime = DateTime.Now
+                     UnresolvedReferences = None
+                     OriginalLoadReferences = []
+                     ExtraProjectInfo = None
+                     ProjectId = None
+                     Stamp = None }
             | Result.Ok _ ->
-                Error ( "error getting FSC args from msbuild info")
+                Error "error getting FSC args from msbuild info"
             | Result.Error error ->
                 Error (sprintf "error getting FSC args from msbuild info, %A" error)
         | Result.Ok r ->

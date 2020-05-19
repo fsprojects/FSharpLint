@@ -19,10 +19,10 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
     |> Array.pairwise
     |> Array.choose (fun (expr, nextExpr) ->
         if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
-           { Range = mkRange "" expr.Range.Start nextExpr.Range.End
-             Message = Resources.GetString("RulesFormattingTupleIndentationError")
-             SuggestedFix = None
-             TypeChecks = [] } |> Some
+            { Range = mkRange "" expr.Range.Start nextExpr.Range.End
+              Message = Resources.GetString("RulesFormattingTupleIndentationError")
+              SuggestedFix = None
+              TypeChecks = [] } |> Some
         else
             None)
 

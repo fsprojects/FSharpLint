@@ -10,10 +10,10 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, pattern, _, _, _, _)) ->
         if isLiteral attributes then
             let rec getLiteralIdents = function
-            | SynPat.Named(_, identifier, _, _, _) ->
-                (identifier, identifier.idText, None) |> Array.singleton
-            | SynPat.Paren(p, _) -> getLiteralIdents p
-            | _ -> Array.empty
+                | SynPat.Named(_, identifier, _, _, _) ->
+                    (identifier, identifier.idText, None) |> Array.singleton
+                | SynPat.Paren(p, _) -> getLiteralIdents p
+                | _ -> Array.empty
 
             getLiteralIdents pattern
         else

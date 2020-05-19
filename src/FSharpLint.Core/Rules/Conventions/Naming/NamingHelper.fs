@@ -273,10 +273,10 @@ let checkIfPublic isCurrentlyPublic = function
 
 let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
-        | AnonModule
-        | NamedModule -> true
-        | DeclaredNamespace
-        | GlobalNamespace -> false
+    | AnonModule
+    | NamedModule -> true
+    | DeclaredNamespace
+    | GlobalNamespace -> false
 
 /// Is module name implicitly created from file name?
 let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =
