@@ -43,13 +43,13 @@ type LineRuleParams =
       GlobalConfig : GlobalRuleConfig }
 
 type RuleMetadata<'config> =
-  { Name : string
-    Identifier : string
-    RuleConfig : 'config }
+    { Name : string
+      Identifier : string
+      RuleConfig : 'config }
 
 type AstNodeRuleConfig =
-  { Runner : AstNodeRuleParams -> WarningDetails []
-    Cleanup : unit -> unit }
+    { Runner : AstNodeRuleParams -> WarningDetails []
+      Cleanup : unit -> unit }
 
 type NamingCase =
     | PascalCase = 0

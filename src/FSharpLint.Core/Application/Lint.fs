@@ -28,7 +28,7 @@ module ConfigurationManagement =
 [<AutoOpen>]
 module Lint =
 
-    type BuildFailure = InvalidProjectFileMessage of string
+    type BuildFailure = | InvalidProjectFileMessage of string
 
     /// Reason for the linter failing.
     [<NoComparison>]
@@ -67,7 +67,7 @@ module Lint =
                 match this with
                 | ProjectFileCouldNotBeFound projectPath ->
                     String.Format(Resources.GetString("ConsoleProjectFileCouldNotBeFound"), projectPath)
-                | MSBuildFailedToLoadProjectFile (projectPath, InvalidProjectFileMessage(message)) ->
+                | MSBuildFailedToLoadProjectFile (projectPath, message) ->
                     String.Format(Resources.GetString("ConsoleMSBuildFailedToLoadProjectFile"), projectPath, message)
                 | FailedToLoadFile filepath ->
                     String.Format(Resources.GetString("ConsoleCouldNotFindFile"), filepath)
@@ -252,7 +252,7 @@ module Lint =
                     |> Seq.map typeCheckSuggestion
                     |> Async.Parallel
                     |> runSynchronously
-                    |> Array.iter (function Some(suggestion) -> suggest suggestion | None -> ())
+                    |> Array.iter (function Some suggestion -> suggest suggestion | None -> ())
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
@@ -316,26 +316,26 @@ module Lint =
                     else
                         Path.Combine(projDir, f)
 
-                { ProjectFileName = projectFilePath
-                  SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
-                  OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
-                  ReferencedProjects = [||]
-                  IsIncompleteTypeCheckEnvironment = false
-                  UseScriptResolutionRules = false
-                  LoadTime = DateTime.Now
-                  UnresolvedReferences = None
-                  OriginalLoadReferences = []
-                  ExtraProjectInfo = None
-                  ProjectId = None
-                  Stamp = None }
+                Ok { ProjectFileName = projectFilePath
+                     SourceFiles = fa |> List.filter isSourceFile |> List.map compileFilesToAbsolutePath |> Array.ofList
+                     OtherOptions = fa |> List.filter (isSourceFile >> not) |> Array.ofList
+                     ReferencedProjects = [||]
+                     IsIncompleteTypeCheckEnvironment = false
+                     UseScriptResolutionRules = false
+                     LoadTime = DateTime.Now
+                     UnresolvedReferences = None
+                     OriginalLoadReferences = []
+                     ExtraProjectInfo = None
+                     ProjectId = None
+                     Stamp = None }
             | Result.Ok _ ->
-                failwithf "error getting FSC args from msbuild info"
+                Error "error getting FSC args from msbuild info"
             | Result.Error error ->
-                failwithf "error getting FSC args from msbuild info, %A" error
+                Error (sprintf "error getting FSC args from msbuild info, %A" error)
         | Result.Ok r ->
-            failwithf "error getting msbuild info: more info returned than expected %A" r
+            Error (sprintf "error getting msbuild info: more info returned than expected %A" r)
         | Result.Error r ->
-            failwithf "error getting msbuild info: %A" r
+            Error (sprintf "error getting msbuild info: %A" r)
 
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
@@ -462,11 +462,15 @@ module Lint =
                     else
                         Failure (FailedToParseFilesInProject failedFiles)
 
-                let projectOptions = getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath
-                let compileFiles = projectOptions.SourceFiles |> Array.toList
-                match parseFilesInProject compileFiles projectOptions with
-                | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
-                | Failure x -> LintResult.Failure x
+                match getProjectFileInfo optionalParams.ReleaseConfiguration projectFilePath with
+                | Ok projectOptions ->
+                    let compileFiles = projectOptions.SourceFiles |> Array.toList
+                    match parseFilesInProject compileFiles projectOptions with
+                    | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
+                    | Failure x -> LintResult.Failure x
+                | Error error ->
+                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
+                    |> LintResult.Failure
             | Error err ->
                 RunTimeConfigError err
                 |> LintResult.Failure

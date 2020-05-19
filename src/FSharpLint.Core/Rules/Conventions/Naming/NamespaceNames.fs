@@ -12,8 +12,8 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             identifier
             |> List.map (fun identifier -> (identifier, identifier.idText, None))
             |> List.toArray
-         else
-             Array.empty
+        else
+            Array.empty
     | _ -> Array.empty
 
 let rule config =

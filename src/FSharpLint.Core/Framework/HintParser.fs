@@ -331,8 +331,7 @@ module HintParser =
                 let map = Dictionary<_, _>()
 
                 transposed
-                |> List.choose
-                    (function
+                |> List.choose (function
                     | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest)
                     | EndOfHint(_) -> None)
                 |> List.filter (isAnyMatch >> not)
@@ -341,8 +340,7 @@ module HintParser =
 
                 let anyMatches =
                     transposed
-                    |> List.choose
-                        (function
+                    |> List.choose (function
                         | HintNode(expr, depth, rest) ->
                             match (getKey expr, expr) with
                             | (SyntaxHintNode.Wildcard as key), HintExpr(Expression.Wildcard)
@@ -373,8 +371,7 @@ module HintParser =
 
                 let matchedHints =
                     transposed
-                    |> Seq.choose
-                        (function
+                    |> Seq.choose (function
                         | HintNode(_) -> None
                         | EndOfHint(hint) -> Some(hint))
                     |> Seq.toList

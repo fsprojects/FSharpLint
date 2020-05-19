@@ -41,22 +41,22 @@ module ContextBuilder =
     let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:range list) =
         match ranges with
         | (first::others) ->
-             let expectedIndentation = first.StartColumn
-             others |> List.map (fun other -> (other.StartLine, (true, expectedIndentation)))
+            let expectedIndentation = first.StartColumn
+            others |> List.map (fun other -> (other.StartLine, (true, expectedIndentation)))
         | _ -> []
 
     let private indentationOverridesForNode (node:AstNode) =
         match node with
         | TypeDefinition (SynTypeDefn.TypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _, _)) ->
-             fields
-             |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
-             |> firstRangePerLine
-             |> createAbsoluteAndOffsetOverridesBasedOnFirst
+            fields
+            |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
+            |> firstRangePerLine
+            |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression (SynExpr.Tuple (_, exprs, _, _)) ->
             exprs
-             |> List.map (fun expr -> expr.Range)
-             |> firstRangePerLine
-             |> createAbsoluteAndOffsetOverridesBasedOnFirst
+            |> List.map (fun expr -> expr.Range)
+            |> firstRangePerLine
+            |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression (SynExpr.Record(recordFields=recordFields)) ->
             recordFields
             |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)

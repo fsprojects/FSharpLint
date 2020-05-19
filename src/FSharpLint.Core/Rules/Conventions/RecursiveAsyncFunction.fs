@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 let private isAsyncCompExpr = function
     | SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.CompExpr _), _)
         when compExprName.idText = "async" ->
-            true
+        true
     | _ -> false
 
 let rec private getIdentFromSynPat = function

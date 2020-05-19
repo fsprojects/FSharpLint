@@ -284,13 +284,13 @@ type BindingConfig =
       wildcardNamedWithAsPattern : EnabledConfig option
       uselessBinding : EnabledConfig option
       tupleOfWildcards : EnabledConfig option }
- with
+with
     member this.Flatten() =
         [|
-           this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
-           this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
-           this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
-           this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
+            this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
+            this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
+            this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
+            this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
         |] |> Array.concat
 
 type ConventionsConfig =
@@ -328,14 +328,14 @@ type TypographyConfig =
       noTabCharacters : EnabledConfig option }
 with
     member this.Flatten() =
-         [|
+        [|
             this.indentation |> Option.bind (constructRuleIfEnabled Indentation.rule) |> Option.toArray
             this.maxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule) |> Option.toArray
             this.trailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule) |> Option.toArray
             this.maxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule) |> Option.toArray
             this.trailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule) |> Option.toArray
             this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
-         |] |> Array.concat
+        |] |> Array.concat
 
 let private getOrEmptyList hints = hints |> Option.defaultValue [||]
 
@@ -517,7 +517,7 @@ let loadConfig (configPath:string) =
 let defaultConfiguration =
     let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
     let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                     |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.json", System.StringComparison.Ordinal))
+                       |> Seq.find (fun n -> n.EndsWith("DefaultConfiguration.json", System.StringComparison.Ordinal))
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
     | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
@@ -654,6 +654,6 @@ let flattenConfig (config:Configuration) =
       DeprecatedRules = deprecatedAllRules
       AstNodeRules = astNodeRules.ToArray()
       LineRules =
-          { GenericLineRules = lineRules.ToArray()
-            IndentationRule = indentationRule
-            NoTabCharactersRule = noTabCharactersRule } }
+        { GenericLineRules = lineRules.ToArray()
+          IndentationRule = indentationRule
+          NoTabCharactersRule = noTabCharactersRule } }

@@ -14,7 +14,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
             match expression with
             | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
                 when identifier.idText = parameter.idText ->
-                    isFunctionPointless expression parameters
+                isFunctionPointless expression parameters
             | _ -> None
         | None :: _ -> None
         | [] ->
