@@ -9,6 +9,7 @@ let config =
       Underscores = Some NamingUnderscores.None
       Prefix = None
       Suffix = None }
+
 [<TestFixture>]
 type TestConventionsActivePatternNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ActivePatternNames.rule config)
@@ -84,3 +85,13 @@ match 3 with
 | dog -> ()"""
 
         this.AssertNoWarnings()
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/425
+    [<Test>]
+    member this.NoWarningForMeasureType() =
+        this.Parse """
+type [<Measure>] kg"""
+
+        this.AssertNoWarnings()
+
+

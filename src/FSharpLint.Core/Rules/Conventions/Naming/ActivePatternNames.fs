@@ -6,12 +6,9 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
-let private getValueOrFunctionIdents isPublic pattern =
+let private getValueOrFunctionIdents _ pattern =
     match pattern with
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
-        // If a pattern identifier is made up of more than one part then it's not binding a new value.
-        let singleIdentifier = List.length longIdent.Lid = 1
-
         match List.tryLast longIdent.Lid with
         | Some ident when isActivePattern ident ->
             ident |> Array.singleton
@@ -27,27 +24,9 @@ let private getValueOrFunctionIdents isPublic pattern =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) ->
-        let isNotTypeExtension =
-            match typeDef with
-            | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconAugmentation, _, _) -> false
-            | _ -> true
-
-        if isNotTypeExtension then
-            match componentInfo with
-            | SynComponentInfo.ComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
-                match List.tryLast identifier with
-                | Some typeIdentifier ->
-                    if isMeasureType attrs then
-                        typeIdentifier |> Array.singleton
-                    else
-                        Array.empty
-                | _ -> Array.empty
-        else
-            Array.empty
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
         getPatternIdents false getValueOrFunctionIdents false pattern
-    | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
