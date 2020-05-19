@@ -1,3 +1,10 @@
+##### 0.14.1 - May 19 2020
+
+* .NET Core 3.1 support [@milbrandt]
+* Performance optimizations
+* Handle exceptional cases for indentation rule
+* Fix issue with active pattern naming rule running against measure types
+
 ##### 0.14.0 - April 11 2020
 
 * Update FCS to 35 [@baronfel]
