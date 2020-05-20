@@ -85,10 +85,15 @@ module ContextBuilder =
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg)); argExpr=outerArg))
+        | Expression(SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg; funcExpr=funcExpr)); argExpr=outerArg))
             when isInfix && outerArg.Range.EndLine <> innerArg.Range.StartLine ->
-            let expectedIndentation = innerArg.Range.StartColumn
-            createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
+            match funcExpr with
+            | SynExpr.Ident ident when ident.idText = "op_ColonEquals" ->
+                // := for reference cell assignment should be handled like normal equals, not like an infix operator.
+                []
+            | _ ->
+                let expectedIndentation = innerArg.Range.StartColumn
+                createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
         | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
             let expectedIndentation = newExprRange.StartColumn + 4
             bindings

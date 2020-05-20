@@ -248,3 +248,37 @@ match args.AstNode with
     Array.empty"""
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional tuple indentation``() =
+        this.Parse """
+    let (|Cons|_|) pattern =
+        match pattern with
+        | SynPat.LongIdent(LongIdentWithDots([identifier], _),
+                           _, _,
+                           Pats([SynPat.Tuple(_, [lhs; rhs], _)]), _, _)
+                when identifier.idText = "op_ColonColon" ->
+            Some(lhs, rhs)
+        | _ -> None"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for multi-line reference cell assignment``() =
+        this.Parse """
+        do pstringelemImpl :=
+            choice
+                [ attempt pstringchar
+                  skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for this``() =
+         this.Parse """
+    type Context =
+        { IndentationRuleContext : Map<int,bool*int>
+          NoTabCharactersRuleContext : (string * Range.range) list }
+"""
+
+         Assert.IsTrue(this.NoErrorsExist)
