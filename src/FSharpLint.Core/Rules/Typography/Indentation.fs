@@ -39,6 +39,16 @@ module ContextBuilder =
                 (offsetLine, (false, expectedIndentation)))
         (absoluteOverride::relativeOverrides)
 
+    let rec private collectRecordFields = function
+        | (SynExpr.Record ( _, _, fields, _)) ->
+            let subRecords =
+                fields
+                |> List.choose (fun (_, expr, _) -> expr |> Option.map collectRecordFields)
+                |> List.concat
+            fields::subRecords
+        | _ ->
+            []
+
     let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:range list) =
         match ranges with
         | (first::others) ->
@@ -58,11 +68,13 @@ module ContextBuilder =
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression (SynExpr.Record(recordFields=recordFields)) ->
-            recordFields
-            |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
-            |> firstRangePerLine
-            |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Expression (SynExpr.Record _ as record) ->
+            collectRecordFields record
+            |> List.collect (fun recordFields ->
+                recordFields
+                |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
+                |> firstRangePerLine
+                |> createAbsoluteAndOffsetOverridesBasedOnFirst)
         | Expression (SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
             extractSeqExprItems expr
             |> List.map (fun expr -> expr.Range)
