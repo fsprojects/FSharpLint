@@ -1,3 +1,7 @@
+##### 0.14.2 - May 20 2020
+
+* Fixes for exceptional indentation cases
+
 ##### 0.14.1 - May 19 2020
 
 * .NET Core 3.1 support [@milbrandt]
