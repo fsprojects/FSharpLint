@@ -163,7 +163,7 @@ module Lint =
                   FilePath = filePath
                   FileContent = fileContent
                   Lines = lines
-                  GlobalConfig =  globalConfig }
+                  GlobalConfig = globalConfig }
 
             let indentationError =
                 lineRules.IndentationRule

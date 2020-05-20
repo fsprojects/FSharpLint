@@ -29,6 +29,7 @@ module ContextBuilder =
                 (other::items)
 
         helper [] seqExpr
+        |> List.rev
 
     let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:range) =
         let absoluteOverride = (rangeToUpdate.StartLine, (true, expectedIndentation))
@@ -37,6 +38,16 @@ module ContextBuilder =
             |> List.map (fun offsetLine ->
                 (offsetLine, (false, expectedIndentation)))
         (absoluteOverride::relativeOverrides)
+
+    let rec private collectRecordFields = function
+        | (SynExpr.Record ( _, _, fields, _)) ->
+            let subRecords =
+                fields
+                |> List.choose (fun (_, expr, _) -> expr |> Option.map collectRecordFields)
+                |> List.concat
+            fields::subRecords
+        | _ ->
+            []
 
     let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:range list) =
         match ranges with
@@ -57,11 +68,13 @@ module ContextBuilder =
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression (SynExpr.Record(recordFields=recordFields)) ->
-            recordFields
-            |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
-            |> firstRangePerLine
-            |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Expression (SynExpr.Record _ as record) ->
+            collectRecordFields record
+            |> List.collect (fun recordFields ->
+                recordFields
+                |> List.map (fun ((fieldName, _), _, _) -> fieldName.Range)
+                |> firstRangePerLine
+                |> createAbsoluteAndOffsetOverridesBasedOnFirst)
         | Expression (SynExpr.ArrayOrListOfSeqExpr(expr=(SynExpr.CompExpr(isArrayOrList=true; expr=expr)))) ->
             extractSeqExprItems expr
             |> List.map (fun expr -> expr.Range)
@@ -90,10 +103,13 @@ module ContextBuilder =
             Map.add line indentationOverride current) current
 
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
-    let numLeadingSpaces = line.Length - line.TrimStart().Length
+    let lineTrimmedStart = line.TrimStart()
+    let numLeadingSpaces = line.Length - lineTrimmedStart.Length
     let range = mkRange "" (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
 
-    if indentationOverrides.ContainsKey lineNumber then
+    if lineTrimmedStart.StartsWith "//" || lineTrimmedStart.StartsWith "(*" then
+        None
+    elif indentationOverrides.ContainsKey lineNumber then
         match indentationOverrides.[lineNumber] with
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then

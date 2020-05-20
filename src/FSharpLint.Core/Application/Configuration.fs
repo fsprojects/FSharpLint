@@ -152,14 +152,14 @@ with
 type PatternMatchFormattingConfig =
     { patternMatchClausesOnNewLine : EnabledConfig option
       patternMatchOrClausesOnNewLine : EnabledConfig option
-      patternMatchClauseIndentation : EnabledConfig option
+      patternMatchClauseIndentation : RuleConfig<PatternMatchClauseIndentation.Config> option
       patternMatchExpressionIndentation : EnabledConfig option }
 with
     member this.Flatten() =
         [|
             this.patternMatchClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchClausesOnNewLine.rule)
             this.patternMatchOrClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule)
-            this.patternMatchClauseIndentation |> Option.bind (constructRuleIfEnabled PatternMatchClauseIndentation.rule)
+            this.patternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
             this.patternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
         |] |> Array.choose id
 
@@ -369,7 +369,7 @@ type Configuration =
       TupleParentheses : EnabledConfig option
       PatternMatchClausesOnNewLine : EnabledConfig option
       PatternMatchOrClausesOnNewLine : EnabledConfig option
-      PatternMatchClauseIndentation : EnabledConfig option
+      PatternMatchClauseIndentation : RuleConfig<PatternMatchClauseIndentation.Config> option
       PatternMatchExpressionIndentation : EnabledConfig option
       RecursiveAsyncFunction : EnabledConfig option
       RedundantNewKeyword : EnabledConfig option
@@ -578,7 +578,7 @@ let flattenConfig (config:Configuration) =
             config.TupleParentheses |> Option.bind (constructRuleIfEnabled TupleParentheses.rule)
             config.PatternMatchClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchClausesOnNewLine.rule)
             config.PatternMatchOrClausesOnNewLine |> Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule)
-            config.PatternMatchClauseIndentation |> Option.bind (constructRuleIfEnabled PatternMatchClauseIndentation.rule)
+            config.PatternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
             config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
