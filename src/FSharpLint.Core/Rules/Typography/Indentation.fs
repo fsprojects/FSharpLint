@@ -29,6 +29,7 @@ module ContextBuilder =
                 (other::items)
 
         helper [] seqExpr
+        |> List.rev
 
     let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:range) =
         let absoluteOverride = (rangeToUpdate.StartLine, (true, expectedIndentation))

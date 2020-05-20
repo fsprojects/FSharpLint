@@ -228,11 +228,11 @@ let comparer =
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
-    member this.``No error for exceptional list indentation``() =
+    member this.``No error for exceptional list indentation with multiple items per line``() =
         this.Parse """
 let opchars =
     [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
-        '#';'^';'!';'?';'/';'.';':';',' ]"""
+      '#';'^';'!';'?';'/';'.';':';',' ]"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
