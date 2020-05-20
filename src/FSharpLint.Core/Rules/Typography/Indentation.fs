@@ -91,10 +91,13 @@ module ContextBuilder =
             Map.add line indentationOverride current) current
 
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
-    let numLeadingSpaces = line.Length - line.TrimStart().Length
+    let lineTrimmedStart = line.TrimStart()
+    let numLeadingSpaces = line.Length - lineTrimmedStart.Length
     let range = mkRange "" (mkPos lineNumber 0) (mkPos lineNumber numLeadingSpaces)
 
-    if indentationOverrides.ContainsKey lineNumber then
+    if lineTrimmedStart.StartsWith "//" || lineTrimmedStart.StartsWith "(*" then
+        None
+    elif indentationOverrides.ContainsKey lineNumber then
         match indentationOverrides.[lineNumber] with
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then
