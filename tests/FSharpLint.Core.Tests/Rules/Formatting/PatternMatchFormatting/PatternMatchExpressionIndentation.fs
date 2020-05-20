@@ -13,9 +13,9 @@ type TestFormattingPatternMatchExpressionIndentation() =
 module Program
 
 match 1 with
-| 1 -> 
+| 1 ->
 true
-| 2 -> 
+| 2 ->
     false
 """
 
@@ -27,9 +27,9 @@ true
 module Program
 
 match 1 with
-| 1 -> 
+| 1 ->
     true
-| 2 -> 
+| 2 ->
     false
 """
 

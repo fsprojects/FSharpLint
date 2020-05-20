@@ -5,7 +5,7 @@ open FSharpLint.Rules
 
 [<TestFixture>]
 type TestFormattingPatternMatchClauseIndentation() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule)
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule { PatternMatchClauseIndentation.Config.AllowSingleLineLambda = false })
 
     [<Test>]
     member this.``Error for pattern match clauses at different indentation``() =
@@ -125,4 +125,21 @@ match "x" with
           this.Parse """fun struct(x, y) -> ()"""
 
           Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Error for single-line lambda pattern match when not allowed``() =
+        this.Parse """let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true | _ -> false"""
+
+        Assert.IsTrue(this.ErrorExistsAt(1, 26))
+
+[<TestFixture>]
+type TestFormattingPatternMatchClauseIndentationAllowSingleLineLambda() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule { PatternMatchClauseIndentation.Config.AllowSingleLineLambda = true })
+
+    [<Test>]
+    member this.``No error for single-line lambda pattern match when allowed``() =
+        this.Parse """let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true | _ -> false"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
 
