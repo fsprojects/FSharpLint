@@ -26,10 +26,10 @@ let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
     | (_, isOneSpaceAllowedAfterOperator) when isOneSpaceAllowedAfterOperator ->
         let trimmedStr = str.TrimEnd()
 
-        trimmedStr.Length = str.Length ||
-            (str.Length - trimmedStr.Length = 1 &&
-                trimmedStr.Length > 0 &&
-                isSymbol trimmedStr.[trimmedStr.Length - 1])
+        (trimmedStr.Length = str.Length)
+        || (str.Length - trimmedStr.Length = 1
+            && trimmedStr.Length > 0
+            && isSymbol trimmedStr.[trimmedStr.Length - 1])
     | _ ->
         str.TrimEnd().Length = str.Length
 

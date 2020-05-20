@@ -20,32 +20,32 @@ type TestMergeSyntaxTrees() =
             dictionary
 
         match (run phint "List.map id ===> id", run phint "List.map woof ===> woof") with
-            | Success(hint, _, _), Success(hint2, _, _) ->
-                let expectedEdges =
-                    { Lookup =
-                        [ (Utilities.hash2 SyntaxHintNode.Identifier "map",
-                           { Edges =
-                               { Lookup =
-                                   [ (Utilities.hash2 SyntaxHintNode.Identifier "woof",
-                                      { Edges = Edges.Empty
-                                        MatchedHint = [hint2] })
-                                     (Utilities.hash2 SyntaxHintNode.Identifier "id",
-                                      { Edges = Edges.Empty
-                                        MatchedHint = [hint] }) ] |> toDictionary
-                                 AnyMatch = [] }
-                             MatchedHint = [] }) ] |> toDictionary
-                      AnyMatch = [] }
+        | Success(hint, _, _), Success(hint2, _, _) ->
+            let expectedEdges =
+                { Lookup =
+                    [ (Utilities.hash2 SyntaxHintNode.Identifier "map",
+                       { Edges =
+                           { Lookup =
+                               [ (Utilities.hash2 SyntaxHintNode.Identifier "woof",
+                                  { Edges = Edges.Empty
+                                    MatchedHint = [hint2] })
+                                 (Utilities.hash2 SyntaxHintNode.Identifier "id",
+                                  { Edges = Edges.Empty
+                                    MatchedHint = [hint] }) ] |> toDictionary
+                             AnyMatch = [] }
+                         MatchedHint = [] }) ] |> toDictionary
+                  AnyMatch = [] }
 
-                let expectedRoot =
-                    { Lookup =
-                        [(Utilities.hash2 SyntaxHintNode.FuncApp 0,
-                          { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
-                      AnyMatch = [] }
+            let expectedRoot =
+                { Lookup =
+                    [(Utilities.hash2 SyntaxHintNode.FuncApp 0,
+                      { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
+                  AnyMatch = [] }
 
-                let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
+            let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
 
-                Assert.AreEqual(expectedRoot, mergedHint)
-            | _ -> Assert.Fail()
+            Assert.AreEqual(expectedRoot, mergedHint)
+        | _ -> Assert.Fail()
 
     [<Test>]
     member __.``Merge no hints gives no merged lists``() =
