@@ -201,3 +201,50 @@ let comparer =
               reversed.CompareTo (rev s2) }"""
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for record with comment``() =
+        this.Parse """
+    type CurrentNode =
+        { Node: AstNode
+          ChildNodes: AstNode list
+
+          /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
+          Breadcrumbs: AstNode list }"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional nested records indentation``() =
+        this.Parse """
+    { LoadedRules.GlobalConfig = getGlobalConfig config.Global
+      DeprecatedRules = deprecatedAllRules
+      AstNodeRules = astNodeRules.ToArray()
+      LineRules =
+        { GenericLineRules = lineRules.ToArray()
+          IndentationRule = indentationRule
+          NoTabCharactersRule = noTabCharactersRule } }"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional list indentation``() =
+        this.Parse """
+let opchars =
+    [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
+        '#';'^';'!';'?';'/';'.';':';',' ]"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``No error for exceptional match guard indentation``() =
+        this.Parse """
+match args.AstNode with
+| AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
+        when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray
+        && not isMutable ->
+    checkForUselessBinding args.CheckInfo pattern expr range
+| _ ->
+    Array.empty"""
+
+        Assert.IsTrue(this.NoErrorsExist)
