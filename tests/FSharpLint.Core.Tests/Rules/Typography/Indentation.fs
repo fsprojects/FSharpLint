@@ -250,7 +250,7 @@ match args.AstNode with
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
-    member this.``No error for exceptional tuple indentation``() =
+    member this.``No error for exceptional tuple pattern indentation``() =
         this.Parse """
     let (|Cons|_|) pattern =
         match pattern with
@@ -264,6 +264,15 @@ match args.AstNode with
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
+    member this.``No error for exceptional record pattern indentation``() =
+        this.Parse """
+        match x with
+        | X { y = y
+              z = z } -> ()"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``No error for multi-line reference cell assignment``() =
         this.Parse """
         do pstringelemImpl :=
@@ -272,13 +281,3 @@ match args.AstNode with
                   skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]"""
 
         Assert.IsTrue(this.NoErrorsExist)
-
-    [<Test>]
-    member this.``No error for this``() =
-         this.Parse """
-    type Context =
-        { IndentationRuleContext : Map<int,bool*int>
-          NoTabCharactersRuleContext : (string * Range.range) list }
-"""
-
-         Assert.IsTrue(this.NoErrorsExist)
