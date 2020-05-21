@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Rules.TypedItemSpacing
 
 open System
+open FSharp.Compiler.Range
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -38,37 +39,41 @@ let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     | TypedItemStyle.SpacesAround -> (1, 1)
     | _ -> (0, 0)
 
-/// Checks for correct spacing around colon of typed expression.
+/// Checks the provided range, containing a typed item, has valid spacing.
+let private checkRange (config:Config) (args:AstNodeRuleParams) (range:range) =
+    let (expectedSpacesBefore, expectedSpacesAfter) =
+        expectedSpacesFromConfig config.TypedItemStyle
+
+    ExpressionUtilities.tryFindTextOfRange range args.FileContent
+    |> Option.bind (fun text ->
+        match text.Split(':') with
+        | [|otherText; typeText|] ->
+            let spacesBeforeColon = getTrailingSpaces otherText
+            let spacesAfterColon = getLeadingSpaces typeText
+            if spacesBeforeColon <> expectedSpacesBefore || spacesAfterColon <> expectedSpacesAfter then
+                let trimmedOtherText = otherText.TrimEnd(' ')
+                let trimmedTypeText = typeText.TrimStart(' ')
+                let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
+                let spacesAfterString = " " |> String.replicate expectedSpacesAfter
+                let suggestedFix = lazy(
+                    { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
+                    |> Some)
+                let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
+                Some
+                    { Range = range
+                      Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                      SuggestedFix = Some suggestedFix
+                      TypeChecks = [] }
+                else
+                    None
+        | _ -> None)
+
+/// Checks for correct spacing around colon of a typed item.
 let runner (config:Config) (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
-        let (expectedSpacesBefore, expectedSpacesAfter) =
-            expectedSpacesFromConfig config.TypedItemStyle
-
-        ExpressionUtilities.tryFindTextOfRange range args.FileContent
-        |> Option.bind (fun text ->
-            match text.Split(':') with
-            | [|otherText; typeText|] ->
-                let spacesBeforeColon = getTrailingSpaces otherText
-                let spacesAfterColon = getLeadingSpaces typeText
-                if spacesBeforeColon <> expectedSpacesBefore || spacesAfterColon <> expectedSpacesAfter then
-                    let trimmedOtherText = otherText.TrimEnd(' ')
-                    let trimmedTypeText = typeText.TrimStart(' ')
-                    let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
-                    let spacesAfterString = " " |> String.replicate expectedSpacesAfter
-                    let suggestedFix = lazy(
-                        { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
-                        |> Some)
-                    let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
-                    Some
-                        { Range = range
-                          Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                          SuggestedFix = Some suggestedFix
-                          TypeChecks = [] }
-                    else
-                        None
-            | _ -> None)
-        |> Option.toArray
+    | AstNode.Pattern (SynPat.Typed (range=range))
+    | AstNode.Field (SynField.Field (range=range)) ->
+        checkRange config args range |> Option.toArray
     | _ -> [||]
 
 let rule config =
