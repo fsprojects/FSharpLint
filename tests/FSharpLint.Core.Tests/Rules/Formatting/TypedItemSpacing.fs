@@ -43,6 +43,11 @@ type TestFormattingTypedItemSpaceAfter() =
         Assert.IsTrue(this.ErrorExistsAt(1, 11))
 
     [<Test>]
+    member this.``Error for named tuple with spaces around colon``() =
+        this.Parse "type X = X of x : int"
+        Assert.IsTrue(this.ErrorExistsAt(1, 11))
+
+    [<Test>]
     member this.``Quickfix for typed pattern with spaces around colon``() =
         let source = "let (x : int) = 1"
         let expected = "let (x: int) = 1"

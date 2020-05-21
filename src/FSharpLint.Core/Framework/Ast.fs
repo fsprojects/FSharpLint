@@ -420,6 +420,13 @@ module Ast =
         | SynTypeDefnRepr.Exception(exceptionRepr) ->
             add <| exceptionRepresentationNode exceptionRepr
 
+    let inline private unionCaseChildren node add =
+        match node with
+        | SynUnionCase.UnionCase(caseType=(UnionCaseFields fields)) ->
+            fields |> List.revIter (fieldNode >> add)
+        | SynUnionCase.UnionCase(caseType=(UnionCaseFullType (fullType, _))) ->
+            add (typeNode fullType)
+
     /// Extracts the child nodes to be visited from a given node.
     let traverseNode node add =
         match node with
@@ -456,9 +463,9 @@ module Ast =
         | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _))) ->
             moduleOrNamespaces |> List.revIter (moduleOrNamespaceNode >> add)
 
+        | UnionCase(x) -> unionCaseChildren x add
         | File(ParsedInput.SigFile(_))
         | ComponentInfo(_)
         | EnumCase(_)
-        | UnionCase(_)
         | Identifier(_)
         | TypeParameter(_) -> ()
