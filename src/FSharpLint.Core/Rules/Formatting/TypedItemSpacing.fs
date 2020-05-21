@@ -73,6 +73,8 @@ let runner (config:Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Pattern (SynPat.Typed (range=range))
     | AstNode.Field (SynField.Field (range=range)) ->
+        // NOTE: This currently does not work for fields in union cases, since the range on union case fields is incorrect,
+        // only including the type and not the field name. (https://github.com/dotnet/fsharp/issues/9279)
         checkRange config args range |> Option.toArray
     | _ -> [||]
 
