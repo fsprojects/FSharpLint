@@ -60,7 +60,11 @@ let private matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArg
             List.zip hintArgs actualArgs
             |> List.map matchLambdaArgument
 
-        let allArgsMatch = matches |> List.forall (function LambdaArgumentMatch.NoMatch -> false | _ -> true)
+        let allArgsMatch =
+            matches
+            |> List.forall (function
+                | LambdaArgumentMatch.NoMatch -> false
+                | _ -> true)
 
         if allArgsMatch then
             matches
@@ -142,7 +146,9 @@ module private Precedence =
         | _ -> false
 
 let private filterParens astNodes =
-    let isNotParen = function AstNode.Expression(SynExpr.Paren(_)) -> false | _ -> true
+    let isNotParen = function
+        | AstNode.Expression(SynExpr.Paren(_)) -> false
+        | _ -> true
 
     List.filter isNotParen astNodes
 
@@ -420,8 +426,8 @@ module private MatchPattern =
             matchArray (pattern, hint)
 
     and private doPatternsMatch patterns hintExpressions =
-        List.length patterns = List.length hintExpressions &&
-            (patterns, hintExpressions) ||> List.forall2 (fun x y -> matchHintPattern (x, y))
+        (List.length patterns = List.length hintExpressions)
+        && (patterns, hintExpressions) ||> List.forall2 (fun x y -> matchHintPattern (x, y))
 
     and private matchList (pattern, hint) =
         match (pattern, hint) with
@@ -535,8 +541,9 @@ module private FormatHint =
             | HintExpr(Expression.Parentheses(hint)) -> "(" + toString (HintExpr hint) + ")"
             | HintPat(Pattern.Parentheses(hint)) -> "(" + toString (HintPat hint) + ")"
             | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) ->
-                "fun " + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments
-                    + " -> " + toString (HintExpr body)
+                "fun "
+                + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments
+                + " -> " + toString (HintExpr body)
             | HintExpr(Expression.LambdaArg(argument)) ->
                 toString (HintExpr argument)
             | HintExpr(Expression.LambdaBody(body)) ->
@@ -565,7 +572,7 @@ module private FormatHint =
         else str
     and private lambdaArgumentsToString replace parentAstNode args matchedVariables (arguments:LambdaArg list) =
         arguments
-        |> List.map (function LambdaArg(expr) -> toString replace parentAstNode args matchedVariables None (HintExpr expr))
+        |> List.map (fun (LambdaArg expr) -> toString replace parentAstNode args matchedVariables None (HintExpr expr))
         |> String.concat " "
 
 let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVariables parentAstNode =

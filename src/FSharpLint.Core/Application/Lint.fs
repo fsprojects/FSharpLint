@@ -252,7 +252,9 @@ module Lint =
                     |> Seq.map typeCheckSuggestion
                     |> Async.Parallel
                     |> runSynchronously
-                    |> Array.iter (function Some suggestion -> suggest suggestion | None -> ())
+                    |> Array.iter (function
+                        | Some suggestion -> suggest suggestion
+                        | None -> ())
                 with
                 | :? TimeoutException -> () // Do nothing.
         with

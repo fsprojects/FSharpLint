@@ -85,16 +85,31 @@ module ContextBuilder =
             |> List.map (fun expr -> expr.Range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | Expression(SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg)); argExpr=outerArg))
+        | Expression (SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg; funcExpr=funcExpr)); argExpr=outerArg))
             when isInfix && outerArg.Range.EndLine <> innerArg.Range.StartLine ->
-            let expectedIndentation = innerArg.Range.StartColumn
-            createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
-        | Expression(SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
+            match funcExpr with
+            | SynExpr.Ident ident when ident.idText = "op_ColonEquals" ->
+                // := for reference cell assignment should be handled like normal equals, not like an infix operator.
+                []
+            | _ ->
+                let expectedIndentation = innerArg.Range.StartColumn
+                createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
+        | Expression (SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
             let expectedIndentation = newExprRange.StartColumn + 4
             bindings
             |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
             |> firstRangePerLine
             |> List.collect (createAbsoluteAndOffsetOverrides expectedIndentation)
+        | Pattern (SynPat.Tuple (elementPats=elemPats)) ->
+            elemPats
+            |> List.map (fun pat -> pat.Range)
+            |> firstRangePerLine
+            |> createAbsoluteAndOffsetOverridesBasedOnFirst
+        | Pattern (SynPat.Record (fieldPats=fieldPats)) ->
+            fieldPats
+            |> List.map (fun ((_, fieldIdent), _) -> fieldIdent.idRange)
+            |> firstRangePerLine
+            |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | _ -> []
 
     let builder current node =

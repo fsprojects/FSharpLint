@@ -12,18 +12,19 @@ module ParseFile =
 
     /// Information for a file to be linted that is given to the analysers.
     [<NoEquality; NoComparison>]
-    type FileParseInfo =
-        { /// Contents of the file.
-          Text: string
+    type FileParseInfo = {
+        /// Contents of the file.
+        Text: string
 
-          /// File represented as an AST.
-          Ast: ParsedInput
+        /// File represented as an AST.
+        Ast: ParsedInput
 
-          /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-          TypeCheckResults: FSharpCheckFileResults option
+        /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+        TypeCheckResults: FSharpCheckFileResults option
 
-          /// Path to the file.
-          File: string }
+        /// Path to the file.
+        File: string
+    }
 
     [<NoComparison>]
     type ParseFileFailure =

@@ -322,9 +322,11 @@ module HintParser =
 
             transposeHead [] hintLists
 
-        let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true | _ -> false
+        let isAnyMatch = function
+            | ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true
+            | _ -> false
 
-        let getHints items = items |> Seq.map (function (_, _, _, hint) -> hint) |> Seq.toList
+        let getHints items = items |> Seq.map (fun (_, _, _, hint) -> hint) |> Seq.toList
 
         let mergeHints hints =
             let rec getEdges transposed =
@@ -460,14 +462,14 @@ module HintParser =
                 [ attempt pident
                   .>>. many (attempt (skipChar '.' >>. pident))
                   .>>. opt (skipChar '.' >>. pidentorop)
-                  |>> fun ((startIdent, idents), operator) ->
+                  |>> (fun ((startIdent, idents), operator) ->
                       let identifiers = startIdent::idents
                       match operator with
                       | Some(operator) -> identifiers@[operator]
-                      | None -> identifiers
+                      | None -> identifiers)
                   attempt (pidentorop |>> fun x -> [x])
                   plongident ]
-                |>> List.map charListToString
+            |>> List.map charListToString
 
     module StringAndCharacterLiterals =
         let private hexToCharacter hex =
@@ -551,6 +553,7 @@ module HintParser =
                   pnewline ]
 
         let private pstringelem, private pstringelemImpl = createParserForwardedToRef()
+
         do pstringelemImpl :=
             choice
                 [ attempt pstringchar

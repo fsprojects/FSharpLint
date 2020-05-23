@@ -21,8 +21,13 @@
         "patternMatchFormatting": {
             "patternMatchClausesOnNewLine": { "enabled": false },
             "patternMatchOrClausesOnNewLine": { "enabled": false },
-            "patternMatchClauseIndentation": { "enabled": false },
-            "patternMatchExpressionIndentation": { "enabled": false }
+            "patternMatchClauseIndentation": {
+              "enabled": true,
+              "config": {
+                "allowSingleLineLambda": false
+              }
+            },
+            "patternMatchExpressionIndentation": { "enabled": true }
         }
     },
     "conventions": {
