@@ -2,5 +2,6 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 </Project>
