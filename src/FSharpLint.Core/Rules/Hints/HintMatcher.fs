@@ -690,7 +690,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
 /// any matches found are not guaranteed and it's expected that the caller verify the match.
 let private runner (config:Config) (args:AstNodeRuleParams) =
     match config.HintTrie.Lookup.TryGetValue args.NodeHashcode with
-    | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray args.SkipArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
+    | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
     | false, _ -> ()
 
     let result = suggestions.ToArray()

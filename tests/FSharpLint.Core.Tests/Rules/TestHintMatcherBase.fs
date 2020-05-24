@@ -30,7 +30,7 @@ type TestHintMatcherBase () =
 
     let mutable hintTrie = Edges.Empty
 
-    member this.SetConfig (hints:string list) =
+    member __.SetConfig (hints:string list) =
         hintTrie <- generateHintConfig hints
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =

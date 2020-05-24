@@ -18,12 +18,17 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.HintParser
 open MergeSyntaxTrees
 
+let private numChildren astNode =
+    let mutable i = 0
+    traverseNode astNode (fun _ -> i <- i + 1)
+    i
+
 /// Confirms if two parts of the ast look alike.
 /// This is required as hints can bind variables: the bound location needs to be compared to
 /// parts of the ast that the hint covers with the same variable.
-let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
-    let skipI = skipArray.[i].NumberOfChildren
-    let skipJ = skipArray.[j].NumberOfChildren
+let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) = 
+    let skipI = numChildren nodeArray.[i].Actual
+    let skipJ = numChildren nodeArray.[j].Actual
 
     if skipI = skipJ then
         Array.zip [|i..i + skipI|] [|j..j + skipJ|]
@@ -39,7 +44,7 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
     | _ -> false
 
 /// Compares the hint trie against a given location in the abstract syntax array.
-let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (boundVariables:Dictionary<_, _>) notify =
+let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<char, int>) (notify:Hint -> unit) =
     trie.MatchedHint |> List.iter notify
 
     if i < nodeArray.Length then
@@ -47,10 +52,10 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
 
         if isParen node then
             // Skip the paren.
-            checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
+            checkTrie (i + 1) trie nodeArray boundVariables notify
         else
             match trie.Edges.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray skipArray boundVariables notify
+            | true, trie -> checkTrie (i + 1) trie nodeArray boundVariables notify
             | false, _ -> ()
 
         trie.Edges.AnyMatch
@@ -58,11 +63,11 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
             match var with
             | Some(var) -> 
                 match boundVariables.TryGetValue var with
-                | true, varI when isMatch varI i nodeArray skipArray  -> 
-                    checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
+                | true, varI when isMatch varI i nodeArray  -> 
+                    checkTrie (i + (numChildren nodeArray.[i].Actual) + 1) trie nodeArray boundVariables notify
                 | false, _ -> 
                     boundVariables.Add(var, i)
-                    checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
+                    checkTrie (i + (numChildren nodeArray.[i].Actual) + 1) trie nodeArray boundVariables notify
                 | true, _ -> ()
-            | None -> checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify)
+            | None -> checkTrie (i + (numChildren nodeArray.[i].Actual) + 1) trie nodeArray boundVariables notify)
 
