@@ -103,7 +103,7 @@ Target.create "BuildRelease" (fun _ ->
 
 Target.create "Pack" (fun _ ->
     let properties = [
-        ("Version", latestEntry.NuGetVersion);
+        ("Version", nugetVersion);
         ("Authors", authors)
         ("PackageProjectUrl", gitUrl)
         ("RepositoryType", "git")
@@ -117,7 +117,7 @@ Target.create "Pack" (fun _ ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
             OutputPath = Some nugetDir
-            MSBuildParams = { p.MSBuildParams with Properties = [("Version", nugetVersion); ("PackageReleaseNotes", packageReleaseNotes)]}
+            MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
     ) "FSharpLint.sln"
 )
