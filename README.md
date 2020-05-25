@@ -1,4 +1,4 @@
-# FSharpLint
+# FSharpLint ![GitHub Actions Build Status](https://github.com/fsprojects/FSharpLint/workflows/.NET%20Core%203.1/badge.svg)]
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
@@ -28,12 +28,6 @@ Package | Version
 ------- | --------
 [dotnet tool](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/v/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/)
 [API](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/)
-
-## Build Status
-
-Mono 4.0.2 | .NET Core 3.1
----------- | -------------
-[![Mono CI Build Status](https://travis-ci.org/fsprojects/FSharpLint.svg?branch=master "Build Status")](https://travis-ci.org/fsprojects/FSharpLint) | [![.NET CI Build status](https://ci.appveyor.com/api/projects/status/l4d22kby012cb7jf "Build Status")](https://ci.appveyor.com/project/duckmatt/fsharplint-231)
 
 ## How to build application
 

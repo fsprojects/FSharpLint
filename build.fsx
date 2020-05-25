@@ -71,7 +71,7 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    DotNet.build id ""
+    DotNet.build id "FSharpLint.sln"
 )
 
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }

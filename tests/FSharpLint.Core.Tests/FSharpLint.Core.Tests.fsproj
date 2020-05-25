@@ -7,8 +7,6 @@
 
   <ItemGroup>
     <Compile Include="TestUtils.fs" />
-    <!-- Framework -->
-    <!-- Rules -->
     <Compile Include="Rules\TestRuleBase.fs" />
     <Compile Include="NUnit.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />
