@@ -59,10 +59,9 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                     let suggestedFix = lazy(
                         { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
                         |> Some)
-                    let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                     Some
                         { Range = range
-                          Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                          Message = Resources.Format("RulesFormattingTypedItemSpacingError", expectedSpacesBefore, expectedSpacesAfter)
                           SuggestedFix = Some suggestedFix
                           TypeChecks = [] }
                     else

@@ -11,8 +11,7 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
     match constructorArguments with
     | SynArgPats.Pats(parameters)
             when List.length parameters > maxParameters ->
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
-        let error = String.Format(errorFormatString, maxParameters)
+        let error = Resources.Format("RulesNumberOfItemsFunctionError", maxParameters)
         { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
 

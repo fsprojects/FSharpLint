@@ -21,9 +21,13 @@ let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:
 
 let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
-        let error = String.Format(errorFormatString, maxItems)
-        { Range = items.[maxItems].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        let error = Resources.Format("RulesNumberOfItemsTupleError", maxItems)
+        {
+            Range = items.[maxItems].Range
+            Message = error
+            SuggestedFix = None
+            TypeChecks = []
+        } |> Array.singleton
     else
         Array.empty
 

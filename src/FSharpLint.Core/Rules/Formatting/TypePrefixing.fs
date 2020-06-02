@@ -21,12 +21,11 @@ let checkTypePrefixing (args:AstNodeRuleParams) range typeName typeArgs isPostfi
             // Prefer postfix.
             if not isPostfix
             then
-                let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
                 let suggestedFix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
                 { Range = range
-                  Message =  String.Format(errorFormatString, typeName)
+                  Message =  Resources.Format("RulesFormattingF#PostfixGenericError", typeName)
                   SuggestedFix = Some suggestedFix
                   TypeChecks = [] } |> Some
             else

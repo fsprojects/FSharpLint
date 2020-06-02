@@ -29,9 +29,12 @@ let private validateType (maxMembers:int) members typeRepresentation =
         |> getMembers
 
     if List.length members > maxMembers then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
-        let error = String.Format(errorFormatString, maxMembers)
-        { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        {
+            Range = members.[maxMembers].Range
+            Message = Resources.Format("RulesNumberOfItemsClassMembersError", maxMembers)
+            SuggestedFix = None
+            TypeChecks = []
+        } |> Array.singleton
     else
         Array.empty
 

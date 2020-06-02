@@ -20,10 +20,9 @@ let private checkTupleOfWildcards pattern identifier =
 
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
-        let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = (constructorString 1)
-        let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
+        let error = Resources.Format("RulesTupleOfWildcardsError", refactorFrom, refactorTo)
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
 

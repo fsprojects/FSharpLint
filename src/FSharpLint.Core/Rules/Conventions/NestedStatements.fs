@@ -10,10 +10,6 @@ open FSharpLint.Framework.Rules
 [<RequireQualifiedAccess>]
 type Config = { Depth : int }
 
-let private error (depth:int) =
-    let errorFormatString = Resources.GetString("RulesNestedStatementsError")
-    String.Format(errorFormatString, depth)
-
 /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
 /// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
@@ -116,7 +112,12 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
                 getRange node
                 |> Option.map (fun range ->
-                    { Range = range; Message = error config.Depth; SuggestedFix = None; TypeChecks = [] })
+                    {
+                        Range = range
+                        Message = Resources.Format("RulesNestedStatementsError", config.Depth)
+                        SuggestedFix = None
+                        TypeChecks = []
+                    })
                 |> Option.toArray
             else
                 depth <- depth + 1

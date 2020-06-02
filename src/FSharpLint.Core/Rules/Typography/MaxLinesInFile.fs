@@ -11,9 +11,8 @@ type Config = { MaxLinesInFile : int }
 
 let private checkNumberOfLinesInFile numberOfLines line maxLines =
     if numberOfLines > maxLines then
-        let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
         { Range = mkRange "" (mkPos (maxLines + 1) 0) (mkPos numberOfLines (String.length line))
-          Message = String.Format(errorFormatString, (maxLines + 1))
+          Message = Resources.Format("RulesTypographyFileLengthError", (maxLines + 1))
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
     else

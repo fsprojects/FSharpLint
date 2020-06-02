@@ -21,13 +21,10 @@ let private validateCondition (maxBooleanOperators:int) condition =
             countBooleanOperators total expr
         | _ -> total
 
-    let ruleName = "MaxNumberOfBooleanOperatorsInCondition"
-
     let numberOfBooleanOperators = countBooleanOperators 0 condition
 
     if numberOfBooleanOperators > maxBooleanOperators then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
-        let error = String.Format(errorFormatString, maxBooleanOperators)
+        let error = Resources.Format("RulesNumberOfItemsBooleanConditionsError", maxBooleanOperators)
         { Range = condition.Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     else
         Array.empty

@@ -97,26 +97,23 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         match indentationOverrides.[lineNumber] with
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then
-                let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
                 { Range = range
-                  Message =  errorString
+                  Message = Resources.GetString("RulesTypographyOverridenIndentationError")
                   SuggestedFix = None
                   TypeChecks = [] } |> Some
             else
                 None
         | (false, indentationOffset) ->
             if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
-                let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
                 { Range = range
-                  Message =  String.Format(errorFormatString, expectedSpaces)
+                  Message = Resources.Format("RulesTypographyOverridenIndentationError", expectedSpaces)
                   SuggestedFix = None
                   TypeChecks = [] } |> Some
             else
                 None
     elif numLeadingSpaces % expectedSpaces <> 0 then
-        let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
         { Range = range
-          Message =  String.Format(errorFormatString, expectedSpaces)
+          Message = Resources.Format("RulesTypographyIndentationError", expectedSpaces)
           SuggestedFix = None
           TypeChecks = [] } |> Some
     else

@@ -574,8 +574,7 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
     match hint.Suggestion with
     | Suggestion.Expr(expr) ->
         let suggestion = FormatHint.toString false None args matchedVariables None (HintExpr expr)
-        let errorFormatString = Resources.GetString("RulesHintRefactor")
-        let error = System.String.Format(errorFormatString, matched, suggestion)
+        let error = Resources.Format("RulesHintRefactor", matched, suggestion)
 
         let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
 
@@ -585,8 +584,7 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
 
         { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
     | Suggestion.Message(message) ->
-        let errorFormatString = Resources.GetString("RulesHintSuggestion")
-        let error = System.String.Format(errorFormatString, matched, message)
+        let error = Resources.Format("RulesHintSuggestion", matched, message)
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =

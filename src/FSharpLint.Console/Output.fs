@@ -22,8 +22,7 @@ let private getParseFailureReason = function
 type Standard () =
 
     let getErrorMessage (range:FSharp.Compiler.Range.range) =
-        let error = Resources.GetString("LintSourceError")
-        String.Format(error, range.StartLine, range.StartColumn)
+        Resources.Format("LintSourceError", range.StartLine, range.StartColumn)
 
     let highlightErrorText (range:range) (errorLine:string) =
         let highlightColumnLine =
@@ -56,19 +55,19 @@ type Standard () =
             match event with
             | LintEvent.FinishedLintingFile (fileName, warnings) ->
                 if not (List.isEmpty warnings) then
-                    String.Format(Resources.GetString("ConsoleStartingFile"), fileName) |> writeInfo
+                    Resources.Format("ConsoleStartingFile", fileName) |> writeInfo
                     warnings |> List.iter writeWarning
-                    String.Format(Resources.GetString("ConsoleFinishedFile"), fileName, List.length warnings) |> writeInfo
+                    Resources.Format("ConsoleFinishedFile", fileName, List.length warnings) |> writeInfo
             | _ -> ()
 
         member __.HandleLintResult (result : Result<Suggestion.LintWarning list, LintFailure>) =
             match result with
             | Ok warnings ->
-                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings) |> writeInfo
+                Resources.Format("ConsoleFinished", List.length warnings) |> writeInfo
             | Error (FailedToLoadFile filePath) ->
-                String.Format(Resources.GetString("ConsoleCouldNotFindFile"), filePath) |> writeError
+                Resources.Format("ConsoleCouldNotFindFile", filePath) |> writeError
             | Error (RunTimeConfigError error) ->
-                String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error) |> writeError
+                Resources.Format("ConsoleRunTimeConfigError", error) |> writeError
             | Error (FailedToParseFiles failures) ->
                 let failureReasons = failures |> List.map getParseFailureReason |> String.concat "\n"
                 "Lint failed to parse files. Failed with: " + failureReasons |> writeError

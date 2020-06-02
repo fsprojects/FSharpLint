@@ -14,9 +14,8 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let lineLength = String.length args.Line
     if lineLength > maxCharacters then
         let range = mkRange "" (mkPos args.LineNumber (maxCharacters + 1)) (mkPos args.LineNumber lineLength)
-        let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
         { Range = range
-          Message = String.Format(errorFormatString, (maxCharacters + 1))
+          Message = Resources.Format("RulesTypographyLineLengthError", (maxCharacters + 1))
           SuggestedFix = None
           TypeChecks = [] } |> Array.singleton
     else

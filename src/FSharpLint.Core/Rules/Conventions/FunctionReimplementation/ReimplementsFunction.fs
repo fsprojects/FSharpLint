@@ -33,7 +33,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
 
         { Range = range
-          Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+          Message = Resources.Format("RulesReimplementsFunction", identifier)
           SuggestedFix = Some suggestedFix
           TypeChecks = [] }
 

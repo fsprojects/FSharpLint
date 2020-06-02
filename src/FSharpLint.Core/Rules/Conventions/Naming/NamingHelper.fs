@@ -99,10 +99,10 @@ let private suffixRule (suffix:string) (identifier:string) =
 
 let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText:string) =
     let formatError errorName =
-        String.Format(Resources.GetString errorName, idText)
+        Resources.Format(errorName, idText)
 
     let formatError2 additional errorName =
-        String.Format(Resources.GetString errorName, idText, additional)
+        Resources.Format(errorName, idText, additional)
 
     let tryAddFix fix message = (message, fix identifier)
 
