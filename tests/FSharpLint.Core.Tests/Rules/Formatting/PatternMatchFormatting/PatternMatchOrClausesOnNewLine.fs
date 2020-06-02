@@ -4,9 +4,9 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingPatternMatchOrClausesOnNewLine() =
+type internal TestFormattingPatternMatchOrClausesOnNewLine() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchOrClausesOnNewLine.rule)
-    
+
     [<Test>]
     member this.``Error for pattern match or clauses on same line``() =
         this.Parse("""

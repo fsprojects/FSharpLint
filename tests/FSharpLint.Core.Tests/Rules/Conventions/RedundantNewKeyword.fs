@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsRedundantNewKeyword() =
+type internal TestConventionsRedundantNewKeyword() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RedundantNewKeyword.rule)
 
     [<Test>]

@@ -5,7 +5,7 @@ module FSharpLint.Core.Tests.Rules.Hints.HintMatcher
 open NUnit.Framework
 
 [<TestFixture>]
-type TestHintMatcher() =
+type internal TestHintMatcher() =
     inherit TestHintMatcherBase.TestHintMatcherBase()
 
     [<Test>]

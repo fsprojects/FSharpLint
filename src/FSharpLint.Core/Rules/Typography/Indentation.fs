@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Indentation
+module internal FSharpLint.Rules.Indentation
 
 open System
 open FSharpLint.Framework

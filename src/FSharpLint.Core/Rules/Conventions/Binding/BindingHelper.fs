@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Helper.Binding
+module internal FSharpLint.Rules.Helper.Binding
 
 open FSharpLint.Framework
 open FSharp.Compiler.SyntaxTree
@@ -11,4 +11,3 @@ let isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:Abstract
         | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _)) -> true
         | _ -> false
     else false
- 

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.InvalidArgWithTwoArguments
+module internal FSharpLint.Rules.InvalidArgWithTwoArguments
 
 open FSharpLint.Framework.Rules
 

@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsEnumCasesNames() =
+type internal TestConventionsEnumCasesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(EnumCasesNames.rule config)
 
     [<Test>]

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.WildcardNamedWithAsPattern
+module internal FSharpLint.Rules.WildcardNamedWithAsPattern
 
 open System
 open FSharpLint.Framework

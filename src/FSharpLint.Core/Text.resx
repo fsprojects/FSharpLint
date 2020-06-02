@@ -117,36 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ConsoleCouldNotFindFile" xml:space="preserve">
-    <value>Could not find the file: {0} on disk.</value>
-  </data>
-  <data name="ConsoleFailedToLoadConfig" xml:space="preserve">
-    <value>{0}</value>
-  </data>
-  <data name="ConsoleFailedToParseFile" xml:space="preserve">
-    <value>Failed to parse file {0}</value>
-  </data>
-  <data name="ConsoleFailedToResolveReferences" xml:space="preserve">
-    <value>Failed to resolve references.</value>
-  </data>
-  <data name="ConsoleFinished" xml:space="preserve">
-    <value>========== Summary: {0} warnings ==========</value>
-  </data>
-  <data name="ConsoleFinishedFile" xml:space="preserve">
-    <value>========== Finished: {0}, {1} warnings ==========</value>
-  </data>
-  <data name="ConsoleStartingFile" xml:space="preserve">
-    <value>========== Linting {0} ==========</value>
-  </data>
-  <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">
-    <value>MSBuild could not load the project file {0} because: {1}</value>
-  </data>
-  <data name="ConsoleProjectFileCouldNotBeFound" xml:space="preserve">
-    <value>{0} could not be found on disk.</value>
-  </data>
-  <data name="ConsoleRunTimeConfigError" xml:space="preserve">
-    <value>Failed while reading from config at run time, error: {0}.</value>
-  </data>
   <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
     <value>`failwithf` has more arguments than were found in its format string, these further arguments will be ignored by the compiler.</value>
   </data>
@@ -233,9 +203,6 @@
   </data>
   <data name="RulesTupleOfWildcardsError" xml:space="preserve">
     <value>A tuple of wildcards in a pattern can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
-  </data>
-  <data name="LintSourceError" xml:space="preserve">
-    <value>Error on line {0} starting at column {1}</value>
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>

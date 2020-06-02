@@ -1,4 +1,4 @@
-module FSharpLint.Rules.ModuleDeclSpacing
+module internal FSharpLint.Rules.ModuleDeclSpacing
 
 open System
 open FSharp.Compiler.SyntaxTree

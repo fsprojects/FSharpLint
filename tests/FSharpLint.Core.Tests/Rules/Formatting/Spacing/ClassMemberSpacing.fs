@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingClassMemberSpacing() =
+type internal TestFormattingClassMemberSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ClassMemberSpacing.rule)
 
     [<Test>]

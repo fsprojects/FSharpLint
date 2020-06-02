@@ -1,4 +1,4 @@
-module FSharpLint.Rules.NoTabCharacters
+module internal FSharpLint.Rules.NoTabCharacters
 
 open System
 open FSharpLint.Framework

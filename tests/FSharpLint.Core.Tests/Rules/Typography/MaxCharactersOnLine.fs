@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestTypographyMaxCharactersOnLine() =
+type internal TestTypographyMaxCharactersOnLine() =
     inherit TestLineRuleBase.TestLineRuleBase(MaxCharactersOnLine.rule { MaxCharactersOnLine = 60 })
 
     [<Test>]

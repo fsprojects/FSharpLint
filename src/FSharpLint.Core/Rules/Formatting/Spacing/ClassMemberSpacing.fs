@@ -1,4 +1,4 @@
-module FSharpLint.Rules.ClassMemberSpacing
+module internal FSharpLint.Rules.ClassMemberSpacing
 
 open System
 open FSharp.Compiler.SyntaxTree
@@ -38,7 +38,7 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
 
 let runner args =
     match args.AstNode with
-    | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->
+    | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, _, members, _)) ->
         checkClassMemberSpacing args members
     | AstNode.TypeRepresentation (SynTypeDefnRepr.ObjectModel (_, members, _)) ->
         checkClassMemberSpacing args members

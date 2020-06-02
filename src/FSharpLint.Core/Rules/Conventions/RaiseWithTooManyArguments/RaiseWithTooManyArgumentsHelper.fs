@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Helper.RaiseWithTooManyArguments
+module internal FSharpLint.Rules.Helper.RaiseWithTooManyArguments
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

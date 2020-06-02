@@ -1,4 +1,4 @@
-module FSharpLint.Rules.FailwithWithSingleArgument
+module internal FSharpLint.Rules.FailwithWithSingleArgument
 
 open FSharpLint.Framework.Rules
 

@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestTypographyTabCharacterInFile() =
+type internal TestTypographyTabCharacterInFile() =
     inherit TestNoTabCharactersRuleBase.TestNoTabCharactersRuleBase(NoTabCharacters.rule)
 
     [<Test>]

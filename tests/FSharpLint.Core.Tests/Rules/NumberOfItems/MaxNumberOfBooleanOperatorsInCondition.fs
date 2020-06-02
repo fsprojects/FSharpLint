@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestMaxNumberOfBooleanOperatorsInCondition() =
+type internal TestMaxNumberOfBooleanOperatorsInCondition() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfBooleanOperatorsInCondition.rule { MaxItems = 4 })
 
     [<Test>]

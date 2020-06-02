@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestTypographyIndentation() =
+type internal TestTypographyIndentation() =
     inherit TestIndentationRuleBase.TestIndentationRuleBase(Indentation.rule)
 
     [<Test>]

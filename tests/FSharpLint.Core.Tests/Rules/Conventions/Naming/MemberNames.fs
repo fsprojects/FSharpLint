@@ -11,7 +11,7 @@ let config =
       Suffix = None }
 
 [<TestFixture>]
-type TestConventionsMemberNames() =
+type internal TestConventionsMemberNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MemberNames.rule config)
 
     [<Test>]

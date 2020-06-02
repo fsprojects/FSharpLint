@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TupleParentheses
+module internal FSharpLint.Rules.TupleParentheses
 
 open System
 open FSharp.Compiler.SyntaxTree

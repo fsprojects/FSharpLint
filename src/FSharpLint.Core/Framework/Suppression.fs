@@ -1,4 +1,4 @@
-module FSharpLint.Framework.Suppression
+module internal FSharpLint.Framework.Suppression
 
 open System
 open System.Text.RegularExpressions

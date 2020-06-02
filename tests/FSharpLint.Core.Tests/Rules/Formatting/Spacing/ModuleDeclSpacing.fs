@@ -4,9 +4,9 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingModuleDeclSpacing() =
+type internal TestFormattingModuleDeclSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ModuleDeclSpacing.rule)
-    
+
     [<Test>]
     member this.``Error for missing space between module declarations``() =
         this.Parse """

@@ -39,7 +39,7 @@ let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     | _ -> (0, 0)
 
 /// Checks for correct spacing around colon of typed expression.
-let runner (config:Config) (args:AstNodeRuleParams) =
+let private runner (config:Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Pattern (SynPat.Typed (_, _, range)) ->
         let (expectedSpacesBefore, expectedSpacesAfter) =
@@ -70,7 +70,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         |> Option.toArray
     | _ -> [||]
 
-let rule config =
+let internal rule config =
     { Name = "TypedItemSpacing"
       Identifier = Identifiers.TypedItemSpacing
       RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }

@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsFailwithWithSingleArg() =
+type internal TestConventionsFailwithWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithWithSingleArgument.rule)
 
     [<Test>]
@@ -44,7 +44,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
 [<TestFixture>]
-type TestConventionsRaiseWithSingleArg() =
+type internal TestConventionsRaiseWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RaiseWithSingleArgument.rule)
 
     [<Test>]
@@ -66,7 +66,7 @@ raise (System.ArgumentException("Divisor cannot be zero!")) "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
 [<TestFixture>]
-type TestConventionsFailwithfWithArugmentMatchingFormatString() =
+type internal TestConventionsFailwithfWithArugmentMatchingFormatString() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithfWithArgumentsMatchingFormatString.rule)
 
     [<Test>]
@@ -97,7 +97,7 @@ failwithf "%d %% %s" 4 "dog" 5 """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
 [<TestFixture>]
-type TestConventionsNullArgWithSingleArg() =
+type internal TestConventionsNullArgWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NullArgWithSingleArgument.rule)
 
     [<Test>]
@@ -119,7 +119,7 @@ nullArg "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
 [<TestFixture>]
-type TestConventionsInvalidOpWithSingleArg() =
+type internal TestConventionsInvalidOpWithSingleArg() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidOpWithSingleArgument.rule)
 
     [<Test>]
@@ -141,7 +141,7 @@ invalidOp "" "" """
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
 [<TestFixture>]
-type TestConventionsInvalidArgWithTwoArguments() =
+type internal TestConventionsInvalidArgWithTwoArguments() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InvalidArgWithTwoArguments.rule)
 
     [<Test>]

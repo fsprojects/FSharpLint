@@ -1,4 +1,4 @@
-module FSharpLint.Rules.ReimplementsFunction
+module internal FSharpLint.Rules.ReimplementsFunction
 
 open System
 open FSharpLint.Framework

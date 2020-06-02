@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsNonPublicValuesNames() =
+type internal TestConventionsNonPublicValuesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NonPublicValuesNames.rule config)
 
     /// A tuple inside a binding should be treated as private.

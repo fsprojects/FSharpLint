@@ -3,13 +3,13 @@
 /// to avoid attempting every hint against every node, an initial pass (the fuzzy match) is done
 /// to eliminate as many cases where there'll never be a match as quickly as possible, so that the
 /// ast match is run against as few hints and ast nodes as possible.
-/// 
+///
 /// The fuzzy match requires two structures to be computed before hand: an abstract syntax array
 /// constructed from the ast, and a trie of hints. Both of these structures contain hash codes of the
 /// nodes, the hash codes are expected to match when the nodes are equivalent. The matching is done using these
 /// hash codes so we end up with a trie of integers searching against an array of integers -
 /// which is pretty fast.
-module FSharpLint.Rules.Helper.Hints
+module internal FSharpLint.Rules.Helper.Hints
 
 open System.Collections.Generic
 open FSharp.Compiler.SyntaxTree
@@ -21,15 +21,15 @@ open MergeSyntaxTrees
 /// Confirms if two parts of the ast look alike.
 /// This is required as hints can bind variables: the bound location needs to be compared to
 /// parts of the ast that the hint covers with the same variable.
-let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) = 
+let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) =
     let skipI = skipArray.[i].NumberOfChildren
     let skipJ = skipArray.[j].NumberOfChildren
 
     if skipI = skipJ then
         Array.zip [|i..i + skipI|] [|j..j + skipJ|]
-        |> Array.forall (fun (i, j) -> 
-            i < nodeArray.Length && 
-            j < nodeArray.Length && 
+        |> Array.forall (fun (i, j) ->
+            i < nodeArray.Length &&
+            j < nodeArray.Length &&
             nodeArray.[i].Hashcode = nodeArray.[j].Hashcode)
     else false
 
@@ -54,13 +54,13 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (skipArray:Abst
             | false, _ -> ()
 
         trie.Edges.AnyMatch
-        |> List.iter (fun (var, trie) -> 
+        |> List.iter (fun (var, trie) ->
             match var with
-            | Some(var) -> 
+            | Some(var) ->
                 match boundVariables.TryGetValue var with
-                | true, varI when isMatch varI i nodeArray skipArray  -> 
+                | true, varI when isMatch varI i nodeArray skipArray  ->
                     checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
-                | false, _ -> 
+                | false, _ ->
                     boundVariables.Add(var, i)
                     checkTrie (i + skipArray.[i].NumberOfChildren + 1) trie nodeArray skipArray boundVariables notify
                 | true, _ -> ()

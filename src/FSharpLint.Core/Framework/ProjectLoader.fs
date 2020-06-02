@@ -1,4 +1,4 @@
-module FSharpLint.Framework.ProjectLoader
+module internal FSharpLint.Framework.ProjectLoader
 
 open System
 open System.IO

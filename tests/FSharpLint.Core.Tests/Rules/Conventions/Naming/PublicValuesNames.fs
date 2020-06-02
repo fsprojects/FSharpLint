@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsPublicValuesNames() =
+type internal TestConventionsPublicValuesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PublicValuesNames.rule config)
 
     /// A public binding let binding identifier may be pascal case or upper case.

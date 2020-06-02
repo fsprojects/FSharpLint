@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Helper.Naming
+module internal FSharpLint.Rules.Helper.Naming
 
 open System
 open FSharp.Compiler.SyntaxTree

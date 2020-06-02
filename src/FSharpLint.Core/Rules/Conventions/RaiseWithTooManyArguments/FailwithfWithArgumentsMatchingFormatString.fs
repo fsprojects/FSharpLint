@@ -1,4 +1,4 @@
-module FSharpLint.Rules.FailwithfWithArgumentsMatchingFormatString
+module internal FSharpLint.Rules.FailwithfWithArgumentsMatchingFormatString
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

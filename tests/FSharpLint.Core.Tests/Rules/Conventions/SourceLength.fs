@@ -8,7 +8,7 @@ let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.conca
 
 let FunctionLength = 70
 [<TestFixture>]
-type TestMaxLinesInFunction() =
+type internal TestMaxLinesInFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInFunction.rule { Config.MaxLines = FunctionLength })
 
     [<Test>]
@@ -33,7 +33,7 @@ let dog x =
 
 let LambdaFunctionLength = 5
 [<TestFixture>]
-type TestMaxLinesInLambdaFunction() =
+type internal TestMaxLinesInLambdaFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInLambdaFunction.rule { Config.MaxLines = LambdaFunctionLength })
 
     [<Test>]
@@ -80,7 +80,7 @@ let dog = fun x ->
 
 let MatchLambdaFunctionLength = 70
 [<TestFixture>]
-type TestMaxLinesInMatchLambdaFunction() =
+type internal TestMaxLinesInMatchLambdaFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMatchLambdaFunction.rule { Config.MaxLines = MatchLambdaFunctionLength })
 
     [<Test>]
@@ -109,7 +109,7 @@ let dog = function
 
 let ValueLength = 70
 [<TestFixture>]
-type TestMaxLinesInValue() =
+type internal TestMaxLinesInValue() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInValue.rule { Config.MaxLines = ValueLength })
 
     [<Test>]
@@ -134,7 +134,7 @@ let dog =
 
 let ConstructorLength = 70
 [<TestFixture>]
-type TestMaxLinesInConstructor() =
+type internal TestMaxLinesInConstructor() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInConstructor.rule { Config.MaxLines = ConstructorLength })
 
     [<Test>]
@@ -158,13 +158,13 @@ type MyClass(x) =
 
 let MemberLength = 70
 [<TestFixture>]
-type TestMaxLinesInMember() =
+type internal TestMaxLinesInMember() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMember.rule { Config.MaxLines = MemberLength })
     // TODO: Add tests.
 
 let PropertyLength = 70
 [<TestFixture>]
-type TestMaxLinesInProperty() =
+type internal TestMaxLinesInProperty() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInProperty.rule { Config.MaxLines = PropertyLength })
 
     [<Test>]
@@ -179,7 +179,7 @@ module Program
 
 let ClassLength = 500
 [<TestFixture>]
-type TestMaxLinesInClass() =
+type internal TestMaxLinesInClass() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInClass.rule { Config.MaxLines = ClassLength })
 
     [<Test>]
@@ -218,13 +218,13 @@ module Program
 
 let UnionLength = 500
 [<TestFixture>]
-type TestMaxLinesInUnion() =
+type internal TestMaxLinesInUnion() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInUnion.rule { Config.MaxLines = UnionLength })
     // TODO: Add tests.
 
 let RecordLength = 500
 [<TestFixture>]
-type TestMaxLinesInRecord() =
+type internal TestMaxLinesInRecord() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInRecord.rule { Config.MaxLines = RecordLength })
 
     [<Test>]
@@ -247,13 +247,13 @@ module Program
 
 let EnumLength = 1000
 [<TestFixture>]
-type TestMaxLinesInEnum() =
+type internal TestMaxLinesInEnum() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInEnum.rule { Config.MaxLines = EnumLength })
     // TODO: Add tests.
 
 let ModuleLength = 1000
 [<TestFixture>]
-type TestMaxLinesInModule() =
+type internal TestMaxLinesInModule() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInModule.rule { Config.MaxLines = ModuleLength })
 
     [<Test>]

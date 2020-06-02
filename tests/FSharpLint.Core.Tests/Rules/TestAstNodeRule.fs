@@ -7,7 +7,7 @@ open FSharpLint.Framework.ParseFile
 open FSharpLint.Framework.Rules
 
 [<AbstractClass>]
-type TestAstNodeRuleBase (rule:Rule) =
+type internal TestAstNodeRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =

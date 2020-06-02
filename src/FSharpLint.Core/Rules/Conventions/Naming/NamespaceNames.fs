@@ -1,4 +1,4 @@
-module FSharpLint.Rules.NamespaceNames
+module internal FSharpLint.Rules.NamespaceNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

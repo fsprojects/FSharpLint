@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestMaxNumberOfItemsInTuple() =
+type internal TestMaxNumberOfItemsInTuple() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfItemsInTuple.rule { MaxItems = 5 })
 
     [<Test>]
@@ -12,7 +12,7 @@ type TestMaxNumberOfItemsInTuple() =
         this.Parse """
 module Program
 
-type Test(a,b,c,d,e,f) =
+type internal Test(a,b,c,d,e,f) =
     member this.One() = ()
 
 let dog = Test(1,2,3,4,5,6)"""
@@ -35,7 +35,7 @@ foo (1,2,3,4,5,6)"""
         this.Parse """
 module Program
 
-type Test(a,b,c,d,e,f) =
+type internal Test(a,b,c,d,e,f) =
     member this.One() = ()
 
 let dog = new Test(1,2,3,4,5,6)"""
@@ -47,7 +47,7 @@ let dog = new Test(1,2,3,4,5,6)"""
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member this.One(a,b,c,d,e,f) = ()
 
 let test = Test()

@@ -1,10 +1,10 @@
-﻿namespace FSharpLint.Framework
+﻿namespace FSharpLint.Console
 
 open System
 open System.Reflection
 open System.Resources
 
-/// Provides a way of getting string values from the framework's resource files (files in src/FSharpLint.Framework/Resources/).
+/// Provides a way of getting string values from the resource files.
 /// Used to retrieve multi-lingual strings inside of the app.
 type internal Resources() =
     static let resourceName =

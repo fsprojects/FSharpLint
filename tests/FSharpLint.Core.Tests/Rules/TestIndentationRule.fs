@@ -8,7 +8,7 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
 
 [<AbstractClass>]
-type TestIndentationRuleBase (rule:Rule) =
+type internal TestIndentationRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =

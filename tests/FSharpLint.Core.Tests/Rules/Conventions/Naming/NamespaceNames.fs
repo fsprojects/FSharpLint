@@ -12,7 +12,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsNamespaceNames() =
+type internal TestConventionsNamespaceNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NamespaceNames.rule config)
 
     [<Test>]

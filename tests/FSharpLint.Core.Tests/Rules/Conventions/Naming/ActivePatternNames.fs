@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsActivePatternNames() =
+type internal TestConventionsActivePatternNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ActivePatternNames.rule config)
 
     [<Test>]

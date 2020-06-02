@@ -35,7 +35,7 @@ let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
 
 let private lengthOfWhitespaceOnEnd (str:string) = str.Length - str.TrimEnd().Length
 
-let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
+let private checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     let line = args.Line
     let lineNumber = args.LineNumber
     let ignoringBlankLinesAndIsBlankLine = config.IgnoreBlankLines && System.String.IsNullOrWhiteSpace(line)
@@ -54,7 +54,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     else
         Array.empty
 
-let rule config =
+let internal rule config =
     { Name = "TrailingWhitespaceOnLine"
       Identifier = Identifiers.TrailingWhitespaceOnLine
       RuleConfig = { LineRuleConfig.Runner = checkTrailingWhitespaceOnLine config } }

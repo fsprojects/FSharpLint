@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Identifiers
+module internal FSharpLint.Rules.Identifiers
 
 let [<Literal>] private Prefix = "FL"
 

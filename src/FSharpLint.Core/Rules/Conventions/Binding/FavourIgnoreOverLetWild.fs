@@ -1,4 +1,4 @@
-module FSharpLint.Rules.FavourIgnoreOverLetWild
+module internal FSharpLint.Rules.FavourIgnoreOverLetWild
 
 open System
 open FSharpLint.Framework

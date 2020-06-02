@@ -6,7 +6,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =
+type internal SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 0; OneSpaceAllowedAfterOperator = true; IgnoreBlankLines = false })
 
     [<Test>]
@@ -16,7 +16,7 @@ type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =
         Assert.IsFalse(this.ErrorExistsAt(1, 8))
 
 [<TestFixture>]
-type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
+type internal SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 0; OneSpaceAllowedAfterOperator = false; IgnoreBlankLines = false })
 
     [<Test>]
@@ -45,7 +45,7 @@ type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
 
 
 [<TestFixture>]
-type MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() =
+type internal MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 0; OneSpaceAllowedAfterOperator = true; IgnoreBlankLines = false })
 
     [<Test>]
@@ -55,7 +55,7 @@ type MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() =
         Assert.IsTrue(this.ErrorExistsAt(1, 8))
 
 [<TestFixture>]
-type TestOneSpace() =
+type internal TestOneSpace() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 1; OneSpaceAllowedAfterOperator = false; IgnoreBlankLines = false })
 
     [<Test>]
@@ -72,7 +72,7 @@ type TestOneSpace() =
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
 
 [<TestFixture>]
-type TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
+type internal TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 2; OneSpaceAllowedAfterOperator = false; IgnoreBlankLines = false })
 
     [<Test>]
@@ -84,7 +84,7 @@ type TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
         Assert.IsFalse(this.ErrorExistsAt(1, 13))
 
 [<TestFixture>]
-type WhitespaceEntireLine() =
+type internal WhitespaceEntireLine() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 0; OneSpaceAllowedAfterOperator = false; IgnoreBlankLines = false })
 
     [<Test>]
@@ -94,7 +94,7 @@ type WhitespaceEntireLine() =
         Assert.IsTrue(this.ErrorExistsAt(1, 0))
 
 [<TestFixture>]
-type WhitespaceEntireLineIgnoreBlankLines() =
+type internal WhitespaceEntireLineIgnoreBlankLines() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingWhitespaceOnLine.rule { NumberOfSpacesAllowed = 0; OneSpaceAllowedAfterOperator = false; IgnoreBlankLines = true })
 
     [<Test>]

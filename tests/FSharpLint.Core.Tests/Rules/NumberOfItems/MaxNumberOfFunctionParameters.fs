@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestMaxNumberOfFunctionParameters() =
+type internal TestMaxNumberOfFunctionParameters() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfFunctionParameters.rule { MaxItems = 5 })
 
     [<Test>]

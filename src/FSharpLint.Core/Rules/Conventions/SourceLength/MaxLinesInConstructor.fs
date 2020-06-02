@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxLinesInConstructor
+module internal FSharpLint.Rules.MaxLinesInConstructor
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

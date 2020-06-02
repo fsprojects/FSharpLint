@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TupleIndentation
+module internal FSharpLint.Rules.TupleIndentation
 
 open System
 open System.Diagnostics.CodeAnalysis

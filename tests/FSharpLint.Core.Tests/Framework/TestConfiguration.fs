@@ -12,7 +12,7 @@ let configWithHints hints =
 
 
 [<TestFixture>]
-type TestConfiguration() =
+type internal TestConfiguration() =
     [<Test>]
     member __.``Ignore all files ignores any given file.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "*" ]
@@ -97,7 +97,7 @@ type TestConfiguration() =
 
     [<Test>]
     member __.``Camel case JSON config correctly parsed into expected config records`` () =
-        let expectedConfig = 
+        let expectedConfig =
             { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
 
 

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.ParameterNames
+module internal FSharpLint.Rules.ParameterNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

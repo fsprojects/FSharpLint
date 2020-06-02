@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestBindingFavourIgnoreOverLetWild() =
+type internal TestBindingFavourIgnoreOverLetWild() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourIgnoreOverLetWild.rule)
 
     [<Test>]

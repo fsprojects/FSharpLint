@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestBindingUselessBinding() =
+type internal TestBindingUselessBinding() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UselessBinding.rule)
 
     [<Test>]

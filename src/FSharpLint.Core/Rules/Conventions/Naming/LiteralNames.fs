@@ -1,4 +1,4 @@
-module FSharpLint.Rules.LiteralNames
+module internal FSharpLint.Rules.LiteralNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

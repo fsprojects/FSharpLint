@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Helper.TupleFormatting
+module internal FSharpLint.Rules.Helper.TupleFormatting
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

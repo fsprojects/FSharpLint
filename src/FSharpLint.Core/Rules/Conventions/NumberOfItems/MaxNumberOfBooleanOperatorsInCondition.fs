@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxNumberOfBooleanOperatorsInCondition
+module internal FSharpLint.Rules.MaxNumberOfBooleanOperatorsInCondition
 
 open System
 open FSharpLint.Framework

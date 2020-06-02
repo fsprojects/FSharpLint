@@ -1,4 +1,4 @@
-module FSharpLint.Rules.RecordFieldNames
+module internal FSharpLint.Rules.RecordFieldNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

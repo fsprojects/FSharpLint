@@ -8,10 +8,8 @@ open FSharp.Compiler.Range
 type SuggestedFix = {
     /// Text to be replaced.
     FromText: string
-
     /// Location of the text to be replaced.
     FromRange: range
-
     /// Text to replace the `FromText`, i.e. the fix.
     ToText: string
 }
@@ -20,13 +18,10 @@ type SuggestedFix = {
 type WarningDetails = {
     /// Location of the code that prompted the suggestion.
     Range: range
-
     /// Suggestion message to describe the possible problem to the user.
     Message: string
-
     /// Information to provide an automated fix.
     SuggestedFix: Lazy<SuggestedFix option> option
-
     /// Async type checks to be performed to confirm this suggestion is valid.
     /// Suggestion is only considered valid when all type checks resolve to true.
     TypeChecks: Async<bool> list
@@ -41,16 +36,12 @@ type WarningDetails = {
 type LintWarning = {
     /// Unique identifier for the rule that caused the warning.
     RuleIdentifier: string
-
     /// Unique name for the rule that caused the warning.
     RuleName: string
-
     /// Path to the file where the error occurs.
     FilePath: string
-
     /// Text that caused the error (the `Range` of the content of `FileName`).
     ErrorText: string
-
     /// Details for the warning.
     Details: WarningDetails
 }

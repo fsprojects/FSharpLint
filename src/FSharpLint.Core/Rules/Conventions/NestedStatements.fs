@@ -58,13 +58,13 @@ let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (sk
 
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
 /// e.g. lambda arg being a duplicate of the lamdba.
-let isMetaData args node i =
+let private isMetaData args node i =
     let parentIndex = args.SkipArray.[i].ParentIndex
     if parentIndex = i then false
     else
         Object.ReferenceEquals(node, args.SyntaxArray.[parentIndex].Actual)
 
-let isElseIf args node i =
+let private isElseIf args node i =
     match node with
     | AstNode.Expression(SynExpr.IfThenElse(_)) ->
         let parentIndex = args.SkipArray.[i].ParentIndex
@@ -75,9 +75,9 @@ let isElseIf args node i =
             | _ -> false
     | _ -> false
 
-let mutable depth = 0
+let mutable private depth = 0
 
-let decrementDepthToCommonParent args i j =
+let private decrementDepthToCommonParent args i j =
     if j < args.SyntaxArray.Length then
         // If next node in array is not a sibling or child of the current node.
         let parent = args.SkipArray.[j].ParentIndex
@@ -85,9 +85,9 @@ let decrementDepthToCommonParent args i j =
             // Decrement depth until we reach a common parent.
             depth <- depth - (distanceToCommonParent args.SyntaxArray args.SkipArray i j)
 
-let mutable skipToIndex = None
+let mutable private skipToIndex = None
 
-let runner (config:Config) (args:AstNodeRuleParams) =
+let private runner (config:Config) (args:AstNodeRuleParams) =
     let skip =
         match skipToIndex with
         | Some skipTo when skipTo = args.NodeIndex ->
@@ -131,7 +131,7 @@ let cleanup () =
     depth <- 0
     skipToIndex <- None
 
-let rule config =
+let internal rule config =
     { Name = "NestedStatements"
       Identifier = Identifiers.NestedStatements
       RuleConfig = { AstNodeRuleConfig.Runner = runner config

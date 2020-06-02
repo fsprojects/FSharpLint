@@ -1,4 +1,4 @@
-module FSharpLint.Rules.ExceptionNames
+module internal FSharpLint.Rules.ExceptionNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

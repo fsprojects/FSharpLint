@@ -10,7 +10,7 @@ open MergeSyntaxTrees
 open System.Collections.Generic
 
 [<TestFixture>]
-type TestMergeSyntaxTrees() =
+type internal TestMergeSyntaxTrees() =
 
     [<Test>]
     member __.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() =
@@ -52,7 +52,7 @@ type TestMergeSyntaxTrees() =
         Assert.AreEqual(MergeSyntaxTrees.Edges.Empty, MergeSyntaxTrees.mergeHints [])
 
 [<TestFixture>]
-type TestHintOperators() =
+type internal TestHintOperators() =
 
     [<Test>]
     member __.Plus() =
@@ -67,7 +67,7 @@ type TestHintOperators() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
-type TestHintIdentifiers() =
+type internal TestHintIdentifiers() =
 
     [<Test>]
     member __.Identifier() =
@@ -106,7 +106,7 @@ type TestHintIdentifiers() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
-type TestHintStringAndCharacterLiterals() =
+type internal TestHintStringAndCharacterLiterals() =
 
     [<Test>]
     member __.ByteCharacter() =
@@ -157,7 +157,7 @@ type TestHintStringAndCharacterLiterals() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
-type TestHintParserNumericLiterals() =
+type internal TestHintParserNumericLiterals() =
 
     [<Test>]
     member __.ByteMin() =
@@ -310,7 +310,7 @@ type TestHintParserNumericLiterals() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
-type TestConstantParser() =
+type internal TestConstantParser() =
 
     [<Test>]
     member __.Bool() =
@@ -355,7 +355,7 @@ type TestConstantParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
 [<TestFixture>]
-type TestHintParser() =
+type internal TestHintParser() =
 
     [<Test>]
     member __.Variable() =

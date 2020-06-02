@@ -1,4 +1,4 @@
-module FSharpLint.Rules.PatternMatchExpressionIndentation
+module internal FSharpLint.Rules.PatternMatchExpressionIndentation
 
 open System
 open FSharp.Compiler.SyntaxTree

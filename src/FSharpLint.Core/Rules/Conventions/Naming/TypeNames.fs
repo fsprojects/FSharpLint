@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TypeNames
+module internal FSharpLint.Rules.TypeNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

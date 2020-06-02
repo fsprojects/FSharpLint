@@ -1,4 +1,4 @@
-module FSharpLint.Rules.EnumCasesNames
+module internal FSharpLint.Rules.EnumCasesNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

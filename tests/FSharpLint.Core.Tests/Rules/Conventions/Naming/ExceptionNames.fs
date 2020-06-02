@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = Some "Exception" }
 [<TestFixture>]
-type TestConventionsExceptionNames() =
+type internal TestConventionsExceptionNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ExceptionNames.rule config)
 
     [<Test>]

@@ -10,7 +10,7 @@ type Config = { MaxLines : int }
 
 let private length (range:range) = range.EndLine - range.StartLine
 
-let checkSourceLengthRule (config:Config) range errorName =
+let internal checkSourceLengthRule (config:Config) range errorName =
     let actualLines = length range
     if actualLines > config.MaxLines then
         { Range = range

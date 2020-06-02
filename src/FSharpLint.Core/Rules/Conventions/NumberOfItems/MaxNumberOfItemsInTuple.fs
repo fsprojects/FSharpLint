@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxNumberOfItemsInTuple
+module internal FSharpLint.Rules.MaxNumberOfItemsInTuple
 
 open System
 open FSharpLint.Framework

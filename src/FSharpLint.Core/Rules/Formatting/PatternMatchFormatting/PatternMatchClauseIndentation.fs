@@ -1,4 +1,4 @@
-module FSharpLint.Rules.PatternMatchClauseIndentation
+module internal FSharpLint.Rules.PatternMatchClauseIndentation
 
 open System
 open FSharp.Compiler.SyntaxTree
@@ -37,7 +37,7 @@ let check (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) 
         |> List.toArray
         |> Array.map (fun clause -> (clause, ExpressionUtilities.getLeadingSpaces clause.Range args.FileContent))
         |> Array.pairwise
-        |> Array.choose (fun ((clauseOne, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
+        |> Array.choose (fun ((_, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
             if clauseOneSpaces <> clauseTwoSpaces then
                 { Range = clauseTwo.Range
                   Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")

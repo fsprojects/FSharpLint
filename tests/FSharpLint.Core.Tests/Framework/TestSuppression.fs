@@ -9,7 +9,7 @@ let lines text =
     FSharpLint.Framework.String.toLines text |> Array.map (fun (line, _, _) -> line)
 
 [<TestFixture>]
-type TestSuppression() =
+type internal TestSuppression() =
     [<Test>]
     member __.``Disable next line with rules specified suppresses as expected``() =
         let text = lines """

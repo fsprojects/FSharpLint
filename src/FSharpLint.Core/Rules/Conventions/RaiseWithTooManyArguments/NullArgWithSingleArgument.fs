@@ -1,4 +1,4 @@
-module FSharpLint.Rules.NullArgWithSingleArgument
+module internal FSharpLint.Rules.NullArgWithSingleArgument
 
 open FSharpLint.Framework.Rules
 

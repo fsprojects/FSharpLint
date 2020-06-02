@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxLinesInRecord
+module internal FSharpLint.Rules.MaxLinesInRecord
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

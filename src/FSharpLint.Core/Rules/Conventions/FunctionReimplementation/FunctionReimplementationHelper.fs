@@ -1,11 +1,11 @@
-module FSharpLint.Rules.Helper.FunctionReimplementation
+module internal FSharpLint.Rules.Helper.FunctionReimplementation
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let rec getLambdaParamIdent = function
-    | SynSimplePats.SimplePats([pattern], _) -> 
+    | SynSimplePats.SimplePats([pattern], _) ->
         let rec getIdent = function
             | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
             | SynSimplePat.Typed(simplePattern, _, _)
@@ -14,14 +14,14 @@ let rec getLambdaParamIdent = function
 
         getIdent pattern |> Some
     | SynSimplePats.SimplePats(_) -> None
-    | SynSimplePats.Typed(simplePatterns, _, _) -> 
+    | SynSimplePats.Typed(simplePatterns, _, _) ->
         getLambdaParamIdent simplePatterns
 
 let checkLambda (args:AstNodeRuleParams) checker =
     match args.AstNode with
-    | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
+    | AstNode.Expression(SynExpr.Lambda(_)) as lambda ->
         match lambda with
-        | Lambda(lambda, range) -> 
+        | Lambda(lambda, range) ->
             if (not << List.isEmpty) lambda.Arguments then
                 checker args.FileContent lambda range
             else Array.empty

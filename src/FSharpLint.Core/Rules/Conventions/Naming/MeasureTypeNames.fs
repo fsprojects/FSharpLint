@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MeasureTypeNames
+module internal FSharpLint.Rules.MeasureTypeNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

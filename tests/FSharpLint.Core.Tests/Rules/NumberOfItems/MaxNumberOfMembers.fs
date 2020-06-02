@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestMaxNumberOfMembers() =
+type internal TestMaxNumberOfMembers() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxNumberOfMembers.rule { MaxItems = 5 })
 
     [<Test>]
@@ -12,7 +12,7 @@ type TestMaxNumberOfMembers() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member val One = 0 with get, set
     member val Two = 0 with get, set
     member val Three = 0 with get, set
@@ -27,7 +27,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member val One = 0 with get, set
     member val Two = 0 with get, set
     member val Three = 0 with get, set
@@ -41,7 +41,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     abstract member One: unit -> unit
     abstract member Two: unit -> unit
     abstract member Three: unit -> unit
@@ -56,7 +56,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     abstract member One: unit -> unit
     abstract member Two: unit -> unit
     abstract member Three: unit -> unit
@@ -70,7 +70,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member this.One() = ()
     member this.Two() = ()
     member this.Three() = ()
@@ -85,7 +85,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member this.One() = ()
     member this.Two() = ()
     member this.Three() = ()
@@ -100,7 +100,7 @@ type Test() =
         this.Parse """
 module Program
 
-type Test() =
+type internal Test() =
     member this.One() = ()
     member this.Two() = ()
     member this.Three() = ()

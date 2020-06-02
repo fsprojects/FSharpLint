@@ -23,7 +23,7 @@ let private generateHintConfig hints =
     |> MergeSyntaxTrees.mergeHints
 
 [<AbstractClass>]
-type TestHintMatcherBase () =
+type internal TestHintMatcherBase () =
     inherit TestRuleBase.TestRuleBase()
 
     let mutable hintTrie = Edges.Empty

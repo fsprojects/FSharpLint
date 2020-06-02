@@ -8,7 +8,7 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
-type Context =
+type internal Context =
     { IndentationRuleContext : Map<int,bool*int>
       NoTabCharactersRuleContext : (string * Range.range) list }
 

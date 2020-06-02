@@ -1,4 +1,4 @@
-module FSharpLint.Rules.UselessBinding
+module internal FSharpLint.Rules.UselessBinding
 
 open System
 open FSharpLint.Framework

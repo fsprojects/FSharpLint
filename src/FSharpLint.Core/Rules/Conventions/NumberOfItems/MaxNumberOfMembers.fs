@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxNumberOfMembers
+module internal FSharpLint.Rules.MaxNumberOfMembers
 
 open System
 open FSharpLint.Framework

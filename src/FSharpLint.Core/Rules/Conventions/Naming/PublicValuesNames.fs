@@ -1,4 +1,4 @@
-module FSharpLint.Rules.PublicValuesNames
+module internal FSharpLint.Rules.PublicValuesNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

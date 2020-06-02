@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingPatternMatchClausesOnNewLine() =
+type internal TestFormattingPatternMatchClausesOnNewLine() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClausesOnNewLine.rule)
 
         [<Test>]

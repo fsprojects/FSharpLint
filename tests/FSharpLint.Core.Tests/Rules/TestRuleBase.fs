@@ -8,7 +8,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Suggestion
 
 [<AbstractClass>]
-type TestRuleBase () =
+type internal TestRuleBase () =
     let suggestions = ResizeArray<_>()
 
     abstract Parse : string * ?fileName:string * ?checkFile:bool * ?globalConfig:GlobalRuleConfig -> unit

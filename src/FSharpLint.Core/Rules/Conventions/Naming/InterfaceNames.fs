@@ -1,4 +1,4 @@
-module FSharpLint.Rules.InterfaceNames
+module internal FSharpLint.Rules.InterfaceNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

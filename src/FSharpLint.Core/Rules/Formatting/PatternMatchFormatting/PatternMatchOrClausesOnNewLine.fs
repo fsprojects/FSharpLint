@@ -1,4 +1,4 @@
-module FSharpLint.Rules.PatternMatchOrClausesOnNewLine
+module internal FSharpLint.Rules.PatternMatchOrClausesOnNewLine
 
 open System
 open FSharp.Compiler.SyntaxTree
@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
-let check args _ (clauses:SynMatchClause list) _ =
+let check _ _ (clauses:SynMatchClause list) _ =
     clauses
     |> List.toArray
     |> Array.collect (function

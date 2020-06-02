@@ -9,18 +9,15 @@ open FSharpLint.Framework.Suggestion
 
 // Non-standard record field names for serialization
 // fsharplint:disable RecordFieldNames
-type GlobalRuleConfig =
-    {
-        numIndentationSpaces : int
+type GlobalRuleConfig = {
+    numIndentationSpaces : int
+} with
+    static member Default = {
+        GlobalRuleConfig.numIndentationSpaces = 4
     }
-with
-    static member Default =
-        {
-            GlobalRuleConfig.numIndentationSpaces = 4
-        }
 // fsharplint:enable RecordFieldNames
 
-type AstNodeRuleParams =
+type internal AstNodeRuleParams =
     { AstNode : AstNode
       NodeHashcode : int
       NodeIndex : int
@@ -33,7 +30,7 @@ type AstNodeRuleParams =
       CheckInfo : FSharpCheckFileResults option
       GlobalConfig : GlobalRuleConfig }
 
-type LineRuleParams =
+type internal LineRuleParams =
     { Line : string
       LineNumber : int
       IsLastLine : bool
@@ -42,12 +39,12 @@ type LineRuleParams =
       Lines : string []
       GlobalConfig : GlobalRuleConfig }
 
-type RuleMetadata<'config> =
+type internal RuleMetadata<'config> =
   { Name : string
     Identifier : string
     RuleConfig : 'config }
 
-type AstNodeRuleConfig =
+type internal AstNodeRuleConfig =
   { Runner : AstNodeRuleParams -> WarningDetails []
     Cleanup : unit -> unit }
 
@@ -66,24 +63,24 @@ type NamingConfig =
       Prefix : string option
       Suffix : string option }
 
-type NamingRuleConfig =
+type internal NamingRuleConfig =
     { Config : NamingConfig
       GetIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
 
-type LineRuleConfig = { Runner : LineRuleParams -> WarningDetails [] }
+type internal LineRuleConfig = { Runner : LineRuleParams -> WarningDetails [] }
 
-type LineRuleConfigWithContext<'Context> = { Runner : 'Context -> LineRuleParams -> WarningDetails [] }
+type internal LineRuleConfigWithContext<'Context> = { Runner : 'Context -> LineRuleParams -> WarningDetails [] }
 
-type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
-type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
+type internal IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
+type internal NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
 
-type Rule =
+type internal Rule =
     | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
     | LineRule of RuleMetadata<LineRuleConfig>
     | IndentationRule of RuleMetadata<IndentationRuleConfig>
     | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
 
-let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details:WarningDetails) =
+let internal toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details:WarningDetails) =
     {
         LintWarning.RuleIdentifier = identifier
         FilePath = filePath
@@ -92,14 +89,14 @@ let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:str
         Details = details
     }
 
-let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
+let internal runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
     rule.RuleConfig.Runner config
     |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
-let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
+let internal runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
     rule.RuleConfig.Runner context config
     |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
-let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
+let internal runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
     rule.RuleConfig.Runner config
     |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)

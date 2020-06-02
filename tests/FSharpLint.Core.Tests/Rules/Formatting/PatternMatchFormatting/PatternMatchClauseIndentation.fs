@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingPatternMatchClauseIndentation() =
+type internal TestFormattingPatternMatchClauseIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule)
 
     [<Test>]

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.Helper.PatternMatchFormatting
+module internal FSharpLint.Rules.Helper.PatternMatchFormatting
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

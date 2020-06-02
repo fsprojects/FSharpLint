@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsRecordFieldNames() =
+type internal TestConventionsRecordFieldNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RecordFieldNames.rule config)
 
     [<Test>]

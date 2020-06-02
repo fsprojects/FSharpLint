@@ -13,7 +13,7 @@ open NUnit.Framework
 open TestUtils
 
 [<TestFixture>]
-type TestAst() =
+type internal TestAst() =
     let unionCaseName (x:'a) =
         match FSharpValue.GetUnionFields(x, typeof<'a>) with
         | case, _ -> case.Name

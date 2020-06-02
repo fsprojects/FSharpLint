@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsFunctionReimplementation() =
+type internal TestConventionsFunctionReimplementation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ReimplementsFunction.rule)
 
     [<Test>]
@@ -167,7 +167,7 @@ let f = fun _ -> ceil x
         this.AssertNoWarnings()
 
 [<TestFixture>]
-type TestConventionsCanBeReplacedWithComposition() =
+type internal TestConventionsCanBeReplacedWithComposition() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(CanBeReplacedWithComposition.rule)
 
     [<Test>]

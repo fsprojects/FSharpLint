@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestTypographyTrailingNewLineInFile() =
+type internal TestTypographyTrailingNewLineInFile() =
     inherit TestLineRuleBase.TestLineRuleBase(TrailingNewLineInFile.rule)
 
     [<Test>]

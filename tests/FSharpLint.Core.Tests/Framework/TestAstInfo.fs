@@ -4,10 +4,10 @@ open NUnit.Framework
 open FSharpLint.Framework.AstInfo
 
 [<TestFixture>]
-type TestAstInfo() =
+type internal TestAstInfo() =
 
     [<Test>]
-    member __.IsOperator() = 
+    member __.IsOperator() =
         Assert.IsTrue(isOperator "op_LeftShift")
 
         Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")

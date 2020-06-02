@@ -11,16 +11,13 @@ open Utilities
 
 /// Information for a file to be linted that is given to the analysers.
 [<NoEquality; NoComparison>]
-type FileParseInfo = {
+type internal FileParseInfo = {
     /// Contents of the file.
     Text: string
-
     /// File represented as an AST.
     Ast: ParsedInput
-
     /// Optional results of inferring the types on the AST (allows for a more accurate lint).
     TypeCheckResults: FSharpCheckFileResults option
-
     /// Path to the file.
     File: string
 }
@@ -86,7 +83,7 @@ let private dotnetCoreReferences () =
     |> List.distinctBy Path.GetFileName
     |> List.map (fun location -> "-r:" + location)
 
-let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
+let internal getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
     let sourceText = SourceText.ofString source
     #if NETSTANDARD2_0
     let assumeDotNetFramework = false
@@ -111,7 +108,7 @@ let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
     { options with OtherOptions = otherOptions }
 
 /// Parses a file using `FSharp.Compiler.Service`.
-let parseFile (checker:FSharpChecker) projectOptions filePath =
+let internal parseFile (checker:FSharpChecker) projectOptions filePath =
     let source = File.ReadAllText(filePath)
 
     let projectOptions =
@@ -122,6 +119,6 @@ let parseFile (checker:FSharpChecker) projectOptions filePath =
     parse filePath source (checker, projectOptions)
 
 /// Parses source code using `FSharp.Compiler.Service`.
-let parseSource (source:string) (checker:FSharpChecker) =
+let internal parseSource (source:string) (checker:FSharpChecker) =
     let options = getProjectOptionsFromScript checker "src.fs" source
     parse "src.fs" source (checker, options)

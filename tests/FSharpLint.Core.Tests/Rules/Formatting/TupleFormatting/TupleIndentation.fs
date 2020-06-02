@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingTupleIndentation() =
+type internal TestFormattingTupleIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleIndentation.rule)
 
         [<Test>]

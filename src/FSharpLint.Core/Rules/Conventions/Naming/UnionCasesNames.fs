@@ -1,4 +1,4 @@
-module FSharpLint.Rules.UnionCasesNames
+module internal FSharpLint.Rules.UnionCasesNames
 
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast

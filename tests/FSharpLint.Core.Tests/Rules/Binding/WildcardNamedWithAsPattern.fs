@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestBindingWildcardNamedWithAsPattern() =
+type internal TestBindingWildcardNamedWithAsPattern() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(WildcardNamedWithAsPattern.rule)
 
     [<Test>]

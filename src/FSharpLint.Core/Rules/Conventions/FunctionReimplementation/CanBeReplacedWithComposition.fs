@@ -1,4 +1,4 @@
-module FSharpLint.Rules.CanBeReplacedWithComposition
+module internal FSharpLint.Rules.CanBeReplacedWithComposition
 
 open System
 open FSharpLint.Framework

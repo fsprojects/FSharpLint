@@ -4,11 +4,11 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestBindingTupleOfWildcards() =
+type internal TestBindingTupleOfWildcards() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleOfWildcards.rule)
 
     [<Test>]
-    member this.TupleOfWildcards() = 
+    member this.TupleOfWildcards() =
         this.Parse """
 module Program
 
@@ -20,21 +20,21 @@ match Persian(1, 3) with
         Assert.IsTrue(this.ErrorExistsAt(7, 14))
 
     [<Test>]
-    member this.``Method's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+    member this.``Method's parameter list of wildcards should not be treated as tuple of wildcards.``() =
         this.Parse """
 module Program
 
-type Cat() = 
+type Cat() =
     member __.Persian(_, _) = ()"""
 
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.``Constructor's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+    member this.``Constructor's parameter list of wildcards should not be treated as tuple of wildcards.``() =
         this.Parse """
 module Program
 
-type Cat() = 
+type Cat() =
     new(_, _) = Cat()
 
     member __.Persian(_) = ()"""
@@ -42,11 +42,11 @@ type Cat() =
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.``Method with type argument's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
+    member this.``Method with type argument's parameter list of wildcards should not be treated as tuple of wildcards.``() =
         this.Parse """
 module Program
 
-type Cat() = 
+type Cat() =
     member __.Persian<'t>(_, _) = ()"""
 
         Assert.IsFalse(this.ErrorsExist)

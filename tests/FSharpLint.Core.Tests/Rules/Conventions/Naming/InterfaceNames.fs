@@ -10,7 +10,7 @@ let config =
       Prefix = Some "I"
       Suffix = None }
 [<TestFixture>]
-type TestConventionsInterfaceNames() =
+type internal TestConventionsInterfaceNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(InterfaceNames.rule config)
 
     [<Test>]

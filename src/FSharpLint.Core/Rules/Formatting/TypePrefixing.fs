@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TypePrefixing
+module internal FSharpLint.Rules.TypePrefixing
 
 open System
 open FSharp.Compiler.SyntaxTree

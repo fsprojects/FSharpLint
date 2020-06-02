@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TupleCommaSpacing
+module internal FSharpLint.Rules.TupleCommaSpacing
 
 open System
 open FSharp.Compiler.SyntaxTree

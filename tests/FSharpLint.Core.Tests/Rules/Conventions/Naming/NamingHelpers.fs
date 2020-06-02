@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules.Helper.Naming
 
 [<TestFixture>]
-type TestConventionsNamingHelpers() =
+type internal TestConventionsNamingHelpers() =
 
     [<Test>]
     member __.IsPascalCase() =

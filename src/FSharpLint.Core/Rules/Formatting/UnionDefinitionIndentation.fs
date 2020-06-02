@@ -1,4 +1,4 @@
-module FSharpLint.Rules.UnionDefinitionIndentation
+module internal FSharpLint.Rules.UnionDefinitionIndentation
 
 open System
 open FSharp.Compiler.SyntaxTree

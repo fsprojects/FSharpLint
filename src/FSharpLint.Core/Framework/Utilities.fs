@@ -1,17 +1,17 @@
 ﻿namespace FSharpLint.Framework
 
-module Utilities =
+module internal Utilities =
 
     /// Fast hash of two objects without having to allocate
     /// (e.g. a common approach would be to take the hash code of a tuple of the two objects).
-    let inline hash2 one two =
+    let hash2 one two =
         let mutable current = 23
         current <- current * 31 + hash one
         current * 31 + hash two
 
     let (</>) x y = System.IO.Path.Combine(x, y)
 
-module Dictionary =
+module internal Dictionary =
 
     open System.Collections.Generic
 
@@ -20,8 +20,8 @@ module Dictionary =
             dict.Remove(key) |> ignore
 
         dict.Add(key, value)
-        
-module ExpressionUtilities =
+
+module internal ExpressionUtilities =
 
     open System
     open FSharp.Compiler
@@ -78,17 +78,17 @@ module ExpressionUtilities =
     /// Converts a LongIdentWithDots to a String.
     let longIdentWithDotsToString (lidwd:LongIdentWithDots) =
         lidwd.Lid |> longIdentToString
-        
+
     /// Tries to find the source code within a given range.
     let tryFindTextOfRange (range:range) (text:string) =
         let startIndex = findPos range.Start text
         let endIndex = findPos range.End text
 
         match (startIndex, endIndex) with
-        | Some(startIndex), Some(endIndex) -> 
+        | Some(startIndex), Some(endIndex) ->
             text.Substring(startIndex, endIndex - startIndex) |> Some
         | _ -> None
-        
+
     let getLeadingSpaces (range:range) (text:string) =
         let range = mkRange "" (mkPos range.StartLine 0) range.End
         tryFindTextOfRange range text
@@ -112,11 +112,11 @@ module ExpressionUtilities =
         if typeStrings.Length = typeArgs.Length
         then typeStrings |> String.concat "," |> Some
         else None
-        
+
     /// Counts the number of comment lines preceeding the given range of text.
     let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
         let range = mkRange "" startPos endPos
-        
+
         tryFindTextOfRange range text
         |> Option.map (fun preceedingText ->
             let lines =
@@ -127,24 +127,24 @@ module ExpressionUtilities =
             |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
             |> Array.length)
         |> Option.defaultValue 0
-        
+
     let rangeContainsOtherRange (containingRange:range) (range:range) =
         range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
-        
-module String =
-    
+
+module internal String =
+
     open System.IO
-    
+
     let toLines input =
         let lines = ResizeArray()
         use reader = new StringReader(input)
 
-        let readLine () = 
+        let readLine () =
             match reader.ReadLine() with
             | null -> None
             | line -> Some line
 
-        let rec iterateLines currentLine i = 
+        let rec iterateLines currentLine i =
             match currentLine with
             | Some line ->
                 let nextLine = readLine ()
@@ -156,5 +156,5 @@ module String =
             | None -> ()
 
         iterateLines (readLine ()) 0
-        
+
         lines.ToArray()

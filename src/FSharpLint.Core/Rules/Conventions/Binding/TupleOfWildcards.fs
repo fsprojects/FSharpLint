@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TupleOfWildcards
+module internal FSharpLint.Rules.TupleOfWildcards
 
 open System
 open FSharpLint.Framework

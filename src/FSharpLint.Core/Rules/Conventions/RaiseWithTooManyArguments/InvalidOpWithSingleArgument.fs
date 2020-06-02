@@ -1,4 +1,4 @@
-module FSharpLint.Rules.InvalidOpWithSingleArgument
+module internal FSharpLint.Rules.InvalidOpWithSingleArgument
 
 open FSharpLint.Framework.Rules
 

@@ -4,7 +4,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingUnionDefinitionIndentation() =
+type internal TestFormattingUnionDefinitionIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UnionDefinitionIndentation.rule)
 
     [<Test>]

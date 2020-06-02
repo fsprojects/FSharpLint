@@ -1,4 +1,4 @@
-module FSharpLint.Rules.RedundantNewKeyword
+module internal FSharpLint.Rules.RedundantNewKeyword
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.RecursiveAsyncFunction
+module internal FSharpLint.Rules.RecursiveAsyncFunction
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

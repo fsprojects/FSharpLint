@@ -8,7 +8,7 @@ open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
 
 [<AbstractClass>]
-type TestNoTabCharactersRuleBase (rule:Rule) =
+type internal TestNoTabCharactersRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =

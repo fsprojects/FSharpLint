@@ -10,7 +10,7 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsMeasureTypesNames() =
+type internal TestConventionsMeasureTypesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MeasureTypeNames.rule config)
 
     [<Test>]

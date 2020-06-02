@@ -4,9 +4,9 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestFormattingTupleCommaSpacing() =
+type internal TestFormattingTupleCommaSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleCommaSpacing.rule)
-    
+
         [<Test>]
     member this.``Error for tuple instantiation without space after comma``() =
         this.Parse("""
@@ -65,7 +65,7 @@ module Program
 let x = (1, 2)""")
 
         Assert.IsTrue(this.NoErrorsExist)
-        
+
     [<Test>]
     member this.``No error for tuple instantiation with newline after comma``() =
         this.Parse("""

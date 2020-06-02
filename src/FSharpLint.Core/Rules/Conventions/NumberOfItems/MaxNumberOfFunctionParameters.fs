@@ -1,4 +1,4 @@
-module FSharpLint.Rules.MaxNumberOfFunctionParameters
+module internal FSharpLint.Rules.MaxNumberOfFunctionParameters
 
 open System
 open FSharpLint.Framework

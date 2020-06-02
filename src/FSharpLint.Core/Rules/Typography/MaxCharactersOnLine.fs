@@ -9,7 +9,7 @@ open FSharp.Compiler.Range
 [<RequireQualifiedAccess>]
 type Config = { MaxCharactersOnLine : int }
 
-let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
+let private checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let maxCharacters = config.MaxCharactersOnLine
     let lineLength = String.length args.Line
     if lineLength > maxCharacters then
@@ -21,7 +21,7 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     else
         Array.empty
 
-let rule config =
+let internal rule config =
     { Name = "MaxCharactersOnLine"
       Identifier = Identifiers.MaxCharactersOnLine
       RuleConfig = { LineRuleConfig.Runner = checkMaxCharactersOnLine config } }

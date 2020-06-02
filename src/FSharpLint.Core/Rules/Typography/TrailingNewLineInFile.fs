@@ -1,4 +1,4 @@
-module FSharpLint.Rules.TrailingNewLineInFile
+module internal FSharpLint.Rules.TrailingNewLineInFile
 
 open System
 open FSharpLint.Framework

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.HintMatcher
+module internal FSharpLint.Rules.HintMatcher
 
 open System
 open System.Collections.Generic
