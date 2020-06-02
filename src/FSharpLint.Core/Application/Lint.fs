@@ -86,7 +86,7 @@ module Lint =
         FilePath : string option
     }
 
-    let private reportLintEvent (handleLintEvent : (LintEvent -> unit) option) (lintEvent : LintEvent) =
+    let private reportLintEvent (handleLintEvent:(LintEvent -> unit) option) (lintEvent:LintEvent) =
         handleLintEvent |> Option.iter (fun handle -> handle lintEvent)
 
     let private lint (lintParams:LintParameters) (config:Configuration) (fileInfo:ParseFile.FileParseInfo) =

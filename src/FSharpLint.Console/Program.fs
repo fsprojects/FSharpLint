@@ -47,21 +47,6 @@ with
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
 
-let private parserProgress (output:Output.IOutput) = function
-    | Starting file ->
-        String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
-    | LintWarning warning ->
-        output.WriteWarning warning
-    | ReachedEnd (_, warnings) ->
-        String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
-    | Failed (file, parseException) ->
-        String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-        "Exception Message:" + Environment.NewLine +
-            parseException.Message + Environment.NewLine +
-            "Exception Stack Trace:" + Environment.NewLine +
-            parseException.StackTrace + Environment.NewLine
-        |> output.WriteError
-
 /// Infers the file type of the target based on its file extension.
 let private inferFileType (target:string) =
     if target.EndsWith ".fs" || target.EndsWith ".fsx" then
@@ -86,34 +71,13 @@ let private start (arguments:ParseResults<ToolArgs>) =
 
     let output =
         match arguments.TryGetResult Format with
-        | Some OutputFormat.MSBuild -> Output.MSBuildOutput() :> Output.IOutput
+        | Some OutputFormat.MSBuild -> Output.MSBuild() :> Output.IOutput
         | Some OutputFormat.Standard
         | Some _
-        | None -> Output.StandardOutput() :> Output.IOutput
-
-    let handleError (str:string) =
-        output.WriteError str
-        exitCode <- -1
+        | None -> Output.Standard() :> Output.IOutput
 
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
-
-        let handleLintResult = function
-            | Ok warnings ->
-                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
-                |> output.WriteInfo
-                if not (List.isEmpty warnings) then exitCode <- -1
-            | Error (FailedToLoadFile filePath) ->
-                String.Format(Resources.GetString("ConsoleCouldNotFindFile"), filePath)
-                |> handleError
-            | Error (RunTimeConfigError error) ->
-                String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error)
-                |> handleError
-            | Error (FailedToParseFiles failures) ->
-                let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
-                "Lint failed to parse files. Failed with: " + failureReasons
-                |> handleError
-
         let lintConfig = lintArgs.TryGetResult Lint_Config
 
         let configParam =
@@ -126,7 +90,7 @@ let private start (arguments:ParseResults<ToolArgs>) =
         let lintParams =
             { CancellationToken = None
               Configuration = configParam
-              ReportLinterProgress = Some (parserProgress output)
+              HandleLintEvent = Some output.HandleLintEvent
               ReleaseConfiguration = releaseConfig }
 
         let target = lintArgs.GetResult Target
@@ -140,12 +104,18 @@ let private start (arguments:ParseResults<ToolArgs>) =
                 | FileType.Solution -> Lint.lintSolution lintParams target
                 | FileType.Project
                 | _ -> Lint.lintProject lintParams target
-            handleLintResult lintResult
+
+            match lintResult with
+            | Ok warnings -> if not (List.isEmpty warnings) then exitCode <- -1
+            | Error _ -> exitCode <- -1
+
+            output.HandleLintResult lintResult
         with
-        | e ->
+        | exn ->
+            exitCode <- -1
             let target = if fileType = FileType.Source then "source" else target
-            sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target e.Message e.StackTrace
-            |> handleError
+            let message = sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target exn.Message exn.StackTrace
+            output.HandleException message
     | _ -> ()
 
     exitCode

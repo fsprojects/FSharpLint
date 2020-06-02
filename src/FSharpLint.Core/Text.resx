@@ -133,7 +133,7 @@
     <value>========== Summary: {0} warnings ==========</value>
   </data>
   <data name="ConsoleFinishedFile" xml:space="preserve">
-    <value>========== Finished: {0} warnings ==========</value>
+    <value>========== Finished: {0}, {1} warnings ==========</value>
   </data>
   <data name="ConsoleStartingFile" xml:space="preserve">
     <value>========== Linting {0} ==========</value>

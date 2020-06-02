@@ -41,17 +41,14 @@ module Lint =
     [<NoEquality; NoComparison>]
     type LintParameters = {
         /// Cancels a lint in progress.
-        CancellationToken: CancellationToken option
-
+        CancellationToken:CancellationToken option
         /// Lint configuration to use.
         /// Can either specify a full configuration object, or a path to a file to load the configuration from.
         /// You can also explicitly specify the default configuration.
-        Configuration: ConfigurationParam
-
+        Configuration:ConfigurationParam
         /// Function to be called for events which occur as the linter runs.
-        HandleLintEvent : (LintEvent -> unit) option
-
-        ReleaseConfiguration : string option
+        HandleLintEvent:(LintEvent -> unit) option
+        ReleaseConfiguration:string option
     } with
         static member Default:LintParameters
 
