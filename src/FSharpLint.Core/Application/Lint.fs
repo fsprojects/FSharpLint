@@ -23,60 +23,93 @@ module ConfigurationManagement =
 [<AutoOpen>]
 module Lint =
 
+    /// Events which may occur as the linter is running.
+    type LintEvent =
+        /// A warning has been produced by the linter.
+        | ReceivedWarning of Suggestion.LintWarning
+        /// Linter started processing a file.
+        | StartedLintingFile of fileName : string
+        /// A file has completed linting with the provided warnings.
+        | FinishedLintingFile of fileName : string * Suggestion.LintWarning list
+        /// Linting has failed for the provided file.
+        | FailedToLintFile of fileName : string * exn
+
+    type ConfigurationParam =
+        /// Explicit Configuration object to use.
+        | Configuration of Configuration
+        /// Load configuration from provided file.
+        | FromFile of configPath:string
+        /// Use default configuration.
+        | Default
+
     /// Reason for the linter failing.
     [<NoComparison>]
     type LintFailure =
         /// The specified file for linting could not be found.
         | FailedToLoadFile of string
-
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
         | RunTimeConfigError of string
-
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files.
         | FailedToParseFiles of ParseFile.ParseFileFailure list
 
-    /// Provides information on what the linter is currently doing.
-    [<NoComparison>]
-    type LintProgress =
-        /// Started parsing a file (file path).
-        | Starting of string
-
-        /// Individual lint warning received for a file.
-        | ReceivedWarning of Suggestion.LintWarning
-
-        /// Finished parsing a file (file path).
-        | ReachedEnd of string * Suggestion.LintWarning list
-
-        /// Failed to parse a file (file path, exception that caused failure).
-        | Failed of string * System.Exception
-
+    /// Parameters that can be provided to the linter.
     [<NoEquality; NoComparison>]
-    type LintInfo =
-        { CancellationToken: CancellationToken option
-          ReportLinterProgress: LintProgress -> unit
-          Configuration: Configuration.Configuration }
+    type LintParameters = {
+        /// Cancels a lint in progress.
+        CancellationToken: CancellationToken option
+        /// Lint configuration to use.
+        Configuration: ConfigurationParam
+        /// This function will be called for events which happen as the linter is running.
+        HandleLintEvent: (LintEvent -> unit) option
+        /// The configuration under which the linter will try to perform parsing.
+        ReleaseConfiguration : string option
+    } with
+        static member Default = {
+            LintParameters.CancellationToken = None
+            Configuration = Default
+            HandleLintEvent = None
+            ReleaseConfiguration = None
+        }
 
-    let lint (lintInfo:LintInfo) (fileInfo:ParseFile.FileParseInfo) =
+    /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
+    /// you want to lint then this can be used to provide the parsed information to prevent the
+    /// linter from parsing the file again.
+    [<NoEquality; NoComparison>]
+    type ParsedFileInformation = {
+        /// File represented as an AST.
+        Ast: FSharp.Compiler.SyntaxTree.ParsedInput
+        /// Contents of the file.
+        Source: string
+        /// Optional results of inferring the types on the AST (allows for a more accurate lint).
+        TypeCheckResults: FSharpCheckFileResults option
+        /// Path to file for source.
+        FilePath : string option
+    }
+
+    let private reportLintEvent (handleLintEvent : (LintEvent -> unit) option) (lintEvent : LintEvent) =
+        handleLintEvent |> Option.iter (fun handle -> handle lintEvent)
+
+    let private lint (lintParams:LintParameters) (config:Configuration) (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
 
         let suggest (warning:Suggestion.LintWarning) =
-            lintInfo.ReportLinterProgress (LintWarning warning)
+            LintEvent.ReceivedWarning warning |> reportLintEvent lintParams.HandleLintEvent
             fileWarnings.Add warning
 
         let trySuggest (suggestion:Suggestion.LintWarning) =
             if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
             else suggestionsRequiringTypeChecks.Push suggestion
 
-        Starting fileInfo.File |> lintInfo.ReportLinterProgress
+        StartedLintingFile fileInfo.File |> reportLintEvent lintParams.HandleLintEvent
 
         let cancelHasNotBeenRequested () =
-            match lintInfo.CancellationToken with
+            match lintParams.CancellationToken with
             | Some ct -> not ct.IsCancellationRequested
             | None -> true
 
-        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
+        let enabledRules = Configuration.flattenConfig config
 
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line)
         let allRuleNames =
@@ -106,7 +139,7 @@ module Lint =
             if cancelHasNotBeenRequested () then
                 let runSynchronously work =
                     let timeoutMs = 2000
-                    match lintInfo.CancellationToken with
+                    match lintParams.CancellationToken with
                     | Some cancellationToken -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
@@ -127,52 +160,11 @@ module Lint =
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
-        | e -> Failed (fileInfo.File, e) |> lintInfo.ReportLinterProgress
+        | exn -> FailedToLintFile (fileInfo.File, exn) |> reportLintEvent lintParams.HandleLintEvent
 
-        ReachedEnd (fileInfo.File, Seq.toList fileWarnings) |> lintInfo.ReportLinterProgress
+        FinishedLintingFile (fileInfo.File, Seq.toList fileWarnings) |> reportLintEvent lintParams.HandleLintEvent
 
         fileWarnings.ToArray() |> Array.toList
-
-    type ConfigurationParam =
-        | Configuration of Configuration
-        | FromFile of configPath:string
-        | Default
-
-    /// Parameters that can be provided to the linter.
-    [<NoEquality; NoComparison>]
-    type LintParameters = {
-        /// Cancels a lint in progress.
-        CancellationToken: CancellationToken option
-        /// Lint configuration to use.
-        /// Can either specify a full configuration object, or a path to a file to load the configuration from.
-        /// You can also explicitly specify the default configuration.
-        Configuration: ConfigurationParam
-        /// This function will be called any time the linter makes progress.
-        ReportLinterProgress: (LintProgress -> unit) option
-        /// The configuration under which the linter will try to perform parsing.
-        ReleaseConfiguration : string option
-    } with
-        static member Default = {
-            LintParameters.CancellationToken = None
-            Configuration = Default
-            ReportLinterProgress = None
-            ReleaseConfiguration = None
-        }
-
-    /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
-    /// you want to lint then this can be used to provide the parsed information to prevent the
-    /// linter from parsing the file again.
-    [<NoEquality; NoComparison>]
-    type ParsedFileInformation = {
-        /// File represented as an AST.
-        Ast: FSharp.Compiler.SyntaxTree.ParsedInput
-        /// Contents of the file.
-        Source: string
-        /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-        TypeCheckResults: FSharpCheckFileResults option
-        /// Path to file for source.
-        FilePath : string option
-    }
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
     let private getConfig (configParam:ConfigurationParam) =
@@ -195,11 +187,8 @@ module Lint =
 
             fileInfos
             |> List.filter (fun fileInfo -> not (Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles fileInfo.File))
-            |> List.collect (fun fileInfo ->
-                lint
-                    { Configuration = config
-                      CancellationToken = lintParams.CancellationToken
-                      ReportLinterProgress = Option.defaultValue ignore lintParams.ReportLinterProgress } fileInfo))
+            |> List.collect (lint lintParams config))
+
 
     /// Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
     let lintProject (lintParams:LintParameters) (projectFilePath:string) =
