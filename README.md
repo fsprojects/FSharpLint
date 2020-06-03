@@ -52,13 +52,14 @@ Package | Version
 2. Create version tag (`git tag vX.Y.Z`)
 3. Push the tag to the repo `git push origin vX.Y.Z` - this will start CI process that will create a GitHub release and publish the packages to NuGet
 
+## How to contribute
+
+Bug reports, feature requests, and pull requests are very welcome! Please [read the Contribution Guidelines](./CONTRIBUTING.md)
+here to get started.
+
 ## Licensing
 
 The project is licensed under MIT. For more information on the license see the LICENSE file.
-
-## Contact
-
-Feel free to post an issue on [github](../../issues) if you have any questions, have suggestions, or have found a defect.
 
 ## Maintainer(s)
 
