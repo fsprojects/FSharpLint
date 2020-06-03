@@ -50,9 +50,7 @@ Package | Version
 
 1. Update [CHANGELOG.md](./CHANGELOG.md) by adding new entry (`## [X.Y.Z]`) and commit it.
 2. Create version tag (`git tag vX.Y.Z`)
-3. Run `dotnet fake build -t Pack` to create the nuget package and test/examine it locally.
-4. Push the tag to the repo `git push origin vX.Y.Z` - this will start CI process that will create GitHub release and put generated NuGet packages in it
-5. Upload generated packages into NuGet.org
+3. Push the tag to the repo `git push origin vX.Y.Z` - this will start CI process that will create a GitHub release and publish the packages to NuGet
 
 ## Licensing
 

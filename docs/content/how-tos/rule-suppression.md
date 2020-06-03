@@ -1,5 +1,5 @@
 ---
-title: Suppress Rules
+title: Rule Suppression
 category: how-to
 menu_order: 4
 ---
