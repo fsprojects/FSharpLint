@@ -4,7 +4,7 @@ category: how-to
 menu_order: 4
 ---
 
-# Suppress Rules
+# Rule Suppression
 
 The linter's rules can be suppressed using structured comments.
 
@@ -17,7 +17,7 @@ The following comments are available for use:
 
 Only one structured comment can be specified per line; any additional ones will be ignored.
 
-### Disabling Specific Rules
+## Disabling Specific Rules
 
 The disable comments allow for specific rules to be disabled by specifying the rules whitespace separated at the end of the comment, for example:
 

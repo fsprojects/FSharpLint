@@ -55,7 +55,7 @@ Package | Version
 ## How to contribute
 
 Bug reports, feature requests, and pull requests are very welcome! Please [read the Contribution Guidelines](./CONTRIBUTING.md)
-here to get started.
+to get started.
 
 ## Licensing
 

@@ -18,6 +18,17 @@ setting that each rule depends on. The config is as follows, but can be complete
       }
     }
 
+## Ignoring Files
+
+In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:
+
+  { "ignoreFiles": ["assemblyinfo.*"] }
+
+* Directories in the path must be separated using `/`
+* If the path ends with a `/` then everything inside of a matching directory shall be excluded.
+* If the path does not end with a `/` then all matching files are excluded.
+
+
 ## Rule Lists
 
 The following rules can be specified for linting.

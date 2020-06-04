@@ -6,13 +6,26 @@ menu_order: 1
 
 # Overview
 
-FSharpLint is a lint tool for F#. It can be run as a dotnet tool, and also integrates with Ionide for VS Code.
+FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
+The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
-> The term [lint] is now applied generically to tools that flag suspicious usage in software written in any computer language - [_Wikipedia_](http://en.wikipedia.org/wiki/Lint_(software))
+The project aims to let the user know of problems through [matching user defined hints](http://fsprojects.github.io/FSharpLint/rules/FL0065.html)
+a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules
+in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
-Using a `.fsproj` (F# project) or `.sln` (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.
+Using a `.fsproj` (F# project) or `.sln` (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for
+code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.
 
-#### Example Usage of the Tool
+## Usage
+
+FSharpLint can be used in several ways:
+
+* [Running as dotnet tool from command line](/how-tos/install-dotnet-tool.html).
+* [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
+* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](/how-tos/msbuild-task.html).
+* [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
+
+### Example Usage
 
 The following program:
 
@@ -72,44 +85,22 @@ After refactoring again we have with no lint errors:
         printfn "%d" x
         0
 
-#### Building The Tool
+## Configuration Files
 
-On windows run `build.cmd` and on unix based systems run `build.sh`.
+Configuration of the tool is done using JSON.
+A single JSON file containing the default configuration for all rules
+is [included inside of the software](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json).
 
-#### Running The Tool
+By default, FSharpLint will use the default configuration. You can override this to point
+to a different file, for example by using the `--lint-config` flag in the dotnet tool.
 
-FSharpLint can be used in several ways:
+See the [Rule Configuration page](/how-tos/rule-configuration.html) for more info.
 
-* [Running as dotnet tool from command line](DotnetTool.html).
-* [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
-* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](MSBuildTask.html).
-* [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
+## Suppressing rules in code
 
-#### Rules
+Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](/how-tos/rule-suppression.html) page for more information.
 
-See a full list of the available rules [here](Rules.html). Each rule has its own page with more information.
-
-#### Suppressing rules in code
-
-Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](Suppression.html) page for more information.
-
-#### Configuration Files
-
-Configuration of the tool is done using JSON. Configuration files must be named: `fsharplint.json`. A single JSON file containing the default configuration for all rules is [included inside of the software](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/DefaultConfiguration.json).
-
-By default, FSharpLint will try to load the configuration from the file `./fsharplint.json`. You can override this to point to a different file, for example by using the `--lint-config` flag in the dotnet tool.
-
-#### Ignoring Files
-
-In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:
-
-  { "ignoreFiles": ["assemblyinfo.*"] }
-
-* Directories in the path must be separated using `/`
-* If the path ends with a `/` then everything inside of a matching directory shall be excluded.
-* If the path does not end with a `/` then all matching files are excluded.
-
-#### Running Lint From An Application
+## Running Lint From An Application
 
 Install the [`FSharp.Core` nuget package](https://www.nuget.org/packages/FSharpLint.Core/).
 
