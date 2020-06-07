@@ -7,19 +7,30 @@ open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+let private boolFunctions =
+    Set.ofList ["op_BooleanOr"; "op_BooleanAnd"; "not"]
+
 let private validateCondition (maxBooleanOperators:int) condition =
     let rec countBooleanOperators total = function
         | SynExpr.App(_, _, expr, SynExpr.Ident(ident), _)
         | SynExpr.App(_, _, SynExpr.Ident(ident), expr, _) ->
-            if List.exists ((=) ident.idText) ["op_BooleanOr"; "op_BooleanAnd"; "not"] then
+            if Set.contains ident.idText boolFunctions then
                 countBooleanOperators (total + 1) expr
             else
                 countBooleanOperators total expr
         | SynExpr.App(_, _, expr, expr2, _) ->
-            total + countBooleanOperators 0 expr + countBooleanOperators 0 expr2
+            let left = countBooleanOperators 0 expr
+            let right = countBooleanOperators 0 expr2
+            total + left + right
         | SynExpr.Paren(expr, _, _, _) ->
             countBooleanOperators total expr
-        | _ -> total
+        | SynExpr.Ident ident ->
+            if Set.contains ident.idText boolFunctions then
+                total + 1
+            else
+                total
+        | x ->
+            total
 
     let ruleName = "MaxNumberOfBooleanOperatorsInCondition"
 
