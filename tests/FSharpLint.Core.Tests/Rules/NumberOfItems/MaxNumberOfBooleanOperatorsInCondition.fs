@@ -25,4 +25,4 @@ module Program
 if not true && (false && false) || true (&&) (false) then
     ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 3))
+        Assert.ErrorExistsAt(this, (4, 3))

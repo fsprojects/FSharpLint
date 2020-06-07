@@ -18,7 +18,7 @@ module Goat
 let (a, b) = (1, 2)
 let valid = not (a = b)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 12))
+        Assert.ErrorExistsAt(this, (5, 12))
 
     [<Test>]
     member this.MatchFunctionApplication() =
@@ -29,7 +29,7 @@ module Goat
 
 List.fold (+) 0 x""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchInfixExpression() =
@@ -40,7 +40,7 @@ module Goat
 
 4 + 4""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchPrefixExpression() =
@@ -51,7 +51,7 @@ module Goat
 
 4 + %4""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.``Match address of operator with a single ampersand in expression``() =
@@ -62,7 +62,7 @@ module Goat
 
 4 + &4""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.``Match address of operator with two ampersands in expression``() =
@@ -73,7 +73,7 @@ module Goat
 
 4 + &&4""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchParenthesesInHintExpression() =
@@ -84,7 +84,7 @@ module Goat
 
 6 + 4 / 5""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchParenthesesExpression() =
@@ -95,7 +95,7 @@ module Goat
 
 6 + (4 + (5))""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchLambda() =
@@ -106,7 +106,7 @@ module Goat
 
 let f = fun x y z -> x + z""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.ErrorExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchWildcardLambda() =
@@ -117,7 +117,7 @@ module Goat
 
 let f = fun _ -> 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.ErrorExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchMultipleWildcardLambda() =
@@ -128,7 +128,7 @@ module Goat
 
 let f = fun _ _ -> 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.ErrorExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchMultipleWildcardAndVariableLambda() =
@@ -139,7 +139,7 @@ module Goat
 
 let f = fun _ a _ x -> 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.ErrorExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchIdLambda() =
@@ -150,7 +150,7 @@ module Goat
 
 let f = fun x -> x""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.ErrorExistsAt(this, (4, 8))
 
     [<Test>]
     member this.DontMatchIdLambda() =
@@ -183,7 +183,7 @@ module Goat
 
 [1;2;3] |> List.fold (+) 0""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchMultipleFunctionApplications() =
@@ -194,7 +194,7 @@ module Goat
 
 [1;2;3] |> List.sort |> List.head""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchTupleApplication() =
@@ -205,7 +205,7 @@ module Goat
 
 fst (1, 0) |> ignore""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchListAppendItem() =
@@ -216,7 +216,7 @@ module Goat
 
 1::[] |> ignore""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchAppendListToList() =
@@ -227,7 +227,7 @@ module Goat
 
 [1]@[2] |> ignore""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchListAppendItemInPattern() =
@@ -240,7 +240,7 @@ match [] with
 | x::[] -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.ErrorExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchTupleInPattern() =
@@ -253,7 +253,7 @@ match ([], []) with
 | (_, []) -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 3))
+        Assert.ErrorExistsAt(this, (5, 3))
 
     [<Test>]
     member this.MatchIntegerConstantInPattern() =
@@ -266,7 +266,7 @@ match 0 with
 | 0 -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.ErrorExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchListInPattern() =
@@ -279,7 +279,7 @@ match [] with
 | [0; 1; 2;] -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.ErrorExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchArrayInPattern() =
@@ -292,7 +292,7 @@ match [] with
 | [|0; 1; 2;|] -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.ErrorExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchEmptyArray() =
@@ -303,7 +303,7 @@ module Goat
 
 Array.isEmpty [||]""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchOrPattern() =
@@ -316,7 +316,7 @@ match [] with
 | [] | [0] -> ()
 | _ -> ()""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.ErrorExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchIfStatement() =
@@ -327,7 +327,7 @@ module Goat
 
 if true then true else false""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchElseIfStatement() =
@@ -338,7 +338,7 @@ module Goat
 
 if true then true else if true then true else false""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchSingleParamStaticMethod() =
@@ -349,7 +349,7 @@ module Goat
 
 System.String.Copy("dog")""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchMultiParamStaticMethod() =
@@ -360,7 +360,7 @@ module Goat
 
 System.String.Compare("dog", "cat")""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.NamedParameterShouldNotBeTreatedAsInfixOperation() =

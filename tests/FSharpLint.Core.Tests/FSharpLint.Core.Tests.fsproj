@@ -11,6 +11,7 @@
     <!-- Framework -->
     <!-- Rules -->
     <Compile Include="Rules\TestRuleBase.fs" />
+    <Compile Include="NUnit.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />
     <Compile Include="Rules\TestHintMatcherBase.fs" />
     <Compile Include="Rules\TestIndentationRule.fs" />
