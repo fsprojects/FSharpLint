@@ -172,7 +172,7 @@ module Goat
 
 (+) 1 <| 2 + 3""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 1))
+        Assert.ErrorExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchFunctionApplicationWithForwardPipe() =
