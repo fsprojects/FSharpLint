@@ -33,6 +33,8 @@ module Lint =
         | FinishedLintingFile of fileName : string * Suggestion.LintWarning list
         /// Linting has failed for the provided file.
         | FailedToLintFile of fileName : string * exn
+        /// Linter produced a log message.
+        | LogMessage of message : string
 
     type ConfigurationParam =
         /// Explicit Configuration object to use.
@@ -89,6 +91,7 @@ module Lint =
     let private reportLintEvent (handleLintEvent:(LintEvent -> unit) option) (lintEvent:LintEvent) =
         handleLintEvent |> Option.iter (fun handle -> handle lintEvent)
 
+    /// Executes the linter with the provided parameters against the provided file.
     let private lint (lintParams:LintParameters) (config:Configuration) (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
