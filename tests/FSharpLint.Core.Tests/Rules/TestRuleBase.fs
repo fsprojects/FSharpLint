@@ -26,6 +26,11 @@ type TestRuleBase () =
         else
             suggestions.Add(suggestion)
 
+    member __.ErrorRanges =
+        suggestions
+        |> Seq.map (fun s -> (s.Details.Range.StartLine, s.Details.Range.StartColumn))
+        |> List.ofSeq
+
     member __.ErrorExistsAt(startLine, startColumn) =
         suggestions
         |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)

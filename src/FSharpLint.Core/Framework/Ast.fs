@@ -195,6 +195,8 @@ module Ast =
         | SynType.StaticConstantExpr(expression, _) -> add <| expressionNode expression
         | SynType.AnonRecd (_, typeNames, _) ->
             typeNames |> List.revIter (snd >> typeNode >> add)
+        | SynType.Paren(innerType, _) ->
+            add <| typeNode innerType
 
     /// Concatenates the typed-or-untyped structure of `SynSimplePats` into a `SynSimplePat list` to keep other code
     /// mostly unchanged.
