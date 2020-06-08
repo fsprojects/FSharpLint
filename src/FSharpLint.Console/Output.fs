@@ -19,7 +19,7 @@ let private getParseFailureReason = function
     | ParseFile.AbortedTypeCheck -> "Aborted type check."
 
 [<RequireQualifiedAccess>]
-type Standard (allFiles : bool) =
+type Standard (allFiles : bool, verbose : bool) =
 
     let getErrorMessage (range:FSharp.Compiler.Range.range) =
         Resources.Format("LintSourceError", range.StartLine, range.StartColumn)
@@ -53,6 +53,11 @@ type Standard (allFiles : bool) =
 
         member __.HandleLintEvent (event : LintEvent) =
             match event with
+            | LintEvent.LogMessage (message, isError) when verbose ->
+                if isError then
+                    eprintfn "%s" message
+                else
+                    printfn "%s" message
             | LintEvent.FinishedLintingFile (fileName, warnings) ->
                 if allFiles || not (List.isEmpty warnings) then
                     Resources.Format("ConsoleStartingFile", fileName) |> writeInfo

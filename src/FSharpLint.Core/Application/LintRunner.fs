@@ -13,6 +13,7 @@ type internal Context =
       NoTabCharactersRuleContext : (string * Range.range) list }
 
 let internal runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray skipArray =
+    use logTime = new Log.TimeLogger(Log.info "%s", sprintf "runAstNodeRules|filePath=%s" filePath)
     let mutable indentationRuleState = Map.empty
     let mutable noTabCharactersRuleState = List.empty
 
@@ -39,7 +40,9 @@ let internal runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalC
             noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
 
             rules
-            |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
+            |> Array.collect (fun rule ->
+                use logRuleTime = new Log.TimeLogger(Log.info "%s", sprintf "runAstNodeRule|filePath=%s|ruleName=%s(%s)" filePath rule.Name rule.Identifier)
+                runAstNodeRule rule astNodeParams))
 
     let context =
         { IndentationRuleContext = indentationRuleState
@@ -63,15 +66,21 @@ let internal runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rule
 
         let indentationError =
             lineRules.IndentationRule
-            |> Option.map (fun rule -> runLineRuleWithContext rule context.IndentationRuleContext lineParams)
+            |> Option.map (fun rule ->
+                use logRuleTime = new Log.TimeLogger(Log.info "%s", sprintf "runLineRule|filePath=%s|lineNumber=%d|ruleName=%s(%s)" filePath lineNumber rule.Name rule.Identifier)
+                runLineRuleWithContext rule context.IndentationRuleContext lineParams)
 
         let noTabCharactersError =
             lineRules.NoTabCharactersRule
-            |> Option.map (fun rule -> runLineRuleWithContext rule context.NoTabCharactersRuleContext lineParams)
+            |> Option.map (fun rule ->
+                use logRuleTime = new Log.TimeLogger(Log.info "%s", sprintf "runLineRule|filePath=%s|lineNumber=%d|ruleName=%s(%s)" filePath lineNumber rule.Name rule.Identifier)
+                runLineRuleWithContext rule context.NoTabCharactersRuleContext lineParams)
 
         let lineErrors =
             lineRules.GenericLineRules
-            |> Array.collect (fun rule -> runLineRule rule lineParams)
+            |> Array.collect (fun rule ->
+                use logRuleTime = new Log.TimeLogger(Log.info "%s", sprintf "runLineRule|filePath=%s|lineNumber=%d|ruleName=%s(%s)" filePath lineNumber rule.Name rule.Identifier)
+                runLineRule rule lineParams)
 
         [|
             indentationError |> Option.toArray

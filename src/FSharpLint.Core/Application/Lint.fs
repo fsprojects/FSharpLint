@@ -34,7 +34,7 @@ module Lint =
         /// Linting has failed for the provided file.
         | FailedToLintFile of fileName : string * exn
         /// Linter produced a log message.
-        | LogMessage of message : string
+        | LogMessage of message : string * isError : bool
 
     type ConfigurationParam =
         /// Explicit Configuration object to use.
@@ -91,8 +91,12 @@ module Lint =
     let private reportLintEvent (handleLintEvent:(LintEvent -> unit) option) (lintEvent:LintEvent) =
         handleLintEvent |> Option.iter (fun handle -> handle lintEvent)
 
+    let private logHandler (lintParams:LintParameters) (log, isError) =
+        lintParams.HandleLintEvent |> Option.iter (fun handler -> handler (LintEvent.LogMessage (log, isError)))
+
     /// Executes the linter with the provided parameters against the provided file.
     let private lint (lintParams:LintParameters) (config:Configuration) (fileInfo:ParseFile.FileParseInfo) =
+        use logTime = new Log.TimeLogger(Log.info "%s", sprintf "lint (%s)" fileInfo.File)
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
@@ -171,15 +175,24 @@ module Lint =
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
     let private getConfig (configParam:ConfigurationParam) =
+        use logTime = new Log.TimeLogger(Log.info "%s", "getConfig")
         match configParam with
-        | Configuration config -> Ok config
+        | Configuration config ->
+            Log.info "Using explicitly provided config"
+            Ok config
         | FromFile filePath ->
+            Log.info "Loading config from file|filePath=%s" filePath
             try Ok (Configuration.loadConfig filePath)
-            with ex -> Error (RunTimeConfigError (string ex))
-        | Default -> Ok Configuration.defaultConfiguration
+            with ex ->
+                Log.error "Failed to load config from file|filePath=%s" filePath
+                Error (RunTimeConfigError (string ex))
+        | Default ->
+            Log.info "Using default config"
+            Ok Configuration.defaultConfiguration
 
     /// Lints several files given the provided list of file information and lint parameters.
     let private lintFiles (lintParams:LintParameters) (fileInfos:FileParseInfo list) =
+        use logTime = new Log.TimeLogger(Log.info "%s", "lintFiles")
         getConfig lintParams.Configuration
         |> Result.map (fun config ->
             let ignoreFiles =
@@ -189,12 +202,18 @@ module Lint =
                 |> List.map IgnoreFiles.parseIgnorePath
 
             fileInfos
-            |> List.filter (fun fileInfo -> not (Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles fileInfo.File))
+            |> List.filter (fun fileInfo ->
+                if not (Configuration.IgnoreFiles.shouldFileBeIgnored ignoreFiles fileInfo.File) then
+                    true
+                else
+                    Log.info "Ignoring file|filePath=%s" fileInfo.File
+                    false)
             |> List.collect (lint lintParams config))
-
 
     /// Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
     let lintProject (lintParams:LintParameters) (projectFilePath:string) =
+        Log.setHandler (Some (logHandler lintParams))
+        use logTime = new Log.TimeLogger(Log.info "%s", sprintf "lintProject|projectFilePath=%s" projectFilePath)
         if IO.File.Exists projectFilePath then
             let checker = FSharpChecker.Create()
             let (projectFiles, projectOptions) = ProjectLoader.getProjectFiles lintParams.ReleaseConfiguration projectFilePath
@@ -212,6 +231,8 @@ module Lint =
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
     let lintSolution (lintParams:LintParameters) (solutionFilePath:string) =
+        Log.setHandler (Some (logHandler lintParams))
+        use logTime = new Log.TimeLogger(Log.info "%s", sprintf "lintProject|solutionFilePath=%s" solutionFilePath)
         if IO.File.Exists solutionFilePath then
             let checker = FSharpChecker.Create()
 
@@ -232,6 +253,8 @@ module Lint =
 
     /// Lints F# source code that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource (lintParams:LintParameters) (parsedFileInfo:ParsedFileInformation) =
+        Log.setHandler (Some (logHandler lintParams))
+        use logTime = new Log.TimeLogger(Log.info "%s", sprintf "lintParsedSource|parsedFilePath=%O" parsedFileInfo.FilePath)
         let parsedFileInfo =
             { ParseFile.Text = parsedFileInfo.Source
               ParseFile.Ast = parsedFileInfo.Ast
@@ -242,6 +265,8 @@ module Lint =
 
     /// Lints F# source code.
     let lintSource (lintParams:LintParameters) (source:string) =
+        Log.setHandler (Some (logHandler lintParams))
+        use logTime = new Log.TimeLogger(Log.info "%s", "lintSource")
         let checker = FSharpChecker.Create()
 
         ParseFile.parseSource source checker
@@ -257,6 +282,8 @@ module Lint =
 
     /// Lints an F# file from a given path to the `.fs` file.
     let lintFile (lintParams:LintParameters) (filePath:string) =
+        Log.setHandler (Some (logHandler lintParams))
+        use logTime = new Log.TimeLogger(Log.info "%s", sprintf "lintFile|filePath=%s" filePath)
         if IO.File.Exists filePath then
             let checker = FSharpChecker.Create()
 

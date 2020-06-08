@@ -27,12 +27,14 @@ let main input =
     Console.SetOut(stdout)
     try
         let returnCode = FSharpLint.Console.Program.main input
+        let s = stdout.ToString()
         (returnCode, getErrorsFromOutput <| stdout.ToString())
     finally
         Console.SetOut(existing)
 
 [<TestFixture>]
 type TestConsoleApplication() =
+
     [<Test>]
     member __.``Lint file, expected rules are triggered.``() =
         let config = """
@@ -81,7 +83,7 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)
-        
+
     [<Test>]
     member __.``Lint source with error suppressed, no error is given.``() =
         let input = """
@@ -90,8 +92,8 @@ type TestConsoleApplication() =
             abstract member Encoded : string
             abstract member PathName : string
         """
-        
+
         let (returnCode, errors) = main [| "lint"; input |]
-        
+
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)

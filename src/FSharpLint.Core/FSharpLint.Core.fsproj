@@ -17,6 +17,7 @@
     <!-- Framework -->
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Prelude.fs" />
+    <Compile Include="Framework\Log.fs" />
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
     <Compile Include="Framework\Suggestion.fs" />

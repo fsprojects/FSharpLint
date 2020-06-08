@@ -22,6 +22,7 @@ type private FileType =
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<AltCommandLine("-a")>] All_Files of bool
+    | [<AltCommandLine("-v")>] Verbose of bool
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
 with
     interface IArgParserTemplate with
@@ -29,6 +30,7 @@ with
             match this with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
+            | Verbose _ -> "Enables verbose logging."
             | All_Files _ -> "If enabled, linter will produce output for files which have no warnings."
 
 // TODO: investigate erroneous warning on this type definition
@@ -72,13 +74,14 @@ let private start (arguments:ParseResults<ToolArgs>) =
     let mutable exitCode = 0
 
     let allFiles = arguments.TryGetResult All_Files |> Option.defaultValue false
+    let verbose = arguments.TryGetResult Verbose |> Option.defaultValue false
 
     let output =
         match arguments.TryGetResult Format with
         | Some OutputFormat.MSBuild -> Output.MSBuild() :> Output.IOutput
         | Some OutputFormat.Standard
         | Some _
-        | None -> Output.Standard(allFiles) :> Output.IOutput
+        | None -> Output.Standard(allFiles, verbose) :> Output.IOutput
 
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
