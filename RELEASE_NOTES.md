@@ -1,3 +1,9 @@
+##### 0.15.0 - June 8 2020
+
+* Update FCS to 36.0.1 [@baronfel]
+* Check record fields in TypedItemSpacing rule
+* Fixes for issues in Indentation rule
+
 ##### 0.14.2 - May 20 2020
 
 * Fixes for exceptional indentation cases
