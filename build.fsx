@@ -32,7 +32,7 @@ Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
 
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
 
-Target.create "RunTests" (fun _ -> 
+Target.create "RunTests" (fun _ ->
   DotNet.test filterPerformanceTests "tests/FSharpLint.Core.Tests"
   DotNet.test filterPerformanceTests "tests/FSharpLint.Console.Tests")
 Target.create "RunFunctionalTests" (fun _ ->

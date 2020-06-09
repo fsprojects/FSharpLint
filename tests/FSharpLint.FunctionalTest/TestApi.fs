@@ -85,19 +85,6 @@ module TestApi =
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 
-         [<Test>]
-         member __.``Lint old-style project``() =
-             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.OldProject"
-             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.OldProject.fsproj"
-
-             let result = lintProject OptionalLintParameters.Default projectFile
-
-             match result with
-             | LintResult.Success warnings ->
-                 Assert.AreEqual(9, warnings.Length)
-             | LintResult.Failure err ->
-                 Assert.True(false, string err)
-
         [<Test>]
         member __.``Lint solution via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
@@ -107,7 +94,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(27, warnings.Length)
+                Assert.AreEqual(18, warnings.Length)
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 
@@ -139,7 +126,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(27, warnings.Length)
+                Assert.AreEqual(18, warnings.Length)
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 #endif

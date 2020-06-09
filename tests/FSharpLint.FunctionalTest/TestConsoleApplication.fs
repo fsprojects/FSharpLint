@@ -71,7 +71,7 @@ module Tests =
 
         [<Test>]
         member __.InvalidConfig() =
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let lintConfigPath = projectPath </> "fsharplint.json"
             let arguments = sprintf "lint --lint-config %s %s" lintConfigPath projectFile
 
@@ -96,7 +96,7 @@ module Tests =
 
         [<Test>]
         member __.FunctionalTestConsoleApplication() =
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let arguments = sprintf "lint %s" projectFile
 
             let output = dotnetFslint arguments
@@ -111,7 +111,7 @@ module Tests =
 
         [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() =
-            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+            let solutionFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.sln"
             let arguments = sprintf "lint %s" solutionFile
 
             let output = dotnetFslint arguments

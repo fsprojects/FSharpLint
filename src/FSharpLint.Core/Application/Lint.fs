@@ -423,8 +423,8 @@ module Lint =
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
                     | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
                     | Failure x -> LintResult.Failure x
-                | Error _ ->
-                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage "Failed to load project file")
+                | Error err ->
+                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage (string err))
                     |> LintResult.Failure
             | Error err ->
                 RunTimeConfigError err

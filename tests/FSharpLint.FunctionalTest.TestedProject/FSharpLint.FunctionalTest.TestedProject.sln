@@ -4,8 +4,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.T
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject.MultiTarget", "FSharpLint.FunctionalTest.TestedProject.MultiTarget\FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj", "{FE182FFC-EADD-431D-98EC-041FF6B5E270}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject.OldProject", "FSharpLint.FunctionalTest.TestedProject.OldProject\FSharpLint.FunctionalTest.TestedProject.OldProject.fsproj", "{88CC83C2-CAA4-4331-B310-6D4D73ADA159}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,9 +18,5 @@ Global
 		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88CC83C2-CAA4-4331-B310-6D4D73ADA159}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88CC83C2-CAA4-4331-B310-6D4D73ADA159}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88CC83C2-CAA4-4331-B310-6D4D73ADA159}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88CC83C2-CAA4-4331-B310-6D4D73ADA159}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
