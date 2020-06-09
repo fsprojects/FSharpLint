@@ -61,16 +61,16 @@ module TestApi =
 
         [<Test>]
         member __.``Lint project via absolute path``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
             let result = lintProject OptionalLintParameters.Default projectFile
 
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 
         [<Test>]
         member __.``Lint multi-targeted project``() =
@@ -82,8 +82,8 @@ module TestApi =
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 
          [<Test>]
          member __.``Lint old-style project``() =
@@ -95,8 +95,8 @@ module TestApi =
              match result with
              | LintResult.Success warnings ->
                  Assert.AreEqual(9, warnings.Length)
-             | LintResult.Failure _ ->
-                 Assert.True(false)
+             | LintResult.Failure err ->
+                 Assert.True(false, string err)
 
         [<Test>]
         member __.``Lint solution via absolute path``() =
@@ -108,14 +108,14 @@ module TestApi =
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(27, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 
 #if NETCOREAPP // GetRelativePath is netcore-only
         [<Test>]
         member __.``Lint project via relative path``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
             let relativePathToProjectFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), projectFile)
 
@@ -124,8 +124,8 @@ module TestApi =
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
             ()
 
         [<Test>]
@@ -139,7 +139,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+                Assert.AreEqual(27, warnings.Length)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 #endif
