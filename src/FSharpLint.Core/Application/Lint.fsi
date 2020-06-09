@@ -15,7 +15,6 @@ module ConfigurationManagement =
 module Lint =
 
     open System.Threading
-    open FSharpLint.Core
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
@@ -57,8 +56,6 @@ module Lint =
         ReceivedWarning: (Suggestion.LintWarning -> unit) option
 
         ReportLinterProgress: (ProjectProgress -> unit) option
-
-        ReleaseConfiguration : string option
     } with
         static member Default: OptionalLintParameters
 

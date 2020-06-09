@@ -33,7 +33,6 @@ with
 // fsharplint:disable UnionDefinitionIndentation
 and private LintArgs =
     | [<MainCommand; Mandatory>] Target of target:string
-    | [<AltCommandLine("-c")>] Release_Config of releaseConfig:string
     | [<AltCommandLine("-l")>] Lint_Config of lintConfig:string
     | File_Type of FileType
 // fsharplint:enable UnionDefinitionIndentation
@@ -43,7 +42,6 @@ with
             match this with
             | Target _ -> "Input to lint."
             | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
-            | Release_Config _ -> "Release config to use to parse files."
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
 
@@ -103,14 +101,12 @@ let private start (arguments:ParseResults<ToolArgs>) =
             | Some configPath -> FromFile configPath
             | None -> Default
 
-        let releaseConfig = lintArgs.TryGetResult Release_Config
 
         let lintParams =
             { CancellationToken = None
               ReceivedWarning = Some output.WriteWarning
               Configuration = configParam
-              ReportLinterProgress = Some (parserProgress output)
-              ReleaseConfiguration = releaseConfig }
+              ReportLinterProgress = Some (parserProgress output) }
 
         let target = lintArgs.GetResult Target
         let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
