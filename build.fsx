@@ -1,97 +1,194 @@
-#r "paket:
-nuget Fake.DotNet.Cli
-nuget Fake.DotNet.FSFormatting
-nuget Fake.DotNet.Paket
-nuget Fake.DotNet.MSBuild
-nuget Fake.IO.FileSystem
-nuget Fake.Tools.Git
-nuget Fake.Core.ReleaseNotes
-nuget Fake.Core.Target //"
+// --------------------------------------------------------------------------------------
+// FAKE build script
+// --------------------------------------------------------------------------------------
+#r "paket: groupref build //"
+#load ".fake/build.fsx/intellisense.fsx"
 
 open Fake.Core
 open Fake.DotNet
-open Fake.IO
-open Fake.IO.Globbing.Operators
 open Fake.Tools
+open Fake.IO
+open Fake.IO.FileSystemOperators
+open Fake.IO.Globbing.Operators
+open Fake.Core.TargetOperators
+open Fake.Api
+
+// --------------------------------------------------------------------------------------
+// Information about the project to be used at NuGet and in AssemblyInfo files
+// --------------------------------------------------------------------------------------
 
 let project = "FSharpLint"
 
-let release = ReleaseNotes.load "RELEASE_NOTES.md"
-Environment.setEnvironVar "Version" release.NugetVersion
+let authors = "Matthew Mcveigh"
+
+let gitOwner = "fsprojects"
+let gitName = "FSharpLint"
+let gitHome = "https://github.com/" + gitOwner
+let gitUrl = gitHome + "/" + gitName
+
+// --------------------------------------------------------------------------------------
+// Build variables
+// --------------------------------------------------------------------------------------
+
+let buildDir  = "./build/"
+let nugetDir  = "./out/"
+
+
+System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
+let changelogFilename = "CHANGELOG.md"
+let changelog = Changelog.load changelogFilename
+let latestEntry = changelog.LatestEntry
+
+let nugetVersion = latestEntry.NuGetVersion
+let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl latestEntry.NuGetVersion
+let releaseNotes =
+    latestEntry.Changes
+    |> List.map (fun c -> " * " + c.ToString())
+    |> String.concat "\n"
+
+// --------------------------------------------------------------------------------------
+// Helpers
+// --------------------------------------------------------------------------------------
+let isNullOrWhiteSpace = System.String.IsNullOrWhiteSpace
+
+let exec cmd args dir =
+    let proc =
+        CreateProcess.fromRawCommandLine cmd args
+        |> CreateProcess.ensureExitCodeWithMessage (sprintf "Error while running '%s' with args: %s" cmd args)
+    (if isNullOrWhiteSpace dir then proc
+    else proc |> CreateProcess.withWorkingDirectory dir)
+    |> Proc.run
+    |> ignore
+
+let getBuildParam = Environment.environVar
+let DoNothing = ignore
+// --------------------------------------------------------------------------------------
+// Build Targets
+// --------------------------------------------------------------------------------------
 
 Target.create "Clean" (fun _ ->
-    !! "src/*/bin"
-    ++ "src/*/obj"
-    ++ "tests/*/bin"
-    ++ "tests/*/obj"
-    |> Shell.cleanDirs)
+    Shell.cleanDirs [buildDir; nugetDir]
+)
 
-Target.create "Restore" (fun _ -> DotNet.exec id "paket" "restore" |> ignore)
-
-Target.create "Build" (fun _ -> DotNet.build id "FSharpLint.sln")
+Target.create "Build" (fun _ ->
+    DotNet.build id "FSharpLint.sln"
+)
 
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
 
-Target.create "RunTests" (fun _ ->
+Target.create "Test" (fun _ ->
   DotNet.test filterPerformanceTests "tests/FSharpLint.Core.Tests"
-  DotNet.test filterPerformanceTests "tests/FSharpLint.Console.Tests")
-Target.create "RunFunctionalTests" (fun _ ->
+  DotNet.test filterPerformanceTests "tests/FSharpLint.Console.Tests"
   DotNet.restore id "tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.sln"
-  DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest")
+  DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest"
+)
 
-Target.create "Package" (fun _ ->
-    // TODO: fix pack warning on deprecated licenseUrl param
-    let cliArgs = { MSBuild.CliArguments.Create() with NoWarn = Some ["NU5125"] }
-    let configure (c:DotNet.PackOptions) =
-      { c with
-          Configuration = DotNet.Release
-          OutputPath = Some "packaging"
-          MSBuildParams = cliArgs }
-    DotNet.pack configure "src/FSharpLint.Core/FSharpLint.Core.fsproj"
-    DotNet.pack configure "src/FSharpLint.Console/FSharpLint.Console.fsproj")
+Target.create "Docs" (fun _ ->
+    exec "dotnet"  @"fornax build" "docs"
+)
 
-Target.create "PublishPackages" (fun _ -> Paket.push(fun p -> { p with WorkingDir = "packaging" }))
+// --------------------------------------------------------------------------------------
+// Release Targets
+// --------------------------------------------------------------------------------------
+Target.create "BuildRelease" (fun _ ->
+    DotNet.build (fun p ->
+        { p with
+            Configuration = DotNet.BuildConfiguration.Release
+            OutputPath = Some buildDir
+            MSBuildParams = { p.MSBuildParams with Properties = [("Version", nugetVersion); ("PackageReleaseNotes", packageReleaseNotes)]}
+        }
+    ) "FSharpLint.sln"
+)
 
-Target.create "Release" (fun _ ->
+
+Target.create "Pack" (fun _ ->
+    let properties = [
+        ("Version", nugetVersion);
+        ("Authors", authors)
+        ("PackageProjectUrl", gitUrl)
+        ("RepositoryType", "git")
+        ("RepositoryUrl", gitUrl)
+        ("PackageLicenseUrl", gitUrl + "/LICENSE")
+        ("PackageReleaseNotes", packageReleaseNotes)
+    ]
+
+
+    DotNet.pack (fun p ->
+        { p with
+            Configuration = DotNet.BuildConfiguration.Release
+            OutputPath = Some nugetDir
+            MSBuildParams = { p.MSBuildParams with Properties = properties }
+        }
+    ) "FSharpLint.sln"
+)
+
+Target.create "ReleaseGitHub" (fun _ ->
+    let remote =
+        Git.CommandHelper.getGitResult "" "remote -v"
+        |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
+        |> Seq.tryFind (fun (s: string) -> s.Contains(gitOwner + "/" + gitName))
+        |> function None -> gitHome + "/" + gitName | Some (s: string) -> s.Split().[0]
+
     Git.Staging.stageAll ""
-    Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
-    Git.Branches.push ""
+    Git.Commit.exec "" (sprintf "Bump version to %s" nugetVersion)
+    Git.Branches.pushBranch "" remote (Git.Information.getBranchName "")
 
-    Git.Branches.tag "" release.NugetVersion
-    Git.Branches.pushTag "" "origin" release.NugetVersion)
 
-Target.create "GenerateDocs" (fun _ ->
-    Shell.cleanDir "docs"
+    Git.Branches.tag "" nugetVersion
+    Git.Branches.pushTag "" remote nugetVersion
 
-    let projInfo =
-        [ "project-name", "FSharpLint"
-          "project-author", "Matthew Mcveigh"
-          "project-summary", "A lint tool for F#."
-          "project-github", "http://fsprojects.github.io/FSharpLint/"
-          "project-nuget", "http://nuget.org/packages/FSharpLint.Core" ]
+    let client =
+        let user =
+            match getBuildParam "github-user" with
+            | s when not (isNullOrWhiteSpace s) -> s
+            | _ -> UserInput.getUserInput "Username: "
+        let pw =
+            match getBuildParam "github-pw" with
+            | s when not (isNullOrWhiteSpace s) -> s
+            | _ -> UserInput.getUserPassword "Password: "
 
-    Shell.copyDir "docs/content" "docs-gen/files" FileFilter.allFiles
-    FSFormatting.createDocs (fun s ->
-        { s with
-            Source = "docs-gen/markdown"
-            OutputDirectory = "docs"
-            Template = "docs-gen/templates/template.html"
-            ProjectParameters = projInfo
-            LayoutRoots = [] }))
+        // Git.createClient user pw
+        GitHub.createClient user pw
+    let files = !! (nugetDir </> "*.nupkg")
 
-Target.create "Default" ignore
 
-open Fake.Core.TargetOperators
+
+    // release on github
+    let cl =
+        client
+        |> GitHub.draftNewRelease gitOwner gitName nugetVersion (latestEntry.SemVer.PreRelease <> None) [releaseNotes]
+    (cl,files)
+    ||> Seq.fold (fun acc e -> acc |> GitHub.uploadFile e)
+    |> GitHub.publishDraft//releaseDraft
+    |> Async.RunSynchronously
+)
+
+Target.create "Push" (fun _ ->
+    let key =
+        match getBuildParam "nuget-key" with
+        | s when not (isNullOrWhiteSpace s) -> s
+        | _ -> UserInput.getUserPassword "NuGet Key: "
+    Paket.push (fun p -> { p with WorkingDir = nugetDir; ApiKey = key; ToolType = ToolType.CreateLocalTool() }))
+
+// --------------------------------------------------------------------------------------
+// Build order
+// --------------------------------------------------------------------------------------
+Target.create "Default" DoNothing
+Target.create "Release" DoNothing
 
 "Clean"
-    ==> "Restore"
-    ==> "Build"
-    ==> "RunTests"
-    ==> "RunFunctionalTests"
-    ==> "Package"
-    ==> "GenerateDocs"
-    ==> "Default"
-    ==> "PublishPackages"
-    ==> "Release"
+  ==> "Build"
+  ==> "Test"
+  ==> "Default"
+
+"Clean"
+ ==> "BuildRelease"
+ ==> "Docs"
+
+"Default"
+  ==> "Pack"
+  ==> "ReleaseGitHub"
+  ==> "Push"
+  ==> "Release"
 
 Target.runOrDefault "Default"

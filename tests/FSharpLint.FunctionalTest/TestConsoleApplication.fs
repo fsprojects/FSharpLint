@@ -15,9 +15,9 @@ module Tests =
     let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 
     type Error =
-        { Description: string
-          Location: string
-          Code: string }
+        { Description:string
+          Location:string
+          Code:string }
 
         override this.ToString() =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code

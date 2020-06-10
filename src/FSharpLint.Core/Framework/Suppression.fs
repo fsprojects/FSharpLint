@@ -13,7 +13,7 @@ type SuppressionInfo =
     | DisableLine of Set<String>
 
 /// Specifies the suppressions for an individual line.
-type LineSuppression = { Line: int; Suppressions: SuppressionInfo list }
+type LineSuppression = { Line:int; Suppressions:SuppressionInfo list }
 
 /// Extracts rule names from a whitespace separated string of rule names.
 let private extractRules (rules:Set<String>) (str:string) =

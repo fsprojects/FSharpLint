@@ -102,6 +102,12 @@ module Lint =
 
         member Description: string
 
+    type Context =
+        { IndentationRuleContext : Map<int,bool*int>
+// TODO: investigate incorrect indentation warning
+// fsharplint:disable-next-line Indentation
+          NoTabCharactersRuleContext : (string * Range.range) list }
+
     /// Result of running the linter.
     [<NoEquality; NoComparison; RequireQualifiedAccess>]
     type LintResult =
@@ -110,10 +116,6 @@ module Lint =
 
         member TryGetSuccess : byref<Suggestion.LintWarning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
-
-    type Context =
-        { IndentationRuleContext : Map<int,bool*int>
-          NoTabCharactersRuleContext : (string * Range.range) list }
 
     /// Runs all rules which take a node of the AST as input.
     val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> string [] -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context

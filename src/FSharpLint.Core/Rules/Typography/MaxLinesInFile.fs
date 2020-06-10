@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
-type Config = { MaxLinesInFile : int }
+type Config = { MaxLinesInFile:int }
 
 let private checkNumberOfLinesInFile numberOfLines line maxLines =
     if numberOfLines > maxLines then

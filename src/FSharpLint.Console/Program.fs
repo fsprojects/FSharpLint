@@ -131,7 +131,9 @@ let private start (arguments:ParseResults<ToolArgs>) =
 
 [<EntryPoint>]
 let main argv =
-    let errorHandler = ProcessExiter(colorizer = function ErrorCode.HelpText -> None | _ -> Some ConsoleColor.Red)
+    let errorHandler = ProcessExiter(colorizer = function
+        | ErrorCode.HelpText -> None
+        | _ -> Some ConsoleColor.Red)
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults

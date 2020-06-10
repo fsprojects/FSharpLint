@@ -9,7 +9,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 [<RequireQualifiedAccess>]
-type Config = { AllowSingleLineLambda : bool }
+type Config = { AllowSingleLineLambda:bool }
 
 let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) isLambda =
     let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.FileContent

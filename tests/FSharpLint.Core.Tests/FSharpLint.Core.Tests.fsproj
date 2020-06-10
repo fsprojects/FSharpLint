@@ -2,14 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <IsPackable>false</IsPackable>
     <RootNamespace>FSharpLint.Core.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="TestUtils.fs" />
-    <!-- Framework -->
-    <!-- Rules -->
     <Compile Include="Rules\TestRuleBase.fs" />
     <Compile Include="NUnit.fs" />
     <Compile Include="Rules\TestAstNodeRule.fs" />

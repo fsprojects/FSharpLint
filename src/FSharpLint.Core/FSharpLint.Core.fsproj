@@ -3,15 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>FSharpLint.Core</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
 
     <Title>FSharpLint.Core</Title>
     <Description>API to programmatically run FSharpLint.</Description>
-    <Authors>Matthew Mcveigh</Authors>
-    <PackageLicenseUrl>https://github.com/fsprojects/FSharpLint/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>http://fsprojects.github.com/FSharpLint</PackageProjectUrl>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <RootNamespace>FSharpLint.Core</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <!-- Framework -->

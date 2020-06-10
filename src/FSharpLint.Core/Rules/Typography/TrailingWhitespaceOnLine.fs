@@ -8,9 +8,9 @@ open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
 type Config =
-    { NumberOfSpacesAllowed : int
-      OneSpaceAllowedAfterOperator : bool
-      IgnoreBlankLines : bool }
+    { NumberOfSpacesAllowed:int
+      OneSpaceAllowedAfterOperator:bool
+      IgnoreBlankLines:bool }
 
 let private isSymbol character =
     let symbols =

@@ -14,16 +14,16 @@ module ParseFile =
     [<NoEquality; NoComparison>]
     type FileParseInfo = {
         /// Contents of the file.
-        Text: string
+        Text:string
 
         /// File represented as an AST.
-        Ast: ParsedInput
+        Ast:ParsedInput
 
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-        TypeCheckResults: FSharpCheckFileResults option
+        TypeCheckResults:FSharpCheckFileResults option
 
         /// Path to the file.
-        File: string
+        File:string
     }
 
     [<NoComparison>]

@@ -6,7 +6,7 @@ open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
-type Config = { MaxLines : int }
+type Config = { MaxLines:int }
 
 let private error name i actual =
     let errorFormatString = Resources.GetString("RulesSourceLengthError")

@@ -11,7 +11,7 @@ open FSharpLint.Framework.Suggestion
 // fsharplint:disable RecordFieldNames
 type GlobalRuleConfig =
     {
-        numIndentationSpaces : int
+        numIndentationSpaces:int
     }
 with
     static member Default =
@@ -21,35 +21,35 @@ with
 // fsharplint:enable RecordFieldNames
 
 type AstNodeRuleParams =
-    { AstNode : AstNode
-      NodeHashcode : int
-      NodeIndex : int
-      SyntaxArray : AbstractSyntaxArray.Node []
-      SkipArray : Skip []
-      GetParents : int -> AstNode list
-      FilePath : string
-      FileContent : string
-      Lines : string []
-      CheckInfo : FSharpCheckFileResults option
-      GlobalConfig : GlobalRuleConfig }
+    { AstNode:AstNode
+      NodeHashcode:int
+      NodeIndex:int
+      SyntaxArray:AbstractSyntaxArray.Node []
+      SkipArray:Skip []
+      GetParents:int -> AstNode list
+      FilePath:string
+      FileContent:string
+      Lines:string []
+      CheckInfo:FSharpCheckFileResults option
+      GlobalConfig:GlobalRuleConfig }
 
 type LineRuleParams =
-    { Line : string
-      LineNumber : int
-      IsLastLine : bool
-      FilePath : string
-      FileContent : string
-      Lines : string []
-      GlobalConfig : GlobalRuleConfig }
+    { Line:string
+      LineNumber:int
+      IsLastLine:bool
+      FilePath:string
+      FileContent:string
+      Lines:string []
+      GlobalConfig:GlobalRuleConfig }
 
 type RuleMetadata<'config> =
-    { Name : string
-      Identifier : string
-      RuleConfig : 'config }
+    { Name:string
+      Identifier:string
+      RuleConfig:'config }
 
 type AstNodeRuleConfig =
-    { Runner : AstNodeRuleParams -> WarningDetails []
-      Cleanup : unit -> unit }
+    { Runner:AstNodeRuleParams -> WarningDetails []
+      Cleanup:unit -> unit }
 
 type NamingCase =
     | PascalCase = 0
@@ -61,18 +61,18 @@ type NamingUnderscores =
     | AllowAny = 2
 
 type NamingConfig =
-    { Naming : NamingCase option
-      Underscores : NamingUnderscores option
-      Prefix : string option
-      Suffix : string option }
+    { Naming:NamingCase option
+      Underscores:NamingUnderscores option
+      Prefix:string option
+      Suffix:string option }
 
 type NamingRuleConfig =
-    { Config : NamingConfig
-      GetIdentifiersToCheck : AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
+    { Config:NamingConfig
+      GetIdentifiersToCheck:AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
 
-type LineRuleConfig = { Runner : LineRuleParams -> WarningDetails [] }
+type LineRuleConfig = { Runner:LineRuleParams -> WarningDetails [] }
 
-type LineRuleConfigWithContext<'Context> = { Runner : 'Context -> LineRuleParams -> WarningDetails [] }
+type LineRuleConfigWithContext<'Context> = { Runner:'Context -> LineRuleParams -> WarningDetails [] }
 
 type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
 type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
