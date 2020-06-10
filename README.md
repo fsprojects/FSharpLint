@@ -64,5 +64,6 @@ The project is licensed under MIT. For more information on the license see the L
 ## Maintainer(s)
 
 - [@duckmatt](https://github.com/duckmatt)
+- [@jgardella](https://github.com/jgardella)
 
 The default maintainer account for projects under "fsprojects" is [@fsprojectsgit](https://github.com/fsprojectsgit) - F# Community Project Incubation Space (repo management)
