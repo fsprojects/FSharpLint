@@ -28,3 +28,12 @@ module Program
   type Record = { dog: int }"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 18))
+
+    [<Test>]
+    member this.RecordFieldRuleDoesntApplyToUnionCaseFields() =
+        this.Parse """
+  match x with
+  | Expression (SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg; funcExpr=funcExpr)); argExpr=outerArg)) -> true
+  | _ -> false"""
+
+        Assert.IsTrue(this.NoErrorsExist)
