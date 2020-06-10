@@ -74,14 +74,30 @@ module TestApi =
 
         [<Test>]
         member __.``Lint multi-targeted project``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.MultiTarget"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj"
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
             let result = lintProject OptionalLintParameters.Default projectFile
 
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
+
+        [<Test>]
+        member __.``Lint project with default config tries to load `fsharplint.json``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
+            let tempConfigFile = TestContext.CurrentContext.TestDirectory </> "fsharplint.json"
+            File.WriteAllText (tempConfigFile, """{ "ignoreFiles": ["*"] }""")
+
+            let result = lintProject OptionalLintParameters.Default projectFile
+            File.Delete tempConfigFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(0, warnings.Length)
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 
