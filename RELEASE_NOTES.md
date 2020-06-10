@@ -1,3 +1,7 @@
+##### 0.16.1 - June 10 2020
+
+* Fix RecordFieldNames rule incorrectly checking Union Case fields
+
 ##### 0.16.0 - June 10 2020
 
 * Use `Dotnet.ProjInfo.Workspace` to load project info.

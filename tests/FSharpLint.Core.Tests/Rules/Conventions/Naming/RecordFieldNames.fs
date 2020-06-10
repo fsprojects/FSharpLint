@@ -28,3 +28,11 @@ module Program
   type Record = { dog: int }"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 18))
+
+    [<Test>]
+    member this.RecordFieldRuleDoesntApplyToUnionCaseFields() =
+        this.Parse """
+  type Test =
+    | InfixOperator of operatorIdentifier:Expression * Expression * Expression"""
+
+        Assert.IsTrue(this.NoErrorsExist)
