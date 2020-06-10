@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject", "FSharpLint.FunctionalTest.TestedProject.fsproj", "{7A1009D0-C83C-47E7-911D-AFA2E38D1560}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject.NetCore", "FSharpLint.FunctionalTest.TestedProject.NetCore\FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj", "{7A1009D0-C83C-47E7-911D-AFA2E38D1560}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.FunctionalTest.TestedProject.MultiTarget", "FSharpLint.FunctionalTest.TestedProject.MultiTarget\FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj", "{FE182FFC-EADD-431D-98EC-041FF6B5E270}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{7A1009D0-C83C-47E7-911D-AFA2E38D1560}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A1009D0-C83C-47E7-911D-AFA2E38D1560}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A1009D0-C83C-47E7-911D-AFA2E38D1560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE182FFC-EADD-431D-98EC-041FF6B5E270}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

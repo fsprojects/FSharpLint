@@ -38,7 +38,7 @@ module Tests =
                                  RedirectStandardOutput = true,
                                  RedirectStandardError = true,
                                  UseShellExecute = false,
-                                 WorkingDirectory = (basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"))
+                                 WorkingDirectory = (basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"))
 
         use app = Process.Start(startInfo)
         let output = app.StandardOutput.ReadToEnd()
@@ -67,11 +67,11 @@ module Tests =
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestConsoleApplication() =
         let projectPath =
-            basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
+            basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
 
         [<Test>]
         member __.InvalidConfig() =
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let lintConfigPath = projectPath </> "fsharplint.json"
             let arguments = sprintf "lint --lint-config %s %s" lintConfigPath projectFile
 
@@ -96,7 +96,7 @@ module Tests =
 
         [<Test>]
         member __.FunctionalTestConsoleApplication() =
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let arguments = sprintf "lint %s" projectFile
 
             let output = dotnetFslint arguments
@@ -110,23 +110,8 @@ module Tests =
                 "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
 
         [<Test>]
-        member __.FunctionalTestConsoleApplicationReleaseMode() =
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
-            let arguments = sprintf "lint %s -c Release" projectFile
-
-            let output = dotnetFslint arguments
-            let errors = getErrorsFromOutput output
-
-            let expectedMissing = Set.difference expectedErrors errors
-            let notExpected = Set.difference errors expectedErrors
-
-            Assert.AreEqual(expectedErrors, errors,
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
-
-        [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() =
-            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+            let solutionFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.sln"
             let arguments = sprintf "lint %s" solutionFile
 
             let output = dotnetFslint arguments

@@ -7,7 +7,8 @@ nuget BenchmarkDotNet
 nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
 nuget FSharp.Compiler.Service ~> 36.0
-nuget Dotnet.ProjInfo ~> 0.31.0
+nuget Dotnet.ProjInfo.Workspace ~> 0.41.0
+nuget Dotnet.ProjInfo.Workspace.FCS ~> 0.41.0
 nuget FSharp.Core ~> 4.6.2
 nuget nunit
 nuget NUnit3TestAdapter

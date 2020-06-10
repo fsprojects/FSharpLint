@@ -1,7 +1,9 @@
 <Project ToolsVersion="15.0">
   <Target Name="FSharpLint"
           AfterTargets="BeforeBuild"
-          Condition="$(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject'
+          Condition="$(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject.NetCore'
+                    And $(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject.MultiTarget'
+                    And $(MSBuildProjectName) != 'FSharpLint.FunctionalTest.TestedProject.OldProject'
                     And $(MSBuildProjectName) != 'FSharpLint.Console'
                     And $(MSBuildProjectName) != 'FSharpLint.Console.Tests'">
    <Exec

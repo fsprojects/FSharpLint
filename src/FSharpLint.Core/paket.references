@@ -1,5 +1,7 @@
 FSharp.Compiler.Service
 FParsec
 Dotnet.ProjInfo
+Dotnet.ProjInfo.Workspace
+Dotnet.ProjInfo.Workspace.FCS
 FSharp.Core
 Newtonsoft.Json

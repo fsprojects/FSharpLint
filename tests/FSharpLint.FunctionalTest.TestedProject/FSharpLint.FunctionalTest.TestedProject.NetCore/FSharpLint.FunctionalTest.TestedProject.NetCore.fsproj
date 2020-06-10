@@ -1,14 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="TestHints.fs" />
-
-    <PackageReference Include="FSharp.Core" Version="4.3.4" />
   </ItemGroup>
-
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
-

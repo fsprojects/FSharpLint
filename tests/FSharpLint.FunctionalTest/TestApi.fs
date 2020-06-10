@@ -61,16 +61,29 @@ module TestApi =
 
         [<Test>]
         member __.``Lint project via absolute path``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
             let result = lintProject OptionalLintParameters.Default projectFile
 
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
+
+        [<Test>]
+        member __.``Lint multi-targeted project``() =
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.MultiTarget"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj"
+
+            let result = lintProject OptionalLintParameters.Default projectFile
+
+            match result with
+            | LintResult.Success warnings ->
+                Assert.AreEqual(9, warnings.Length)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 
         [<Test>]
         member __.``Lint solution via absolute path``() =
@@ -81,28 +94,15 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
-
-        [<Test>]
-        member __.``Lint solution with release config``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
-
-            let result = lintSolution { OptionalLintParameters.Default with ReleaseConfiguration = Some "Release" } solutionFile
-
-            match result with
-            | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+                Assert.AreEqual(18, warnings.Length)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 
 #if NETCOREAPP // GetRelativePath is netcore-only
         [<Test>]
         member __.``Lint project via relative path``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.fsproj"
+            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
+            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
             let relativePathToProjectFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), projectFile)
 
@@ -111,8 +111,8 @@ module TestApi =
             match result with
             | LintResult.Success warnings ->
                 Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
             ()
 
         [<Test>]
@@ -126,7 +126,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure _ ->
-                Assert.True(false)
+                Assert.AreEqual(18, warnings.Length)
+            | LintResult.Failure err ->
+                Assert.True(false, string err)
 #endif
