@@ -216,11 +216,11 @@ module AbstractSyntaxArray =
     /// Contains information on the current node being visited.
     [<NoEquality; NoComparison>]
     type CurrentNode =
-        { Node: AstNode
-          ChildNodes: AstNode list
+        { Node:AstNode
+          ChildNodes:AstNode list
 
           /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
-          Breadcrumbs: AstNode list }
+          Breadcrumbs:AstNode list }
 
     let astToArray ast =
         let astRoot = File ast

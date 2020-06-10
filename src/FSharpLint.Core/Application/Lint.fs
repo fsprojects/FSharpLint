@@ -108,14 +108,14 @@ module Lint =
 
     [<NoEquality; NoComparison>]
     type LintInfo =
-        { CancellationToken: CancellationToken option
-          ErrorReceived: Suggestion.LintWarning -> unit
-          ReportLinterProgress: ProjectProgress -> unit
-          Configuration: Configuration.Configuration }
+        { CancellationToken:CancellationToken option
+          ErrorReceived:Suggestion.LintWarning -> unit
+          ReportLinterProgress:ProjectProgress -> unit
+          Configuration:Configuration.Configuration }
 
     type Context =
-        { IndentationRuleContext : Map<int,bool*int>
-          NoTabCharactersRuleContext : (string * Range.range) list }
+        { IndentationRuleContext:Map<int,bool*int>
+          NoTabCharactersRuleContext:(string * Range.range) list }
 
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray skipArray =
         let mutable indentationRuleState = Map.empty
@@ -328,15 +328,15 @@ module Lint =
     [<NoEquality; NoComparison>]
     type OptionalLintParameters = {
         /// Cancels a lint in progress.
-        CancellationToken: CancellationToken option
+        CancellationToken:CancellationToken option
         /// Lint configuration to use.
         /// Can either specify a full configuration object, or a path to a file to load the configuration from.
         /// You can also explicitly specify the default configuration.
-        Configuration: ConfigurationParam
+        Configuration:ConfigurationParam
         /// This function will be called every time the linter finds a broken rule.
-        ReceivedWarning: (Suggestion.LintWarning -> unit) option
+        ReceivedWarning:(Suggestion.LintWarning -> unit) option
         /// This function will be called any time the linter progress changes for a project.
-        ReportLinterProgress: (ProjectProgress -> unit) option
+        ReportLinterProgress:(ProjectProgress -> unit) option
     } with
         static member Default = {
             OptionalLintParameters.CancellationToken = None
@@ -351,11 +351,11 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation = {
         /// File represented as an AST.
-        Ast: FSharp.Compiler.SyntaxTree.ParsedInput
+        Ast:FSharp.Compiler.SyntaxTree.ParsedInput
         /// Contents of the file.
-        Source: string
+        Source:string
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-        TypeCheckResults: FSharpCheckFileResults option
+        TypeCheckResults:FSharpCheckFileResults option
     }
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.

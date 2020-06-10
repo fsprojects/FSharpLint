@@ -123,8 +123,8 @@ module IgnoreFiles =
 // Non-standard record field naming for config serialization.
 // fsharplint:disable RecordFieldNames
 type RuleConfig<'Config> = {
-    Enabled : bool
-    Config : 'Config option
+    Enabled:bool
+    Config:'Config option
 }
 
 type EnabledConfig = RuleConfig<unit>
@@ -138,9 +138,9 @@ let constructRuleWithConfig rule ruleConfig =
         None
 
 type TupleFormattingConfig =
-    { tupleCommaSpacing : EnabledConfig option
-      tupleIndentation : EnabledConfig option
-      tupleParentheses : EnabledConfig option }
+    { tupleCommaSpacing:EnabledConfig option
+      tupleIndentation:EnabledConfig option
+      tupleParentheses:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -150,10 +150,10 @@ with
         |] |> Array.choose id
 
 type PatternMatchFormattingConfig =
-    { patternMatchClausesOnNewLine : EnabledConfig option
-      patternMatchOrClausesOnNewLine : EnabledConfig option
-      patternMatchClauseIndentation : RuleConfig<PatternMatchClauseIndentation.Config> option
-      patternMatchExpressionIndentation : EnabledConfig option }
+    { patternMatchClausesOnNewLine:EnabledConfig option
+      patternMatchOrClausesOnNewLine:EnabledConfig option
+      patternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
+      patternMatchExpressionIndentation:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -164,13 +164,13 @@ with
         |] |> Array.choose id
 
 type FormattingConfig =
-    { typedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
-      typePrefixing : EnabledConfig option
-      unionDefinitionIndentation : EnabledConfig option
-      moduleDeclSpacing : EnabledConfig option
-      classMemberSpacing : EnabledConfig option
-      tupleFormatting : TupleFormattingConfig option
-      patternMatchFormatting : PatternMatchFormattingConfig option }
+    { typedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
+      typePrefixing:EnabledConfig option
+      unionDefinitionIndentation:EnabledConfig option
+      moduleDeclSpacing:EnabledConfig option
+      classMemberSpacing:EnabledConfig option
+      tupleFormatting:TupleFormattingConfig option
+      patternMatchFormatting:PatternMatchFormattingConfig option }
 with
     member this.Flatten() =
         [|
@@ -184,11 +184,11 @@ with
         |] |> Array.concat
 
 type RaiseWithTooManyArgsConfig =
-    { raiseWithSingleArgument : EnabledConfig option
-      nullArgWithSingleArgument : EnabledConfig option
-      invalidOpWithSingleArgument : EnabledConfig option
-      invalidArgWithTwoArguments : EnabledConfig option
-      failwithfWithArgumentsMatchingFormatString : EnabledConfig option }
+    { raiseWithSingleArgument:EnabledConfig option
+      nullArgWithSingleArgument:EnabledConfig option
+      invalidOpWithSingleArgument:EnabledConfig option
+      invalidArgWithTwoArguments:EnabledConfig option
+      failwithfWithArgumentsMatchingFormatString:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -200,18 +200,18 @@ with
         |] |> Array.concat
 
 type SourceLengthConfig =
-    { maxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInMatchLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInValue : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInFunction : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInMember : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInConstructor : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInProperty : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInModule : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInRecord : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInEnum : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInUnion : RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInClass : RuleConfig<Helper.SourceLength.Config> option }
+    { maxLinesInLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInMatchLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInValue:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInFunction:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInMember:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInConstructor:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInProperty:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInModule:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInRecord:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInEnum:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInUnion:RuleConfig<Helper.SourceLength.Config> option
+      maxLinesInClass:RuleConfig<Helper.SourceLength.Config> option }
 with
     member this.Flatten() =
         [|
@@ -230,21 +230,21 @@ with
         |] |> Array.concat
 
 type NamesConfig =
-    { interfaceNames : RuleConfig<NamingConfig> option
-      exceptionNames : RuleConfig<NamingConfig> option
-      typeNames : RuleConfig<NamingConfig> option
-      recordFieldNames : RuleConfig<NamingConfig> option
-      enumCasesNames : RuleConfig<NamingConfig> option
-      unionCasesNames : RuleConfig<NamingConfig> option
-      moduleNames : RuleConfig<NamingConfig> option
-      literalNames : RuleConfig<NamingConfig> option
-      namespaceNames : RuleConfig<NamingConfig> option
-      memberNames : RuleConfig<NamingConfig> option
-      parameterNames : RuleConfig<NamingConfig> option
-      measureTypeNames : RuleConfig<NamingConfig> option
-      activePatternNames : RuleConfig<NamingConfig> option
-      publicValuesNames : RuleConfig<NamingConfig> option
-      nonPublicValuesNames : RuleConfig<NamingConfig> option }
+    { interfaceNames:RuleConfig<NamingConfig> option
+      exceptionNames:RuleConfig<NamingConfig> option
+      typeNames:RuleConfig<NamingConfig> option
+      recordFieldNames:RuleConfig<NamingConfig> option
+      enumCasesNames:RuleConfig<NamingConfig> option
+      unionCasesNames:RuleConfig<NamingConfig> option
+      moduleNames:RuleConfig<NamingConfig> option
+      literalNames:RuleConfig<NamingConfig> option
+      namespaceNames:RuleConfig<NamingConfig> option
+      memberNames:RuleConfig<NamingConfig> option
+      parameterNames:RuleConfig<NamingConfig> option
+      measureTypeNames:RuleConfig<NamingConfig> option
+      activePatternNames:RuleConfig<NamingConfig> option
+      publicValuesNames:RuleConfig<NamingConfig> option
+      nonPublicValuesNames:RuleConfig<NamingConfig> option }
 with
     member this.Flatten() =
         [|
@@ -266,10 +266,10 @@ with
         |] |> Array.concat
 
 type NumberOfItemsConfig =
-    { maxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option }
+    { maxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
+      maxNumberOfBooleanOperatorsInCondition:RuleConfig<Helper.NumberOfItems.Config> option }
 with
     member this.Flatten() =
         [|
@@ -280,10 +280,10 @@ with
         |] |> Array.concat
 
 type BindingConfig =
-    { favourIgnoreOverLetWild : EnabledConfig option
-      wildcardNamedWithAsPattern : EnabledConfig option
-      uselessBinding : EnabledConfig option
-      tupleOfWildcards : EnabledConfig option }
+    { favourIgnoreOverLetWild:EnabledConfig option
+      wildcardNamedWithAsPattern:EnabledConfig option
+      uselessBinding:EnabledConfig option
+      tupleOfWildcards:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -294,16 +294,16 @@ with
         |] |> Array.concat
 
 type ConventionsConfig =
-    { recursiveAsyncFunction : EnabledConfig option
-      redundantNewKeyword : EnabledConfig option
-      nestedStatements : RuleConfig<NestedStatements.Config> option
-      reimplementsFunction : EnabledConfig option
-      canBeReplacedWithComposition : EnabledConfig option
-      raiseWithTooManyArgs : RaiseWithTooManyArgsConfig option
-      sourceLength : SourceLengthConfig option
-      naming : NamesConfig option
-      numberOfItems : NumberOfItemsConfig option
-      binding : BindingConfig option }
+    { recursiveAsyncFunction:EnabledConfig option
+      redundantNewKeyword:EnabledConfig option
+      nestedStatements:RuleConfig<NestedStatements.Config> option
+      reimplementsFunction:EnabledConfig option
+      canBeReplacedWithComposition:EnabledConfig option
+      raiseWithTooManyArgs:RaiseWithTooManyArgsConfig option
+      sourceLength:SourceLengthConfig option
+      naming:NamesConfig option
+      numberOfItems:NumberOfItemsConfig option
+      binding:BindingConfig option }
 with
     member this.Flatten() =
         [|
@@ -320,12 +320,12 @@ with
         |] |> Array.concat
 
 type TypographyConfig =
-    { indentation : EnabledConfig option
-      maxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
-      trailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
-      maxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
-      trailingNewLineInFile : EnabledConfig option
-      noTabCharacters : EnabledConfig option }
+    { indentation:EnabledConfig option
+      maxCharactersOnLine:RuleConfig<MaxCharactersOnLine.Config> option
+      trailingWhitespaceOnLine:RuleConfig<TrailingWhitespaceOnLine.Config> option
+      maxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
+      trailingNewLineInFile:EnabledConfig option
+      noTabCharacters:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -340,89 +340,89 @@ with
 let private getOrEmptyList hints = hints |> Option.defaultValue [||]
 
 type HintConfig = {
-    add : string [] option
-    ignore : string [] option
+    add:string [] option
+    ignore:string [] option
 }
 
 type GlobalConfig = {
-    numIndentationSpaces : int option
+    numIndentationSpaces:int option
 }
 
 type Configuration =
-    { Global : GlobalConfig option
+    { Global:GlobalConfig option
       // Deprecated grouped configs. TODO: remove in next major release
       /// DEPRECATED, provide formatting rules at root level.
-      formatting : FormattingConfig option
+      formatting:FormattingConfig option
       /// DEPRECATED, provide conventions rules at root level.
-      conventions : ConventionsConfig option
+      conventions:ConventionsConfig option
       /// DEPRECATED, provide typography rules at root level.
-      typography : TypographyConfig option
-      ignoreFiles : string [] option
-      Hints : HintConfig option
-      TypedItemSpacing : RuleConfig<TypedItemSpacing.Config> option
-      TypePrefixing : EnabledConfig option
-      UnionDefinitionIndentation : EnabledConfig option
-      ModuleDeclSpacing : EnabledConfig option
-      ClassMemberSpacing : EnabledConfig option
-      TupleCommaSpacing : EnabledConfig option
-      TupleIndentation : EnabledConfig option
-      TupleParentheses : EnabledConfig option
-      PatternMatchClausesOnNewLine : EnabledConfig option
-      PatternMatchOrClausesOnNewLine : EnabledConfig option
-      PatternMatchClauseIndentation : RuleConfig<PatternMatchClauseIndentation.Config> option
-      PatternMatchExpressionIndentation : EnabledConfig option
-      RecursiveAsyncFunction : EnabledConfig option
-      RedundantNewKeyword : EnabledConfig option
-      NestedStatements : RuleConfig<NestedStatements.Config> option
-      ReimplementsFunction : EnabledConfig option
-      CanBeReplacedWithComposition : EnabledConfig option
-      RaiseWithSingleArgument : EnabledConfig option
-      FailwithWithSingleArgument : EnabledConfig option
-      NullArgWithSingleArgument : EnabledConfig option
-      InvalidOpWithSingleArgument : EnabledConfig option
-      InvalidArgWithTwoArguments : EnabledConfig option
-      FailwithfWithArgumentsMatchingFormatString : EnabledConfig option
-      MaxLinesInLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInMatchLambdaFunction : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInValue : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInFunction : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInMember : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInConstructor : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInProperty : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInModule : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInRecord : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInEnum : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInUnion : RuleConfig<Helper.SourceLength.Config> option
-      MaxLinesInClass : RuleConfig<Helper.SourceLength.Config> option
-      InterfaceNames : RuleConfig<NamingConfig> option
-      ExceptionNames : RuleConfig<NamingConfig> option
-      TypeNames : RuleConfig<NamingConfig> option
-      RecordFieldNames : RuleConfig<NamingConfig> option
-      EnumCasesNames : RuleConfig<NamingConfig> option
-      UnionCasesNames : RuleConfig<NamingConfig> option
-      ModuleNames : RuleConfig<NamingConfig> option
-      LiteralNames : RuleConfig<NamingConfig> option
-      NamespaceNames : RuleConfig<NamingConfig> option
-      MemberNames : RuleConfig<NamingConfig> option
-      ParameterNames : RuleConfig<NamingConfig> option
-      MeasureTypeNames : RuleConfig<NamingConfig> option
-      ActivePatternNames : RuleConfig<NamingConfig> option
-      PublicValuesNames : RuleConfig<NamingConfig> option
-      NonPublicValuesNames : RuleConfig<NamingConfig> option
-      MaxNumberOfItemsInTuple : RuleConfig<Helper.NumberOfItems.Config> option
-      MaxNumberOfFunctionParameters : RuleConfig<Helper.NumberOfItems.Config> option
-      MaxNumberOfMembers : RuleConfig<Helper.NumberOfItems.Config> option
-      MaxNumberOfBooleanOperatorsInCondition : RuleConfig<Helper.NumberOfItems.Config> option
-      FavourIgnoreOverLetWild : EnabledConfig option
-      WildcardNamedWithAsPattern : EnabledConfig option
-      UselessBinding : EnabledConfig option
-      TupleOfWildcards : EnabledConfig option
-      Indentation : EnabledConfig option
-      MaxCharactersOnLine : RuleConfig<MaxCharactersOnLine.Config> option
-      TrailingWhitespaceOnLine : RuleConfig<TrailingWhitespaceOnLine.Config> option
-      MaxLinesInFile : RuleConfig<MaxLinesInFile.Config> option
-      TrailingNewLineInFile : EnabledConfig option
-      NoTabCharacters : EnabledConfig option }
+      typography:TypographyConfig option
+      ignoreFiles:string [] option
+      Hints:HintConfig option
+      TypedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
+      TypePrefixing:EnabledConfig option
+      UnionDefinitionIndentation:EnabledConfig option
+      ModuleDeclSpacing:EnabledConfig option
+      ClassMemberSpacing:EnabledConfig option
+      TupleCommaSpacing:EnabledConfig option
+      TupleIndentation:EnabledConfig option
+      TupleParentheses:EnabledConfig option
+      PatternMatchClausesOnNewLine:EnabledConfig option
+      PatternMatchOrClausesOnNewLine:EnabledConfig option
+      PatternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
+      PatternMatchExpressionIndentation:EnabledConfig option
+      RecursiveAsyncFunction:EnabledConfig option
+      RedundantNewKeyword:EnabledConfig option
+      NestedStatements:RuleConfig<NestedStatements.Config> option
+      ReimplementsFunction:EnabledConfig option
+      CanBeReplacedWithComposition:EnabledConfig option
+      RaiseWithSingleArgument:EnabledConfig option
+      FailwithWithSingleArgument:EnabledConfig option
+      NullArgWithSingleArgument:EnabledConfig option
+      InvalidOpWithSingleArgument:EnabledConfig option
+      InvalidArgWithTwoArguments:EnabledConfig option
+      FailwithfWithArgumentsMatchingFormatString:EnabledConfig option
+      MaxLinesInLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInMatchLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInValue:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInFunction:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInMember:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInConstructor:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInProperty:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInModule:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInRecord:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInEnum:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInUnion:RuleConfig<Helper.SourceLength.Config> option
+      MaxLinesInClass:RuleConfig<Helper.SourceLength.Config> option
+      InterfaceNames:RuleConfig<NamingConfig> option
+      ExceptionNames:RuleConfig<NamingConfig> option
+      TypeNames:RuleConfig<NamingConfig> option
+      RecordFieldNames:RuleConfig<NamingConfig> option
+      EnumCasesNames:RuleConfig<NamingConfig> option
+      UnionCasesNames:RuleConfig<NamingConfig> option
+      ModuleNames:RuleConfig<NamingConfig> option
+      LiteralNames:RuleConfig<NamingConfig> option
+      NamespaceNames:RuleConfig<NamingConfig> option
+      MemberNames:RuleConfig<NamingConfig> option
+      ParameterNames:RuleConfig<NamingConfig> option
+      MeasureTypeNames:RuleConfig<NamingConfig> option
+      ActivePatternNames:RuleConfig<NamingConfig> option
+      PublicValuesNames:RuleConfig<NamingConfig> option
+      NonPublicValuesNames:RuleConfig<NamingConfig> option
+      MaxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
+      MaxNumberOfBooleanOperatorsInCondition:RuleConfig<Helper.NumberOfItems.Config> option
+      FavourIgnoreOverLetWild:EnabledConfig option
+      WildcardNamedWithAsPattern:EnabledConfig option
+      UselessBinding:EnabledConfig option
+      TupleOfWildcards:EnabledConfig option
+      Indentation:EnabledConfig option
+      MaxCharactersOnLine:RuleConfig<MaxCharactersOnLine.Config> option
+      TrailingWhitespaceOnLine:RuleConfig<TrailingWhitespaceOnLine.Config> option
+      MaxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
+      TrailingNewLineInFile:EnabledConfig option
+      NoTabCharacters:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -528,15 +528,15 @@ let defaultConfiguration =
         |> parseConfig
 
 type LineRules =
-    { GenericLineRules : RuleMetadata<LineRuleConfig> []
-      NoTabCharactersRule : RuleMetadata<NoTabCharactersRuleConfig> option
-      IndentationRule : RuleMetadata<IndentationRuleConfig> option }
+    { GenericLineRules:RuleMetadata<LineRuleConfig> []
+      NoTabCharactersRule:RuleMetadata<NoTabCharactersRuleConfig> option
+      IndentationRule:RuleMetadata<IndentationRuleConfig> option }
 
 type LoadedRules =
-    { GlobalConfig : Rules.GlobalRuleConfig
-      AstNodeRules : RuleMetadata<AstNodeRuleConfig> []
-      LineRules : LineRules
-      DeprecatedRules : Rule [] }
+    { GlobalConfig:Rules.GlobalRuleConfig
+      AstNodeRules:RuleMetadata<AstNodeRuleConfig> []
+      LineRules:LineRules
+      DeprecatedRules:Rule [] }
 
 let getGlobalConfig (globalConfig:GlobalConfig option) =
     globalConfig

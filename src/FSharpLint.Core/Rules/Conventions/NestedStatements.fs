@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 [<RequireQualifiedAccess>]
-type Config = { Depth : int }
+type Config = { Depth:int }
 
 let private error (depth:int) =
     let errorFormatString = Resources.GetString("RulesNestedStatementsError")

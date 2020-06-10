@@ -72,8 +72,8 @@ module HintParser =
         | Message of string
 
     type Hint =
-        { MatchedNode: HintNode
-          Suggestion: Suggestion }
+        { MatchedNode:HintNode
+          Suggestion:Suggestion }
 
     /// Provides a way of creating a single list from any number of hint ASTs.
     /// Means we can simply iterate over a single list for each node in the F# tree
@@ -128,11 +128,11 @@ module HintParser =
 
         [<NoComparison>]
         type Node =
-            { Edges: Edges
-              MatchedHint: Hint list }
+            { Edges:Edges
+              MatchedHint:Hint list }
         and [<CustomEquality; NoComparison>] Edges =
-            { Lookup: Dictionary<int, Node>
-              AnyMatch: (char option * Node) list }
+            { Lookup:Dictionary<int, Node>
+              AnyMatch:(char option * Node) list }
 
             override lhs.Equals(other) =
                 match other with

@@ -14,7 +14,7 @@ open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.Rules
 
 type Config =
-    { HintTrie : MergeSyntaxTrees.Edges }
+    { HintTrie:MergeSyntaxTrees.Edges }
 
 let rec private extractSimplePatterns = function
     | SynSimplePats.SimplePats(simplePatterns, _) ->
@@ -161,12 +161,12 @@ module private MatchExpression =
 
     [<NoEquality; NoComparison>]
     type Arguments =
-        { LambdaArguments: Map<char, string>
-          MatchedVariables: Dictionary<char, SynExpr>
-          Expression: AstNode
-          Hint: Expression
-          FSharpCheckFileResults: FSharpCheckFileResults option
-          Breadcrumbs: AstNode list }
+        { LambdaArguments:Map<char, string>
+          MatchedVariables:Dictionary<char, SynExpr>
+          Expression:AstNode
+          Hint:Expression
+          FSharpCheckFileResults:FSharpCheckFileResults option
+          Breadcrumbs:AstNode list }
 
         with
             member this.SubHint(expr, hint) =

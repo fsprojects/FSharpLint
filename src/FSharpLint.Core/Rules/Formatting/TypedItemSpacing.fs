@@ -14,7 +14,7 @@ type TypedItemStyle =
     | SpacesAround = 2
 
 [<RequireQualifiedAccess>]
-type Config = { TypedItemStyle : TypedItemStyle }
+type Config = { TypedItemStyle:TypedItemStyle }
 
 let private getLeadingSpaces (s:string) =
     let rec loop i =

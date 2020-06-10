@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 open FSharp.Compiler.Range
 
 [<RequireQualifiedAccess>]
-type Config = { MaxCharactersOnLine : int }
+type Config = { MaxCharactersOnLine:int }
 
 let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let maxCharacters = config.MaxCharactersOnLine
