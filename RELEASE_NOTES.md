@@ -1,3 +1,7 @@
+##### 0.16.0 - June 10 2020
+
+* Use `Dotnet.ProjInfo.Workspace` to load project info.
+
 ##### 0.15.0 - June 8 2020
 
 * Update FCS to 36.0.1 [@baronfel]
