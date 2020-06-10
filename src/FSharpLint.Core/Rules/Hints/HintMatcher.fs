@@ -306,12 +306,12 @@ module private MatchExpression =
 
     and private matchIf arguments =
         match (arguments.Expression, arguments.Hint) with
-        | AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
-            Expression.If(hintCond, hintExpr, None) ->
+        | (AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
+           Expression.If(hintCond, hintExpr, None)) ->
             arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
             (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr)
-        | AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)),
-            Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr))) ->
+        | (AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)),
+           Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr)))) ->
             arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
             (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr) &&~
             (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
@@ -353,13 +353,13 @@ module private MatchExpression =
 
     and private matchInfixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
-        | AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple(_, [leftExpr; rightExpr], _, _), _)),
-                Expression.InfixOperator(op, left, right) ->
+        | (AstNode.Expression(SynExpr.App(_, true, (SynExpr.Ident(_) as opExpr), SynExpr.Tuple(_, [leftExpr; rightExpr], _, _), _)),
+           Expression.InfixOperator(op, left, right)) ->
             arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&~
             (arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr) &&~
             (arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr)
-        | AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)),
-                Expression.InfixOperator(op, left, right) ->
+        | (AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)),
+           Expression.InfixOperator(op, left, right)) ->
 
             match removeParens <| AstNode.Expression(infixExpr) with
             | AstNode.Expression(SynExpr.App(_, true, opExpr, leftExpr, _)) ->
@@ -372,8 +372,8 @@ module private MatchExpression =
 
     and private matchPrefixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
-        | AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)),
-                Expression.PrefixOperator(Expression.Identifier([op]), expr) ->
+        | (AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)),
+           Expression.PrefixOperator(Expression.Identifier([op]), expr)) ->
             arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&~
             (arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr)
         | _ -> NoMatch

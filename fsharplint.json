@@ -263,7 +263,7 @@
     },
     "typography": {
         "indentation": {
-            "enabled": false,
+            "enabled": true,
             "config": {
                 "numberOfIndentationSpaces": 4
             }
