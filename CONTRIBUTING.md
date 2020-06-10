@@ -1,4 +1,4 @@
-# Contributing to Waypoint
+# Contributing to FSharpLint
 
 Please take a moment to review this document in order to make the contribution
 process easy and effective for everyone involved!
@@ -85,11 +85,11 @@ in order to craft an excellent pull request:
 
    ```bash
    # Clone your fork of the repo into the current directory
-   git clone https://github.com/<your-username>/Waypoint
+   git clone https://github.com/<your-username>/FSharpLint
    # Navigate to the newly cloned directory
-   cd Waypoint
+   cd FSharpLint
    # Assign the original repo to a remote called "upstream"
-   git remote add upstream https://github.com/<project-username>/Waypoint
+   git remote add upstream https://github.com/fsprojects/FSharpLint
    ```
 
 2. If you cloned a while ago, get the latest changes from upstream, and update your fork:
