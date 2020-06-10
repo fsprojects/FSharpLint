@@ -7,10 +7,12 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Field(SynField.Field(_, _, identifier, _, _, _, _, _)) ->
-        identifier
-        |> Option.map (fun identifier -> (identifier, identifier.idText, None))
-        |> Option.toArray
+    | AstNode.TypeSimpleRepresentation (SynTypeDefnSimpleRepr.Record (recordFields=recordFields)) ->
+        recordFields
+        |> List.choose (fun (SynField.Field (idOpt=idOpt)) ->
+            idOpt
+            |> Option.map (fun identifier -> (identifier, identifier.idText, None)))
+        |> List.toArray
     | _ -> Array.empty
 
 let rule config =

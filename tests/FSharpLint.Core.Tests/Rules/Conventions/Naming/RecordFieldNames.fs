@@ -32,8 +32,7 @@ module Program
     [<Test>]
     member this.RecordFieldRuleDoesntApplyToUnionCaseFields() =
         this.Parse """
-  match x with
-  | Expression (SynExpr.App(funcExpr=(SynExpr.App(isInfix=isInfix; argExpr=innerArg; funcExpr=funcExpr)); argExpr=outerArg)) -> true
-  | _ -> false"""
+  type Test =
+    | InfixOperator of operatorIdentifier:Expression * Expression * Expression"""
 
         Assert.IsTrue(this.NoErrorsExist)
