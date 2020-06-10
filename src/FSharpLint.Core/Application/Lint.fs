@@ -322,6 +322,8 @@ module Lint =
     type ConfigurationParam =
         | Configuration of Configuration
         | FromFile of configPath:string
+        /// Tries to load the config from file `fsharplint.json`.
+        /// If this file doesn't exist or is invalid, falls back to the default configuration.
         | Default
 
     /// Optional parameters that can be provided to the linter.
@@ -368,7 +370,14 @@ module Lint =
                 |> Ok
             with
             | ex -> Error (string ex)
-        | Default -> Ok Configuration.defaultConfiguration
+        | Default ->
+            try
+                Configuration.loadConfig "./fsharplint.json"
+                |> Ok
+            with
+            | ex ->
+                // TODO: log default config load error
+                Ok Configuration.defaultConfiguration
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
