@@ -137,21 +137,9 @@ Target.create "ReleaseGitHub" (fun _ ->
     Git.Branches.tag "" nugetVersion
     Git.Branches.pushTag "" remote nugetVersion
 
-    let client =
-        let user =
-            match getBuildParam "github-user" with
-            | s when not (isNullOrWhiteSpace s) -> s
-            | _ -> UserInput.getUserInput "Username: "
-        let pw =
-            match getBuildParam "github-pw" with
-            | s when not (isNullOrWhiteSpace s) -> s
-            | _ -> UserInput.getUserPassword "Password: "
-
-        // Git.createClient user pw
-        GitHub.createClient user pw
+    let gitHubToken = System.Environment.GetEnvironmentVariable("GITHUB_TOKEN")
+    let client = GitHub.createClientWithToken gitHubToken
     let files = !! (nugetDir </> "*.nupkg")
-
-
 
     // release on github
     let cl =
@@ -159,7 +147,7 @@ Target.create "ReleaseGitHub" (fun _ ->
         |> GitHub.draftNewRelease gitOwner gitName nugetVersion (latestEntry.SemVer.PreRelease <> None) [releaseNotes]
     (cl,files)
     ||> Seq.fold (fun acc e -> acc |> GitHub.uploadFile e)
-    |> GitHub.publishDraft//releaseDraft
+    |> GitHub.publishDraft
     |> Async.RunSynchronously
 )
 

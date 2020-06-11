@@ -54,4 +54,5 @@ jobs:
     - name: Upload binaries to nuget
       env:
         nuget-key: ${{ secrets.NUGET_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: dotnet fake build -t Push
