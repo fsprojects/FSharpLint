@@ -122,35 +122,6 @@ Target.create "Pack" (fun _ ->
     ) "FSharpLint.sln"
 )
 
-Target.create "ReleaseGitHub" (fun _ ->
-    let remote =
-        Git.CommandHelper.getGitResult "" "remote -v"
-        |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
-        |> Seq.tryFind (fun (s: string) -> s.Contains(gitOwner + "/" + gitName))
-        |> function None -> gitHome + "/" + gitName | Some (s: string) -> s.Split().[0]
-
-    Git.Staging.stageAll ""
-    Git.Commit.exec "" (sprintf "Bump version to %s" nugetVersion)
-    Git.Branches.pushBranch "" remote (Git.Information.getBranchName "")
-
-
-    Git.Branches.tag "" nugetVersion
-    Git.Branches.pushTag "" remote nugetVersion
-
-    let gitHubToken = System.Environment.GetEnvironmentVariable("GITHUB_TOKEN")
-    let client = GitHub.createClientWithToken gitHubToken
-    let files = !! (nugetDir </> "*.nupkg")
-
-    // release on github
-    let cl =
-        client
-        |> GitHub.draftNewRelease gitOwner gitName nugetVersion (latestEntry.SemVer.PreRelease <> None) [releaseNotes]
-    (cl,files)
-    ||> Seq.fold (fun acc e -> acc |> GitHub.uploadFile e)
-    |> GitHub.publishDraft
-    |> Async.RunSynchronously
-)
-
 Target.create "Push" (fun _ ->
     let key =
         match getBuildParam "nuget-key" with
@@ -175,7 +146,6 @@ Target.create "Release" DoNothing
 
 "Default"
   ==> "Pack"
-  ==> "ReleaseGitHub"
   ==> "Push"
   ==> "Release"
 
