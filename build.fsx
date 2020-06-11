@@ -108,7 +108,7 @@ Target.create "Pack" (fun _ ->
         ("PackageProjectUrl", gitUrl)
         ("RepositoryType", "git")
         ("RepositoryUrl", gitUrl)
-        ("PackageLicenseUrl", gitUrl + "/LICENSE")
+        ("PackageLicenseExpression", "MIT")
         ("PackageReleaseNotes", packageReleaseNotes)
     ]
 
