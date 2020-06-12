@@ -1,5 +1,6 @@
 module FSharpLint.Rules.NoPartialFunctions
 
+open System
 open FSharp.Compiler.Range
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -62,15 +63,15 @@ let private checkIfPartialIdentifier (identifier:string) (range:range) =
         | PatternMatch ->
             {
                 Range = range
-                Message = sprintf "Consider using pattern matching instead of partial function '%s'" identifier
+                Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
                 SuggestedFix = None
                 TypeChecks = []
             }
         | Function replacementFunction ->
             {
                 Range = range
-                Message = sprintf "Consider using '%s' instead of partial function '%s'" replacementFunction identifier
-                SuggestedFix = Some (Lazy.CreateFromValue (Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
+                Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
+                SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
                 TypeChecks = []
             })
 
