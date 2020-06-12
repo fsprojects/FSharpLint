@@ -1,5 +1,7 @@
 ﻿namespace FSharpLint.Framework
 
+open FSharp.Compiler.Range
+
 /// Used to walk the FSharp Compiler's abstract syntax tree,
 /// so that each node can be visited by a list of visitors.
 module Ast =
@@ -30,7 +32,7 @@ module Ast =
         | ConstructorArguments of SynArgPats
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
-        | Identifier of string list
+        | Identifier of string list * range : range
         | File of ParsedInput
 
     /// Concatenates the nested-list structure of `SynAttributes` into a `SynAttribute list` to keep other code
@@ -142,7 +144,7 @@ module Ast =
     let inline private fieldNode x = Node(ExtraSyntaxInfo.None, Field x)
     let inline private matchNode x = Node(ExtraSyntaxInfo.None, Match x)
     let inline private constructorArgumentsNode x = Node(ExtraSyntaxInfo.None, ConstructorArguments x)
-    let inline private identifierNode x = Node(ExtraSyntaxInfo.None, Identifier x)
+    let inline private identifierNode (x, range) = Node(ExtraSyntaxInfo.None, Identifier (x, range))
 
     /// Gets a string literal from the AST.
     let (|StringLiteral|_|) node =
@@ -355,9 +357,9 @@ module Ast =
         | SynExpr.LetOrUse(_, _, bindings, expression, _) ->
             add <| expressionNode expression
             bindings |> List.revIter (bindingNode >> add)
-        | SynExpr.Ident(ident) -> add <| identifierNode([ident.idText])
-        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) ->
-            add <| identifierNode(ident |> List.map (fun x -> x.idText))
+        | SynExpr.Ident(ident) -> add <| identifierNode([ident.idText], ident.idRange)
+        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, range) ->
+            add <| identifierNode(ident |> List.map (fun x -> x.idText), range)
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) ->
             add <| Node(ExtraSyntaxInfo.Else, AstNode.Expression elseExpr)
             add <| expressionNode body
@@ -394,7 +396,7 @@ module Ast =
             add <| typeNode synType
             add <| simplePatternNode simplePattern
         | SynSimplePat.Attrib(simplePattern, _, _) -> add <| simplePatternNode simplePattern
-        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| identifierNode([identifier.idText])
+        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| identifierNode([identifier.idText], identifier.idRange)
 
     let inline private matchChildren node add =
         match node with

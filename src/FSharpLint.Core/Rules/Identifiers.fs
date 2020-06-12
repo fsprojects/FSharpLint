@@ -70,3 +70,4 @@ let MaxLinesInFile = identifier 62
 let TrailingNewLineInFile = identifier 63
 let NoTabCharacters = identifier 64
 let Hints = identifier 65
+let NoPartialFunctions = identifier 66
