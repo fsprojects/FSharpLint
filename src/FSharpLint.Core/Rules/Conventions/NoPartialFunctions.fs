@@ -10,7 +10,7 @@ type private Replacement =
     | PatternMatch
     | Function of functionName:string
 
-let private partialFunctions =
+let private partialFunctionIdentifiers =
     [
         // Option
         ("Option.get", PatternMatch)
@@ -56,8 +56,8 @@ let private partialFunctions =
         ("List.pick", Function "List.tryPick")
     ] |> Map.ofList
 
-let private checkIfPartial (identifier:string) (range:range) =
-    Map.tryFind identifier partialFunctions
+let private checkIfPartialIdentifier (identifier:string) (range:range) =
+    Map.tryFind identifier partialFunctionIdentifiers
     |> Option.map (function
         | PatternMatch ->
             {
@@ -70,14 +70,14 @@ let private checkIfPartial (identifier:string) (range:range) =
             {
                 Range = range
                 Message = sprintf "Consider using '%s' instead of partial function '%s'" replacementFunction identifier
-                SuggestedFix = None
+                SuggestedFix = Some (Lazy.CreateFromValue (Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
                 TypeChecks = []
             })
 
 let runner (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Identifier (identifier, range) ->
-        checkIfPartial (String.concat "." identifier) range
+        checkIfPartialIdentifier (String.concat "." identifier) range
         |> Option.toArray
     | _ ->
         Array.empty
