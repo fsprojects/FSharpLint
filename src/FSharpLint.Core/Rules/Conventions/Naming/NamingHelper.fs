@@ -177,7 +177,7 @@ let activePatternIdentifiers (identifier:Ident) =
     |> Seq.toArray
     |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
-let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i =
+let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
     let isSynAccessPublic = function
         | Some(SynAccess.Public) | None -> true
         | _ -> false
@@ -185,7 +185,8 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntax
     let rec isPublic publicSoFar isPrivateWhenReachedBinding i =
         if i = 0 then publicSoFar
         else if publicSoFar then
-            match syntaxArray.[i].Actual with
+            let node = syntaxArray.[i]
+            match node.Actual with
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
             | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
@@ -195,15 +196,15 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntax
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
             | Pattern(SynPat.Named(_, _, _, access, _))
             | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                isPublic (isSynAccessPublic access) isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+                isPublic (isSynAccessPublic access) isPrivateWhenReachedBinding node.ParentIndex
             | TypeSimpleRepresentation(_)
             | Pattern(_) -> true
             | MemberDefinition(_) ->
                 if isPrivateWhenReachedBinding then false
-                else isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+                else isPublic publicSoFar isPrivateWhenReachedBinding node.ParentIndex
             | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
                 if isPrivateWhenReachedBinding then false
-                else isPublic (isSynAccessPublic access) true skipArray.[i].ParentIndex
+                else isPublic (isSynAccessPublic access) true node.ParentIndex
             | EnumCase(_)
             | TypeRepresentation(_)
             | Type(_)
@@ -216,11 +217,11 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntax
             | SimplePattern(_)
             | File(_)
             | LambdaArg(_)
-            | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
+            | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding node.ParentIndex
             | TypeDefinition(_)
             | Else(_)
             | LambdaBody(_)
-            | Expression(_) -> isPublic publicSoFar true skipArray.[i].ParentIndex
+            | Expression(_) -> isPublic publicSoFar true node.ParentIndex
         else false
 
     isPublic true false i

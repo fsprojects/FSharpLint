@@ -51,7 +51,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
-            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray
+            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray
                  && not isMutable ->
         checkForUselessBinding args.CheckInfo pattern expr range
     | _ ->

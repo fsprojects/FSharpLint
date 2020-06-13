@@ -117,7 +117,7 @@ module Lint =
         { IndentationRuleContext:Map<int,bool*int>
           NoTabCharactersRuleContext:(string * Range.range) list }
 
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -126,13 +126,12 @@ module Lint =
             syntaxArray
             |> Array.mapi (fun i astNode -> (i, astNode))
             |> Array.collect (fun (i, astNode) ->
-                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
+                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray i
                 let astNodeParams =
                     { AstNode = astNode.Actual
                       NodeHashcode = astNode.Hashcode
                       NodeIndex =  i
                       SyntaxArray = syntaxArray
-                      SkipArray = skipArray
                       GetParents = getParents
                       FilePath = filePath
                       FileContent = fileContent
@@ -220,10 +219,10 @@ module Lint =
         let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames (Array.toList lines)
 
         try
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+            let syntaxArray = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text lines syntaxArray skipArray
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text lines syntaxArray
             let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text lines context
 
             [| lineSuggestions; astNodeSuggestions |]

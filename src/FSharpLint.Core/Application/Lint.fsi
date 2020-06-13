@@ -120,7 +120,7 @@ module Lint =
         member TryGetFailure : byref<LintFailure> -> bool
 
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> string [] -> AbstractSyntaxArray.Node [] -> AbstractSyntaxArray.Skip [] -> Suggestion.LintWarning [] * Context
+    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> string [] -> AbstractSyntaxArray.Node [] -> Suggestion.LintWarning [] * Context
 
     /// Runs all rules which take a line of text as input.
     val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> string [] -> Context -> Suggestion.LintWarning []

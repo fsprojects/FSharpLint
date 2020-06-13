@@ -11,16 +11,12 @@ open NUnit.Framework
 open FParsec
 open TestUtils
 
-let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) (hintTrie:Edges) notify = 
-    assert (syntaxArray.Length = skipArray.Length)
-
-    let len = syntaxArray.Length
-    
+let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify = 
     for i = 0 to syntaxArray.Length - 1 do
         let node = syntaxArray.[i]
         
         match hintTrie.Lookup.TryGetValue node.Hashcode with
-        | true, trie -> checkTrie (i + 1) trie syntaxArray skipArray (Dictionary<_, _>()) (notify i)
+        | true, trie -> checkTrie (i + 1) trie syntaxArray (Dictionary<_, _>()) (notify i)
         | false, _ -> ()
 
 [<TestFixture>]
@@ -36,7 +32,7 @@ type TestAst() =
     member __.``Performance of matching fuzzy matching hints``() = 
         let (tree, _) = getPerformanceTestInput ()
 
-        let (array, skipArray) = astToArray tree
+        let array = astToArray tree
 
         let matches = ResizeArray()
 
@@ -146,7 +142,7 @@ type TestAst() =
     
         let stopwatch = Stopwatch.StartNew()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         stopwatch.Stop()
         Assert.Less(stopwatch.ElapsedMilliseconds, 50)
@@ -160,13 +156,13 @@ do
     let y = fun _ -> ()
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun _ -> () ===> ignore"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
@@ -178,13 +174,13 @@ do
     let y = List.isEmpty []
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.isEmpty [] ===> true"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
@@ -196,13 +192,13 @@ do
     let y = 1 + 0
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"x + 0 ===> x"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
@@ -214,13 +210,13 @@ do
     let y = ~~~1
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"~~~1 ===> x"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
@@ -233,13 +229,13 @@ do
     let y = numbers |> List.rev |> List.rev
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.rev (List.rev x) ===> x"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
         
@@ -251,13 +247,13 @@ do
     let y = fun x -> x
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
@@ -269,12 +265,12 @@ do
     let y = fun x -> 0
     ()"
 
-        let (array, skipArray) = generateAst source |> astToArray
+        let array = generateAst source |> astToArray
 
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
 
         let matches = ResizeArray()
         
-        possibleMatches array skipArray hintTrie (fun n1 hint -> matches.Add(n1, hint))
+        possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(0, matches.Count)
