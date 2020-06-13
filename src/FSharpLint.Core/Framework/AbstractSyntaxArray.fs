@@ -129,9 +129,12 @@ module AbstractSyntaxArray =
         | InterfaceImplementation(_)
         | TypeRepresentation(_)
         | File(_)
-        | AstNode.ComponentInfo(_) -> SyntaxNode.Other
-        | AstNode.EnumCase(_) -> SyntaxNode.EnumCase
-        | AstNode.UnionCase(_) -> SyntaxNode.UnionCase
+        | LambdaArg(_)
+        | LambdaBody(_) 
+        | Else(_) 
+        | ComponentInfo(_) -> SyntaxNode.Other
+        | EnumCase(_) -> SyntaxNode.EnumCase
+        | UnionCase(_) -> SyntaxNode.UnionCase
 
     [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type Node(hashcode: int, actual: AstNode) =
@@ -194,7 +197,7 @@ module AbstractSyntaxArray =
         | _ -> 0
 
     [<Struct; NoEquality; NoComparison>]
-    type private StackedNode(node: Ast.Node, depth: int) =
+    type private StackedNode(node: AstNode, depth: int) =
         member __.Node = node
         member __.Depth = depth
 
@@ -237,36 +240,35 @@ module AbstractSyntaxArray =
                 let parentIndex = if possibleSkips.Count > 0 then possibleSkips.Peek().SkipPosition else 0
                 skips.Add(TempSkip(numberOfChildren, parentIndex, nodePosition))
 
-        left.Push (StackedNode(Ast.Node(ExtraSyntaxInfo.None, astRoot), 0))
+        left.Push (StackedNode(astRoot, 0))
 
         while left.Count > 0 do
             let stackedNode = left.Pop()
             let node = stackedNode.Node
-            let astNode = node.AstNode
             let depth = stackedNode.Depth
 
             tryAddPossibleSkips depth
+            
+            // Strip out "extra info".
+            let node =
+                let extractExtraInfo actual extraInfoNode =
+                    possibleSkips.Push (PossibleSkip(nodes.Count, depth))
+                    nodes.Add (Node(Utilities.hash2 extraInfoNode 0, actual))
+                    actual
 
-            traverseNode astNode (fun node -> left.Push (StackedNode(node, depth + 1)))
+                match node with
+                | LambdaArg(arg) -> extractExtraInfo (SimplePatterns(arg)) SyntaxNode.LambdaArg
+                | LambdaBody(body) -> extractExtraInfo (Expression(body)) SyntaxNode.LambdaBody
+                | Else(body) -> extractExtraInfo (Expression(body)) SyntaxNode.Else
+                | _ -> node
 
-            if node.ExtraSyntaxInfo <> ExtraSyntaxInfo.None then
-                possibleSkips.Push (PossibleSkip(nodes.Count, depth))
+            traverseNode node (fun node -> left.Push (StackedNode(node, depth + 1)))
 
-                let syntaxNode =
-                    match node.ExtraSyntaxInfo with
-                    | ExtraSyntaxInfo.LambdaArg -> SyntaxNode.LambdaArg
-                    | ExtraSyntaxInfo.LambdaBody -> SyntaxNode.LambdaBody
-                    | ExtraSyntaxInfo.Else -> SyntaxNode.Else
-                    | _ -> failwith ("Unknown extra syntax info: " + string node.ExtraSyntaxInfo)
-
-                nodes.Add (Node(Utilities.hash2 syntaxNode 0, astNode))
-
-            match astNodeToSyntaxNode astNode with
+            match astNodeToSyntaxNode node with
             | SyntaxNode.Other -> ()
             | syntaxNode ->
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-
-                nodes.Add (Node(Utilities.hash2 syntaxNode (getHashCode astNode), astNode))
+                nodes.Add (Node(Utilities.hash2 syntaxNode (getHashCode node), node))
 
         tryAddPossibleSkips 0
 

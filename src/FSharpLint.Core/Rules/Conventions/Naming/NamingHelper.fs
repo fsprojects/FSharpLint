@@ -215,8 +215,11 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntax
             | Identifier(_)
             | SimplePattern(_)
             | File(_)
+            | LambdaArg(_)
             | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding skipArray.[i].ParentIndex
             | TypeDefinition(_)
+            | Else(_)
+            | LambdaBody(_)
             | Expression(_) -> isPublic publicSoFar true skipArray.[i].ParentIndex
         else false
 
