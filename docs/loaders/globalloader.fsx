@@ -13,9 +13,9 @@ let config = {
     theme_variant = Some "blue"
     root_url =
       #if WATCH
-        "http://localhost:8080/"
+        "http://localhost:8080"
       #else
-        "http://fsprojects.github.io/FSharpLint/"
+        "https://fsprojects.github.io/FSharpLint"
       #endif
 }
 
