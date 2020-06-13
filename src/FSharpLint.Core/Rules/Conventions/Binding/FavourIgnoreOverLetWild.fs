@@ -24,7 +24,7 @@ let private checkForBindingToAWildcard pattern range =
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Binding(SynBinding.Binding(_, _, _, _, _, _, _, pattern, _, _, range, _))
-            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray ->
+            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray ->
         checkForBindingToAWildcard pattern range
     | _ -> Array.empty
 

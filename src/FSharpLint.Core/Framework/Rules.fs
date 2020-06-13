@@ -25,7 +25,6 @@ type AstNodeRuleParams =
       NodeHashcode:int
       NodeIndex:int
       SyntaxArray:AbstractSyntaxArray.Node []
-      SkipArray:Skip []
       GetParents:int -> AstNode list
       FilePath:string
       FileContent:string

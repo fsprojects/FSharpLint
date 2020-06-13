@@ -7,17 +7,18 @@ open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) (skipArray:AbstractSyntaxArray.Skip[]) i =
+let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) i =
     let rec isApplicationNode i =
         if i <= 0 then false
         else
-            match syntaxArray.[i].Actual with
-            | AstNode.Expression(SynExpr.Paren(_)) -> isApplicationNode skipArray.[i].ParentIndex
+            let node = syntaxArray.[i]
+            match node.Actual with
+            | AstNode.Expression(SynExpr.Paren(_)) -> isApplicationNode node.ParentIndex
             | AstNode.Expression(SynExpr.App(_) | SynExpr.New(_)) -> true
             | _ -> false
 
     if i <= 0 then false
-    else isApplicationNode skipArray.[i].ParentIndex
+    else isApplicationNode syntaxArray.[i].ParentIndex
 
 let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
@@ -31,7 +32,7 @@ let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression (expression) ->
         match expression with
-        | SynExpr.Tuple(_, expressions, _, _) when not <| isInApplication args.SyntaxArray args.SkipArray args.NodeIndex ->
+        | SynExpr.Tuple(_, expressions, _, _) when not <| isInApplication args.SyntaxArray args.NodeIndex ->
             validateTuple config.MaxItems expressions
         | _ -> Array.empty
     | _ ->
