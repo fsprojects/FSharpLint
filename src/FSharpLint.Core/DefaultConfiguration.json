@@ -268,7 +268,13 @@
     },
     "trailingNewLineInFile": { "enabled": false },
     "noTabCharacters": { "enabled": true },
-    "noPartialFunctions": { "enabled": false },
+    "noPartialFunctions": {
+        "enabled": false,
+        "config": {
+            "allowedPartials": [],
+            "additionalPartials": []
+        }
+    },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

@@ -423,7 +423,7 @@ type Configuration =
       MaxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
-      NoPartialFunctions:EnabledConfig option }
+      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option }
 with
     static member Zero = {
         Global = None
@@ -634,7 +634,7 @@ let flattenConfig (config:Configuration) =
             config.MaxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule)
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
-            config.NoPartialFunctions |> Option.bind (constructRuleIfEnabled NoPartialFunctions.rule)
+            config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
         |] |> Array.choose id
 
     let astNodeRules = ResizeArray()

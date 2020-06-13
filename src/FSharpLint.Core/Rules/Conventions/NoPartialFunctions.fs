@@ -7,6 +7,12 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+[<RequireQualifiedAccess>]
+type Config = {
+    AllowedPartials:string list
+    AdditionalPartials:string list
+}
+
 type private Replacement =
     | PatternMatch
     | Function of functionName:string
@@ -57,36 +63,46 @@ let private partialFunctionIdentifiers =
         ("List.pick", Function "List.tryPick")
     ] |> Map.ofList
 
-let private checkIfPartialIdentifier (identifier:string) (range:range) =
-    Map.tryFind identifier partialFunctionIdentifiers
-    |> Option.map (function
-        | PatternMatch ->
-            {
-                Range = range
-                Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
-                SuggestedFix = None
-                TypeChecks = []
-            }
-        | Function replacementFunction ->
-            {
-                Range = range
-                Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
-                SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
-                TypeChecks = []
-            })
+let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:range) =
+    if List.contains identifier config.AllowedPartials then
+        None
+    elif List.contains identifier config.AdditionalPartials then
+        Some {
+            Range = range
+            Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
+            SuggestedFix = None
+            TypeChecks = []
+        }
+    else
+        Map.tryFind identifier partialFunctionIdentifiers
+        |> Option.filter (fun _ -> not (List.contains identifier config.AllowedPartials))
+        |> Option.map (function
+            | PatternMatch ->
+                {
+                    Range = range
+                    Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
+                    SuggestedFix = None
+                    TypeChecks = []
+                }
+            | Function replacementFunction ->
+                {
+                    Range = range
+                    Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
+                    SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
+                    TypeChecks = []
+                })
 
-let runner (args:AstNodeRuleParams) =
+let private runner (config:Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Identifier (identifier, range) ->
-        checkIfPartialIdentifier (String.concat "." identifier) range
+        checkIfPartialIdentifier config (String.concat "." identifier) range
         |> Option.toArray
     | _ ->
         Array.empty
 
-let rule =
+let rule config =
     { Name = "NoPartialFunctions"
       Identifier = Identifiers.NoPartialFunctions
-      RuleConfig = { AstNodeRuleConfig.Runner = runner
+      RuleConfig = { AstNodeRuleConfig.Runner = runner config
                      Cleanup = ignore } }
     |> AstNodeRule
-

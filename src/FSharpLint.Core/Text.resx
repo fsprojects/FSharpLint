@@ -313,6 +313,9 @@
     <value>Consider using '{0}' instead of partial function '{1}'.</value>
   </data>
   <data name="RulesConventionsNoPartialFunctionsPatternMatchError" xml:space="preserve">
-    <value>Consider using pattern matching instead of partial function '%s'.</value>
+    <value>Consider using pattern matching instead of partial function '{0}'.</value>
+  </data>
+  <data name="RulesConventionsNoPartialFunctionsAdditionalError" xml:space="preserve">
+    <value>Consider not using partial function '{0}'.</value>
   </data>
 </root>
