@@ -1,0 +1,247 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | Rule Config
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li id="menu-explanations" class="dd-item menu-group-link">
+            <a>
+              Explanation
+            </a>
+          </li>
+          <li id="menu-howtos" class="dd-item menu-group-link menu-group-link-active">
+            <a>
+              How-To Guides
+            </a>
+          </li>
+          <li id="menu-refs" class="dd-item menu-group-link">
+            <a>
+              API References
+            </a>
+          </li>
+        </ul>
+        <ul id="submenu-explanations" class="submenu">
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/explanations/overview.html" class="padding">
+              Overview
+            </a>
+          </li>
+        </ul>
+        <ul id="submenu-howtos" class="submenu submenu-active">
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="padding">
+              Install Dotnet Tool
+            </a>
+          </li>
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="padding">
+              Setup MSBuild Task
+            </a>
+          </li>
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="active-link padding">
+              Rule Config
+            </a>
+          </li>
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="padding">
+              Rule Suppression
+            </a>
+          </li>
+        </ul>
+        <ul id="submenu-refs" class="submenu">
+          <li>
+            <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="padding">
+              FSharpLint.Core
+            </a>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortucts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <h1>Rule Configuration</h1>
+<h2>Global Configuration</h2>
+<p>In addition to the configuration available for each rule, there are some settings which are defined globally to maintain consistency across
+multiple rules. These are defind in the <code>globals</code> object in the base of the configuration file. The rule pages below point out any global
+setting that each rule depends on. The config is as follows, but can be completely omitted to use defaults:</p>
+<pre><code>{
+  &quot;globals&quot;: {
+    &quot;numIndentationSpaces&quot;: 4 // number of spaces used for indentation
+  }
+}
+</code></pre>
+<h2>Ignoring Files</h2>
+<p>In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:</p>
+<p>{ &quot;ignoreFiles&quot;: [&quot;assemblyinfo.*&quot;] }</p>
+<ul>
+<li>Directories in the path must be separated using <code>/</code></li>
+<li>If the path ends with a <code>/</code> then everything inside of a matching directory shall be excluded.</li>
+<li>If the path does not end with a <code>/</code> then all matching files are excluded.</li>
+</ul>
+<h2>Rule Lists</h2>
+<p>The following rules can be specified for linting.</p>
+<ul>
+<li><a href="rules/FL0001.html">TupleCommaSpacing (FL0001)</a></li>
+<li><a href="rules/FL0002.html">TupleIndentation (FL0002)</a></li>
+<li><a href="rules/FL0003.html">TupleParentheses (FL0003)</a></li>
+<li><a href="rules/FL0004.html">PatternMatchClausesOnNewLine (FL0004)</a></li>
+<li><a href="rules/FL0005.html">PatternMatchOrClausesOnNewLine (FL0005)</a></li>
+<li><a href="rules/FL0006.html">PatternMatchClauseIndentation (FL0006)</a></li>
+<li><a href="rules/FL0007.html">PatternMatchExpressionIndentation (FL0007)</a></li>
+<li><a href="rules/FL0008.html">ModuleDeclSpacing (FL0008)</a></li>
+<li><a href="rules/FL0009.html">ClassMemberSpacing (FL0009)</a></li>
+<li><a href="rules/FL0010.html">TypedItemSpacing (FL0010)</a></li>
+<li><a href="rules/FL0011.html">TypePrefixing (FL0011)</a></li>
+<li><a href="rules/FL0012.html">UnionDefinitionIndentation (FL0012)</a></li>
+<li><a href="rules/FL0013.html">RecursiveAsyncFunction (FL0013)</a></li>
+<li><a href="rules/FL0014.html">RedundantNewKeyword (FL0014)</a></li>
+<li><a href="rules/FL0015.html">NestedStatements (FL0015)</a></li>
+<li><a href="rules/FL0016.html">FailwithWithSingleArgument (FL0016)</a></li>
+<li><a href="rules/FL0017.html">RaiseWithSingleArgument (FL0017)</a></li>
+<li><a href="rules/FL0018.html">NullArgWithSingleArgument (FL0018)</a></li>
+<li><a href="rules/FL0019.html">InvalidOpWithSingleArgument (FL0019)</a></li>
+<li><a href="rules/FL0020.html">InvalidArgWithTwoArguments (FL0020)</a></li>
+<li><a href="rules/FL0021.html">FailwithfWithArgumentsMatchingFormattingString (FL0021)</a></li>
+<li><a href="rules/FL0022.html">MaxLinesInLambdaFunction (FL0022)</a></li>
+<li><a href="rules/FL0023.html">MaxLinesInMatchLambdaFunction (FL0023)</a></li>
+<li><a href="rules/FL0024.html">MaxLinesInValue (FL0024)</a></li>
+<li><a href="rules/FL0025.html">MaxLinesInFunction (FL0025)</a></li>
+<li><a href="rules/FL0026.html">MaxLinesInMember (FL0026)</a></li>
+<li><a href="rules/FL0027.html">MaxLinesInConstructor (FL0027)</a></li>
+<li><a href="rules/FL0028.html">MaxLinesInProperty (FL0028)</a></li>
+<li><a href="rules/FL0029.html">MaxLinesInModule (FL0029)</a></li>
+<li><a href="rules/FL0030.html">MaxLinesInRecord (FL0030)</a></li>
+<li><a href="rules/FL0031.html">MaxLinesInEnum (FL0031)</a></li>
+<li><a href="rules/FL0032.html">MaxLinesInUnion (FL0032)</a></li>
+<li><a href="rules/FL0033.html">MaxLinesInClass (FL0033)</a></li>
+<li><a href="rules/FL0034.html">ReimplementsFunction (FL0034)</a></li>
+<li><a href="rules/FL0035.html">CanBeReplacedWithComposition (FL0035)</a></li>
+<li><a href="rules/FL0036.html">InterfaceNames (FL0036)</a></li>
+<li><a href="rules/FL0037.html">ExceptionNames (FL0037)</a></li>
+<li><a href="rules/FL0038.html">TypeNames (FL0038)</a></li>
+<li><a href="rules/FL0039.html">RecordFieldNames (FL0039)</a></li>
+<li><a href="rules/FL0040.html">EnumCasesNames (FL0040)</a></li>
+<li><a href="rules/FL0041.html">UnionCasesNames (FL0041)</a></li>
+<li><a href="rules/FL0042.html">ModuleNames (FL0042)</a></li>
+<li><a href="rules/FL0043.html">LiteralNames (FL0043)</a></li>
+<li><a href="rules/FL0044.html">NamespaceNames (FL0044)</a></li>
+<li><a href="rules/FL0045.html">MemberNames (FL0045)</a></li>
+<li><a href="rules/FL0046.html">ParameterNames (FL0046)</a></li>
+<li><a href="rules/FL0047.html">MeasureTypeNames (FL0047)</a></li>
+<li><a href="rules/FL0048.html">ActivePatternNames (FL0048)</a></li>
+<li><a href="rules/FL0049.html">PublicValuesNames (FL0049)</a></li>
+<li><a href="rules/FL0050.html">NonPublicValuesNames (FL0050)</a></li>
+<li><a href="rules/FL0051.html">MaxNumberOfItemsInTuple (FL0051)</a></li>
+<li><a href="rules/FL0052.html">MaxNumberOfFunctionParameters (FL0052)</a></li>
+<li><a href="rules/FL0053.html">MaxNumberOfMembers (FL0053)</a></li>
+<li><a href="rules/FL0054.html">MaxNumberOfBooleanOperatorsInCondition (FL0054)</a></li>
+<li><a href="rules/FL0055.html">FavourIgnoreOverLetWild (FL0055)</a></li>
+<li><a href="rules/FL0056.html">WildcardNamedAsPattern (FL0056)</a></li>
+<li><a href="rules/FL0057.html">UselessBinding (FL0057)</a></li>
+<li><a href="rules/FL0058.html">TupleOfWildcards (FL0058)</a></li>
+<li><a href="rules/FL0059.html">Indentation (FL0059)</a></li>
+<li><a href="rules/FL0060.html">MaxCharactersOnLine (FL0060)</a></li>
+<li><a href="rules/FL0061.html">TrailingWhitespaceOnLine (FL0061)</a></li>
+<li><a href="rules/FL0062.html">MaxLinesInFile (FL0062)</a></li>
+<li><a href="rules/FL0063.html">TrailingNewLineInFile (FL0063)</a></li>
+<li><a href="rules/FL0064.html">NoTabCharacters (FL0064)</a></li>
+<li><a href="rules/FL0065.html">Hints (FL0065)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>
