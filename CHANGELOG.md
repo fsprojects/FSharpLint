@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.4] - 2020-06-26
+- Update docs to fix broken links.
+
 ## [0.16.3] - 2020-06-13
 - Update docs to support https.
 
