@@ -15,8 +15,4 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
     for filePath in Directory.GetFiles(intputPath, "*.*", SearchOption.AllDirectories) do
         File.Copy(filePath, filePath.Replace(intputPath, outputPath), true)
 
-    let intputPath = Path.Combine(projectRoot, "index.html")
-    let outputPath = Path.Combine(projectRoot, "_public", "index.html")
-    File.Copy(intputPath, outputPath, true)
-
     siteContet
