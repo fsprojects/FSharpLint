@@ -22,7 +22,7 @@ setting that each rule depends on. The config is as follows, but can be complete
 
 In the configuration file paths can be used to specify files that should be included, globs are used to match wildcard directories and files. For example the following will match all files with the file name assemblyinfo (the matching is case insensitive) with any extension:
 
-  { "ignoreFiles": ["assemblyinfo.*"] }
+    { "ignoreFiles": ["assemblyinfo.*"] }
 
 * Directories in the path must be separated using `/`
 * If the path ends with a `/` then everything inside of a matching directory shall be excluded.
@@ -98,4 +98,3 @@ The following rules can be specified for linting.
 - [TrailingNewLineInFile (FL0063)](rules/FL0063.html)
 - [NoTabCharacters (FL0064)](rules/FL0064.html)
 - [Hints (FL0065)](rules/FL0065.html)
-
