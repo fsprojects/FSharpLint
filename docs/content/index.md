@@ -1,6 +1,6 @@
 ---
 title: Overview
-category: explanation
+category: top-level
 menu_order: 1
 ---
 

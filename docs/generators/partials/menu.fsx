@@ -19,14 +19,9 @@ let menu (ctx : SiteContents) (page: string) =
 
   let group = content |> Seq.tryFind (fun n -> n.title = page) |> Option.map (fun n -> n.category)
 
-  let explenations =
+  let topLevel =
     content
-    |> Seq.filter (fun n -> n.category = Contentloader.Explanation && not n.hide_menu )
-    |> Seq.sortBy (fun n -> n.menu_order)
-
-  let tutorials =
-    content
-    |> Seq.filter (fun n -> n.category = Contentloader.Tutorial && not n.hide_menu )
+    |> Seq.filter (fun n -> n.category = Contentloader.TopLevel && not n.hide_menu )
     |> Seq.sortBy (fun n -> n.menu_order)
 
   let howtos =
@@ -34,67 +29,33 @@ let menu (ctx : SiteContents) (page: string) =
     |> Seq.filter (fun n -> n.category = Contentloader.HowTo && not n.hide_menu )
     |> Seq.sortBy (fun n -> n.menu_order)
 
-  let hasTutorials = not (Seq.isEmpty tutorials)
-  let hasExplenations = not (Seq.isEmpty explenations)
-  let hasHowTos = not (Seq.isEmpty howtos)
-
   let menuHeader =
     [
-      if hasExplenations then
-        li [Id "menu-explanations"; if group = Some Contentloader.Explanation then Class "dd-item menu-group-link menu-group-link-active" else  Class "dd-item menu-group-link"; ] [
-          a [] [!! "Explanation"]
-        ]
-      if hasTutorials then
-        li [Id "menu-tutorials"; if group = Some Contentloader.Tutorial then Class "dd-item menu-group-link menu-group-link-active" else Class "dd-item menu-group-link"; ] [
-          a [] [!! "Tutorials"]
-        ]
-      if hasHowTos then
-        li [Id "menu-howtos"; if group = Some Contentloader.HowTo then Class "dd-item menu-group-link menu-group-link-active" else Class "dd-item menu-group-link"; ] [
-          a [] [!! "How-To Guides"]
-        ]
-      li [ Id "menu-refs"; if group = None then Class "dd-item menu-group-link menu-group-link-active" else Class "dd-item menu-group-link";] [
-        a [] [!! "API References"]
+      li [Class "dd-item"] [
+        a [Href rootUrl; if page = "Overview" then Class "active" else Class ""] [!! "Overview"]
       ]
-    ]
-
-  let renderExpls =
-    ul [Id "submenu-explanations"; if group = Some Contentloader.Explanation then Class "submenu submenu-active" else Class "submenu"; ] [
-      for r in explenations ->
-        li [] [
-          a [Href (rootUrl + "/" +  r.link); if r.title = page then Class "active-link padding" else Class "padding"] [
-            !! r.title
-          ]
+      li [Class "dd-item parent" ] [
+        a [if group = Some Contentloader.HowTo then Class "active" else Class ""] [!! "How-To Guides"]
+        ul [Class "child"] [
+          for r in howtos ->
+            li [Class "dd-item"] [
+              a [Href (rootUrl + "/" +  r.link); if r.title = page then Class "active" else Class "" ] [
+                !! r.title
+              ]
+            ]
         ]
-    ]
-
-  let renderTuts =
-    ul [Id "submenu-tutorials"; if group = Some Contentloader.Tutorial then Class "submenu submenu-active" else Class "submenu"; ] [
-      for r in tutorials ->
-        li [] [
-          a [ Href (rootUrl + "/" + r.link); if r.title = page then Class "active-link padding" else Class "padding" ] [
-            !! r.title
-          ]
+      ]
+      li [Class "dd-item parent"] [
+        a [if group = None then Class "active" else Class ""] [!! "API References"]
+        ul [Class "child"] [
+          for r in all ->
+            li [Class "dd-item"] [
+              a [Href (rootUrl + "/reference/" +  r.Label + "/index.html"); if r.Label = page then Class "active" else Class "" ] [
+                !! r.Label
+              ]
+            ]
         ]
-    ]
-
-  let renderHowTos =
-    ul [Id "submenu-howtos"; if group = Some Contentloader.HowTo then Class "submenu submenu-active" else Class "submenu"; ] [
-      for r in howtos ->
-        li [] [
-          a [Href (rootUrl + "/" +  r.link); if r.title = page then Class "active-link padding" else Class "padding" ] [
-            !! r.title
-          ]
-        ]
-    ]
-
-  let renderRefs =
-    ul [Id "submenu-refs"; if group = None then Class "submenu submenu-active" else Class "submenu"; ] [
-      for r in all ->
-        li [] [
-          a [Href (rootUrl + "/reference/" +  r.Label + "/index.html"); if r.Label = page then Class "active-link padding" else Class "padding" ] [
-            !! r.Label
-          ]
-        ]
+      ]
     ]
 
   let renderShortucuts =
@@ -135,10 +96,6 @@ let menu (ctx : SiteContents) (page: string) =
     ]
     div [Class "highlightable"] [
       ul [Class "topics"] menuHeader
-      if hasExplenations then renderExpls
-      if hasTutorials then renderTuts
-      if hasHowTos then renderHowTos
-      renderRefs
       renderShortucuts
       renderFooter
     ]
