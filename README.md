@@ -15,7 +15,8 @@ FSharpLint can be used in several ways:
 
 * [Running as dotnet tool from command line](https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html).
 * [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
-* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](http://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html).
+* [In Visual Studio using the F# Lint extension](https://marketplace.visualstudio.com/items?itemName=asti.fslint-vs).
+* [As an MSBuild Task](http://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html).
 * [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
 
 ## Documentation
