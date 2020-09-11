@@ -16,7 +16,7 @@ let private error (depth:int) =
 
 /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
-/// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
+/// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
 let private isCompilerGeneratedMatch = function
     | SynExpr.Match(_, SynExpr.Ident(ident), _, _) when ident.idText.StartsWith("_arg") -> true
     | _ -> false
@@ -61,7 +61,7 @@ let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) i j
     distance
 
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
-/// e.g. lambda arg being a duplicate of the lamdba.
+/// e.g. lambda arg being a duplicate of the lambda.
 let isMetaData args node i =
     let parentIndex = args.SyntaxArray.[i].ParentIndex
     if parentIndex = i then false
