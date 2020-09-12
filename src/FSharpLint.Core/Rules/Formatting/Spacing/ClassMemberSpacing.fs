@@ -14,8 +14,8 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
     |> List.toArray
     |> Array.pairwise
     |> Array.choose (fun (memberOne, memberTwo) ->
-        let numPreceedingCommentLines = countPrecedingCommentLines args.FileContent memberOne.Range.End memberTwo.Range.Start
-        if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPreceedingCommentLines then
+        let numPrecedingCommentLines = countPrecedingCommentLines args.FileContent memberOne.Range.End memberTwo.Range.Start
+        if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPrecedingCommentLines then
             let intermediateRange =
                 let startLine = memberOne.Range.EndLine + 1
                 let endLine = memberTwo.Range.StartLine
