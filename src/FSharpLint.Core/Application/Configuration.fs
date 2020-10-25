@@ -21,10 +21,10 @@ module FSharpJsonConverter =
     type OptionConverter() =
         inherit JsonConverter()
 
-        override x.CanConvert(t) =
+        override __.CanConvert(t) =
             t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ option>
 
-        override x.WriteJson(writer, value, serializer) =
+        override __.WriteJson(writer, value, serializer) =
             let value =
                 if isNull value then null
                 else
@@ -32,7 +32,7 @@ module FSharpJsonConverter =
                     fields.[0]
             serializer.Serialize(writer, value)
 
-        override x.ReadJson(reader, t, _, serializer) =
+        override __.ReadJson(reader, t, _, serializer) =
             let innerType = t.GetGenericArguments().[0]
             let innerType =
                 if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
@@ -42,10 +42,7 @@ module FSharpJsonConverter =
             if isNull value then FSharpValue.MakeUnion(cases.[0], [||])
             else FSharpValue.MakeUnion(cases.[1], [|value|])
 
-    let private converters =
-        [|
-            OptionConverter() :> JsonConverter
-        |]
+    let private converters = [| OptionConverter() :> JsonConverter |]
 
     let serializerSettings =
         let settings = JsonSerializerSettings()
@@ -563,7 +560,8 @@ let flattenConfig (config:Configuration) =
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+            config.Hints |> Option.map (fun config -> HintMatcher.rule { 
+                HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
         |] |> Array.concat
 
     let allRules =
