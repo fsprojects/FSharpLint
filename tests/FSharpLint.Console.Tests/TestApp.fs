@@ -117,6 +117,30 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(-1, returnCode)
         Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
+        
+    /// Regression for bug discovered during: https://github.com/fsprojects/FSharpLint/issues/466
+    /// Adding a rule to the config was disabling other rules unless they're explicitly specified.
+    [<Test>]
+    member __.``Adding a rule to a custom config should not have side effects on other rules (from the default config).``() =
+        let config = """
+        {
+            "exceptionNames": {
+                "enabled": false
+            }
+        }
+        """
+        use config = new TemporaryFile(config, "json")
+        
+        let input = """
+        type Signature =
+            abstract member Encoded : string
+            abstract member PathName : string
+        """
+        
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+        
+        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
 open FSharpLint.Console.Program
 
