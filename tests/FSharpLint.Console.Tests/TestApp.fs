@@ -108,8 +108,7 @@ type TestConsoleApplication() =
         
         // Check default config triggers the hint we're expecting to ignore later.
         Assert.AreEqual(-1, returnCode)
-        Assert.AreEqual(Set.ofList [
-            "`List.map f (List.map g x)` might be able to be refactored into `List.map (g >> f) x`."], errors)
+        Assert.AreEqual(Set.ofList ["`List.map f (List.map g x)` might be able to be refactored into `List.map (g >> f) x`."], errors)
 
         let config = """
         {
@@ -127,3 +126,27 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)
+        
+    /// Regression for bug discovered during: https://github.com/fsprojects/FSharpLint/issues/466
+    /// Adding a rule to the config was disabling other rules unless they're explicitly specified.
+    [<Test>]
+    member __.``Adding a rule to a custom config should not have side effects on other rules (from the default config).``() =
+        let config = """
+        {
+            exceptionNames: {
+                enabled: false
+            }
+        }
+        """
+        use config = new TemporaryFile(config, "json")
+        
+        let input = """
+        type Signature =
+            abstract member Encoded : string
+            abstract member PathName : string
+        """
+        
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+        
+        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(Set.ofList ["Consider changing `Signature` to be prefixed with `I`."], errors)
