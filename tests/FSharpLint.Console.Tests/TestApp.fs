@@ -127,7 +127,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)
         
-    /// Regression for bug discovered during: https://github.com/fsprojects/FSharpLint/issues/466
+    /// Regression test for bug discovered during: https://github.com/fsprojects/FSharpLint/issues/466
     /// Adding a rule to the config was disabling other rules unless they're explicitly specified.
     [<Test>]
     member __.``Adding a rule to a custom config should not have side effects on other rules (from the default config).``() =
@@ -140,6 +140,7 @@ type TestConsoleApplication() =
         """
         use config = new TemporaryFile(config, "json")
         
+        // Should trigger warning for InterfaceNames rule.
         let input = """
         type Signature =
             abstract member Encoded : string
