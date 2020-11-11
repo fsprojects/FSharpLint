@@ -8,7 +8,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
     let checkNotUnionCase ident =
-        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident |> async.Return)
+        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
 
     let isNotActivePattern (ident:Ident) =
         ident.idText.StartsWith("|")

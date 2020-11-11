@@ -244,13 +244,14 @@ let isLiteral = isAttribute "Literal"
 
 let isMeasureType = isAttribute "Measure"
 
-let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
-    let symbol = checkFile.GetSymbolUseAtLocation(
+let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) = async {
+    let! symbol = checkFile.GetSymbolUseAtLocation(
                     ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
     match symbol with
-    | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
-    | Some(_) | None -> true
+    | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> return false
+    | Some(_) | None -> return true
+}
 
 let isInterface typeDef =
     let hasConstructor = function

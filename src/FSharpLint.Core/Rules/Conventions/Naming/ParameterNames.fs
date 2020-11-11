@@ -14,7 +14,7 @@ let private getMemberIdents _ = function
 
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
     let checkNotUnionCase ident =
-        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident |> async.Return )
+        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
 
     match pattern with
     | SynPat.Named(_, ident, _, _, _)

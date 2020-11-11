@@ -44,7 +44,7 @@ module ExpressionUtilities =
                 range.EndColumn,
                 "",
                 identNames)
-        | _ -> None
+        | _ -> async.Return None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =

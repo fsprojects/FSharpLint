@@ -15,20 +15,21 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
             | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
             | SynPat.Named(_, ident, _, _, _) -> Some(ident)
             | _ -> None
+        
+        let isNotMutable (symbol:FSharpSymbolUse) =
+            match symbol.Symbol with
+            | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+            | _ -> true
 
-        let checkNotMutable (ident:Ident) =
-            let symbol =
+        let checkNotMutable (ident:Ident) = async {
+            let! symbol =
                 checkInfo.GetSymbolUseAtLocation(
                     ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-            let isNotMutable (symbol:FSharpSymbolUse) =
-                match symbol.Symbol with
-                | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
-                | _ -> true
-
             match symbol with
-            | Some(symbol) -> isNotMutable symbol
-            | None -> false
+            | Some(symbol) -> return isNotMutable symbol
+            | None -> return false
+        }
 
         let rec matchingIdentifier (bindingIdent:Ident) = function
             | SynExpr.Paren(expr, _, _, _) ->
@@ -42,7 +43,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
             { Range = range
               Message = Resources.GetString("RulesUselessBindingError")
               SuggestedFix = None
-              TypeChecks = [ checkNotMutable ident |> async.Return ] })
+              TypeChecks = [ checkNotMutable ident ] })
         |> Option.toArray
     | _ -> Array.empty
 
