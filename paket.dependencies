@@ -1,5 +1,4 @@
 source https://api.nuget.org/v3/index.json
-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json                                               
 
 framework: netstandard2.0, net5.0
 storage: none
@@ -8,10 +7,10 @@ nuget Argu
 nuget BenchmarkDotNet
 nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
-nuget FSharp.Compiler.Service prerelease
+nuget FSharp.Compiler.Service ~> 38.0
 nuget Dotnet.ProjInfo.Workspace ~> 0.41.0
 nuget Dotnet.ProjInfo.Workspace.FCS ~> 0.41.0
-nuget FSharp.Core prerelease
+nuget FSharp.Core
 nuget nunit
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk
