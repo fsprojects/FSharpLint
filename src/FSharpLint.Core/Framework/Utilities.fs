@@ -43,7 +43,7 @@ module ExpressionUtilities =
                 range.StartLine,
                 range.EndColumn,
                 "",
-                identNames) |> Async.RunSynchronously
+                identNames)
         | _ -> None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +

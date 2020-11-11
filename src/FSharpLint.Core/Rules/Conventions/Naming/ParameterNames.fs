@@ -14,7 +14,7 @@ let private getMemberIdents _ = function
 
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
     let checkNotUnionCase ident =
-        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
+        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident |> async.Return )
 
     match pattern with
     | SynPat.Named(_, ident, _, _, _)
@@ -27,7 +27,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
+        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _) ->
             ctorArgs
             |> extractPatterns
             |> List.toArray

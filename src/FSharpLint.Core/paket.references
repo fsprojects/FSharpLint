@@ -5,3 +5,4 @@ Dotnet.ProjInfo.Workspace
 Dotnet.ProjInfo.Workspace.FCS
 FSharp.Core
 Newtonsoft.Json
+Microsoft.Build.Utilities.Core

@@ -8,7 +8,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
     let checkNotUnionCase ident =
-        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
+        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident |> async.Return)
 
     match pattern with
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->

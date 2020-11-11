@@ -24,7 +24,7 @@ module AstInfo =
                 | MemberKind.PropertyGet(_)
                 | MemberKind.PropertySet(_)
                 | MemberKind.PropertyGetSet(_) -> Property
-            | None when valInfo.ArgInfos.Length = 0 -> Value
+            | None when valInfo.CurriedArgInfos.Length = 0 -> Value
             | None -> Function
 
     let operatorIdentifiers = 

@@ -219,20 +219,19 @@ module private MatchExpression =
         | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
             | Some(checkFile) ->
-                async {
-                    let! symbolUse =
-                        checkFile.GetSymbolUseAtLocation(
-                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                let symbolUse =
+                    checkFile.GetSymbolUseAtLocation(
+                        ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-                    return
-                        match symbolUse with
-                        | Some(symbolUse) ->
-                            match symbolUse.Symbol with
-                            | :? FSharpParameter
-                            | :? FSharpField -> false
-                            | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
-                            | _ -> true
-                        | None -> true }
+                match symbolUse with
+                | Some(symbolUse) ->
+                    match symbolUse.Symbol with
+                    | :? FSharpParameter
+                    | :? FSharpField -> false
+                    | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
+                    | _ -> true
+                | None -> true
+                |> async.Return
                 |> List.singleton
                 |> Match
             | None ->
@@ -597,35 +596,33 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
-    async {
-        let! symbol =
-            checkFile.GetSymbolUseAtLocation(
-                methodIdent.Range.StartLine,
-                methodIdent.Range.EndColumn,
-                "",
-                methodIdent.Lid |> List.map (fun x -> x.idText))
+    let symbol =
+        checkFile.GetSymbolUseAtLocation(
+            methodIdent.Range.StartLine,
+            methodIdent.Range.EndColumn,
+            "",
+            methodIdent.Lid |> List.map (fun x -> x.idText))
 
-        return
-            match symbol with
-            | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
-                let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+    match symbol with
+    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
+        let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
-                if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
-                else None
-            | _ -> None }
+        if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
+        else None
+    | _ -> None
 
 /// Check a lambda function can be replaced with a function,
 /// it will not be if the lambda is automatically getting
 /// converted to a delegate type e.g. Func<T>.
-let private canReplaceLambdaWithFunction checkFile methodIdent index = async {
-    let! parameters = getMethodParameters checkFile methodIdent
+let private canReplaceLambdaWithFunction checkFile methodIdent index =
+    let parameters = getMethodParameters checkFile methodIdent
 
-    return
-        match parameters with
-        | Some(parameters) when index < Seq.length parameters ->
-            let parameter = parameters.[index]
-            not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
-        | _ -> true }
+
+    match parameters with
+    | Some(parameters) when index < Seq.length parameters ->
+        let parameter = parameters.[index]
+        not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
+    | _ -> true
 
 /// Check if lambda can be replaced with an identifier (cannot in the case when is a parameter with the type of a delegate).
 let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range) =
@@ -676,8 +673,8 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
                 | RequiresCheck(index, methodIdent) ->
                     match args.CheckInfo with
                     | Some checkFile ->
-                        let typeCheck = canReplaceLambdaWithFunction checkFile methodIdent index
-                        suggest (typeCheck::typeChecks)
+                        let typeCheck = canReplaceLambdaWithFunction checkFile methodIdent index |> async.Return
+                        suggest (typeCheck ::typeChecks)
                     | None -> ()
                 | CanBeReplaced -> suggest typeChecks
                 | CannotBeReplaced -> ()
