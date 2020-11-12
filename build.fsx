@@ -39,14 +39,17 @@ let nugetDir  = "./out/"
 System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
 let changelogFilename = "CHANGELOG.md"
 let changelog = Changelog.load changelogFilename
-let latestEntry = changelog.LatestEntry
+let nugetVersion =
+    match changelog.Unreleased with
+    | None -> changelog.LatestEntry.NuGetVersion
+    | Some _unreleased ->
+        let current = changelog.LatestEntry.NuGetVersion |> SemVer.parse
+        let bumped =
+            { current with Minor = current.Minor + 1u
+                           PreRelease = Fake.Core.PreRelease.TryParse "alpha01" }
+        string bumped
 
-let nugetVersion = latestEntry.NuGetVersion
-let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl latestEntry.NuGetVersion
-let releaseNotes =
-    latestEntry.Changes
-    |> List.map (fun c -> " * " + c.ToString())
-    |> String.concat "\n"
+let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion
 
 // --------------------------------------------------------------------------------------
 // Helpers

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 - Update to FCS 38
+- Update to .Net 5
 
 ## [0.16.5] - 2020-06-26
 - Update navigation in docs.
