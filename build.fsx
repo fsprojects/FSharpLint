@@ -13,6 +13,8 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.Api
 
+Target.initEnvironment()
+
 // --------------------------------------------------------------------------------------
 // Information about the project to be used at NuGet and in AssemblyInfo files
 // --------------------------------------------------------------------------------------
@@ -149,4 +151,4 @@ Target.create "Release" DoNothing
   ==> "Push"
   ==> "Release"
 
-Target.runOrDefault "Default"
+Target.runOrDefaultWithArguments "Default"
