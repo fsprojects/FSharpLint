@@ -63,7 +63,7 @@ module ParseFile =
         #endif
 
         let (options, _diagnostics) =
-            checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework) 
+            checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework, useSdkRefs = assumeDotNetFramework) 
             |> Async.RunSynchronously
 
         options
