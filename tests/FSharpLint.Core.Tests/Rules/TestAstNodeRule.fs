@@ -11,7 +11,7 @@ type TestAstNodeRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         let parseResults =
             match fileName with

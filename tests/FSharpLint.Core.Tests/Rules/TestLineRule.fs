@@ -12,7 +12,7 @@ type TestLineRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
         let fileName = fileName |> Option.defaultValue "Test.fsx"

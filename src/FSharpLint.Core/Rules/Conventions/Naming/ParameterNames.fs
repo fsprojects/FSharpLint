@@ -27,7 +27,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
+        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _) ->
             ctorArgs
             |> extractPatterns
             |> List.toArray

@@ -248,10 +248,10 @@ let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) = async {
     let! symbol = checkFile.GetSymbolUseAtLocation(
                     ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
-    return
-        match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
-        | Some(_) | None -> true }
+    match symbol with
+    | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> return false
+    | Some(_) | None -> return true
+}
 
 let isInterface typeDef =
     let hasConstructor = function

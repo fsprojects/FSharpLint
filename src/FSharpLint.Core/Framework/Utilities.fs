@@ -43,8 +43,8 @@ module ExpressionUtilities =
                 range.StartLine,
                 range.EndColumn,
                 "",
-                identNames) |> Async.RunSynchronously
-        | _ -> None
+                identNames)
+        | _ -> async.Return None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =

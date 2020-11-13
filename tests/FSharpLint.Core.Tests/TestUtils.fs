@@ -16,7 +16,7 @@
     let private performanceTestSourceFile = basePath </> "TypeChecker.fs"
 
     let generateAst source =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString source
 
         let options = ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source

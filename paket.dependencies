@@ -1,20 +1,21 @@
 source https://api.nuget.org/v3/index.json
-framework: netstandard2.0, netcoreapp3.1, netcoreapp2.1
+
+framework: netstandard2.0, net5.0
 storage: none
 
 nuget Argu
 nuget BenchmarkDotNet
 nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
-nuget FSharp.Compiler.Service ~> 36.0
+nuget FSharp.Compiler.Service ~> 38.0
 nuget Dotnet.ProjInfo.Workspace ~> 0.41.0
 nuget Dotnet.ProjInfo.Workspace.FCS ~> 0.41.0
-nuget FSharp.Core ~> 4.6.2
+nuget FSharp.Core
 nuget nunit
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk
 nuget Newtonsoft.Json
-
+nuget Microsoft.Build.Utilities.Core 16.7
 
 group Docs
   source https://api.nuget.org/v3/index.json

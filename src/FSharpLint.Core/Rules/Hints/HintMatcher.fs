@@ -214,7 +214,7 @@ module private MatchExpression =
 
     /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
     /// or a named parameter in a method call.
-    let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
+    let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr = 
         match (leftExpr, opExpr) with
         | SynExpr.Ident(ident), SynExpr.Ident(opIdent) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
@@ -232,7 +232,8 @@ module private MatchExpression =
                             | :? FSharpField -> false
                             | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                             | _ -> true
-                        | None -> true }
+                        | None -> true
+                }
                 |> List.singleton
                 |> Match
             | None ->
@@ -596,23 +597,22 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
         let error = System.String.Format(errorFormatString, matched, message)
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
 
-let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) =
-    async {
-        let! symbol =
-            checkFile.GetSymbolUseAtLocation(
-                methodIdent.Range.StartLine,
-                methodIdent.Range.EndColumn,
-                "",
-                methodIdent.Lid |> List.map (fun x -> x.idText))
+let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:LongIdentWithDots) = async {
+    let! symbol =
+        checkFile.GetSymbolUseAtLocation(
+            methodIdent.Range.StartLine,
+            methodIdent.Range.EndColumn,
+            "",
+            methodIdent.Lid |> List.map (fun x -> x.idText))
 
-        return
-            match symbol with
-            | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
-                let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+    match symbol with
+    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
+        let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
-                if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
-                else None
-            | _ -> None }
+        if symbol.IsMember then return symbol.CurriedParameterGroups |> Seq.tryHead
+        else return None
+    | _ -> return None
+}
 
 /// Check a lambda function can be replaced with a function,
 /// it will not be if the lambda is automatically getting
@@ -620,12 +620,13 @@ let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:
 let private canReplaceLambdaWithFunction checkFile methodIdent index = async {
     let! parameters = getMethodParameters checkFile methodIdent
 
-    return
-        match parameters with
-        | Some(parameters) when index < Seq.length parameters ->
-            let parameter = parameters.[index]
-            not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
-        | _ -> true }
+
+    match parameters with
+    | Some(parameters) when index < Seq.length parameters ->
+        let parameter = parameters.[index]
+        return not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
+    | _ -> return true
+}
 
 /// Check if lambda can be replaced with an identifier (cannot in the case when is a parameter with the type of a delegate).
 let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range) =
@@ -677,7 +678,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
                     match args.CheckInfo with
                     | Some checkFile ->
                         let typeCheck = canReplaceLambdaWithFunction checkFile methodIdent index
-                        suggest (typeCheck::typeChecks)
+                        suggest (typeCheck ::typeChecks)
                     | None -> ()
                 | CanBeReplaced -> suggest typeChecks
                 | CannotBeReplaced -> ()
