@@ -291,7 +291,7 @@ module Lint =
         let locator = MSBuildLocator()
         let loader = Dotnet.ProjInfo.Workspace.Loader.Create (LoaderConfig.Default locator)
         let netFwInfo = NetFWInfo.Create (NetFWInfoConfig.Default locator)
-        let fcsBinder = FCSBinder (netFwInfo, loader, FSharpChecker.Create())
+        let fcsBinder = FCSBinder (netFwInfo, loader, FSharpChecker.Create(keepAssemblyContents=true))
         loader.LoadProjects [projectFilePath]
         fcsBinder.GetProjectOptions projectFilePath
 
@@ -394,7 +394,7 @@ module Lint =
 
                     optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
-                let checker = FSharpChecker.Create()
+                let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
                 let parseFilesInProject files projectOptions =
                     let lintInformation =
@@ -518,7 +518,7 @@ module Lint =
 
     /// Lints F# source code.
     let lintSource optionalParams source =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         match ParseFile.parseSource source checker with
         | ParseFile.Success(parseFileInformation) ->
@@ -561,7 +561,7 @@ module Lint =
     /// Lints an F# file from a given path to the `.fs` file.
     let lintFile optionalParams filePath =
         if IO.File.Exists filePath then
-            let checker = FSharpChecker.Create()
+            let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
             match ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->
