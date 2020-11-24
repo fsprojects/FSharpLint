@@ -27,7 +27,6 @@ let private areChildrenNested = function
     | AstNode.Expression(SynExpr.MatchLambda(_))
     | AstNode.Expression(SynExpr.IfThenElse(_))
     | AstNode.Expression(SynExpr.Lazy(_))
-    | AstNode.Expression(SynExpr.Record(_))
     | AstNode.Expression(SynExpr.ObjExpr(_))
     | AstNode.Expression(SynExpr.TryFinally(_))
     | AstNode.Expression(SynExpr.TryWith(_))
