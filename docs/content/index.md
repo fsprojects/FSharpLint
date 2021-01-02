@@ -94,7 +94,7 @@ is [included inside of the software](https://github.com/fsprojects/FSharpLint/bl
 By default, FSharpLint will use the default configuration. You can override this to point
 to a different file, for example by using the `--lint-config` flag in the dotnet tool.
 
-See the [Rule Configuration page](../how-tos/rule-configuration.html) for more info.
+See the [Rule Configuration page](./how-tos/rule-configuration.html) for more info.
 
 ## Suppressing rules in code
 
