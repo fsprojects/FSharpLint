@@ -137,10 +137,6 @@ in order to craft an excellent pull request:
 8. If you haven't updated your pull request for a while, you should consider
    rebasing on master and resolving any conflicts.
 
-   **IMPORTANT**: _Never ever_ merge upstream `master` into your branches. You
-   should always `git rebase` on `master` to bring your changes up to date when
-   necessary.
-
    ```bash
    git checkout master
    git pull upstream master
