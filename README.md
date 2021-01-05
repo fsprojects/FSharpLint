@@ -21,7 +21,7 @@ FSharpLint can be used in several ways:
 
 ## Documentation
 
-The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it, including a list of the [available rules](http://fsprojects.github.io/FSharpLint/Rules.html) for linting.
+The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it.
 
 ## Nuget Packages
 
