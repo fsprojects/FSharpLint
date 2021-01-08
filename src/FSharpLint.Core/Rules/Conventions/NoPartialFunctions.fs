@@ -22,6 +22,10 @@ let private partialFunctionIdentifiers =
         // Option
         ("Option.get", PatternMatch)
 
+        // Map
+        ("Map.find", Function "Map.tryFind")
+        ("Map.findKey", Function "Map.tryFindKey")
+
         // Array
         ("Array.exactlyOne", Function "Array.tryExactlyOne")
         ("Array.get", Function "Array.tryItem")
