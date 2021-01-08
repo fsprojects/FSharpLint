@@ -12,7 +12,7 @@ type TestIndentationRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
         let fileName = fileName |> Option.defaultValue "Test.fsx"
@@ -32,8 +32,8 @@ type TestIndentationRuleBase (rule:Rule) =
 
         match parseResults.ParseTree with
         | Some tree ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray skipArray
+            let syntaxArray = AbstractSyntaxArray.astToArray tree
+            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray
             let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = [||] }
 
             runLineRules lineRules globalConfig fileName input lines context

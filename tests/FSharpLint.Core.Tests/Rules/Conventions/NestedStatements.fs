@@ -105,3 +105,41 @@ module Program
 let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 47))
+        
+    
+    [<Test>]
+    member this.RecordMembersMustNotCountAsNestedStatements() =
+        this.Parse """
+module Program
+
+ type DummyRecord =
+    { Value: int }
+    member this.Create1 i = { Value=i }
+    member this.Create2 (i: float) = { Value=Convert.ToInt32(i)}
+    member this.Create3 (i: float32) = { Value=Convert.ToInt32(i)}
+    member this.Create4 (i: bool) = { Value=Convert.ToInt32(i)}
+    member this.Create5 (i: string) = { Value=Convert.ToInt32(i)}
+    member this.Create6 (i: uint32) = { Value=Convert.ToInt32(i)}
+    member this.Create7 (i: uint16) = { Value=Convert.ToInt32(i)}
+    member this.Create8 (i: byte) = { Value=Convert.ToInt32(i)}
+    member this.Create9 (i: char) = { Value=Convert.ToInt32(i)}"""
+    
+        Assert.IsFalse(this.ErrorsExist)
+
+    [<Test>]
+    member this.NestedStatementsWithinRecordMemberCountedCorrectly() =
+        this.Parse """
+module Program
+
+type DummyRecord =
+    { Value: int }
+    member this.DummyMember() =
+                if true then
+                    if true then
+                        if true then
+                            if true then
+                                if true then
+                                    if true then
+                                        ()"""
+    
+        Assert.IsTrue(this.ErrorExistsAt(11, 32))

@@ -1,13 +1,10 @@
 ﻿module TestAbstractSyntaxArray
 
-open System.IO
 open System.Diagnostics
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
-open FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Reflection
 open NUnit.Framework
 open TestUtils
@@ -112,7 +109,7 @@ type TestAst() =
     member __.``Syntax array constructed from AST in valid order.``() =
         let tree = generateAst "List.map (fun x y -> id x) woofs"
 
-        let (array, skipArray) = astToArray tree
+        let array = astToArray tree
 
         let actual = array |> Array.map (fun x -> x.Hashcode)
 
@@ -134,29 +131,31 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
-        Assert.AreEqual([ AbstractSyntaxArray.Skip(14, 0)
-                          AbstractSyntaxArray.Skip(13, 0)
-                          AbstractSyntaxArray.Skip(12, 1)
-                          AbstractSyntaxArray.Skip(0, 2)
-                          AbstractSyntaxArray.Skip(9, 2)
-                          AbstractSyntaxArray.Skip(8, 4)
-                          AbstractSyntaxArray.Skip(1, 5)
-                          AbstractSyntaxArray.Skip(0, 6)
-                          AbstractSyntaxArray.Skip(1, 5)
-                          AbstractSyntaxArray.Skip(0, 8)
-                          AbstractSyntaxArray.Skip(3, 5)
-                          AbstractSyntaxArray.Skip(2, 10)
-                          AbstractSyntaxArray.Skip(0, 11)
-                          AbstractSyntaxArray.Skip(0, 11)
-                          AbstractSyntaxArray.Skip(0, 2) ],
-                        skipArray)
+        
+        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex))
+        Assert.AreEqual([ (14, 0)
+                          (13, 0)
+                          (12, 1)
+                          (0, 2)
+                          (9, 2)
+                          (8, 4)
+                          (1, 5)
+                          (0, 6)
+                          (1, 5)
+                          (0, 8)
+                          (3, 5)
+                          (2, 10)
+                          (0, 11)
+                          (0, 11)
+                          (0, 2) ],
+                        expected)
 
     /// e.g. a lambda arg shouldn't have the body of the lambda in its child nodes (that should be a sibling).
     [<Test>]
     member __.``Syntax array's extra info nodes do not contain children of node they're generated from.``() =
         let tree = generateAst "fun x -> x"
 
-        let (array, skipArray) = astToArray tree
+        let array = astToArray tree
 
         let actual = array |> Array.map (fun x -> x.Hashcode)
 
@@ -170,11 +169,13 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "x" ]
 
         Assert.AreEqual(expected, actual)
-        Assert.AreEqual([ AbstractSyntaxArray.Skip(6, 0)
-                          AbstractSyntaxArray.Skip(5, 0)
-                          AbstractSyntaxArray.Skip(4, 1)
-                          AbstractSyntaxArray.Skip(1, 2)
-                          AbstractSyntaxArray.Skip(0, 3)
-                          AbstractSyntaxArray.Skip(1, 2)
-                          AbstractSyntaxArray.Skip(0, 5) ],
-                        skipArray)
+
+        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex))
+        Assert.AreEqual([ (6, 0)
+                          (5, 0)
+                          (4, 1)
+                          (1, 2)
+                          (0, 3)
+                          (1, 2)
+                          (0, 5) ],
+                        expected)

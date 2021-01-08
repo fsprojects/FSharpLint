@@ -117,7 +117,7 @@ module Lint =
         { IndentationRuleContext:Map<int,bool*int>
           NoTabCharactersRuleContext:(string * Range.range) list }
 
-    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray skipArray =
+    let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
@@ -126,13 +126,12 @@ module Lint =
             syntaxArray
             |> Array.mapi (fun i astNode -> (i, astNode))
             |> Array.collect (fun (i, astNode) ->
-                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray skipArray i
+                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray i
                 let astNodeParams =
                     { AstNode = astNode.Actual
                       NodeHashcode = astNode.Hashcode
                       NodeIndex =  i
                       SyntaxArray = syntaxArray
-                      SkipArray = skipArray
                       GetParents = getParents
                       FilePath = filePath
                       FileContent = fileContent
@@ -220,10 +219,10 @@ module Lint =
         let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames (Array.toList lines)
 
         try
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray fileInfo.Ast
+            let syntaxArray = AbstractSyntaxArray.astToArray fileInfo.Ast
 
             // Collect suggestions for AstNode rules
-            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text lines syntaxArray skipArray
+            let (astNodeSuggestions, context) = runAstNodeRules enabledRules.AstNodeRules enabledRules.GlobalConfig fileInfo.TypeCheckResults fileInfo.File fileInfo.Text lines syntaxArray
             let lineSuggestions = runLineRules enabledRules.LineRules enabledRules.GlobalConfig fileInfo.File fileInfo.Text lines context
 
             [| lineSuggestions; astNodeSuggestions |]
@@ -292,7 +291,7 @@ module Lint =
         let locator = MSBuildLocator()
         let loader = Dotnet.ProjInfo.Workspace.Loader.Create (LoaderConfig.Default locator)
         let netFwInfo = NetFWInfo.Create (NetFWInfoConfig.Default locator)
-        let fcsBinder = FCSBinder (netFwInfo, loader, FSharpChecker.Create())
+        let fcsBinder = FCSBinder (netFwInfo, loader, FSharpChecker.Create(keepAssemblyContents=true))
         loader.LoadProjects [projectFilePath]
         fcsBinder.GetProjectOptions projectFilePath
 
@@ -395,7 +394,7 @@ module Lint =
 
                     optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
-                let checker = FSharpChecker.Create()
+                let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
                 let parseFilesInProject files projectOptions =
                     let lintInformation =
@@ -519,7 +518,7 @@ module Lint =
 
     /// Lints F# source code.
     let lintSource optionalParams source =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         match ParseFile.parseSource source checker with
         | ParseFile.Success(parseFileInformation) ->
@@ -562,7 +561,7 @@ module Lint =
     /// Lints an F# file from a given path to the `.fs` file.
     let lintFile optionalParams filePath =
         if IO.File.Exists filePath then
-            let checker = FSharpChecker.Create()
+            let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
             match ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->

@@ -34,7 +34,7 @@ type TestHintMatcherBase () =
         hintTrie <- generateHintConfig hints
 
     override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         let parseResults =
             match fileName with
@@ -52,12 +52,12 @@ type TestHintMatcherBase () =
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
-            let (syntaxArray, skipArray) = AbstractSyntaxArray.astToArray parseInfo.Ast
+            let syntaxArray = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray skipArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray |> fst
             suggestions |> Array.iter this.PostSuggestion
         | _ ->
             failwithf "Failed to parse"

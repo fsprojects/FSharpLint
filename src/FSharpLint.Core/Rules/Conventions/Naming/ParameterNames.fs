@@ -27,7 +27,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _) ->
+        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _) ->
             ctorArgs
             |> extractPatterns
             |> List.toArray
@@ -38,7 +38,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.SyntaxArray args.SkipArray args.NodeIndex
+                let isPublic = isPublic args.SyntaxArray args.NodeIndex
                 getPatternIdents isPublic (getValueOrFunctionIdents args.CheckInfo) true pattern
             | Member | Property ->
                 getPatternIdents false getMemberIdents true pattern

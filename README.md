@@ -3,7 +3,7 @@
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
-The project aims to let the user know of problems through [matching user defined hints](http://fsprojects.github.io/FSharpLint/rules/FL0065.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
+The project aims to let the user know of problems through [matching user defined hints](https://fsprojects.github.io/FSharpLint/how-tos/rules/FL0065.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
 The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to true):
 
@@ -13,14 +13,15 @@ The tool in use (running as an MSBuild task with TreatWarningsAsErrors set to tr
 
 FSharpLint can be used in several ways:
 
-* [Running as dotnet tool from command line](http://fsprojects.github.io/FSharpLint/DotnetTool.html).
+* [Running as dotnet tool from command line](https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html).
 * [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
-* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](http://fsprojects.github.io/FSharpLint/MSBuildTask.html).
+* [In Visual Studio using the F# Lint extension](https://marketplace.visualstudio.com/items?itemName=asti.fslint-vs).
+* [As an MSBuild Task](http://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html).
 * [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
 
 ## Documentation
 
-The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it, including a list of the [available rules](http://fsprojects.github.io/FSharpLint/Rules.html) for linting.
+The [docs](http://fsprojects.github.io/FSharpLint/) contains an overview of the tool and how to use it.
 
 ## Nuget Packages
 

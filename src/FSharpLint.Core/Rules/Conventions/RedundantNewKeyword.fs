@@ -19,14 +19,15 @@ let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (iden
     let names = ident.Lid |> List.map (fun x -> x.idText)
     let! symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, "", names)
 
-    return
-        match symbol with
-        | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
-            let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+    match symbol with
+    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
+        let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+        return
             ctor.DeclaringEntity
             |> Option.exists (fun ctorForType ->
                 Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
-        | Some(_) | None -> false }
+    | Some(_) | None -> return false
+}
 
 let private generateFix (text:string) range = lazy(
     ExpressionUtilities.tryFindTextOfRange range text
@@ -42,7 +43,7 @@ let runner args =
         { Range = range
           Message = Resources.GetString("RulesRedundantNewKeyword")
           SuggestedFix = Some (generateFix args.FileContent range)
-          TypeChecks = [doesNotImplementIDisposable checkInfo identifier] } |> Array.singleton
+          TypeChecks = [ doesNotImplementIDisposable checkInfo identifier ] } |> Array.singleton
     | _ -> Array.empty
 
 let rule =

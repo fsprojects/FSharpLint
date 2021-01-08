@@ -1,8 +1,14 @@
-module FSharpLint.Core.Tests.Rules.Hints.HintMatcher
+module rec FSharpLint.Core.Tests.Rules.Hints.HintMatcher
 
 // fsharplint:disable TupleIndentation
 
 open NUnit.Framework
+
+type Assert with
+  static member NoErrors(this:TestHintMatcher) = 
+    if this.NoErrorsExist then ()
+    else
+        raise (NUnit.Framework.AssertionException($"No errors were expected, but there were some errors. Errors were:\n{this.ErrorMsg}"))
 
 [<TestFixture>]
 type TestHintMatcher() =
@@ -370,11 +376,11 @@ System.String.Compare("dog", "cat")""")
 module Goat
 
 type Bar() =
-    static member SomeMethod(foo: bool) = ()
+    static member SomeMethod(foo:bool) = ()
 
 Bar.SomeMethod(foo = true)""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.``Named parameter in object method call should not be treated as infix operation``() =
@@ -388,7 +394,7 @@ type Bar() =
 
 Bar().SomeMethod(foo = true)""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.NamedParameterWithMoreThanOneParameterShouldNotBeTreatedAsInfixOperation() =
@@ -402,7 +408,7 @@ type Bar() =
 
 Bar.SomeMethod(woof = 5, foo = true)""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/128
     [<Test>]
@@ -418,7 +424,7 @@ do
             (inputs = args, raiseOnUsage = false, ignoreMissing = true,
              errorHandler = ProcessExiter())""", checkFile=false) // This test only passes with typechecking disabled.
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.``Named parameter in object method call with more than one arg should not be treated as infix operation``() =
@@ -432,7 +438,7 @@ type Bar() =
 
 Bar().SomeMethod(woof = 5, foo = true)""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.PropertyInitShouldNotBeTreatedAsInfixOperation() =
@@ -446,7 +452,7 @@ type Bar() =
 
 Bar(Foo = true) |> ignore""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.PropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
@@ -460,7 +466,7 @@ type Bar() =
 
 new Bar(Foo = true) |> ignore""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.MultiplePropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
@@ -475,7 +481,7 @@ type Bar() =
 
 new Bar(Foo = true, Bar = true) |> ignore""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/108
     /// Type arguments on a constructor were causing hint to be displayed for property initialisation.
@@ -491,7 +497,7 @@ type Bar<'a>() =
 
 Bar<_>(Foo = true) |> ignore""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.PropertyEqualityOperationShouldBeTreatedAsInfixOperation() =
@@ -546,7 +552,7 @@ type TakesDelegate() =
 
 TakesDelegate().Foo(fun _ -> ())""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -561,7 +567,7 @@ type TakesDelegate() =
 
 TakesDelegate().Foo("", fun _ -> ())""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -592,7 +598,7 @@ type TakesDelegate() =
 let object = TakesDelegate()
 object.Foo("", fun _ -> ())""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -608,7 +614,7 @@ type TakesDelegate() =
 let object = TakesDelegate()
 object.Foo(fun _ -> ())""")
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.NoErrors(this)
 
     [<Test>]
     member this.``Operator identifier is correctly written out as an operator symbol in the error message.``() =

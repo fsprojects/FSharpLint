@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New rule `NoPartialFunctions (FL0066)`.
 
+## [0.17.1] - 2020-11-25
+- Fix for records being counted as a nested statement #464 [@davidtgillard]
+
+## [0.17.0] - 2020-11-13
+- Update to FCS 38 [@baronfel]
+- Update to .Net 5 [@baronfel]
+
+## [0.16.5] - 2020-06-26
+- Update navigation in docs.
+
+## [0.16.4] - 2020-06-26
+- Update docs to fix broken links.
+
+## [0.16.3] - 2020-06-13
+- Update docs to support https.
+
 ## [0.16.2] - 2020-06-10
 - Load config from `fsharplint.json` by default.
 

@@ -43,8 +43,8 @@ module ExpressionUtilities =
                 range.StartLine,
                 range.EndColumn,
                 "",
-                identNames) |> Async.RunSynchronously
-        | _ -> None
+                identNames)
+        | _ -> async.Return None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =
@@ -98,7 +98,7 @@ module ExpressionUtilities =
             |> Array.length)
         |> Option.defaultValue 0
 
-    /// Converts a AsynType to its string representation.
+    /// Converts a SynType to its string representation.
     let synTypeToString (text:string) = function
         | SynType.Tuple _ as synType ->
             tryFindTextOfRange synType.Range text
@@ -113,14 +113,14 @@ module ExpressionUtilities =
         then typeStrings |> String.concat "," |> Some
         else None
 
-    /// Counts the number of comment lines preceeding the given range of text.
+    /// Counts the number of comment lines preceding the given range of text.
     let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
         let range = mkRange "" startPos endPos
 
         tryFindTextOfRange range text
-        |> Option.map (fun preceedingText ->
+        |> Option.map (fun precedingText ->
             let lines =
-                preceedingText.Split '\n'
+                precedingText.Split '\n'
                 |> Array.rev
                 |> Array.tail
             lines

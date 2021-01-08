@@ -12,7 +12,7 @@ type Benchmark () =
 
     let generateAst source sourceFile =
         let sourceText = SourceText.ofString source
-        let checker = FSharpChecker.Create()
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         let (options, _diagnostics) =
             checker.GetProjectOptionsFromScript(sourceFile, sourceText)

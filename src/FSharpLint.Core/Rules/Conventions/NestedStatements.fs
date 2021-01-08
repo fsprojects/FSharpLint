@@ -16,7 +16,7 @@ let private error (depth:int) =
 
 /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
-/// This function returns true if the given match statement is compiler generated for a lmabda wildcard argument.
+/// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
 let private isCompilerGeneratedMatch = function
     | SynExpr.Match(_, SynExpr.Ident(ident), _, _) when ident.idText.StartsWith("_arg") -> true
     | _ -> false
@@ -27,7 +27,6 @@ let private areChildrenNested = function
     | AstNode.Expression(SynExpr.MatchLambda(_))
     | AstNode.Expression(SynExpr.IfThenElse(_))
     | AstNode.Expression(SynExpr.Lazy(_))
-    | AstNode.Expression(SynExpr.Record(_))
     | AstNode.Expression(SynExpr.ObjExpr(_))
     | AstNode.Expression(SynExpr.TryFinally(_))
     | AstNode.Expression(SynExpr.TryWith(_))
@@ -44,26 +43,26 @@ let private getRange = function
     | AstNode.Binding(node) -> Some node.RangeOfBindingAndRhs
     | _ -> None
 
-let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) (skipArray:AbstractSyntaxArray.Skip []) i j =
+let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) i j =
     let mutable i = i
     let mutable j = j
     let mutable distance = 0
 
     while i <> j do
         if i > j then
-            i <- skipArray.[i].ParentIndex
+            i <- syntaxArray.[i].ParentIndex
 
             if i <> j && areChildrenNested syntaxArray.[i].Actual then
                 distance <- distance + 1
         else
-            j <- skipArray.[j].ParentIndex
+            j <- syntaxArray.[j].ParentIndex
 
     distance
 
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
-/// e.g. lambda arg being a duplicate of the lamdba.
+/// e.g. lambda arg being a duplicate of the lambda.
 let isMetaData args node i =
-    let parentIndex = args.SkipArray.[i].ParentIndex
+    let parentIndex = args.SyntaxArray.[i].ParentIndex
     if parentIndex = i then false
     else
         Object.ReferenceEquals(node, args.SyntaxArray.[parentIndex].Actual)
@@ -71,7 +70,7 @@ let isMetaData args node i =
 let isElseIf args node i =
     match node with
     | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-        let parentIndex = args.SkipArray.[i].ParentIndex
+        let parentIndex = args.SyntaxArray.[i].ParentIndex
         if parentIndex = i then false
         else
             match args.SyntaxArray.[parentIndex].Actual with
@@ -84,10 +83,10 @@ let mutable depth = 0
 let decrementDepthToCommonParent args i j =
     if j < args.SyntaxArray.Length then
         // If next node in array is not a sibling or child of the current node.
-        let parent = args.SkipArray.[j].ParentIndex
-        if parent <> i && parent <> args.SkipArray.[i].ParentIndex then
+        let parent = args.SyntaxArray.[j].ParentIndex
+        if parent <> i && parent <> args.SyntaxArray.[i].ParentIndex then
             // Decrement depth until we reach a common parent.
-            depth <- depth - (distanceToCommonParent args.SyntaxArray args.SkipArray i j)
+            depth <- depth - (distanceToCommonParent args.SyntaxArray i j)
 
 let mutable skipToIndex = None
 
@@ -110,7 +109,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         if areChildrenNested node && not <| isMetaData args node i && not <| isElseIf args node i then
             if depth >= config.Depth then
                 // Skip children as we've had an error containing them.
-                let skipChildren = i + args.SkipArray.[i].NumberOfChildren + 1
+                let skipChildren = i + args.SyntaxArray.[i].NumberOfChildren + 1
                 decrementDepthToCommonParent args i skipChildren
                 skipToIndex <- Some skipChildren
 
