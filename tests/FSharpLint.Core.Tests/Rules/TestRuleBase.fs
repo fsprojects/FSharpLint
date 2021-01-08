@@ -69,8 +69,9 @@ type TestRuleBase () =
         this.ErrorsAt(startLine, startColumn)
         |> Seq.exists (fun s -> s.Details.Message = message)
 
-    member __.ErrorWithMessageExists(message) =
-        suggestions |> Seq.exists (fun s -> s.Details.Message = message)
+    member __.AssertErrorWithMessageExists(message) =
+        let foundSuggestions = suggestions |> Seq.map (fun s -> s.Details.Message)
+        Assert.IsTrue(foundSuggestions |> Seq.contains message, sprintf "Couldn't find message '%s', found: [%s]" message (String.concat "," foundSuggestions))
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)

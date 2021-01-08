@@ -422,7 +422,8 @@ type Configuration =
       TrailingWhitespaceOnLine:RuleConfig<TrailingWhitespaceOnLine.Config> option
       MaxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
       TrailingNewLineInFile:EnabledConfig option
-      NoTabCharacters:EnabledConfig option }
+      NoTabCharacters:EnabledConfig option
+      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option }
 with
     static member Zero = {
         Global = None
@@ -496,6 +497,7 @@ with
         MaxLinesInFile = None
         TrailingNewLineInFile = None
         NoTabCharacters = None
+        NoPartialFunctions = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -632,6 +634,7 @@ let flattenConfig (config:Configuration) =
             config.MaxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule)
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
+            config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
         |] |> Array.choose id
 
     let astNodeRules = ResizeArray()

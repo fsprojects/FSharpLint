@@ -98,3 +98,4 @@ The following rules can be specified for linting.
 - [TrailingNewLineInFile (FL0063)](rules/FL0063.html)
 - [NoTabCharacters (FL0064)](rules/FL0064.html)
 - [Hints (FL0065)](rules/FL0065.html)
+- [NoPartialFunctions (FL0066)](rules/FL0066.html)

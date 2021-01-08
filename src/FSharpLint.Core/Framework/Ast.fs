@@ -1,5 +1,7 @@
 ﻿namespace FSharpLint.Framework
 
+open FSharp.Compiler.Range
+
 /// Used to walk the FSharp Compiler's abstract syntax tree,
 /// so that each node can be visited by a list of visitors.
 module Ast =
@@ -30,7 +32,7 @@ module Ast =
         | ConstructorArguments of SynArgPats
         | TypeParameter of SynTypar
         | InterfaceImplementation of SynInterfaceImpl
-        | Identifier of string list
+        | Identifier of string list * range : range
         | File of ParsedInput
         | LambdaBody of SynExpr
         | LambdaArg of SynSimplePats
@@ -326,9 +328,9 @@ module Ast =
         | SynExpr.LetOrUse(_, _, bindings, expression, _) ->
             add <| Expression expression
             bindings |> List.revIter (Binding >> add)
-        | SynExpr.Ident(ident) -> add <| Identifier([ident.idText])
-        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, _) ->
-            add <| Identifier(ident |> List.map (fun x -> x.idText))
+        | SynExpr.Ident(ident) -> add <| Identifier([ident.idText], ident.idRange)
+        | SynExpr.LongIdent(_, LongIdentWithDots(ident, _), _, range) ->
+            add <| Identifier(ident |> List.map (fun x -> x.idText), range)
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) ->
             add <| Else elseExpr
             add <| Expression body
@@ -374,7 +376,7 @@ module Ast =
             add <| Type synType
             add <| SimplePattern simplePattern
         | SynSimplePat.Attrib(simplePattern, _, _) -> add <| SimplePattern simplePattern
-        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| Identifier([identifier.idText])
+        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| Identifier([identifier.idText], identifier.idRange)
 
     let inline private matchChildren node add =
         match node with

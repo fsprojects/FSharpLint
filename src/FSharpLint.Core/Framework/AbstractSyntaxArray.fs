@@ -164,7 +164,7 @@ module AbstractSyntaxArray =
     /// Get hash code of an ast node to be used for the fuzzy match of hints against the ast.
     let private getHashCode node =
         match node with
-        | Identifier(idents) -> getIdentHash idents
+        | Identifier(idents, _) -> getIdentHash idents
         | Pattern(SynPat.Const(SynConst.Bool(x), _))
         | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Byte(x), _))
