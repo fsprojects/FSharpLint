@@ -9,7 +9,7 @@ menu_order: 1
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
-The project aims to let the user know of problems through [matching user defined hints](../how-tos/rules/FL0065.html)
+The project aims to let the user know of problems through [matching user defined hints](./how-tos/rules/FL0065.html)
 a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules
 in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
@@ -20,9 +20,9 @@ code that breaks a set of rules governing the style of the code. Examples of rul
 
 FSharpLint can be used in several ways:
 
-* [Running as dotnet tool from command line](../how-tos/install-dotnet-tool.html).
+* [Running as dotnet tool from command line](./how-tos/install-dotnet-tool.html).
 * [In VS Code using the Ionide-FSharp plugin](https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp).
-* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](../how-tos/msbuild-task.html).
+* [In other IDEs (Visual Studio, Rider) as an MSBuild Task](./how-tos/msbuild-task.html).
 * [In other editors through FsAutoComplete Language Server](https://github.com/fsharp/FsAutoComplete)
 
 ### Example Usage
@@ -98,7 +98,7 @@ See the [Rule Configuration page](./how-tos/rule-configuration.html) for more in
 
 ## Suppressing rules in code
 
-Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](../how-tos/rule-suppression.html) page for more information.
+Rules can be disabled within the code using structured comments. See the [Suppressing Warnings](./how-tos/rule-suppression.html) page for more information.
 
 ## Running Lint From An Application
 
