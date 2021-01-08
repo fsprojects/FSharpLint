@@ -1,4 +1,4 @@
-# FSharpLint [![GitHub Actions Build Status](https://github.com/fsprojects/FSharpLint/workflows/.NET%20Core%203.1/badge.svg)](https://github.com/fsprojects/FSharpLint/actions?query=workflow%3A%22.NET+Core+3.1%22)
+# FSharpLint [![GitHub Actions Build Status](https://github.com/fsprojects/FSharpLint/workflows/.NET%205.0/badge.svg)](https://github.com/fsprojects/FSharpLint/actions?query=workflow%3A%22.NET+5.0%22)
 
 FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
 The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
