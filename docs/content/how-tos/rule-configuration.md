@@ -29,7 +29,7 @@ In the configuration file paths can be used to specify files that should be incl
 * If the path does not end with a `/` then all matching files are excluded.
 
 
-## Rule Lists
+## <a name="ruleList"></a>Rule List
 
 The following rules can be specified for linting.
 
