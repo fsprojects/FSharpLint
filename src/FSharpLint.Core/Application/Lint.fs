@@ -22,8 +22,8 @@ open FSharpLint.Rules
 module ConfigurationManagement =
 
     /// Load a FSharpLint configuration file given its contents.
-    let loadConfigurationFile (configText:string) =
-        parseConfig configText
+    let loadConfigurationFile (configurationFileText:string) =
+        parseConfig configurationFileText
 
 /// Provides an API for running FSharpLint from within another application.
 [<AutoOpen>]

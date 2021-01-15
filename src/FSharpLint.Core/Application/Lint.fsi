@@ -140,8 +140,8 @@ module Lint =
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:OptionalLintParameters -> filepath:string -> LintResult
+    val lintFile : optionalParams:OptionalLintParameters -> filePath:string -> LintResult
 
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
-    val lintParsedFile : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> filepath:string -> LintResult
+    val lintParsedFile : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> filePath:string -> LintResult
