@@ -7,15 +7,19 @@ nuget Argu
 nuget BenchmarkDotNet
 nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
-nuget FSharp.Compiler.Service ~> 38.0
-nuget Dotnet.ProjInfo.Workspace ~> 0.41.0
-nuget Dotnet.ProjInfo.Workspace.FCS ~> 0.41.0
+nuget FSharp.Compiler.Service ~> 39.0
+nuget Ionide.ProjInfo.ProjectSystem ~> 0.48.0
+nuget Ionide.ProjInfo.FCS ~> 0.48.0
 nuget FSharp.Core
 nuget nunit
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk
 nuget Newtonsoft.Json
-nuget Microsoft.Build.Utilities.Core 16.7
+nuget Microsoft.Build.Tasks.Core ~> 16.8 copy_local: false
+nuget Microsoft.Build.Framework ~> 16.8 copy_local: false
+nuget Microsoft.Build.Locator copy_local: false
+nuget Microsoft.Build.Utilities.Core ~> 16.8 copy_local: false
+nuget Microsoft.Build ~> 16.8 copy_local: false
 
 group Docs
   source https://api.nuget.org/v3/index.json

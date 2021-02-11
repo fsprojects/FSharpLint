@@ -1,7 +1,7 @@
 ﻿module FSharpLint.Framework.Rules
 
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
@@ -67,7 +67,7 @@ type NamingConfig =
 
 type NamingRuleConfig =
     { Config:NamingConfig
-      GetIdentifiersToCheck:AstNodeRuleParams -> (Ident * string * Async<bool> option) [] }
+      GetIdentifiersToCheck:AstNodeRuleParams -> (Ident * string * (unit -> bool) option) [] }
 
 type LineRuleConfig = { Runner:LineRuleParams -> WarningDetails [] }
 

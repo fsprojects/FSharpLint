@@ -2,7 +2,7 @@ module FSharpLint.Rules.Helper.Naming
 
 open System
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
@@ -54,7 +54,7 @@ let private NumberOfExpectedBackticks = 4
 /// the information as to whether the identifier was backticked doesn't appear to be in the AST.
 let private isNotDoubleBackTickedIdent =
     let isDoubleBackTickedIdent (identifier:Ident) =
-        let diffOfRangeAgainstIdent (r:range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
+        let diffOfRangeAgainstIdent (r:Range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
 
         let range = identifier.idRange
         not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
@@ -170,7 +170,7 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
     }
 
 let isActivePattern (identifier:Ident) =
-    FSharp.Compiler.PrettyNaming.IsActivePatternName identifier.idText
+    FSharp.Compiler.SourceCodeServices.PrettyNaming.IsActivePatternName identifier.idText
 
 let activePatternIdentifiers (identifier:Ident) =
     identifier.idText.Split('|')
@@ -244,14 +244,13 @@ let isLiteral = isAttribute "Literal"
 
 let isMeasureType = isAttribute "Measure"
 
-let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) = async {
-    let! symbol = checkFile.GetSymbolUseAtLocation(
+let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
+    let symbol = checkFile.GetSymbolUseAtLocation(
                     ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
 
     match symbol with
-    | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> return false
-    | Some(_) | None -> return true
-}
+    | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
+    | Some(_) | None -> true
 
 let isInterface typeDef =
     let hasConstructor = function
@@ -284,7 +283,7 @@ let isModule (moduleKind:SynModuleOrNamespaceKind) =
 
 /// Is module name implicitly created from file name?
 let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =
-    let zeroLengthRange (r:range) =
+    let zeroLengthRange (r:Range) =
         (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
 
     // Check the identifiers in the module name have no length.
@@ -292,7 +291,9 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
     // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
     isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
 
-let rec getPatternIdents isPublic getIdents argsAreParameters pattern =
+type GetIdents<'t> = bool -> SynPat -> 't []
+
+let rec getPatternIdents<'t> isPublic (getIdents:GetIdents<'t>) argsAreParameters pattern =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
         let isPublic = checkIfPublic isPublic access

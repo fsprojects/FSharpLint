@@ -1,7 +1,7 @@
 module FSharpLint.Console.Output
 
 open System
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 
 type IOutput =
@@ -14,11 +14,11 @@ type IOutput =
 
 type StandardOutput () =
 
-    let getErrorMessage (range:FSharp.Compiler.Range.range) =
+    let getErrorMessage (range:Range) =
         let error = Resources.GetString("LintSourceError")
         String.Format(error, range.StartLine, range.StartColumn)
 
-    let highlightErrorText (range:range) (errorLine:string) =
+    let highlightErrorText (range:Range) (errorLine:string) =
         let highlightColumnLine =
             if String.length errorLine = 0 then "^"
             else

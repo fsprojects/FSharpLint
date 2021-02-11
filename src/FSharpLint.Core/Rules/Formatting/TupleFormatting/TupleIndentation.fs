@@ -3,7 +3,7 @@ module FSharpLint.Rules.TupleIndentation
 open System
 open System.Diagnostics.CodeAnalysis
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -19,7 +19,7 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
     |> Array.pairwise
     |> Array.choose (fun (expr, nextExpr) ->
         if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
-            { Range = mkRange "" expr.Range.Start nextExpr.Range.End
+            { Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
               Message = Resources.GetString("RulesFormattingTupleIndentationError")
               SuggestedFix = None
               TypeChecks = [] } |> Some

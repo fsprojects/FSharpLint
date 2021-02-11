@@ -4,7 +4,7 @@ open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Rules
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 
 [<RequireQualifiedAccess>]
 type Config = { MaxCharactersOnLine:int }
@@ -13,7 +13,7 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let maxCharacters = config.MaxCharactersOnLine
     let lineLength = String.length args.Line
     if lineLength > maxCharacters then
-        let range = mkRange "" (mkPos args.LineNumber (maxCharacters + 1)) (mkPos args.LineNumber lineLength)
+        let range = Range.mkRange "" (Pos.mkPos args.LineNumber (maxCharacters + 1)) (Pos.mkPos args.LineNumber lineLength)
         let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
         { Range = range
           Message = String.Format(errorFormatString, (maxCharacters + 1))

@@ -111,7 +111,7 @@ type TestAst() =
 
         let array = astToArray tree
 
-        let actual = array |> Array.map (fun x -> x.Hashcode)
+        let actual = array |> Array.map (fun x -> x.Hashcode) |> Array.toList
 
         let expected =
             [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
@@ -132,7 +132,7 @@ type TestAst() =
 
         Assert.AreEqual(expected, actual)
         
-        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex))
+        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex)) |> Array.toList
         Assert.AreEqual([ (14, 0)
                           (13, 0)
                           (12, 1)
@@ -157,7 +157,7 @@ type TestAst() =
 
         let array = astToArray tree
 
-        let actual = array |> Array.map (fun x -> x.Hashcode)
+        let actual = array |> Array.map (fun x -> x.Hashcode) |> List.ofArray
 
         let expected =
             [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
@@ -170,7 +170,7 @@ type TestAst() =
 
         Assert.AreEqual(expected, actual)
 
-        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex))
+        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex)) |> List.ofArray
         Assert.AreEqual([ (6, 0)
                           (5, 0)
                           (4, 1)

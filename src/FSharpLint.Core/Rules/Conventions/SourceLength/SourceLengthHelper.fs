@@ -3,7 +3,7 @@ module FSharpLint.Rules.Helper.SourceLength
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 
 [<RequireQualifiedAccess>]
 type Config = { MaxLines:int }
@@ -12,7 +12,7 @@ let private error name i actual =
     let errorFormatString = Resources.GetString("RulesSourceLengthError")
     String.Format(errorFormatString, name, i, actual)
 
-let private length (range:range) = range.EndLine - range.StartLine
+let private length (range:Range) = range.EndLine - range.StartLine
 
 let checkSourceLengthRule (config:Config) range errorName =
     let actualLines = length range

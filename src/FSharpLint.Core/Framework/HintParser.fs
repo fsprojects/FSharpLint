@@ -426,7 +426,7 @@ module HintParser =
             >>= fun ident ->
                 let identStr = System.String.Join("", ident)
 
-                let isKeyword = List.exists ((=) identStr) PrettyNaming.KeywordNames
+                let isKeyword = List.exists ((=) identStr) FSharpKeywords.KeywordNames
 
                 if isKeyword then fail (sprintf "Unexpected keyword %s" identStr)
                 else preturn ident

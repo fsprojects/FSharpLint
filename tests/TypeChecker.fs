@@ -841,7 +841,7 @@ let TcConst cenv ty m env c =
     | SynConst.Bytes _ -> error(InternalError(FSComp.SR.tcUnexpectedConstByteArray(),m))
  
 /// Convert an Abstract IL ILFieldInit value read from .NET metadata to a TAST constant
-let TcFieldInit (_m:range) lit = 
+let TcFieldInit (_m:Range) lit = 
     match lit with 
     | ILFieldInit.String s   -> Const.String s
     | ILFieldInit.Null       -> Const.Zero
@@ -1280,7 +1280,7 @@ let ComputeAccessAndCompPath env declKindOpt m vis actualParent =
     let cpath = (if accessModPermitted then Some cpath else None)
     vis,cpath 
 
-let CheckForAbnormalOperatorNames cenv (idRange:range) opName isMember =
+let CheckForAbnormalOperatorNames cenv (idRange:Range) opName isMember =
     
 
     if (idRange.EndColumn - idRange.StartColumn <= 5) && not cenv.g.compilingFslib  then 
@@ -6339,7 +6339,7 @@ and TcConstExpr cenv overallTy env m tpenv c  =
 //------------------------------------------------------------------------- 
 
 // Check an 'assert(x)' expression. 
-and TcAssertExpr cenv overallTy env (m:range) tpenv x  =
+and TcAssertExpr cenv overallTy env (m:Range) tpenv x  =
     let synm = m.MakeSynthetic() // Mark as synthetic so the language service won't pick it up.
     let callDiagnosticsExpr = SynExpr.App(ExprAtomicFlag.Atomic, false, mkSynLidGet synm ["System";"Diagnostics";"Debug"] "Assert", 
                                            // wrap an extra parentheses so 'assert(x=1) isn't considered a named argument to a method call 
@@ -6579,7 +6579,7 @@ and TcComputationExpression cenv env overallTy mWhole interpExpr builderTy tpenv
         | _ -> false
 
     /// Make a builder.Method(...) call
-    let mkSynCall nm (m:range) args = 
+    let mkSynCall nm (m:Range) args = 
         let m = m.MakeSynthetic() // Mark as synthetic so the language service won't pick it up.
         let args = 
             match args with 
@@ -15153,7 +15153,7 @@ and TcModuleOrNamespaceSignature cenv env (id:Ident,isModule,defs,xml,attribs,vi
     return (mspec, envAtEnd)
   }
 
-and TcModuleOrNamespaceSignatureElements cenv parent env (id,modKind,defs,m:range,xml) =
+and TcModuleOrNamespaceSignatureElements cenv parent env (id,modKind,defs,m:Range,xml) =
 
   eventually {
     let endm = m.EndRange // use end of range for errors 
@@ -15387,7 +15387,7 @@ and TcModuleOrNamespaceElements cenv parent endm env xml defs =
     return (mexpr, topAttrsNew, env, envAtEnd)
   }  
     
-and TcModuleOrNamespace cenv env (id,isModule,defs,xml,modAttrs,vis,m:range) =
+and TcModuleOrNamespace cenv env (id,isModule,defs,xml,modAttrs,vis,m:Range) =
   eventually {
     let endm = m.EndRange
     let modKind = ComputeModuleOrNamespaceKind cenv.g isModule modAttrs

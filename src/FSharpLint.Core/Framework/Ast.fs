@@ -1,6 +1,6 @@
 ﻿namespace FSharpLint.Framework
 
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 
 /// Used to walk the FSharp Compiler's abstract syntax tree,
 /// so that each node can be visited by a list of visitors.
