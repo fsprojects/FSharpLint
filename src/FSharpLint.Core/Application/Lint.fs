@@ -6,10 +6,10 @@ open System.Collections.Generic
 open System.IO
 open System.Runtime.InteropServices
 open System.Threading
-open FSharp.Compiler
+open FSharp.Compiler.Text
 open FSharp.Compiler.SourceCodeServices
-open Dotnet.ProjInfo.Workspace
-open Dotnet.ProjInfo.Workspace.FCS
+open Ionide.ProjInfo.ProjectSystem
+open Ionide.ProjInfo.FCS
 open FSharpLint.Core
 open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
@@ -59,7 +59,7 @@ module Lint =
             with get() =
                 let getParseFailureReason = function
                     | ParseFile.FailedToParseFile failures ->
-                        let getFailureReason (x:FSharp.Compiler.SourceCodeServices.FSharpErrorInfo) =
+                        let getFailureReason (x:FSharpDiagnostic) =
                             sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
                         String.Join(", ", failures |> Array.map getFailureReason)
@@ -115,7 +115,7 @@ module Lint =
 
     type Context =
         { IndentationRuleContext:Map<int,bool*int>
-          NoTabCharactersRuleContext:(string * Range.range) list }
+          NoTabCharactersRuleContext:(string * Range) list }
 
     let runAstNodeRules (rules:RuleMetadata<AstNodeRuleConfig> []) (globalConfig:Rules.GlobalRuleConfig) typeCheckResults (filePath:string) (fileContent:string) (lines:string []) syntaxArray =
         let mutable indentationRuleState = Map.empty
@@ -240,21 +240,18 @@ module Lint =
                     | None -> Async.RunSynchronously(work, timeoutMs)
 
                 try
-                    let typeChecksSuccessful (typeChecks:Async<bool> list) =
-                        typeChecks
-                        |> List.reduce (Async.combine (&&))
+                    let typeChecksSuccessful (typeChecks:(unit -> bool) list) =
+                        (true, typeChecks)
+                        ||> List.fold (fun acc cur -> acc && cur())
 
                     let typeCheckSuggestion (suggestion:Suggestion.LintWarning) =
-                        typeChecksSuccessful suggestion.Details.TypeChecks
-                        |> Async.map (fun checkSuccessful -> if checkSuccessful then Some suggestion else None)
+                        if typeChecksSuccessful suggestion.Details.TypeChecks
+                        then Some suggestion
+                        else None
 
                     suggestionsRequiringTypeChecks
-                    |> Seq.map typeCheckSuggestion
-                    |> Async.Parallel
-                    |> runSynchronously
-                    |> Array.iter (function
-                        | Some suggestion -> suggest suggestion
-                        | None -> ())
+                    |> Seq.choose typeCheckSuggestion
+                    |> Seq.iter suggest
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
@@ -288,12 +285,17 @@ module Lint =
         (exitCode, (workingDir, exePath, args))
 
     let getProjectInfo (projectFilePath:string) =
-        let locator = MSBuildLocator()
-        let loader = Dotnet.ProjInfo.Workspace.Loader.Create (LoaderConfig.Default locator)
-        let netFwInfo = NetFWInfo.Create (NetFWInfoConfig.Default locator)
-        let fcsBinder = FCSBinder (netFwInfo, loader, FSharpChecker.Create(keepAssemblyContents=true))
-        loader.LoadProjects [projectFilePath]
-        fcsBinder.GetProjectOptions projectFilePath
+        let toolsPath = Ionide.ProjInfo.Init.init()
+        let loader = Ionide.ProjInfo.WorkspaceLoader.Create toolsPath
+        let errors = ResizeArray<_>()
+        loader.Notifications.Add errors.Add
+        let options = loader.LoadProjects [projectFilePath]
+        options
+        |> Seq.tryFind (fun opt -> opt.ProjectFileName = projectFilePath)
+        |> Option.map (fun proj -> Ionide.ProjInfo.FCS.mapToFSharpProjectOptions proj options)
+        |> function
+            | Some proj -> Ok proj
+            | None      -> Error errors
 
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
@@ -431,8 +433,9 @@ module Lint =
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
                     | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
                     | Failure x -> LintResult.Failure x
-                | Error err ->
-                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage (string err))
+                | Error errors ->
+                    let errors = errors |> Seq.toArray
+                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage (string errors))
                     |> LintResult.Failure
             | Error err ->
                 RunTimeConfigError err

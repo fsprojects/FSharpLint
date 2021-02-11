@@ -6,7 +6,7 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
-let private getMemberIdents _ = function
+let private getMemberIdents _ =  function
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
         match List.tryLast longIdent.Lid with
         | Some(ident) when ident.idText.StartsWith "op_" ->

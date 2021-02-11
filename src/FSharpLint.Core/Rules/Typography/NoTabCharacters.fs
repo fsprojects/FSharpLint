@@ -4,7 +4,7 @@ open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -24,7 +24,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = mkRange "" (mkPos args.LineNumber indexOfTab) (mkPos args.LineNumber (indexOfTab + 1))
+        let range = Range.mkRange "" (Pos.mkPos args.LineNumber indexOfTab) (Pos.mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")

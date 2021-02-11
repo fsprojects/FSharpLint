@@ -1,7 +1,7 @@
 ﻿module FSharpLint.Rules.TypedItemSpacing
 
 open System
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharp.Compiler.SyntaxTree
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -40,7 +40,7 @@ let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     | _ -> (0, 0)
 
 /// Checks the provided range, containing a typed item, has valid spacing.
-let private checkRange (config:Config) (args:AstNodeRuleParams) (range:range) =
+let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
     let (expectedSpacesBefore, expectedSpacesAfter) =
         expectedSpacesFromConfig config.TypedItemStyle
 

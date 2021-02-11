@@ -2,7 +2,7 @@ module FSharpLint.Rules.ModuleDeclSpacing
 
 open System
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -26,10 +26,10 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                         then 1
                         else 0
 
-                    mkRange
+                    Range.mkRange
                         ""
-                        (mkPos (declOne.Range.EndLine + 1) 0)
-                        (mkPos (declTwo.Range.StartLine + endOffset) 0)
+                        (Pos.mkPos (declOne.Range.EndLine + 1) 0)
+                        (Pos.mkPos (declTwo.Range.StartLine + endOffset) 0)
                 { Range = intermediateRange
                   Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
                   SuggestedFix = None

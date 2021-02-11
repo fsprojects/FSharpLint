@@ -7,8 +7,10 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getValueOrFunctionIdents typeChecker isPublic pattern =
-    let checkNotUnionCase ident =
-        typeChecker |> Option.map (fun checker -> isNotUnionCase checker ident)
+    let checkNotUnionCase ident = fun () -> 
+        typeChecker
+        |> Option.map (fun checker -> isNotUnionCase checker ident)
+        |> Option.defaultValue false
 
     let isNotActivePattern (ident:Ident) =
         ident.idText.StartsWith("|")
@@ -23,7 +25,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
         | Some ident when singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
             if isPublic && isNotActivePattern ident then
-                (ident, ident.idText, checkNotUnionCase)
+                (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else
                 Array.empty

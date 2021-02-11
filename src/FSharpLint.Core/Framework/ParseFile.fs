@@ -28,7 +28,7 @@ module ParseFile =
 
     [<NoComparison>]
     type ParseFileFailure =
-        | FailedToParseFile of FSharpErrorInfo []
+        | FailedToParseFile of FSharpDiagnostic []
         | AbortedTypeCheck
 
     [<NoComparison>]

@@ -18,7 +18,7 @@ module Lint =
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
-    open FSharp.Compiler
+    open FSharp.Compiler.Text
     open FSharp.Compiler.SourceCodeServices
 
     /// Provides information on what the linter is currently doing.
@@ -108,7 +108,7 @@ module Lint =
         { IndentationRuleContext : Map<int,bool*int>
 // TODO: investigate incorrect indentation warning
 // fsharplint:disable-next-line Indentation
-          NoTabCharactersRuleContext : (string * Range.range) list }
+          NoTabCharactersRuleContext : (string * Range) list }
 
     /// Result of running the linter.
     [<NoEquality; NoComparison; RequireQualifiedAccess>]

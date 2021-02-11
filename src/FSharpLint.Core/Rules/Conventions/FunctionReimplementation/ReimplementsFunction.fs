@@ -4,7 +4,7 @@ open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.PrettyNaming
+open FSharp.Compiler.SourceCodeServices
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -25,7 +25,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
     let generateError (identifier:LongIdent) =
         let identifier =
             identifier
-            |> List.map (fun x -> DemangleOperatorName x.idText)
+            |> List.map (fun x ->  PrettyNaming.DemangleOperatorName x.idText)
             |> String.concat "."
 
         let suggestedFix = lazy(

@@ -5,7 +5,7 @@ open NUnit.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharp.Compiler.SyntaxTree
 open FSharp.Compiler.SourceCodeServices
 

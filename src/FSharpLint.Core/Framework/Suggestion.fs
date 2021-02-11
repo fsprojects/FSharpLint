@@ -1,7 +1,7 @@
 ﻿module FSharpLint.Framework.Suggestion
 
 open System
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 
 /// Information for consuming applications to provide an automated fix for a lint suggestion.
 [<NoEquality; NoComparison>]
@@ -10,7 +10,7 @@ type SuggestedFix = {
     FromText:string
 
     /// Location of the text to be replaced.
-    FromRange:range
+    FromRange:Range
 
     /// Text to replace the `FromText`, i.e. the fix.
     ToText:string
@@ -19,7 +19,7 @@ type SuggestedFix = {
 [<NoEquality; NoComparison>]
 type WarningDetails = {
     /// Location of the code that prompted the suggestion.
-    Range:range
+    Range:Range
 
     /// Suggestion message to describe the possible problem to the user.
     Message:string
@@ -27,9 +27,9 @@ type WarningDetails = {
     /// Information to provide an automated fix.
     SuggestedFix:Lazy<SuggestedFix option> option
 
-    /// Async type checks to be performed to confirm this suggestion is valid.
+    /// Type checks to be performed to confirm this suggestion is valid.
     /// Suggestion is only considered valid when all type checks resolve to true.
-    TypeChecks:Async<bool> list
+    TypeChecks:(unit -> bool) list
 } with
     member internal this.WithTypeCheck typeCheck =
         match typeCheck with

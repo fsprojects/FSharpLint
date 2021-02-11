@@ -26,7 +26,7 @@ module ExpressionUtilities =
     open System
     open FSharp.Compiler
     open FSharp.Compiler.SyntaxTree
-    open FSharp.Compiler.Range
+    open FSharp.Compiler.Text
     open FSharp.Compiler.SourceCodeServices
 
     let (|Identifier|_|) = function
@@ -44,7 +44,7 @@ module ExpressionUtilities =
                 range.EndColumn,
                 "",
                 identNames)
-        | _ -> async.Return None
+        | _ -> None
 
     /// Converts an operator name e.g. op_Add to the operator symbol e.g. +
     let identAsDecompiledOpName (ident:Ident) =
@@ -80,7 +80,7 @@ module ExpressionUtilities =
         lidwd.Lid |> longIdentToString
 
     /// Tries to find the source code within a given range.
-    let tryFindTextOfRange (range:range) (text:string) =
+    let tryFindTextOfRange (range:Range) (text:string) =
         let startIndex = findPos range.Start text
         let endIndex = findPos range.End text
 
@@ -89,8 +89,8 @@ module ExpressionUtilities =
             text.Substring(startIndex, endIndex - startIndex) |> Some
         | _ -> None
 
-    let getLeadingSpaces (range:range) (text:string) =
-        let range = mkRange "" (mkPos range.StartLine 0) range.End
+    let getLeadingSpaces (range:Range) (text:string) =
+        let range = Range.mkRange "" (Pos.mkPos range.StartLine 0) range.End
         tryFindTextOfRange range text
         |> Option.map (fun text ->
             text.ToCharArray()
@@ -115,7 +115,7 @@ module ExpressionUtilities =
 
     /// Counts the number of comment lines preceding the given range of text.
     let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
-        let range = mkRange "" startPos endPos
+        let range = Range.mkRange "" startPos endPos
 
         tryFindTextOfRange range text
         |> Option.map (fun precedingText ->
@@ -128,7 +128,7 @@ module ExpressionUtilities =
             |> Array.length)
         |> Option.defaultValue 0
 
-    let rangeContainsOtherRange (containingRange:range) (range:range) =
+    let rangeContainsOtherRange (containingRange:Range) (range:Range) =
         range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
 
 module String =
