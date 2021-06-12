@@ -1,8 +1,12 @@
 FSharp.Compiler.Service
 FParsec
-Dotnet.ProjInfo
-Dotnet.ProjInfo.Workspace
-Dotnet.ProjInfo.Workspace.FCS
+Ionide.ProjInfo
+Ionide.ProjInfo.ProjectSystem
+Ionide.ProjInfo.FCS
 FSharp.Core
 Newtonsoft.Json
-Microsoft.Build.Utilities.Core
+Microsoft.Build.Tasks.Core copy_local: false
+Microsoft.Build.Framework copy_local: false
+Microsoft.Build.Locator copy_local: false
+Microsoft.Build.Utilities.Core copy_local: false 
+Microsoft.Build copy_local: false

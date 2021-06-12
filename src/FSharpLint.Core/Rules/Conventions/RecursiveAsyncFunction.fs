@@ -3,7 +3,7 @@ module FSharpLint.Rules.RecursiveAsyncFunction
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -29,8 +29,8 @@ let private getFunctionNameFromAsyncCompExprBinding = function
     | _ ->
         None
 
-let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:range) (doBangExpr:SynExpr) breadcrumbs =
-    let doTokenRange = mkRange "do!" (mkPos range.StartLine range.StartColumn) (mkPos range.StartLine (range.StartColumn + 3))
+let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangExpr:SynExpr) breadcrumbs =
+    let doTokenRange = Range.mkRange "do!" (Pos.mkPos range.StartLine range.StartColumn) (Pos.mkPos range.StartLine (range.StartColumn + 3))
     match doBangExpr with
     | SynExpr.App (funcExpr=(SynExpr.Ident callerIdent)) ->
         breadcrumbs

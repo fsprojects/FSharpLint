@@ -1,7 +1,7 @@
 module FSharpLint.Rules.NoPartialFunctions
 
 open System
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -67,7 +67,7 @@ let private partialFunctionIdentifiers =
         ("List.pick", Function "List.tryPick")
     ] |> Map.ofList
 
-let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:range) =
+let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:Range) =
     if List.contains identifier config.AllowedPartials then
         None
     elif List.contains identifier config.AdditionalPartials then

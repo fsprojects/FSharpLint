@@ -2,7 +2,7 @@ module FSharpLint.Rules.TupleCommaSpacing
 
 open System
 open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.Range
+open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -16,7 +16,7 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
     |> Array.pairwise
     |> Array.choose (fun (expr, nextExpr) ->
         if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
-            let commaRange = mkRange "" expr.Range.End nextExpr.Range.Start
+            let commaRange = Range.mkRange "" expr.Range.End nextExpr.Range.Start
             let suggestedFix =
                 ExpressionUtilities.tryFindTextOfRange commaRange args.FileContent
                 |> Option.map (fun commaText ->

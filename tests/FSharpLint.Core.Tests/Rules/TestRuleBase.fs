@@ -16,10 +16,8 @@ type TestRuleBase () =
     member __.PostSuggestion (suggestion:Suggestion.LintWarning) =
         if not suggestion.Details.TypeChecks.IsEmpty then
             let successfulTypeCheck =
-                suggestion.Details.TypeChecks
-                |> Async.Parallel
-                |> Async.RunSynchronously
-                |> Array.reduce (&&)
+                (true, suggestion.Details.TypeChecks)
+                ||> List.fold (fun acc check -> acc && check ())
 
             if successfulTypeCheck then
                 suggestions.Add(suggestion)

@@ -69,7 +69,7 @@ let private inferFileType (target:string) =
     else
         FileType.Source
 
-let private start (arguments:ParseResults<ToolArgs>) =
+let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
     let mutable exitCode = 0
 
     let output =
@@ -116,9 +116,9 @@ let private start (arguments:ParseResults<ToolArgs>) =
                 match fileType with
                 | FileType.File -> Lint.lintFile lintParams target
                 | FileType.Source -> Lint.lintSource lintParams target
-                | FileType.Solution -> Lint.lintSolution lintParams target
+                | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
                 | FileType.Project
-                | _ -> Lint.lintProject lintParams target
+                | _ -> Lint.lintProject lintParams target toolsPath
             handleLintResult lintResult
         with
         | e ->
@@ -128,6 +128,10 @@ let private start (arguments:ParseResults<ToolArgs>) =
     | _ -> ()
 
     exitCode
+    
+/// Must be called only once per process.
+/// We're calling it globally so we can call main multiple times from our tests.
+let toolsPath = Ionide.ProjInfo.Init.init()
 
 [<EntryPoint>]
 let main argv =
@@ -136,4 +140,4 @@ let main argv =
         | _ -> Some ConsoleColor.Red)
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
-    start parseResults
+    start parseResults toolsPath

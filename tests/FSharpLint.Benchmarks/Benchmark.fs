@@ -2,7 +2,6 @@ namespace FSharpLint.Benchmarks
 
 open System.IO
 open BenchmarkDotNet.Attributes
-open FSharp.Compiler.AbstractIL.Internal.Library
 open FSharp.Compiler.SourceCodeServices
 open FSharp.Compiler.Text
 open FSharpLint.Application.Lint
@@ -34,7 +33,7 @@ type Benchmark () =
     let (fileInfo, lines) =
         let text = File.ReadAllText sourceFile
         let tree = generateAst text sourceFile
-        ({ Ast = tree; Source = text; TypeCheckResults = None }, String.getLines text |> Array.toList)
+        ({ Ast = tree; Source = text; TypeCheckResults = None }, String.toLines text |> Array.toList)
 
     [<Benchmark>]
     member this.LintParsedFile () =
