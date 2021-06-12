@@ -285,17 +285,26 @@ module Lint =
         (exitCode, (workingDir, exePath, args))
 
     let getProjectInfo (projectFilePath:string) =
+        let errorMessageFromNotifications notifications =
+            let extractError = function
+            | Ionide.ProjInfo.Types.WorkspaceProjectState.Failed(_projFile, error) -> Some(string(error))
+            | _ -> None
+
+            notifications 
+            |> Seq.tryPick extractError
+            |> function Some(error) -> error | None -> "Unknown error when loading project file."
+
         let toolsPath = Ionide.ProjInfo.Init.init()
         let loader = Ionide.ProjInfo.WorkspaceLoader.Create toolsPath
-        let errors = ResizeArray<_>()
-        loader.Notifications.Add errors.Add
+        let notifications = ResizeArray<_>()
+        loader.Notifications.Add notifications.Add
         let options = loader.LoadProjects [projectFilePath]
         options
         |> Seq.tryFind (fun opt -> opt.ProjectFileName = projectFilePath)
         |> Option.map (fun proj -> Ionide.ProjInfo.FCS.mapToFSharpProjectOptions proj options)
         |> function
             | Some proj -> Ok proj
-            | None      -> Error errors
+            | None      -> errorMessageFromNotifications notifications |> Error
 
     let getFailedFiles = function
         | ParseFile.Failed failure -> Some failure
@@ -433,9 +442,8 @@ module Lint =
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
                     | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
                     | Failure x -> LintResult.Failure x
-                | Error errors ->
-                    let errors = errors |> Seq.toArray
-                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage (string errors))
+                | Error error ->
+                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
                     |> LintResult.Failure
             | Error err ->
                 RunTimeConfigError err

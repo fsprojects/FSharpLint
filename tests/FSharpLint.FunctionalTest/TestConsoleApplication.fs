@@ -107,7 +107,8 @@ module Tests =
 
             Assert.AreEqual(expectedErrors, errors,
                 "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]\n" +
+                "Complete output: " + output)
 
         [<Test>]
         member __.FunctionalTestConsoleApplicationSolution() =
@@ -122,4 +123,5 @@ module Tests =
 
             Assert.AreEqual(expectedErrors, errors,
                 "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]")
+                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]\n" +
+                "Complete output: " + output)
