@@ -414,7 +414,7 @@ module Lint =
                           ReportLinterProgress = projectProgress }
 
                     let isIgnoredFile filePath =
-                        config.ignoreFiles
+                        config.IgnoreFiles
                         |> Option.map (fun ignoreFiles ->
                             let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
                             Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)

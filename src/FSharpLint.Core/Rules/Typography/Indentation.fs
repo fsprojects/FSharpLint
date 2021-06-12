@@ -154,7 +154,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         None
 
 let runner context args =
-    checkIndentation args.GlobalConfig.numIndentationSpaces args.Line args.LineNumber context
+    checkIndentation args.GlobalConfig.NumIndentationSpaces args.Line args.LineNumber context
     |> Option.toArray
 
 let rule =

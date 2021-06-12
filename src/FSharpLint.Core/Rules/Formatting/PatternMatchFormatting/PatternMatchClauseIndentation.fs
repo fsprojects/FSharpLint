@@ -23,7 +23,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
             |> Option.bind (fun firstClause ->
                 let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
                 if isLambda then
-                    if clauseIndentation <> matchStartIndentation + args.GlobalConfig.numIndentationSpaces then
+                    if clauseIndentation <> matchStartIndentation + args.GlobalConfig.NumIndentationSpaces then
                         { Range = firstClause.Range
                           Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
                           SuggestedFix = None
