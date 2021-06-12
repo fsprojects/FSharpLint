@@ -33,6 +33,9 @@ module TestApi =
             | Some(parseTree) -> parseTree
             | None -> failwith "Failed to parse file."
 
+        /// Must be called once per process.
+        let toolsPath = Ionide.ProjInfo.Init.init()
+
         [<Category("Performance")>]
         [<Test>]
         member __.``Performance of linting an existing file``() =
@@ -64,7 +67,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
-            let result = lintProject OptionalLintParameters.Default projectFile
+            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
 
             match result with
             | LintResult.Success warnings ->
@@ -77,7 +80,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
-            let result = lintProject OptionalLintParameters.Default projectFile
+            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
 
             match result with
             | LintResult.Success warnings ->
@@ -86,13 +89,13 @@ module TestApi =
                 Assert.True(false, string err)
 
         [<Test>]
-        member __.``Lint project with default config tries to load `fsharplint.json``() =
+        member __.``Lint project with default config tries to load fsharplint.json``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let tempConfigFile = TestContext.CurrentContext.TestDirectory </> "fsharplint.json"
             File.WriteAllText (tempConfigFile, """{ "ignoreFiles": ["*"] }""")
 
-            let result = lintProject OptionalLintParameters.Default projectFile
+            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
             File.Delete tempConfigFile
 
             match result with
@@ -106,7 +109,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
 
-            let result = lintSolution OptionalLintParameters.Default solutionFile
+            let result = lintSolution OptionalLintParameters.Default solutionFile toolsPath
 
             match result with
             | LintResult.Success warnings ->
@@ -122,7 +125,7 @@ module TestApi =
 
             let relativePathToProjectFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), projectFile)
 
-            let result = lintProject OptionalLintParameters.Default relativePathToProjectFile
+            let result = lintProject OptionalLintParameters.Default relativePathToProjectFile toolsPath
 
             match result with
             | LintResult.Success warnings ->
@@ -138,7 +141,7 @@ module TestApi =
 
             let relativePathToSolutionFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), solutionFile)
 
-            let result = lintSolution OptionalLintParameters.Default relativePathToSolutionFile
+            let result = lintSolution OptionalLintParameters.Default relativePathToSolutionFile toolsPath
 
             match result with
             | LintResult.Success warnings ->

@@ -126,11 +126,11 @@ module Lint =
     val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> string [] -> Context -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> LintResult
+    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> LintResult
+    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
     /// Lints F# source code.
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult

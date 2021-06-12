@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open Microsoft.Build.Locator
 open NUnit.Framework
 
 let getErrorsFromOutput (output:string) =
@@ -34,11 +33,6 @@ let main input =
 
 [<TestFixture>]
 type TestConsoleApplication() =
-    [<OneTimeSetUp>]
-    static member Setup() =
-        if not MSBuildLocator.IsRegistered then
-            MSBuildLocator.RegisterDefaults() |> ignore
-
     [<Test>]
     member __.``Lint file, expected rules are triggered.``() =
         let config = """

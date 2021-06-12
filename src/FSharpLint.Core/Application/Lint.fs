@@ -284,7 +284,7 @@ module Lint =
 
         (exitCode, (workingDir, exePath, args))
 
-    let getProjectInfo (projectFilePath:string) =
+    let getProjectInfo (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         let errorMessageFromNotifications notifications =
             let extractError = function
             | Ionide.ProjInfo.Types.WorkspaceProjectState.Failed(_projFile, error) -> Some(string(error))
@@ -294,7 +294,6 @@ module Lint =
             |> Seq.tryPick extractError
             |> function Some(error) -> error | None -> "Unknown error when loading project file."
 
-        let toolsPath = Ionide.ProjInfo.Init.init()
         let loader = Ionide.ProjInfo.WorkspaceLoader.Create toolsPath
         let notifications = ResizeArray<_>()
         loader.Notifications.Add notifications.Add
@@ -391,7 +390,7 @@ module Lint =
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) =
+    let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         if IO.File.Exists projectFilePath then
             let projectFilePath = Path.GetFullPath projectFilePath
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
@@ -437,7 +436,7 @@ module Lint =
                     else
                         Failure (FailedToParseFilesInProject failedFiles)
 
-                match getProjectInfo projectFilePath with
+                match getProjectInfo projectFilePath toolsPath with
                 | Ok projectOptions ->
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
                     | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
@@ -453,7 +452,7 @@ module Lint =
             |> LintResult.Failure
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
-    let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) =
+    let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         if IO.File.Exists solutionFilePath then
             let solutionFilePath = Path.GetFullPath solutionFilePath
             let solutionFolder = Path.GetDirectoryName solutionFilePath
@@ -480,7 +479,7 @@ module Lint =
 
                 let (successes, failures) =
                     projectsInSolution
-                    |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath)
+                    |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath toolsPath)
                     |> Array.fold (fun (successes, failures) result ->
                         match result with
                         | LintResult.Success warnings ->
