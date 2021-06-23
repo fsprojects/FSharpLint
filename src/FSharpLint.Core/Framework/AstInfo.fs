@@ -2,7 +2,7 @@
 
 module AstInfo =
 
-    open FSharp.Compiler.SyntaxTree
+    open FSharp.Compiler.Syntax
     open Ast
 
     type IdentifierType =
@@ -18,12 +18,12 @@ module AstInfo =
             match memberFlags with
             | Some(memberFlags) -> 
                 match memberFlags.MemberKind with
-                | MemberKind.Constructor(_)
-                | MemberKind.ClassConstructor(_) -> Constructor
-                | MemberKind.Member(_) -> Member
-                | MemberKind.PropertyGet(_)
-                | MemberKind.PropertySet(_)
-                | MemberKind.PropertyGetSet(_) -> Property
+                | SynMemberKind.Constructor(_)
+                | SynMemberKind.ClassConstructor(_) -> Constructor
+                | SynMemberKind.Member(_) -> Member
+                | SynMemberKind.PropertyGet(_)
+                | SynMemberKind.PropertySet(_)
+                | SynMemberKind.PropertyGetSet(_) -> Property
             | None when valInfo.CurriedArgInfos.Length = 0 -> Value
             | None -> Function
 

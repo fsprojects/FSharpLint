@@ -1,7 +1,7 @@
 module FSharpLint.Rules.PatternMatchOrClausesOnNewLine
 
 open System
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -12,7 +12,7 @@ let check args _ (clauses:SynMatchClause list) _ =
     clauses
     |> List.toArray
     |> Array.collect (function
-        | SynMatchClause.Clause (SynPat.Or (firstPat, secondPat, _), _, _, _, _) ->
+        | SynMatchClause (SynPat.Or (firstPat, secondPat, _), _, _, _, _) ->
             [|firstPat; secondPat|]
         | _ -> [||])
     |> Array.pairwise

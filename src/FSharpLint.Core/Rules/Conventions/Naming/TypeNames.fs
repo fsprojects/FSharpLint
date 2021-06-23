@@ -1,21 +1,21 @@
 module FSharpLint.Rules.TypeNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(componentInfo, typeDef, _, _)) ->
+    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, typeDef, _, _, _)) ->
         let isNotTypeExtension =
             match typeDef with
-            | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconAugmentation, _, _) -> false
+            | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.Augmentation, _, _) -> false
             | _ -> true
 
         if isNotTypeExtension then
             match componentInfo with
-            | SynComponentInfo.ComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
+            | SynComponentInfo(attrs, _, _, identifier, _, _, _, _) ->
                 match List.tryLast identifier with
                 | Some _ ->
                     if not (isMeasureType attrs) && not (isInterface typeDef) then

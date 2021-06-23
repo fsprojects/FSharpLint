@@ -1,6 +1,6 @@
 ﻿module TestLineRuleBase
 
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text
 open FSharpLint.Application
 open FSharpLint.Framework
@@ -30,12 +30,9 @@ type TestLineRuleBase (rule:Rule) =
 
         let lines = input.Split "\n"
 
-        match parseResults.ParseTree with
-        | Some tree ->
-            let syntaxArray = AbstractSyntaxArray.astToArray tree
-            let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray
-            let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = None; GenericLineRules = [|rule|] }
+        let syntaxArray = AbstractSyntaxArray.astToArray parseResults.ParseTree
+        let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray
+        let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = None; GenericLineRules = [|rule|] }
 
-            runLineRules lineRules globalConfig fileName input lines context
-            |> Array.iter this.PostSuggestion
-        | None -> ()
+        runLineRules lineRules globalConfig fileName input lines context
+        |> Array.iter this.PostSuggestion

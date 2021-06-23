@@ -5,8 +5,9 @@ Ionide.ProjInfo.ProjectSystem
 Ionide.ProjInfo.FCS
 FSharp.Core
 Newtonsoft.Json
-Microsoft.Build.Tasks.Core copy_local: false
-Microsoft.Build.Framework copy_local: false
-Microsoft.Build.Locator copy_local: false
-Microsoft.Build.Utilities.Core copy_local: false 
-Microsoft.Build copy_local: false
+Microsoft.SourceLink.GitHub
+Microsoft.Build.Tasks.Core
+Microsoft.Build.Framework
+Microsoft.Build.Locator
+Microsoft.Build.Utilities.Core
+Microsoft.Build

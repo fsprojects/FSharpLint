@@ -9421,7 +9421,7 @@ and bindLetRec (binds:Bindings) m e =
 and CheckRecursiveBindingIds binds =
     let hashOfBinds = new Dictionary<string,_>()
             
-    for (SynBinding.Binding(_,_,_,_,_,_,_,b,_,_,m,_)) in binds do
+    for (SynBinding(_,_,_,_,_,_,_,b,_,_,m,_)) in binds do
         let nm =
             match b with
             | SynPat.Named(_,id,_,_,_) -> id.idText

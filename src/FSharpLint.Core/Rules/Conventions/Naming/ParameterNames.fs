@@ -1,6 +1,6 @@
 module FSharpLint.Rules.ParameterNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
@@ -36,7 +36,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             |> Array.choose identFromSimplePat
             |> Array.map (fun ident -> (ident, ident.idText, None))
         | _ -> Array.empty
-    | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->

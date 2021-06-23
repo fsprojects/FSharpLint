@@ -120,11 +120,11 @@ module XmlDocumentation =
                 if ruleAccessEnabled args.Info i access "ExceptionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
                     suggest range (getString "RulesXmlDocumentationExceptionError")
 
-            | AstNode.EnumCase(SynEnumCase.EnumCase(_, id, _, xmlDoc, range)) ->
+            | AstNode.EnumCase(SynEnumCase(_, id, _, xmlDoc, range)) ->
                 if ruleEnabled args.Info i "EnumDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
                     suggest range (String.Format(getString "RulesXmlDocumentationEnumError", id.idText))
 
-            | AstNode.UnionCase(SynUnionCase.UnionCase(_, id, _, xmlDoc, access, range)) ->
+            | AstNode.UnionCase(SynUnionCase(_, id, _, xmlDoc, access, range)) ->
                 if ruleAccessEnabled args.Info i access "UnionDefinitionHeader" && isPreXmlDocEmpty xmlDoc then
                     suggest range (String.Format(getString "RulesXmlDocumentationUnionError", id.idText))
 
@@ -134,7 +134,7 @@ module XmlDocumentation =
 
             | AstNode.MemberDefinition(SynMemberDefn.Member(synBinding, _)) ->
                 if ruleEnabled args.Info i "MemberDefinitionHeader" then
-                    let (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
+                    let (SynBinding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) = synBinding
                     let setting = getAccessSetting args.Info.Config "MemberDefinitionHeader"
                     if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                         suggest range (getString "RulesXmlDocumentationMemberError")
@@ -142,21 +142,21 @@ module XmlDocumentation =
             | AstNode.MemberDefinition(SynMemberDefn.LetBindings(synBindings, _, _, _)) ->
                 if ruleEnabled args.Info i "LetDefinitionHeader" then
                     let setting = getAccessSetting args.Info.Config "LetDefinitionHeader"
-                    let evalBinding (SynBinding.Binding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) =
+                    let evalBinding (SynBinding(access, _, _, _, _, xmlDoc, _, _, _, _, range, _)) =
                         if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                             suggest range (getString "RulesXmlDocumentationLetError")
                     synBindings |> List.iter evalBinding
 
-            | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(coreInfo, typeDefnRep, _, _)) ->
+            | AstNode.TypeDefinition(SynTypeDefn(coreInfo, typeDefnRep, _, _)) ->
                 if ruleEnabled args.Info i "TypeDefinitionHeader" then
-                    let (SynComponentInfo.ComponentInfo(_, _, _, _, xmlDoc, _, access, range)) = coreInfo
+                    let (SynComponentInfo(_, _, _, _, xmlDoc, _, access, range)) = coreInfo
                     let setting = getAccessSetting args.Info.Config "TypeDefinitionHeader"
                     if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                         suggest range (getString "RulesXmlDocumentationTypeError")
 
                 if ruleEnabled args.Info i "RecordDefinitionHeader" then
                     let setting = getAccessSetting args.Info.Config "RecordDefinitionHeader"
-                    let evalField (SynField.Field(_, _, id, _, _, xmlDoc, access, range)) =
+                    let evalField (SynField(_, _, id, _, _, xmlDoc, access, range)) =
                         if isAccessEnabledOpt setting access && isPreXmlDocEmpty xmlDoc then
                             suggest range (String.Format(getString "RulesXmlDocumentationRecordError", getIdText id))
                     match typeDefnRep with

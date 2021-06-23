@@ -3,8 +3,9 @@ module FSharpLint.Rules.HintMatcher
 open System
 open System.Collections.Generic
 open System.Diagnostics
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.Symbols
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -85,19 +86,20 @@ let private matchConst = function
     | SynConst.UInt32(x) -> Some(Constant.UInt32(x))
     | SynConst.UInt64(x) -> Some(Constant.UInt64(x))
     | SynConst.Byte(x) -> Some(Constant.Byte(x))
-    | SynConst.Bytes(x, _) -> Some(Constant.Bytes(x))
+    | SynConst.Bytes(x, _, _) -> Some(Constant.Bytes(x))
     | SynConst.Char(x) -> Some(Constant.Char(x))
     | SynConst.Decimal(x) -> Some(Constant.Decimal(x))
     | SynConst.Double(x) -> Some(Constant.Double(x))
     | SynConst.SByte(x) -> Some(Constant.SByte(x))
     | SynConst.Single(x) -> Some(Constant.Single(x))
-    | SynConst.String(x, _) -> Some(Constant.String(x))
+    | SynConst.String(x, _, _) -> Some(Constant.String(x))
     | SynConst.UIntPtr(x) -> Some(Constant.UIntPtr(unativeint x))
     | SynConst.IntPtr(x) -> Some(Constant.IntPtr(nativeint x))
     | SynConst.UserNum(x, endChar) ->
         Some(Constant.UserNum(System.Numerics.BigInteger.Parse(x), endChar.[0]))
     | SynConst.Unit -> Some(Constant.Unit)
     | SynConst.UInt16s(_)
+    | SynConst.SourceIdentifier _
     | SynConst.Measure(_) -> None
 
 module private Precedence =
@@ -451,7 +453,7 @@ module private MatchPattern =
                             LongIdentWithDots([ident],_),
                             _,
                             _,
-                            Pats([SynPat.Tuple(_, [leftPattern;rightPattern], _)]),
+                            SynArgPats.Pats([SynPat.Tuple(_, [leftPattern;rightPattern], _)]),
                             _,
                             _), Pattern.Cons(left, right)
                 when ident.idText = "op_ColonColon" ->

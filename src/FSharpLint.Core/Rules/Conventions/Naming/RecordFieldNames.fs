@@ -1,6 +1,6 @@
 module FSharpLint.Rules.RecordFieldNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
@@ -9,7 +9,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.TypeSimpleRepresentation (SynTypeDefnSimpleRepr.Record (recordFields=recordFields)) ->
         recordFields
-        |> List.choose (fun (SynField.Field (idOpt=idOpt)) ->
+        |> List.choose (fun (SynField (idOpt=idOpt)) ->
             idOpt
             |> Option.map (fun identifier -> (identifier, identifier.idText, None)))
         |> List.toArray

@@ -1,6 +1,6 @@
 module FSharpLint.Rules.MemberNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
@@ -24,7 +24,7 @@ let private isImplementingInterface parents =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         let parents = args.GetParents 3
         if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
@@ -35,7 +35,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             Array.empty
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.AbstractSlot(SynValSig.ValSpfn(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
+        | SynMemberDefn.AbstractSlot(SynValSig(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
             (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty

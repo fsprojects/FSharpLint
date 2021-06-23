@@ -3,7 +3,7 @@ module FSharpLint.Rules.MaxNumberOfMembers
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -14,7 +14,7 @@ let private getMembers (members:SynMemberDefn list) =
 
     let isPublicMember = function
         | SynMemberDefn.AbstractSlot(_) -> true
-        | SynMemberDefn.Member(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _), _)
+        | SynMemberDefn.Member(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _), _)
         | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _) -> isPublic access
         | _ -> false
 
@@ -37,8 +37,8 @@ let private validateType (maxMembers:int) members typeRepresentation =
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, typeRepresentation, members, _)) ->
-        validateType config.MaxItems members typeRepresentation
+    | AstNode.TypeDefinition(SynTypeDefn(_, typeRepresentation, members, implicitCtor, _)) ->
+        validateType config.MaxItems (Option.toList implicitCtor @ members) typeRepresentation
     | _ -> Array.empty
 
 let rule config =

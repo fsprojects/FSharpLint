@@ -1,6 +1,6 @@
 module FSharpLint.Rules.ActivePatternNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
@@ -26,7 +26,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
         getPatternIdents false getValueOrFunctionIdents false pattern
-    | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->

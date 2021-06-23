@@ -25,9 +25,9 @@ module ExpressionUtilities =
 
     open System
     open FSharp.Compiler
-    open FSharp.Compiler.SyntaxTree
+    open FSharp.Compiler.Syntax
     open FSharp.Compiler.Text
-    open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.CodeAnalysis
 
     let (|Identifier|_|) = function
         | SynExpr.Ident(ident) -> Some([ident], ident.idRange)
@@ -90,7 +90,7 @@ module ExpressionUtilities =
         | _ -> None
 
     let getLeadingSpaces (range:Range) (text:string) =
-        let range = Range.mkRange "" (Pos.mkPos range.StartLine 0) range.End
+        let range = Range.mkRange "" (Position.mkPos range.StartLine 0) range.End
         tryFindTextOfRange range text
         |> Option.map (fun text ->
             text.ToCharArray()

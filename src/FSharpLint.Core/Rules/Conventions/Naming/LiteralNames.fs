@@ -1,13 +1,13 @@
 module FSharpLint.Rules.LiteralNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding.Binding(_, _, _, _, attributes, _, _, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, pattern, _, _, _, _)) ->
         if isLiteral attributes then
             let rec getLiteralIdents = function
                 | SynPat.Named(_, identifier, _, _, _) ->

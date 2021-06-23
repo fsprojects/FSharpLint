@@ -1,14 +1,15 @@
 module FSharpLint.Rules.Helper.Naming
 
 open System
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
+open FSharp.Compiler.Symbols
 
 module QuickFixes =
     let removeAllUnderscores (ident:Ident) = lazy(
@@ -170,7 +171,7 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
     }
 
 let isActivePattern (identifier:Ident) =
-    FSharp.Compiler.SourceCodeServices.PrettyNaming.IsActivePatternName identifier.idText
+    PrettyNaming.IsActivePatternName identifier.idText
 
 let activePatternIdentifiers (identifier:Ident) =
     identifier.idText.Split('|')
@@ -189,9 +190,9 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
             match node.Actual with
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
-            | UnionCase(SynUnionCase.UnionCase(_, _, _, _, access, _))
-            | Field(SynField.Field(_, _, _, _, _, _, access, _))
-            | ComponentInfo(SynComponentInfo.ComponentInfo(_, _, _, _, _, _, access, _))
+            | UnionCase(SynUnionCase(_, _, _, _, access, _))
+            | Field(SynField(_, _, _, _, _, _, access, _))
+            | ComponentInfo(SynComponentInfo(_, _, _, _, _, _, access, _))
             | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _))
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
             | Pattern(SynPat.Named(_, _, _, access, _))
@@ -202,7 +203,7 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
             | MemberDefinition(_) ->
                 if isPrivateWhenReachedBinding then false
                 else isPublic publicSoFar isPrivateWhenReachedBinding node.ParentIndex
-            | Binding(SynBinding.Binding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
+            | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
                 if isPrivateWhenReachedBinding then false
                 else isPublic (isSynAccessPublic access) true node.ParentIndex
             | EnumCase(_)
@@ -264,8 +265,8 @@ let isInterface typeDef =
         | _ -> false
 
     match typeDef with
-    | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconInterface, members, _)
-    | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.TyconUnspecified, members, _) ->
+    | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.Interface, members, _)
+    | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.Unspecified, members, _) ->
         members |> List.exists hasConstructor |> not &&
         members |> List.forall canBeInInterface
     | _ -> false
@@ -276,10 +277,10 @@ let checkIfPublic isCurrentlyPublic = function
 
 let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
-    | AnonModule
-    | NamedModule -> true
-    | DeclaredNamespace
-    | GlobalNamespace -> false
+    | SynModuleOrNamespaceKind.AnonModule
+    | SynModuleOrNamespaceKind.NamedModule -> true
+    | SynModuleOrNamespaceKind.DeclaredNamespace
+    | SynModuleOrNamespaceKind.GlobalNamespace -> false
 
 /// Is module name implicitly created from file name?
 let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =

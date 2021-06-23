@@ -3,7 +3,7 @@ module FSharpLint.Rules.TupleOfWildcards
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -30,7 +30,7 @@ let private checkTupleOfWildcards pattern identifier =
 let private isTupleMemberArgs breadcrumbs tupleRange =
     let (|MemberBindingArgs|_|) bindingPattern =
         match bindingPattern with
-        | SynBinding.Binding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _) ->
+        | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _) ->
             match args with
             | SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_) as args, _)]) -> Some(args)
             | _ -> None

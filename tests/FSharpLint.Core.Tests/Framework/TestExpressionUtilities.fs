@@ -11,7 +11,7 @@ type TestExpressionUtilities() =
         let text = "123\n345\n678"
 
         let textOfRange (line1, col1) (line2, col2) = 
-            tryFindTextOfRange (Range.mkRange "" (Pos.mkPos line1 col1) (Pos.mkPos line2 col2)) text
+            tryFindTextOfRange (Range.mkRange "" (Position.mkPos line1 col1) (Position.mkPos line2 col2)) text
             
         Assert.AreEqual(Some "123", textOfRange (1, 0) (1, 3))
         Assert.AreEqual(Some "345", textOfRange (2, 0) (2, 3))

@@ -4,7 +4,7 @@ module AbstractSyntaxArray =
 
     open System.Collections.Generic
     open System.Diagnostics
-    open FSharp.Compiler.SyntaxTree
+    open FSharp.Compiler.Syntax
 
     open Ast
 
@@ -89,6 +89,7 @@ module AbstractSyntaxArray =
         | SynConst.UInt16s(_)
         | SynConst.UserNum(_)
         | SynConst.Measure(_) -> SyntaxNode.Other
+        | SynConst.SourceIdentifier (_) -> SyntaxNode.Other
 
     let private astNodeToSyntaxNode = function
         | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
@@ -169,8 +170,8 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Byte(x), _))
         | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Bytes(x, _), _))
-        | Expression(SynExpr.Const(SynConst.Bytes(x, _), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.Bytes(x, _, _), _))
+        | Expression(SynExpr.Const(SynConst.Bytes(x, _, _), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Char(x), _))
         | Expression(SynExpr.Const(SynConst.Char(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Decimal(x), _))
@@ -189,8 +190,8 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.Single(x), _))
         | Expression(SynExpr.Const(SynConst.Single(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.String(x, _), _))
-        | Expression(SynExpr.Const(SynConst.String(x, _), _)) -> hash x
+        | Pattern(SynPat.Const(SynConst.String(x, _, _), _))
+        | Expression(SynExpr.Const(SynConst.String(x, _, _), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.UInt16(x), _))
         | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.UInt16s(x), _))

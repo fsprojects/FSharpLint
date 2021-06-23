@@ -2,7 +2,7 @@ module FSharpLint.Rules.Helper.RaiseWithTooManyArguments
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 

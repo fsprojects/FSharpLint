@@ -2,7 +2,7 @@ module FSharpLint.Rules.TupleIndentation
 
 open System
 open System.Diagnostics.CodeAnalysis
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion

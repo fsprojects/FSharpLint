@@ -3,7 +3,7 @@ module FSharpLint.Rules.NoTabCharacters
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -12,7 +12,7 @@ module ContextBuilder =
 
     let builder current astNode =
         match astNode with
-        | Expression(SynExpr.Const(SynConst.String(value, _), range)) ->
+        | Expression(SynExpr.Const(SynConst.String(value, _, _), range)) ->
             (value, range) :: current
         | _ ->
             current
@@ -24,7 +24,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = Range.mkRange "" (Pos.mkPos args.LineNumber indexOfTab) (Pos.mkPos args.LineNumber (indexOfTab + 1))
+        let range = Range.mkRange "" (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")

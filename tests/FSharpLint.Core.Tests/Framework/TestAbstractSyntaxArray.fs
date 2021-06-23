@@ -4,7 +4,7 @@ open System.Diagnostics
 open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AbstractSyntaxArray
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open Microsoft.FSharp.Reflection
 open NUnit.Framework
 open TestUtils
