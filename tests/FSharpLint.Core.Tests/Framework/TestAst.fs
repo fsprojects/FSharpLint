@@ -6,11 +6,11 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.ParseFile
 open FSharp.Compiler.Text
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.SourceCodeServices
 
 let stubBinding attributes =
-    SynBinding.Binding(None,
+    SynBinding(None,
                        SynBindingKind.NormalBinding,
                        false,
                        false,

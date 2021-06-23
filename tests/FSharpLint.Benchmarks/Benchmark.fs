@@ -2,7 +2,7 @@ namespace FSharpLint.Benchmarks
 
 open System.IO
 open BenchmarkDotNet.Attributes
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text
 open FSharpLint.Application.Lint
 open FSharpLint.Framework
@@ -21,9 +21,7 @@ type Benchmark () =
             checker.ParseFile(sourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
 
-        match parseResults.ParseTree with
-        | Some(parseTree) -> parseTree
-        | None -> failwith "Failed to parse file."
+        parseResults.ParseTree
 
     let (</>) x y = Path.Combine(x, y)
 

@@ -3,7 +3,7 @@ module FSharpLint.Rules.NestedStatements
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -22,7 +22,7 @@ let private isCompilerGeneratedMatch = function
     | _ -> false
 
 let private areChildrenNested = function
-    | AstNode.Binding(SynBinding.Binding(_))
+    | AstNode.Binding(SynBinding(_))
     | AstNode.Expression(SynExpr.Lambda(_))
     | AstNode.Expression(SynExpr.MatchLambda(_))
     | AstNode.Expression(SynExpr.IfThenElse(_))
@@ -40,7 +40,7 @@ let private areChildrenNested = function
 
 let private getRange = function
     | AstNode.Expression(node) -> Some node.Range
-    | AstNode.Binding(node) -> Some node.RangeOfBindingAndRhs
+    | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
     | _ -> None
 
 let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) i j =

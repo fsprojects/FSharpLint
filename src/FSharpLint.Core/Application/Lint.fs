@@ -7,7 +7,8 @@ open System.IO
 open System.Runtime.InteropServices
 open System.Threading
 open FSharp.Compiler.Text
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Diagnostics
+open FSharp.Compiler.CodeAnalysis
 open Ionide.ProjInfo.ProjectSystem
 open Ionide.ProjInfo.FCS
 open FSharpLint.Core
@@ -362,7 +363,7 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation = {
         /// File represented as an AST.
-        Ast:FSharp.Compiler.SyntaxTree.ParsedInput
+        Ast:FSharp.Compiler.Syntax.ParsedInput
         /// Contents of the file.
         Source:string
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).

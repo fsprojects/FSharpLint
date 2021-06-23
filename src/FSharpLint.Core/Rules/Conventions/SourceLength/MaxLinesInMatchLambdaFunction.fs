@@ -1,6 +1,6 @@
 module FSharpLint.Rules.MaxLinesInMatchLambdaFunction
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 

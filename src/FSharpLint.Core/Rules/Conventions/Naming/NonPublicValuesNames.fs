@@ -1,6 +1,6 @@
 module FSharpLint.Rules.NonPublicValuesNames
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
@@ -32,7 +32,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
         getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
-    | AstNode.Binding(SynBinding.Binding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
@@ -43,7 +43,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             Array.empty
     | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
         (identifier, identifier.idText, None) |> Array.singleton
-    | AstNode.Match(SynMatchClause.Clause(pattern, _, _, _, _)) ->
+    | AstNode.Match(SynMatchClause(pattern, _, _, _, _)) ->
         match pattern with
         | SynPat.Named(_, identifier, isThis, _, _) when not isThis ->
             (identifier, identifier.idText, None) |> Array.singleton

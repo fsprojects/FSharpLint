@@ -1,7 +1,7 @@
 ﻿module TestUtils
 
     open System.IO
-    open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.CodeAnalysis
     open FSharp.Compiler.Text
     open NUnit.Framework
     open FSharpLint.Framework
@@ -25,9 +25,7 @@
             checker.ParseFile(performanceTestSourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
             |> Async.RunSynchronously
 
-        match parseResults.ParseTree with
-        | Some(parseTree) -> parseTree
-        | None -> failwith "Failed to parse file."
+        parseResults.ParseTree
 
     let getPerformanceTestInput =
         let memoizedResult = ref None

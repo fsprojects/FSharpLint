@@ -2,8 +2,9 @@ module FSharpLint.Rules.RedundantNewKeyword
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Symbols
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 

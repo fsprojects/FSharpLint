@@ -1,7 +1,7 @@
 module FSharpLint.Rules.ClassMemberSpacing
 
 open System
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -26,8 +26,8 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
 
                 Range.mkRange
                     ""
-                    (Pos.mkPos (memberOne.Range.EndLine + 1) 0)
-                    (Pos.mkPos (memberTwo.Range.StartLine + endOffset) 0)
+                    (Position.mkPos (memberOne.Range.EndLine + 1) 0)
+                    (Position.mkPos (memberTwo.Range.StartLine + endOffset) 0)
 
             { Range = intermediateRange
               Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
@@ -38,8 +38,8 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
 
 let runner args =
     match args.AstNode with
-    | AstNode.TypeDefinition (SynTypeDefn.TypeDefn (_, repr, members, defnRange)) ->
-        checkClassMemberSpacing args members
+    | AstNode.TypeDefinition (SynTypeDefn.SynTypeDefn (_, repr, members, implicitCtor, defnRange)) ->
+        checkClassMemberSpacing args (Option.toList implicitCtor @ members)
     | AstNode.TypeRepresentation (SynTypeDefnRepr.ObjectModel (_, members, _)) ->
         checkClassMemberSpacing args members
     | _ -> Array.empty

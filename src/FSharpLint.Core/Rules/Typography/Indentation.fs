@@ -2,7 +2,7 @@ module FSharpLint.Rules.Indentation
 
 open System
 open FSharpLint.Framework
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -58,9 +58,9 @@ module ContextBuilder =
 
     let private indentationOverridesForNode (node:AstNode) =
         match node with
-        | TypeDefinition (SynTypeDefn.TypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _, _)) ->
+        | TypeDefinition (SynTypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _,_,  _)) ->
             fields
-            |> List.map (fun (SynField.Field (_, _, _, _, _, _, _, range)) -> range)
+            |> List.map (fun (SynField (_, _, _, _, _, _, _, range)) -> range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression (SynExpr.Tuple (_, exprs, _, _)) ->
@@ -97,7 +97,7 @@ module ContextBuilder =
         | Expression (SynExpr.ObjExpr(bindings=bindings; newExprRange=newExprRange)) ->
             let expectedIndentation = newExprRange.StartColumn + 4
             bindings
-            |> List.map (fun binding -> binding.RangeOfBindingAndRhs)
+            |> List.map (fun binding -> binding.RangeOfBindingWithRhs)
             |> firstRangePerLine
             |> List.collect (createAbsoluteAndOffsetOverrides expectedIndentation)
         | Pattern (SynPat.Tuple (elementPats=elemPats)) ->
@@ -120,7 +120,7 @@ module ContextBuilder =
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
     let lineTrimmedStart = line.TrimStart()
     let numLeadingSpaces = line.Length - lineTrimmedStart.Length
-    let range = Range.mkRange "" (Pos.mkPos lineNumber 0) (Pos.mkPos lineNumber numLeadingSpaces)
+    let range = Range.mkRange "" (Position.mkPos lineNumber 0) (Position.mkPos lineNumber numLeadingSpaces)
 
     if lineTrimmedStart.StartsWith "//" || lineTrimmedStart.StartsWith "(*" then
         None

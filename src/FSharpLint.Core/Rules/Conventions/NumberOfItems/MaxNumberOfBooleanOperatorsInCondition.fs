@@ -3,7 +3,7 @@ module FSharpLint.Rules.MaxNumberOfBooleanOperatorsInCondition
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -52,7 +52,7 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
         | SynExpr.Assert(condition, _) ->
             validateCondition config.MaxItems condition
         | _ -> Array.empty
-    | AstNode.Match(SynMatchClause.Clause(_, Some(whenExpr), _, _, _)) ->
+    | AstNode.Match(SynMatchClause(_, Some(whenExpr), _, _, _)) ->
         validateCondition config.MaxItems whenExpr
     | _ -> Array.empty
 

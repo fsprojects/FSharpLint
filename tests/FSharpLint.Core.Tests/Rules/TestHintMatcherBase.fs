@@ -1,7 +1,7 @@
 ﻿module TestHintMatcherBase
 
 open FParsec
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.HintParser

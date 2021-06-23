@@ -19,7 +19,7 @@ module Lint =
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
     open FSharp.Compiler.Text
-    open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.CodeAnalysis
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
@@ -67,13 +67,13 @@ module Lint =
     [<NoEquality; NoComparison>]
     type ParsedFileInformation = {
         /// File represented as an AST.
-        Ast: FSharp.Compiler.SyntaxTree.ParsedInput
+        Ast: FSharp.Compiler.Syntax.ParsedInput
 
         /// Contents of the file.
         Source: string
 
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
-        TypeCheckResults: FSharp.Compiler.SourceCodeServices.FSharpCheckFileResults option
+        TypeCheckResults: FSharpCheckFileResults option
     }
 
     type BuildFailure = | InvalidProjectFileMessage of string

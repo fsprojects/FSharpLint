@@ -240,7 +240,7 @@ let opchars =
     member this.``No error for exceptional match guard indentation``() =
         this.Parse """
 match args.AstNode with
-| AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
+| AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
         when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray args.SkipArray
              && not isMutable ->
     checkForUselessBinding args.CheckInfo pattern expr range

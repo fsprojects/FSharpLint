@@ -8,7 +8,7 @@ open FSharp.Compiler.Text
 
 let checkTrailingNewLineInFile (args:LineRuleParams) =
     if args.IsLastLine && args.FileContent.EndsWith("\n") then
-        let pos = Pos.mkPos args.LineNumber 0
+        let pos = Position.mkPos args.LineNumber 0
         { Range = Range.mkRange "" pos pos
           Message = Resources.GetString("RulesTypographyTrailingLineError")
           SuggestedFix = None

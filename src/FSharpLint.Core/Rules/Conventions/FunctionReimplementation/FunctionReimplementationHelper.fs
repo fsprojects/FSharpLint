@@ -1,6 +1,6 @@
 module FSharpLint.Rules.Helper.FunctionReimplementation
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 

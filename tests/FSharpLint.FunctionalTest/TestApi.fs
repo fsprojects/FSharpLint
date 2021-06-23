@@ -6,7 +6,7 @@ module TestApi =
     open System.Diagnostics
     open NUnit.Framework
     open FSharpLint.Application.Lint
-    open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.CodeAnalysis
     open FSharp.Compiler.Text
 
     let (</>) x y = Path.Combine(x, y)
@@ -29,9 +29,7 @@ module TestApi =
                 checker.ParseFile(sourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
                 |> Async.RunSynchronously
 
-            match parseResults.ParseTree with
-            | Some(parseTree) -> parseTree
-            | None -> failwith "Failed to parse file."
+            parseResults.ParseTree
 
         /// Must be called once per process.
         let toolsPath = Ionide.ProjInfo.Init.init()

@@ -1,8 +1,8 @@
 ﻿module FSharpLint.Framework.Rules
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Suggestion

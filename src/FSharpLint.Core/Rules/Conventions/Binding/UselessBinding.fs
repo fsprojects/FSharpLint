@@ -3,8 +3,9 @@ module FSharpLint.Rules.UselessBinding
 open System
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.SyntaxTree
-open FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.Syntax
+open FSharp.Compiler.Symbols
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -48,7 +49,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
 
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding.Binding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
+    | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
             when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray
                  && not isMutable ->
         checkForUselessBinding args.CheckInfo pattern expr range

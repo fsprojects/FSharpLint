@@ -5,8 +5,9 @@ module ParseFile =
 
     open System.IO
     open FSharpLint.Framework
-    open FSharp.Compiler.SyntaxTree
-    open FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.CodeAnalysis
+    open FSharp.Compiler.Diagnostics
+    open FSharp.Compiler.Syntax
     open FSharp.Compiler.Text
     open Utilities
 
@@ -42,17 +43,13 @@ module ParseFile =
             checker.ParseAndCheckFileInProject(file, 0, sourceText, options)
             |> Async.RunSynchronously
 
-        match parseResults.ParseTree with
-        | Some(parseTree) ->
-            match checkFileAnswer with
-            | FSharpCheckFileAnswer.Succeeded(typeCheckResults) ->
-
-                { Text = source
-                  Ast = parseTree
-                  TypeCheckResults = Some(typeCheckResults)
-                  File = file } |> Success
-            | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
-        | None -> Failed(FailedToParseFile(parseResults.Errors))
+        match checkFileAnswer with
+        | FSharpCheckFileAnswer.Succeeded(typeCheckResults) ->
+            { Text = source
+              Ast = parseResults.ParseTree
+              TypeCheckResults = Some(typeCheckResults)
+              File = file } |> Success
+        | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
 
     let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
         let sourceText = SourceText.ofString source

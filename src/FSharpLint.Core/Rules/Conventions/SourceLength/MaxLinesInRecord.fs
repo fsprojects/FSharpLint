@@ -1,12 +1,12 @@
 module FSharpLint.Rules.MaxLinesInRecord
 
-open FSharp.Compiler.SyntaxTree
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn.TypeDefn(_, repr, _, range)) ->
+    | AstNode.TypeDefinition(SynTypeDefn(_, repr, _, _, range)) ->
         match repr with
         | SynTypeDefnRepr.Simple(simpleRepr, _) ->
             match simpleRepr with
