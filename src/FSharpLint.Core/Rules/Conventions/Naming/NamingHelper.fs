@@ -243,6 +243,8 @@ let isAttribute name (attributes:SynAttributes) =
 
 let isLiteral = isAttribute "Literal"
 
+let isExtern = isAttribute "DllImport"
+
 let isMeasureType = isAttribute "Measure"
 
 let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
