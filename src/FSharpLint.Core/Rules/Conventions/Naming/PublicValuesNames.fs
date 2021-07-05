@@ -36,8 +36,8 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
         getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
-    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
-        if not (isLiteral attributes) then
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+        if not (isLiteral attributes || isExtern attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
                 let isPublic = isPublic args.SyntaxArray args.NodeIndex
