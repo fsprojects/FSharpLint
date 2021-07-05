@@ -22,6 +22,22 @@ module Program
     let (Cat, _) = 1, 0"""
 
         this.AssertNoWarnings()
+        
+    /// Extern functions typically match the counterpart from the external library 
+    /// and as such often won't follow F#'s conventions.
+    [<Test>]
+    member this.``extern function definition should not trigger naming warnings``() =
+        this.Parse """
+module Program
+        
+open System
+open System.Runtime.InteropServices
+
+[<DllImport(@"python37", EntryPoint = "PyThreadState_SetAsyncExc", CallingConvention = CallingConvention.Cdecl)>]
+extern int PyThreadState_SetAsyncExcLLP64(uint id, IntPtr exc)
+    """
+        
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.PublicTupleIsCamelCase() =
