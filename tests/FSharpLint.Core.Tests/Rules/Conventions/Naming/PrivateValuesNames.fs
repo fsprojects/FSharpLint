@@ -1,4 +1,4 @@
-module FSharpLint.Core.Tests.Rules.Conventions.NonPublicValuesNames
+module FSharpLint.Core.Tests.Rules.Conventions.PrivateValuesNames
 
 open NUnit.Framework
 open FSharpLint.Framework.Rules
@@ -10,8 +10,8 @@ let config =
       Prefix = None
       Suffix = None }
 [<TestFixture>]
-type TestConventionsNonPublicValuesNames() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NonPublicValuesNames.rule config)
+type TestConventionsPrivateValuesNames() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PrivateValuesNames.rule config)
 
     /// A tuple inside a binding should be treated as private.
     [<Test>]
@@ -286,3 +286,43 @@ let result = extractInt singleCaseDU""")
 
         Assert.IsTrue(this.ErrorsExist)
 
+    [<Test>]
+    member this.PrivateVariableIsCamelCase() =
+        this.Parse """
+module Program
+  let private cat = 1"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.PrivateVariableIsPascalCase() =
+        this.Parse """
+module Program
+  let private Cat = 1"""
+
+        Assert.IsTrue(this.ErrorExistsAt(3,14))
+
+    [<Test>]
+    member this.PublicVariableIsNotRecorded() =
+        this.Parse """
+module Program
+  let Cat = 1"""
+
+        this.AssertNoWarnings()
+
+
+    [<Test>]
+    member this.ExplicitPublicVariableIsNotRecorded() =
+        this.Parse """
+module Program
+  let public Cat = 1"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.InternalVariableIsNotRecorded() =
+        this.Parse """
+module Program
+  let internal Cat = 1"""
+
+        this.AssertNoWarnings()

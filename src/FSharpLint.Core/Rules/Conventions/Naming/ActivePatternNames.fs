@@ -25,13 +25,13 @@ let private getValueOrFunctionIdents _ pattern =
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents false getValueOrFunctionIdents false pattern
+        getPatternIdents Accessibility.Private getValueOrFunctionIdents false pattern
     | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.SyntaxArray args.NodeIndex
-                getPatternIdents isPublic getValueOrFunctionIdents true pattern
+                let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
+                getPatternIdents accessibility getValueOrFunctionIdents true pattern
             | _ -> Array.empty
         else
             Array.empty

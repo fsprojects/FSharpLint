@@ -12,7 +12,7 @@ let private getMemberIdents _ = function
         (ident, ident.idText, None) |> Array.singleton
     | _ -> Array.empty
 
-let private getValueOrFunctionIdents typeChecker isPublic pattern =
+let private getValueOrFunctionIdents typeChecker _accessibility pattern =
     let checkNotUnionCase ident = fun () ->
         typeChecker
         |> Option.map (fun checker -> isNotUnionCase checker ident)
@@ -40,15 +40,15 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.SyntaxArray args.NodeIndex
-                getPatternIdents isPublic (getValueOrFunctionIdents args.CheckInfo) true pattern
+                let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
+                getPatternIdents accessibility (getValueOrFunctionIdents args.CheckInfo) true pattern
             | Member | Property ->
-                getPatternIdents false getMemberIdents true pattern
+                getPatternIdents Accessibility.Private getMemberIdents true pattern
             | _ -> Array.empty
         else
             Array.empty
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
+        getPatternIdents Accessibility.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | _ -> Array.empty
 
 let rule config =

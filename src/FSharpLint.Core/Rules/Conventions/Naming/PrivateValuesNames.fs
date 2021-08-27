@@ -1,4 +1,4 @@
-module FSharpLint.Rules.NonPublicValuesNames
+module FSharpLint.Rules.PrivateValuesNames
 
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
@@ -6,7 +6,7 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
-let private getValueOrFunctionIdents typeChecker isPublic pattern =
+let private getValueOrFunctionIdents typeChecker accessibility pattern =
     let checkNotUnionCase ident = fun () -> 
         typeChecker
         |> Option.map (fun checker -> isNotUnionCase checker ident)
@@ -20,7 +20,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
         match List.tryLast longIdent.Lid with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
-            if not isPublic then
+            if accessibility = Accessibility.Private then
                 (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else
@@ -31,13 +31,13 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents false (getValueOrFunctionIdents args.CheckInfo) false pattern
+        getPatternIdents Accessibility.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let isPublic = isPublic args.SyntaxArray args.NodeIndex
-                getPatternIdents isPublic (getValueOrFunctionIdents args.CheckInfo) true pattern
+                let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
+                getPatternIdents accessibility (getValueOrFunctionIdents args.CheckInfo) true pattern
             | _ -> Array.empty
         else
             Array.empty
@@ -51,8 +51,8 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { Name = "NonPublicValuesNames"
-      Identifier = Identifiers.NonPublicValuesNames
+    { Name = "PrivateValuesNames"
+      Identifier = Identifiers.PrivateValuesNames
       RuleConfig = { NamingRuleConfig.Config = config; GetIdentifiersToCheck = getIdentifiers } }
     |> toAstNodeRule
     |> AstNodeRule
