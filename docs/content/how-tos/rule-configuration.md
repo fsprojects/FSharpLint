@@ -90,7 +90,7 @@ The following rules can be specified for linting.
 - [MeasureTypeNames (FL0047)](rules/FL0047.html)
 - [ActivePatternNames (FL0048)](rules/FL0048.html)
 - [PublicValuesNames (FL0049)](rules/FL0049.html)
-- [NonPublicValuesNames (FL0050)](rules/FL0050.html)
+- [PrivateValuesNames (FL0050)](rules/FL0050.html)
 - [MaxNumberOfItemsInTuple (FL0051)](rules/FL0051.html)
 - [MaxNumberOfFunctionParameters (FL0052)](rules/FL0052.html)
 - [MaxNumberOfMembers (FL0053)](rules/FL0053.html)
@@ -107,3 +107,4 @@ The following rules can be specified for linting.
 - [NoTabCharacters (FL0064)](rules/FL0064.html)
 - [Hints (FL0065)](rules/FL0065.html)
 - [NoPartialFunctions (FL0066)](rules/FL0066.html)
+- [InternalValuesNames (FL0068)](rules/FL0068.html)
