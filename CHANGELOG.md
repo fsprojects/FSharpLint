@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.20.0] - 2021-09-02
 
-- Separate non public values naming rule in two rules (internal and private). [@knocte] & [@su8898]
+- Separate non public values naming rule into two rules (internal and private). [@knocte] & [@su8898]
 
 ## [0.19.2] - 2021-07-05
 
