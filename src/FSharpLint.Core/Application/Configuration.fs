@@ -244,7 +244,9 @@ type NamesConfig =
       measureTypeNames:RuleConfig<NamingConfig> option
       activePatternNames:RuleConfig<NamingConfig> option
       publicValuesNames:RuleConfig<NamingConfig> option
-      nonPublicValuesNames:RuleConfig<NamingConfig> option }
+      nonPublicValuesNames:RuleConfig<NamingConfig> option
+      privateValuesNames:RuleConfig<NamingConfig> option
+      internalValuesNames:RuleConfig<NamingConfig> option }
 with
     member this.Flatten() =
         [|
@@ -262,7 +264,10 @@ with
             this.measureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule) |> Option.toArray
             this.activePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule) |> Option.toArray
             this.publicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule) |> Option.toArray
-            this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.rule) |> Option.toArray
+            this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule) |> Option.toArray
+            this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule) |> Option.toArray
+            this.privateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule) |> Option.toArray
+            this.internalValuesNames|> Option.bind (constructRuleWithConfig InternalValuesNames.rule) |> Option.toArray
         |] |> Array.concat
 
 type NumberOfItemsConfig =
@@ -409,6 +414,8 @@ type Configuration =
       ActivePatternNames:RuleConfig<NamingConfig> option
       PublicValuesNames:RuleConfig<NamingConfig> option
       NonPublicValuesNames:RuleConfig<NamingConfig> option
+      PrivateValuesNames:RuleConfig<NamingConfig> option
+      InternalValuesNames:RuleConfig<NamingConfig> option
       MaxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
       MaxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
       MaxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
@@ -483,6 +490,8 @@ with
         ActivePatternNames = None
         PublicValuesNames = None
         NonPublicValuesNames = None
+        PrivateValuesNames = None
+        InternalValuesNames = None
         MaxNumberOfItemsInTuple = None
         MaxNumberOfFunctionParameters = None
         MaxNumberOfMembers = None
@@ -619,7 +628,10 @@ let flattenConfig (config:Configuration) =
             config.MeasureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule)
             config.ActivePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule)
             config.PublicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule)
-            config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig NonPublicValuesNames.rule)
+            config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
+            config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
+            config.PrivateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
+            config.InternalValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
             config.MaxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule)
             config.MaxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule)
             config.MaxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule)
@@ -636,6 +648,10 @@ let flattenConfig (config:Configuration) =
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
         |] |> Array.choose id
+
+    if config.NonPublicValuesNames.IsSome &&
+        (config.PrivateValuesNames.IsSome || config.PublicValuesNames.IsSome) then
+        failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
 
     let astNodeRules = ResizeArray()
     let lineRules = ResizeArray()

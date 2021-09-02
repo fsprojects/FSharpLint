@@ -178,14 +178,21 @@ let activePatternIdentifiers (identifier:Ident) =
     |> Seq.toArray
     |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
-let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
-    let isSynAccessPublic = function
-        | Some(SynAccess.Public) | None -> true
-        | _ -> false
 
-    let rec isPublic publicSoFar isPrivateWhenReachedBinding i =
-        if i = 0 then publicSoFar
-        else if publicSoFar then
+type Accessibility = 
+    | Public
+    | Private
+    | Internal
+
+let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
+    let isSynAccessPublic = function
+        | Some(SynAccess.Public) | None -> Accessibility.Public
+        | Some(SynAccess.Private) -> Accessibility.Private
+        | Some(SynAccess.Internal) -> Accessibility.Internal
+
+    let rec getAccessibility state isPrivateWhenReachedBinding i =
+        if i = 0 then state
+        else
             let node = syntaxArray.[i]
             match node.Actual with
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
@@ -197,15 +204,15 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
             | Pattern(SynPat.Named(_, _, _, access, _))
             | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                isPublic (isSynAccessPublic access) isPrivateWhenReachedBinding node.ParentIndex
+                getAccessibility (isSynAccessPublic access) isPrivateWhenReachedBinding node.ParentIndex
             | TypeSimpleRepresentation(_)
-            | Pattern(_) -> true
+            | Pattern(_) -> Accessibility.Public
             | MemberDefinition(_) ->
-                if isPrivateWhenReachedBinding then false
-                else isPublic publicSoFar isPrivateWhenReachedBinding node.ParentIndex
+                if isPrivateWhenReachedBinding then Accessibility.Private
+                else getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
             | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
-                if isPrivateWhenReachedBinding then false
-                else isPublic (isSynAccessPublic access) true node.ParentIndex
+                if isPrivateWhenReachedBinding then Accessibility.Private
+                else getAccessibility (isSynAccessPublic access) true node.ParentIndex
             | EnumCase(_)
             | TypeRepresentation(_)
             | Type(_)
@@ -218,14 +225,14 @@ let isPublic (syntaxArray:AbstractSyntaxArray.Node []) i =
             | SimplePattern(_)
             | File(_)
             | LambdaArg(_)
-            | SimplePatterns(_) -> isPublic publicSoFar isPrivateWhenReachedBinding node.ParentIndex
+            | SimplePatterns(_) -> getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
             | TypeDefinition(_)
             | Else(_)
             | LambdaBody(_)
-            | Expression(_) -> isPublic publicSoFar true node.ParentIndex
-        else false
+            | Expression(_) -> getAccessibility state true node.ParentIndex
 
-    isPublic true false i
+    getAccessibility Accessibility.Public false i
+
 
 /// Is an attribute with a given name?
 /// e.g. check for Literal attribute.
@@ -273,9 +280,10 @@ let isInterface typeDef =
         members |> List.forall canBeInInterface
     | _ -> false
 
-let checkIfPublic isCurrentlyPublic = function
-    | Some(SynAccess.Public) | None -> isCurrentlyPublic
-    | Some(SynAccess.Internal | SynAccess.Private) -> false
+let checkAccessibility currentAccessibility = function
+    | Some(SynAccess.Public) | None -> currentAccessibility
+    | Some(SynAccess.Private) -> Accessibility.Private
+    | Some(SynAccess.Internal) -> Accessibility.Internal
 
 let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
@@ -294,12 +302,12 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
     // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
     isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
 
-type GetIdents<'t> = bool -> SynPat -> 't []
+type GetIdents<'t> = Accessibility -> SynPat -> 't []
 
-let rec getPatternIdents<'t> isPublic (getIdents:GetIdents<'t>) argsAreParameters pattern =
+let rec getPatternIdents<'t> accessibility (getIdents:GetIdents<'t>) argsAreParameters pattern =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
-        let isPublic = checkIfPublic isPublic access
+        let isPublic = checkAccessibility accessibility access
 
         let hasNoArgs =
             match args with
@@ -311,11 +319,11 @@ let rec getPatternIdents<'t> isPublic (getIdents:GetIdents<'t>) argsAreParameter
             | SynArgPats.NamePatPairs(pats, _) ->
                 pats
                 |> List.toArray
-                |> Array.collect (snd >> getPatternIdents false getIdents false)
+                |> Array.collect (snd >> getPatternIdents Accessibility.Private getIdents false)
             | SynArgPats.Pats(pats) ->
                 pats
                 |> List.toArray
-                |> Array.collect (getPatternIdents false getIdents false)
+                |> Array.collect (getPatternIdents Accessibility.Private getIdents false)
 
         // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
         if hasNoArgs || argsAreParameters then
@@ -324,20 +332,20 @@ let rec getPatternIdents<'t> isPublic (getIdents:GetIdents<'t>) argsAreParameter
         else
             argSuggestions
     | SynPat.Named(p, _, _, access, _) ->
-        let isPublic = checkIfPublic isPublic access
-        getIdents isPublic pattern
-        |> Array.append (getPatternIdents isPublic getIdents false p)
+        let accessibility = checkAccessibility accessibility access
+        getIdents accessibility pattern
+        |> Array.append (getPatternIdents accessibility getIdents false p)
     | SynPat.Or(p1, p2, _) ->
         [|p1; p2|]
-        |> Array.collect (getPatternIdents isPublic getIdents false)
+        |> Array.collect (getPatternIdents accessibility getIdents false)
     | SynPat.Paren(p, _) ->
-        getPatternIdents isPublic getIdents false p
+        getPatternIdents accessibility getIdents false p
     | SynPat.Ands(pats, _)
     | SynPat.Tuple(_, pats, _)
     | SynPat.ArrayOrList(_, pats, _) ->
         pats
         |> List.toArray
-        |> Array.collect (getPatternIdents isPublic getIdents false)
+        |> Array.collect (getPatternIdents accessibility getIdents false)
     | SynPat.Record(_)
     | SynPat.IsInst(_)
     | SynPat.QuoteExpr(_)

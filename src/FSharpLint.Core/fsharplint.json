@@ -208,7 +208,14 @@
             "underscores": "AllowPrefix"
         }
     },
-    "nonPublicValuesNames": {
+    "privateValuesNames": {
+        "enabled": true,
+        "config": {
+            "naming": "CamelCase",
+            "underscores": "AllowPrefix"
+        }
+    },
+    "internalValuesNames": {
         "enabled": true,
         "config": {
             "naming": "CamelCase",

@@ -48,7 +48,8 @@
     <Compile Include="Rules\Conventions\Naming\MeasureTypeNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />
     <Compile Include="Rules\Conventions\Naming\PublicValuesNames.fs" />
-    <Compile Include="Rules\Conventions\Naming\NonPublicValuesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\PrivateValuesNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\InternalValuesNames.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Typography\NoTabCharacters.fs" />
