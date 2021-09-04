@@ -303,7 +303,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3,14))
 
     [<Test>]
-    member this.PublicVariableIsNotRecorded() =
+    member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
   let Cat = 1"""
@@ -312,7 +312,7 @@ module Program
 
 
     [<Test>]
-    member this.ExplicitPublicVariableIsNotRecorded() =
+    member this.ExplicitPublicVariableIsNotReported() =
         this.Parse """
 module Program
   let public Cat = 1"""
@@ -320,7 +320,7 @@ module Program
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.InternalVariableIsNotRecorded() =
+    member this.InternalVariableIsNotReported() =
         this.Parse """
 module Program
   let internal Cat = 1"""
