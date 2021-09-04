@@ -30,7 +30,7 @@ module Program
         Assert.IsTrue(this.ErrorExistsAt(3,15))
 
     [<Test>]
-    member this.PublicVariableIsNotRecorded() =
+    member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
   let Cat = 1"""
@@ -38,7 +38,7 @@ module Program
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.PascalCaseLetBindingInTypeIsNotRecorded() =
+    member this.PascalCaseLetBindingInTypeIsNotReported() =
         this.Parse """
 module program
   let Cat() = ()"""
