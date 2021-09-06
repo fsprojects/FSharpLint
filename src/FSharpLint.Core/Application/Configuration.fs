@@ -650,7 +650,7 @@ let flattenConfig (config:Configuration) =
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&
-        (config.PrivateValuesNames.IsSome || config.PublicValuesNames.IsSome) then
+        (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
         failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
 
     let astNodeRules = ResizeArray()
