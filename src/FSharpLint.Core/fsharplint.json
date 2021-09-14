@@ -202,10 +202,17 @@
             "underscores": "None"
         }
     },
+	  "genericTypesNames": {
+        "enabled": true,
+        "config": {
+            "naming": "PascalCase",  
+            "underscores": "None"
+        }
+    },
     "publicValuesNames": {
         "enabled": true,
         "config": {
-            "underscores": "AllowPrefix"
+          "underscores": "AllowPrefix"
         }
     },
     "privateValuesNames": {
