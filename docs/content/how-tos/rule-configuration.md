@@ -109,3 +109,4 @@ The following rules can be specified for linting.
 - [NoPartialFunctions (FL0066)](rules/FL0066.html)
 - [PrivateValuesNames (FL0067)](rules/FL0067.html)
 - [InternalValuesNames (FL0068)](rules/FL0068.html)
+- [GenericTypesNames (FL0069)](rules/FL0069.html)
