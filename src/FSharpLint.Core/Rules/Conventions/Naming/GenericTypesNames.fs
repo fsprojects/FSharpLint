@@ -9,17 +9,23 @@ open FSharpLint.Rules.Helper.Naming
 let private getIdentifiers (args: AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, typeDef, _, _, _)) ->
+        let rec checkTypes types = 
+            match types with
+            | synType::tail ->
+                match synType with
+                | SynTyparDecl(_attr, synTypeDecl) -> 
+                    let single =
+                        match synTypeDecl with
+                        | SynTypar(id, _, _) when not (isPascalCase id.idText) ->
+                            (id, id.idText, None) |> Array.singleton
+                        | _ -> Array.empty
+                    let rest = checkTypes tail
+                    Array.append single rest
+            | [] -> Array.empty
+            
         match componentInfo with
         | SynComponentInfo(attrs, types, _, identifier, _, _, _, _) ->
-            match List.tryLast types with
-            | Some synType ->
-                match synType with
-                | SynTyparDecl(_attr, synTypeDecl) ->  
-                    match synTypeDecl with
-                    | SynTypar(id, _, _) when not (isPascalCase id.idText) ->
-                        (id, id.idText, None) |> Array.singleton
-                    | _ -> Array.empty
-            | _ -> Array.empty       
+            checkTypes types
     | _ -> Array.empty
 
 let rule config =
