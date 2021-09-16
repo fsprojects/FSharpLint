@@ -212,7 +212,7 @@
     "publicValuesNames": {
         "enabled": true,
         "config": {
-          "underscores": "AllowPrefix"
+            "underscores": "AllowPrefix"
         }
     },
     "privateValuesNames": {
