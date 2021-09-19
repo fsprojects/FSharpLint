@@ -202,6 +202,13 @@
             "underscores": "None"
         }
     },
+	  "genericTypesNames": {
+        "enabled": true,
+        "config": {
+            "naming": "PascalCase",  
+            "underscores": "None"
+        }
+    },
     "publicValuesNames": {
         "enabled": true,
         "config": {
