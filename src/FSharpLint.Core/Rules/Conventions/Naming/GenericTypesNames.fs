@@ -2,30 +2,24 @@
 
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
-open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args: AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, typeDef, _, _, _)) ->
-        let rec checkTypes types = 
-            match types with
-            | synType::tail ->
-                match synType with
-                | SynTyparDecl(_attr, synTypeDecl) -> 
-                    let single =
-                        match synTypeDecl with
-                        | SynTypar(id, _, _) when not (isPascalCase id.idText) ->
-                            (id, id.idText, None) |> Array.singleton
-                        | _ -> Array.empty
-                    let rest = checkTypes tail
-                    Array.append single rest
-            | [] -> Array.empty
+    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _)) ->
+        let checkTypes types =
+            seq {
+                for SynTyparDecl(_attr, synTypeDecl) in types do
+                    match synTypeDecl with
+                    | SynTypar(id, _, _) when not (isPascalCase id.idText) ->
+                        yield (id, id.idText, None)
+                    | _ -> ()
+            }
             
         match componentInfo with
-        | SynComponentInfo(attrs, types, _, identifier, _, _, _, _) ->
-            checkTypes types
+        | SynComponentInfo(_attrs, types, _, _identifier, _, _, _, _) ->
+            checkTypes types |> Array.ofSeq
     | _ -> Array.empty
 
 let rule config =
