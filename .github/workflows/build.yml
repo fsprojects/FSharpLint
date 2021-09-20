@@ -24,9 +24,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet }}
-    - name: workaround nuget problem
-      if: ${{ runner.os == 'macOS' }}
-      run: export NUGET_CERT_REVOCATION_MODE=offline
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
