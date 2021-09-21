@@ -318,4 +318,7 @@
   <data name="RulesConventionsNoPartialFunctionsAdditionalError" xml:space="preserve">
     <value>Consider not using partial function '{0}'.</value>
   </data>
+  <data name="RulesFavourTypedIgnore" xml:space="preserve">
+    <value>Use a generic type parameter when calling the 'ignore' function</value>
+  </data>
 </root>
