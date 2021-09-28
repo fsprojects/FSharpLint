@@ -110,3 +110,4 @@ The following rules can be specified for linting.
 - [PrivateValuesNames (FL0067)](rules/FL0067.html)
 - [InternalValuesNames (FL0068)](rules/FL0068.html)
 - [GenericTypesNames (FL0069)](rules/FL0069.html)
+- [CyclomaticComplexity (FL0070)](rules/FL0070.html)

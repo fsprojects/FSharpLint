@@ -318,4 +318,7 @@
   <data name="RulesConventionsNoPartialFunctionsAdditionalError" xml:space="preserve">
     <value>Consider not using partial function '{0}'.</value>
   </data>
+  <data name="RulesCyclomaticComplexityError" xml:space="preserve">
+    <value>Code suggested number of linearly independent paths should be no greater than {0}.</value>
+  </data>
 </root>

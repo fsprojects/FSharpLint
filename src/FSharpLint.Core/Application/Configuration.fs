@@ -302,6 +302,7 @@ type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
       redundantNewKeyword:EnabledConfig option
       nestedStatements:RuleConfig<NestedStatements.Config> option
+      cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       reimplementsFunction:EnabledConfig option
       canBeReplacedWithComposition:EnabledConfig option
       raiseWithTooManyArgs:RaiseWithTooManyArgsConfig option
@@ -315,6 +316,7 @@ with
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
+            this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
             this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
             this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
             this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
@@ -379,6 +381,7 @@ type Configuration =
       RecursiveAsyncFunction:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
       NestedStatements:RuleConfig<NestedStatements.Config> option
+      CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       ReimplementsFunction:EnabledConfig option
       CanBeReplacedWithComposition:EnabledConfig option
       RaiseWithSingleArgument:EnabledConfig option
@@ -455,6 +458,7 @@ with
         RecursiveAsyncFunction = None
         RedundantNewKeyword = None
         NestedStatements = None
+        CyclomaticComplexity = None
         ReimplementsFunction = None
         CanBeReplacedWithComposition = None
         FailwithWithSingleArgument = None
@@ -594,6 +598,7 @@ let flattenConfig (config:Configuration) =
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
             config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
+            config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
