@@ -20,6 +20,8 @@ type BindingScope =
     {
        /// The Node corresponding to the binding.
        Node: AstNode
+       /// The binding of the node
+       Binding: SynBinding
        /// the cyclomatic complexity of the binding scope.
        Complexity: int
     }
@@ -40,17 +42,10 @@ let private countCasesInMatchClause (clause: SynMatchClause) =
     match clause with 
     | SynMatchClause(pat, _, _, _, _) -> countCases pat 0
 
-let private increaseComplexity (config: Config) (expression: SynExpr) incr =
+let private increaseComplexity incr =
     let h = BindingStack.Head
     let complexity = h.Complexity + incr
     BindingStack <- {h with Complexity = complexity}::BindingStack
-    if complexity > config.MaxComplexity then
-        let errorFormatString = Resources.GetString("RulesCyclomaticComplexityError")
-        let errMsg = String.Format(errorFormatString, config.MaxComplexity)
-        [| { Range = expression.Range; Message = errMsg; SuggestedFix = None; TypeChecks = [] } |]
-    else
-        Array.empty
-    
 
 /// Boolean operator functions.
 let private boolFunctions = Set.ofList ["op_BooleanOr"; "op_BooleanAnd"]
@@ -93,29 +88,46 @@ let private countBooleanOperators expression =
     countOperators 0 expression
 
 /// Runner for the rule. 
-let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =   
+let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
+    let popOffBindingStack() =
+        if BindingStack.Length > 0 then 
+            let popped = BindingStack.Head
+            BindingStack <- BindingStack.Tail
+            // if the complexity within the scope of the binding is greater than the max complexity, report it
+            if popped.Complexity > config.MaxComplexity then
+                let errorFormatString = Resources.GetString("RulesCyclomaticComplexityError")
+                let errMsg = String.Format(errorFormatString, popped.Complexity, config.MaxComplexity)
+                Some { Range = popped.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = [] }
+            else
+                None
+        else
+            None
+        
+    let mutable warningDetails = None
     let node = args.AstNode
     let parentIndex = args.SyntaxArray.[args.NodeIndex].ParentIndex
-    // determine if the node is a duplicate of a node in the AST containining ExtraSyntaxInfo (e.g. lambda arg being a duplicate of the lambda itself)
+    // determine if the node is a duplicate of a node in the AST containing ExtraSyntaxInfo (e.g. lambda arg being a duplicate of the lambda itself)
     let isMetaData = if parentIndex = args.NodeIndex then
                          false
                      else
                          Object.ReferenceEquals(node, args.SyntaxArray.[parentIndex].Actual)
     // determine if the node is a binding, and so will be pushed onto the stack
-    let isBinding = match node with
-                     | AstNode.Binding _ -> true 
-                     | _ -> false
+    let bindingOpt = match node with
+                     | AstNode.Binding binding -> Some binding
+                     | _ -> None
     // if the node is a child of the current binding scope
     let isChildOfCurrent = if List.isEmpty BindingStack then
                                    false
                                else
                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(BindingStack.Head.Node, x)) |> Option.isSome
-    // if the node is not a child and the stack isn't empty, we're finished with the current binding scope at the head of the stack
+    // if the node is not a child and the stack isn't empty, we're finished with the current binding scope at the head of the stack, so pop it off
     if not isChildOfCurrent && List.length BindingStack > 0 then
-        BindingStack <- BindingStack.Tail
-    // if the node is a binding, pop it onto the stack
-    if isBinding then
-        BindingStack <- { Node = node; Complexity = 0 }::BindingStack
+        warningDetails <- popOffBindingStack()
+    
+    // if the node is a binding, push it onto the stack
+    match bindingOpt with
+    | Some binding -> BindingStack <- { Node = node; Binding = binding; Complexity = 0 }::BindingStack
+    | None -> ()
          
     // if not metadata, match the node against an expression which increments the complexity
     if not isMetaData then
@@ -123,22 +135,36 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
         | AstNode.Expression expression ->
             match expression with
             | SynExpr.For _ ->
-                increaseComplexity config expression 1
+                increaseComplexity 1
             | SynExpr.ForEach _ ->
-                increaseComplexity config expression 1
+                increaseComplexity 1
             | SynExpr.While(_, condition, _, _) ->
-                increaseComplexity config expression (1 +  + countBooleanOperators condition) // include the number of boolean operators in the while condition
+                increaseComplexity (1 + countBooleanOperators condition) // include the number of boolean operators in the while condition
             | SynExpr.IfThenElse(condition, _, _, _, _, _, _) ->
-                 increaseComplexity config expression (1 + countBooleanOperators condition) // include the number of boolean operators in the condition
+                 increaseComplexity (1 + countBooleanOperators condition) // include the number of boolean operators in the condition
             | SynExpr.MatchBang(_, _, clauses, _)
             | SynExpr.MatchLambda(_, _, clauses, _, _)
             | SynExpr.Match(_, _, clauses, _) ->
                 let numCases = clauses |> List.sumBy countCasesInMatchClause // determine the number of cases in the match expression 
-                increaseComplexity config expression (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
-            | _ -> Array.empty 
-        | _ -> Array.empty
+                increaseComplexity (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
+            | _ -> ()
+        | _ -> ()
+    
+    // if the last node to be processed, pop everything off the stack
+    if args.NodeIndex >= args.SyntaxArray.Length-1 then
+        seq {
+            match warningDetails with
+            | Some x -> yield x
+            | None -> ()
+            while not BindingStack.IsEmpty do
+                match popOffBindingStack() with
+                | Some x -> yield x
+                | None -> ()
+        } |> Seq.toArray
     else
-        Array.empty
+        match warningDetails with
+        | Some x -> [|x|]
+        | None -> Array.empty
   
 /// Resets call stack after a call to runner.
 let cleanup () =

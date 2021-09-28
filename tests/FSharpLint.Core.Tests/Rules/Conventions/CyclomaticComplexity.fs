@@ -134,26 +134,16 @@ type TestConventionsCyclomaticComplexity() =
             let nl = TestConventionsCyclomaticComplexity.NewLine
             let num = maxComplexity + 1
             
-            /// basic conditional expressions
-            let errorLocation = maxComplexity+3, TestConventionsCyclomaticComplexity.Indent.Length
+            let errorLocation = 2, TestConventionsCyclomaticComplexity.Indent.Length
             yield ifElseExpressions ind nl num, errorLocation
             yield forExpressions ind  nl num, errorLocation
             yield foreachExpressions ind  nl num, errorLocation
             yield whileExpressions ind nl num, errorLocation
-
-            /// match and function expressions
-            let errorLocation = 3, TestConventionsCyclomaticComplexity.Indent.Length
             yield matchExpression ind nl num, errorLocation
             yield matchExpressionWithCombinedPatterns ind nl num, errorLocation
             yield matchFunction ind nl num, errorLocation
-            
-            /// match! expression
-            let errorLocation = 4, TestConventionsCyclomaticComplexity.Indent.Length
             yield matchBang ind nl num, errorLocation
-            
-            /// boolean conditionals
-            let errorLocation = 3, TestConventionsCyclomaticComplexity.Indent.Length
-            yield ifThenExpressionWithMultipleAndConditionals  ind nl num, errorLocation
+            yield ifThenExpressionWithMultipleAndConditionals ind nl num, errorLocation
             yield ifThenExpressionWithMultipleOrConditionals ind nl num, errorLocation
             yield whileWithBooleanOperatorsInConditionExpressions ind nl num, errorLocation    
         } |> Seq.map (fun (x, y) -> [| box x; box y |])
@@ -227,7 +217,7 @@ type TestConventionsCyclomaticComplexity() =
                    "let g() =" + newline + makeMatchSnippet indent newline maxComplexity 
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length)
-        Assert.IsTrue(this.ErrorExistsAt(3, indent.Length))
+        Assert.IsTrue(this.ErrorExistsAt(2, indent.Length))
         
     /// Verifies that the cyclomatic complexity of nested functions are calculated independently by checking that evaluation of multiple nested functions each with a cyclomatic complexity equal to maxComplexity (so that the sum of their complexities is greater than maxComplexity) does not result in a flag.
     [<Test>]
@@ -251,7 +241,7 @@ type TestConventionsCyclomaticComplexity() =
         let code = "Module Program" + newline + 
                         "let f() = " + newline +
                         indent + "let g() = " + newline + makeMatchSnippet (indent+indent) newline (maxComplexity+1) + newline +
-                        indent + "let g() = " + newline + makeMatchSnippet (indent+indent) newline maxComplexity + newline +
+                        indent + "let h() = " + newline + makeMatchSnippet (indent+indent) newline maxComplexity + newline +
                         makeMatchSnippet indent newline (maxComplexity+1)   
         this.Parse code
         Assert.AreEqual(2, this.ErrorRanges.Length)

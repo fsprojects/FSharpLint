@@ -319,6 +319,6 @@
     <value>Consider not using partial function '{0}'.</value>
   </data>
   <data name="RulesCyclomaticComplexityError" xml:space="preserve">
-    <value>Code suggested number of linearly independent paths should be no greater than {0}.</value>
+    <value>The cyclomatic complexity of this section is {0}, which exceeds the maximum suggested complexity of {1}.</value>
   </data>
 </root>
