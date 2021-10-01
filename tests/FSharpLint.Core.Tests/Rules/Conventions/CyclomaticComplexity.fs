@@ -6,146 +6,143 @@ open System
 
 /// The max cyclomatic complexity as configured in these tests.
 [<Literal>]
-let private maxComplexity = 5
+let private MaxComplexity = 5
 
-let private makeMatchSnippet indent newline len =
-    indent + "match \"dummyString\" with" + newline +  
-        (Seq.map (fun i -> (sprintf "%s| \"%d\" -> ()" indent i)) [| 1..len-1 |] |> String.concat newline) + newline + 
-        indent + "| _ -> ()"
-        
+/// '\n' character as a string. Used instead of Environment.NewLine because line breaks in triple-comment strings are not equivalent to Environment.NewLine on Windows.
+[<Literal>]
+let private NewLine = "\n"
+
+/// Indent all lines of a string equally by the given number of spaces.
+let private indent numSpaces (s: string) =
+    let indentStr = String.replicate numSpaces " "
+    let result = indentStr + s.Replace(NewLine, $"{NewLine}{indentStr}")
+    result
+    
+/// Generates a body of code containing a match expression.
+let private makeMatchSnippet len =
+    $"""match "dummyString" with
+{Seq.map (fun i -> (sprintf "| \"%d\" -> ()" i)) [| 1..len-1 |] |> String.concat NewLine}
+| _ -> ()"""
+
 /// Generates a body of code containing a match expression with a when clause containing a logical operator in each pattern.
-let private makeMatchSnippetWithLogicalOperatorsInWhenClause indent newline (len: int) =
-        indent + "match \"dummyString\" with" + newline +  
-        (Seq.map (fun i -> (sprintf "%s| x when x = \"%d\" || x = \"%d\" -> ()" indent (i*len) (i*len+1))) [| 1..len-1 |] |> String.concat newline) + newline + 
-        indent + "| _ -> ()"
-
+let private makeMatchSnippetWithLogicalOperatorsInWhenClause len =
+    $"""match "dummyString" with
+{Seq.map (fun i -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (i*len) (i*len+1))) [| 1..len-1 |] |> String.concat NewLine}
+| _ -> ()"""
+    
 /// module declaration and let binding declaration for a body of code
-let private makeProgram funcString newline body =
-    "Module Program" + newline
-    + "let " + funcString + " =" + newline
-    + body
+let private makeProgram funcString body =
+    $"""Module Program
+let {funcString} =
+{indent 4 body}"""
 
 /// Generates a body of code consisting of if-else expressions.
-let private ifElseExpressions indent newline len =
-    indent + "if true then ()" + 
-        String.replicate (len-1) (sprintf "%s%selif true then ()" newline indent)
-    |> makeProgram "f()" newline 
+let private ifElseExpressions len =
+    $"""if true then ()
+    {String.replicate (len-1) (sprintf "%selif true then ()" NewLine)}"""
+    |> makeProgram "f()"
 
 /// Generates a body of code containing for expressions.
-let private forExpressions indent newline len =
-    String.replicate len (sprintf "%sfor i = 0 to 1 do ()%s" indent newline)
-    |> makeProgram "f()" newline 
+let private forExpressions len =
+    String.replicate len (sprintf "for i = 0 to 1 do ()%s" NewLine)
+    |> makeProgram "f()" 
   
 /// Generates a body of code containing foreach expressions.    
-let private foreachExpressions indent newline len =
-    String.replicate len (sprintf "%sfor _ in [] do ()%s" indent newline)
-    |> makeProgram "f()" newline 
+let private foreachExpressions len =
+    String.replicate len (sprintf "for _ in [] do ()%s" NewLine)
+    |> makeProgram "f()"
 
 /// Generates a body of code containing while expressions.   
-let private whileExpressions indent newline len =
-    String.replicate len (sprintf "%swhile false do ()%s" indent newline)
-    |> makeProgram "f()" newline 
+let private whileExpressions len =
+    String.replicate len (sprintf "while false do ()%s" NewLine)
+    |> makeProgram "f()"
 
 /// Generates a body of code containing a while expression with multiple logical operators in the condition.
-let private whileWithBooleanOperatorsInConditionExpressions indent newline len =
+let private whileWithBooleanOperatorsInConditionExpressions len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    indent + "while true &&" + 
-    String.replicate (len-2) (sprintf "%s%sfalse &&" newline indent) + newline + 
-    indent + "true do ()"
-    |> makeProgram "f()" newline 
+    $"""while true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true do ()"""
+    |> makeProgram "f()" 
 
 /// Generates a body of code containing an if statement with multiple && conditional operators 
-let private ifThenExpressionWithMultipleAndConditionals indent newline len =
+let private ifThenExpressionWithMultipleAndConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    indent + "if true &&" + 
-    String.replicate (len-2) (sprintf "%s%sfalse &&" newline indent) + newline + 
-    indent + "true then ()"
-    |> makeProgram "f()" newline 
+    $"""if true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true then ()"""
+    |> makeProgram "f()" 
 
 /// Generates a body of code containing an if statement with multiple || conditional operators    
-let private ifThenExpressionWithMultipleOrConditionals indent newline len =
+let private ifThenExpressionWithMultipleOrConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    indent + "if true ||" + 
-    String.replicate (len-2) (sprintf "%s%sfalse ||" newline indent) + newline + 
-    indent + "true then ()"
-    |> makeProgram "f()" newline 
-   
+    $"""if true || {String.replicate (len-2) (sprintf "%sfalse ||" NewLine)} true then ()"""
+    |> makeProgram "f()"
+    
 /// Generates a body of code containing a match expression with multiple patterns.
-let private matchExpression indent newline len =
-    makeMatchSnippet indent newline len
-    |> makeProgram "f()" newline 
+let private matchExpression len =
+    makeMatchSnippet len
+    |> makeProgram "f()"
     
 /// Generates a body of code containing a match expression with multiple combined patterns.
-let private matchExpressionWithCombinedPatterns indent newline len =
-    indent + "match \"dummyString\" with" + newline +  
-        (Seq.map (fun i -> (sprintf "%s| \"%d\"" indent i)) [| 1..len-1 |] |> String.concat newline) + newline + 
-        indent + "| _ -> ()"
-        |> makeProgram "f()" newline 
+let private matchExpressionWithCombinedPatterns len =
+    $"""match "dummyString" with
+{(Seq.map (fun i -> (sprintf "| \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+| _ -> ()"""
+    |> makeProgram "f()"
 
 /// Generates a body of code containing a match function with multiple patterns.
-let private matchFunction indent newline len =
-    indent + "function" + newline + 
-    (Seq.map (fun i -> (sprintf "%s| \"%d\"" indent i)) [| 1..len-1 |] |> String.concat newline) + newline + 
-    indent + "| _ -> ()" + newline +
-    indent + "f \"dummyString\""
-    |> makeProgram "f" newline
+let private matchFunction len =
+    $"""    function 
+{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)} 
+    | _ -> ()
+f "dummyString" """
+    |> makeProgram "f"
    
 /// Generates a computational expression with a match! expression containing multiple patterns.
-let private matchBang indent newline len =
-    sprintf "%sasync {" indent + newline +
-    sprintf "%smatch! async {return \"dummyString\" } with" indent + newline +
-    (Seq.map (fun i -> (sprintf "%s| \"%d\"" indent i)) [| 1..len-1 |] |> String.concat newline) + newline + 
-    sprintf "%s| _ -> ()" indent
-    |> makeProgram "a" newline
+let private matchBang len =
+    $"""async {{
+    match! async {{ return "dummyString" }} with
+{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+    | _ -> ()
+}}"""
+    |> makeProgram "a"
      
 /// Tests for the cyclomatic complexity rule.
 type TestConventionsCyclomaticComplexity() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(rule { Config.MaxComplexity = maxComplexity; })
- 
-    /// indentation for source code snippets used to test rule.
-    static member private Indent = "    "
-    static member private NewLine = Environment.NewLine
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(rule { Config.MaxComplexity = MaxComplexity; })
 
     /// Generator for source code test cases which have cyclomatic complexity equal to maxComplexity.
     /// Yields an enumerable of source code snippets.
     static member private AtMaxComplexityTestCasesSource =
         seq {
-            let ind = TestConventionsCyclomaticComplexity.Indent
-            let nl = TestConventionsCyclomaticComplexity.NewLine
-            let num = maxComplexity
-            yield ifElseExpressions ind nl num
-            yield forExpressions ind nl num
-            yield foreachExpressions ind nl num
-            yield whileExpressions ind nl num
-            yield matchExpression ind nl num
-            yield matchExpressionWithCombinedPatterns ind nl num
-            yield matchFunction ind nl num
-            yield matchBang ind nl num  
-            yield ifThenExpressionWithMultipleAndConditionals ind nl num
-            yield ifThenExpressionWithMultipleOrConditionals ind nl num
-            yield whileWithBooleanOperatorsInConditionExpressions ind nl num
+            let num = MaxComplexity
+            yield ifElseExpressions num
+            yield forExpressions num
+            yield foreachExpressions num
+            yield whileExpressions num
+            yield matchExpression num
+            yield matchExpressionWithCombinedPatterns num
+            yield matchFunction num
+            yield matchBang num  
+            yield ifThenExpressionWithMultipleAndConditionals num
+            yield ifThenExpressionWithMultipleOrConditionals num
+            yield whileWithBooleanOperatorsInConditionExpressions num
         } |> Seq.map box |> Seq.map Array.singleton // return an enumerable of obj arrays
     
     /// Generator for source code test cases which have cyclomatic complexity greater than maxComplexity.
     /// Yields an enumerable of (source code snippet, errorLocation) pairs.
     static member private FailureCasesSource =
         seq {
-            let ind = TestConventionsCyclomaticComplexity.Indent
-            let nl = TestConventionsCyclomaticComplexity.NewLine
-            let num = maxComplexity + 1
-            
-            let errorLocation = 2, TestConventionsCyclomaticComplexity.Indent.Length
-            yield ifElseExpressions ind nl num, errorLocation
-            yield forExpressions ind  nl num, errorLocation
-            yield foreachExpressions ind  nl num, errorLocation
-            yield whileExpressions ind nl num, errorLocation
-            yield matchExpression ind nl num, errorLocation
-            yield matchExpressionWithCombinedPatterns ind nl num, errorLocation
-            yield matchFunction ind nl num, errorLocation
-            yield matchBang ind nl num, errorLocation
-            yield ifThenExpressionWithMultipleAndConditionals ind nl num, errorLocation
-            yield ifThenExpressionWithMultipleOrConditionals ind nl num, errorLocation
-            yield whileWithBooleanOperatorsInConditionExpressions ind nl num, errorLocation    
+            let num = MaxComplexity + 1
+            let errorLocation = 2, 4
+            yield ifElseExpressions num, errorLocation
+            yield forExpressions num, errorLocation
+            yield foreachExpressions num, errorLocation
+            yield whileExpressions num, errorLocation
+            yield matchExpression num, errorLocation
+            yield matchExpressionWithCombinedPatterns num, errorLocation
+            yield matchFunction num, errorLocation
+            yield matchBang num, errorLocation
+            yield ifThenExpressionWithMultipleAndConditionals num, errorLocation
+            yield ifThenExpressionWithMultipleOrConditionals num, errorLocation
+            yield whileWithBooleanOperatorsInConditionExpressions num, errorLocation    
         } |> Seq.map (fun (x, y) -> [| box x; box y |])
  
     /// Verifies that no cyclomatic complexity over-maximum flags are raised on source that has cyclomatic complexity <= maxComplexity.
@@ -163,86 +160,79 @@ type TestConventionsCyclomaticComplexity() =
     /// Verifies that an error is raised on a match expression which has multiple boolean operator conditions in multiple when clauses.
     [<Test>]
     member this.TestLogicalOperatorsInMatch() =
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let code = "Module Program" + newline + 
-                   "let f() = " + newline +
-                   makeMatchSnippetWithLogicalOperatorsInWhenClause indent newline (maxComplexity + 1) 
+        let code = $"""Module Program
+let f() = 
+{makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity + 1)}"""
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length) 
     
     /// Verifies that an error is raised on a single match clause with multiple logical operators.
     [<Test>]
     member this.TestMultipleLogicalOperatorsInSingleMatchClause() =
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let code = "Module Program" + newline + 
-                   "let f() = " + newline +
-                   indent + "match \"dummyString\" with" + newline +
-                   indent + "| x when x = \"1\"" + ([2..maxComplexity+1] |> List.map (sprintf "|| x = \"%d\"") |> String.concat " ") + " -> ()" + newline +
-                   indent + "| _ -> ()"
+        let code = $"""Module Program 
+let f() =
+    match "dummyString" with
+    | x when x = "1" {[2..MaxComplexity+1] |> List.map (sprintf "|| x = \"%d\"") |> String.concat " "} -> ()
+    | _ -> ()"""
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length)
       
     /// Verifies that no cyclomatic complexity error is flagged when boolean operators are raised outside of conditional branching contexts (sanity check).
     [<Test>]
     member this.EnsureNoErrorWhenLogicalExpressionOutsideCondition() =
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let code = "Module Program" + newline +
-                   "let f() =" + newline +
-                   indent + "let t = true " + String.replicate (maxComplexity+1) "|| false "  + newline +
-                   indent + "()" 
+        let code = $"""Module Program
+    let f() =
+        let t = true {String.replicate (MaxComplexity+1) "|| false "} 
+        ()"""    
         this.Parse code
         Assert.IsTrue(this.NoErrorsExist)
     
     /// Verifies that the cyclomatic complexity of functions is independent, by checking that a snippet of code with two functions, each with a complexity lower than the threshold but with a sum complexity greater than the threshold, does not flag an error. 
     [<Test>]
-    member this.EnsureComplexityOfFunctionsWithLowComplexityIsIndependent() =
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let code = "Module Program" + newline +
-                   "let f() = " + newline + makeMatchSnippetWithLogicalOperatorsInWhenClause indent newline (maxComplexity / 2 ) + newline + 
-                   "let g() = " + newline + makeMatchSnippetWithLogicalOperatorsInWhenClause indent newline (maxComplexity / 2)   
+    member this.EnsureComplexityOfFunctionsWithLowComplexityAreIndependent() =
+        let code = $"""Module Program
+    let f() =
+{makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity / 2 ) |> indent 8}
+    let g() =
+{makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity / 2) |> indent 8}""" 
         this.Parse code
         Assert.AreEqual(0, this.ErrorRanges.Length)
         
     /// Verifies that the cyclomatic complexity is calculated on functions independently by checking that a function that comes after a function with a cyclomatic complexity that is flagged as too high need not be flagged.
     [<Test>]
-    member this.EnsureComplexityOfFunctionsIsIndependent() =
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let code = "Module Program" + newline +
-                   "let f() =" + newline + makeMatchSnippet indent newline (maxComplexity + 1) + newline + 
-                   "let g() =" + newline + makeMatchSnippet indent newline maxComplexity 
+    member this.EnsureComplexityOfFunctionsAreIndependent() =
+        let code = $"""Module Program
+let f() =
+    {makeMatchSnippet (MaxComplexity + 1) |> indent 4}
+let g() =
+    {makeMatchSnippet MaxComplexity |> indent 4}"""
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length)
-        Assert.IsTrue(this.ErrorExistsAt(2, indent.Length))
+        Assert.IsTrue(this.ErrorExistsAt(2, 4))
         
     /// Verifies that the cyclomatic complexity of nested functions are calculated independently by checking that evaluation of multiple nested functions each with a cyclomatic complexity equal to maxComplexity (so that the sum of their complexities is greater than maxComplexity) does not result in a flag.
     [<Test>]
-    member this.EnsureComplexityOfNestedFunctionsWithLowComplexityIsIndependent() =
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let code = "Module Program" + newline + 
-                        "let f() = " + newline +
-                        indent + "let g() = " + newline + makeMatchSnippet (indent+indent) newline maxComplexity + newline +
-                        indent + "let g() = " + newline + makeMatchSnippet (indent+indent) newline maxComplexity + newline +
-                        makeMatchSnippet indent newline maxComplexity   
+    member this.EnsureComplexityOfNestedFunctionsWithLowComplexityAreIndependent() =
+        let code = $"""Module Program 
+let f() = 
+    let g() =
+{makeMatchSnippet MaxComplexity |> indent 8}
+    let h() =
+{makeMatchSnippet MaxComplexity |> indent 8}
+    ()"""
         this.Parse code
         Assert.AreEqual(0, this.ErrorRanges.Length)
         
        
     /// Verifies that the cyclomatic complexity is calculated on nested functions independently by checking that a nested function that comes after another nested function with a cyclomatic complexity that is flagged as too high need not be flagged.
     [<Test>]
-    member this.EnsureComplexityOfNestedFunctionsIsIndependent() =
-        let newline = TestConventionsCyclomaticComplexity.NewLine
-        let indent = TestConventionsCyclomaticComplexity.Indent
-        let code = "Module Program" + newline + 
-                        "let f() = " + newline +
-                        indent + "let g() = " + newline + makeMatchSnippet (indent+indent) newline (maxComplexity+1) + newline +
-                        indent + "let h() = " + newline + makeMatchSnippet (indent+indent) newline maxComplexity + newline +
-                        makeMatchSnippet indent newline (maxComplexity+1)   
+    member this.EnsureComplexityOfNestedFunctionsAreIndependent() =
+        let code = $"""Module Program
+let f() = 
+    let g() =
+{(makeMatchSnippet (MaxComplexity+1)) |> indent 8} 
+    let h() =
+{makeMatchSnippet (MaxComplexity) |> indent 8} 
+{makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    
         this.Parse code
         Assert.AreEqual(2, this.ErrorRanges.Length)
-        
