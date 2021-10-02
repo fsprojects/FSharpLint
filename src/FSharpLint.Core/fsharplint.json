@@ -257,6 +257,7 @@
     "wildcardNamedWithAsPattern": { "enabled": true },
     "uselessBinding": { "enabled": true },
     "tupleOfWildcards": { "enabled": true },
+    "favourTypedIgnore": { "enabled": false },
     "indentation": {
         "enabled": false
     },
