@@ -74,4 +74,5 @@ let NoPartialFunctions = identifier 66
 let PrivateValuesNames = identifier 67
 let InternalValuesNames = identifier 68
 let GenericTypesNames = identifier 69
+let FavourTypedIgnore = identifier 70
 let CyclomaticComplexity = identifier 71

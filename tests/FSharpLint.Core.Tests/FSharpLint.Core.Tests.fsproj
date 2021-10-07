@@ -62,6 +62,7 @@
     <Compile Include="Rules\NumberOfItems\MaxNumberOfMembers.fs" />
     <Compile Include="Rules\NumberOfItems\MaxNumberOfBooleanOperatorsInCondition.fs" />
     <Compile Include="Rules\Binding\FavourIgnoreOverLetWild.fs" />
+    <Compile Include="Rules\Binding\FavourTypedIgnore.fs" />
     <Compile Include="Rules\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
     <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
