@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.20.2] - 2021-10-09
 
 - Added cyclomatic complexity rule [@davidtgillard]
-- Add new rule FavourTypedIgnore [@su8898]
+- Added FavourTypedIgnore rule [@su8898]
 
 ## [0.20.1] - 2021-09-06
 
