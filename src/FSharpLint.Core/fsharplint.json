@@ -30,6 +30,12 @@
             "depth": 8
         }
     },
+    "cyclomaticComplexity": {
+        "enabled": false,
+        "config": {
+            "maxComplexity": 40
+        }
+    },
     "reimplementsFunction": { "enabled": true },
     "canBeReplacedWithComposition": { "enabled": true },
     "failwithWithSingleArgument": { "enabled": true },

@@ -38,7 +38,8 @@ let private areChildrenNested = function
     | AstNode.Expression(SynExpr.Match(_) as matchExpr) when not (isCompilerGeneratedMatch matchExpr) -> true
     | _ -> false
 
-let private getRange = function
+let private getRange node =
+    match node with 
     | AstNode.Expression(node) -> Some node.Range
     | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
     | _ -> None
