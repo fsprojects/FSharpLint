@@ -322,6 +322,6 @@
     <value>The cyclomatic complexity of this section is {0}, which exceeds the maximum suggested complexity of {1}.</value>
   </data>
   <data name="RulesFavourTypedIgnore" xml:space="preserve">
-    <value>Use a generic type parameter when calling the 'ignore' function</value>
+    <value>Use a generic type parameter when calling the 'ignore' function.</value>
   </data>
 </root>
