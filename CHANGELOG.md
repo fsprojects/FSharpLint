@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added cyclomatic complexity rule [@davidtgillard]
 - Added FavourTypedIgnore rule [@su8898]
+- Added GenericTypesNames rule [@su8898]
 
 ## [0.20.1] - 2021-09-06
 
