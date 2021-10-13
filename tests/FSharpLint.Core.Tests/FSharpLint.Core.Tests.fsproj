@@ -29,6 +29,7 @@
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments.fs" />
+    <Compile Include="Rules\Conventions\FailwithBadUsage.fs" />
     <Compile Include="Rules\Conventions\NestedStatements.fs" />
     <Compile Include="Rules\Conventions\CyclomaticComplexity.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation.fs" />

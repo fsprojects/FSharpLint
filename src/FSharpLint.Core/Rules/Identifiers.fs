@@ -76,3 +76,4 @@ let InternalValuesNames = identifier 68
 let GenericTypesNames = identifier 69
 let FavourTypedIgnore = identifier 70
 let CyclomaticComplexity = identifier 71
+let FailwithBadUsage = identifier 72
