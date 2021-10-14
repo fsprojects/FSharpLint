@@ -44,6 +44,7 @@
     "invalidOpWithSingleArgument": { "enabled": true },
     "invalidArgWithTwoArguments": { "enabled": true },
     "failwithfWithArgumentsMatchingFormatString": { "enabled": true },
+    "failwithBadUsage": { "enabled": true },
     "maxLinesInLambdaFunction": {
         "enabled": false,
         "config": {

@@ -324,4 +324,7 @@
   <data name="RulesFavourTypedIgnore" xml:space="preserve">
     <value>Use a generic type parameter when calling the 'ignore' function.</value>
   </data>
+  <data name="RulesFailwithBadUsage" xml:space="preserve">
+    <value>Bad usage of failwith: {0}.</value>
+  </data>
 </root>

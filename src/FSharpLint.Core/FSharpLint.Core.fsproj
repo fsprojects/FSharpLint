@@ -54,6 +54,7 @@
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidOpWithSingleArgument.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
+    <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithBadUsage.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />
