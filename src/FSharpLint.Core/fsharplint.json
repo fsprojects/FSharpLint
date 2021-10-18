@@ -265,6 +265,7 @@
     "uselessBinding": { "enabled": true },
     "tupleOfWildcards": { "enabled": true },
     "favourTypedIgnore": { "enabled": false },
+    "favourReRaise": { "enabled": true },
     "indentation": {
         "enabled": false
     },
