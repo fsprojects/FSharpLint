@@ -35,6 +35,7 @@
     <Compile Include="Rules\Conventions\FunctionReimplementation.fs" />
     <Compile Include="Rules\Conventions\SourceLength.fs" />
     <Compile Include="Rules\Conventions\NoPartialFunctions.fs" />
+    <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\Naming\NamingHelpers.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />

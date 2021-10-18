@@ -327,4 +327,7 @@
   <data name="RulesFailwithBadUsage" xml:space="preserve">
     <value>Bad usage of failwith: {0}.</value>
   </data>
+  <data name="RulesFavourReRaise" xml:space="preserve">
+    <value>Rather use reraise() instead of using raise with the same captured exception.</value>
+  </data>
 </root>
