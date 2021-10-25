@@ -114,3 +114,4 @@ The following rules can be specified for linting.
 - [CyclomaticComplexity (FL0071)](rules/FL0071.html)
 - [FailwithBadUsage (FL0072)](rules/FL0072.html)
 - [FavourReRaise (FL0073)](rules/FL0073.html)
+- [FavourConsistentThis (FL0074)](rules/FL0074.html)
