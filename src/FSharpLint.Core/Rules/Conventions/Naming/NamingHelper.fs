@@ -361,3 +361,22 @@ let rec identFromSimplePat = function
     | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
     | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
     | SynSimplePat.Attrib(_) -> None
+
+let rec isNested args nodeIndex =
+    let parent = args.SyntaxArray.[nodeIndex].ParentIndex
+    let actual = args.SyntaxArray.[parent].Actual
+
+    match actual with
+    | AstNode.Expression (SynExpr.LetOrUse (_, _, _, _, _)) -> true
+    | _ -> false
+
+let getFunctionIdents _ =
+    function
+    | SynPat.LongIdent (longIdent, _, _, pats, _, _) ->
+        match pats with
+        | SynArgPats.Pats _ ->
+            match List.tryLast longIdent.Lid with
+            | Some ident -> (ident, ident.idText, None) |> Array.singleton
+            | None -> Array.empty
+        | _ -> Array.empty
+    | _ -> Array.empty
