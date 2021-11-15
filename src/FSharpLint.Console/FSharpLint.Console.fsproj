@@ -12,6 +12,7 @@
     <AssemblyName>dotnet-fsharplint</AssemblyName>
     <RootNamespace>FSharpLint.Console</RootNamespace>
     <IsPackable>true</IsPackable>
+    <RollForward>Major</RollForward>
   </PropertyGroup>
 
   <ItemGroup>
