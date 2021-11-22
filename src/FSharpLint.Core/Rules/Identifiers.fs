@@ -78,3 +78,4 @@ let FavourTypedIgnore = identifier 70
 let CyclomaticComplexity = identifier 71
 let FailwithBadUsage = identifier 72
 let FavourReRaise = identifier 73
+let FavourConsistentThis = identifier 74

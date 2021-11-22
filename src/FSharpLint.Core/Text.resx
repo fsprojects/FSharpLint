@@ -330,4 +330,7 @@
   <data name="RulesFavourReRaise" xml:space="preserve">
     <value>Rather use reraise() instead of using raise with the same captured exception.</value>
   </data>
+  <data name="RulesFavourConsistentThis" xml:space="preserve">
+    <value>Prefer using '{0}' consistently.</value>
+  </data>
 </root>

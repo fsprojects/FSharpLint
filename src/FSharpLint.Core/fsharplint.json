@@ -266,6 +266,12 @@
     "tupleOfWildcards": { "enabled": true },
     "favourTypedIgnore": { "enabled": false },
     "favourReRaise": { "enabled": true },
+    "favourConsistentThis": {
+        "enabled": false,
+        "config": {
+            "symbol": "this"
+        }
+    },
     "indentation": {
         "enabled": false
     },
