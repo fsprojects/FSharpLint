@@ -272,6 +272,7 @@
             "symbol": "this"
         }
     },
+    "avoidTooShortNames": { "enabled": false },
     "indentation": {
         "enabled": false
     },
