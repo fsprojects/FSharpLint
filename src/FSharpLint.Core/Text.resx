@@ -310,10 +310,10 @@
     <value>Recursive async functions ending with a `do!` recursive call will leak memory; prefer `return!`.</value>
   </data>
   <data name="RulesConventionsNoPartialFunctionsReplacementError" xml:space="preserve">
-    <value>Consider using '{0}' instead of partial function '{1}'.</value>
+    <value>Consider using '{0}' instead of partial function/method '{1}'.</value>
   </data>
   <data name="RulesConventionsNoPartialFunctionsPatternMatchError" xml:space="preserve">
-    <value>Consider using pattern matching instead of partial function '{0}'.</value>
+    <value>Consider using pattern matching instead of partial function/method '{0}'.</value>
   </data>
   <data name="RulesConventionsNoPartialFunctionsAdditionalError" xml:space="preserve">
     <value>Consider not using partial function '{0}'.</value>

@@ -11,13 +11,13 @@ type TestConventionsNoPartialFunctions() =
     member this.``Error for partial function which should be replaced with pattern matching``() =
         this.Parse("let x = Option.get None")
 
-        this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function 'Option.get'.")
+        this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.get'.")
 
     [<Test>]
     member this.``Error for partial function which should be replaced with another function``() =
         this.Parse("let x = List.find 1 [2; 3; 4]")
 
-        this.AssertErrorWithMessageExists("Consider using 'List.tryFind' instead of partial function 'List.find'.")
+        this.AssertErrorWithMessageExists("Consider using 'List.tryFind' instead of partial function/method 'List.find'.")
 
     [<Test>]
     member this.``Quickfix for partial function which should be replaced with another function``() =
@@ -26,7 +26,7 @@ type TestConventionsNoPartialFunctions() =
 
         let expected = "let x = List.tryFind 1 [2; 3; 4]"
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        this.AssertErrorWithMessageExists( "Consider using 'List.tryFind' instead of partial function 'List.find'.")
+        this.AssertErrorWithMessageExists( "Consider using 'List.tryFind' instead of partial function/method 'List.find'.")
 
     [<Test>]
     member this.``Error for user-specified partial function``() =
@@ -39,3 +39,130 @@ type TestConventionsNoPartialFunctions() =
         this.Parse("let x = List.pick id [Some 4; None]")
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Error for Option.Value (simple test case)``() =
+        this.Parse("""
+let foo = None
+printf foo.Value""")
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+
+    [<Test>]
+    member this.``Error for Option.Value (complex test case)``() =
+        this.Parse("""
+namespace Foo
+module Program =
+    let foo = None
+
+    let printFoo() =
+        System.Console.WriteLine (foo.Value.ToString())""")
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(7, 34))
+        this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
+
+    [<Test>]
+    member this.``No error for value property in DU``() =
+        this.Parse("
+namespace Foo
+module Program =
+type SomeTypeThatsNotOption =
+    | Value of string
+    | Count of int
+
+let foo = SomeTypeThatsNotOption.Value")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``No error for option methods other than Option.Value``() =
+        this.Parse("
+let foo = None
+if foo.IsNone then
+    System.Console.WriteLine (foo.ToString())")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``No error for Map methods that are not Item``() =
+        this.Parse("
+let foo = Map.empty
+if foo.IsEmpty then
+    System.Console.WriteLine foo.Count")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Error for Map.Item``() =
+        this.Parse("
+let foo = Map.empty
+if foo.Item 1 then
+    System.Console.WriteLine foo.Count")
+
+        Assert.IsTrue this.ErrorsExist
+        this.AssertErrorWithMessageExists("Consider using 'Map.tryFind' instead of partial function/method 'Map.Item'.")
+
+    [<Test>]
+    member this.``No error for List methods that are not Item``() =
+        this.Parse("
+let foo = List.empty
+if foo.IsEmpty then
+    System.Console.WriteLine foo.Length")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Error for List.Item``() =
+        this.Parse("
+let foo = List.empty
+if foo.Item 1 then
+    System.Console.WriteLine foo.Length")
+
+        Assert.IsTrue this.ErrorsExist
+        this.AssertErrorWithMessageExists("Consider using 'List.tryFind' instead of partial function/method 'List.Item'.")
+
+    [<Test>]
+    member this.``Error for List.Head``() =
+        this.Parse("
+let foo = List.empty
+if foo.Head 1 then
+    System.Console.WriteLine foo.Length")
+
+        Assert.IsTrue this.ErrorsExist
+        this.AssertErrorWithMessageExists("Consider using 'List.tryHead' instead of partial function/method 'List.Head'.")
+
+(*
+    // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers
+
+    [<Test>]
+    member this.``Error for methods Foo.Bar.Instance.Baz``() =
+        this.Parse("
+namespace Foo
+type Bar() =
+    member this.Baz = 'x'
+    static member Instance = Bar()
+namespace FooBar
+module Program =
+    let bar = '212'
+    Console.WriteLine bar
+    let foo = None
+    printf foo.ToString()
+    System.Console.WriteLine Foo.Bar.Instance.Baz")
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Error for methods Foo.Bar.Instance.Baz 2``() =
+        this.Parse("
+namespace Foo
+type Bar() =
+    member this.Baz = 'x'
+    static member Instance = Bar()
+namespace FooBar
+module Program =
+    System.Console.WriteLine Foo.Bar.Instance.Baz")
+
+        Assert.IsTrue this.ErrorsExist
+        this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Foo.Bar.Baz'.")
+*)
