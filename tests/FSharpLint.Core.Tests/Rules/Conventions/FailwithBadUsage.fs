@@ -116,3 +116,21 @@ let foo () =
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(3, 4))
+
+    [<Test>]
+    member this.FailwithfWithNullArgument() =
+        this.Parse """
+let foo () =
+    failwithf null"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+
+    [<Test>]
+    member this.FailwithfWithFullNameModuleEmptyMessage() =
+        this.Parse """
+let bar () =
+    failwithf System.String.Empty"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(3, 4))
