@@ -266,6 +266,7 @@
     "tupleOfWildcards": { "enabled": true },
     "favourTypedIgnore": { "enabled": false },
     "favourReRaise": { "enabled": true },
+    "favourNamedMembers": { "enabled": true },
     "favourConsistentThis": {
         "enabled": false,
         "config": {

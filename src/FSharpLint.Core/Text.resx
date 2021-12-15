@@ -333,4 +333,7 @@
   <data name="RulesFavourConsistentThis" xml:space="preserve">
     <value>Prefer using '{0}' consistently.</value>
   </data>
+  <data name="RulesFavourNamedMembersError" xml:space="preserve">
+    <value>Prefer adding a name for the member.</value>
+  </data>
 </root>
