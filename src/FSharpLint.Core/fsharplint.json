@@ -267,6 +267,7 @@
     "favourTypedIgnore": { "enabled": false },
     "favourReRaise": { "enabled": true },
     "favourStaticEmptyFields": { "enabled": false },
+    "favourNamedMembers": { "enabled": true },
     "favourConsistentThis": {
         "enabled": false,
         "config": {

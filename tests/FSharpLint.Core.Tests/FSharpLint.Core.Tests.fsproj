@@ -27,6 +27,7 @@
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <Compile Include="Rules\Conventions\FavourStaticEmptyFields.fs" />
+    <Compile Include="Rules\Conventions\FavourNamedMembers.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments.fs" />
