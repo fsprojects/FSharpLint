@@ -184,7 +184,8 @@ with
         |] |> Array.concat
 
 type RaiseWithTooManyArgsConfig =
-    { raiseWithSingleArgument:EnabledConfig option
+    { failwithBadUsage:EnabledConfig option
+      raiseWithSingleArgument:EnabledConfig option
       nullArgWithSingleArgument:EnabledConfig option
       invalidOpWithSingleArgument:EnabledConfig option
       invalidArgWithTwoArguments:EnabledConfig option
@@ -192,6 +193,7 @@ type RaiseWithTooManyArgsConfig =
 with
     member this.Flatten() =
         [|
+            this.failwithBadUsage |> Option.bind (constructRuleIfEnabled FailwithBadUsage.rule) |> Option.toArray
             this.raiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule) |> Option.toArray
             this.nullArgWithSingleArgument |> Option.bind (constructRuleIfEnabled NullArgWithSingleArgument.rule) |> Option.toArray
             this.invalidOpWithSingleArgument |> Option.bind (constructRuleIfEnabled InvalidOpWithSingleArgument.rule) |> Option.toArray
@@ -231,6 +233,7 @@ with
 
 type NamesConfig =
     { interfaceNames:RuleConfig<NamingConfig> option
+      genericTypesNames:RuleConfig<NamingConfig> option
       exceptionNames:RuleConfig<NamingConfig> option
       typeNames:RuleConfig<NamingConfig> option
       recordFieldNames:RuleConfig<NamingConfig> option
@@ -251,6 +254,7 @@ with
     member this.Flatten() =
         [|
             this.interfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.rule) |> Option.toArray
+            this.genericTypesNames |> Option.bind (constructRuleWithConfig GenericTypesNames.rule) |> Option.toArray
             this.exceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.rule) |> Option.toArray
             this.typeNames |> Option.bind (constructRuleWithConfig TypeNames.rule) |> Option.toArray
             this.recordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.rule) |> Option.toArray
@@ -288,11 +292,13 @@ type BindingConfig =
     { favourIgnoreOverLetWild:EnabledConfig option
       wildcardNamedWithAsPattern:EnabledConfig option
       uselessBinding:EnabledConfig option
-      tupleOfWildcards:EnabledConfig option }
+      tupleOfWildcards:EnabledConfig option
+      favourTypedIgnore:EnabledConfig option }
 with
     member this.Flatten() =
         [|
             this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
+            this.favourTypedIgnore |> Option.bind (constructRuleIfEnabled FavourTypedIgnore.rule) |> Option.toArray
             this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
             this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
             this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
@@ -309,13 +315,17 @@ type ConventionsConfig =
       sourceLength:SourceLengthConfig option
       naming:NamesConfig option
       numberOfItems:NumberOfItemsConfig option
-      binding:BindingConfig option }
+      binding:BindingConfig option
+      favourReRaise:EnabledConfig option
+      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option }
 with
     member this.Flatten() =
         [|
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
+            this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
             this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
+            this.favourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule) |> Option.toArray
             this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
             this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
             this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
@@ -380,10 +390,13 @@ type Configuration =
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
+      FavourReRaise:EnabledConfig option
       NestedStatements:RuleConfig<NestedStatements.Config> option
+      FavourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       ReimplementsFunction:EnabledConfig option
       CanBeReplacedWithComposition:EnabledConfig option
+      FailwithBadUsage:EnabledConfig option
       RaiseWithSingleArgument:EnabledConfig option
       FailwithWithSingleArgument:EnabledConfig option
       NullArgWithSingleArgument:EnabledConfig option
@@ -403,6 +416,7 @@ type Configuration =
       MaxLinesInUnion:RuleConfig<Helper.SourceLength.Config> option
       MaxLinesInClass:RuleConfig<Helper.SourceLength.Config> option
       InterfaceNames:RuleConfig<NamingConfig> option
+      GenericTypesNames:RuleConfig<NamingConfig> option
       ExceptionNames:RuleConfig<NamingConfig> option
       TypeNames:RuleConfig<NamingConfig> option
       RecordFieldNames:RuleConfig<NamingConfig> option
@@ -424,6 +438,7 @@ type Configuration =
       MaxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
       MaxNumberOfBooleanOperatorsInCondition:RuleConfig<Helper.NumberOfItems.Config> option
       FavourIgnoreOverLetWild:EnabledConfig option
+      FavourTypedIgnore:EnabledConfig option
       WildcardNamedWithAsPattern:EnabledConfig option
       UselessBinding:EnabledConfig option
       TupleOfWildcards:EnabledConfig option
@@ -457,11 +472,14 @@ with
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
         RedundantNewKeyword = None
+        FavourReRaise = None
         NestedStatements = None
+        FavourConsistentThis = None
         CyclomaticComplexity = None
         ReimplementsFunction = None
         CanBeReplacedWithComposition = None
         FailwithWithSingleArgument = None
+        FailwithBadUsage = None
         RaiseWithSingleArgument = None
         NullArgWithSingleArgument = None
         InvalidOpWithSingleArgument = None
@@ -480,6 +498,7 @@ with
         MaxLinesInUnion = None
         MaxLinesInClass = None
         InterfaceNames = None
+        GenericTypesNames = None
         ExceptionNames = None
         TypeNames = None
         RecordFieldNames = None
@@ -501,6 +520,7 @@ with
         MaxNumberOfMembers = None
         MaxNumberOfBooleanOperatorsInCondition = None
         FavourIgnoreOverLetWild = None
+        FavourTypedIgnore = None
         WildcardNamedWithAsPattern = None
         UselessBinding = None
         TupleOfWildcards = None
@@ -597,10 +617,13 @@ let flattenConfig (config:Configuration) =
             config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
+            config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
             config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
+            config.FavourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule)
             config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
+            config.FailwithBadUsage |> Option.bind (constructRuleIfEnabled FailwithBadUsage.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
             config.FailwithWithSingleArgument |> Option.bind (constructRuleIfEnabled FailwithWithSingleArgument.rule)
             config.NullArgWithSingleArgument |> Option.bind (constructRuleIfEnabled NullArgWithSingleArgument.rule)
@@ -620,6 +643,7 @@ let flattenConfig (config:Configuration) =
             config.MaxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.rule)
             config.MaxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule)
             config.InterfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.rule)
+            config.GenericTypesNames |> Option.bind (constructRuleWithConfig GenericTypesNames.rule)
             config.ExceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.rule)
             config.TypeNames |> Option.bind (constructRuleWithConfig TypeNames.rule)
             config.RecordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.rule)
@@ -642,6 +666,7 @@ let flattenConfig (config:Configuration) =
             config.MaxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule)
             config.MaxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule)
             config.FavourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule)
+            config.FavourTypedIgnore |> Option.bind (constructRuleIfEnabled FavourTypedIgnore.rule)
             config.WildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule)
             config.UselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule)
             config.TupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule)
