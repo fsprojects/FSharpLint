@@ -448,7 +448,8 @@ type Configuration =
       MaxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
-      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option }
+      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
+      CSharpFriendlyAsyncOverload:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -531,6 +532,7 @@ with
         TrailingNewLineInFile = None
         NoTabCharacters = None
         NoPartialFunctions = None
+        CSharpFriendlyAsyncOverload = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -677,6 +679,7 @@ let flattenConfig (config:Configuration) =
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
+            config.CSharpFriendlyAsyncOverload |> Option.bind (constructRuleIfEnabled CSharpFriendlyAsyncOverload.rule)
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&
