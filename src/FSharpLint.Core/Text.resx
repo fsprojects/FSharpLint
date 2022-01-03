@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="RulesFavourNonMutablePropertyInitializationError" xml:space="preserve">
+    <value>Prefer using non mutable property initialization.</value>
+  </data>
 </root>
