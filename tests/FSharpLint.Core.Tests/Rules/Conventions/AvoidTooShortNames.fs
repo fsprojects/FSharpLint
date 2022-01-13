@@ -11,6 +11,8 @@ type TestConventionsAvoidTooShortNames() =
     [<Test>]
     member this.AvoidTooShortNamesShouldNotProduceError() =
         this.Parse """
+open System
+
 let foo = 1
 let bar baz =
     let foobar = "x"
@@ -21,6 +23,8 @@ let bar baz =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError_1() =
         this.Parse """
+open System
+
 let f = 1
 let bar baz =
     let foobar = "x"
@@ -31,6 +35,8 @@ let bar baz =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError_2() =
         this.Parse """
+open System
+
 let foo = 1
 let b baz n =
     let foobar = "x"
@@ -41,6 +47,8 @@ let b baz n =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError_3() =
         this.Parse """
+open System
+
 let foo = 1
 let bar b =
     let foobar = "x"
@@ -51,6 +59,8 @@ let bar b =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError_4() =
         this.Parse """
+open System
+
 let foo = 1
 let bar baz =
     let x = "x"
