@@ -11,6 +11,8 @@ type TestConventionsFavourNamedMembers() =
     [<Test>]
     member this.NamedMembersShouldNotProduceError_1() =
         this.Parse """
+open System
+
 let examineData x =
     match data with
     | OnePartData(part1=p1) -> p1
@@ -33,7 +35,7 @@ type Data =
 let examineData x =
     match data with
     | OnePart p1 -> p1
-    | TwoPart (p1, p2) -> p1 + p2"""
+    | TwoParts (p1, p2) -> p1 + p2"""
 
         Assert.IsTrue this.ErrorsExist
 
