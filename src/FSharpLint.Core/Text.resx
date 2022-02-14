@@ -336,4 +336,7 @@
   <data name="RulesFavourConsistentThis" xml:space="preserve">
     <value>Prefer using '{0}' consistently.</value>
   </data>
+  <data name="AvoidTypeHintSuffixesInNames" xml:space="preserve">
+    <value>Consider removing from the name the suffix that gives a hint about its type.</value>
+  </data>
 </root>

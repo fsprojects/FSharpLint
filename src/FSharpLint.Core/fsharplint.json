@@ -266,6 +266,7 @@
     "tupleOfWildcards": { "enabled": true },
     "favourTypedIgnore": { "enabled": false },
     "favourReRaise": { "enabled": true },
+    "AvoidTypeHintSuffixesInNames": { "enabled": false },
     "favourConsistentThis": {
         "enabled": false,
         "config": {

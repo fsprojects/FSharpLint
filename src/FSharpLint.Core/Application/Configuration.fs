@@ -318,6 +318,7 @@ type ConventionsConfig =
       numberOfItems:NumberOfItemsConfig option
       binding:BindingConfig option
       favourReRaise:EnabledConfig option
+      avoidTypeHintSuffixesInNames:EnabledConfig option
       favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option }
 with
     member this.Flatten() =
@@ -326,6 +327,7 @@ with
             this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray           
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
+            this.avoidTypeHintSuffixesInNames |> Option.bind (constructRuleIfEnabled AvoidTypeHintSuffixesInNames.rule) |> Option.toArray
             this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
             this.favourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule) |> Option.toArray
             this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
@@ -394,6 +396,7 @@ type Configuration =
       AvoidTooShortNames:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
       FavourReRaise:EnabledConfig option
+      AvoidTypeHintSuffixesInNames:EnabledConfig option
       NestedStatements:RuleConfig<NestedStatements.Config> option
       FavourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
@@ -477,6 +480,7 @@ with
         AvoidTooShortNames = None
         RedundantNewKeyword = None
         FavourReRaise = None
+        AvoidTypeHintSuffixesInNames = None
         NestedStatements = None
         FavourConsistentThis = None
         CyclomaticComplexity = None
@@ -623,6 +627,7 @@ let flattenConfig (config:Configuration) =
             config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
             config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
+            config.AvoidTypeHintSuffixesInNames |> Option.bind (constructRuleIfEnabled AvoidTypeHintSuffixesInNames.rule)
             config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
             config.FavourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule)
             config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
