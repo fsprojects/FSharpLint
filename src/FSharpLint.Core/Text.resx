@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="AvoidTypeHintSuffixesInNames" xml:space="preserve">
+    <value>Consider removing from the name the suffix that gives a hint about its type.</value>
+  </data>
 </root>
