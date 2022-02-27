@@ -306,6 +306,7 @@ with
 
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
+      avoidTooShortNames:EnabledConfig option
       redundantNewKeyword:EnabledConfig option
       nestedStatements:RuleConfig<NestedStatements.Config> option
       cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
@@ -322,6 +323,7 @@ with
     member this.Flatten() =
         [|
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
+            this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray           
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
             this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
@@ -389,6 +391,7 @@ type Configuration =
       PatternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
+      AvoidTooShortNames:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
       FavourReRaise:EnabledConfig option
       NestedStatements:RuleConfig<NestedStatements.Config> option
@@ -471,6 +474,7 @@ with
         PatternMatchClauseIndentation = None
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
+        AvoidTooShortNames = None
         RedundantNewKeyword = None
         FavourReRaise = None
         NestedStatements = None
@@ -616,6 +620,7 @@ let flattenConfig (config:Configuration) =
             config.PatternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
             config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
+            config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
             config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
             config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
