@@ -175,7 +175,7 @@
     <value>Consider changing `{0}` to remove any underscores.</value>
   </data>
   <data name="RulesAvoidTooShortNamesError" xml:space="preserve">
-    <value>Consider increasing the length of the flagged.</value>
+    <value>Consider using a longer name, as it is currently too short.</value>
   </data>
   <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
     <value>Consider changing `{0}` to be prefixed with `{1}`.</value>
