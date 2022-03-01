@@ -212,7 +212,7 @@
     "genericTypesNames": {
         "enabled": true,
         "config": {
-            "naming": "PascalCase",  
+            "naming": "PascalCase",
             "underscores": "None"
         }
     },
