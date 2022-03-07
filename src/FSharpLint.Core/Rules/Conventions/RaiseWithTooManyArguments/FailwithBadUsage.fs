@@ -38,11 +38,11 @@ let private runner (args: AstNodeRuleParams) =
 
         let message =
             match badUsageType with
-            | EmptyMessage -> "Consider using non-empty error messages with failwith"
-            | DuplicateMessage -> "Consider using unique error messages with failwith"
+            | EmptyMessage -> "consider using a non-empty error message as parameter"
+            | DuplicateMessage -> "consider using unique error messages as parameters"
             | SwallowedException ->
-                "failwith must not swallow exception details with it, rather use raise passing the current exception as innerException (2nd parameter of Exception constructor)"
-            | NullMessage -> "Consider using non-null error messages with failwith"
+                "rather use `raise` passing the current exception as innerException (2nd parameter of Exception constructor), otherwise using `failwith` the exception details will be swallowed"
+            | NullMessage -> "consider using a non-null error messages as parameter"
         let error =
             { Range = range
               Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
