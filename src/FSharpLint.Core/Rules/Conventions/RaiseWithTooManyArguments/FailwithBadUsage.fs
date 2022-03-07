@@ -14,6 +14,7 @@ type private BadUsageType =
     | EmptyMessage
     | DuplicateMessage
     | SwallowedException
+    | NullMessage
 
 let private runner (args: AstNodeRuleParams) =
     let generateError
@@ -37,11 +38,11 @@ let private runner (args: AstNodeRuleParams) =
 
         let message =
             match badUsageType with
-            | EmptyMessage -> "Consider using non-empty error messages with failwith"
-            | DuplicateMessage -> "Consider using unique error messages with failwith"
+            | EmptyMessage -> "consider using a non-empty error message as parameter"
+            | DuplicateMessage -> "consider using unique error messages as parameters"
             | SwallowedException ->
-                "failwith must not swallow exception details with it, rather use raise passing the current exception as innerException (2nd parameter of Exception constructor)"
-
+                "rather use `raise` passing the current exception as innerException (2nd parameter of Exception constructor), otherwise using `failwith` the exception details will be swallowed"
+            | NullMessage -> "consider using a non-null error messages as parameter"
         let error =
             { Range = range
               Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
@@ -72,6 +73,7 @@ let private runner (args: AstNodeRuleParams) =
                         Array.empty
             | SynExpr.LongIdent (_, LongIdentWithDots (id, _), _, _) when
                 (ExpressionUtilities.longIdentToString id) = "String.Empty"
+                || (ExpressionUtilities.longIdentToString id) = "System.String.Empty"
                 ->
                 generateError
                     failwithId.idText
@@ -79,6 +81,8 @@ let private runner (args: AstNodeRuleParams) =
                     range
                     (BadUsageType.EmptyMessage)
                     (None)
+            | SynExpr.Null range -> 
+                generateError failwithId.idText "null" range BadUsageType.NullMessage maybeIdentifier
             | _ -> Array.empty
         | SynExpr.TryWith (_, _, clauseList, _expression, _range, _, _) ->
             clauseList
@@ -89,7 +93,7 @@ let private runner (args: AstNodeRuleParams) =
                     match pat with
                     | SynPat.Named (_, id, _, _, _) -> checkExpr app (Some id.idText)
                     | _ -> checkExpr app None)
-        | _ -> Array.empty
+                | _ -> Array.empty
         | _ -> Array.empty
 
     match args.AstNode with
