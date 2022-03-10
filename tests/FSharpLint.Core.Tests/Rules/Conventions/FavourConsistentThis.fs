@@ -57,3 +57,47 @@ type CustomerName(firstName, middleInitial, lastName) =
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(4, 11))
 
+    [<Test>]
+    member this.StaticMethodShouldNotProduceError() =
+        this.Parse """
+type Connection() =
+    static member Connect() =
+        printfn "New World!" """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.LetShouldNotProduceError() =
+        this.Parse """
+type Connection() =
+    let tryGetConnectionRequest() =
+        printfn "New World!" """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.UnderScoreMethodShouldNotProduceError() =
+        this.Parse """
+type Connection() =
+    member __.AcceptClient() =
+        printfn "New World!" """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.AttributeShouldNotProduceError() =
+        this.Parse """
+module Command =
+    [<Literal>]
+    let AuthChallenge = 130uy """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.NewShouldNotProduceError() =
+        this.Parse """
+type TorMessageDigest(isSha256: bool) =
+    new() = TorMessageDigest false """
+
+        Assert.IsTrue this.NoErrorsExist
+
