@@ -134,3 +134,12 @@ let bar () =
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(3, 4))
+
+    [<Test>]
+    member this.FailwithfWithShouldnotFail() =
+        this.Parse """
+let failIfNone (opt: 'a option) : 'a =
+    opt
+    |> Option.defaultWith (fun _ -> failwith "A unique error message")"""
+
+        Assert.IsTrue this.NoErrorsExist
