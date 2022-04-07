@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.2] - 2022-04-07
+
+- Fix for false positive in FailwithBadUsage #539 [@janus]
+- FavourConsistentThis: fix some false positives and add unit tests for them [@janus]
+- NoPartialFunctions: detect instance members Option.Value, Map.Item, List.Head & List.Item [@su8898]
+- Cover more scenarios in FailwithBadUsage [@janus]
+
 ## [0.21.1] - 2022-03-01
 
 - Add new rule AvoidTooShortNames [@janus]
