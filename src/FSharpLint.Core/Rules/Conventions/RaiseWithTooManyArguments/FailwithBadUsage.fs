@@ -8,7 +8,14 @@ open FSharpLint.Framework.Rules
 open System
 open System.Collections.Generic
 
-let mutable failwithErrorMessageList = Set.empty
+type Location =
+    {
+        FileName: string
+        StartLine: int
+        StartColumn: int
+    }
+
+let mutable failwithMessages = Set.empty
 
 type private BadUsageType =
     | EmptyMessage
@@ -43,6 +50,7 @@ let private runner (args: AstNodeRuleParams) =
             | SwallowedException ->
                 "rather use `raise` passing the current exception as innerException (2nd parameter of Exception constructor), otherwise using `failwith` the exception details will be swallowed"
             | NullMessage -> "consider using a non-null error messages as parameter"
+
         let error =
             { Range = range
               Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
@@ -62,14 +70,28 @@ let private runner (args: AstNodeRuleParams) =
             | SynExpr.Const (SynConst.String (id, _, _), _) when id = "" ->
                 generateError failwithId.idText id range BadUsageType.EmptyMessage maybeIdentifier
             | SynExpr.Const (SynConst.String (id, _, _), _) ->
-                if Set.contains id failwithErrorMessageList then
+                let isDuplicate =
+                    let location =
+                        { FileName = range.FileName
+                          StartLine = range.StartLine
+                          StartColumn = range.StartColumn }
+
+                    Set.exists
+                        (fun (message, failwithMsgLocation) ->
+                            id = message
+                            && location <> failwithMsgLocation)
+                        failwithMessages
+
+                if isDuplicate then
                     generateError failwithId.idText id range BadUsageType.DuplicateMessage maybeIdentifier
                 else
                     match maybeIdentifier with
                     | Some maybeId ->
                         generateError failwithId.idText id range BadUsageType.SwallowedException (Some maybeId)
                     | _ ->
-                        failwithErrorMessageList <- failwithErrorMessageList.Add(id)
+                        failwithMessages <-
+                            failwithMessages.Add(id, { FileName = range.FileName; StartLine = range.StartLine; StartColumn = range.StartColumn })
+
                         Array.empty
             | SynExpr.LongIdent (_, LongIdentWithDots (id, _), _, _) when
                 (ExpressionUtilities.longIdentToString id) = "String.Empty"
@@ -81,7 +103,7 @@ let private runner (args: AstNodeRuleParams) =
                     range
                     (BadUsageType.EmptyMessage)
                     (None)
-            | SynExpr.Null range -> 
+            | SynExpr.Null range ->
                 generateError failwithId.idText "null" range BadUsageType.NullMessage maybeIdentifier
             | _ -> Array.empty
         | SynExpr.TryWith (_, _, clauseList, _expression, _range, _, _) ->
@@ -100,7 +122,7 @@ let private runner (args: AstNodeRuleParams) =
     | AstNode.Expression expr -> checkExpr expr None
     | _ -> Array.empty
 
-let cleanup () = failwithErrorMessageList <- Set.empty
+let cleanup () = failwithMessages <- Set.empty
 
 let rule =
     { Name = "FailwithBadUsage"
