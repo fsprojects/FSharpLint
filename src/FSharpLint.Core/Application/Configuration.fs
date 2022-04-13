@@ -386,7 +386,8 @@ type ConventionsConfig =
       usedUnderscorePrefixedElements:EnabledConfig option
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
       favourNestedFunctions:EnabledConfig option
-      disallowShadowing:EnabledConfig option}
+      disallowShadowing:EnabledConfig option
+      preferStringInterpolationWithSprintf:EnabledConfig option}
 with
     member this.Flatten() =
         Array.concat
@@ -416,6 +417,7 @@ with
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
+                this.preferStringInterpolationWithSprintf |> Option.bind (constructRuleIfEnabled PreferStringInterpolationWithSprintf.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -558,7 +560,8 @@ type Configuration =
       FavourSingleton:EnabledConfig option
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
       FavourNestedFunctions:EnabledConfig option
-      DisallowShadowing:EnabledConfig option }
+      DisallowShadowing:EnabledConfig option
+      PreferStringInterpolationWithSprintf:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -587,6 +590,7 @@ with
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
         IndexerAccessorStyleConsistency = None
+        PreferStringInterpolationWithSprintf = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None

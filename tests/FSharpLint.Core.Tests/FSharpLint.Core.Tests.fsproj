@@ -41,6 +41,7 @@
     <Compile Include="Rules\Conventions\SourceLength.fs" />
     <Compile Include="Rules\Conventions\NoPartialFunctions.fs" />
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
+    <Compile Include="Rules\Conventions\PreferStringInterpolationWithSprintf.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
     <Compile Include="Rules\Conventions\AvoidTooShortNames.fs" />
     <Compile Include="Rules\Conventions\AvoidSinglePipeOperator.fs" />

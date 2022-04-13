@@ -62,6 +62,7 @@
     <Compile Include="Rules\Conventions\FavourSingleton.fs" />
     <Compile Include="Rules\Conventions\FavourNestedFunctions.fs" />
     <Compile Include="Rules\Conventions\DisallowShadowing.fs" />
+    <Compile Include="Rules\Conventions\PreferStringInterpolationWithSprintf.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />
