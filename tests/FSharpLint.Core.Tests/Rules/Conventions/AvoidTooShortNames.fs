@@ -67,3 +67,31 @@ let bar baz =
     x """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_5() =
+        this.Parse """
+type CellCreatedFast =
+    private
+        {
+            Y: array<byte>
+            DerivativeKeyData: array<byte>
+        }
+ """
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_6() =
+        this.Parse """
+type TorStreamCipher(keyBytes: array<byte>, ivOpt: Option<array<byte>>) =
+    member self.Encrypt(data: array<byte>) : array<byte> =
+        let rec innerEncrypt (x: int) (state: array<byte>) =
+            if x >= data.Length then
+                state
+            else
+                Array.empty
+        innerEncrypt 3 keyBytes
+ """
+
+        Assert.IsTrue this.ErrorsExist
