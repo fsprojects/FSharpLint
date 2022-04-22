@@ -28,5 +28,5 @@ jobs:
       run: dotnet tool restore
     - name: Restore dependencies
       run: dotnet restore
-    - name: Run build
+    - name: Build and run tests
       run: dotnet fake build -t Test
