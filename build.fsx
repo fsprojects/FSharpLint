@@ -4,6 +4,8 @@
 #r "paket: groupref build //"
 #load ".fake/build.fsx/intellisense.fsx"
 
+open System.Linq
+
 open Fake.Core
 open Fake.DotNet
 open Fake.Tools
@@ -61,35 +63,64 @@ let nugetVersion =
     | None ->
         changelog.LatestEntry.NuGetVersion
     | Some _unreleased ->
+
+        // this is a translation of doing this in unix (assuming initialVersion="0.1.0"):
+        // 0.1.0--date`date +%Y%m%d-%H%M`.git-`git rev-parse --short=7 HEAD`
+        let getPreReleaseVersionWithGitAndDate(inputVersion: string) =
+
+            let getLastGitCommit() =
+                let procResult =
+                    CreateProcess.fromRawCommand
+                        "git"
+                        [
+                            "log"
+                            "--no-color"
+                            "--first-parent"
+                            "-n1"
+                            "--pretty=format:%h"
+                        ]
+                    |> CreateProcess.redirectOutput
+                    |> CreateProcess.ensureExitCode
+                    |> Proc.run
+
+                let lines =
+                    procResult.Result.Output.Split(
+                        [| System.Environment.NewLine |],
+                        System.StringSplitOptions.RemoveEmptyEntries
+                    )
+                if lines.Length <> 1 then
+                    failwith "Unexpected git output for special git log command"
+                lines.[0].Trim()
+
+            let initialVersion =
+                let versionSplit = inputVersion.Split '.'
+
+                if versionSplit.Length = 4 && versionSplit.[3] = "0" then
+                    System.String.Join(".", versionSplit.Take 3)
+                else
+                    inputVersion
+
+            let dateSegment =
+                sprintf "date%s" (System.DateTime.UtcNow.ToString "yyyyMMdd-hhmm")
+
+            let gitHash = getLastGitCommit()
+
+            if isNullOrWhiteSpace gitHash then
+                System.Console.Error.WriteLine "Last git commit hash not found; not in a git repository?"
+                System.Environment.Exit 1
+
+            let gitHashDefaultShortLength = 7
+            let gitShortHash = gitHash.Substring(0, gitHashDefaultShortLength)
+            let gitSegment = sprintf "git-%s" gitShortHash
+            sprintf "%s--%s.%s" initialVersion dateSegment gitSegment
+
         let current = changelog.LatestEntry.NuGetVersion |> SemVer.parse
         let bumped = { current with
                             Minor = current.Minor + 1u
                             Patch = 0u
                             Original = None }
         let bumpedBaseVersion = string bumped
-
-        let nugetPush = System.IO.Path.Combine("fsx", "Tools", "nugetPush.fsx")
-        if not(System.IO.File.Exists nugetPush) then
-            exec "git" "clone https://gitlab.com/nblockchain/fsx.git" "."
-        let isWindows =
-            (System.IO.Path.DirectorySeparatorChar = '\\')
-        let fsiRunner =
-            if isWindows then
-                System.IO.Path.Combine("fsx", "Tools", "fsi.bat")
-            else
-                "fsharpi"
-        let procResult =
-            CreateProcess.fromRawCommand
-                fsiRunner
-                [
-                    nugetPush
-                    "--output-version"
-                    bumpedBaseVersion
-                ]
-            |> CreateProcess.redirectOutput
-            |> CreateProcess.ensureExitCode
-            |> Proc.run
-        procResult.Result.Output.Trim()
+        getPreReleaseVersionWithGitAndDate bumpedBaseVersion
 
 let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion
 

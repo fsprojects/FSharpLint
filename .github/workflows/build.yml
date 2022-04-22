@@ -24,9 +24,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet }}
-    - name: install F# from Mono
-      if: runner.os == 'Linux'
-      run: sudo ./install_mono_from_microsoft_deb_packages.sh
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
