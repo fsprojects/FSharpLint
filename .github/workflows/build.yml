@@ -24,6 +24,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet }}
+    - name: install F# from Mono
+      if: runner.os == 'Linux'
+      run: sudo ./install_mono_from_microsoft_deb_packages.sh
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
@@ -57,6 +60,7 @@ jobs:
       run: dotnet fake build
     - name: Pack
       run: dotnet fake build -t Pack
+
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1.1.0
@@ -84,8 +88,8 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+
     - name: Upload binaries to nuget
-      if: startsWith(github.ref, 'refs/tags/')
       env:
         nuget-key: ${{ secrets.NUGET_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

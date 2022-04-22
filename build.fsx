@@ -65,9 +65,31 @@ let nugetVersion =
         let bumped = { current with
                             Minor = current.Minor + 1u
                             Patch = 0u
-                            Original = None
-                            PreRelease = PreRelease.TryParse "alpha01" }
-        string bumped
+                            Original = None }
+        let bumpedBaseVersion = string bumped
+
+        let nugetPush = System.IO.Path.Combine("fsx", "Tools", "nugetPush.fsx")
+        if not(System.IO.File.Exists nugetPush) then
+            exec "git" "clone https://gitlab.com/nblockchain/fsx.git" "."
+        let isWindows =
+            (System.IO.Path.DirectorySeparatorChar = '\\')
+        let fsiRunner =
+            if isWindows then
+                System.IO.Path.Combine("fsx", "Tools", "fsi.bat")
+            else
+                "fsharpi"
+        let procResult =
+            CreateProcess.fromRawCommand
+                fsiRunner
+                [
+                    nugetPush
+                    "--output-version"
+                    bumpedBaseVersion
+                ]
+            |> CreateProcess.redirectOutput
+            |> CreateProcess.ensureExitCode
+            |> Proc.run
+        procResult.Result.Output.Trim()
 
 let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion
 
