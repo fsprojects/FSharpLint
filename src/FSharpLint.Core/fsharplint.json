@@ -274,6 +274,7 @@
         }
     },
     "avoidTooShortNames": { "enabled": false },
+    "favourBasicControlFlow": { "enabled": false },
     "indentation": {
         "enabled": false
     },
