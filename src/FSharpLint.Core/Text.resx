@@ -336,4 +336,7 @@
   <data name="RulesFavourConsistentThis" xml:space="preserve">
     <value>Prefer using '{0}' consistently.</value>
   </data>
+  <data name="FavourBasicControlFlow" xml:space="preserve">
+    <value>Rather use simpler if-else construct instead of match clause.</value>
+  </data>
 </root>
