@@ -99,3 +99,4 @@ let FavourNestedFunctions = identifier 91
 let DisallowShadowing = identifier 92
 let DiscourageStringInterpolationWithStringFormat = identifier 93
 let FavourNamedMembers = identifier 94
+let FavourBasicControlFlow = identifier 95

@@ -299,6 +299,7 @@
     "avoidTooShortNames": { "enabled": false },
     "asyncExceptionWithoutReturn": { "enabled": false },
     "unneededRecKeyword": { "enabled": true },
+    "favourBasicControlFlow": { "enabled": false },
     "indentation": {
         "enabled": false
     },

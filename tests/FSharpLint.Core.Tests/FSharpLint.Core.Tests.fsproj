@@ -43,6 +43,7 @@
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\DiscourageStringInterpolationWithStringFormat.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
+    <Compile Include="Rules\Conventions\FavourBasicControlFlow.fs" />
     <Compile Include="Rules\Conventions\AvoidTooShortNames.fs" />
     <Compile Include="Rules\Conventions\AvoidSinglePipeOperator.fs" />
     <Compile Include="Rules\Conventions\SuggestUseAutoProperty.fs" />
