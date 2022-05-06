@@ -339,10 +339,10 @@
   <data name="RulesFavourStaticEmptyFieldsForString" xml:space="preserve">
     <value>Consider using 'String.Empty' instead.</value>
   </data>
-  <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
-    <value>Consider using 'Array.Empty' instead.</value>
-  </data>
   <data name="RulesFavourStaticEmptyFieldsForList" xml:space="preserve">
     <value>Consider using 'List.Empty' instead.</value>
+  </data>
+  <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
+    <value>Consider using 'Array.empty' instead.</value>
   </data>
 </root>

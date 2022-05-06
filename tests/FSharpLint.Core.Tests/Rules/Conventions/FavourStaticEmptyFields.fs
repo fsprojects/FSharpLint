@@ -93,7 +93,7 @@ let foo a =
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError_5() =
-        this.Parse "System.Console.WriteLine List.Empty.Length"
+        this.Parse "System.Console.WriteLine(List.Empty.Length.ToString())"
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -105,7 +105,7 @@ let foo a =
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError_7() =
-        this.Parse "System.Console.WriteLine Array.Empty.Length"
+        this.Parse "System.Console.WriteLine(Array.empty.Length.ToString())"
 
         Assert.IsTrue this.NoErrorsExist
 
