@@ -10,17 +10,14 @@ let private getIdentifiers (args: AstNodeRuleParams) =
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _)) ->
         let checkTypes types =
             seq {
-                for SynTyparDecl(_attr, synTypeDecl) in types do
-                    match synTypeDecl with
-                    | SynTypar(id, _, _) when not (isPascalCase id.idText) ->
-                        yield (id, id.idText, None)
-                    | _ -> ()
+                for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
+                    yield (id, id.idText, None)
             }
             
         match componentInfo with
         | SynComponentInfo(_attrs, types, _, _identifier, _, _, _, _) ->
             checkTypes types |> Array.ofSeq
-    | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) when not (isPascalCase id.idText) ->
+    | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) ->
         (id, id.idText, None) |> Array.singleton
     | _ -> Array.empty
 
