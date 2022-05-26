@@ -57,3 +57,35 @@ type Foo<'K, 'V> = Option<'K * 'V>
 type Foo<'T1, 'T2, 'T3, 'T4, 'T5, 'a, 'T6> = Option<'T1 * 'T2 * 'T3 * 'T4 * 'T5 * 'a * 'T6>
 """
         Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``generic type names shouldn't be camelCase even for types in methods``() =
+        this.Parse """
+module PeerChannelEncryptorMonad =
+    type PeerChannelEncryptorComputation<'T> =
+        | PeerChannelEncryptorComputation of
+            (PeerChannelEncryptor -> Result<'T * PeerChannelEncryptor, PeerError>)
+
+    let runP pcec initialState =
+        let (PeerChannelEncryptorComputation innerFn) = pcec
+        innerFn initialState
+
+    let returnP x =
+        let innerFn state =
+            Ok(x, state)
+
+        PeerChannelEncryptorComputation innerFn
+
+    let bindP
+        (f: 'a -> PeerChannelEncryptorComputation<'b>)
+        (xT: PeerChannelEncryptorComputation<'a>)
+        : PeerChannelEncryptorComputation<'b> =
+        let innerFn state =
+            runP xT state
+            >>= fun (res, state2) ->
+                    let h = runP (f res) state2
+                    h
+
+        PeerChannelEncryptorComputation innerFn
+"""
+        Assert.IsTrue(this.ErrorsExist)
