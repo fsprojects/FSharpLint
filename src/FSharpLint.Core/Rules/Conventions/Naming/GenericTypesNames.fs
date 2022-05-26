@@ -20,6 +20,8 @@ let private getIdentifiers (args: AstNodeRuleParams) =
         match componentInfo with
         | SynComponentInfo(_attrs, types, _, _identifier, _, _, _, _) ->
             checkTypes types |> Array.ofSeq
+    | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) when not (isPascalCase id.idText) ->
+        (id, id.idText, None) |> Array.singleton
     | _ -> Array.empty
 
 let rule config =
