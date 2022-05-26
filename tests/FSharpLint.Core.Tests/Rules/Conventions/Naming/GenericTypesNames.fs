@@ -26,7 +26,7 @@ type Foo<'T> = Option<'T>
 type Foo<'a> = Option<'a>
     """
         Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(2, 9))
+        Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase (2 generic types)``() =
@@ -34,7 +34,7 @@ type Foo<'a> = Option<'a>
 type Foo<'a, 'T> = Option<'a * 'T>
 """
         Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(2, 9))
+        Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase (2 generic types with different order)``() =
@@ -42,7 +42,7 @@ type Foo<'a, 'T> = Option<'a * 'T>
 type Foo<'T, 'a> = Option<'T * 'a>
 """
         Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(2, 13))
+        Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names are PascalCase``() =
@@ -57,6 +57,7 @@ type Foo<'K, 'V> = Option<'K * 'V>
 type Foo<'T1, 'T2, 'T3, 'T4, 'T5, 'a, 'T6> = Option<'T1 * 'T2 * 'T3 * 'T4 * 'T5 * 'a * 'T6>
 """
         Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase even for types in methods``() =
@@ -89,3 +90,4 @@ module PeerChannelEncryptorMonad =
         PeerChannelEncryptorComputation innerFn
 """
         Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsOnLine 18)
