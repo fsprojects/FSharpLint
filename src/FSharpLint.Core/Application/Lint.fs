@@ -385,9 +385,9 @@ module Lint =
                 Configuration.loadConfig "./fsharplint.json"
                 |> Ok
             with
-            | ex ->
-                // TODO: log default config load error
+            | :? System.IO.FileNotFoundException ->
                 Ok Configuration.defaultConfiguration
+            | _ as ex -> Error (string ex)
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
