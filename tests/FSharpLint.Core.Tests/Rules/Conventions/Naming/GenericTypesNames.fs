@@ -5,7 +5,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 
 let config =
-    { NamingConfig.Naming = Some NamingCase.PascalCase
+    { NamingConfig.Naming = Some NamingCase.CamelCase
       Underscores = Some NamingUnderscores.None
       Prefix = None
       Suffix = None }
@@ -14,22 +14,22 @@ type TestConventionsGenericTypesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(GenericTypesNames.rule config)
 
     [<Test>]
-    member this.GenericTypeNameIsPascalCase() =
+    member this.GenericTypeNameIsCamelCase() =
         this.Parse """
-type Foo<'T> = Option<'T>
+type Foo<'a> = Option<'a>
 """
         this.AssertNoWarnings()
         
     [<Test>]
-    member this.``generic type name shouldn't be camelCase``() =
+    member this.``generic type name shouldn't be PascalCase``() =
         this.Parse """
-type Foo<'a> = Option<'a>
+type Foo<'T> = Option<'T>
     """
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
-    member this.``generic type names shouldn't be camelCase (2 generic types)``() =
+    member this.``generic type names shouldn't be PascalCase (2 generic types)``() =
         this.Parse """
 type Foo<'a, 'T> = Option<'a * 'T>
 """
@@ -37,7 +37,7 @@ type Foo<'a, 'T> = Option<'a * 'T>
         Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
-    member this.``generic type names shouldn't be camelCase (2 generic types with different order)``() =
+    member this.``generic type names shouldn't be PascalCase (2 generic types with different order)``() =
         this.Parse """
 type Foo<'T, 'a> = Option<'T * 'a>
 """
@@ -45,27 +45,27 @@ type Foo<'T, 'a> = Option<'T * 'a>
         Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
-    member this.``generic type names are PascalCase``() =
+    member this.``generic type names are camelCase``() =
         this.Parse """
-type Foo<'K, 'V> = Option<'K * 'V>
+type Foo<'k, 'v> = Option<'k * 'v>
 """
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.``generic type names shouldn't be camelCase (multiple generic types)``() =
+    member this.``generic type names shouldn't be PascalCase (multiple generic types)``() =
         this.Parse """
-type Foo<'T1, 'T2, 'T3, 'T4, 'T5, 'a, 'T6> = Option<'T1 * 'T2 * 'T3 * 'T4 * 'T5 * 'a * 'T6>
+type Foo<'a1, 'a2, 'a3, 'a4, 'a5, 'T, 'a6> = Option<'a1 * 'a2 * 'a3 * 'a4 * 'a5 * 'T * 'a6>
 """
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine 2)
 
     [<Test>]
-    member this.``generic type names shouldn't be camelCase even for types in methods``() =
+    member this.``generic type names shouldn't be PascalCase even for types in methods``() =
         this.Parse """
 module PeerChannelEncryptorMonad =
-    type PeerChannelEncryptorComputation<'T> =
+    type PeerChannelEncryptorComputation<'a> =
         | PeerChannelEncryptorComputation of
-            (PeerChannelEncryptor -> Result<'T * PeerChannelEncryptor, PeerError>)
+            (PeerChannelEncryptor -> Result<'a * PeerChannelEncryptor, PeerError>)
 
     let runP pcec initialState =
         let (PeerChannelEncryptorComputation innerFn) = pcec
@@ -78,9 +78,9 @@ module PeerChannelEncryptorMonad =
         PeerChannelEncryptorComputation innerFn
 
     let bindP
-        (f: 'a -> PeerChannelEncryptorComputation<'b>)
-        (xT: PeerChannelEncryptorComputation<'a>)
-        : PeerChannelEncryptorComputation<'b> =
+        (f: 'T1 -> PeerChannelEncryptorComputation<'T2>)
+        (xT: PeerChannelEncryptorComputation<'T1>)
+        : PeerChannelEncryptorComputation<'T2> =
         let innerFn state =
             runP xT state
             >>= fun (res, state2) ->
