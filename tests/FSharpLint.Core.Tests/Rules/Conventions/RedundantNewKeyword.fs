@@ -39,3 +39,30 @@ let _ = System.Version()"""
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``new keyword is not required (1).``() =
+        this.Parse("""
+module Program
+    let foo =
+        new System.Collections.Generic.Dictionary<string, string>() |> ignore""")
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``new keyword is not required (2).``() =
+        this.Parse("""
+module Program
+    let foo =
+        new Guid() |> ignore""")
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``new keyword is not required (3).``() =
+        this.Parse("""
+module Program
+    let foo =
+        new Int32() |> ignore""")
+
+        Assert.IsTrue this.ErrorsExist
