@@ -27,7 +27,11 @@ let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (iden
         ctor.DeclaringEntity
         |> Option.exists (fun ctorForType ->
             Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
-    | Some(_) | None -> false
+    | Some symbol when (symbol.Symbol :? FSharpEntity) ->
+        let ctor = symbol.Symbol :?> FSharpEntity
+        Seq.forall (implementsIDisposable >> not) ctor.AllInterfaces
+    | Some _ -> false
+    | None -> true
 
 let private generateFix (text:string) range = lazy(
     ExpressionUtilities.tryFindTextOfRange range text
@@ -38,8 +42,9 @@ let private generateFix (text:string) range = lazy(
 
 
 let runner args =
-    match (args.AstNode, args.CheckInfo) with
-    | (AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo) ->
+    match args.AstNode, args.CheckInfo with
+    | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
+    | AstNode.Expression(SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
         { Range = range
           Message = Resources.GetString("RulesRedundantNewKeyword")
           SuggestedFix = Some (generateFix args.FileContent range)
