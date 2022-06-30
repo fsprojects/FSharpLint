@@ -239,7 +239,7 @@ module Lint =
             | Some(value) -> not value.IsCancellationRequested
             | None -> true
 
-        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
+        let enabledRules = Configuration.flattenConfig lintInfo.Configuration true
 
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line)
         let allRuleNames =
@@ -422,7 +422,7 @@ module Lint =
     }
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
-    let private getConfig (configParam:ConfigurationParam) =
+    let getConfig (configParam:ConfigurationParam) =
         match configParam with
         | Configuration config -> Ok config
         | FromFile filePath ->
