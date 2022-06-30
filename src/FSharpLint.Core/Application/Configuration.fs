@@ -129,13 +129,20 @@ type RuleConfig<'Config> = {
 
 type EnabledConfig = RuleConfig<unit>
 
-let constructRuleIfEnabled rule ruleConfig = if ruleConfig.Enabled then Some rule else None
+let constructRuleIfEnabledBase (onlyEnabled: bool) rule ruleConfig = 
+    if not onlyEnabled || ruleConfig.Enabled then Some rule else None
 
-let constructRuleWithConfig rule ruleConfig =
-    if ruleConfig.Enabled then
-        ruleConfig.Config |> Option.map rule
-    else
-        None
+let constructRuleIfEnabled rule ruleConfig = 
+    constructRuleIfEnabledBase true rule ruleConfig
+
+let constructRuleWithConfigBase (onlyEnabled: bool) (rule: 'TRuleConfig -> 'TRule) (ruleConfig: RuleConfig<'TRuleConfig>): Option<'TRule> =
+     if not onlyEnabled || ruleConfig.Enabled then
+         ruleConfig.Config |> Option.map rule
+     else
+         None
+ 
+let constructRuleWithConfig (rule: 'TRuleConfig -> 'TRule) (ruleConfig: RuleConfig<'TRuleConfig>): Option<'TRule> =
+    constructRuleWithConfigBase true rule ruleConfig
 
 type TupleFormattingConfig =
     { tupleCommaSpacing:EnabledConfig option
@@ -600,7 +607,7 @@ let private parseHints (hints:string []) =
     |> Array.toList
     |> MergeSyntaxTrees.mergeHints
 
-let flattenConfig (config:Configuration) =
+let flattenConfig (config:Configuration) (onlyEnabled:bool) =
     let deprecatedAllRules =
         [|
             config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
@@ -609,6 +616,12 @@ let flattenConfig (config:Configuration) =
             config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
         |] |> Array.concat
 
+    let constructRuleIfEnabled rule ruleConfig = 
+        constructRuleIfEnabledBase onlyEnabled rule ruleConfig
+
+    let constructRuleWithConfig (rule: 'TRuleConfig -> 'TRule) (ruleConfig: RuleConfig<'TRuleConfig>): Option<'TRule> =
+        constructRuleWithConfigBase onlyEnabled rule ruleConfig
+    
     let allRules =
         [|
             config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
