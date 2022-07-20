@@ -274,6 +274,12 @@
         }
     },
     "avoidTooShortNames": { "enabled": false },
+    "indexerAccessorStyleConsistency": { 
+        "enabled": false,
+        "config": {
+            "style": "OCaml"
+        }
+    },
     "indentation": {
         "enabled": false
     },
