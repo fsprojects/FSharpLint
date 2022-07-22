@@ -22,9 +22,13 @@ type private FileType =
 
 type ExitCode = 
     | Error = -1
-    | Success = 0
+    // for `fix` when the file is changed and for `fix --check` when there are no fixes available.
+    | Success = 0 
     | NoSuchRuleName = 1
+    // only for fix (without --check)
     | NoSuggestedFix = 2
+    //only for fix --check
+    | FixExists = 3 
 
 let fileTypeHelp = "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
 
@@ -63,6 +67,7 @@ with
 and private FixArgs =
     | [<MainCommand; Mandatory>] Fix_Target of ruleName:string * target:string
     | Fix_File_Type of FileType
+    | Check
 // fsharplint:enable UnionDefinitionIndentation
 with
     interface IArgParserTemplate with
@@ -70,6 +75,7 @@ with
             match this with
             | Fix_Target _ -> "Rule name to be applied with suggestedFix and input to lint."
             | Fix_File_Type _ -> fileTypeHelp
+            | Check _ -> "If passed to the fix command, the linter will only check if the fix is needed."
 // fsharplint:enable UnionCasesNames
 
 let private parserProgress (output:Output.IOutput) = function
@@ -106,7 +112,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | Some _
         | None -> Output.StandardOutput() :> Output.IOutput
 
-    let handleError (status:ExitCode) (str:string) =
+    let handleError (status: ExitCode) (str: string) =
         output.WriteError str
         exitCode <- status
 
@@ -121,44 +127,64 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                exitCode <- ExitCode.Error
         | LintResult.Failure failure -> handleError ExitCode.Error failure.Description
     
-    let handleFixResult (ruleName: string) = function
+    let handleFixResult (ruleName: string) (checkFlag: bool) = function
         | LintResult.Success warnings ->
-            Resources.GetString "ConsoleApplyingSuggestedFixFile" |> output.WriteInfo
-            let increment = 1
+            if not checkFlag then
+                Resources.GetString "ConsoleApplyingSuggestedFixFile" |> output.WriteInfo
             let noFixIncrement = 0
-            let countSuggestedFix = 
-                List.fold (fun acc elem -> acc + elem) 0 (
+            let foundFixIncrement = 1
+            let noSuggestedFixIncrement = 2
+            let countFixStatus = 
+                List.fold (fun (accNoFix, accFoundFix, accNoSuggestedFix) elem -> 
+                    if elem = noFixIncrement then
+                        (accNoFix + 1, accFoundFix, accNoSuggestedFix)
+                    elif elem = foundFixIncrement then
+                        (accNoFix, accFoundFix + 1, accNoSuggestedFix)
+                    elif elem = noSuggestedFixIncrement then
+                        (accNoFix, accFoundFix, accNoSuggestedFix + 1)
+                    else
+                        failwith "Code should never reach here!") (0, 0, 0) (
                     List.map (fun (element: Suggestion.LintWarning) ->
                         let sourceCode = File.ReadAllText element.FilePath
                         if String.Equals(ruleName, element.RuleName, StringComparison.InvariantCultureIgnoreCase) then
                             match element.Details.SuggestedFix with
                             | Some suggestedFix ->
-                                suggestedFix.Force()
-                                |> Option.map (fun suggestedFix ->
-                                    let updatedSourceCode = 
-                                        sourceCode.Replace(
-                                            suggestedFix.FromText,
-                                            suggestedFix.ToText
+                                ((fun checkFlag ->
+                                if not checkFlag then
+                                    (suggestedFix.Force()
+                                    |> Option.map (fun suggestedFix ->
+                                        let updatedSourceCode = 
+                                            sourceCode.Replace(
+                                                suggestedFix.FromText,
+                                                suggestedFix.ToText
+                                            )
+                                        File.WriteAllText(
+                                            element.FilePath,
+                                            updatedSourceCode,
+                                            Encoding.UTF8)
                                         )
-                                    File.WriteAllText(
-                                        element.FilePath,
-                                        updatedSourceCode,
-                                        Encoding.UTF8)
-                                    ) 
-                                    |> ignore |> fun () -> increment
-                            | None -> noFixIncrement
+                                    ) |> ignore
+                                else
+                                    ()
+                                ) checkFlag)
+                                |> ignore |> fun () -> foundFixIncrement
+                            | None -> noSuggestedFixIncrement
                         else
                             noFixIncrement) warnings)
             outputWarnings warnings
-
-            if countSuggestedFix > 0 then
+            let (accNoFix, accFoundFix, accNoSuggestedFix) = countFixStatus
+            if not checkFlag && accFoundFix > 0 then
                 exitCode <- ExitCode.Success
-            else
+            elif not checkFlag then
                 exitCode <- ExitCode.NoSuggestedFix
+            elif checkFlag && accFoundFix > 0 then
+                exitCode <- ExitCode.FixExists
+            elif checkFlag then
+                exitCode <- ExitCode.Success
 
         | LintResult.Failure failure -> handleError ExitCode.Error failure.Description
 
-    let linting fileType lintParams target toolsPath shouldFix maybeRuleName =
+    let linting fileType lintParams target toolsPath shouldFix maybeRuleName checkFlag =
         try
             let lintResult =
                 match fileType with
@@ -169,7 +195,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | _ -> Lint.lintProject lintParams target toolsPath
             if shouldFix then
                 match maybeRuleName with
-                | Some ruleName -> handleFixResult ruleName lintResult
+                | Some ruleName -> handleFixResult ruleName checkFlag lintResult
                 | None -> exitCode <- ExitCode.NoSuchRuleName
             else
                 handleLintResult lintResult
@@ -197,12 +223,13 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         let target = lintArgs.GetResult Target
         let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
-        linting fileType lintParams target toolsPath false None
+        linting fileType lintParams target toolsPath false None false
 
     let applySuggestedFix (fixArgs: ParseResults<FixArgs>) =
         let fixParams = getParams None
         let ruleName, target = fixArgs.GetResult Fix_Target
         let fileType = fixArgs.TryGetResult Fix_File_Type |> Option.defaultValue (inferFileType target)
+        let checkFlag = fixArgs.Contains Check
         
         let allRules = 
             match getConfig fixParams.Configuration with
@@ -220,7 +247,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             | _ -> Set.empty
 
         if allRuleNames.Any(fun aRuleName -> String.Equals(aRuleName, ruleName, StringComparison.InvariantCultureIgnoreCase)) then
-            linting fileType fixParams target toolsPath true (Some ruleName)
+            linting fileType fixParams target toolsPath true (Some ruleName) checkFlag
         else
             sprintf "Rule '%s' does not exist." ruleName |> (handleError ExitCode.NoSuchRuleName)
 
