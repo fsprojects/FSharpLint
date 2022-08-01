@@ -143,3 +143,13 @@ let failIfNone (opt: 'a option) : 'a =
     |> Option.defaultWith (fun _ -> failwith "A unique error message")"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.ExternDeclarationsShouldnotFail() =
+        this.Parse """[<DllImport("LibFoo")>]
+extern bool Foo()
+        
+[<DllImport("LibFoo")>]
+extern bool Bar()"""
+
+        Assert.IsTrue this.NoErrorsExist
