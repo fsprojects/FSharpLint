@@ -153,3 +153,11 @@ extern bool Foo()
 extern bool Bar()"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.ExternDeclarationsWithoutDllImportShouldnotFail() =
+        this.Parse """extern bool Foo()
+
+extern bool Bar()"""
+
+        Assert.IsTrue this.NoErrorsExist
