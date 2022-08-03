@@ -304,10 +304,12 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
 
 type GetIdents<'t> = Accessibility -> SynPat -> 't []
 
-let rec getPatternIdents<'t> accessibility (getIdents:GetIdents<'t>) argsAreParameters pattern =
+/// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
+/// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
+let rec getPatternIdents<'t> (accessibility:Accessibility) (getIdents:GetIdents<'t>) argsAreParameters (pattern:SynPat) =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
-        let isPublic = checkAccessibility accessibility access
+        let identAccessibility = checkAccessibility accessibility access
 
         let hasNoArgs =
             match args with
@@ -327,7 +329,7 @@ let rec getPatternIdents<'t> accessibility (getIdents:GetIdents<'t>) argsArePara
 
         // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
         if hasNoArgs || argsAreParameters then
-            getIdents isPublic pattern
+            getIdents identAccessibility pattern
             |> Array.append argSuggestions
         else
             argSuggestions
