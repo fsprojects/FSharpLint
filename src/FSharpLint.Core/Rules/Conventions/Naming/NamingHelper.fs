@@ -377,13 +377,10 @@ let rec isNested args nodeIndex =
     | AstNode.Expression (SynExpr.LetOrUse _) -> true
     | _ -> false
 
-let getFunctionIdents _ =
-    function
-    | SynPat.LongIdent (longIdent, _, _, pats, _, _) ->
-        match pats with
-        | SynArgPats.Pats _ ->
-            match List.tryLast longIdent.Lid with
-            | Some ident -> (ident, ident.idText, None) |> Array.singleton
-            | None -> Array.empty
-        | _ -> Array.empty
+let getFunctionIdents (_accessibility: AccessControlLevel) (pattern: SynPat) =
+    match pattern with
+    | SynPat.LongIdent (longIdent, _, _, SynArgPats.Pats _, _, _) ->
+        match List.tryLast longIdent.Lid with
+        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | None -> Array.empty
     | _ -> Array.empty
