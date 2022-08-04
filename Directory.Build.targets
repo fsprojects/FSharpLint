@@ -1,0 +1,11 @@
+<!-- Workaround for Central Package Management taken from
+     https://github.com/NuGet/Home/issues/11949 and
+     https://github.com/microsoft/MSBuildSdks/blob/22cee25ad037827b54b75b6ee1c59a5bc75a744f/src/CentralPackageVersions/Sdk/Sdk.targets#L70-L76 -->
+<Project>
+    <ItemGroup Condition=" '$(EnableCentralPackageVersions)' != 'false' ">
+        <PackageReference Update="FSharp.Core"
+                          Condition="'$(MSBuildProjectExtension)' == '.fsproj' And '$(DisableImplicitFSharpCoreReference)' != 'true' And '$(UpdateImplicitFSharpCoreReference)' != 'false'"
+                          IsImplicitlyDefined="true"
+                          Version="5.0.2" />
+    </ItemGroup>
+</Project>
