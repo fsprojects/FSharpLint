@@ -10,7 +10,8 @@ let private getIdentifiers (args: AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Binding (SynBinding (_, _, _, _, _attributes, _, _, pattern, _, _, _, _)) ->
         if isNested args args.NodeIndex then
-            getPatternIdents AccessControlLevel.Public getFunctionIdents true pattern
+            let allEncompassingAccessibility = AccessControlLevel.Public
+            getPatternIdents allEncompassingAccessibility (fun _accessibility pat -> getFunctionIdents pat) true pattern
         else
             Array.empty
     | _ -> Array.empty

@@ -12,7 +12,8 @@ let private getIdentifiers (args: AstNodeRuleParams) =
         if isNested args args.NodeIndex then
             Array.empty
         else
-            getPatternIdents AccessControlLevel.Public getFunctionIdents true pattern
+            let allEncompassingAccessibility = AccessControlLevel.Public
+            getPatternIdents allEncompassingAccessibility (fun _accessibility pat -> getFunctionIdents pat) true pattern
     | _ -> Array.empty
 
 let rule config =
