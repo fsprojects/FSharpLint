@@ -28,5 +28,6 @@
     <PackageReference Include="Argu" />
     <PackageReference Include="FSharp.Compiler.Service" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" />
+    <PackageReference Include="Microsoft.Build.Locator" />
   </ItemGroup>
 </Project>
