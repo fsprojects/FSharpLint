@@ -140,10 +140,10 @@
     <PackageReference Include="Ionide.ProjInfo.FCS" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" />
-    <PackageReference Include="Microsoft.Build.Framework" />
-    <PackageReference Include="Microsoft.Build.Locator" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" />
-    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Locator" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
   </ItemGroup>
 </Project>
