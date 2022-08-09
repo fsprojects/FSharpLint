@@ -20,6 +20,13 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="FSharp.Compiler.Service" />
     <PackageReference Include="Microsoft.Build.Locator" />
-    <PackageReference Include="NuGet.Frameworks" />
   </ItemGroup>
+
+  <!-- workaround for NuGet.Frameworks FileLoadException issue,
+       see https://github.com/dotnet/roslyn/issues/61454#issuecomment-1191209761 -->
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy SourceFiles="$(MSBuildSDKsPath)\..\NuGet.Frameworks.dll"
+          DestinationFolder="$(OutputPath)"
+          ContinueOnError="false" />
+  </Target>
 </Project>
