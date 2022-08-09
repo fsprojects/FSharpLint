@@ -29,7 +29,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
             | Member | Property ->
-                getPatternIdents Accessibility.Private getMemberIdents true pattern
+                getPatternIdents AccessControlLevel.Private getMemberIdents true pattern
             | _ -> Array.empty
         else
             Array.empty

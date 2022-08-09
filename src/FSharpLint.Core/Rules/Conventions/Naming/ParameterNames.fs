@@ -43,12 +43,12 @@ let private getIdentifiers (args:AstNodeRuleParams) =
                 let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
                 getPatternIdents accessibility (getValueOrFunctionIdents args.CheckInfo) true pattern
             | Member | Property ->
-                getPatternIdents Accessibility.Private getMemberIdents true pattern
+                getPatternIdents AccessControlLevel.Private getMemberIdents true pattern
             | _ -> Array.empty
         else
             Array.empty
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents Accessibility.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
+        getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | _ -> Array.empty
 
 let rule config =

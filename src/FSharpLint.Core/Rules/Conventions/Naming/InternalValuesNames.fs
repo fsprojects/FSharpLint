@@ -20,7 +20,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
         match List.tryLast longIdent.Lid with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
-            if isPublic = Accessibility.Internal then
+            if isPublic = AccessControlLevel.Internal then
                 (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else

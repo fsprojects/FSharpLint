@@ -25,7 +25,7 @@ let private getValueOrFunctionIdents _ pattern =
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents Accessibility.Private getValueOrFunctionIdents false pattern
+        getPatternIdents AccessControlLevel.Private getValueOrFunctionIdents false pattern
     | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
