@@ -24,7 +24,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
         match List.tryLast longIdent.Lid with
         | Some ident when singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
-            if isPublic = Accessibility.Public && isNotActivePattern ident then
+            if isPublic = AccessControlLevel.Public && isNotActivePattern ident then
                 (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else
@@ -35,7 +35,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents Accessibility.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
+        getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes || isExtern attributes) then
             match identifierTypeFromValData valData with

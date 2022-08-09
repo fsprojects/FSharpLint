@@ -179,16 +179,21 @@ let activePatternIdentifiers (identifier:Ident) =
     |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
 
-type Accessibility = 
+/// Specifies access control level as described in 
+/// https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/access-control .
+/// Higher levels also include lower levels, so e.g. identifier marked with Public 
+/// is also accessible in Internal and Private scopes.
+/// Public scope is the widest, then goes Internal, then Private.
+type AccessControlLevel = 
     | Public
     | Private
     | Internal
 
 let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
     let isSynAccessPublic = function
-        | Some(SynAccess.Public) | None -> Accessibility.Public
-        | Some(SynAccess.Private) -> Accessibility.Private
-        | Some(SynAccess.Internal) -> Accessibility.Internal
+        | Some(SynAccess.Public) | None -> AccessControlLevel.Public
+        | Some(SynAccess.Private) -> AccessControlLevel.Private
+        | Some(SynAccess.Internal) -> AccessControlLevel.Internal
 
     let rec getAccessibility state isPrivateWhenReachedBinding i =
         if i = 0 then state
@@ -206,12 +211,12 @@ let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
             | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
                 getAccessibility (isSynAccessPublic access) isPrivateWhenReachedBinding node.ParentIndex
             | TypeSimpleRepresentation(_)
-            | Pattern(_) -> Accessibility.Public
+            | Pattern(_) -> AccessControlLevel.Public
             | MemberDefinition(_) ->
-                if isPrivateWhenReachedBinding then Accessibility.Private
+                if isPrivateWhenReachedBinding then AccessControlLevel.Private
                 else getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
             | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
-                if isPrivateWhenReachedBinding then Accessibility.Private
+                if isPrivateWhenReachedBinding then AccessControlLevel.Private
                 else getAccessibility (isSynAccessPublic access) true node.ParentIndex
             | EnumCase(_)
             | TypeRepresentation(_)
@@ -231,7 +236,7 @@ let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
             | LambdaBody(_)
             | Expression(_) -> getAccessibility state true node.ParentIndex
 
-    getAccessibility Accessibility.Public false i
+    getAccessibility AccessControlLevel.Public false i
 
 
 /// Is an attribute with a given name?
@@ -282,8 +287,8 @@ let isInterface typeDef =
 
 let checkAccessibility currentAccessibility = function
     | Some(SynAccess.Public) | None -> currentAccessibility
-    | Some(SynAccess.Private) -> Accessibility.Private
-    | Some(SynAccess.Internal) -> Accessibility.Internal
+    | Some(SynAccess.Private) -> AccessControlLevel.Private
+    | Some(SynAccess.Internal) -> AccessControlLevel.Internal
 
 let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
@@ -302,11 +307,11 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
     // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
     isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
 
-type GetIdents<'t> = Accessibility -> SynPat -> 't []
+type GetIdents<'t> = AccessControlLevel -> SynPat -> 't []
 
 /// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
 /// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
-let rec getPatternIdents<'t> (accessibility:Accessibility) (getIdents:GetIdents<'t>) argsAreParameters (pattern:SynPat) =
+let rec getPatternIdents<'t> (accessibility:AccessControlLevel) (getIdents:GetIdents<'t>) argsAreParameters (pattern:SynPat) =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
         let identAccessibility = checkAccessibility accessibility access
@@ -321,11 +326,11 @@ let rec getPatternIdents<'t> (accessibility:Accessibility) (getIdents:GetIdents<
             | SynArgPats.NamePatPairs(pats, _) ->
                 pats
                 |> List.toArray
-                |> Array.collect (snd >> getPatternIdents Accessibility.Private getIdents false)
+                |> Array.collect (snd >> getPatternIdents AccessControlLevel.Private getIdents false)
             | SynArgPats.Pats(pats) ->
                 pats
                 |> List.toArray
-                |> Array.collect (getPatternIdents Accessibility.Private getIdents false)
+                |> Array.collect (getPatternIdents AccessControlLevel.Private getIdents false)
 
         // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
         if hasNoArgs || argsAreParameters then

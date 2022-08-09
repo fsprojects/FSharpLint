@@ -20,7 +20,7 @@ let private getValueOrFunctionIdents typeChecker accessibility pattern =
         match List.tryLast longIdent.Lid with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
-            if accessibility = Accessibility.Private then
+            if accessibility = AccessControlLevel.Private then
                 (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else
@@ -31,7 +31,7 @@ let private getValueOrFunctionIdents typeChecker accessibility pattern =
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
-        getPatternIdents Accessibility.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
+        getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
