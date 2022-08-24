@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - '*' # Publish on any new tag
+      - 'v*' # Publish on any new tag
 
 jobs:
   build:
