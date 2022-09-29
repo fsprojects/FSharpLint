@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.3] - 2022-09-29
+
+- Add new rule FavourStaticEmptyFields #530 [@janus]
+- Fix false negative in GenericTypesNames #551 #552 [@janus]
+- Fix GenericTypesNames not honoring configuation #552 [@janus]
+- Stop ignoring errors when parsing fsharplint.json #550 #553 [@janus]
+- Fix false negative in RedundantNewKeyword #555 #556 [@janus]
+
 ## [0.21.2] - 2022-04-07
 
 - Fix for false positive in FailwithBadUsage #539 [@janus]
