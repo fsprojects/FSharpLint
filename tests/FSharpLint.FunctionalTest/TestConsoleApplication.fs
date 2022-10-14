@@ -30,7 +30,7 @@ module Tests =
                 "Release"
             #endif
 
-        let dll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> binDir </> "net5.0" </> "dotnet-fsharplint.dll"
+        let dll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> binDir </> "net5.0" </> "fsharplint-tool.dll"
 
         let startInfo = ProcessStartInfo
                                 (FileName = "dotnet",

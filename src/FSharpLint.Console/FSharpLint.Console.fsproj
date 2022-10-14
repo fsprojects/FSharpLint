@@ -9,7 +9,7 @@
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;cli</PackageTags>
     <PackageType>DotNetCliTool</PackageType>
     <PackAsTool>true</PackAsTool>
-    <AssemblyName>dotnet-fsharplint</AssemblyName>
+    <AssemblyName>fsharplint-tool</AssemblyName>
     <RootNamespace>FSharpLint.Console</RootNamespace>
     <IsPackable>true</IsPackable>
     <RollForward>Major</RollForward>
