@@ -6,7 +6,7 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
-let private getValueOrFunctionIdents typeChecker isPublic pattern =
+let private getValueOrFunctionIdents typeChecker accessControlLevel pattern =
     let checkNotUnionCase ident = fun () ->
         typeChecker
         |> Option.map (fun checker -> isNotUnionCase checker ident)
@@ -20,7 +20,7 @@ let private getValueOrFunctionIdents typeChecker isPublic pattern =
         match List.tryLast longIdent.Lid with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
-            if isPublic = AccessControlLevel.Internal then
+            if accessControlLevel = AccessControlLevel.Internal then
                 (ident, ident.idText, Some checkNotUnionCase)
                 |> Array.singleton
             else
@@ -34,7 +34,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
+                let accessibility = getAccessControlLevel args.SyntaxArray args.NodeIndex
                 getPatternIdents accessibility (getValueOrFunctionIdents args.CheckInfo) true pattern
             | _ -> Array.empty
         else
