@@ -36,7 +36,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
-                let accessibility = getAccessibility args.SyntaxArray args.NodeIndex
+                let accessibility = getAccessControlLevel args.SyntaxArray args.NodeIndex
                 getPatternIdents accessibility (getValueOrFunctionIdents args.CheckInfo) true pattern
             | _ -> Array.empty
         else

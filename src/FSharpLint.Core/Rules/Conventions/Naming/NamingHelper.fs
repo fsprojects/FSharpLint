@@ -189,8 +189,8 @@ type AccessControlLevel =
     | Private
     | Internal
 
-let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
-    let isSynAccessPublic = function
+let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
+    let resolveAccessControlLevel = function
         | Some(SynAccess.Public) | None -> AccessControlLevel.Public
         | Some(SynAccess.Private) -> AccessControlLevel.Private
         | Some(SynAccess.Internal) -> AccessControlLevel.Internal
@@ -209,7 +209,7 @@ let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
             | Pattern(SynPat.Named(_, _, _, access, _))
             | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                getAccessibility (isSynAccessPublic access) isPrivateWhenReachedBinding node.ParentIndex
+                getAccessibility (resolveAccessControlLevel access) isPrivateWhenReachedBinding node.ParentIndex
             | TypeSimpleRepresentation(_)
             | Pattern(_) -> AccessControlLevel.Public
             | MemberDefinition(_) ->
@@ -217,7 +217,7 @@ let getAccessibility (syntaxArray:AbstractSyntaxArray.Node []) i =
                 else getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
             | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
                 if isPrivateWhenReachedBinding then AccessControlLevel.Private
-                else getAccessibility (isSynAccessPublic access) true node.ParentIndex
+                else getAccessibility (resolveAccessControlLevel access) true node.ParentIndex
             | EnumCase(_)
             | TypeRepresentation(_)
             | Type(_)
