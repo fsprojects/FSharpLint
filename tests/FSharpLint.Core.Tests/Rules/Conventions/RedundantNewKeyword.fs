@@ -9,38 +9,30 @@ type TestConventionsRedundantNewKeyword() =
 
     [<Test>]
     member this.``Lint gives suggestion when new keyword is not required.``() =
-        this.Parse(
-            """
+        this.Parse("""
 module Program
 
-let _ = new System.Version()"""
-        )
+let _ = new System.Version()""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
-    member this.``New keyword not considered unnecassery if used with a constructor of a type which implements IDisposable.``
-        ()
-        =
-        this.Parse(
-            """
+    member this.``New keyword not considered unnecassery if used with a constructor of a type which implements IDisposable.``() =
+        this.Parse("""
 module Program
 
-let _ = new System.IO.MemoryStream()"""
-        )
+let _ = new System.IO.MemoryStream()""")
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``Quick fix for unnecassery new keyword.``() =
-        let source =
-            """
+        let source = """
 module Program
 
 let _ = new System.Version()"""
 
-        let expected =
-            """
+        let expected = """
 module Program
 
 let _ = System.Version()"""
@@ -50,34 +42,28 @@ let _ = System.Version()"""
 
     [<Test>]
     member this.``new keyword is not required (1).``() =
-        this.Parse(
-            """
+        this.Parse("""
 module Program
     let foo =
-        new System.Collections.Generic.Dictionary<string, string>() |> ignore"""
-        )
+        new System.Collections.Generic.Dictionary<string, string>() |> ignore""")
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.``new keyword is not required (2).``() =
-        this.Parse(
-            """
+        this.Parse("""
 module Program
     let foo =
-        new Guid() |> ignore"""
-        )
+        new Guid() |> ignore""")
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.``new keyword is not required (3).``() =
-        this.Parse(
-            """
+        this.Parse("""
 module Program
     let foo =
-        new Int32() |> ignore"""
-        )
+        new Int32() |> ignore""")
 
         Assert.IsTrue this.ErrorsExist
 
