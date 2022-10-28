@@ -2,7 +2,6 @@ module FSharpLint.Core.Tests.Rules.Conventions.CyclomaticComplexity
 
 open NUnit.Framework
 open FSharpLint.Rules.CyclomaticComplexity
-open System
 
 /// The max cyclomatic complexity as configured in these tests.
 [<Literal>]
@@ -149,7 +148,7 @@ type TestConventionsCyclomaticComplexity() =
     [<TestCaseSource(nameof(TestConventionsCyclomaticComplexity.AtMaxComplexityTestCasesSource))>]
     member this.EnsureNoErrorWhenComplexityBelowThreshold(code) =
         this.Parse code
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsTrue(this.NoErrorsExist)
       
     /// Verifies that flags are raised on source code that has cyclomatic complexity > maxComplexity.
     [<TestCaseSource(nameof(TestConventionsCyclomaticComplexity.FailureCasesSource))>]
@@ -196,7 +195,7 @@ let f() =
     let g() =
 {makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity / 2) |> indent 8}""" 
         this.Parse code
-        Assert.AreEqual(0, this.ErrorRanges.Length)
+        Assert.IsTrue this.NoErrorsExist
         
     /// Verifies that the cyclomatic complexity is calculated on functions independently by checking that a function that comes after a function with a cyclomatic complexity that is flagged as too high need not be flagged.
     [<Test>]
@@ -221,7 +220,7 @@ let f() =
 {makeMatchSnippet MaxComplexity |> indent 8}
     ()"""
         this.Parse code
-        Assert.AreEqual(0, this.ErrorRanges.Length)
+        Assert.IsTrue this.NoErrorsExist
         
        
     /// Verifies that the cyclomatic complexity is calculated on nested functions independently by checking that a nested function that comes after another nested function with a cyclomatic complexity that is flagged as too high need not be flagged.
@@ -232,7 +231,22 @@ let f() =
     let g() =
 {(makeMatchSnippet (MaxComplexity+1)) |> indent 8} 
     let h() =
-{makeMatchSnippet (MaxComplexity) |> indent 8} 
+{makeMatchSnippet MaxComplexity |> indent 8} 
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    
         this.Parse code
         Assert.AreEqual(2, this.ErrorRanges.Length)
+        
+    /// Verifies that the multiple messages are not provided for a single function.
+    [<Test>]
+    member this.EnsureRedundantWarningsNotReported() =
+        // generates a vapid match clause
+        let genMatchClause i = $"""| "{i}" -> match str with
+    | "A" -> ()
+    | "B" -> ()"""
+        // create a snippet of code with 10 match clauses
+        let matchClauses = [ 1..10 ] |> List.map genMatchClause |> List.map (indent 4) |> String.concat NewLine
+        let code = """Module Program
+let f (str: string) =
+    match str with""" + NewLine + matchClauses
+        this.Parse code
+        Assert.AreEqual(1, this.ErrorRanges.Length)

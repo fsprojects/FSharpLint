@@ -1,7 +1,8 @@
 module FSharpLint.Rules.CyclomaticComplexity
     
 open System
-open System.IO
+open System.Collections.Generic
+open System.Linq
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -16,7 +17,7 @@ type Config = {
 }
 
 /// The scope of a binding. 
-type BindingScope =
+type private BindingScope =
     {
        /// The Node corresponding to the binding.
        Node: AstNode
@@ -26,8 +27,68 @@ type BindingScope =
        Complexity: int
     }
 
+type private BindingScopeComparer() =
+    interface IComparer<BindingScope> with
+        member this.Compare(left, right) =
+            let leftStart = left.Binding.RangeOfBindingWithoutRhs.Start
+            let rightStart = right.Binding.RangeOfBindingWithoutRhs.Start
+            let leftTuple : ValueTuple<int, int, int> = leftStart.Line, leftStart.Column, left.Complexity
+            let rightTuple : ValueTuple<int, int, int> = rightStart.Line, rightStart.Column, right.Complexity
+            leftTuple.CompareTo rightTuple
+    
+///  A two-tiered stack-like structure for containing BindingScopes.
+type private BindingStack(maxComplexity: int) =
+    let mutable tier1_ = []
+    let mutable tier2_ = SortedSet<BindingScope>(BindingScopeComparer())
+    
+    member this.Push (args:AstNodeRuleParams) (bs: BindingScope) =
+        // if the node is a child of the current binding scope
+        let isChildOfCurrent = if List.isEmpty tier1_ then
+                                    false
+                                else
+                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(tier1_.Head.Node, x)) |> Option.isSome
+        // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
+        if not isChildOfCurrent && not (List.isEmpty tier1_) then
+            let popped = tier1_.Head
+            tier1_ <- tier1_.Tail
+            if popped.Complexity > maxComplexity then
+                tier2_.Add popped |> ignore
+        // finally, push the item on to the stack
+        tier1_ <- bs::tier1_
+        
+    member this.IncrComplexityOfCurrentScope incr =
+        let h = tier1_.Head
+        let complexity = h.Complexity + incr
+        tier1_ <- {h with Complexity = complexity}::tier1_.Tail
+        
+    interface IEnumerable<BindingScope> with
+        member this.GetEnumerator() =
+            let cleanedUp =
+                tier1_
+                |> List.filter (fun scope -> scope.Complexity > maxComplexity)
+                |> List.sortByDescending (fun scope -> scope.Complexity) // sort in descending order by complexity
+                |> List.distinctBy (fun scope -> scope.Binding.RangeOfBindingWithRhs.Start) // throw away any extraneous elements with the same start position but a lower complexity
+            let enum1 = cleanedUp :> IEnumerable<BindingScope>
+            let enum2 = tier2_ :> IEnumerable<BindingScope>
+            Enumerable.Concat(enum1, enum2).GetEnumerator()
+            
+        member this.GetEnumerator(): Collections.IEnumerator = (this :> IEnumerable<BindingScope> :> System.Collections.IEnumerable).GetEnumerator()
+        
+    /// Clears the stack.
+    member this.Clear() =
+        tier1_ <- []
+        tier2_.Clear()
+
 /// A stack to track the current cyclomatic complexity of a binding scope.
-let mutable private BindingStack : BindingScope list = []
+let mutable private bindingStackOpt : BindingStack option = None
+
+/// gets the global binding stack 
+let private getBindingStack (maxComplexity: int) =
+    match bindingStackOpt with
+    | Some bs -> bs
+    | None -> let bs = BindingStack maxComplexity
+              bindingStackOpt <- Some bs
+              bs
    
 /// Determines the number of cases in a match clause.
 let private countCasesInMatchClause (clause: SynMatchClause) =
@@ -41,11 +102,6 @@ let private countCasesInMatchClause (clause: SynMatchClause) =
     // apply countCases to the given clause.
     match clause with 
     | SynMatchClause(pat, _, _, _, _) -> countCases pat 0
-
-let private increaseComplexity incr =
-    let h = BindingStack.Head
-    let complexity = h.Complexity + incr
-    BindingStack <- {h with Complexity = complexity}::BindingStack
 
 /// Boolean operator functions.
 let private boolFunctions = Set.ofList ["op_BooleanOr"; "op_BooleanAnd"]
@@ -89,20 +145,8 @@ let private countBooleanOperators expression =
 
 /// Runner for the rule. 
 let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
-    let popOffBindingStack() =
-        if BindingStack.Length > 0 then 
-            let popped = BindingStack.Head
-            BindingStack <- BindingStack.Tail
-            // if the complexity within the scope of the binding is greater than the max complexity, report it
-            if popped.Complexity > config.MaxComplexity then
-                let errorFormatString = Resources.GetString("RulesCyclomaticComplexityError")
-                let errMsg = String.Format(errorFormatString, popped.Complexity, config.MaxComplexity)
-                Some { Range = popped.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = [] }
-            else
-                None
-        else
-            None
-        
+    let bindingStack = getBindingStack config.MaxComplexity
+    
     let mutable warningDetails = None
     let node = args.AstNode
     let parentIndex = args.SyntaxArray.[args.NodeIndex].ParentIndex
@@ -115,18 +159,10 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
     let bindingOpt = match node with
                      | AstNode.Binding binding -> Some binding
                      | _ -> None
-    // if the node is a child of the current binding scope
-    let isChildOfCurrent = if List.isEmpty BindingStack then
-                                   false
-                               else
-                                   args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(BindingStack.Head.Node, x)) |> Option.isSome
-    // if the node is not a child and the stack isn't empty, we're finished with the current binding scope at the head of the stack, so pop it off
-    if not isChildOfCurrent && List.length BindingStack > 0 then
-        warningDetails <- popOffBindingStack()
     
     // if the node is a binding, push it onto the stack
     match bindingOpt with
-    | Some binding -> BindingStack <- { Node = node; Binding = binding; Complexity = 0 }::BindingStack
+    | Some binding -> bindingStack.Push args { Node = node; Binding = binding; Complexity = 0 }
     | None -> ()
          
     // if not metadata, match the node against an expression which increments the complexity
@@ -135,40 +171,43 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
         | AstNode.Expression expression ->
             match expression with
             | SynExpr.For _ ->
-                increaseComplexity 1
+                bindingStack.IncrComplexityOfCurrentScope 1
             | SynExpr.ForEach _ ->
-                increaseComplexity 1
+                bindingStack.IncrComplexityOfCurrentScope 1
             | SynExpr.While(_, condition, _, _) ->
-                increaseComplexity (1 + countBooleanOperators condition) // include the number of boolean operators in the while condition
+                bindingStack.IncrComplexityOfCurrentScope (1 + countBooleanOperators condition) // include the number of boolean operators in the while condition
             | SynExpr.IfThenElse(condition, _, _, _, _, _, _) ->
-                 increaseComplexity (1 + countBooleanOperators condition) // include the number of boolean operators in the condition
+                 bindingStack.IncrComplexityOfCurrentScope (1 + countBooleanOperators condition) // include the number of boolean operators in the condition
             | SynExpr.MatchBang(_, _, clauses, _)
             | SynExpr.MatchLambda(_, _, clauses, _, _)
             | SynExpr.Match(_, _, clauses, _) ->
                 let numCases = clauses |> List.sumBy countCasesInMatchClause // determine the number of cases in the match expression 
-                increaseComplexity (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
+                bindingStack.IncrComplexityOfCurrentScope (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
             | _ -> ()
         | _ -> ()
     
     // if the last node to be processed, pop everything off the stack
     if args.NodeIndex >= args.SyntaxArray.Length-1 then
-        seq {
-            match warningDetails with
-            | Some x -> yield x
-            | None -> ()
-            while not BindingStack.IsEmpty do
-                match popOffBindingStack() with
-                | Some x -> yield x
-                | None -> ()
-        } |> Seq.toArray
+            let fromStack = bindingStack
+                            |> Seq.sortBy (fun scope -> // sort by order of start position, for reporting
+                                 let pos = scope.Binding.RangeOfBindingWithRhs.Start
+                                 pos.Column, pos.Line)
+                            |> Seq.map (fun scope -> // transform into WarningDetails
+                                let errMsg = String.Format(Resources.GetString("RulesCyclomaticComplexityError"), scope.Complexity, config.MaxComplexity)
+                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = [] })
+                            |> Seq.toList
+            let ret = match warningDetails with
+                      | Some x -> x::fromStack
+                      | None -> fromStack
+            ret |> List.toArray
     else
-        match warningDetails with
-        | Some x -> [|x|]
-        | None -> Array.empty
+        Array.empty
   
 /// Resets call stack after a call to runner.
 let cleanup () =
-    BindingStack <- []
+    match bindingStackOpt with
+    | Some bs -> bs.Clear()
+    | None _ -> ()
 
 /// Generator function for a rule instance.
 let rule config =
