@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Rules.AsyncIgnoreWithType
 
 open FSharp.Compiler.Syntax
+open FSharpLint.Framework
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
@@ -17,7 +18,7 @@ let runner (args:AstNodeRuleParams) =
                     if ident.[0].ToString().Equals("Async") 
                         && ident.[1].ToString().Equals("Ignore") then
                         { Range = range
-                          Message = ""
+                          Message = Resources.GetString "RulesAsyncIgnoreWithType"
                           SuggestedFix = None
                           TypeChecks = List.Empty } |> Array.singleton
                     else 
