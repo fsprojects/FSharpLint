@@ -273,6 +273,7 @@
             "symbol": "this"
         }
     },
+    "asyncIgnoreWithType": { "enabled": false},
     "avoidTooShortNames": { "enabled": false },
     "indentation": {
         "enabled": false

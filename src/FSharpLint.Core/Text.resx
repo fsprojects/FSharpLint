@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="RulesAsyncIgnoreWithType" xml:space="preserve">
+    <value>You should use Async.Ignore with specified type</value>
+  </data>
 </root>

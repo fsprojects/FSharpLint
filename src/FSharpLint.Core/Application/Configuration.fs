@@ -307,6 +307,7 @@ with
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
       avoidTooShortNames:EnabledConfig option
+      asyncIgnoreWithType:EnabledConfig option
       redundantNewKeyword:EnabledConfig option
       favourStaticEmptyFields:EnabledConfig option
       nestedStatements:RuleConfig<NestedStatements.Config> option
@@ -325,6 +326,7 @@ with
         [|
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
             this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray           
+            this.asyncIgnoreWithType |> Option.bind (constructRuleIfEnabled AsyncIgnoreWithType.rule) |> Option.toArray  
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
             this.favourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule) |> Option.toArray
@@ -394,6 +396,7 @@ type Configuration =
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
       AvoidTooShortNames:EnabledConfig option
+      AsyncIgnoreWithType:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
       FavourReRaise:EnabledConfig option
       FavourStaticEmptyFields:EnabledConfig option
@@ -478,6 +481,7 @@ with
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
+        AsyncIgnoreWithType = None
         RedundantNewKeyword = None
         FavourReRaise = None
         FavourStaticEmptyFields = None
@@ -625,6 +629,7 @@ let flattenConfig (config:Configuration) =
             config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+            config.AsyncIgnoreWithType |> Option.bind (constructRuleIfEnabled AsyncIgnoreWithType.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
             config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
             config.FavourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule)
