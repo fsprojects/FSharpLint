@@ -23,6 +23,16 @@ let private runner (args: AstNodeRuleParams) =
           Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
           SuggestedFix = Some suggestedFix
           TypeChecks = [] }
+    
+    let generateErrorAsyncIgnore (ident: LongIdent) (range) =
+        if ident.[0].ToString().Equals("Async") 
+            && ident.[1].ToString().Equals("Ignore") then
+            { Range = range
+              Message = Resources.GetString "RulesAsyncIgnoreWithType"
+              SuggestedFix = None
+              TypeChecks = List.Empty } |> Array.singleton
+        else 
+            Array.empty
 
     let isTyped expression identifier range text =
         match expression with
@@ -46,6 +56,17 @@ let private runner (args: AstNodeRuleParams) =
         | _ ->
             generateError identifier.idText range identifier.idText
             |> Array.singleton
+    | AstNode.Expression(SynExpr.DoBang(expr, _)) ->
+        match expr with
+        | SynExpr.App(_, _, _, ignoreExpr, _) ->
+            match ignoreExpr with
+            | SynExpr.LongIdent(_,LongIdentWithDots(idents, _), _, range) ->
+                generateErrorAsyncIgnore idents range
+            | _ -> Array.empty
+        | _ -> 
+            Array.empty
+    | _ ->
+        Array.empty
     | _ -> Array.empty
 
 /// Checks if any code uses untyped ignore
