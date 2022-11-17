@@ -86,3 +86,4 @@ let AsyncExceptionWithoutReturn = identifier 78
 let SuggestUseAutoProperty = identifier 79
 let UnnestedFunctionNames = identifier 80
 let NestedFunctionNames = identifier 81
+let UsedUnderscorePrefixedElements = identifier 82
