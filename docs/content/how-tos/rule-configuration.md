@@ -117,3 +117,4 @@ The following rules can be specified for linting.
 - [FavourConsistentThis (FL0074)](rules/FL0074.html)
 - [AvoidTooShortNames (FL0075)](rules/FL0075.html)
 - [FavourStaticEmptyFields (FL0076)](rules/FL0076.html)
+- [UsedUnderscorePrefixedElements (FL0077)](rules/FL0077.html)
