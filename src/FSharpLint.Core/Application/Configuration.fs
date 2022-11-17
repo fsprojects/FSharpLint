@@ -637,6 +637,7 @@ let flattenConfig (config:Configuration) =
             config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
+            config.UsedUnderscorePrefixedElements |> Option.bind (constructRuleIfEnabled UsedUnderscorePrefixedElements.rule)
             config.FailwithBadUsage |> Option.bind (constructRuleIfEnabled FailwithBadUsage.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
             config.FailwithWithSingleArgument |> Option.bind (constructRuleIfEnabled FailwithWithSingleArgument.rule)
