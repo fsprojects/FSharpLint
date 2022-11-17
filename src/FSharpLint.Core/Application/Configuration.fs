@@ -404,6 +404,7 @@ type Configuration =
       CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       ReimplementsFunction:EnabledConfig option
       CanBeReplacedWithComposition:EnabledConfig option
+      UsedUnderscorePrefixedElements:EnabledConfig option
       FailwithBadUsage:EnabledConfig option
       RaiseWithSingleArgument:EnabledConfig option
       FailwithWithSingleArgument:EnabledConfig option
@@ -488,6 +489,7 @@ with
         CyclomaticComplexity = None
         ReimplementsFunction = None
         CanBeReplacedWithComposition = None
+        UsedUnderscorePrefixedElements = None
         FailwithWithSingleArgument = None
         FailwithBadUsage = None
         RaiseWithSingleArgument = None
