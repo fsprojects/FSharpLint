@@ -319,7 +319,8 @@ type ConventionsConfig =
       numberOfItems:NumberOfItemsConfig option
       binding:BindingConfig option
       favourReRaise:EnabledConfig option
-      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option }
+      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
+      usedUnderscorePrefixedElements:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -333,6 +334,7 @@ with
             this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
             this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
             this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
+            this.usedUnderscorePrefixedElements |> Option.bind (constructRuleIfEnabled UsedUnderscorePrefixedElements.rule) |> Option.toArray
             this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
