@@ -10,7 +10,24 @@ open FSharpLint.Framework.Rules
 
 
 let runner (args:AstNodeRuleParams) =
-    Array.empty
+    printfn "AstNode: %A" args.AstNode
+    let error =
+      match args.AstNode with
+      | AstNode.Expression (SynExpr.LetOrUse (isRecursive, isUse, bindings, body, range)) ->
+           match bindings with
+           | head ->
+                ()
+           | _ ->
+               ()
+          let parents = args.GetParents 5
+          printfn "%A" parents
+          Array.empty
+          // checkRecursiveAsyncFunction args range expr parents
+      | _ -> Array.empty
+
+    printfn "----------------"
+
+    error
 
 let rule =
     { Name = "UsedUnderscorePrefixedElements"
