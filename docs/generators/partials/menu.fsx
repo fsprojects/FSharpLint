@@ -58,9 +58,9 @@ let menu (ctx : SiteContents) (page: string) =
       ]
     ]
 
-  let renderShortucuts =
+  let renderShortcuts =
     section [Id "shortcuts"] [
-        h3 [] [!! "Shortucts"]
+        h3 [] [!! "Shortcuts"]
         ul [] [
           for s in shortcuts do
             yield
@@ -96,7 +96,7 @@ let menu (ctx : SiteContents) (page: string) =
     ]
     div [Class "highlightable"] [
       ul [Class "topics"] menuHeader
-      renderShortucuts
+      renderShortcuts
       renderFooter
     ]
   ]
