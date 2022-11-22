@@ -12,8 +12,10 @@ type TestConventionsUsedUnderscorePrefixedElementsZahra() =
     member this.``Lint flags record member(s) with type hints``() =
         this.Parse """
 module MyClass =
-    let _random = System.Random()
-    member val Random = (_random.Next() |> Some) with get, set """
+    let MyFunc =
+        let _random = System.Random()
+        printfn "%A" _random
+        () """
 
         Assert.IsTrue this.ErrorsExist
 
