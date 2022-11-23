@@ -7,7 +7,7 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let CheckTwice (previousIdent: Ident) (body: SynExpr) =
+let private checkUsedIdent (previousIdent: Ident) (body: SynExpr) =
     match body with
     | SynExpr.Sequential(debugPointAtSequential, isTrueSeq, synExpr, expr2, range) ->
         match synExpr with
@@ -40,7 +40,7 @@ let runner (args:AstNodeRuleParams) =
                 match headPat with
                 | SynPat.Named(synPat, ident, isSelfIdentifier, synAccessOption, range) ->
                     if ident.idText.StartsWith "_" then
-                        CheckTwice ident body
+                        checkUsedIdent ident body
                     else
                         Array.empty
                 | _ ->
