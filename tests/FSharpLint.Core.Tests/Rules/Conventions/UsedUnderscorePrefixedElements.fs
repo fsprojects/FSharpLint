@@ -29,5 +29,16 @@ module MyModule =
         () """
 
         Assert.IsFalse this.ErrorsExist
+        
+    [<Test>]
+    member this.``Using variable without underscore prefix``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let random = System.Random()
+        printfn "%A" random
+        () """
+
+        Assert.IsFalse this.ErrorsExist
 
 
