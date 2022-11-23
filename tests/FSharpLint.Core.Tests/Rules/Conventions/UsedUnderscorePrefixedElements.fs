@@ -9,7 +9,7 @@ type TestConventionsUsedUnderscorePrefixedElementsZahra() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UsedUnderscorePrefixedElements.rule)
 
     [<Test>]
-    member this.``Lint flags record member(s) with type hints``() =
+    member this.``Use variable with underscore prefix``() =
         this.Parse """
 module MyModule =
     let MyFunc () =
@@ -20,11 +20,14 @@ module MyModule =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.``New keyword not considered unnecassery if used with a constructor of a type which implements IDisposable.``() =
-        this.Parse("""
-module Program
+    member this.``Not using variable with underscore prefix``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let _random = System.Random()
+        printfn "_random is not used here"
+        () """
 
-let _ = new System.IO.MemoryStream()""")
+        Assert.IsFalse this.ErrorsExist
 
-        this.AssertNoWarnings()
 
