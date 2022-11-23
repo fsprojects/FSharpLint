@@ -1,8 +1,8 @@
 module FSharpLint.Core.Tests.Rules.Conventions.UsedUnderscorePrefixedElements
 
 open NUnit.Framework
+
 open FSharpLint.Rules
-open System
 
 [<TestFixture>]
 type TestConventionsUsedUnderscorePrefixedElements() =
