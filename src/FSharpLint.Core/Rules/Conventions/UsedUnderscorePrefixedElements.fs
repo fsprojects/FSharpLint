@@ -39,7 +39,7 @@ let runner (args:AstNodeRuleParams) =
             | SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding) ->
                 match headPat with
                 | SynPat.Named(synPat, ident, isSelfIdentifier, synAccessOption, range) ->
-                    if ident.idText.StartsWith("_") then
+                    if ident.idText.StartsWith "_" then
                         CheckTwice ident body
                     else
                         Array.empty
