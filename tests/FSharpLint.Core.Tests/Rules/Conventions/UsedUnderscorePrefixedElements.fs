@@ -11,8 +11,8 @@ type TestConventionsUsedUnderscorePrefixedElementsZahra() =
     [<Test>]
     member this.``Lint flags record member(s) with type hints``() =
         this.Parse """
-module MyClass =
-    let MyFunc =
+module MyModule =
+    let MyFunc () =
         let _random = System.Random()
         printfn "%A" _random
         () """
