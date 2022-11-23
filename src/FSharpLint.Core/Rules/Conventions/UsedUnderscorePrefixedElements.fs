@@ -18,7 +18,8 @@ let runner (args:AstNodeRuleParams) =
             | SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding) ->
                 match headPat with
                 | SynPat.Named(synPat, ident, isSelfIdentifier, synAccessOption, range) ->
-                    idents <- List.append idents [ident.idText]
+                    if ident.idText.StartsWith("_") then
+                        idents <- List.append idents [ident.idText]
                 | _ ->
                     ()
                     
