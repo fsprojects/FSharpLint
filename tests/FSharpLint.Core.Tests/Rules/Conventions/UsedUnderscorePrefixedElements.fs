@@ -5,7 +5,7 @@ open FSharpLint.Rules
 open System
 
 [<TestFixture>]
-type TestConventionsUsedUnderscorePrefixedElementsZahra() =
+type TestConventionsUsedUnderscorePrefixedElements() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UsedUnderscorePrefixedElements.rule)
 
     [<Test>]
