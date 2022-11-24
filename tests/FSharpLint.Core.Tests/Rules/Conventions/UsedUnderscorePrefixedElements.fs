@@ -49,5 +49,15 @@ type CustomerName(firstName) =
         printfn "%A" this._FirstName"""
 
         Assert.IsFalse this.ErrorsExist
+        
+        
+    member this.``Using private member with underscore prefix``() =
+        this.Parse """
+type CustomerName(firstName) =
+    member private this._FirstName = firstName
+    member this.MyFunc () =
+        printfn "%A" this._FirstName"""
+
+        Assert.IsFalse this.ErrorsExist
 
 
