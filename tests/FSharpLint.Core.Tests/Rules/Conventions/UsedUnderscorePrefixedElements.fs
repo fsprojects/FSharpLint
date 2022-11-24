@@ -60,4 +60,12 @@ type CustomerName(firstName) =
 
         Assert.IsFalse this.ErrorsExist
 
+    member this.``Using private property with underscore prefix``() =
+        this.Parse """
+type CustomerName(firstName) =
+    member val private _FirstName = firstName with get, set
+    
+    member this.MyFunc () =
+        printfn "%A" this._FirstName"""
 
+        Assert.IsFalse this.ErrorsExist
