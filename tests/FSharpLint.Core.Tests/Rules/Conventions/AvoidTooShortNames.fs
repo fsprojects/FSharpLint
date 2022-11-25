@@ -95,3 +95,15 @@ type TorStreamCipher(keyBytes: array<byte>, ivOpt: Option<array<byte>>) =
  """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_7() =
+        this.Parse """
+module Base32Util =
+    let DecodeBase32 text =
+        let rec parse result input =
+            result
+        [ for c in text -> c ] |> parse List.Empty |> List.toArray
+ """
+
+        Assert.IsTrue this.ErrorsExist
