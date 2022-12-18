@@ -9,9 +9,9 @@ open FSharpLint.Framework.Rules
 
 let private checkUsedIdent (previousIdent: Ident) (body: SynExpr) =
     match body with
-    | SynExpr.Sequential(debugPointAtSequential, isTrueSeq, synExpr, expr2, range) ->
+    | SynExpr.Sequential(_debugPointAtSequential, _isTrueSeq, synExpr, _expr2, _range) ->
         match synExpr with
-        | SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range) ->
+        | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, argExpr, range) ->
             match argExpr with
             | SynExpr.Ident ident ->
                 if previousIdent.idText = ident.idText then
@@ -34,11 +34,11 @@ let runner (args: AstNodeRuleParams) =
     
     let error =
         match args.AstNode with
-        | AstNode.Expression (SynExpr.LetOrUse (isRecursive, isUse, bindings, body, range)) ->
+        | AstNode.Expression (SynExpr.LetOrUse (_isRecursive, _isUse, bindings, body, _range)) ->
             match List.tryHead bindings with
-            | Some(SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding)) ->
+            | Some(SynBinding(_synAccessOption, _synBindingKind, _mustInline, _isMutable, _synAttributeLists, _preXmlDoc, _synValData, headPat, _synBindingReturnInfoOption, _synExpr, _range, _debugPointAtBinding)) ->
                 match headPat with
-                | SynPat.Named(synPat, ident, isSelfIdentifier, synAccessOption, range) ->
+                | SynPat.Named(_synPat, ident, _isSelfIdentifier, _synAccessOption, _range) ->
                     if ident.idText.StartsWith "_" then
                         checkUsedIdent ident body
                     else
