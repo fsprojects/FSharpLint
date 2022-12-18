@@ -9,7 +9,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    
+    printfn "%A" args.AstNode
     let error = Array.empty
       
     error
