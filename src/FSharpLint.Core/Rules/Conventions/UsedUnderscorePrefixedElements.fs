@@ -1,6 +1,7 @@
 module FSharpLint.Rules.UsedUnderscorePrefixedElements
 
 open System
+
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
