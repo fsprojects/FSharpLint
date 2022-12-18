@@ -10,4 +10,11 @@ type TestConventionsAvoidOnePipeOperatorZahra() =
 
     [<Test>]
     member this.``Use pipe operator once``() =
-        Assert.IsTrue true
+        this.Parse """
+let someFunc someParam =
+    someParam
+    |> someOtherFunc
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
