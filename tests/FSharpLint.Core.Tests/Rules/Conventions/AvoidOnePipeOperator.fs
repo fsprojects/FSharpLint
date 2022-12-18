@@ -5,9 +5,9 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsAvoidOnePipeOperator() =
+type TestConventionsAvoidOnePipeOperatorZahra() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AvoidOnePipeOperator.rule)
 
     [<Test>]
     member this.``Use pipe operator once``() =
-        Assert.Pass
+        Assert.IsTrue true
