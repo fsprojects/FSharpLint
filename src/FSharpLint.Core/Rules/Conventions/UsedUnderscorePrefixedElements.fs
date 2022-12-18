@@ -19,7 +19,7 @@ let private checkUsedIdent (previousIdent: Ident) (body: SynExpr) =
                         Range = range
                         Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
                         SuggestedFix = None
-                        TypeChecks = []
+                        TypeChecks = List.Empty
                     } |> Array.singleton
                 else
                     Array.empty
@@ -28,15 +28,15 @@ let private checkUsedIdent (previousIdent: Ident) (body: SynExpr) =
         | _ ->
             Array.empty
     | _ ->
-            Array.empty  
+        Array.empty  
 
-let runner (args:AstNodeRuleParams) =
+let runner (args: AstNodeRuleParams) =
     
     let error =
         match args.AstNode with
         | AstNode.Expression (SynExpr.LetOrUse (isRecursive, isUse, bindings, body, range)) ->
-            match bindings.[0] with
-            | SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding) ->
+            match List.tryHead bindings with
+            | Some(SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding)) ->
                 match headPat with
                 | SynPat.Named(synPat, ident, isSelfIdentifier, synAccessOption, range) ->
                     if ident.idText.StartsWith "_" then
@@ -45,6 +45,7 @@ let runner (args:AstNodeRuleParams) =
                         Array.empty
                 | _ ->
                     Array.empty
+            | _ -> Array.empty
         | _ -> Array.empty
         
     error
