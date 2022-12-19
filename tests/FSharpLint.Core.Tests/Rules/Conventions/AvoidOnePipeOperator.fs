@@ -18,3 +18,14 @@ let someFunc someParam =
 
         Assert.IsTrue this.ErrorsExist
 
+    [<Test>]
+    member this.``Use pipe operator twice``() =
+        this.Parse """
+let someFunc someParam =
+    someParam
+    |> someOtherFunc
+    |> yetAnotherFunc
+"""
+
+        Assert.IsFalse this.ErrorsExist
+
