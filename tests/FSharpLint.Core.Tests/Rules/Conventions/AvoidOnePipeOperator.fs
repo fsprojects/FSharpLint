@@ -40,7 +40,7 @@ module MyModule =
 
         Assert.IsTrue this.ErrorsExist
 
-
+    [<Test>]
     member this.``Use pipe operator once in type``() =
         this.Parse """
 type CustomerName(firstName) =
