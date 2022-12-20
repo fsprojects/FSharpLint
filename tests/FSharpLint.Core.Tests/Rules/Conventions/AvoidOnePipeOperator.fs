@@ -29,3 +29,13 @@ let someFunc someParam =
 
         Assert.IsFalse this.ErrorsExist
 
+    [<Test>]
+    member this.``Use pipe operator once in module``() =
+        this.Parse """
+module MyModule =
+    let someFunc someParam =
+        someParam
+        |> someOtherFunc
+        """
+
+        Assert.IsTrue this.ErrorsExist
