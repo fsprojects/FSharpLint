@@ -62,3 +62,15 @@ type CustomerName(firstName) =
         """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator twice in type``() =
+        this.Parse """
+type CustomerName(firstName) =
+    member this.someFunc someParam =
+        someParam
+        |> someOtherFunc
+        |> yetAnotherFunc
+        """
+
+        Assert.IsFalse this.ErrorsExist
