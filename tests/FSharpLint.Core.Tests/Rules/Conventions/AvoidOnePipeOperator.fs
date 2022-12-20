@@ -39,3 +39,14 @@ module MyModule =
         """
 
         Assert.IsTrue this.ErrorsExist
+
+
+    member this.``Use pipe operator once in type``() =
+        this.Parse """
+type CustomerName(firstName) =
+    member this.someFunc someParam =
+        someParam
+        |> someOtherFunc
+        """
+
+        Assert.IsTrue this.ErrorsExist
