@@ -46,6 +46,9 @@ let runner (args: AstNodeRuleParams) =
                                             TypeChecks = List.Empty
                                         } |> Array.singleton
                                         
+                                | SynExpr.Ident _ ->
+                                    Array.empty
+                                
                                 | _ ->
                                     {
                                         Range = range
