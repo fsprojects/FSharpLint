@@ -74,3 +74,13 @@ type CustomerName(firstName) =
         """
 
         Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator once to avoid parenthesis``() =
+        this.Parse """
+let someFunc someParam =
+    someOtherFunc1 someParam
+    |> someOtherFunc2
+"""
+
+        Assert.IsFalse this.ErrorsExist
