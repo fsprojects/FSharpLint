@@ -1,4 +1,4 @@
-module FSharpLint.Rules.AvoidOnePipeOperator
+module FSharpLint.Rules.AvoidSinglePipeOperator
 
 open System
 
@@ -34,14 +34,14 @@ let runner (args: AstNodeRuleParams) =
                                         else
                                             {
                                                 Range = range
-                                                Message = String.Format(Resources.GetString ("RulesAvoidOnePipeOperator"))
+                                                Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
                                                 SuggestedFix = None
                                                 TypeChecks = List.Empty
                                             } |> Array.singleton
                                     | _ ->
                                         {
                                             Range = range
-                                            Message = String.Format(Resources.GetString ("RulesAvoidOnePipeOperator"))
+                                            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
                                             SuggestedFix = None
                                             TypeChecks = List.Empty
                                         } |> Array.singleton
@@ -52,14 +52,14 @@ let runner (args: AstNodeRuleParams) =
                                 | _ ->
                                     {
                                         Range = range
-                                        Message = String.Format(Resources.GetString ("RulesAvoidOnePipeOperator"))
+                                        Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
                                         SuggestedFix = None
                                         TypeChecks = List.Empty
                                     } |> Array.singleton
                             | _ ->
                                 {
                                     Range = range
-                                    Message = String.Format(Resources.GetString ("RulesAvoidOnePipeOperator"))
+                                    Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
                                     SuggestedFix = None
                                     TypeChecks = List.Empty
                                 } |> Array.singleton
@@ -77,7 +77,7 @@ let runner (args: AstNodeRuleParams) =
     error
 
 let rule =
-    { Name = "AvoidOnePipeOperator"
-      Identifier = Identifiers.AvoidOnePipeOperator
+    { Name = "AvoidSinglePipeOperator"
+      Identifier = Identifiers.AvoidSinglePipeOperator
       RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

@@ -1,12 +1,12 @@
-module FSharpLint.Core.Tests.Rules.Conventions.AvoidOnePipeOperator
+module FSharpLint.Core.Tests.Rules.Conventions.AvoidSinglePipeOperator
 
 open NUnit.Framework
 
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsAvoidOnePipeOperatorZahra() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AvoidOnePipeOperator.rule)
+type TestConventionsAvoidSinglePipeOperatorZahra() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AvoidSinglePipeOperator.rule)
 
     [<Test>]
     member this.``Use pipe operator once``() =
