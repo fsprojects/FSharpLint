@@ -346,6 +346,6 @@
     <value>Consider using 'Array.empty' instead.</value>
   </data>
   <data name="RulesCSharpFriendlyAsyncOverload" xml:space="preserve">
-    <value>Consider using a C#-friendly async overload for {0}.</value>
+    <value>Async functions in F# should have the "Async" prefix and a C# friendly overload. Check these conventions for {0}.</value>
   </data>
 </root>

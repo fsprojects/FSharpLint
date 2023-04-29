@@ -18,6 +18,13 @@ let rec private getIdentFromSynPat =
         |> Some
     | SynPat.Typed (pat, _, _) -> getIdentFromSynPat pat
     | _ -> None
+    
+let getErrorMessage (ident: string) (range: range) =
+    { Range = range
+      Message = String.Format(Resources.GetString "RulesCSharpFriendlyAsyncOverload", ident)
+      SuggestedFix = None
+      TypeChecks = List.Empty }
+    |> Array.singleton
 
 let runner (args: AstNodeRuleParams) =
     let hasAsync (syntaxArray: array<AbstractSyntaxArray.Node>) nodeIndex fnIdent =
@@ -46,14 +53,13 @@ let runner (args: AstNodeRuleParams) =
                 let idents = getIdentFromSynPat pattern
                 match idents with
                 | Some ident when not (ident.EndsWith "Async") ->
-                    match hasAsync args.SyntaxArray args.NodeIndex ident with
-                    | Some _ -> Array.empty
-                    | None ->
-                        { Range = range
-                          Message = String.Format(Resources.GetString "RulesCSharpFriendlyAsyncOverload", ident)
-                          SuggestedFix = None
-                          TypeChecks = List.Empty }
-                        |> Array.singleton
+                    if (ident.StartsWith "Async") then
+                        match hasAsync args.SyntaxArray args.NodeIndex (ident.Replace("Async", "", StringComparison.Ordinal)) with
+                        | Some _ -> Array.empty
+                        | None ->
+                            getErrorMessage ident range
+                    else
+                        getErrorMessage ident range
                 | _ -> Array.empty
             | _ -> Array.empty
         | _ -> Array.empty
