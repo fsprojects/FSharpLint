@@ -11,7 +11,7 @@ jobs:
         - ubuntu-latest
         - windows-latest
         - macOS-latest
-        dotnet: [5.0.202, 6.0.416]
+        dotnet: [5.0.202]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -24,6 +24,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ matrix.dotnet }}
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.x'
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
