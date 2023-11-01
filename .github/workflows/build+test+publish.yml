@@ -9,7 +9,7 @@ on:
       - '**'
 
 env:
-  DOTNET_VERSION: 5.0.202
+  DOTNET_VERSION: 6.0.416
 
 jobs:
   buildAndTest:
@@ -20,6 +20,7 @@ jobs:
         - ubuntu-latest
         - windows-latest
         - macOS-latest
+
     runs-on: ${{ matrix.os }}
 
     steps:
