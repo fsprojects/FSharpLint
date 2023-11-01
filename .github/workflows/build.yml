@@ -11,7 +11,7 @@ jobs:
         - ubuntu-latest
         - windows-latest
         - macOS-latest
-        dotnet: [5.0.202]
+        dotnet: [5.0.202, 6.0.416]
     runs-on: ${{ matrix.os }}
 
     steps:

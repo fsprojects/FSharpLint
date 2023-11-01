@@ -229,7 +229,7 @@ let f() =
         let code = $"""Module Program
 let f() = 
     let g() =
-{(makeMatchSnippet (MaxComplexity+1)) |> indent 8} 
+        {(makeMatchSnippet (MaxComplexity+1)) |> indent 8} 
     let h() =
 {makeMatchSnippet MaxComplexity |> indent 8} 
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    

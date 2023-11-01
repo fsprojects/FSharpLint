@@ -116,7 +116,7 @@ let private runner (args: AstNodeRuleParams) =
                     | SynPat.Named (_, id, _, _, _) -> checkExpr app (Some id.idText)
                     | _ -> checkExpr app None)
                 | _ -> Array.empty
-        | _ -> Array.empty
+        // | _ -> Array.empty
 
     match args.AstNode with
     | AstNode.Expression expr -> checkExpr expr None
