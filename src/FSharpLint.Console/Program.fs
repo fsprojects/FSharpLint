@@ -22,12 +22,14 @@ type private FileType =
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
+    | Version 
 with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
+            | Version -> "Prints current version"
 
 // TODO: investigate erroneous warning on this type definition
 // fsharplint:disable UnionDefinitionIndentation
@@ -78,6 +80,13 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | Some OutputFormat.Standard
         | Some _
         | None -> Output.StandardOutput() :> Output.IOutput
+
+    if arguments.Contains ToolArgs.Version then
+        let v = 
+            System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(false)
+            |> Seq.pick (fun a -> match a with | :? System.Reflection.AssemblyInformationalVersionAttribute as i -> Some i.InformationalVersion | _ -> None)
+        sprintf "Current version: %s" v |> output.WriteInfo
+        ()
 
     let handleError (str:string) =
         output.WriteError str
