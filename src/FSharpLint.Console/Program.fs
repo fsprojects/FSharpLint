@@ -4,6 +4,7 @@ open Argu
 open System
 open FSharpLint.Framework
 open FSharpLint.Application
+open System.Reflection
 
 /// Output format the linter will use.
 type private OutputFormat =
@@ -29,7 +30,7 @@ with
             match this with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
-            | Version -> "Prints current version"
+            | Version -> "Prints current version."
 
 // TODO: investigate erroneous warning on this type definition
 // fsharplint:disable UnionDefinitionIndentation
@@ -82,10 +83,10 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | None -> Output.StandardOutput() :> Output.IOutput
 
     if arguments.Contains ToolArgs.Version then
-        let v = 
-            System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes(false)
-            |> Seq.pick (fun a -> match a with | :? System.Reflection.AssemblyInformationalVersionAttribute as i -> Some i.InformationalVersion | _ -> None)
-        sprintf "Current version: %s" v |> output.WriteInfo
+        let version = 
+            Assembly.GetExecutingAssembly().GetCustomAttributes false
+            |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
+        sprintf "Current version: %s" version |> output.WriteInfo
         ()
 
     let handleError (str:string) =
