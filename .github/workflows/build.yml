@@ -17,11 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Setup .Net Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '3.1.x'
     - name: Setup .NET 5
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ matrix.dotnet }}
     - name: Restore tools
