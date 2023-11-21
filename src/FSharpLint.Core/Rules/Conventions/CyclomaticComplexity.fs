@@ -207,7 +207,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
 let cleanup () =
     match bindingStackOpt with
     | Some bs -> bs.Clear()
-    | None _ -> ()
+    | None -> ()
 
 /// Generator function for a rule instance.
 let rule config =
