@@ -177,6 +177,9 @@
   <data name="RulesAvoidTooShortNamesError" xml:space="preserve">
     <value>Consider using a longer name, as it is currently too short.</value>
   </data>
+  <data name="RulesIndexerAccessorStyleConsistency" xml:space="preserve">
+    <value>Consider switching the indexer accessor from OCaml style to CSharp style or viceversa.</value>
+  </data>
   <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
     <value>Consider changing `{0}` to be prefixed with `{1}`.</value>
   </data>
