@@ -14,5 +14,5 @@ After pushing the tag to remote, the publish pipeline will be kicked off which w
 
 * Github secret: `NUGET_KEY`.
   * This is the API key from nuget, used to push the package to nuget.
-  * At the moment the key lives under `duckmatt`'s nuget account, but I believe the `fsprojects` account should also be able to create an applicable API key.
-  * "Expires in 7 months" from 2021/11/16
+  * At the moment the key lives under `knocte`'s nuget account, but maybe the `fsprojects` account should also be able to create an applicable API key.
+  * "Expires in 12 months" from 2023/11/23 (NOTE: if you forget to update the key after it has expired, and then pushing to nuget fails, don't forget to delete the release in github before retrying the CI workflow.)
