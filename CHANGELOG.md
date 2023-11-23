@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.4] - 2023-11-23
+
+- Paket: use Packages storage #615 [@Numpsy]
+- Fix VS2022 build #613 [@Thorium]
+- Dotnet version SDK to allow minor version difference fwd #607 [@Thorium]
+- docs: fix Shortcuts typo in the menu #584 [@pirrman]
+- Fix false negatives in AvoidTooShortNames #548 [@janus]
+- Fix cyclomatic complexity yielding redundant messages #559 #579 [@davidtgillard]
+- Refactoring: rename DU #565 [@webwarrior-ws]
+
 ## [0.21.3] - 2022-09-29
 
 - Add new rule FavourStaticEmptyFields #530 [@janus]
