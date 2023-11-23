@@ -95,3 +95,17 @@ type TorStreamCipher(keyBytes: array<byte>, ivOpt: Option<array<byte>>) =
  """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_7() =
+        this.Parse """
+type Foo<'T> = Option<'T>
+"""
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_8() =
+        this.Parse """
+type Foo<'SomeType> = Option<'SomeType>
+"""
+        this.AssertNoWarnings()
