@@ -32,6 +32,11 @@ jobs:
       with:
         version: ${{ github.ref }}
         path: ./CHANGELOG.md
+    - name: Upload binaries to nuget
+      env:
+        nuget-key: ${{ secrets.NUGET_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet fake build -t Push
     - name: Create Release
       id: create_release
       uses: actions/create-release@latest
@@ -51,8 +56,3 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
-    - name: Upload binaries to nuget
-      env:
-        nuget-key: ${{ secrets.NUGET_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: dotnet fake build -t Push
