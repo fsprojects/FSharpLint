@@ -445,7 +445,7 @@ module Ast =
         | FuncApp(exprs, _) -> exprs |> List.revIter (Expression >> add)
         | Lambda({ Arguments = args; Body = body }, _) ->
             add <| LambdaBody(body)
-            args |> List.revIter (fun arg -> add <| LambdaArg arg)
+            args |> List.revIter (LambdaArg >> add)
             
         | LambdaBody(x)
         | Else(x)
