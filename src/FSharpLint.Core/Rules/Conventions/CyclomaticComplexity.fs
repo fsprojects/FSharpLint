@@ -38,46 +38,46 @@ type private BindingScopeComparer() =
     
 ///  A two-tiered stack-like structure for containing BindingScopes.
 type private BindingStack(maxComplexity: int) =
-    let mutable tier1_ = []
-    let mutable tier2_ = SortedSet<BindingScope>(BindingScopeComparer())
+    let mutable tier1 = []
+    let mutable tier2 = SortedSet<BindingScope>(BindingScopeComparer())
     
     member this.Push (args:AstNodeRuleParams) (bs: BindingScope) =
         // if the node is a child of the current binding scope
-        let isChildOfCurrent = if List.isEmpty tier1_ then
+        let isChildOfCurrent = if List.isEmpty tier1 then
                                     false
                                 else
-                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(tier1_.Head.Node, x)) |> Option.isSome
+                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(tier1.Head.Node, x)) |> Option.isSome
         // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
-        if not isChildOfCurrent && not (List.isEmpty tier1_) then
-            let popped = tier1_.Head
-            tier1_ <- tier1_.Tail
+        if not isChildOfCurrent && not (List.isEmpty tier1) then
+            let popped = tier1.Head
+            tier1 <- tier1.Tail
             if popped.Complexity > maxComplexity then
-                tier2_.Add popped |> ignore
+                tier2.Add popped |> ignore
         // finally, push the item on to the stack
-        tier1_ <- bs::tier1_
+        tier1 <- bs::tier1
         
     member this.IncrComplexityOfCurrentScope incr =
-        let h = tier1_.Head
+        let h = tier1.Head
         let complexity = h.Complexity + incr
-        tier1_ <- {h with Complexity = complexity}::tier1_.Tail
+        tier1 <- {h with Complexity = complexity}::tier1.Tail
         
     interface IEnumerable<BindingScope> with
         member this.GetEnumerator() =
             let cleanedUp =
-                tier1_
+                tier1
                 |> List.filter (fun scope -> scope.Complexity > maxComplexity)
                 |> List.sortByDescending (fun scope -> scope.Complexity) // sort in descending order by complexity
                 |> List.distinctBy (fun scope -> scope.Binding.RangeOfBindingWithRhs.Start) // throw away any extraneous elements with the same start position but a lower complexity
             let enum1 = cleanedUp :> IEnumerable<BindingScope>
-            let enum2 = tier2_ :> IEnumerable<BindingScope>
+            let enum2 = tier2 :> IEnumerable<BindingScope>
             Enumerable.Concat(enum1, enum2).GetEnumerator()
             
         member this.GetEnumerator(): Collections.IEnumerator = (this :> IEnumerable<BindingScope> :> System.Collections.IEnumerable).GetEnumerator()
         
     /// Clears the stack.
     member this.Clear() =
-        tier1_ <- []
-        tier2_.Clear()
+        tier1 <- []
+        tier2.Clear()
 
 /// A stack to track the current cyclomatic complexity of a binding scope.
 let mutable private bindingStackOpt : BindingStack option = None

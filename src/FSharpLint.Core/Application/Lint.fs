@@ -387,7 +387,7 @@ module Lint =
             with
             | :? System.IO.FileNotFoundException ->
                 Ok Configuration.defaultConfiguration
-            | _ as ex -> Error (string ex)
+            | ex -> Error (string ex)
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
