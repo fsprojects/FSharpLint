@@ -84,8 +84,8 @@ module Lint =
                     "Lint failed to parse files. Failed with: " + failureReasons
 
     [<NoComparison>]
-    type Result<'t> =
-        | Success of 't
+    type Result<'T> =
+        | Success of 'T
         | Failure of LintFailure
 
     /// Provides information on what the linter is currently doing.

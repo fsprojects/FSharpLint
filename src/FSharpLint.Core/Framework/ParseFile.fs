@@ -33,9 +33,9 @@ module ParseFile =
         | AbortedTypeCheck
 
     [<NoComparison>]
-    type ParseFileResult<'t> =
+    type ParseFileResult<'T> =
         | Failed of ParseFileFailure
-        | Success of 't
+        | Success of 'T
 
     let private parse file source (checker:FSharpChecker, options) =
         let sourceText = SourceText.ofString source
