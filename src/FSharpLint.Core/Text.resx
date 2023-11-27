@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="RulesAsyncExceptionWithoutReturn" xml:space="preserve">
+    <value>You should return raise in an async computation expression.</value>
+  </data>
 </root>
