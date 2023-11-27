@@ -56,6 +56,19 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         | _ -> Array.empty
     | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
         (identifier, identifier.idText, None) |> Array.singleton
+    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _)) ->
+        let checkTypes types =
+            seq {
+                for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
+                    if isIdentifierTooShort id.idText then
+                        yield (id, id.idText, None)
+            }
+            
+        match componentInfo with
+        | SynComponentInfo(_attrs, types, _, _identifier, _, _, _, _) ->
+            checkTypes types |> Array.ofSeq
+    | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) when isIdentifierTooShort id.idText ->
+        (id, id.idText, None) |> Array.singleton
     | _ -> Array.empty
 
 let runner (args:AstNodeRuleParams) =
