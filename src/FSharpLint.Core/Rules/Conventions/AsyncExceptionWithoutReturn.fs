@@ -7,18 +7,26 @@ open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+let isIdentifierExecptionRaise (identifer: Ident) =
+    identifer.idText = "failwith"
+    || identifer.idText = "failwithf"
+    || identifer.idText = "raise"
+    
+
 let checkSequentialExpression (expression: SynExpr) (range: range) =
     match expression with
     | SynExpr.App (_, _, SynExpr.Ident failwithId, _, _) when
-        failwithId.idText = "failwith"
-        || failwithId.idText = "failwithf"
-        || failwithId.idText = "raise"
+        isIdentifierExecptionRaise failwithId
         ->
         { Range = range
           Message = Resources.GetString "RulesAsyncExceptionWithoutReturn"
           SuggestedFix = None
           TypeChecks = List.Empty }
         |> Array.singleton
+    // WIP
+    //| SynExpr.YieldOrReturn (_, SynExpr.App (_, _, SynExpr.Ident identifier, _, _), range) when 
+    //    isIdentifierExecptionRaise identifier -> 
+
     | _ -> Array.empty
 
 
@@ -58,6 +66,7 @@ let rec checkExpression (expression: SynExpr) (range: range) =
 
 
 let runner args =
+    printf "________%A" args.AstNode
     match args.AstNode with
     | AstNode.Expression
         (
