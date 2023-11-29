@@ -49,6 +49,10 @@ let rec checkExpression (expression: SynExpr) (range: range) =
           SuggestedFix = None
           TypeChecks = List.Empty }
         |> Array.singleton
+    | SynExpr.App (_, _, funcExpr, _, range) ->
+        checkExpression funcExpr range
+    | SynExpr.LetOrUse (_, _, _, body, range) ->
+        checkExpression body range
     | _ -> Array.empty
 
 
