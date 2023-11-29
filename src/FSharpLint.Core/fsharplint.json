@@ -275,6 +275,7 @@
         }
     },
     "avoidTooShortNames": { "enabled": false },
+    "asyncExceptionWithoutReturn": { "enabled": false },
     "indentation": {
         "enabled": false
     },

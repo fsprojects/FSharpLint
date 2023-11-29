@@ -309,6 +309,7 @@ type ConventionsConfig =
       avoidTooShortNames:EnabledConfig option
       redundantNewKeyword:EnabledConfig option
       favourStaticEmptyFields:EnabledConfig option
+      asyncExceptionWithoutReturn:EnabledConfig option
       nestedStatements:RuleConfig<NestedStatements.Config> option
       cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       reimplementsFunction:EnabledConfig option
@@ -329,6 +330,7 @@ with
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
             this.favourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule) |> Option.toArray
+            this.asyncExceptionWithoutReturn |> Option.bind (constructRuleIfEnabled AsyncExceptionWithoutReturn.rule) |> Option.toArray
             this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
             this.favourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule) |> Option.toArray
             this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
@@ -399,6 +401,7 @@ type Configuration =
       RedundantNewKeyword:EnabledConfig option
       FavourReRaise:EnabledConfig option
       FavourStaticEmptyFields:EnabledConfig option
+      AsyncExceptionWithoutReturn:EnabledConfig option
       NestedStatements:RuleConfig<NestedStatements.Config> option
       FavourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
@@ -484,6 +487,7 @@ with
         RedundantNewKeyword = None
         FavourReRaise = None
         FavourStaticEmptyFields = None
+        AsyncExceptionWithoutReturn = None
         NestedStatements = None
         FavourConsistentThis = None
         CyclomaticComplexity = None
@@ -632,6 +636,7 @@ let flattenConfig (config:Configuration) =
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
             config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
             config.FavourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule)
+            config.AsyncExceptionWithoutReturn |> Option.bind (constructRuleIfEnabled AsyncExceptionWithoutReturn.rule)
             config.NestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule)
             config.FavourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule)
             config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
