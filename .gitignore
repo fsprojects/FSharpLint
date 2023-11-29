@@ -191,3 +191,6 @@ tests/FSharpLint.FunctionalTest.TestedProject/FSharpLintMSBuildTaskTest/
 DesignTimeBuild/
 .vs/
 .ionide/
+
+# BenchmarkDotNet Results
+tests/FSharpLint.Benchmarks/BenchmarkDotNet.Artifacts
