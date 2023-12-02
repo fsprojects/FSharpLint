@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="FavourBasicControlFlow" xml:space="preserve">
+    <value>Rather use simpler if-else construct instead of match clause.</value>
+  </data>
 </root>
