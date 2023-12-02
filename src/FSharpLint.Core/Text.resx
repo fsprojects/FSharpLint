@@ -345,4 +345,7 @@
   <data name="RulesFavourStaticEmptyFieldsForArray" xml:space="preserve">
     <value>Consider using 'Array.empty' instead.</value>
   </data>
+  <data name="RulesFavourSingleton" xml:space="preserve">
+    <value>Consider using List.singleton/Array.singleton instead of single member list/array.</value>
+  </data>
 </root>
