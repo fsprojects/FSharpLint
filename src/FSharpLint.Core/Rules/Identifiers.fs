@@ -83,3 +83,4 @@ let AvoidTooShortNames = identifier 75
 let FavourStaticEmptyFields = identifier 76
 let AvoidSinglePipeOperator = identifier 77
 let AsyncExceptionWithoutReturn = identifier 78
+let SuggestUseAutoProperty = identifier 79
