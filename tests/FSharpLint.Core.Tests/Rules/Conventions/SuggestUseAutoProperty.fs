@@ -18,6 +18,25 @@ type Foo(content: int) =
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
+    member this.``Should suggest usage of auto-property for property that only returns literal`` () =
+        this.Parse """
+type Foo() =
+    member self.Content = 42
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Shouldn't suggest usage of auto-property for property that returns mutable value``() =
+        this.Parse """
+type Foo(content: int) =
+    let mutable mutableContent = content
+    member self.Content = mutableContent
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
     member this.``Shouldn't suggest usage of auto-property for non-property member``() =
         this.Parse """
 type Foo(content: int) =
