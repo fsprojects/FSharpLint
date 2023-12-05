@@ -72,3 +72,18 @@ type Foo() =
 """
 
         Assert.IsTrue(this.NoErrorsExist)
+
+    [<Test>]
+    member this.``Quick fix for property that only returns immutable value`` () =
+        let source = """
+type Foo(content: int) =
+    member self.Content = content
+"""
+    
+        let expected = """
+type Foo(content: int) =
+    member val Content = content
+"""
+
+        this.Parse source
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
