@@ -58,7 +58,7 @@ let private runner (args: AstNodeRuleParams) =
                             false,
                             _attributes,
                             _xmlDoc,
-                            _valData,
+                            SynValData(Some(memberFlags), _, _),
                             SynPat.LongIdent (_, _, _, argPats, _, _),
                             _returnInfo,
                             expr,
@@ -67,7 +67,7 @@ let private runner (args: AstNodeRuleParams) =
                         ),
                     memberRange
                 )
-        ) ->
+        ) when memberFlags.IsInstance ->
         match expr, argPats with
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
