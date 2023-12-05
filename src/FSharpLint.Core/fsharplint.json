@@ -38,7 +38,7 @@
     },
     "reimplementsFunction": { "enabled": true },
     "canBeReplacedWithComposition": { "enabled": true },
-    "AvoidSinglePipeOperator": { "enabled": false },
+    "avoidSinglePipeOperator": { "enabled": false },
     "failwithWithSingleArgument": { "enabled": true },
     "raiseWithSingleArgument": { "enabled": true },
     "nullArgWithSingleArgument": { "enabled": true },

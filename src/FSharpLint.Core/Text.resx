@@ -346,6 +346,6 @@
     <value>Consider using 'Array.empty' instead.</value>
   </data>
   <data name="RulesAvoidSinglePipeOperator" xml:space="preserve">
-    <value>Prefer using normal function call when the invocation is only once.</value>
+    <value>Can use normal function call (instead of pipe operator) because there is no invocation chain (single invocation only).</value>
   </data>
 </root>

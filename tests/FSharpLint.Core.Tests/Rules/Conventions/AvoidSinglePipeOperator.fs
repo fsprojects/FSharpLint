@@ -5,7 +5,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 
 [<TestFixture>]
-type TestConventionsAvoidSinglePipeOperatorZahra() =
+type TestConventionsAvoidSinglePipeOperator() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AvoidSinglePipeOperator.rule)
 
     [<Test>]
