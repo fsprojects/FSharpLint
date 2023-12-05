@@ -45,3 +45,21 @@ type Foo(content: int) =
 
         Assert.IsTrue(this.NoErrorsExist)
 
+
+    [<Test>]
+    member this.``Should suggest usage of auto-property for for property that only returns list of immutable values``() =
+        this.Parse """
+type Foo(content: int) =
+    member self.Content = [ 42 ]
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Should suggest usage of auto-property for for property that only returns array of immutable values``() =
+        this.Parse """
+type Foo(content: int) =
+    member self.Content = [| content; 42 |]
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
