@@ -63,3 +63,12 @@ type Foo(content: int) =
 """
 
         Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Should not suggest usage of auto-property for static property`` () =
+        this.Parse """
+type Foo() =
+    static member Content = 42
+"""
+
+        Assert.IsTrue(this.NoErrorsExist)
