@@ -313,6 +313,7 @@ type ConventionsConfig =
       cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       reimplementsFunction:EnabledConfig option
       canBeReplacedWithComposition:EnabledConfig option
+      avoidSinglePipeOperator:EnabledConfig option
       raiseWithTooManyArgs:RaiseWithTooManyArgsConfig option
       sourceLength:SourceLengthConfig option
       naming:NamesConfig option
@@ -333,6 +334,7 @@ with
             this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
             this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
             this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
+            this.avoidSinglePipeOperator|> Option.bind (constructRuleIfEnabled AvoidSinglePipeOperator.rule) |> Option.toArray
             this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
@@ -402,6 +404,7 @@ type Configuration =
       CyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       ReimplementsFunction:EnabledConfig option
       CanBeReplacedWithComposition:EnabledConfig option
+      AvoidSinglePipeOperator:EnabledConfig option
       FailwithBadUsage:EnabledConfig option
       RaiseWithSingleArgument:EnabledConfig option
       FailwithWithSingleArgument:EnabledConfig option
@@ -486,6 +489,7 @@ with
         CyclomaticComplexity = None
         ReimplementsFunction = None
         CanBeReplacedWithComposition = None
+        AvoidSinglePipeOperator = None
         FailwithWithSingleArgument = None
         FailwithBadUsage = None
         RaiseWithSingleArgument = None
@@ -633,6 +637,7 @@ let flattenConfig (config:Configuration) =
             config.CyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule)
             config.ReimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule)
             config.CanBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule)
+            config.AvoidSinglePipeOperator |> Option.bind (constructRuleIfEnabled AvoidSinglePipeOperator.rule)
             config.FailwithBadUsage |> Option.bind (constructRuleIfEnabled FailwithBadUsage.rule)
             config.RaiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule)
             config.FailwithWithSingleArgument |> Option.bind (constructRuleIfEnabled FailwithWithSingleArgument.rule)

@@ -50,6 +50,7 @@
     <Compile Include="Rules\Conventions\CyclomaticComplexity.fs" />
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
+    <Compile Include="Rules\Conventions\AvoidSinglePipeOperator.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
     <Compile Include="Rules\Conventions\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />
