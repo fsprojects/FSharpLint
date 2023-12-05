@@ -58,8 +58,8 @@ let private runner (args: AstNodeRuleParams) =
                             false,
                             _attributes,
                             _xmlDoc,
-                            SynValData(Some(memberFlags), _, _),
-                            SynPat.LongIdent (_, _, _, argPats, _, _),
+                            SynValData (Some memberFlags, _, _),
+                            SynPat.LongIdent (memberIdentifier, _, _, argPats, _, _),
                             _returnInfo,
                             expr,
                             _bindingRange,
@@ -72,9 +72,19 @@ let private runner (args: AstNodeRuleParams) =
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
         | expression, _ when isImmutableValueExpression args expression ->
+            let suggestedFix =
+                lazy
+                    (match memberIdentifier.Lid with
+                     | [ _; memberName ] ->
+                         Some
+                             { FromText = args.FileContent
+                               FromRange = memberIdentifier.Range
+                               ToText = "val " + memberName.idText }
+                     | _ -> None)
+
             { Range = memberRange
               Message = Resources.GetString "RulesSuggestUseAutoProperty"
-              SuggestedFix = None
+              SuggestedFix = Some suggestedFix
               TypeChecks = List.Empty }
             |> Array.singleton
         | _ -> Array.empty
