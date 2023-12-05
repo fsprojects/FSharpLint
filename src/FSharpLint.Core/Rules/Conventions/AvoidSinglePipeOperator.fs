@@ -9,60 +9,42 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    printfn "%A" args.AstNode
-    printfn "-------"
-    
+    let errors range =
+        {
+            Range = range
+            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        } |> Array.singleton
+
     let error =
         match args.AstNode with
-        | AstNode.Binding (SynBinding(synAccessOption, synBindingKind, mustInline, isMutable, synAttributeLists, preXmlDoc, synValData, headPat, synBindingReturnInfoOption, synExpr, range, debugPointAtBinding)) ->
+        | AstNode.Binding (SynBinding(_synAcc, _synBinding, _mustInline, _isMut, _synAttribs, _preXmlDoc, _synValData, _headPat, _synBindingRet, synExpr, _range, _debugPointAtBinding)) ->
             match synExpr with
-            | SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range) ->
+            | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range) ->
                 match funcExpr with
-                | SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range) ->
+                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range) ->
                     match funcExpr with
                     | SynExpr.Ident ident ->
                         if ident.idText = "op_PipeRight" then
                             match argExpr with
-                            | SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range) ->
-                                
+                            | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, range) ->
                                 match funcExpr with
-                                | SynExpr.App(exprAtomicFlag, isInfix, funcExpr, argExpr, range) ->
+                                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, range) ->
                                     match funcExpr with
                                     | SynExpr.Ident ident ->
                                         if ident.idText = "op_PipeRight" then
                                             Array.empty
                                         else
-                                            {
-                                                Range = range
-                                                Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-                                                SuggestedFix = None
-                                                TypeChecks = List.Empty
-                                            } |> Array.singleton
+                                            errors range
                                     | _ ->
-                                        {
-                                            Range = range
-                                            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-                                            SuggestedFix = None
-                                            TypeChecks = List.Empty
-                                        } |> Array.singleton
-                                        
-                                | SynExpr.Ident _ ->
-                                    Array.empty
-                                
+                                        errors range
+                                | SynExpr.Ident _ident ->
+                                    Array.empty                                
                                 | _ ->
-                                    {
-                                        Range = range
-                                        Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-                                        SuggestedFix = None
-                                        TypeChecks = List.Empty
-                                    } |> Array.singleton
+                                    errors range
                             | _ ->
-                                {
-                                    Range = range
-                                    Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-                                    SuggestedFix = None
-                                    TypeChecks = List.Empty
-                                } |> Array.singleton
+                                errors range
                         else
                             Array.empty
                     | _ ->
@@ -75,6 +57,7 @@ let runner (args: AstNodeRuleParams) =
             Array.empty
 
     error
+
 
 let rule =
     { Name = "AvoidSinglePipeOperator"
