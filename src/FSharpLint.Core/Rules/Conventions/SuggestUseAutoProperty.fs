@@ -40,12 +40,31 @@ let private runner (args: AstNodeRuleParams) =
               SuggestedFix = None
               TypeChecks = List.Empty }
             |> Array.singleton
-        | (SynExpr.Ident _ident, _) ->
-            { Range = memberRange
-              Message = Resources.GetString "RulesSuggestUseAutoProperty"
-              SuggestedFix = None
-              TypeChecks = List.Empty }
-            |> Array.singleton
+        | (SynExpr.Ident ident, _) ->
+            let isMutableVariable =
+                match args.GetParents args.NodeIndex with
+                | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _)) :: _ ->
+                    members
+                    |> List.exists (fun (memberDef: SynMemberDefn) ->
+                        match memberDef with
+                        | SynMemberDefn.LetBindings (bindings, _, _, _) ->
+                            bindings
+                            |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _)) ->
+                                match headPat with
+                                | SynPat.Named (_, bindingIdent, _, _, _) when isMutable ->
+                                    bindingIdent.idText = ident.idText
+                                | _ -> false)
+                        | _ -> false)
+                | _ -> false
+
+            if isMutableVariable then
+                Array.empty
+            else
+                { Range = memberRange
+                  Message = Resources.GetString "RulesSuggestUseAutoProperty"
+                  SuggestedFix = None
+                  TypeChecks = List.Empty }
+                |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty
 
