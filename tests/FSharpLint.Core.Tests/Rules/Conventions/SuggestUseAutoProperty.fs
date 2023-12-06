@@ -18,6 +18,24 @@ type Foo(content: int) =
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
+    member this.``Should suggest usage of auto-property for property that only returns immutable value (this self-identifier)`` () =
+        this.Parse """
+type Foo(content: int) =
+    member this.Content = content
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
+    member this.``Should suggest usage of auto-property for property that only returns immutable value (__ self-identifier)`` () =
+        this.Parse """
+type Foo(content: int) =
+    member __.Content = content
+"""
+
+        Assert.IsTrue(this.ErrorsExist)
+
+    [<Test>]
     member this.``Should suggest usage of auto-property for property that only returns literal`` () =
         this.Parse """
 type Foo() =
