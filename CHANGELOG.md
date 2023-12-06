@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.5] - 2023-12-06
+
+- FSharpLint.Console: add --version #612 #611 [@Thorium]
+- gitignore: add the BenchmarkDotNet artifacts folder #619 [@Numpsy]
+- CI: remove redundant .NET install #624 [@knocte]
+- Add new rule AvoidSinglePipeOperator #595 [@tehraninasab]
+- AvoidTooShortNames: fix false negative (generic type names) #622 [@Mersho]
+- Remove recursive dependency #569 [@knocte]
+- Conventions/Naming: refactoring #571 [@webwarrior-ws]
+
+
 ## [0.21.4] - 2023-11-23
 
 - Paket: use Packages storage #615 [@Numpsy]
