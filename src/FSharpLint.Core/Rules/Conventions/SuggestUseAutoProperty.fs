@@ -9,7 +9,7 @@ open FSharpLint.Framework.Rules
 
 let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) =
     match expression with
-    | SynExpr.Const (constant, range) -> true
+    | SynExpr.Const (_constant, _range) -> true
     | SynExpr.Ident ident ->
         let isMutableVariable =
             match args.GetParents args.NodeIndex with
