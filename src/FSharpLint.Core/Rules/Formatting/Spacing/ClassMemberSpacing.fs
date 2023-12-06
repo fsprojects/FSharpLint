@@ -38,7 +38,7 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
 
 let runner args =
     match args.AstNode with
-    | AstNode.TypeDefinition (SynTypeDefn.SynTypeDefn (_, repr, members, implicitCtor, defnRange)) ->
+    | AstNode.TypeDefinition (SynTypeDefn.SynTypeDefn (_, repr, members, implicitCtor, defnRange, _)) ->
         checkClassMemberSpacing args (Option.toList implicitCtor @ members)
     | AstNode.TypeRepresentation (SynTypeDefnRepr.ObjectModel (_, members, _)) ->
         checkClassMemberSpacing args members

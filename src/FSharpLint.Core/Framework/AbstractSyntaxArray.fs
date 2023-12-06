@@ -94,7 +94,7 @@ module AbstractSyntaxArray =
     let private astNodeToSyntaxNode = function
         | Expression(SynExpr.Null(_)) -> SyntaxNode.Null
         | Expression(SynExpr.Tuple(_)) -> SyntaxNode.Tuple
-        | Expression(SynExpr.ArrayOrListOfSeqExpr(_))
+        | Expression(SynExpr.ArrayOrListComputed(_))
         | Expression(SynExpr.ArrayOrList(_)) -> SyntaxNode.ArrayOrList
         | Expression(SynExpr.AddressOf(_)) -> SyntaxNode.AddressOf
         | Identifier(_) -> SyntaxNode.Identifier

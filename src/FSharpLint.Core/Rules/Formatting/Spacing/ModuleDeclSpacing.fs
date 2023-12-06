@@ -11,7 +11,7 @@ open FSharpLint.Framework.ExpressionUtilities
 
 let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
     match synModuleOrNamespace with
-    | SynModuleOrNamespace (_, _, _, decls, _, _, _, _) ->
+    | SynModuleOrNamespace (_, _, _, decls, _, _, _, _, _) ->
         decls
         |> List.toArray
         |> Array.pairwise

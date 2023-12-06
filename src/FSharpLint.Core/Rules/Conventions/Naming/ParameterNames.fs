@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
 let private getMemberIdents _ = function
-    | SynPat.Named(_, ident, _, _, _)
+    | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) ->
         (ident, ident.idText, None) |> Array.singleton
     | _ -> Array.empty
@@ -19,7 +19,7 @@ let private getValueOrFunctionIdents typeChecker _accessibility pattern =
         |> Option.defaultValue true
 
     match pattern with
-    | SynPat.Named(_, ident, _, _, _)
+    | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) when not (isActivePattern ident) ->
         let checkNotUnionCase = checkNotUnionCase ident
         (ident, ident.idText, Some checkNotUnionCase) |> Array.singleton
@@ -36,7 +36,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             |> Array.choose identFromSimplePat
             |> Array.map (fun ident -> (ident, ident.idText, None))
         | _ -> Array.empty
-    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
@@ -47,7 +47,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             | _ -> Array.empty
         else
             Array.empty
-    | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
+    | AstNode.Expression(SynExpr.ForEach(_, _, _, true, pattern, _, _, _)) ->
         getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | _ -> Array.empty
 

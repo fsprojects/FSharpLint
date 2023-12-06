@@ -12,7 +12,7 @@ let check args _ (clauses:SynMatchClause list) _ =
     clauses
     |> List.toArray
     |> Array.collect (function
-        | SynMatchClause (SynPat.Or (firstPat, secondPat, _), _, _, _, _) ->
+        | SynMatchClause (SynPat.Or (firstPat, secondPat, _, _), _, _, _, _, _) ->
             [|firstPat; secondPat|]
         | _ -> [||])
     |> Array.pairwise

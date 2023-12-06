@@ -14,24 +14,24 @@ let rec checkExpression (expression: SynExpr) (range: range) =
         Array.append result (checkExpression secondExpression secondExpression.Range)
     | SynExpr.Paren (innerExpression, _, _, range) -> checkExpression innerExpression range
     | SynExpr.While (_, _, innerExpression, range) -> checkExpression innerExpression range
-    | SynExpr.For (_, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range
-    | SynExpr.ForEach (_, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range
-    | SynExpr.Match (_, _, clauses, range) ->
+    | SynExpr.For (_, _, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range
+    | SynExpr.ForEach (_, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range
+    | SynExpr.Match (_, _, clauses, range, _) ->
         clauses
-        |> List.map (fun (SynMatchClause (_, _, clause, range, _)) -> checkExpression clause range)
+        |> List.map (fun (SynMatchClause (_, _, clause, range, _, _)) -> checkExpression clause range)
         |> List.toArray
         |> Array.concat
     | SynExpr.Do (innerExpression, range) -> checkExpression innerExpression range
-    | SynExpr.TryWith (tryExpression, tryRange, withCases, _, _, _, _) ->
+    | SynExpr.TryWith (tryExpression, withCases, tryRange, _, _, _) ->
         withCases
-        |> List.map (fun (SynMatchClause (_, _, withCase, withRange, _)) -> checkExpression withCase withRange)
+        |> List.map (fun (SynMatchClause (_, _, withCase, withRange, _, _)) -> checkExpression withCase withRange)
         |> List.toArray
         |> Array.concat
         |> Array.append (checkExpression tryExpression tryRange)
-    | SynExpr.TryFinally (tryExpression, finallyExpr, range, _, _) ->
+    | SynExpr.TryFinally (tryExpression, finallyExpr, range, _, _, _) ->
         checkExpression finallyExpr range
         |> Array.append (checkExpression tryExpression range)
-    | SynExpr.IfThenElse (_, thenExpr, elseExpr, _, _, _, range) ->
+    | SynExpr.IfThenElse (_, thenExpr, elseExpr, _, _, range, _) ->
         let checkThen = checkExpression thenExpr range
 
         match elseExpr with
@@ -51,7 +51,7 @@ let rec checkExpression (expression: SynExpr) (range: range) =
         |> Array.singleton
     | SynExpr.App (_, _, funcExpr, _, range) ->
         checkExpression funcExpr range
-    | SynExpr.LetOrUse (_, _, _, body, range) ->
+    | SynExpr.LetOrUse (_, _, _, body, range, _) ->
         checkExpression body range
     | _ -> Array.empty
 
@@ -60,7 +60,7 @@ let runner args =
     match args.AstNode with
     | AstNode.Expression
         (
-            SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.CompExpr (_, _, innerExpression, _)), range)
+            SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.ComputationExpr (_, innerExpression, _)), range)
         ) when compExprName.idText = "async" -> checkExpression innerExpression range
     | _ -> Array.empty
 

@@ -16,8 +16,8 @@ let private implementsIDisposable (fsharpType:FSharpType) =
     else
         false
 
-let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident:LongIdentWithDots) = fun () -> 
-    let names = ident.Lid |> List.map (fun x -> x.idText)
+let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) = fun () -> 
+    let names = ident.LongIdent |> List.map (fun x -> x.idText)
     let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, "", names)
 
     match symbol with

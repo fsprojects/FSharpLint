@@ -15,9 +15,9 @@ let private getValueOrFunctionIdents typeChecker accessControlLevel pattern =
     match pattern with
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
         // If a pattern identifier is made up of more than one part then it's not binding a new value.
-        let singleIdentifier = List.length longIdent.Lid = 1
+        let singleIdentifier = List.length longIdent.LongIdent = 1
 
-        match List.tryLast longIdent.Lid with
+        match List.tryLast longIdent.LongIdent with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
             if accessControlLevel = AccessControlLevel.Internal then
@@ -30,7 +30,7 @@ let private getValueOrFunctionIdents typeChecker accessControlLevel pattern =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->

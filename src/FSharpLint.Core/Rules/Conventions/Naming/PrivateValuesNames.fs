@@ -15,9 +15,9 @@ let private getValueOrFunctionIdents typeChecker accessibility pattern =
     match pattern with
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
         // If a pattern identifier is made up of more than one part then it's not binding a new value.
-        let singleIdentifier = List.length longIdent.Lid = 1
+        let singleIdentifier = List.length longIdent.LongIdent = 1
 
-        match List.tryLast longIdent.Lid with
+        match List.tryLast longIdent.LongIdent with
         | Some ident when not (isActivePattern ident) && singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
             if accessibility = AccessControlLevel.Private then
@@ -30,9 +30,9 @@ let private getValueOrFunctionIdents typeChecker accessibility pattern =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
+    | AstNode.Expression(SynExpr.ForEach(_, _, _, true, pattern, _, _, _)) ->
         getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
-    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->
@@ -41,12 +41,14 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             | _ -> Array.empty
         else
             Array.empty
-    | AstNode.Expression(SynExpr.For(_, identifier, _, _, _, _, _)) ->
+    | AstNode.Expression(SynExpr.For(_, _, identifier, _, _, _, _, _, _)) ->
         (identifier, identifier.idText, None) |> Array.singleton
-    | AstNode.Match(SynMatchClause(pattern, _, _, _, _)) ->
+    | AstNode.Match(SynMatchClause(pattern, _, _, _, _, _)) ->
         match pattern with
-        | SynPat.Named(_, identifier, isThis, _, _) when not isThis ->
+        | SynPat.Named(SynIdent(identifier, _), isThis, _, _) when not isThis ->
             (identifier, identifier.idText, None) |> Array.singleton
+        | SynPat.As(_lshPat, rhsPat, _) ->
+            getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false rhsPat
         | _ -> Array.empty
     | _ -> Array.empty
 

@@ -7,7 +7,7 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let getUnionCaseStartColumn (SynUnionCase (attrs, _, _, _, _, range)) =
+let getUnionCaseStartColumn (SynUnionCase (attrs, _, _, _, _, range, _)) =
     match attrs |> List.tryHead with
     | Some attr ->
         // startcolumn of the attributes now includes the `[<` starter sigil, so we can just use it!
@@ -56,7 +56,7 @@ let runner args =
     | AstNode.ModuleDeclaration (SynModuleDecl.Types (typeDefns, typesRange)) ->
         typeDefns
         |> List.toArray
-        |> Array.collect (fun (SynTypeDefn (_, repr, _, _, _)) ->
+        |> Array.collect (fun (SynTypeDefn (_, repr, _, _, _, _)) ->
             checkUnionDefinitionIndentation args repr typesRange.StartColumn)
     | _ ->
         Array.empty

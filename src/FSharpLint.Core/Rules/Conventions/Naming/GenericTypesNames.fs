@@ -7,7 +7,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args: AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _)) ->
+    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _, _)) ->
         let checkTypes types =
             seq {
                 for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
@@ -15,8 +15,10 @@ let private getIdentifiers (args: AstNodeRuleParams) =
             }
             
         match componentInfo with
-        | SynComponentInfo(_attrs, types, _, _identifier, _, _, _, _) ->
-            checkTypes types |> Array.ofSeq
+        | SynComponentInfo(_attrs, maybeTypes, _, _identifier, _, _, _, _) ->
+            match maybeTypes with
+            | Some types -> checkTypes types.TyparDecls |> Array.ofSeq
+            | None -> Array.empty
     | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) ->
         (id, id.idText, None) |> Array.singleton
     | _ -> Array.empty

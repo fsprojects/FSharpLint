@@ -13,15 +13,15 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
     | SynExpr.Ident ident ->
         let isMutableVariable =
             match args.GetParents args.NodeIndex with
-            | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _)) :: _ ->
+            | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _, _)) :: _ ->
                 members
                 |> List.exists (fun (memberDef: SynMemberDefn) ->
                     match memberDef with
                     | SynMemberDefn.LetBindings (bindings, _, _, _) ->
                         bindings
-                        |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _)) ->
+                        |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
                             match headPat with
-                            | SynPat.Named (_, bindingIdent, _, _, _) when isMutable ->
+                            | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
                                 bindingIdent.idText = ident.idText
                             | _ -> false)
                     | _ -> false)
@@ -31,7 +31,7 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
     | SynExpr.ArrayOrList (_, elements, _) ->
         elements
         |> List.forall (isImmutableValueExpression args)
-    | SynExpr.ArrayOrListOfSeqExpr (_, SynExpr.CompExpr(true, _, innerExpr, _), _) ->
+    | SynExpr.ArrayOrListComputed (_, innerExpr, _) ->
         isImmutableValueExpression args innerExpr
         || isImmutableSequentialExpression args innerExpr
     | _ -> false
@@ -63,6 +63,7 @@ let private runner (args: AstNodeRuleParams) =
                             _returnInfo,
                             expr,
                             _bindingRange,
+                            _,
                             _
                         ),
                     memberRange
@@ -74,7 +75,7 @@ let private runner (args: AstNodeRuleParams) =
         | expression, _ when isImmutableValueExpression args expression ->
             let suggestedFix =
                 lazy
-                    (match memberIdentifier.Lid with
+                    (match memberIdentifier.LongIdent with
                      | [ _; memberName ] ->
                          Some
                              { FromText = args.FileContent

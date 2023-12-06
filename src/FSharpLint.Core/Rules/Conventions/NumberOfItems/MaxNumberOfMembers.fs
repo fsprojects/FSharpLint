@@ -9,13 +9,13 @@ open FSharpLint.Framework.Rules
 
 let private getMembers (members:SynMemberDefn list) =
     let isPublic = function
-        | Some(SynAccess.Public) | None -> true
+        | Some(SynAccess.Public(_)) | None -> true
         | Some(_) -> false
 
     let isPublicMember = function
         | SynMemberDefn.AbstractSlot(_) -> true
-        | SynMemberDefn.Member(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _), _)
-        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _) -> isPublic access
+        | SynMemberDefn.Member(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _, _), _)
+        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _, _, _) -> isPublic access
         | _ -> false
 
     members
@@ -37,7 +37,7 @@ let private validateType (maxMembers:int) members typeRepresentation =
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn(_, typeRepresentation, members, implicitCtor, _)) ->
+    | AstNode.TypeDefinition(SynTypeDefn(_, typeRepresentation, members, implicitCtor, _, _)) ->
         validateType config.MaxItems (Option.toList implicitCtor @ members) typeRepresentation
     | _ -> Array.empty
 

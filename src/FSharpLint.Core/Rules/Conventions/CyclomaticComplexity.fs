@@ -96,12 +96,12 @@ let private countCasesInMatchClause (clause: SynMatchClause) =
     let rec countCases (pat: SynPat) (count: int) =
         let mutable localSoFar = count + 1
         match pat with
-        | SynPat.Or (lhs, _, _) ->
+        | SynPat.Or (lhs, _, _, _) ->
             countCases lhs localSoFar
         | _ -> localSoFar
     // apply countCases to the given clause.
     match clause with 
-    | SynMatchClause(pat, _, _, _, _) -> countCases pat 0
+    | SynMatchClause(pat, _, _, _, _, _) -> countCases pat 0
 
 /// Boolean operator functions.
 let private boolFunctions = Set.ofList ["op_BooleanOr"; "op_BooleanAnd"]
@@ -122,18 +122,18 @@ let private countBooleanOperators expression =
         count + left + right
     | SynExpr.Paren(expr, _, _, _) ->
         countOperators count expr
-    | SynExpr.Ident ident ->
+    | ExpressionUtilities.Identifier([ ident ], _) ->
         if Set.contains ident.idText boolFunctions then
             count + 1
         else
             count
     // in match and match-like expressions, consider the when expressions of any clauses
-    | SynExpr.MatchBang(_, _, clauses, _)
+    | SynExpr.MatchBang(_, _, clauses, _, _)
     | SynExpr.MatchLambda(_, _, clauses, _, _) 
-    | SynExpr.Match(_, _, clauses, _) ->
+    | SynExpr.Match(_, _, clauses, _, _) ->
         clauses |> List.sumBy (fun c -> 
                                       match c with
-                                      | SynMatchClause(_, whenExprOpt, _, _, _) ->
+                                      | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
                                           match whenExprOpt with
                                           | Some whenExpr ->
                                               countOperators 0 whenExpr
@@ -178,9 +178,9 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
                 bindingStack.IncrComplexityOfCurrentScope (1 + countBooleanOperators condition) // include the number of boolean operators in the while condition
             | SynExpr.IfThenElse(condition, _, _, _, _, _, _) ->
                  bindingStack.IncrComplexityOfCurrentScope (1 + countBooleanOperators condition) // include the number of boolean operators in the condition
-            | SynExpr.MatchBang(_, _, clauses, _)
+            | SynExpr.MatchBang(_, _, clauses, _, _)
             | SynExpr.MatchLambda(_, _, clauses, _, _)
-            | SynExpr.Match(_, _, clauses, _) ->
+            | SynExpr.Match(_, _, clauses, _, _) ->
                 let numCases = clauses |> List.sumBy countCasesInMatchClause // determine the number of cases in the match expression 
                 bindingStack.IncrComplexityOfCurrentScope (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
             | _ -> ()

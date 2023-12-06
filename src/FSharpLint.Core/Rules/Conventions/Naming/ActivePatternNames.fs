@@ -9,12 +9,12 @@ open FSharpLint.Rules.Helper.Naming
 let private getValueOrFunctionIdents _ pattern =
     match pattern with
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
-        match List.tryLast longIdent.Lid with
+        match List.tryLast longIdent.LongIdent with
         | Some ident when isActivePattern ident ->
             ident |> Array.singleton
         | _ ->
             Array.empty
-    | SynPat.Named(_, ident, _, _, _)
+    | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) ->
         if isActivePattern ident then
             ident |> Array.singleton
@@ -24,9 +24,9 @@ let private getValueOrFunctionIdents _ pattern =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Expression(SynExpr.ForEach(_, _, true, pattern, _, _, _)) ->
+    | AstNode.Expression(SynExpr.ForEach(_, _, _, true, pattern, _, _, _)) ->
         getPatternIdents AccessControlLevel.Private getValueOrFunctionIdents false pattern
-    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->

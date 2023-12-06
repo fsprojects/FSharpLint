@@ -14,7 +14,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
     | Some checkInfo ->
         let rec findBindingIdentifier = function
             | SynPat.Paren(pattern, _) -> findBindingIdentifier pattern
-            | SynPat.Named(_, ident, _, _, _) -> Some(ident)
+            | SynPat.Named(SynIdent(ident, _), _, _, _) -> Some(ident)
             | _ -> None
         
         let isNotMutable (symbol:FSharpSymbolUse) =
@@ -49,7 +49,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
 
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
+    | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _, _))
             when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray
                  && not isMutable ->
         checkForUselessBinding args.CheckInfo pattern expr range

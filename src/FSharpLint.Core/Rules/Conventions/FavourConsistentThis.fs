@@ -18,9 +18,9 @@ let internal isNotConsistent identifier symbol =
 let runner (config: Config) args =
     let symbol = config.Symbol
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, range, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, range, _, _)) ->
         match pattern with
-        | SynPat.LongIdent(LongIdentWithDots(identifiers, _),_, _, _, _, _) ->
+        | SynPat.LongIdent(SynLongIdent(identifiers, _, _), _, _, _, _, _) ->
             if identifiers.Length = 2 then
                 match identifiers  with
                 | head::_ when isNotConsistent head.idText symbol ->

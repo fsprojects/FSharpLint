@@ -96,7 +96,7 @@ let private runner (args: AstNodeRuleParams) =
                             failwithMessages.Add(id, { FileName = range.FileName; StartLine = range.StartLine; StartColumn = range.StartColumn })
 
                         Array.empty
-            | SynExpr.LongIdent (_, LongIdentWithDots (id, _), _, _) when
+            | SynExpr.LongIdent (_, SynLongIdent (id, _, _), _, _) when
                 (ExpressionUtilities.longIdentToString id) = "String.Empty"
                 || (ExpressionUtilities.longIdentToString id) = "System.String.Empty"
                 ->
@@ -109,14 +109,14 @@ let private runner (args: AstNodeRuleParams) =
             | SynExpr.Null range ->
                 generateError failwithId.idText "null" range BadUsageType.NullMessage maybeIdentifier
             | _ -> Array.empty
-        | SynExpr.TryWith (_, _, clauseList, _expression, _range, _, _) ->
+        | SynExpr.TryWith (_, clauseList, _expression, _range, _, _) ->
             clauseList
             |> List.toArray
             |> Array.collect (fun clause ->
                 match clause with
-                | SynMatchClause (pat, _, app, _, _) ->
+                | SynMatchClause (pat, _, app, _, _, _) ->
                     match pat with
-                    | SynPat.Named (_, id, _, _, _) -> checkExpr app (Some id.idText)
+                    | SynPat.Named (SynIdent(id, _), _, _, _) -> checkExpr app (Some id.idText)
                     | _ -> checkExpr app None)
                 | _ -> Array.empty
 

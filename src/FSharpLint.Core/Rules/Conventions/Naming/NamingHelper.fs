@@ -191,9 +191,9 @@ type AccessControlLevel =
 
 let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
     let resolveAccessControlLevel = function
-        | Some(SynAccess.Public) | None -> AccessControlLevel.Public
-        | Some(SynAccess.Private) -> AccessControlLevel.Private
-        | Some(SynAccess.Internal) -> AccessControlLevel.Internal
+        | Some(SynAccess.Public _) | None -> AccessControlLevel.Public
+        | Some(SynAccess.Private _) -> AccessControlLevel.Private
+        | Some(SynAccess.Internal _) -> AccessControlLevel.Internal
 
     let rec getAccessibility state isPrivateWhenReachedBinding i =
         if i = 0 then state
@@ -202,12 +202,12 @@ let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
             match node.Actual with
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
-            | UnionCase(SynUnionCase(_, _, _, _, access, _))
+            | UnionCase(SynUnionCase(_, _, _, _, access, _, _))
             | Field(SynField(_, _, _, _, _, _, access, _))
             | ComponentInfo(SynComponentInfo(_, _, _, _, _, _, access, _))
-            | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _))
+            | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _, _))
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
-            | Pattern(SynPat.Named(_, _, _, access, _))
+            | Pattern(SynPat.Named(_, _, access, _))
             | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
                 getAccessibility (resolveAccessControlLevel access) isPrivateWhenReachedBinding node.ParentIndex
             | TypeSimpleRepresentation(_)
@@ -215,7 +215,7 @@ let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
             | MemberDefinition(_) ->
                 if isPrivateWhenReachedBinding then AccessControlLevel.Private
                 else getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
-            | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _)) ->
+            | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _, _)) ->
                 if isPrivateWhenReachedBinding then AccessControlLevel.Private
                 else getAccessibility (resolveAccessControlLevel access) true node.ParentIndex
             | EnumCase(_)
@@ -245,7 +245,7 @@ let isAttribute name (attributes:SynAttributes) =
     let fullName = name + "Attribute"
 
     let attributeHasExpectedName (attribute:SynAttribute) =
-        match List.tryLast attribute.TypeName.Lid with
+        match List.tryLast attribute.TypeName.LongIdent with
         | Some(ident) -> ident.idText = fullName || ident.idText = name
         | None -> false
 
@@ -286,9 +286,9 @@ let isInterface typeDef =
     | _ -> false
 
 let checkAccessibility currentAccessibility = function
-    | Some(SynAccess.Public) | None -> currentAccessibility
-    | Some(SynAccess.Private) -> AccessControlLevel.Private
-    | Some(SynAccess.Internal) -> AccessControlLevel.Internal
+    | Some(SynAccess.Public _) | None -> currentAccessibility
+    | Some(SynAccess.Private _) -> AccessControlLevel.Private
+    | Some(SynAccess.Internal _) -> AccessControlLevel.Internal
 
 let isModule (moduleKind:SynModuleOrNamespaceKind) =
     match moduleKind with
@@ -298,7 +298,7 @@ let isModule (moduleKind:SynModuleOrNamespaceKind) =
     | SynModuleOrNamespaceKind.GlobalNamespace -> false
 
 /// Is module name implicitly created from file name?
-let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range)) =
+let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range, _)) =
     let zeroLengthRange (r:Range) =
         (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
 
@@ -326,7 +326,7 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
             | SynArgPats.NamePatPairs(pats, _) ->
                 pats
                 |> List.toArray
-                |> Array.collect (snd >> getPatternIdents AccessControlLevel.Private getIdents false)
+                |> Array.collect (fun(_, _, synPat) -> getPatternIdents AccessControlLevel.Private getIdents false synPat)
             | SynArgPats.Pats(pats) ->
                 pats
                 |> List.toArray
@@ -338,11 +338,10 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
             |> Array.append argSuggestions
         else
             argSuggestions
-    | SynPat.Named(p, _, _, access, _) ->
+    | SynPat.Named(_, _, access, _) ->
         let accessibility = checkAccessibility accessibility access
         getIdents accessibility pattern
-        |> Array.append (getPatternIdents accessibility getIdents false p)
-    | SynPat.Or(p1, p2, _) ->
+    | SynPat.Or(p1, p2, _, _) ->
         [|p1; p2|]
         |> Array.collect (getPatternIdents accessibility getIdents false)
     | SynPat.Paren(p, _) ->
@@ -363,6 +362,7 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.Wild(_)
     | SynPat.OptionalVal(_)
     | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> Array.empty
+    | SynPat.As(_) -> failwith "Not implemented"
 
 let rec identFromSimplePat = function
     | SynSimplePat.Id(ident, _, _, _, _, _) -> Some ident
@@ -380,7 +380,7 @@ let rec isNested args nodeIndex =
 let getFunctionIdents (pattern:SynPat) =
     match pattern with
     | SynPat.LongIdent (longIdent, _, _, SynArgPats.Pats _, _, _) ->
-        match List.tryLast longIdent.Lid with
+        match List.tryLast longIdent.LongIdent with
         | Some ident -> (ident, ident.idText, None) |> Array.singleton
         | None -> Array.empty
     | _ -> Array.empty

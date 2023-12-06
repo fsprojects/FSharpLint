@@ -7,10 +7,10 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, typeDef, _, _, _)) ->
+    | AstNode.TypeDefinition(SynTypeDefn(componentInfo, typeDef, _, _, _, _)) ->
         let isNotTypeExtension =
             match typeDef with
-            | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.Augmentation, _, _) -> false
+            | SynTypeDefnRepr.ObjectModel(SynTypeDefnKind.Augmentation(_), _, _) -> false
             | _ -> true
 
         if isNotTypeExtension then

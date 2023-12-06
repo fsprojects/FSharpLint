@@ -6,9 +6,9 @@ open FSharpLint.Framework.Rules
 
 let isActualPatternMatch (args:AstNodeRuleParams) rule =
     match args.AstNode with
-    | AstNode.Expression (SynExpr.Match (_, _, clauses, range))
+    | AstNode.Expression (SynExpr.Match (_, _, clauses, range, _))
     | AstNode.Expression (SynExpr.MatchLambda (_, _, clauses, _, range))
-    | AstNode.Expression (SynExpr.TryWith (_, _, clauses, range, _, _, _)) as node ->
+    | AstNode.Expression (SynExpr.TryWith (_, clauses, range, _, _, _)) as node ->
         let isLambda =
             match node with
             | AstNode.Expression (SynExpr.MatchLambda _) -> true

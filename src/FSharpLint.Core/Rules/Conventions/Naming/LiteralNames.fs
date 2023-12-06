@@ -7,10 +7,10 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, pattern, _, _, _, _, _)) ->
         if isLiteral attributes then
             let rec getLiteralIdents = function
-                | SynPat.Named(_, identifier, _, _, _) ->
+                | SynPat.Named(SynIdent(identifier, _), _, _, _) ->
                     (identifier, identifier.idText, None) |> Array.singleton
                 | SynPat.Paren(p, _) -> getLiteralIdents p
                 | _ -> Array.empty
