@@ -118,3 +118,4 @@ The following rules can be specified for linting.
 - [AvoidTooShortNames (FL0075)](rules/FL0075.html)
 - [FavourStaticEmptyFields (FL0076)](rules/FL0076.html)
 - [AvoidSinglePipeOperator (FL0077)](rules/FL0077.html)
+- [AsyncExceptionWithoutReturn (FL0078)](rules/FL0078.html)
