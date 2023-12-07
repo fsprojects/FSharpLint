@@ -14,6 +14,7 @@ nuget Ionide.ProjInfo == 0.53.0
 nuget Ionide.ProjInfo.Sln == 0.53.0
 nuget FSharp.Core ~> 6.0
 nuget nunit ~> 3.0
+nuget System.Reactive ~> 5
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk 17.7.2
 nuget Newtonsoft.Json
@@ -45,6 +46,8 @@ group Build
   storage: none
   strategy: min
 
+  nuget System.Reactive ~> 5
+  nuget MSBuild.StructuredLogger == 2.1.815
   nuget FSharp.Core ~> 5.0
   nuget Fake.Core.Target
   nuget Fake.Core.Process
