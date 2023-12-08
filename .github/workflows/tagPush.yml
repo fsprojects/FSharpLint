@@ -1,4 +1,4 @@
-name: Publish
+name: tagPush
 
 on:
   push:
@@ -6,20 +6,16 @@ on:
       - 'v*' # Publish on any new tag
 
 jobs:
-  build:
+  publish:
 
-    strategy:
-      matrix:
-        os: [windows-latest]
-        dotnet: [5.0.202]
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET 5
+    - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: 5.0.202
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
@@ -56,3 +52,29 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+
+  docs:
+    needs:
+    - publish
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 5.0.202
+    - name: Restore tools
+      run: dotnet tool restore
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Run Fornax
+      run: dotnet fake build -t Docs
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        personal_token: ${{ secrets.GITHUB_TOKEN  }}
+        publish_dir: ./docs/_public
+        publish_branch: gh-pages
+        force_orphan: true
