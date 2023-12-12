@@ -226,7 +226,11 @@ Target.create "SelfCheck" (fun _ ->
     let fsharplintJsonDir = Path.Combine("src", "FSharpLint.Core", "fsharplint.json")
     let fsharplintJsonText = File.ReadAllText fsharplintJsonDir
 
-    let recommendedRules = [ "recursiveAsyncFunction" ]
+    let recommendedRules =
+        [ 
+            "recursiveAsyncFunction"
+            "nestedStatements"
+        ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
 
