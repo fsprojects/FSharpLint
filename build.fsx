@@ -235,6 +235,7 @@ Target.create "SelfCheck" (fun _ ->
             "avoidSinglePipeOperator" rule must be improved and we can enable it later
             *)
             "maxLinesInLambdaFunction"
+            "maxLinesInMatchLambdaFunction"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
