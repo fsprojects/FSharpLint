@@ -30,7 +30,7 @@
     let getPerformanceTestInput =
         let memoizedResult = ref None
 
-        fun () ->
+        let getMemoizedResult () =
             match !memoizedResult with
             | Some(result) -> result
             | None ->
@@ -38,3 +38,5 @@
                 let result = (generateAst text, text)
                 memoizedResult := Some(result)
                 result
+
+        getMemoizedResult

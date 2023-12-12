@@ -9,6 +9,15 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let check args _ (clauses:SynMatchClause list) _ =
+    let choose (clauseOne: SynPat) (clauseTwo: SynPat) = 
+        if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
+            { Range = clauseTwo.Range
+              Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
+              SuggestedFix = None
+              TypeChecks = [] } |> Some
+        else
+            None
+
     clauses
     |> List.toArray
     |> Array.collect (function
@@ -16,14 +25,7 @@ let check args _ (clauses:SynMatchClause list) _ =
             [|firstPat; secondPat|]
         | _ -> [||])
     |> Array.pairwise
-    |> Array.choose (fun (clauseOne, clauseTwo) ->
-        if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
-            { Range = clauseTwo.Range
-              Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Some
-        else
-            None)
+    |> Array.choose (fun (clauseOne, clauseTwo) -> choose clauseOne clauseTwo)
 
 let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
 

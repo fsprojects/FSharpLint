@@ -40,8 +40,7 @@ let private runner (args: AstNodeRuleParams) =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
         generateError range emptyLiteralType
     | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
-        synExprRecordField
-        |> List.map (fun field ->
+        let map (field: SynExprRecordField) =
             match field with
             | SynExprRecordField(_, _, expr, _) ->
                 match expr with
@@ -52,7 +51,10 @@ let private runner (args: AstNodeRuleParams) =
                     generateError range EmptyStringLiteral
                 | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
                     generateError range EmptyStringLiteral
-                | _ -> Array.empty)
+                | _ -> Array.empty
+
+        synExprRecordField
+        |> List.map map
         |> Array.concat
     | _ -> Array.empty
 

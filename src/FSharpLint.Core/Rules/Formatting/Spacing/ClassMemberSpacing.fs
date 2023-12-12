@@ -10,10 +10,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
 let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
-    members
-    |> List.toArray
-    |> Array.pairwise
-    |> Array.choose (fun (memberOne, memberTwo) ->
+    let choose (memberOne: SynMemberDefn) (memberTwo: SynMemberDefn) =
         let numPrecedingCommentLines = countPrecedingCommentLines args.FileContent memberOne.Range.End memberTwo.Range.Start
         if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPrecedingCommentLines then
             let intermediateRange =
@@ -34,7 +31,12 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
               SuggestedFix = None
               TypeChecks = [] } |> Some
         else
-            None)
+            None
+
+    members
+    |> List.toArray
+    |> Array.pairwise
+    |> Array.choose (fun (memberOne, memberTwo) -> choose memberOne memberTwo)
 
 let runner args =
     match args.AstNode with

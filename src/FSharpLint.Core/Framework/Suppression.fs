@@ -31,10 +31,7 @@ let private extractRules (rules:Set<String>) (str:string) =
 let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
     let rules = rules |> Set.map (fun rule -> rule.ToLowerInvariant())
 
-    lines
-    |> List.mapi (fun lineNum line -> (lineNum + 1, line))
-    |> List.filter (fun (_, line) -> line.Contains("fsharplint:"))
-    |> List.choose (fun (lineNum, line) ->
+    let choose lineNum line = 
         let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
         if matched.Success then
             let suppressionTarget =
@@ -48,7 +45,12 @@ let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
             | "disable-line" -> Some (lineNum, DisableLine suppressionTarget)
             | "disable-next-line" -> Some (lineNum + 1, DisableLine suppressionTarget)
             | _ -> None
-        else None)
+        else None
+
+    lines
+    |> List.mapi (fun lineNum line -> (lineNum + 1, line))
+    |> List.filter (fun (_, line) -> line.Contains("fsharplint:"))
+    |> List.choose (fun (lineNum, line) -> choose lineNum line)
     |> List.groupBy (fun (line, _) -> line)
     |> List.map (fun (line, suppressions) ->
         { Line = line
@@ -61,22 +63,25 @@ let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list
         false
     else
         let rule = rule.ToLowerInvariant()
+            
+        
+        let fold (disabledRules:Set<String>) (lineSuppression:LineSuppression) = 
+            let innerFold (disabledRules:Set<String>) suppression = 
+                match suppression with
+                | Enable(rules) ->
+                    Set.difference disabledRules rules
+                | Disable(rules) ->
+                    Set.union disabledRules rules
+                | DisableLine(rules) ->
+                    if line = lineSuppression.Line then
+                        Set.union disabledRules rules
+                    else
+                        disabledRules
+            lineSuppression.Suppressions |> List.fold innerFold disabledRules
 
         let disabledRules =
             lineSuppressions
             |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
-            |> List.fold (fun (disabledRules:Set<String>) (lineSuppression:LineSuppression) ->
-                lineSuppression.Suppressions |> List.fold (fun (disabledRules:Set<String>) suppression ->
-                    match suppression with
-                    | Enable(rules) ->
-                        Set.difference disabledRules rules
-                    | Disable(rules) ->
-                        Set.union disabledRules rules
-                    | DisableLine(rules) ->
-                        if line = lineSuppression.Line then
-                            Set.union disabledRules rules
-                        else
-                            disabledRules
-                ) disabledRules) Set.empty
+            |> List.fold fold Set.empty
 
         disabledRules.Contains(rule)

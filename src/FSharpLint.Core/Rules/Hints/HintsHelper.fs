@@ -54,8 +54,7 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables
             | true, trie -> checkTrie (i + 1) trie nodeArray boundVariables notify
             | false, _ -> ()
 
-        trie.Edges.AnyMatch
-        |> List.iter (fun (var, trie) -> 
+        let collect var trie = 
             match var with
             | Some(var) -> 
                 match boundVariables.TryGetValue var with
@@ -65,5 +64,8 @@ let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables
                     boundVariables.Add(var, i)
                     checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
                 | true, _ -> ()
-            | None -> checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify)
+            | None -> checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+
+        trie.Edges.AnyMatch
+        |> List.iter (fun (var, trie) -> collect var trie)
 

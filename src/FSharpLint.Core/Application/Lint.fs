@@ -122,29 +122,33 @@ module Lint =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
+        let collect i (astNode: AbstractSyntaxArray.Node) =
+            let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray i
+            let astNodeParams =
+                { 
+                    AstNode = astNode.Actual
+                    NodeHashcode = astNode.Hashcode
+                    NodeIndex =  i
+                    SyntaxArray = syntaxArray
+                    GetParents = getParents
+                    FilePath = filePath
+                    FileContent = fileContent
+                    Lines = lines
+                    CheckInfo = typeCheckResults
+                    GlobalConfig = globalConfig
+                }
+            // Build state for rules with context.
+            indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
+            noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
+
+            rules
+            |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams)
+
         // Collect suggestions for AstNode rules, and build context for following rules.
         let astNodeSuggestions =
             syntaxArray
             |> Array.mapi (fun i astNode -> (i, astNode))
-            |> Array.collect (fun (i, astNode) ->
-                let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray i
-                let astNodeParams =
-                    { AstNode = astNode.Actual
-                      NodeHashcode = astNode.Hashcode
-                      NodeIndex =  i
-                      SyntaxArray = syntaxArray
-                      GetParents = getParents
-                      FilePath = filePath
-                      FileContent = fileContent
-                      Lines = lines
-                      CheckInfo = typeCheckResults
-                      GlobalConfig = globalConfig }
-                // Build state for rules with context.
-                indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
-                noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
-
-                rules
-                |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams))
+            |> Array.collect (fun (i, astNode) -> collect i astNode)
 
         let context =
             { IndentationRuleContext = indentationRuleState
@@ -154,17 +158,17 @@ module Lint =
         (astNodeSuggestions, context)
 
     let runLineRules (lineRules:Configuration.LineRules) (globalConfig:Rules.GlobalRuleConfig) (filePath:string) (fileContent:string) (lines:string []) (context:Context) =
-        fileContent
-        |> String.toLines
-        |> Array.collect (fun (line, lineNumber, isLastLine) ->
+        let collectErrors (line: string) (lineNumber: int) (isLastLine: bool) = 
             let lineParams =
-                { LineRuleParams.Line = line
-                  LineNumber = lineNumber + 1
-                  IsLastLine = isLastLine
-                  FilePath = filePath
-                  FileContent = fileContent
-                  Lines = lines
-                  GlobalConfig = globalConfig }
+                { 
+                    LineRuleParams.Line = line
+                    LineNumber = lineNumber + 1
+                    IsLastLine = isLastLine
+                    FilePath = filePath
+                    FileContent = fileContent
+                    Lines = lines
+                    GlobalConfig = globalConfig
+                }
 
             let indentationError =
                 lineRules.IndentationRule
@@ -182,7 +186,11 @@ module Lint =
                 indentationError |> Option.toArray
                 noTabCharactersError |> Option.toArray
                 lineErrors |> Array.singleton
-            |])
+            |]
+
+        fileContent
+        |> String.toLines
+        |> Array.collect (fun (line, lineNumber, isLastLine) -> collectErrors line lineNumber isLastLine)
         |> Array.concat
         |> Array.concat
 
@@ -464,20 +472,22 @@ module Lint =
             | Ok config ->
                 let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration config }
 
+                let collect (s: string) =
+                    let endIndex = s.IndexOf(".fsproj") + 7
+                    let startIndex = s.IndexOf(",") + 1
+                    let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
+                    let projectPath =
+                        if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
+                            projectPath
+                        else // For non-Windows, we need to convert the project path in the solution to Unix format.
+                            projectPath.Replace("\\", "/")
+                    Path.Combine(solutionFolder, projectPath)
+
                 let projectsInSolution =
                     File.ReadAllText(solutionFilePath)
                     |> String.toLines
                     |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project") && s.Contains(".fsproj"))
-                    |> Array.map (fun (s, _, _) ->
-                        let endIndex = s.IndexOf(".fsproj") + 7
-                        let startIndex = s.IndexOf(",") + 1
-                        let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
-                        let projectPath =
-                            if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
-                                projectPath
-                            else // For non-Windows, we need to convert the project path in the solution to Unix format.
-                                projectPath.Replace("\\", "/")
-                        Path.Combine(solutionFolder, projectPath))
+                    |> Array.map (fun (s, _, _) -> collect s)
 
                 let (successes, failures) =
                     projectsInSolution

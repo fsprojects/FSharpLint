@@ -924,18 +924,20 @@ module HintParser =
                 else
                     preturn ""
 
+            let checkPrefix remOpChars expr =
+                if prefix = "&" then Expression.AddressOf(true, expr)
+                else if prefix = "&&" then Expression.AddressOf(false, expr)
+                else if prefix = "!" || prefix = "~" then
+                    let opIdent = Expression.Identifier [prefix + remOpChars]
+                    Expression.PrefixOperator(opIdent, expr)
+                else
+                    let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
+                    Expression.PrefixOperator(opIdent, expr)
+
             let prefixOp =
                 PrefixOperator(
                     prefix, remainingOpChars, precedence, true, (),
-                    fun remOpChars expr ->
-                        if prefix = "&" then Expression.AddressOf(true, expr)
-                        else if prefix = "&&" then Expression.AddressOf(false, expr)
-                        else if prefix = "!" || prefix = "~" then
-                            let opIdent = Expression.Identifier [prefix + remOpChars]
-                            Expression.PrefixOperator(opIdent, expr)
-                        else
-                            let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
-                            Expression.PrefixOperator(opIdent, expr))
+                    checkPrefix)
 
             opp.AddOperator(prefixOp)
 

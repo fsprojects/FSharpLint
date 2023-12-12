@@ -220,7 +220,7 @@ module private MatchExpression =
         | ExpressionUtilities.Identifier([ident], _), ExpressionUtilities.Identifier([opIdent], _) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
             | Some(checkFile) ->
-                fun () -> 
+                let checkSymbol () = 
                     let symbolUse =
                         checkFile.GetSymbolUseAtLocation(
                             ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
@@ -233,6 +233,7 @@ module private MatchExpression =
                         | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
                         | _ -> true
                     | None -> true
+                fun () -> checkSymbol()
                 |> List.singleton
                 |> Match
             | None ->
