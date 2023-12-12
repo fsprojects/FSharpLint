@@ -264,7 +264,16 @@ Target.create "SelfCheck" (fun _ ->
     let fsharplintJsonDir = Path.Combine("src", "FSharpLint.Core", "fsharplint.json")
     let fsharplintJsonText = File.ReadAllText fsharplintJsonDir
 
-    let recommendedRules = [ "recursiveAsyncFunction" ]
+    let recommendedRules =
+        [ 
+            "recursiveAsyncFunction"
+            (*
+            "nestedStatements" // not enable for now
+            "cyclomaticComplexity" rule is too complex and we can enable it later
+            "avoidSinglePipeOperator" rule must be improved and we can enable it later
+            *)
+            "maxLinesInLambdaFunction"
+        ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
 
