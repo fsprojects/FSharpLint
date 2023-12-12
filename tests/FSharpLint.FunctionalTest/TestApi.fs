@@ -32,7 +32,7 @@ module TestApi =
             parseResults.ParseTree
 
         /// Must be called once per process.
-        let toolsPath = Ionide.ProjInfo.Init.init()
+        let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
 
         [<Category("Performance")>]
         [<Test>]

@@ -2,6 +2,7 @@
 
 open Argu
 open System
+open System.IO
 open FSharpLint.Framework
 open FSharpLint.Application
 open System.Reflection
@@ -141,7 +142,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
     
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
-let toolsPath = Ionide.ProjInfo.Init.init()
+let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
 
 [<EntryPoint>]
 let main argv =
