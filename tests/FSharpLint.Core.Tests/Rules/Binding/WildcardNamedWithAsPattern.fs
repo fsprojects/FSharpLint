@@ -27,5 +27,15 @@ match [] with
 
         Assert.IsFalse(this.ErrorsExist)
 
+    [<Test>]
+    member this.WildcardWithoutAsPattern() =
+        this.Parse """
+module Program
+
+match [] with
+    | _ -> ()"""
+
+        Assert.IsFalse(this.ErrorsExist)
+
 
 
