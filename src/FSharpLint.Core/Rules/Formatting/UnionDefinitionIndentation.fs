@@ -32,17 +32,19 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                     None
 
             let consistentIndentationErrors =
-                cases
-                |> List.toArray
-                |> Array.pairwise
-                |> Array.choose (fun (caseOne, caseTwo) ->
+                let choose caseOne caseTwo = 
                     if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
                         { Range = caseTwo.Range
                           Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
                           SuggestedFix = None
                           TypeChecks = [] } |> Some
                     else
-                        None)
+                        None
+
+                cases
+                |> List.toArray
+                |> Array.pairwise
+                |> Array.choose (fun (caseOne, caseTwo) -> choose caseOne caseTwo)
 
             [|
                 indentationLevelError |> Option.toArray

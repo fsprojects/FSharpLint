@@ -21,26 +21,25 @@ let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
 let runner (args: AstNodeRuleParams) =
     match args.AstNode, args.CheckInfo with
     | UnneededRecKeyword.RecursiveFunctions(funcs), Some checkInfo ->
-        funcs
-        |> List.choose
-            (fun functionInfo ->
-                if UnneededRecKeyword.functionIsCalledInOneOf checkInfo functionInfo funcs then
-                    let hasTailCallAttribute =
-                        functionInfo.Attributes 
-                        |> List.collect (fun attrs -> attrs.Attributes) 
-                        |> List.exists 
-                            (fun attr -> 
-                                match attr.TypeName with
-                                | SynLongIdent([ident], _, _) ->
-                                    ident.idText = "TailCall" || ident.idText = "TailCallAttribute"
-                                | _ -> false)
-                    if hasTailCallAttribute then
-                        None
-                    else
-                        emitWarning functionInfo |> Some
-                else
+        let processFunction functionInfo =
+            if UnneededRecKeyword.functionIsCalledInOneOf checkInfo functionInfo funcs then
+                let hasTailCallAttribute =
+                    functionInfo.Attributes 
+                    |> List.collect (fun attrs -> attrs.Attributes) 
+                    |> List.exists 
+                        (fun attr -> 
+                            match attr.TypeName with
+                            | SynLongIdent([ident], _, _) ->
+                                ident.idText = "TailCall" || ident.idText = "TailCallAttribute"
+                            | _ -> false)
+                if hasTailCallAttribute then
                     None
-            )
+                else
+                    emitWarning functionInfo |> Some
+            else
+                None
+        funcs
+        |> List.choose processFunction
         |> List.toArray
     | _ -> Array.empty
 

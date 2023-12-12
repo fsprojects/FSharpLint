@@ -12,19 +12,21 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
     | SynExpr.Const (_constant, _range) -> true
     | SynExpr.Ident ident ->
         let isMutableVariable =
+            let exists memberDef =
+                match memberDef with
+                | SynMemberDefn.LetBindings (bindings, _, _, _) ->
+                    bindings
+                    |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
+                        match headPat with
+                        | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
+                            bindingIdent.idText = ident.idText
+                        | _ -> false)
+                | _ -> false
+
             match args.GetParents args.NodeIndex with
             | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _, _)) :: _ ->
                 members
-                |> List.exists (fun (memberDef: SynMemberDefn) ->
-                    match memberDef with
-                    | SynMemberDefn.LetBindings (bindings, _, _, _) ->
-                        bindings
-                        |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
-                            match headPat with
-                            | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
-                                bindingIdent.idText = ident.idText
-                            | _ -> false)
-                    | _ -> false)
+                |> List.exists exists
             | _ -> false
 
         not isMutableVariable

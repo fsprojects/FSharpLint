@@ -121,15 +121,17 @@ module ExpressionUtilities =
     let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
         let range = Range.mkRange "" startPos endPos
 
-        tryFindTextOfRange range text
-        |> Option.map (fun precedingText ->
+        let map (precedingText: string) =
             let lines =
                 precedingText.Split '\n'
                 |> Array.rev
                 |> Array.tail
             lines
             |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
-            |> Array.length)
+            |> Array.length
+
+        tryFindTextOfRange range text
+        |> Option.map map
         |> Option.defaultValue 0
 
     let rangeContainsOtherRange (containingRange:Range) (range:Range) =

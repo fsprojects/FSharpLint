@@ -245,8 +245,7 @@ let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType)
 
 let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
     let typeChecks =
-        (partialInstanceMemberIdentifiers
-        |> List.map (fun replacement ->
+        let map (replacement: string * option<string> * string * Replacement) =
             match replacement with
             | (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
                 if not (fullyQualifiedInstanceMember.Contains ".") then
@@ -289,20 +288,48 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
 
                         if typeMatches then
                             match replacementStrategy with
-                             | PatternMatch ->
-                                Some { Range = range
-                                       Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError", fullyQualifiedInstanceMember)
-                                       SuggestedFix = None
-                                       TypeChecks = (fun () -> typeMatches) |> List.singleton }
-                             | Function replacementFunctionName ->
-                                Some { Range = range
-                                       Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunctionName, fullyQualifiedInstanceMember)
-                                       SuggestedFix = Some (lazy ( Some { FromText = (String.concat "." names) ; FromRange = range; ToText = replacementFunctionName }))
-                                       TypeChecks = (fun () -> typeMatches) |> List.singleton }
+                            | PatternMatch ->
+                                Some
+                                    {
+                                        Range = range
+                                        Message =
+                                            String.Format(
+                                                Resources.GetString
+                                                    "RulesConventionsNoPartialFunctionsPatternMatchError",
+                                                fullyQualifiedInstanceMember
+                                            )
+                                        SuggestedFix = None
+                                        TypeChecks = (fun () -> typeMatches) |> List.singleton
+                                    }
+                            | Function replacementFunctionName ->
+                                Some
+                                    {
+                                        Range = range
+                                        Message =
+                                            String.Format(
+                                                Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
+                                                replacementFunctionName,
+                                                fullyQualifiedInstanceMember
+                                            )
+                                        SuggestedFix =
+                                            Some(
+                                                lazy
+                                                    (Some
+                                                        {
+                                                            FromText = (String.concat "." names)
+                                                            FromRange = range
+                                                            ToText = replacementFunctionName
+                                                        })
+                                            )
+                                        TypeChecks = (fun () -> typeMatches) |> List.singleton
+                                    }
                         else
                             None
                     | _ -> None
-                | _ -> None))
+                | _ -> None
+
+        (partialInstanceMemberIdentifiers
+        |> List.map map)
     match List.tryFind(fun (typeCheck:Option<WarningDetails>) -> typeCheck.IsSome) typeChecks with
     | None -> None
     | Some instanceMember -> instanceMember
@@ -314,8 +341,7 @@ let private checkMemberCallOnExpression
     (originalRange: Range): array<WarningDetails> =
     match getTypedExpressionForRange checkFile range with
     | Some expression ->
-        partialInstanceMemberIdentifiers
-        |> List.choose (fun (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
+        let choose (fullyQualifiedInstanceMember: string) (replacementStrategy: Replacement) =
             let typeName = fullyQualifiedInstanceMember.Split(".").[0]
             let fsharpType = expression.Type
 
@@ -329,17 +355,47 @@ let private checkMemberCallOnExpression
             if matchesType then
                 match replacementStrategy with
                 | PatternMatch ->
-                    Some { Range = originalRange
-                           Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError", fullyQualifiedInstanceMember)
-                           SuggestedFix = None
-                           TypeChecks = (fun () -> true) |> List.singleton }
+                    Some
+                        {
+                            Range = originalRange
+                            Message =
+                                String.Format(
+                                    Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError",
+                                    fullyQualifiedInstanceMember
+                                )
+                            SuggestedFix = None
+                            TypeChecks = (fun () -> true) |> List.singleton
+                        }
                 | Function replacementFunctionName ->
-                    Some { Range = originalRange
-                           Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunctionName, fullyQualifiedInstanceMember)
-                           SuggestedFix = Some (lazy ( Some { FromText = (ExpressionUtilities.tryFindTextOfRange originalRange flieContent).Value ; FromRange = originalRange; ToText = replacementFunctionName }))
-                           TypeChecks = (fun () -> true) |> List.singleton }
+                    Some
+                        {
+                            Range = originalRange
+                            Message =
+                                String.Format(
+                                    Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
+                                    replacementFunctionName,
+                                    fullyQualifiedInstanceMember
+                                )
+                            SuggestedFix =
+                                Some(
+                                    lazy
+                                        (Some
+                                            {
+                                                FromText =
+                                                    (ExpressionUtilities.tryFindTextOfRange originalRange flieContent)
+                                                        .Value
+                                                FromRange = originalRange
+                                                ToText = replacementFunctionName
+                                            })
+                                )
+                            TypeChecks = (fun () -> true) |> List.singleton
+                        }
             else
-                None)
+                None
+
+        partialInstanceMemberIdentifiers
+        |> List.choose (fun (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
+            choose fullyQualifiedInstanceMember replacementStrategy)
         |> List.toArray
     | None -> Array.empty
 
