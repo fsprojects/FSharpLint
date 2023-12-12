@@ -31,6 +31,26 @@ let private getFunctionNameFromAsyncCompExprBinding = function
 
 let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangExpr:SynExpr) breadcrumbs =
     let doTokenRange = Range.mkRange "do!" (Position.mkPos range.StartLine range.StartColumn) (Position.mkPos range.StartLine (range.StartColumn + 3))
+
+    let suggestFix () = 
+        let suggestedFix =
+            lazy
+                (ExpressionUtilities.tryFindTextOfRange doTokenRange args.FileContent
+                 |> Option.map (fun fromText ->
+                     {
+                         FromText = fromText
+                         FromRange = doTokenRange
+                         ToText = "return!"
+                     }))
+
+        {
+            Range = range
+            Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
+            SuggestedFix = Some suggestedFix
+            TypeChecks = []
+        }
+        |> Some
+
     match doBangExpr with
     | SynExpr.App (funcExpr=(SynExpr.Ident callerIdent)) ->
         breadcrumbs
@@ -43,18 +63,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
             | _ -> [])
         |> List.choose getFunctionNameFromAsyncCompExprBinding
         |> List.filter ((=) callerIdent.idText)
-        |> List.choose (fun _ ->
-            let suggestedFix = lazy(
-                ExpressionUtilities.tryFindTextOfRange doTokenRange args.FileContent
-                |> Option.map (fun fromText ->
-                    { FromText = fromText
-                      FromRange = doTokenRange
-                      ToText = "return!" }))
-
-            { Range = range
-              Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = [] } |> Some)
+        |> List.choose (fun _ -> suggestFix ())
         |> List.toArray
     | _ -> Array.empty
 

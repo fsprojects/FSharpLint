@@ -13,23 +13,29 @@ open FSharpLint.Framework.Rules
 let runner (args: AstNodeRuleParams) =
     // hack to only run rule once
     if args.NodeIndex = 0 then
+        let choose (usage: FSharpSymbolUse) =
+            match usage.Symbol with
+            | :? FSharp.Compiler.Symbols.FSharpMemberOrFunctionOrValue as symbol -> 
+                let conditions =
+                    not usage.IsFromDefinition
+                    && symbol.FullName.StartsWith "_"
+                    && symbol.FullName <> "_"
+                    && not symbol.IsCompilerGenerated
+                if conditions then
+                    Some {
+                        Range = usage.Range
+                        Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
+                else
+                    None
+            | _ -> None
+
         match args.CheckInfo with
         | Some checkResults -> 
             checkResults.GetAllUsesOfAllSymbolsInFile() 
-            |> Seq.choose (fun usage ->
-                match usage.Symbol with
-                | :? FSharp.Compiler.Symbols.FSharpMemberOrFunctionOrValue as symbol -> 
-                    if not usage.IsFromDefinition && symbol.FullName.StartsWith "_" 
-                            && symbol.FullName <> "_" && not symbol.IsCompilerGenerated then
-                        Some {
-                            Range = usage.Range
-                            Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
-                            SuggestedFix = None
-                            TypeChecks = List.Empty
-                        }
-                    else
-                        None
-                | _ -> None )
+            |> Seq.choose choose
             |> Seq.toArray
         | None -> Array.empty
     else

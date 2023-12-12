@@ -9,9 +9,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
-    clauses
-    |> List.toArray
-    |> Array.choose (fun clause ->
+    let choose clause = 
         let (SynMatchClause (pat, guard, expr, _, _, _)) = clause
         let clauseIndentation = ExpressionUtilities.getLeadingSpaces clause.Range args.FileContent
         let exprIndentation = ExpressionUtilities.getLeadingSpaces expr.Range args.FileContent
@@ -25,7 +23,11 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
               SuggestedFix = None
               TypeChecks = [] } |> Some
         else
-            None)
+            None
+
+    clauses
+    |> List.toArray
+    |> Array.choose choose
 
 let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
 

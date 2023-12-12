@@ -44,8 +44,7 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
     let (expectedSpacesBefore, expectedSpacesAfter) =
         expectedSpacesFromConfig config.TypedItemStyle
 
-    ExpressionUtilities.tryFindTextOfRange range args.FileContent
-    |> Option.bind (fun text ->
+    let bind (text: string) = 
         match text.Split(':') with
         | [|otherText; typeText|] ->
             let spacesBeforeColon = getTrailingSpaces otherText
@@ -66,7 +65,10 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                       TypeChecks = [] }
                 else
                     None
-        | _ -> None)
+        | _ -> None
+
+    ExpressionUtilities.tryFindTextOfRange range args.FileContent
+    |> Option.bind bind
 
 /// Checks for correct spacing around colon of a typed item.
 let runner (config:Config) (args:AstNodeRuleParams) =
