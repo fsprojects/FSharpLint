@@ -230,6 +230,11 @@ Target.create "SelfCheck" (fun _ ->
         [ 
             "recursiveAsyncFunction"
             "nestedStatements"
+            (*
+            "cyclomaticComplexity" rule is too complex and we can enable it later
+            "avoidSinglePipeOperator" rule must be improved and we can enable it later
+            *)
+            "maxLinesInLambdaFunction"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
