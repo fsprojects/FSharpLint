@@ -19,7 +19,7 @@ let private implementsIDisposable (fsharpType:FSharpType) =
         false
 
 let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) =
-    let names = ident.LongIdent |> List.map (fun x -> x.idText)
+    let names = ident.LongIdent |> List.map (fun identifier -> identifier.idText)
     let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, String.Empty, names)
 
     match symbol with

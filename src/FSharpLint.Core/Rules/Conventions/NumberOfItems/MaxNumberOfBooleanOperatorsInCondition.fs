@@ -29,7 +29,7 @@ let private validateCondition (maxBooleanOperators:int) condition =
                 total + 1
             else
                 total
-        | x ->
+        | _ ->
             total
 
     let ruleName = "MaxNumberOfBooleanOperatorsInCondition"

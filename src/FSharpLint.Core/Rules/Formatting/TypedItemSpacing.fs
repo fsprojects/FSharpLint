@@ -16,21 +16,21 @@ type TypedItemStyle =
 [<RequireQualifiedAccess>]
 type Config = { TypedItemStyle:TypedItemStyle }
 
-let private getLeadingSpaces (s:string) =
-    let rec loop i =
-        if i < s.Length && s.[i] = ' '
-        then loop (i + 1)
-        else i
+let private getLeadingSpaces (text:string) =
+    let rec loop index =
+        if index < text.Length && text.[index] = ' '
+        then loop (index + 1)
+        else index
 
     loop 0
 
-let private getTrailingSpaces (s:string) =
-    let rec loop i count =
-        if i >= 0 && s.[i] = ' '
-        then loop (i - 1) (count + 1)
+let private getTrailingSpaces (text:string) =
+    let rec loop index count =
+        if index >= 0 && text.[index] = ' '
+        then loop (index - 1) (count + 1)
         else count
 
-    (loop (s.Length - 1) 0)
+    (loop (text.Length - 1) 0)
 
 let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     match typedItemStyle with

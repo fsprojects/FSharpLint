@@ -46,7 +46,7 @@ type private BindingStack(maxComplexity: int) =
         let isChildOfCurrent = if List.isEmpty tier1 then
                                     false
                                 else
-                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(tier1.Head.Node, x)) |> Option.isSome
+                                    args.GetParents args.NodeIndex |> List.tryFind (fun astNode -> Object.ReferenceEquals(tier1.Head.Node, astNode)) |> Option.isSome
         // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
         if not isChildOfCurrent && not (List.isEmpty tier1) then
             let popped = tier1.Head
@@ -57,9 +57,9 @@ type private BindingStack(maxComplexity: int) =
         tier1 <- bs::tier1
         
     member this.IncrComplexityOfCurrentScope incr =
-        let h = tier1.Head
-        let complexity = h.Complexity + incr
-        tier1 <- {h with Complexity = complexity}::tier1.Tail
+        let head = tier1.Head
+        let complexity = head.Complexity + incr
+        tier1 <- {head with Complexity = complexity}::tier1.Tail
         
     interface IEnumerable<BindingScope> with
         member this.GetEnumerator() =
@@ -131,8 +131,8 @@ let private countBooleanOperators expression =
     | SynExpr.MatchBang(_, _, clauses, _, _)
     | SynExpr.MatchLambda(_, _, clauses, _, _) 
     | SynExpr.Match(_, _, clauses, _, _) ->
-        clauses |> List.sumBy (fun c -> 
-                                      match c with
+        clauses |> List.sumBy (fun matchClause -> 
+                                      match matchClause with
                                       | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
                                           match whenExprOpt with
                                           | Some whenExpr ->
@@ -197,7 +197,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
                                 { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = List.Empty })
                             |> Seq.toList
             let ret = match warningDetails with
-                      | Some x -> x::fromStack
+                      | Some warning -> warning::fromStack
                       | None -> fromStack
             ret |> List.toArray
     else

@@ -9,7 +9,7 @@ module TestApi =
     open FSharp.Compiler.CodeAnalysis
     open FSharp.Compiler.Text
 
-    let (</>) x y = Path.Combine(x, y)
+    let (</>) basePath relativePath = Path.Combine(basePath, relativePath)
 
     let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 

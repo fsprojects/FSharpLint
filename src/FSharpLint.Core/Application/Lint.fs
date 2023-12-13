@@ -61,8 +61,8 @@ module Lint =
             with get() =
                 let getParseFailureReason = function
                     | ParseFile.FailedToParseFile failures ->
-                        let getFailureReason (x:FSharpDiagnostic) =
-                            $"failed to parse file {x.FileName}, message: {x.Message}"
+                        let getFailureReason (fSharpDiagnostic:FSharpDiagnostic) =
+                            $"failed to parse file {fSharpDiagnostic.FileName}, message: {fSharpDiagnostic.Message}"
 
                         String.Join(", ", failures |> Array.map getFailureReason)
                     | ParseFile.AbortedTypeCheck -> "Type check failed. You might want to build your solution/project first and try again."
@@ -85,8 +85,8 @@ module Lint =
                     $"Lint failed to parse files. Failed with: {failureReasons}"
 
     [<NoComparison>]
-    type Result<'T> =
-        | Success of 'T
+    type Result<'SuccessType> =
+        | Success of 'SuccessType
         | Failure of LintFailure
 
     /// Provides information on what the linter is currently doing.
@@ -104,9 +104,9 @@ module Lint =
         /// Path of the F# file the progress information is for.
         member this.FilePath() =
             match this with
-            | Starting(f)
-            | ReachedEnd(f, _)
-            | Failed(f, _) -> f
+            | Starting(filePath)
+            | ReachedEnd(filePath, _)
+            | Failed(filePath, _) -> filePath
 
     [<NoEquality; NoComparison>]
     type LintInfo =
@@ -123,13 +123,13 @@ module Lint =
         let mutable indentationRuleState = Map.empty
         let mutable noTabCharactersRuleState = List.empty
 
-        let collect i (astNode: AbstractSyntaxArray.Node) =
-            let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray i
+        let collect index (astNode: AbstractSyntaxArray.Node) =
+            let getParents (depth:int) = AbstractSyntaxArray.getBreadcrumbs depth syntaxArray index
             let astNodeParams =
                 { 
                     AstNode = astNode.Actual
                     NodeHashcode = astNode.Hashcode
-                    NodeIndex =  i
+                    NodeIndex =  index
                     SyntaxArray = syntaxArray
                     GetParents = getParents
                     FilePath = filePath
@@ -148,8 +148,8 @@ module Lint =
         // Collect suggestions for AstNode rules, and build context for following rules.
         let astNodeSuggestions =
             syntaxArray
-            |> Array.mapi (fun i astNode -> (i, astNode))
-            |> Array.collect (fun (i, astNode) -> collect i astNode)
+            |> Array.mapi (fun index astNode -> (index, astNode))
+            |> Array.collect (fun (index, astNode) -> collect index astNode)
 
         let context =
             { IndentationRuleContext = indentationRuleState
@@ -212,7 +212,7 @@ module Lint =
 
         let cancelHasNotBeenRequested () =
             match lintInfo.CancellationToken with
-            | Some(x) -> not x.IsCancellationRequested
+            | Some(value) -> not value.IsCancellationRequested
             | None -> true
 
         let enabledRules = Configuration.flattenConfig lintInfo.Configuration
@@ -265,7 +265,7 @@ module Lint =
                 with
                 | :? TimeoutException -> () // Do nothing.
         with
-        | e -> Failed(fileInfo.File, e) |> lintInfo.ReportLinterProgress
+        | exn -> Failed(fileInfo.File, exn) |> lintInfo.ReportLinterProgress
 
         ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
@@ -281,17 +281,17 @@ module Lint =
                 UseShellExecute = false
             )
 
-        use p = new System.Diagnostics.Process(StartInfo = psi)
+        use proc = new System.Diagnostics.Process(StartInfo = psi)
         let sbOut = System.Text.StringBuilder()
-        p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
+        proc.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
         let sbErr = System.Text.StringBuilder()
-        p.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
-        p.Start() |> ignore<bool>
-        p.BeginOutputReadLine()
-        p.BeginErrorReadLine()
-        p.WaitForExit()
+        proc.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
+        proc.Start() |> ignore<bool>
+        proc.BeginOutputReadLine()
+        proc.BeginErrorReadLine()
+        proc.WaitForExit()
 
-        let exitCode = p.ExitCode
+        let exitCode = proc.ExitCode
 
         (exitCode, (workingDir, exePath, args))
 
@@ -451,7 +451,7 @@ module Lint =
                 | Ok projectOptions ->
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
                     | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
-                    | Failure x -> LintResult.Failure x
+                    | Failure lintFailure -> LintResult.Failure lintFailure
                 | Error error ->
                     MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
                     |> LintResult.Failure

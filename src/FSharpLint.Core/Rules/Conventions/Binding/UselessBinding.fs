@@ -19,7 +19,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         
         let isNotMutable (symbol:FSharpSymbolUse) =
             match symbol.Symbol with
-            | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+            | :? FSharpMemberOrFunctionOrValue as fSharpMemberOrFunctionOrValue -> not fSharpMemberOrFunctionOrValue.IsMutable
             | _ -> true
 
         let checkNotMutable (ident:Ident) = fun () ->

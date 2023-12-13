@@ -9,7 +9,7 @@ module Utilities =
         current <- current * 31 + hash one
         current * 31 + hash two
 
-    let (</>) x y = System.IO.Path.Combine(x, y)
+    let (</>) path1 path2 = System.IO.Path.Combine(path1, path2)
 
 module Dictionary =
 
@@ -37,7 +37,7 @@ module ExpressionUtilities =
     let getSymbolFromIdent (checkFile:FSharpCheckFileResults option) expr =
         match (checkFile, expr) with
         | Some(checkFile), Identifier(ident, range) ->
-            let identNames = ident |> List.map (fun x -> x.idText)
+            let identNames = ident |> List.map (fun identifier -> identifier.idText)
 
             checkFile.GetSymbolUseAtLocation(
                 range.StartLine,
@@ -60,8 +60,8 @@ module ExpressionUtilities =
 
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec removeParens = function
-        | SynExpr.Paren(x, _, _, _) -> removeParens x
-        | x -> x
+        | SynExpr.Paren(expr, _, _, _) -> removeParens expr
+        | expression -> expression
 
     /// Finds index of a given (line number, column) position in a string.
     let findPos (pos:pos) (str:string) =
@@ -73,7 +73,7 @@ module ExpressionUtilities =
                 else None
 
         findLineStart pos.Line 1 0
-        |> Option.map (fun x -> x + pos.Column)
+        |> Option.map (fun lineStart -> lineStart + pos.Column)
 
     /// Converts a LongIdent to a String.
     let longIdentToString (lid:LongIdent) =
@@ -106,7 +106,7 @@ module ExpressionUtilities =
     let synTypeToString (text:string) = function
         | SynType.Tuple _ as synType ->
             tryFindTextOfRange synType.Range text
-            |> Option.map (fun x -> $"({x})")
+            |> Option.map (fun extractedText -> $"({extractedText})")
         | other ->
             tryFindTextOfRange other.Range text
 
@@ -150,15 +150,15 @@ module String =
             | null -> None
             | line -> Some line
 
-        let rec iterateLines currentLine i =
+        let rec iterateLines currentLine index =
             match currentLine with
             | Some line ->
                 let nextLine = readLine ()
                 let isLastLine = Option.isNone nextLine
 
-                lines.Add(line, i, isLastLine)
+                lines.Add(line, index, isLastLine)
 
-                iterateLines nextLine (i + 1)
+                iterateLines nextLine (index + 1)
             | None -> ()
 
         iterateLines (readLine ()) 0

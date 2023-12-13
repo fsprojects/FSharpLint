@@ -12,7 +12,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             let rec getLiteralIdents = function
                 | SynPat.Named(SynIdent(identifier, _), _, _, _) ->
                     (identifier, identifier.idText, None) |> Array.singleton
-                | SynPat.Paren(p, _) -> getLiteralIdents p
+                | SynPat.Paren(pat, _) -> getLiteralIdents pat
                 | _ -> Array.empty
 
             getLiteralIdents pattern

@@ -21,17 +21,17 @@ open MergeSyntaxTrees
 /// Confirms if two parts of the ast look alike.
 /// This is required as hints can bind variables: the bound location needs to be compared to
 /// parts of the ast that the hint covers with the same variable.
-let private isMatch i j (nodeArray:AbstractSyntaxArray.Node []) = 
-    let numChildrenI = nodeArray.[i].NumberOfChildren
-    let numChildrenJ = nodeArray.[j].NumberOfChildren
+let private isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) = 
+    let numChildrenI = nodeArray.[iIndex].NumberOfChildren
+    let numChildrenJ = nodeArray.[jIndex].NumberOfChildren
 
     if numChildrenI = numChildrenJ then
         let numChildren = numChildrenI
 
         { 0..numChildren } |> Seq.forall (fun child -> 
-            i + child < nodeArray.Length && 
-            j + child < nodeArray.Length && 
-            nodeArray.[i + child].Hashcode = nodeArray.[j + child].Hashcode)
+            iIndex + child < nodeArray.Length && 
+            jIndex + child < nodeArray.Length && 
+            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode)
     else false
 
 let inline private isParen (node:AbstractSyntaxArray.Node) =
@@ -40,31 +40,31 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
     | _ -> false
 
 /// Compares the hint trie against a given location in the abstract syntax array.
-let rec checkTrie i trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<_, _>) notify =
+let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<_, _>) notify =
     trie.MatchedHint |> List.iter notify
 
-    if i < nodeArray.Length then
-        let node = nodeArray.[i]
+    if index < nodeArray.Length then
+        let node = nodeArray.[index]
 
         if isParen node then
             // Skip the paren.
-            checkTrie (i + 1) trie nodeArray boundVariables notify
+            checkTrie (index + 1) trie nodeArray boundVariables notify
         else
             match trie.Edges.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (i + 1) trie nodeArray boundVariables notify
+            | true, trie -> checkTrie (index + 1) trie nodeArray boundVariables notify
             | false, _ -> ()
 
         let collect var trie = 
             match var with
             | Some(var) -> 
                 match boundVariables.TryGetValue var with
-                | true, varI when isMatch varI i nodeArray  -> 
-                    checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+                | true, varI when isMatch varI index nodeArray  -> 
+                    checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
                 | false, _ -> 
-                    boundVariables.Add(var, i)
-                    checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+                    boundVariables.Add(var, index)
+                    checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
                 | true, _ -> ()
-            | None -> checkTrie (i + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+            | None -> checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
 
         trie.Edges.AnyMatch
         |> List.iter (fun (var, trie) -> collect var trie)

@@ -17,9 +17,9 @@ type private MultilineCommentMarker =
     | Begin of int
     | End of int
 
-let private error name i actual =
+let private error name lineCount actual =
     let errorFormatString = Resources.GetString("RulesSourceLengthError")
-    String.Format(errorFormatString, name, i, actual)
+    String.Format(errorFormatString, name, lineCount, actual)
 
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 

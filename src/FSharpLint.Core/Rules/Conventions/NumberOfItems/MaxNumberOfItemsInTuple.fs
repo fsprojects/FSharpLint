@@ -7,18 +7,18 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) i =
-    let rec isApplicationNode i =
-        if i <= 0 then false
+let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) index =
+    let rec isApplicationNode nodeIndex =
+        if nodeIndex <= 0 then false
         else
-            let node = syntaxArray.[i]
+            let node = syntaxArray.[nodeIndex]
             match node.Actual with
             | AstNode.Expression(SynExpr.Paren(_)) -> isApplicationNode node.ParentIndex
             | AstNode.Expression(SynExpr.App(_) | SynExpr.New(_)) -> true
             | _ -> false
 
-    if i <= 0 then false
-    else isApplicationNode syntaxArray.[i].ParentIndex
+    if index <= 0 then false
+    else isApplicationNode syntaxArray.[index].ParentIndex
 
 let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
