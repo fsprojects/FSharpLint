@@ -14,10 +14,13 @@ let private checkForBindingToAWildcard pattern range =
         | _ -> false
 
     if findWildAndIgnoreParens pattern then
-        { Range = range
-          Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-          SuggestedFix = None
-          TypeChecks = [] } |> Array.singleton
+        {
+            Range = range
+            Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     else
         Array.empty
 

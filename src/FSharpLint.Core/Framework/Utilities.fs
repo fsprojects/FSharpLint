@@ -42,7 +42,7 @@ module ExpressionUtilities =
             checkFile.GetSymbolUseAtLocation(
                 range.StartLine,
                 range.EndColumn,
-                "",
+                String.Empty,
                 identNames)
         | _ -> None
 
@@ -94,7 +94,7 @@ module ExpressionUtilities =
         | _ -> None
 
     let getLeadingSpaces (range:Range) (text:string) =
-        let range = Range.mkRange "" (Position.mkPos range.StartLine 0) range.End
+        let range = Range.mkRange String.Empty (Position.mkPos range.StartLine 0) range.End
         tryFindTextOfRange range text
         |> Option.map (fun text ->
             text.ToCharArray()
@@ -119,7 +119,7 @@ module ExpressionUtilities =
 
     /// Counts the number of comment lines preceding the given range of text.
     let countPrecedingCommentLines (text:string) (startPos:pos) (endPos:pos) =
-        let range = Range.mkRange "" startPos endPos
+        let range = Range.mkRange String.Empty startPos endPos
 
         let map (precedingText: string) =
             let lines =

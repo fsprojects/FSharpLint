@@ -13,7 +13,13 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
             when List.length parameters > maxParameters ->
         let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
         let error = String.Format(errorFormatString, maxParameters)
-        { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        {
+            Range = parameters.[maxParameters].Range
+            Message = error
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     | _ -> Array.empty
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =

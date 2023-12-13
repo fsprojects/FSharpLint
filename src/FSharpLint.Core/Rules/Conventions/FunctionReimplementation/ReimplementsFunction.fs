@@ -35,10 +35,12 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
             ExpressionUtilities.tryFindTextOfRange range text
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
 
-        { Range = range
-          Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] }
+        {
+            Range = range
+            Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
 
     let argumentsAsIdentifiers =
         lambda.Arguments

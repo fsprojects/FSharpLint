@@ -223,7 +223,7 @@ module private MatchExpression =
                 let checkSymbol () = 
                     let symbolUse =
                         checkFile.GetSymbolUseAtLocation(
-                            ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                            ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
                     match symbolUse with
                     | Some(symbolUse) ->
@@ -241,8 +241,8 @@ module private MatchExpression =
                 match filterParens arguments.Breadcrumbs with
                 | PossiblyInMethod
                 | PossiblyInConstructor -> NoMatch
-                | _ -> Match([])
-        | _ -> Match([])
+                | _ -> Match(List.Empty)
+        | _ -> Match(List.Empty)
 
     let rec matchHintExpr arguments =
         let expr = removeParens arguments.Expression
@@ -253,19 +253,19 @@ module private MatchExpression =
             match expr with
             | AstNode.Expression(ExpressionUtilities.Identifier([identifier], _))
                     when identifier.idText = arguments.LambdaArguments.[variable] ->
-                Match([])
+                Match(List.Empty)
             | _ -> NoMatch
         | Expression.Variable(var) ->
             match expr with
             | AstNode.Expression(expr) -> arguments.MatchedVariables.TryAdd(var, expr) |> ignore<bool>
             | _ -> ()
-            Match([])
+            Match(List.Empty)
         | Expression.Wildcard ->
-            Match([])
+            Match(List.Empty)
         | Expression.Null
         | Expression.Constant(_)
         | Expression.Identifier(_) ->
-            if matchExpr expr = Some(arguments.Hint) then Match([])
+            if matchExpr expr = Some(arguments.Hint) then Match(List.Empty)
             else NoMatch
         | Expression.Parentheses(hint) ->
             arguments.SubHint(expr, hint) |> matchHintExpr
@@ -301,7 +301,7 @@ module private MatchExpression =
         if List.length expressions = List.length hintExpressions then
             (expressions, hintExpressions)
             ||> List.map2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
-            |> List.fold (&&~) (Match([]))
+            |> List.fold (&&~) (Match(List.Empty))
         else
             NoMatch
 
@@ -501,7 +501,7 @@ module private FormatHint =
         | Expression.Identifier(identifier) -> String.concat "." identifier
         | x ->
             Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString())
-            ""
+            String.Empty
 
     let rec toString replace parentAstNode (args:AstNodeRuleParams) (matchedVariables:Dictionary<_, SynExpr>) parentHintNode hintNode =
         let toString = toString replace parentAstNode args matchedVariables (Some hintNode)
@@ -532,7 +532,7 @@ module private FormatHint =
                         each)
                 |> String.concat "."
             | HintExpr(Expression.FunctionApplication(expressions)) ->
-                expressions |> surroundExpressionsString (HintExpr >> toString) "" "" " "
+                expressions |> surroundExpressionsString (HintExpr >> toString) String.Empty String.Empty " "
             | HintExpr(Expression.InfixOperator(operator, leftHint, rightHint)) ->
                 toString (HintExpr leftHint) + " " + opToString operator + " " + toString (HintExpr rightHint)
             | HintPat(Pattern.Cons(leftHint, rightHint)) ->
@@ -606,7 +606,7 @@ let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:
         checkFile.GetSymbolUseAtLocation(
             methodIdent.Range.StartLine,
             methodIdent.Range.EndColumn,
-            "",
+            String.Empty,
             methodIdent.LongIdent |> List.map (fun x -> x.idText))
 
     match symbol with
@@ -655,7 +655,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
     | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
     | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern (pattern, hintPattern) ->
-        hintError [] hint args pattern.Range (Dictionary<_, _>()) None
+        hintError List.Empty hint args pattern.Range (Dictionary<_, _>()) None
         |> suggestions.Add
     | AstNode.Expression(expr), HintExpr(hintExpr) ->
         let arguments =

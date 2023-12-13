@@ -41,10 +41,13 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
         | _ -> false
 
     if canBeReplacedWithFunctionComposition lambda.Body then
-        { Range = range
-          Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-          SuggestedFix = None
-          TypeChecks = [] } |> Array.singleton
+        {
+            Range = range
+            Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     else
         Array.empty
 

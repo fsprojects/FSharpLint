@@ -10,10 +10,13 @@ open FSharpLint.Framework.Rules
 let private checkForWildcardNamedWithAsPattern pattern =
     match pattern with
     | SynPat.Wild(range) ->
-        { Range = range
-          Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
-          SuggestedFix = None
-          TypeChecks = [] } |> Array.singleton
+        {
+            Range = range
+            Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =

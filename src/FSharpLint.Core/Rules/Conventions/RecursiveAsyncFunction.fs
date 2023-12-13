@@ -47,7 +47,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
             Range = range
             Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
             SuggestedFix = Some suggestedFix
-            TypeChecks = []
+            TypeChecks = List.Empty
         }
         |> Some
 
@@ -60,7 +60,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
                 bindings
             | AstNode.Expression (SynExpr.LetOrUse (true, false, bindings, _, _, _)) ->
                 bindings
-            | _ -> [])
+            | _ -> List.Empty)
         |> List.choose getFunctionNameFromAsyncCompExprBinding
         |> List.filter ((=) callerIdent.idText)
         |> List.choose (fun _ -> suggestFix ())

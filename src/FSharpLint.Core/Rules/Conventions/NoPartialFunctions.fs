@@ -92,7 +92,7 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
             Range = range
             Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
             SuggestedFix = None
-            TypeChecks = []
+            TypeChecks = List.Empty
         }
     else
         Map.tryFind identifier partialFunctionIdentifiers
@@ -103,14 +103,14 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
                     Range = range
                     Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
                     SuggestedFix = None
-                    TypeChecks = []
+                    TypeChecks = List.Empty
                 }
             | Function replacementFunction ->
                 {
                     Range = range
                     Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
                     SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
-                    TypeChecks = []
+                    TypeChecks = List.Empty
                 })
 
 let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) = 

@@ -25,7 +25,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         let checkNotMutable (ident:Ident) = fun () ->
             let symbol =
                 checkInfo.GetSymbolUseAtLocation(
-                    ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                    ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
             match symbol with
             | Some(symbol) -> isNotMutable symbol

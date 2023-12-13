@@ -53,12 +53,12 @@ let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) :
         Array.append
             (processLetBinding instanceNames expr1)
             (processLetBinding instanceNames expr2)
-    | _ -> [||]
+    | _ -> Array.empty
 
 and processExpression (expression: SynExpr) : array<WarningDetails> =
     match expression with
     | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
-        let instanceNames = extraFromBindings bindings [] |> Set.ofList
+        let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
         processLetBinding instanceNames body
     | SynExpr.Sequential(_, _, expr1, expr2, _) ->
         Array.append
@@ -69,7 +69,7 @@ and processExpression (expression: SynExpr) : array<WarningDetails> =
 let runner args =
     match args.AstNode with
     | Binding(SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, body, _, _), _, _, _)) ->
-        let instanceNames = extraFromBindings bindings [] |> Set.ofList
+        let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
         processLetBinding instanceNames body
     | Match(SynMatchClause(_, _, expr, _, _, _)) ->
         processExpression expr

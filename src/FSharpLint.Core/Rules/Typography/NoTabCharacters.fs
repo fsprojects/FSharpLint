@@ -24,12 +24,15 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = Range.mkRange "" (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
+        let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
-            { Range = range
-              Message = Resources.GetString("RulesTypographyTabCharacterError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString("RulesTypographyTabCharacterError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
+            |> Array.singleton
         else
             Array.empty
     else

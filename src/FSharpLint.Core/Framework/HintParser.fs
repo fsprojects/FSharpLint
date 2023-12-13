@@ -1,5 +1,6 @@
 ﻿namespace FSharpLint.Framework
 
+open System
 open FParsec
 open FSharp.Compiler.Tokenization
 
@@ -146,7 +147,7 @@ module HintParser =
 
             override this.GetHashCode() = hash (this.AnyMatch, hash this.Lookup)
 
-            static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = [] }
+            static member Empty = { Lookup = Dictionary<_, _>(); AnyMatch = List.Empty }
 
         let private getConstKey = function
             | Constant.Unit -> SyntaxHintNode.Unit
@@ -235,7 +236,7 @@ module HintParser =
             | HintExpr(Expression.Constant(_))
             | HintExpr(Expression.Null)
             | HintExpr(Expression.Wildcard)
-            | HintExpr(Expression.Variable(_)) -> []
+            | HintExpr(Expression.Variable(_)) -> List.Empty
             | HintPat(Pattern.Cons(lhs, rhs))
             | HintPat(Pattern.Or(lhs, rhs)) -> [HintPat lhs; HintPat rhs]
             | HintPat(Pattern.Array(patterns))
@@ -246,7 +247,7 @@ module HintParser =
             | HintPat(Pattern.Identifier(_))
             | HintPat(Pattern.Constant(_))
             | HintPat(Pattern.Wildcard)
-            | HintPat(Pattern.Null) -> []
+            | HintPat(Pattern.Null) -> List.Empty
 
         let private getConstantHashCode = function
             | Constant.Bool(x) -> hash x
@@ -320,7 +321,7 @@ module HintParser =
                     transposeHead next rest
                 | [] -> builtList
 
-            transposeHead [] hintLists
+            transposeHead List.Empty hintLists
 
         let isAnyMatch = function
             | ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true
@@ -387,7 +388,7 @@ module HintParser =
             getEdges transposed
 
     let charListToString charList =
-        Seq.fold (fun x y -> x + y.ToString()) "" charList
+        Seq.fold (fun x y -> x + y.ToString()) String.Empty charList
 
     let pischar chars : Parser<char, 'T> =
         satisfy (fun x -> List.exists ((=) x) chars)
@@ -424,7 +425,7 @@ module HintParser =
             pidentstartchar .>>. many pidentchar
             |>> fun (start, rest) -> start::rest
             >>= fun ident ->
-                let identStr = System.String.Join("", ident)
+                let identStr = System.String.Join(String.Empty, ident)
 
                 let isKeyword = List.exists ((=) identStr) FSharpKeywords.KeywordNames
 
@@ -902,9 +903,9 @@ module HintParser =
         let addInfixOperator prefix precedence associativity =
             let remainingOpChars =
                 if prefix = "=" then
-                    notFollowedBy (pstring "==>") |>> fun _ -> ""
+                    notFollowedBy (pstring "==>") |>> fun _ -> String.Empty
                 else if prefix = "|" then
-                    notFollowedBy (pstring "]") |>> fun _ -> ""
+                    notFollowedBy (pstring "]") |>> fun _ -> String.Empty
                 else
                     manySatisfy (isAnyOf Operators.opchars)
 
@@ -922,7 +923,7 @@ module HintParser =
                 else if prefix = "~" then
                     manySatisfy ((=) '~')
                 else
-                    preturn ""
+                    preturn String.Empty
 
             let checkPrefix remOpChars expr =
                 if prefix = "&" then Expression.AddressOf(true, expr)
@@ -1026,7 +1027,7 @@ module HintParser =
         let addInfixOperator operator precedence associativity =
             let remainingOpChars =
                 if operator = "|" then
-                    notFollowedBy (pstring "]") |>> fun _ -> ""
+                    notFollowedBy (pstring "]") |>> fun _ -> String.Empty
                 else
                     manySatisfy (isAnyOf Operators.opchars)
 

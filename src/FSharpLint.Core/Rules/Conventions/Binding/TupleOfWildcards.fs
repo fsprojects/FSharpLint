@@ -24,7 +24,13 @@ let private checkTupleOfWildcards pattern identifier =
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = (constructorString 1)
         let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-        { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        {
+            Range = range
+            Message = error
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     | _ -> Array.empty
 
 let private isTupleMemberArgs breadcrumbs tupleRange =

@@ -497,7 +497,7 @@ module Lint =
                         | LintResult.Success warnings ->
                             (List.append warnings successes, failures)
                         | LintResult.Failure err ->
-                            (successes, err :: failures)) ([], [])
+                            (successes, err :: failures)) (List.Empty, List.Empty)
 
                 match failures with
                 | [] ->
