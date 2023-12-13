@@ -159,7 +159,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                                 && fsharpType.TypeDefinition.CompiledName = "list`1"
                              | _ -> fnVal.FullName = typeName
 
-                        let typeMatches = moduleEnt.MembersFunctionsAndValues.Any(fun element -> getFunctionValTypeName element)
+                        let typeMatches = moduleEnt.MembersFunctionsAndValues.Any(Func<FSharpMemberOrFunctionOrValue, bool>(getFunctionValTypeName))
                         if typeMatches then
                             match replacementStrategy with
                              | PatternMatch ->

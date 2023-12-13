@@ -26,3 +26,5 @@ jobs:
       run: dotnet restore
     - name: Build and run tests
       run: dotnet fake build -t Test
+    - name: Run FSharpLint on itself
+      run: dotnet fake build -t SelfCheck

@@ -13,6 +13,8 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.Api
 
+open System.IO
+
 Target.initEnvironment()
 
 // --------------------------------------------------------------------------------------
@@ -136,6 +138,21 @@ Target.create "Push" (fun _ ->
         | s when not (isNullOrWhiteSpace s) -> s
         | _ -> UserInput.getUserPassword "NuGet Key: "
     Paket.push (fun p -> { p with WorkingDir = nugetDir; ApiKey = key; ToolType = ToolType.CreateLocalTool() }))
+
+
+Target.create "SelfCheck" (fun _ ->
+    let frameworkVersion = "net5.0"
+    let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
+    let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
+
+    let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
+    printfn "Checking %s..." consoleProj.FullName
+    exec "dotnet" (sprintf "run --framework %s lint %s" frameworkVersion consoleProj.FullName) consoleProj.Directory.FullName
+
+    let coreProj = Path.Combine(srcDir.FullName, "FSharpLint.Core", "FSharpLint.Core.fsproj") |> FileInfo
+    printfn "Checking %s..." coreProj.FullName
+    exec "dotnet" (sprintf "run --framework %s lint %s" frameworkVersion coreProj.FullName) consoleProj.Directory.FullName
+)
 
 // --------------------------------------------------------------------------------------
 // Build order

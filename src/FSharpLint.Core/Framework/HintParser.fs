@@ -389,10 +389,10 @@ module HintParser =
     let charListToString charList =
         Seq.fold (fun x y -> x + y.ToString()) "" charList
 
-    let pischar chars : Parser<char, 'a> =
+    let pischar chars : Parser<char, 'T> =
         satisfy (fun x -> List.exists ((=) x) chars)
 
-    let pnotchar chars : Parser<char, 'a> =
+    let pnotchar chars : Parser<char, 'T> =
         satisfy (fun x -> not <| List.exists ((=) x) chars)
 
     module Operators =
@@ -783,7 +783,7 @@ module HintParser =
             satisfy isLetter
             .>> notFollowedBy (satisfy isLetter)
 
-        let ptuple (pparser:Parser<'a, unit>) : Parser<'a list, unit> =
+        let ptuple (pparser:Parser<'T, unit>) : Parser<'T list, unit> =
             skipChar '('
             >>. pparser
             .>> skipChar ','
@@ -791,14 +791,14 @@ module HintParser =
             .>> skipChar ')'
             |>> fun (func, rest) -> (func::rest)
 
-        let plist (pparser:Parser<'a, unit>): Parser<'a list, unit> =
+        let plist (pparser:Parser<'T, unit>): Parser<'T list, unit> =
             skipChar '['
             >>. spaces
             >>. sepEndBy pparser (skipChar ';')
             .>> spaces
             .>> skipChar ']'
 
-        let parray (pparser:Parser<'a, unit>): Parser<'a list, unit> =
+        let parray (pparser:Parser<'T, unit>): Parser<'T list, unit> =
             skipString "[|"
             >>. spaces
             >>. sepEndBy pparser (skipChar ';')

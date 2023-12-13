@@ -84,8 +84,8 @@ module Lint =
                     "Lint failed to parse files. Failed with: " + failureReasons
 
     [<NoComparison>]
-    type Result<'t> =
-        | Success of 't
+    type Result<'T> =
+        | Success of 'T
         | Failure of LintFailure
 
     /// Provides information on what the linter is currently doing.
@@ -387,7 +387,7 @@ module Lint =
             with
             | :? System.IO.FileNotFoundException ->
                 Ok Configuration.defaultConfiguration
-            | _ as ex -> Error (string ex)
+            | ex -> Error (string ex)
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.

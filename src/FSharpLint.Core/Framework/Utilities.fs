@@ -15,7 +15,7 @@ module Dictionary =
 
     open System.Collections.Generic
 
-    let addOrUpdate key value (dict:Dictionary<'key,'value>) =
+    let addOrUpdate key value (dict:Dictionary<'Key,'Value>) =
         if dict.ContainsKey(key) then
             dict.Remove(key) |> ignore
 

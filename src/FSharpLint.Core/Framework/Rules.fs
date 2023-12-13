@@ -41,10 +41,10 @@ type LineRuleParams =
       Lines:string []
       GlobalConfig:GlobalRuleConfig }
 
-type RuleMetadata<'config> =
+type RuleMetadata<'Config> =
     { Name:string
       Identifier:string
-      RuleConfig:'config }
+      RuleConfig:'Config }
 
 type AstNodeRuleConfig =
     { Runner:AstNodeRuleParams -> WarningDetails []
