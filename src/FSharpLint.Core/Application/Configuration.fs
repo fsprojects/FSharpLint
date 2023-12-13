@@ -628,6 +628,39 @@ let private parseHints (hints:string []) =
     |> Array.toList
     |> MergeSyntaxTrees.mergeHints
 
+let findDeprecation config deprecatedAllRules allRules =
+    if config.NonPublicValuesNames.IsSome &&
+        (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
+        failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
+
+    let astNodeRules = ResizeArray()
+    let lineRules = ResizeArray()
+    let mutable indentationRule = None
+    let mutable noTabCharactersRule = None
+    Array.append allRules deprecatedAllRules
+    |> Array.distinctBy (function // Discard any deprecated rules which were define in a non-deprecated form.
+        | Rule.AstNodeRule rule -> rule.Identifier
+        | Rule.LineRule rule -> rule.Identifier
+        | Rule.IndentationRule rule -> rule.Identifier
+        | Rule.NoTabCharactersRule rule -> rule.Identifier)
+    |> Array.iter (function
+        | AstNodeRule rule -> astNodeRules.Add rule
+        | LineRule rule -> lineRules.Add(rule)
+        | IndentationRule rule -> indentationRule <- Some rule
+        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
+
+    {
+        LoadedRules.GlobalConfig = getGlobalConfig config.Global
+        DeprecatedRules = deprecatedAllRules
+        AstNodeRules = astNodeRules.ToArray()
+        LineRules =
+            {
+                GenericLineRules = lineRules.ToArray()
+                IndentationRule = indentationRule
+                NoTabCharactersRule = noTabCharactersRule
+            }
+    }
+
 let flattenConfig (config:Configuration) =
     let deprecatedAllRules =
         [|
@@ -722,30 +755,4 @@ let flattenConfig (config:Configuration) =
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
         |] |> Array.choose id
 
-    if config.NonPublicValuesNames.IsSome &&
-        (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
-        failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
-
-    let astNodeRules = ResizeArray()
-    let lineRules = ResizeArray()
-    let mutable indentationRule = None
-    let mutable noTabCharactersRule = None
-    Array.append allRules deprecatedAllRules
-    |> Array.distinctBy (function // Discard any deprecated rules which were define in a non-deprecated form.
-        | Rule.AstNodeRule rule -> rule.Identifier
-        | Rule.LineRule rule -> rule.Identifier
-        | Rule.IndentationRule rule -> rule.Identifier
-        | Rule.NoTabCharactersRule rule -> rule.Identifier)
-    |> Array.iter (function
-        | AstNodeRule rule -> astNodeRules.Add rule
-        | LineRule rule -> lineRules.Add(rule)
-        | IndentationRule rule -> indentationRule <- Some rule
-        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
-
-    { LoadedRules.GlobalConfig = getGlobalConfig config.Global
-      DeprecatedRules = deprecatedAllRules
-      AstNodeRules = astNodeRules.ToArray()
-      LineRules =
-        { GenericLineRules = lineRules.ToArray()
-          IndentationRule = indentationRule
-          NoTabCharactersRule = noTabCharactersRule } }
+    findDeprecation config deprecatedAllRules allRules

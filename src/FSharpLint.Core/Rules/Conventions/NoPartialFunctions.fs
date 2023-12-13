@@ -191,11 +191,9 @@ let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) =
                 tryFindTypedExpression range inpExpr
             | FSharpExprPatterns.UnionCaseSet(unionExpr, unionType, unionCase, unionCaseField, valueExpr) -> 
                 tryFindTypedExpression range unionExpr |> Option.orElse (tryFindTypedExpression range valueExpr)
-            | FSharpExprPatterns.UnionCaseGet(unionExpr, _unionType, _unionCase, _unionCaseField) -> 
-                tryFindTypedExpression range unionExpr
-            | FSharpExprPatterns.UnionCaseTest(unionExpr, _unionType, _unionCase) -> 
-                tryFindTypedExpression range unionExpr
-            | FSharpExprPatterns.UnionCaseTag(unionExpr, _unionType) -> 
+            | FSharpExprPatterns.UnionCaseGet(unionExpr, _, _, _)
+            | FSharpExprPatterns.UnionCaseTest(unionExpr, _, _)
+            | FSharpExprPatterns.UnionCaseTag(unionExpr, _) -> 
                 tryFindTypedExpression range unionExpr
             | FSharpExprPatterns.ObjectExpr(_objType, baseCallExpr, overrides, interfaceImplementations) -> 
                 let interfaceImlps = interfaceImplementations |> List.collect snd
