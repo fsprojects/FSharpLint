@@ -23,7 +23,7 @@ type Benchmark () =
 
         parseResults.ParseTree
 
-    let (</>) x y = Path.Combine(x, y)
+    let (</>) basePath relativePath = Path.Combine(basePath, relativePath)
 
     let basePath = ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".."
     let sourceFile = basePath </> "TypeChecker.fs"
