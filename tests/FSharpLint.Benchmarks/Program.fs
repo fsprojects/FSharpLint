@@ -11,5 +11,5 @@ let main _ =
         .Run<Benchmark>(
             DefaultConfig.Instance
                 .AddJob(Job.Default)
-                .AddDiagnoser(EtwProfiler())) |> ignore
+                .AddDiagnoser(EtwProfiler())) |> ignore<BenchmarkDotNet.Reports.Summary>
     0

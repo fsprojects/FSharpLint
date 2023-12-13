@@ -52,7 +52,7 @@ type private BindingStack(maxComplexity: int) =
             let popped = tier1.Head
             tier1 <- tier1.Tail
             if popped.Complexity > maxComplexity then
-                tier2.Add popped |> ignore
+                tier2.Add popped |> ignore<bool>
         // finally, push the item on to the stack
         tier1 <- bs::tier1
         

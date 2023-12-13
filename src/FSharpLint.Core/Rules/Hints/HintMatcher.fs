@@ -257,7 +257,7 @@ module private MatchExpression =
             | _ -> NoMatch
         | Expression.Variable(var) ->
             match expr with
-            | AstNode.Expression(expr) -> arguments.MatchedVariables.TryAdd(var, expr) |> ignore
+            | AstNode.Expression(expr) -> arguments.MatchedVariables.TryAdd(var, expr) |> ignore<bool>
             | _ -> ()
             Match([])
         | Expression.Wildcard ->
