@@ -17,7 +17,7 @@ module Dictionary =
 
     let addOrUpdate key value (dict:Dictionary<'Key,'Value>) =
         if dict.ContainsKey(key) then
-            dict.Remove(key) |> ignore
+            dict.Remove(key) |> ignore<bool>
 
         dict.Add(key, value)
 

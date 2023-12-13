@@ -95,7 +95,7 @@ type TestAst() =
         for _ in 0..iterations do
             stopwatch.Restart()
 
-            astToArray tree |> ignore
+            astToArray tree |> ignore<Node array>
 
             stopwatch.Stop()
 

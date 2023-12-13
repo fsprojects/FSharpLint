@@ -283,10 +283,10 @@ module Lint =
 
         use p = new System.Diagnostics.Process(StartInfo = psi)
         let sbOut = System.Text.StringBuilder()
-        p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore)
+        p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
         let sbErr = System.Text.StringBuilder()
-        p.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore)
-        p.Start() |> ignore
+        p.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
+        p.Start() |> ignore<bool>
         p.BeginOutputReadLine()
         p.BeginErrorReadLine()
         p.WaitForExit()
@@ -411,7 +411,7 @@ module Lint =
                 let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
 
                 let warningReceived (warning:Suggestion.LintWarning) =
-                    lintWarnings.AddLast warning |> ignore
+                    lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
                     optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
@@ -521,7 +521,7 @@ module Lint =
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
             let warningReceived (warning:Suggestion.LintWarning) =
-                lintWarnings.AddLast warning |> ignore
+                lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
                 optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
             let lintInformation =
@@ -563,7 +563,7 @@ module Lint =
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
 
             let warningReceived (warning:Suggestion.LintWarning) =
-                lintWarnings.AddLast warning |> ignore
+                lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
                 optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
