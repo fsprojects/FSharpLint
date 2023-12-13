@@ -254,7 +254,9 @@ module Ast =
             add <| Pattern lhs
             add <| Pattern rhs
 
-    let inline private expressionChildren node add =
+    let inline private expressionChildren (node: SynExpr) (add: AstNode -> unit) =
+        let addMany = List.iter add
+
         match node with
         | SynExpr.Paren(expression, _, _, _)
         | SynExpr.DotGet(expression, _, _, _)
@@ -273,9 +275,7 @@ module Ast =
         | SynExpr.YieldOrReturn(_, expression, _, _)
         | SynExpr.YieldOrReturnFrom(_, expression, _, _) -> add <| Expression expression
         | SynExpr.SequentialOrImplicitYield(_, expression1, expression2, ifNotExpression, _) ->
-            add <| Expression expression1
-            add <| Expression expression2
-            add <| Expression ifNotExpression
+            addMany [Expression expression1; Expression expression2; Expression ifNotExpression]
         | SynExpr.Quote(expression, _, expression1, _, _)
         | SynExpr.Sequential(_, _, expression, expression1, _, _)
         | SynExpr.NamedIndexedPropertySet(_, expression, expression1, _)
@@ -285,11 +285,9 @@ module Ast =
         | SynExpr.TryFinally(expression, expression1, _, _, _, _)
         | SynExpr.Set(expression, expression1, _)
         | SynExpr.DotSet(expression, _, expression1, _) ->
-            add <| Expression expression1
-            add <| Expression expression
+            addMany [Expression expression1; Expression expression]
         | SynExpr.Typed(expression, synType, _) ->
-            add <| Type synType
-            add <| Expression expression
+            addMany [Type synType; Expression expression]
         | SynExpr.Tuple(_, expressions, _, _)
         | SynExpr.ArrayOrList(_, expressions, _) -> expressions |> List.revIter (Expression >> add)
         | SynExpr.Record(_, Some(expr, _), _, _) -> add <| Expression expr
@@ -300,34 +298,18 @@ module Ast =
         | SynExpr.ObjExpr(synType, _, _, bindings, _, _, _, _) ->
             bindings |> List.revIter (Binding >> add)
             add <| Type synType
-        | SynExpr.ImplicitZero(_)
-        | SynExpr.Null(_)
-        | SynExpr.Const(_)
-        | SynExpr.DiscardAfterMissingQualificationAfterDot(_)
-        | SynExpr.FromParseError(_)
-        | SynExpr.LibraryOnlyILAssembly(_)
-        | SynExpr.LibraryOnlyStaticOptimization(_)
-        | SynExpr.LibraryOnlyUnionCaseFieldGet(_)
-        | SynExpr.LibraryOnlyUnionCaseFieldSet(_)
-        | SynExpr.ArbitraryAfterError(_) -> ()
         | SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _)
         | SynExpr.For(_, _, _, _, expression, _, expression1, expression2, _) ->
-            add <| Expression expression2
-            add <| Expression expression1
-            add <| Expression expression
+            addMany [Expression expression2; Expression expression1; Expression expression]
         | SynExpr.LetOrUseBang(_, _, _, pattern, rightHandSide, andBangs, leftHandSide, _, _) ->
-            add <| Expression rightHandSide
-            add <| Expression leftHandSide
+            addMany [Expression rightHandSide; Expression leftHandSide]
             // TODO: is the the correct way to handle the new `and!` syntax?
             andBangs |> List.iter (fun (SynExprAndBang(_, _, _, pattern, body, _, _)) ->
-                add <| Expression body
-                add <| Pattern pattern
+                addMany [Expression body; Pattern pattern]
             )
             add <| Pattern pattern
         | SynExpr.ForEach(_, _, _, _, pattern, expression, expression1, _) ->
-            add <| Expression expression1
-            add <| Expression expression
-            add <| Pattern pattern
+            addMany [Expression expression1; Expression expression; Pattern pattern]
         | SynExpr.MatchLambda(_, _, matchClauses, _, _) ->
             matchClauses |> List.revIter (Match >> add)
         | SynExpr.TryWith(expression, matchClauses, _, _, _, _)
@@ -342,8 +324,7 @@ module Ast =
         | SynExpr.TypeTest(expression, synType, _)
         | SynExpr.Upcast(expression, synType, _)
         | SynExpr.Downcast(expression, synType, _) ->
-            add <| Type synType
-            add <| Expression expression
+            addMany [Type synType; Expression expression]
         | SynExpr.LetOrUse(_, _, bindings, expression, _, _) ->
             add <| Expression expression
             bindings |> List.revIter (Binding >> add)
@@ -351,39 +332,46 @@ module Ast =
         | SynExpr.LongIdent(_, SynLongIdent(ident, _, _), _, range) ->
             add <| Identifier(ident |> List.map (fun x -> x.idText), range)
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) ->
-            add <| Else elseExpr
-            add <| Expression body
-            add <| Expression cond
+            addMany [Else elseExpr; Expression body; Expression cond]
         | SynExpr.IfThenElse(cond, body, None, _, _, _, _) ->
-            add <| Expression body
-            add <| Expression cond
-        | SynExpr.InterpolatedString(contents, _, range) ->
+            addMany [Expression body; Expression cond]
+        | SynExpr.InterpolatedString(contents, _, range) -> 
             contents
             |> List.iter (
                 function
-                    | SynInterpolatedStringPart.String _ ->
-                        ()
-                    | SynInterpolatedStringPart.FillExpr (expr, _ident) ->
-                        add <| Expression expr
+                    | SynInterpolatedStringPart.String _ -> ()
+                    | SynInterpolatedStringPart.FillExpr (expr, _ident) -> add <| Expression expr
             )
+        (*
+        | SynExpr.ImplicitZero(_)
+        | SynExpr.Null(_)
+        | SynExpr.Const(_)
+        | SynExpr.DiscardAfterMissingQualificationAfterDot(_)
+        | SynExpr.FromParseError(_)
+        | SynExpr.LibraryOnlyILAssembly(_)
+        | SynExpr.LibraryOnlyStaticOptimization(_)
+        | SynExpr.LibraryOnlyUnionCaseFieldGet(_)
+        | SynExpr.LibraryOnlyUnionCaseFieldSet(_)
+        | SynExpr.ArbitraryAfterError(_)
         | SynExpr.Lambda(_)
         | SynExpr.DotLambda(_)
         | SynExpr.App(_)
-        | SynExpr.Fixed(_)
+        | SynExpr.Fixed(_) -> ()
+        *)
         | SynExpr.Typar(_) -> ()
         | SynExpr.WhileBang(_, expression, expression1, _) ->
             add <| Expression expression1
             add <| Expression expression
-        | SynExpr.DebugPoint(_debugPoint, _, innerExpr) ->
+        | SynExpr.DebugPoint(_debugPoint, _, innerExpr) -> 
             add <| Expression innerExpr
         | SynExpr.Dynamic(funcExpr, _, argExpr, _) ->
-            add <| Expression funcExpr
-            add <| Expression argExpr
-        | SynExpr.IndexFromEnd(expr, _) ->
+            addMany [Expression funcExpr; Expression argExpr]
+        | SynExpr.IndexFromEnd(expr, _) -> 
             add <| Expression expr
         | SynExpr.IndexRange(expr1, _, expr2, _, _, _) ->
             expr1 |> Option.iter (Expression >> add)
             expr2 |> Option.iter (Expression >> add)
+        | _ -> ()
 
     let inline private typeSimpleRepresentationChildren node add =
         match node with
