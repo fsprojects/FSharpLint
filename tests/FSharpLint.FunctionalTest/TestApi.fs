@@ -49,7 +49,7 @@ module TestApi =
             for _ in 0..iterations do
                 stopwatch.Restart()
 
-                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
+                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore<LintResult>
 
                 stopwatch.Stop()
 
