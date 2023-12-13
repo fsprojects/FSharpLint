@@ -300,5 +300,5 @@ module AbstractSyntaxArray =
             else
                 breadcrumbs
 
-        if i = 0 then []
-        else getBreadcrumbs [] (syntaxArray.[i].ParentIndex) |> List.rev
+        if i = 0 then List.Empty
+        else getBreadcrumbs List.Empty (syntaxArray.[i].ParentIndex) |> List.rev

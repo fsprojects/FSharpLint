@@ -24,20 +24,26 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
         | firstCase :: _ ->
             let indentationLevelError =
                 if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
-                    { Range = firstCase.Range
-                      Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
-                      SuggestedFix = None
-                      TypeChecks = [] } |> Some
+                    {
+                        Range = firstCase.Range
+                        Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
+                    |> Some
                 else
                     None
 
             let consistentIndentationErrors =
                 let choose caseOne caseTwo = 
                     if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
-                        { Range = caseTwo.Range
-                          Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
-                          SuggestedFix = None
-                          TypeChecks = [] } |> Some
+                        {
+                            Range = caseTwo.Range
+                            Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
+                            SuggestedFix = None
+                            TypeChecks = List.Empty
+                        }
+                        |> Some
                     else
                         None
 

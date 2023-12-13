@@ -1,5 +1,7 @@
 module FSharpLint.Rules.FailwithfWithArgumentsMatchingFormatString
 
+open System
+
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
@@ -13,12 +15,12 @@ let private runner (args:AstNodeRuleParams) =
         | FuncApp(expressions, range) ->
             match expressions with
             | SynExpr.Ident(ident)::SynExpr.Const(SynConst.String(formatString, _, _), _)::arguments
-                when ident.idText = "failwithf" && List.length arguments = formatString.Replace("%%", "").Split('%').Length ->
+                when ident.idText = "failwithf" && List.length arguments = formatString.Replace("%%", String.Empty).Split('%').Length ->
                 {
                     Range = range
                     Message = Resources.GetString "FailwithfWithArgumentsMatchingFormatString"
                     SuggestedFix = None
-                    TypeChecks = []
+                    TypeChecks = List.Empty
                 } |> Array.singleton
             | _ -> Array.empty
         | _ -> Array.empty

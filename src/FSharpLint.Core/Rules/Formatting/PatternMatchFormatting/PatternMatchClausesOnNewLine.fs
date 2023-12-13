@@ -11,10 +11,13 @@ open FSharpLint.Rules.Helper
 let check args _ (clauses:SynMatchClause list) _ =
     let choose (clauseOne: SynMatchClause) (clauseTwo: SynMatchClause) = 
         if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
-            { Range = clauseTwo.Range
-              Message = Resources.GetString("RulesFormattingPatternMatchClausesOnNewLineError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Some
+            {
+                Range = clauseTwo.Range
+                Message = Resources.GetString("RulesFormattingPatternMatchClausesOnNewLineError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
+            |> Some
         else
             None
 

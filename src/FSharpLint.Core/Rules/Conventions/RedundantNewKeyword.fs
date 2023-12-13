@@ -1,5 +1,7 @@
 module FSharpLint.Rules.RedundantNewKeyword
 
+open System
+
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Symbols
@@ -18,7 +20,7 @@ let private implementsIDisposable (fsharpType:FSharpType) =
 
 let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) =
     let names = ident.LongIdent |> List.map (fun x -> x.idText)
-    let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, "", names)
+    let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, String.Empty, names)
 
     match symbol with
     | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->

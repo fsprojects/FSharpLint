@@ -81,7 +81,7 @@ module IgnoreFiles =
                 else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
             | [] -> false
 
-        doesGlobSeqMatchPathSeq path []
+        doesGlobSeqMatchPathSeq path List.Empty
 
     let shouldFileBeIgnored (ignorePaths:Ignore list) (filePath:string) =
         let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList
@@ -355,7 +355,7 @@ with
             this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
         |] |> Array.concat
 
-let private getOrEmptyList hints = hints |> Option.defaultValue [||]
+let private getOrEmptyList hints = hints |> Option.defaultValue Array.empty
 
 type HintConfig = {
     add:string [] option

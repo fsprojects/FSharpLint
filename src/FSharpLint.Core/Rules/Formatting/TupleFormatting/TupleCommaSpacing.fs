@@ -13,7 +13,7 @@ open FSharpLint.Rules.Helper
 let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tupleRange _ =
     let choose (expr: SynExpr) (nextExpr: SynExpr) = 
       if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
-        let commaRange = Range.mkRange "" expr.Range.End nextExpr.Range.Start
+        let commaRange = Range.mkRange String.Empty expr.Range.End nextExpr.Range.Start
         let map commaText =
             lazy
                 ({
@@ -30,7 +30,7 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
             Range = commaRange
             Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
             SuggestedFix = suggestedFix
-            TypeChecks = []
+            TypeChecks = List.Empty
         }
         |> Some
       else

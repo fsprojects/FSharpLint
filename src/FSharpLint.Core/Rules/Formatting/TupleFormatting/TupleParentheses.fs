@@ -9,7 +9,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
-    let map text =
+    let map text = 
         let suggestedFix =
             lazy
                 ({
@@ -19,10 +19,12 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
                  }
                  |> Some)
 
-        { Range = range
-          Message = Resources.GetString("RulesFormattingTupleParenthesesError")
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] }
+        {
+            Range = range
+            Message = Resources.GetString("RulesFormattingTupleParenthesesError")
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
 
     match parentNode with
     | Some (AstNode.Expression (SynExpr.Paren _)) ->

@@ -21,7 +21,7 @@ let runner (args: AstNodeRuleParams) =
         let checkParentPiped (expr: AstNode) =
             match expr with
             | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-                checkExpr funcExpr outerArgExpr range [] |> Seq.isEmpty
+                checkExpr funcExpr outerArgExpr range List.Empty |> Seq.isEmpty
             | _ -> false
 
         match expr with

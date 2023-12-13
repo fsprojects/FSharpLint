@@ -20,14 +20,14 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                 let endOffset = if startLine = endLine then 1 else 0
 
                 Range.mkRange
-                    ""
+                    String.Empty
                     (Position.mkPos (declOne.Range.EndLine + 1) 0)
                     (Position.mkPos (declTwo.Range.StartLine + endOffset) 0)
             {
                 Range = intermediateRange
                 Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
                 SuggestedFix = None
-                TypeChecks = []
+                TypeChecks = List.Empty
             }
             |> Some
         else

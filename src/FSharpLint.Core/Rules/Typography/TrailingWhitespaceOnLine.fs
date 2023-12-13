@@ -46,11 +46,14 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
 
     if stringEndsWithWhitespace then
         let whitespaceLength = lengthOfWhitespaceOnEnd line
-        let range = Range.mkRange "" (Position.mkPos lineNumber (line.Length - whitespaceLength)) (Position.mkPos lineNumber line.Length)
-        { Range = range
-          Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
-          SuggestedFix = None
-          TypeChecks = [] } |> Array.singleton
+        let range = Range.mkRange String.Empty (Position.mkPos lineNumber (line.Length - whitespaceLength)) (Position.mkPos lineNumber line.Length)
+        {
+            Range = range
+            Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     else
         Array.empty
 

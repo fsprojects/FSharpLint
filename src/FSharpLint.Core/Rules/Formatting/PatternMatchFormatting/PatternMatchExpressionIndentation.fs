@@ -18,10 +18,13 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
             |> Option.map (fun expr -> expr.Range.EndLine)
             |> Option.defaultValue pat.Range.EndLine
         if expr.Range.StartLine <> matchPatternEndLine && exprIndentation <> clauseIndentation + args.GlobalConfig.numIndentationSpaces then
-            { Range = expr.Range
-              Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Some
+            {
+                Range = expr.Range
+                Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
+            |> Some
         else
             None
 

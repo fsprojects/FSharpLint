@@ -68,7 +68,7 @@ module Ast =
 
         match functionApplication with
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) ->
-            Some(flatten [] functionApplication, range)
+            Some(flatten List.Empty functionApplication, range)
         | _ -> None
 
     [<NoEquality; NoComparison>]
@@ -100,7 +100,7 @@ module Ast =
 
         match lambda with
         | AstNode.Expression(SynExpr.Lambda(_, _, _, _, _, range, _) as lambda) ->
-            getLambdaParametersAndExpression [] lambda
+            getLambdaParametersAndExpression List.Empty lambda
             |> Option.map (fun x -> (x, range))
         | _ -> None
 

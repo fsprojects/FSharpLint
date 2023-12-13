@@ -40,16 +40,16 @@ let private stripMultilineComments (source: string) =
 
     let rec getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
         match toProcess with
-        | [] -> []
+        | [] -> List.Empty
         | Begin(index)::tail ->
             getTopLevelBalancedPairs tail (index::stack)
         | End(index)::tail ->
             match stack with
-            | [] -> []
-            | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail []
+            | [] -> List.Empty
+            | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
             | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
-    getTopLevelBalancedPairs markers []
+    getTopLevelBalancedPairs markers List.Empty
     |> List.fold
         (fun (currSource: string) (startIndex, endIndex) ->
             currSource.Substring(0, startIndex) 
@@ -73,10 +73,13 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
 
         let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount
         if skipResult > config.MaxLines then
-            { Range = range
-              Message = error errorName config.MaxLines skipResult
-              SuggestedFix = None
-              TypeChecks = [] } |> Array.singleton
+            {
+                Range = range
+                Message = error errorName config.MaxLines skipResult
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
+            |> Array.singleton
         else
             Array.empty
     | None -> Array.empty

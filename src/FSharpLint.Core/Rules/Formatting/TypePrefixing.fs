@@ -27,7 +27,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             { Range = range
               Message = Resources.GetString("RulesFormattingGenericPrefixError")
               SuggestedFix = Some suggestedFix
-              TypeChecks = [] } |> Some
+              TypeChecks = List.Empty } |> Some
 
         match lid |> longIdentWithDotsToString with
         | "list"
@@ -46,7 +46,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
                 { Range = range
                   Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
                   SuggestedFix = Some suggestedFix
-                  TypeChecks = [] } |> Some
+                  TypeChecks = List.Empty } |> Some
             else
                 if isPostfix && config.Mode = Mode.Always then
                     prefixSuggestion typeName
@@ -61,7 +61,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             { Range = range
               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
               SuggestedFix = Some suggestedFix
-              TypeChecks = [] } |> Some
+              TypeChecks = List.Empty } |> Some
 
         | typeName ->
             match (isPostfix, config.Mode) with

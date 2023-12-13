@@ -1,5 +1,6 @@
 ﻿module FSharpLint.Core.Tests.TestAstNodeRuleBase
 
+open System
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application
 open FSharpLint.Framework
@@ -34,7 +35,7 @@ type TestAstNodeRuleBase (rule:Rule) =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split("\n")) syntaxArray |> fst
+            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue String.Empty fileName) input (input.Split("\n")) syntaxArray |> fst
             rule.RuleConfig.Cleanup()
 
             suggestions |> Array.iter this.PostSuggestion

@@ -21,7 +21,7 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
         | SynExpr.App(_, _, ExpressionUtilities.Identifier([opIdent], _), SynExpr.Ident(ident), _)
             when opIdent.idText = "op_Equality" && Option.contains ident.idText patternIdent ->
 
-            let fromRange = Range.mkRange "" range.Start constRange.End
+            let fromRange = Range.mkRange String.Empty range.Start constRange.End
 
             let suggestedFix =
                 ExpressionUtilities.tryFindTextOfRange fromRange args.FileContent
@@ -39,7 +39,7 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
             { Range = fromRange
               Message = Resources.GetString("RulesFavourAsKeyword")
               SuggestedFix = suggestedFix
-              TypeChecks = [] } |> Array.singleton
+              TypeChecks = List.Empty } |> Array.singleton
 
         | _ -> Array.empty
     | _ -> Array.empty
