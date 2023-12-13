@@ -78,29 +78,29 @@ let private matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArg
 
 /// Converts a SynConst (FSharp AST) into a Constant (hint AST).
 let private matchConst = function
-    | SynConst.Bool(x) -> Some(Constant.Bool(x))
-    | SynConst.Int16(x) -> Some(Constant.Int16(x))
-    | SynConst.Int32(x) -> Some(Constant.Int32(x))
-    | SynConst.Int64(x) -> Some(Constant.Int64(x))
-    | SynConst.UInt16(x) -> Some(Constant.UInt16(x))
-    | SynConst.UInt32(x) -> Some(Constant.UInt32(x))
-    | SynConst.UInt64(x) -> Some(Constant.UInt64(x))
-    | SynConst.Byte(x) -> Some(Constant.Byte(x))
-    | SynConst.Bytes(x, _, _) -> Some(Constant.Bytes(x))
-    | SynConst.Char(x) -> Some(Constant.Char(x))
-    | SynConst.Decimal(x) -> Some(Constant.Decimal(x))
-    | SynConst.Double(x) -> Some(Constant.Double(x))
-    | SynConst.SByte(x) -> Some(Constant.SByte(x))
-    | SynConst.Single(x) -> Some(Constant.Single(x))
-    | SynConst.String(x, _, _) -> Some(Constant.String(x))
-    | SynConst.UIntPtr(x) -> Some(Constant.UIntPtr(unativeint x))
-    | SynConst.IntPtr(x) -> Some(Constant.IntPtr(nativeint x))
-    | SynConst.UserNum(x, endChar) ->
-        Some(Constant.UserNum(System.Numerics.BigInteger.Parse(x), endChar.[0]))
-    | SynConst.Unit -> Some(Constant.Unit)
-    | SynConst.UInt16s(_)
+    | SynConst.Bool value -> Some(Constant.Bool value)
+    | SynConst.Int16 value  -> Some(Constant.Int16 value)
+    | SynConst.Int32 value  -> Some(Constant.Int32 value)
+    | SynConst.Int64 value  -> Some(Constant.Int64 value)
+    | SynConst.UInt16 value  -> Some(Constant.UInt16 value)
+    | SynConst.UInt32 value -> Some(Constant.UInt32 value)
+    | SynConst.UInt64 value  -> Some(Constant.UInt64 value)
+    | SynConst.Byte value  -> Some(Constant.Byte value)
+    | SynConst.Bytes (value, _, _)  -> Some(Constant.Bytes value)
+    | SynConst.Char value  -> Some(Constant.Char value)
+    | SynConst.Decimal value  -> Some(Constant.Decimal value)
+    | SynConst.Double value  -> Some(Constant.Double value)
+    | SynConst.SByte value  -> Some(Constant.SByte value)
+    | SynConst.Single value  -> Some(Constant.Single value)
+    | SynConst.String (value, _, _)  -> Some(Constant.String value)
+    | SynConst.UIntPtr value  -> Some(Constant.UIntPtr(unativeint value))
+    | SynConst.IntPtr value  -> Some(Constant.IntPtr(nativeint value))
+    | SynConst.UserNum (value, endChar)  ->
+        Some(Constant.UserNum(System.Numerics.BigInteger.Parse(value), endChar.[0]))
+    | SynConst.Unit -> Some Constant.Unit 
+    | SynConst.UInt16s _ 
     | SynConst.SourceIdentifier _
-    | SynConst.Measure(_) -> None
+    | SynConst.Measure _  -> None
 
 module private Precedence =
     let private ofHint hint =
@@ -157,8 +157,8 @@ module private MatchExpression =
 
     /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
     let rec private removeParens = function
-        | AstNode.Expression(SynExpr.Paren(x, _, _, _)) -> x |> AstNode.Expression |> removeParens
-        | x -> x
+        | AstNode.Expression(SynExpr.Paren(expr, _, _, _)) -> expr |> AstNode.Expression |> removeParens
+        | node -> node
 
     [<NoEquality; NoComparison>]
     type Arguments =
@@ -178,7 +178,7 @@ module private MatchExpression =
             let ident = identAsDecompiledOpName ident
             Some(Expression.Identifier([ident]))
         | AstNode.Expression(SynExpr.LongIdent(_, ident, _, _)) ->
-            let identifier = ident.LongIdent |> List.map (fun x -> x.idText)
+            let identifier = ident.LongIdent |> List.map (fun ident -> ident.idText)
             Some(Expression.Identifier(identifier))
         | AstNode.Expression(SynExpr.Const(constant, _)) ->
             matchConst constant |> Option.map Expression.Constant
@@ -230,7 +230,7 @@ module private MatchExpression =
                         match symbolUse.Symbol with
                         | :? FSharpParameter
                         | :? FSharpField -> false
-                        | :? FSharpMemberOrFunctionOrValue as x -> not x.IsProperty
+                        | :? FSharpMemberOrFunctionOrValue as element -> not element.IsProperty
                         | _ -> true
                     | None -> true
                 fun () -> checkSymbol()
@@ -300,7 +300,7 @@ module private MatchExpression =
     and private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
         if List.length expressions = List.length hintExpressions then
             (expressions, hintExpressions)
-            ||> List.map2 (fun x y -> arguments.SubHint(x, y) |> matchHintExpr)
+            ||> List.map2 (fun expr hint -> arguments.SubHint(expr, hint) |> matchHintExpr)
             |> List.fold (&&~) (Match(List.Empty))
         else
             NoMatch
@@ -389,7 +389,7 @@ module private MatchPattern =
 
     let private matchPattern = function
         | SynPat.LongIdent(ident, _, _, _, _, _) ->
-            let identifier = ident.LongIdent |> List.map (fun x -> x.idText)
+            let identifier = ident.LongIdent |> List.map (fun ident -> ident.idText)
             Some(Pattern.Identifier(identifier))
         | SynPat.Const(constant, _) ->
             matchConst constant |> Option.map Pattern.Constant
@@ -399,8 +399,8 @@ module private MatchPattern =
 
     /// Extracts a pattern from parentheses e.g. ((x)) -> x
     let rec private removeParens = function
-        | SynPat.Paren(x, _) -> removeParens x
-        | x -> x
+        | SynPat.Paren(pattern, _) -> removeParens pattern
+        | pat -> pat
 
     let rec matchHintPattern (pattern, hint) =
         let pattern = removeParens pattern
@@ -428,7 +428,7 @@ module private MatchPattern =
 
     and private doPatternsMatch patterns hintExpressions =
         (List.length patterns = List.length hintExpressions)
-        && (patterns, hintExpressions) ||> List.forall2 (fun x y -> matchHintPattern (x, y))
+        && (patterns, hintExpressions) ||> List.forall2 (fun pattern hint -> matchHintPattern (pattern, hint))
 
     and private matchList (pattern, hint) =
         match (pattern, hint) with
@@ -469,24 +469,24 @@ module private MatchPattern =
 
 module private FormatHint =
     let private constantToString = function
-        | Constant.Bool(x) -> if x then "true" else "false"
-        | Constant.Int16(x) -> x.ToString() + "s"
-        | Constant.Int32(x) -> x.ToString()
-        | Constant.Int64(x) -> x.ToString() + "L"
-        | Constant.UInt16(x) -> x.ToString() + "us"
-        | Constant.UInt32(x) -> x.ToString() + "u"
-        | Constant.UInt64(x) -> x.ToString() + "UL"
-        | Constant.Byte(x) -> x.ToString() + "uy"
-        | Constant.Bytes(x) -> x.ToString()
-        | Constant.Char(x) -> "'" + x.ToString() + "'"
-        | Constant.Decimal(x) -> x.ToString() + "m"
-        | Constant.Double(x) -> x.ToString()
-        | Constant.SByte(x) -> x.ToString() + "y"
-        | Constant.Single(x) -> x.ToString() + "f"
-        | Constant.String(x) -> "\"" + x + "\""
-        | Constant.UIntPtr(x) -> x.ToString()
-        | Constant.IntPtr(x) -> x.ToString()
-        | Constant.UserNum(x, _) -> x.ToString()
+        | Constant.Bool value -> if value then "true" else "false"
+        | Constant.Int16 value -> value.ToString() + "s"
+        | Constant.Int32 value -> value.ToString()
+        | Constant.Int64 value -> value.ToString() + "L"
+        | Constant.UInt16 value -> value.ToString() + "us"
+        | Constant.UInt32 value -> value.ToString() + "u"
+        | Constant.UInt64 value -> value.ToString() + "UL"
+        | Constant.Byte value -> value.ToString() + "uy"
+        | Constant.Bytes value -> value.ToString()
+        | Constant.Char value -> "'" + value.ToString() + "'"
+        | Constant.Decimal value -> value.ToString() + "m"
+        | Constant.Double value -> value.ToString()
+        | Constant.SByte value -> value.ToString() + "y"
+        | Constant.Single value -> value.ToString() + "f"
+        | Constant.String value -> "\"" + value + "\""
+        | Constant.UIntPtr value -> value.ToString()
+        | Constant.IntPtr value -> value.ToString()
+        | Constant.UserNum(value, _) -> value.ToString()
         | Constant.Unit -> "()"
 
     let private surroundExpressionsString hintToString left right sep expressions =
@@ -499,8 +499,8 @@ module private FormatHint =
 
     let private opToString = function
         | Expression.Identifier(identifier) -> String.concat "." identifier
-        | x ->
-            Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString())
+        | expression ->
+            Debug.Assert(false, "Expected operator to be an expression identifier, but was " + expression.ToString())
             String.Empty
 
     let rec toString replace parentAstNode (args:AstNodeRuleParams) (matchedVariables:Dictionary<_, SynExpr>) parentHintNode hintNode =
@@ -607,7 +607,7 @@ let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:
             methodIdent.Range.StartLine,
             methodIdent.Range.EndColumn,
             String.Empty,
-            methodIdent.LongIdent |> List.map (fun x -> x.idText))
+            methodIdent.LongIdent |> List.map (fun ident -> ident.idText))
 
     match symbol with
     | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
@@ -634,7 +634,7 @@ let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range
     match filterParens breadcrumbs with
     | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
     | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ ->
-        match exprs |> List.tryFindIndex (fun x -> x.Range = range) with
+        match exprs |> List.tryFindIndex (fun expr -> expr.Range = range) with
         | Some(index) -> RequiresCheck(index, methodIdent)
         | None -> CannotBeReplaced
     | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_

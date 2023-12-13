@@ -132,9 +132,9 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | _ -> Lint.lintProject lintParams target toolsPath
             handleLintResult lintResult
         with
-        | e ->
+        | exn ->
             let target = if fileType = FileType.Source then "source" else target
-            sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target e.Message e.StackTrace
+            sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target exn.Message exn.StackTrace
             |> handleError
     | _ -> ()
 

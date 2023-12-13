@@ -24,11 +24,11 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
     let generateError (identifier:LongIdent) =
         let identifier =
             identifier
-            |> List.map (fun x ->
-                if PrettyNaming.IsMangledOpName x.idText then
-                    PrettyNaming.DecompileOpName x.idText |> sprintf "( %s )"
+            |> List.map (fun ident ->
+                if PrettyNaming.IsMangledOpName ident.idText then
+                    PrettyNaming.DecompileOpName ident.idText |> sprintf "( %s )"
                 else
-                    x.idText)
+                    ident.idText)
             |> String.concat "."
 
         let suggestedFix = lazy(

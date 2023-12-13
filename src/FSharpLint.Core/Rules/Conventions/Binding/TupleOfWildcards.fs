@@ -53,7 +53,7 @@ let private runner (args:AstNodeRuleParams) =
     | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, range) as pattern, _)]), _, _)) ->
         let breadcrumbs = args.GetParents 2
         if (not << isTupleMemberArgs breadcrumbs) range then
-            let identifier = identifier.LongIdent |> List.map (fun x -> x.idText)
+            let identifier = identifier.LongIdent |> List.map (fun ident -> ident.idText)
             checkTupleOfWildcards pattern identifier
         else
             Array.empty

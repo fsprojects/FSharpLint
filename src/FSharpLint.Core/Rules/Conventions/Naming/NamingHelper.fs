@@ -18,7 +18,7 @@ module QuickFixes =
 
     let removeNonPrefixingUnderscores (ident:Ident) = lazy(
         let prefixingUnderscores =
-            ident.idText |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
+            ident.idText |> Seq.takeWhile (fun char -> char = '_') |> String.Concat
 
         let toText = prefixingUnderscores + ident.idText.Replace("_", String.Empty)
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
@@ -31,7 +31,7 @@ module QuickFixes =
 
     let private mapFirstChar map (str:string) =
         let prefix =
-            str |> Seq.takeWhile (fun x -> x = '_') |> String.Concat
+            str |> Seq.takeWhile (fun char -> char = '_') |> String.Concat
         let withoutPrefix = str.Substring prefix.Length
         if withoutPrefix.Length > 0 then
             let firstChar = map withoutPrefix.[0] |> string
@@ -55,7 +55,7 @@ let private NumberOfExpectedBackticks = 4
 /// the information as to whether the identifier was backticked doesn't appear to be in the AST.
 let private isNotDoubleBackTickedIdent =
     let isDoubleBackTickedIdent (identifier:Ident) =
-        let diffOfRangeAgainstIdent (r:Range) = (r.EndColumn - r.StartColumn) - identifier.idText.Length
+        let diffOfRangeAgainstIdent (range:Range) = (range.EndColumn - range.StartColumn) - identifier.idText.Length
 
         let range = identifier.idRange
         not range.IsSynthetic && diffOfRangeAgainstIdent range = NumberOfExpectedBackticks
@@ -178,7 +178,7 @@ let isActivePattern (identifier:Ident) =
 let activePatternIdentifiers (identifier:Ident) =
     identifier.idText.Split('|')
     |> Seq.toArray
-    |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
+    |> Array.filter (fun identifierSegment -> not <| String.IsNullOrEmpty(identifierSegment) && identifierSegment.Trim() <> "_")
 
 
 /// Specifies access control level as described in 
@@ -191,16 +191,16 @@ type AccessControlLevel =
     | Private
     | Internal
 
-let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
+let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) index =
     let resolveAccessControlLevel = function
         | Some(SynAccess.Public _) | None -> AccessControlLevel.Public
         | Some(SynAccess.Private _) -> AccessControlLevel.Private
         | Some(SynAccess.Internal _) -> AccessControlLevel.Internal
 
-    let rec getAccessibility state isPrivateWhenReachedBinding i =
-        if i = 0 then state
+    let rec getAccessibility state isPrivateWhenReachedBinding index =
+        if index = 0 then state
         else
-            let node = syntaxArray.[i]
+            let node = syntaxArray.[index]
             match node.Actual with
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
@@ -238,7 +238,7 @@ let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
             | LambdaBody(_)
             | Expression(_) -> getAccessibility state true node.ParentIndex
 
-    getAccessibility AccessControlLevel.Public false i
+    getAccessibility AccessControlLevel.Public false index
 
 
 /// Is an attribute with a given name?
@@ -301,19 +301,19 @@ let isModule (moduleKind:SynModuleOrNamespaceKind) =
 
 /// Is module name implicitly created from file name?
 let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range, _)) =
-    let zeroLengthRange (r:Range) =
-        (r.EndColumn - r.StartColumn) = 0 && r.StartLine = r.EndLine
+    let zeroLengthRange (range:Range) =
+        (range.EndColumn - range.StartColumn) = 0 && range.StartLine = range.EndLine
 
     // Check the identifiers in the module name have no length.
     // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
     // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
-    isModule moduleKind && longIdent |> List.forall (fun x -> zeroLengthRange x.idRange)
+    isModule moduleKind && longIdent |> List.forall (fun ident -> zeroLengthRange ident.idRange)
 
-type GetIdents<'T> = AccessControlLevel -> SynPat -> 'T []
+type GetIdents<'Item> = AccessControlLevel -> SynPat -> 'Item []
 
 /// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
 /// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
-let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetIdents<'T>) argsAreParameters (pattern:SynPat) =
+let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:GetIdents<'Item>) argsAreParameters (pattern:SynPat) =
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
         let identAccessibility = checkAccessibility accessibility access
@@ -346,8 +346,8 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.Or(p1, p2, _, _) ->
         [|p1; p2|]
         |> Array.collect (getPatternIdents accessibility getIdents false)
-    | SynPat.Paren(p, _) ->
-        getPatternIdents accessibility getIdents false p
+    | SynPat.Paren(pat, _) ->
+        getPatternIdents accessibility getIdents false pat
     | SynPat.Ands(pats, _)
     | SynPat.Tuple(_, pats, _)
     | SynPat.ArrayOrList(_, pats, _) ->
@@ -371,7 +371,7 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
 
 let rec identFromSimplePat = function
     | SynSimplePat.Id(ident, _, _, _, _, _) -> Some ident
-    | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
+    | SynSimplePat.Typed(pat, _, _) -> identFromSimplePat pat
     | SynSimplePat.Attrib(_) -> None
 
 let isNested args nodeIndex =

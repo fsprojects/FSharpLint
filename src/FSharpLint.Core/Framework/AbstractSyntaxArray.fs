@@ -274,9 +274,9 @@ module AbstractSyntaxArray =
 
         let result = Array.zeroCreate nodes.Count
 
-        let mutable i = 0
-        while i < nodes.Count do
-            let skip = skips.[i]
+        let mutable index = 0
+        while index < nodes.Count do
+            let skip = skips.[index]
             let node = nodes.[skip.Index]
 
             result.[skip.Index] <- 
@@ -285,20 +285,20 @@ module AbstractSyntaxArray =
                   NumberOfChildren = skip.NumberOfChildren
                   ParentIndex = skip.ParentIndex }
 
-            i <- i + 1
+            index <- index + 1
 
         result
 
-    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) i =
-        let rec getBreadcrumbs breadcrumbs i =
-            if i = 0 then
-                let node = syntaxArray.[i]
+    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) index =
+        let rec getBreadcrumbs breadcrumbs index =
+            if index = 0 then
+                let node = syntaxArray.[index]
                 node.Actual::breadcrumbs
-            else if i < syntaxArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
-                let node = syntaxArray.[i]
+            else if index < syntaxArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+                let node = syntaxArray.[index]
                 getBreadcrumbs (node.Actual::breadcrumbs) node.ParentIndex
             else
                 breadcrumbs
 
-        if i = 0 then List.Empty
-        else getBreadcrumbs List.Empty (syntaxArray.[i].ParentIndex) |> List.rev
+        if index = 0 then List.Empty
+        else getBreadcrumbs List.Empty (syntaxArray.[index].ParentIndex) |> List.rev

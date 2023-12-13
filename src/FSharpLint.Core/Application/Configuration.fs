@@ -21,8 +21,8 @@ module FSharpJsonConverter =
     type OptionConverter() =
         inherit JsonConverter()
 
-        override this.CanConvert(t) =
-            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ option>
+        override this.CanConvert(genericType) =
+            genericType.IsGenericType && genericType.GetGenericTypeDefinition() = typedefof<_ option>
 
         override this.WriteJson(writer, value, serializer) =
             let value =
@@ -32,13 +32,13 @@ module FSharpJsonConverter =
                     fields.[0]
             serializer.Serialize(writer, value)
 
-        override this.ReadJson(reader, t, _, serializer) =
-            let innerType = t.GetGenericArguments().[0]
+        override this.ReadJson(reader, objectType, _, serializer) =
+            let innerType = objectType.GetGenericArguments().[0]
             let innerType =
                 if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
                 else innerType
             let value = serializer.Deserialize(reader, innerType)
-            let cases = FSharpType.GetUnionCases(t)
+            let cases = FSharpType.GetUnionCases(objectType)
             if isNull value then FSharpValue.MakeUnion(cases.[0], Array.empty)
             else FSharpValue.MakeUnion(cases.[1], [|value|])
 
@@ -588,7 +588,7 @@ let loadConfig (configPath:string) =
 let defaultConfiguration =
     let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
     let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                       |> Seq.find (fun n -> n.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+                       |> Seq.find (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
     | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)

@@ -12,21 +12,21 @@ let private MaxComplexity = 5
 let private NewLine = "\n"
 
 /// Indent all lines of a string equally by the given number of spaces.
-let private indent numSpaces (s: string) =
+let private indent numSpaces (inputText: string) =
     let indentStr = String.replicate numSpaces " "
-    let result = indentStr + s.Replace(NewLine, $"{NewLine}{indentStr}")
+    let result = indentStr + inputText.Replace(NewLine, $"{NewLine}{indentStr}")
     result
     
 /// Generates a body of code containing a match expression.
 let private makeMatchSnippet len =
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| \"%d\" -> ()" i)) [| 1..len-1 |] |> String.concat NewLine}
+{Seq.map (fun index -> (sprintf "| \"%d\" -> ()" index)) [| 1..len-1 |] |> String.concat NewLine}
 | _ -> ()"""
 
 /// Generates a body of code containing a match expression with a when clause containing a logical operator in each pattern.
 let private makeMatchSnippetWithLogicalOperatorsInWhenClause len =
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (i*len) (i*len+1))) [| 1..len-1 |] |> String.concat NewLine}
+{Seq.map (fun index -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (index*len) (index*len+1))) [| 1..len-1 |] |> String.concat NewLine}
 | _ -> ()"""
     
 /// module declaration and let binding declaration for a body of code
@@ -82,14 +82,14 @@ let private matchExpression len =
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
     $"""match "dummyString" with
-{(Seq.map (fun i -> (sprintf "| \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{(Seq.map (fun index -> (sprintf "| \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)}
 | _ -> ()"""
     |> makeProgram "f()"
 
 /// Generates a body of code containing a match function with multiple patterns.
 let private matchFunction len =
     $"""    function 
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)} 
+{(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)} 
     | _ -> ()
 f "dummyString" """
     |> makeProgram "f"
@@ -98,7 +98,7 @@ f "dummyString" """
 let private matchBang len =
     $"""async {{
     match! async {{ return "dummyString" }} with
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)}
     | _ -> ()
 }}"""
     |> makeProgram "a"
@@ -240,7 +240,7 @@ let f() =
     [<Test>]
     member this.EnsureRedundantWarningsNotReported() =
         // generates a vapid match clause
-        let genMatchClause i = $"""| "{i}" -> match str with
+        let genMatchClause index = $"""| "{index}" -> match str with
     | "A" -> ()
     | "B" -> ()"""
         // create a snippet of code with 10 match clauses
