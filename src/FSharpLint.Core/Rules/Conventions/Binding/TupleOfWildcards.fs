@@ -29,7 +29,13 @@ let private checkTupleOfWildcards fileContents pattern identifier identifierRang
         let error = String.Format(errorFormat, refactorFrom, refactorTo)
         let suggestedFix = lazy(
             Some { SuggestedFix.FromRange = identifierRange; FromText = fileContents; ToText = refactorTo })
-        { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] } |> Array.singleton
+        {
+            Range = range
+            Message = error
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
+        |> Array.singleton
     | _ -> Array.empty
 
 let private isTupleMemberArgs breadcrumbs tupleRange =

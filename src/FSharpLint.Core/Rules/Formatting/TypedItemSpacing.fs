@@ -59,10 +59,12 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                     |> Some)
                 let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                 Some
-                    { Range = range
-                      Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                      SuggestedFix = Some suggestedFix
-                      TypeChecks = [] }
+                    {
+                        Range = range
+                        Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                        SuggestedFix = Some suggestedFix
+                        TypeChecks = List.Empty
+                    }
                 else
                     None
         | _ -> None
@@ -78,7 +80,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         // NOTE: This currently does not work for fields in union cases, since the range on union case fields is incorrect,
         // only including the type and not the field name. (https://github.com/dotnet/fsharp/issues/9279)
         checkRange config args range |> Option.toArray
-    | _ -> [||]
+    | _ -> Array.empty
 
 let rule config =
     { Name = "TypedItemSpacing"

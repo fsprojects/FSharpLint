@@ -17,7 +17,7 @@ let private checkForWildcardNamedWithAsPattern fileContents pattern =
         { Range = range
           Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
           SuggestedFix = Some suggestedFix
-          TypeChecks = [] } |> Array.singleton
+          TypeChecks = List.Empty } |> Array.singleton
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =

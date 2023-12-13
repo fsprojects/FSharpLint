@@ -23,7 +23,7 @@ let checkRaiseWithTooManyArgs (raiseType:string) (count:int) (ruleName:string) (
                     Range = range
                     Message = Resources.GetString ruleName
                     SuggestedFix = None
-                    TypeChecks = []
+                    TypeChecks = List.Empty
                 } |> Array.singleton
             | _ -> Array.empty
         | _ -> Array.empty

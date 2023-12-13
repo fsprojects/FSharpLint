@@ -70,7 +70,7 @@ let private runner (args: AstNodeRuleParams) =
             || failwithId.idText = "failwithf"
             ->
             match expression with
-            | SynExpr.Const (SynConst.String (id, _, _), _) when id = "" ->
+            | SynExpr.Const (SynConst.String (id, _, _), _) when id = String.Empty ->
                 generateError failwithId.idText id range BadUsageType.EmptyMessage maybeIdentifier
             | SynExpr.Const (SynConst.String (id, _, _), _) when id <> fakeExternDeclErrorMsg ->
                 let isDuplicate =

@@ -21,7 +21,7 @@ let private checkForBindingToAWildcard pattern range fileContent (expr: SynExpr)
               SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
                                                 FromText = fileContent
                                                 ToText = sprintf "(%s) |> ignore" exprText })))
-              TypeChecks = [] } |> Array.singleton
+              TypeChecks = List.Empty } |> Array.singleton
         else
             Array.empty
     | None -> Array.empty

@@ -15,8 +15,8 @@ let generateNewLines numNewLines numIndents =
                 else
                     String.replicate numIndents " "
             $"{indentationChars}printf System.String.Empty\n")
-            (Array.create numNewLines "")
-    |> String.concat ""
+            (Array.create numNewLines String.Empty)
+    |> String.concat String.Empty
 
 let generateAbstractMembers numMembers numIndents =
     Array.init numMembers (fun index -> $"abstract member Foo%i{index} : unit -> unit\n")

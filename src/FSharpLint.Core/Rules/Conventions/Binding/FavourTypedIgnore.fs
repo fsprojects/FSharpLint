@@ -19,10 +19,12 @@ let private runner (args: AstNodeRuleParams) =
                            FromRange = range
                            ToText = identifier }))
 
-        { Range = range
-          Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] }
+        {
+            Range = range
+            Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
 
     let isTyped expression identifier range text =
         match expression with

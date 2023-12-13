@@ -24,7 +24,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = Range.mkRange "" (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
+        let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")
@@ -37,7 +37,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
                               ToText = String.replicate args.GlobalConfig.numIndentationSpaces " " }
                         ))
                 )
-              TypeChecks = [] } |> Array.singleton
+              TypeChecks = List.Empty } |> Array.singleton
         else
             Array.empty
     else
