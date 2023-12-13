@@ -54,9 +54,9 @@ let DoNothing = ignore
 
 let buildDir  = "./build/"
 let nugetDir  = "./out/"
+let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
 
-
-System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
+System.Environment.CurrentDirectory <- rootDir.FullName
 let changelogFilename = "CHANGELOG.md"
 let changelog = Changelog.load changelogFilename
 
@@ -82,16 +82,13 @@ let nugetVersion =
                             PreRelease = None }
         let bumpedBaseVersion = string bumped
 
-        let nugetPush = System.IO.Path.Combine("fsx", "Tools", "nugetPush.fsx")
-        if not(System.IO.File.Exists nugetPush) then
-            exec "git" "clone https://github.com/nblockchain/fsx.git" "."
+        let nugetPreRelease = Path.Combine(rootDir.FullName, "nugetPreRelease.fsx")
         let procResult =
             CreateProcess.fromRawCommand
                 "dotnet"
                 [
                     "fsi"
-                    nugetPush
-                    "--output-version"
+                    nugetPreRelease
                     bumpedBaseVersion
                 ]
             |> CreateProcess.redirectOutput
@@ -176,7 +173,6 @@ Target.create "Push" (fun _ ->
 
 Target.create "SelfCheck" (fun _ ->
     let frameworkVersion = "net5.0"
-    let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
     let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
