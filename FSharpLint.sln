@@ -19,6 +19,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FSharpLint.Console.Tests", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpLint.Benchmarks", "tests\FSharpLint.Benchmarks\FSharpLint.Benchmarks.fsproj", "{B4A92AC6-F74A-4709-B2F7-6C5BABBFDEB0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{270E691D-ECA1-4BC5-B851-C5431A64E9FA}"
+	ProjectSection(SolutionItems) = preProject
+		build.fsx = build.fsx
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
