@@ -39,7 +39,13 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
             match pat with
             | SynPat.Typed(typedPat, _, _) ->
                 loop (typedPat::tail) acc
-            | _ -> loop tail acc
+            | _ -> loop (pat::tail) acc
+        | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
+            match argPats with
+            | SynArgPats.Pats(pats) -> 
+                loop (List.append pats tail) acc
+            | _ -> 
+                loop tail acc
         | _ -> acc
     loop pats Array.empty
 
