@@ -13,30 +13,35 @@ type TestConventionsFavourStaticEmptyFields() =
         this.Parse "let foo = \"\""
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_2() =
         this.Parse "System.Console.WriteLine \"\""
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_3() =
         this.Parse "let aList = []"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_4() =
         this.Parse "let aList = [ ]"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_5() =
         this.Parse "System.Console.WriteLine([].Length)"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_6() =
@@ -48,24 +53,28 @@ let foo a =
         "" """
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_7() =
         this.Parse "let anArray = [||]"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_8() =
         this.Parse "let anArray = [| |]"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldProduceError_9() =
         this.Parse "System.Console.WriteLine([||].Length)"
 
         Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError_1() =
