@@ -133,3 +133,12 @@ match foo with
 | Some(x) -> ()
 """
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_12() =
+        this.Parse """
+match foo with
+| Some(x) -> (x)
+"""
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 14))
