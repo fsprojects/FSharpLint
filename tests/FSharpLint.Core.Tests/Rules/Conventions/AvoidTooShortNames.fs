@@ -109,3 +109,12 @@ type Foo<'T> = Option<'T>
 type Foo<'SomeType> = Option<'SomeType>
 """
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_9() =
+        this.Parse """
+let Foo (x: int) =
+    x.ToString()
+"""
+        Assert.IsTrue this.ErrorsExist
+
