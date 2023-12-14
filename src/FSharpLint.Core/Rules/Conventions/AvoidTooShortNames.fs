@@ -85,18 +85,10 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let runner (args:AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Identifier([identifier], range) when isIdentifierTooShort identifier ->
-        { Range = range
-          Message = Resources.GetString "RulesAvoidTooShortNamesError"
-          SuggestedFix = None
-          TypeChecks = List.empty }
-        |> Array.singleton
-    | _ ->
-        getIdentifiers args
-        |> Array.collect (fun (identifier, idText, typeCheck) ->
-            let suggestions = checkIdentifier identifier idText
-            suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
+    getIdentifiers args
+    |> Array.collect (fun (identifier, idText, typeCheck) ->
+        let suggestions = checkIdentifier identifier idText
+        suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
 
 let rule =
     { Name = "AvoidTooShortNames"
