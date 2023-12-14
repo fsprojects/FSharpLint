@@ -21,10 +21,10 @@ module FSharpJsonConverter =
     type OptionConverter() =
         inherit JsonConverter()
 
-        override x.CanConvert(t) =
+        override this.CanConvert(t) =
             t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ option>
 
-        override x.WriteJson(writer, value, serializer) =
+        override this.WriteJson(writer, value, serializer) =
             let value =
                 if isNull value then null
                 else
@@ -32,7 +32,7 @@ module FSharpJsonConverter =
                     fields.[0]
             serializer.Serialize(writer, value)
 
-        override x.ReadJson(reader, t, _, serializer) =
+        override this.ReadJson(reader, t, _, serializer) =
             let innerType = t.GetGenericArguments().[0]
             let innerType =
                 if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])

@@ -329,12 +329,12 @@ module Lint =
         | Success of Suggestion.LintWarning list
         | Failure of LintFailure
 
-        member self.TryGetSuccess([<Out>] success:byref<Suggestion.LintWarning list>) =
-            match self with
+        member this.TryGetSuccess([<Out>] success:byref<Suggestion.LintWarning list>) =
+            match this with
             | Success value -> success <- value; true
             | _ -> false
-        member self.TryGetFailure([<Out>] failure:byref<LintFailure>) =
-            match self with
+        member this.TryGetFailure([<Out>] failure:byref<LintFailure>) =
+            match this with
             | Failure value -> failure <- value; true
             | _ -> false
 
