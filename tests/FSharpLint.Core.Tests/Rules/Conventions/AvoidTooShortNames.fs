@@ -126,3 +126,10 @@ match foo with
 """
         Assert.IsTrue this.ErrorsExist
 
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_11() =
+        this.Parse """
+match foo with
+| Some(x) -> ()
+"""
+        Assert.IsTrue this.ErrorsExist
