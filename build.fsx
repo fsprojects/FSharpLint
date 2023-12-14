@@ -13,6 +13,7 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.Api
 
+open System
 open System.IO
 
 Target.initEnvironment()
@@ -31,32 +32,6 @@ let gitHome = "https://github.com/" + gitOwner
 let gitUrl = gitHome + "/" + gitName
 
 // --------------------------------------------------------------------------------------
-// Build variables
-// --------------------------------------------------------------------------------------
-
-let buildDir  = "./build/"
-let nugetDir  = "./out/"
-
-
-System.Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
-let changelogFilename = "CHANGELOG.md"
-let changelog = Changelog.load changelogFilename
-let nugetVersion =
-    match changelog.Unreleased with
-    | None ->
-        changelog.LatestEntry.NuGetVersion
-    | Some _unreleased ->
-        let current = changelog.LatestEntry.NuGetVersion |> SemVer.parse
-        let bumped = { current with
-                            Minor = current.Minor + 1u
-                            Patch = 0u
-                            Original = None
-                            PreRelease = PreRelease.TryParse "alpha01" }
-        string bumped
-
-let packageReleaseNotes = sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion
-
-// --------------------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------------------
 let isNullOrWhiteSpace = System.String.IsNullOrWhiteSpace
@@ -72,6 +47,61 @@ let exec cmd args dir =
 
 let getBuildParam = Environment.environVar
 let DoNothing = ignore
+
+// --------------------------------------------------------------------------------------
+// Build variables
+// --------------------------------------------------------------------------------------
+
+let buildDir  = "./build/"
+let nugetDir  = "./out/"
+let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
+
+System.Environment.CurrentDirectory <- rootDir.FullName
+let changelogFilename = "CHANGELOG.md"
+let changelog = Changelog.load changelogFilename
+
+let githubRef = Environment.GetEnvironmentVariable "GITHUB_REF"
+let tagPrefix = "refs/tags/"
+let isTag =
+    if isNull githubRef then
+        false
+    else
+        githubRef.StartsWith tagPrefix
+
+let nugetVersion =
+    match (changelog.Unreleased, isTag) with
+    | (Some _unreleased, true) -> failwith "Shouldn't publish a git tag for changes outside a real release"
+    | (None, true) ->
+        changelog.LatestEntry.NuGetVersion
+    | (_, false) ->
+        let current = changelog.LatestEntry.NuGetVersion |> SemVer.parse
+        let bumped = { current with
+                            Minor = current.Minor + 1u
+                            Patch = 0u
+                            Original = None
+                            PreRelease = None }
+        let bumpedBaseVersion = string bumped
+
+        let nugetPreRelease = Path.Combine(rootDir.FullName, "nugetPreRelease.fsx")
+        let procResult =
+            CreateProcess.fromRawCommand
+                "dotnet"
+                [
+                    "fsi"
+                    nugetPreRelease
+                    bumpedBaseVersion
+                ]
+            |> CreateProcess.redirectOutput
+            |> CreateProcess.ensureExitCode
+            |> Proc.run
+        procResult.Result.Output.Trim()
+
+let PackageReleaseNotes baseProps =
+    if isTag then
+        ("PackageReleaseNotes", sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion)::baseProps
+    else
+        baseProps
+
 // --------------------------------------------------------------------------------------
 // Build Targets
 // --------------------------------------------------------------------------------------
@@ -100,28 +130,29 @@ Target.create "Docs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Release Targets
 // --------------------------------------------------------------------------------------
+
 Target.create "BuildRelease" (fun _ ->
+    let properties = ("Version", nugetVersion) |> List.singleton |> PackageReleaseNotes
+
     DotNet.build (fun p ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
             OutputPath = Some buildDir
-            MSBuildParams = { p.MSBuildParams with Properties = [("Version", nugetVersion); ("PackageReleaseNotes", packageReleaseNotes)]}
+            MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
     ) "FSharpLint.sln"
 )
 
 
 Target.create "Pack" (fun _ ->
-    let properties = [
+    let properties = PackageReleaseNotes ([
         ("Version", nugetVersion);
         ("Authors", authors)
         ("PackageProjectUrl", gitUrl)
         ("RepositoryType", "git")
         ("RepositoryUrl", gitUrl)
         ("PackageLicenseExpression", "MIT")
-        ("PackageReleaseNotes", packageReleaseNotes)
-    ]
-
+    ])
 
     DotNet.pack (fun p ->
         { p with
@@ -142,7 +173,6 @@ Target.create "Push" (fun _ ->
 
 Target.create "SelfCheck" (fun _ ->
     let frameworkVersion = "net5.0"
-    let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
     let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
