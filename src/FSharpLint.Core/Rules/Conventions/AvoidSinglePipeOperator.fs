@@ -9,21 +9,13 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    let errors range =
-        {
-            Range = range
-            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        } |> Array.singleton
-
     let error =
         match args.AstNode with
         | AstNode.Binding (SynBinding(_synAcc, _synBinding, _mustInline, _isMut, _synAttribs, _preXmlDoc, _synValData, _headPat, _synBindingRet, synExpr, _range, _debugPointAtBinding)) ->
             match synExpr with
-            | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range) ->
-                match funcExpr with
-                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range) ->
+            | SynExpr.App(_exprAtomicFlag, _isInfix, outerFuncExpr, outerArgExpr, appRange) ->
+                match outerFuncExpr with
+                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, pipeRange) ->
                     match funcExpr with
                     | SynExpr.Ident ident ->
                         if ident.idText = "op_PipeRight" then
@@ -31,7 +23,21 @@ let runner (args: AstNodeRuleParams) =
                             | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
                                 Array.empty 
                             | _ ->
-                                errors range
+                                let suggestedFix = lazy(
+                                    let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
+                                    let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
+                                    match maybeFuncText, maybeArgText with
+                                    | Some(funcText), Some(argText) ->
+                                        let replacementText = sprintf "%s %s" funcText argText
+                                        Some { FromText=args.FileContent; FromRange=appRange; ToText=replacementText }
+                                    | _ -> None)
+                                Array.singleton
+                                    {
+                                        Range = pipeRange
+                                        Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
+                                        SuggestedFix = Some suggestedFix
+                                        TypeChecks = List.Empty
+                                    }
                         else
                             Array.empty
                     | _ ->
