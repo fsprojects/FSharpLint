@@ -28,21 +28,8 @@ let runner (args: AstNodeRuleParams) =
                     | SynExpr.Ident ident ->
                         if ident.idText = "op_PipeRight" then
                             match argExpr with
-                            | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, range) ->
-                                match funcExpr with
-                                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, range) ->
-                                    match funcExpr with
-                                    | SynExpr.Ident ident ->
-                                        if ident.idText = "op_PipeRight" then
-                                            Array.empty
-                                        else
-                                            errors range
-                                    | _ ->
-                                        errors range
-                                | SynExpr.Ident _ident ->
-                                    Array.empty                                
-                                | _ ->
-                                    errors range
+                            | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
+                                Array.empty 
                             | _ ->
                                 errors range
                         else
