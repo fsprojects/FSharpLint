@@ -56,8 +56,8 @@ let private runner (args: AstNodeRuleParams) =
                     let suggestions = generateError range idText emptyLiteralType
                     suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
             | _ -> Array.empty
-        | SynExpr.ArrayOrList (_, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
-            (range, sprintf "%A" id, None, getEmptyLiteralType (sprintf "%A" id))
+        | SynExpr.ArrayOrList (isArray, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
+            (range, sprintf "%A" id, None, (if isArray then EmptyArrayLiteral else EmptyListLiteral))
             |> Array.singleton
             |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
                 let suggestions = generateError range idText emptyLiteralType
@@ -77,8 +77,8 @@ let private runner (args: AstNodeRuleParams) =
             |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
                 let suggestions = generateError range idText emptyLiteralType
                 suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-        | SynExpr.ArrayOrList (_, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
-            (range, sprintf "%A" id, None, getEmptyLiteralType (sprintf "%A" id))
+        | SynExpr.ArrayOrList (isArray, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
+            (range, sprintf "%A" id, None, (if isArray then EmptyArrayLiteral else EmptyListLiteral))
             |> Array.singleton
             |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
                 let suggestions = generateError range idText emptyLiteralType
