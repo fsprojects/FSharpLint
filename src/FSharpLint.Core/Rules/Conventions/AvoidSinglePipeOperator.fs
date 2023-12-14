@@ -9,23 +9,23 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    let errors range =
+    let errors range suggestedFix =
         {
             Range = range
             Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-            SuggestedFix = None
+            SuggestedFix = suggestedFix
             TypeChecks = List.Empty
         } |> Array.singleton
     
-    let rec checkExpr (expr: SynExpr) (parentList: AstNode list): WarningDetails array =
+    let rec checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
         let checkParentPiped (expr: AstNode) =
             match expr with
             | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-                checkExpr funcExpr [] |> Seq.isEmpty
+                checkExpr funcExpr outerArgExpr range [] |> Seq.isEmpty
             | _ -> false
 
         match expr with
-        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range) ->
+        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, appRange) ->
             match funcExpr with
             | ExpressionUtilities.Identifier([ ident ], _) ->
                 if ident.idText = "op_PipeRight" then
@@ -42,7 +42,15 @@ let runner (args: AstNodeRuleParams) =
                         if isParentPiped then
                             Array.empty
                         else
-                            errors ident.idRange
+                            let suggestedFix = lazy(
+                                let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
+                                let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
+                                match maybeFuncText, maybeArgText with
+                                | Some(funcText), Some(argText) ->
+                                    let replacementText = sprintf "%s %s" funcText argText
+                                    Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }
+                                | _ -> None)
+                            errors ident.idRange (Some suggestedFix)
                 else
                     Array.empty
             | _ ->
@@ -52,13 +60,13 @@ let runner (args: AstNodeRuleParams) =
 
     let error =
         match args.AstNode with
-        | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range)) ->
+        | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range)) ->
             match argExpr with
             | SynExpr.App(_) ->
                 // function has extra arguments
                 Array.empty
             | _ ->
-                checkExpr funcExpr (args.GetParents args.NodeIndex)
+                checkExpr funcExpr argExpr range (args.GetParents args.NodeIndex)
         | _ ->
             Array.empty
 
