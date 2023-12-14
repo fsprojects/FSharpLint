@@ -118,3 +118,11 @@ let Foo (x: int) =
 """
         Assert.IsTrue this.ErrorsExist
 
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_10() =
+        this.Parse """
+match foo with
+| x -> ()
+"""
+        Assert.IsTrue this.ErrorsExist
+
