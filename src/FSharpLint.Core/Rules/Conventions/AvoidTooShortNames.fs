@@ -35,6 +35,11 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
                 Array.singleton (ident, ident.idText, None) |> Array.append acc |> loop tail 
             else
                 loop tail acc
+        | SynPat.Paren(pat, _)::tail ->
+            match pat with
+            | SynPat.Typed(typedPat, _, _) ->
+                loop (typedPat::tail) acc
+            | _ -> loop tail acc
         | _ -> acc
     loop pats Array.empty
 
