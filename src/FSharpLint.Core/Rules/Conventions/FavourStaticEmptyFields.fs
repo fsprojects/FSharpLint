@@ -12,14 +12,6 @@ type private EmptyLiteralType =
     | EmptyListLiteral
     | EmptyArrayLiteral
 
-let private getEmptyLiteralType (str: string): EmptyLiteralType =
-    if str.Length = 0 then
-        EmptyLiteralType.EmptyStringLiteral
-    elif str = "[]" then
-        EmptyLiteralType.EmptyListLiteral
-    else
-        EmptyLiteralType.EmptyArrayLiteral
-
 let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
     let errorMessageKey =
         match emptyLiteralType with
@@ -30,60 +22,23 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     let formatError errorName =
         Resources.GetString errorName
 
-    errorMessageKey |> formatError |> Array.singleton
+    errorMessageKey |> formatError
 
-let private generateError (range:FSharp.Compiler.Text.Range) (idText:string) (emptyLiteralType: EmptyLiteralType) =
-    if idText = "" || idText = "[]" then
-        getStaticEmptyErrorMessage range emptyLiteralType
-        |> Array.map (fun message ->
-            { Range = range
-              Message = message
-              SuggestedFix = None
-              TypeChecks = List.Empty })
-    else
-        Array.empty
+let private generateError (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+    { Range = range
+      Message = getStaticEmptyErrorMessage range emptyLiteralType
+      SuggestedFix = None
+      TypeChecks = List.Empty }
+    |> Array.singleton
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Expression expr ->
-        match expr with
-        | SynExpr.App (_, _, SynExpr.Ident failwithId, expression, range) ->
-            match expression with
-            | SynExpr.Const (SynConst.String (id, _, _), _) when id = "" ->
-                (range, id, None, getEmptyLiteralType id)
-                |> Array.singleton
-                |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
-                    let suggestions = generateError range idText emptyLiteralType
-                    suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-            | _ -> Array.empty
-        | SynExpr.ArrayOrList (isArray, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
-            (range, sprintf "%A" id, None, (if isArray then EmptyArrayLiteral else EmptyListLiteral))
-            |> Array.singleton
-            |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
-                let suggestions = generateError range idText emptyLiteralType
-                suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-        | SynExpr.Const (SynConst.String (id, _, range), _) when id = "" ->
-            (range, id, None, getEmptyLiteralType id)
-            |> Array.singleton
-            |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
-                let suggestions = generateError range idText emptyLiteralType
-                suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-        | _ -> Array.empty
-    | Binding(SynBinding(_, _, _, _, _, _, _, _, _, expression, _, _)) ->
-        match expression with
-        | SynExpr.Const (SynConst.String (id, _, range), _) when id = "" ->
-            (range, id, None, getEmptyLiteralType id)
-            |> Array.singleton
-            |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
-                let suggestions = generateError range idText emptyLiteralType
-                suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-        | SynExpr.ArrayOrList (isArray, id, range) when "[]" = sprintf "%A" id || "[||]" = sprintf "%A" id ->
-            (range, sprintf "%A" id, None, (if isArray then EmptyArrayLiteral else EmptyListLiteral))
-            |> Array.singleton
-            |> Array.collect (fun (range, idText, typeCheck, emptyLiteralType) ->
-                let suggestions = generateError range idText emptyLiteralType
-                suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
-        | _ -> Array.empty
+    | AstNode.Expression(SynExpr.Const (SynConst.String ("", _, range), _)) -> 
+        generateError range EmptyStringLiteral
+    | AstNode.Expression(SynExpr.ArrayOrList (isArray, [], range)) ->
+        let emptyLiteralType =
+            if isArray then EmptyArrayLiteral else EmptyListLiteral
+        generateError range emptyLiteralType
     | _ -> Array.empty
 
 
