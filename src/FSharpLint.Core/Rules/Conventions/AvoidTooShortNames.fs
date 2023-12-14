@@ -45,6 +45,8 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
+    | AstNode.Match(SynMatchClause(namePattern, _, _, _, _)) ->
+        getParameterWithBelowMinimumLength [namePattern]
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _)) ->
         match pattern with
         | SynPat.LongIdent(LongIdentWithDots(identifiers, _),_, _, SynArgPats.Pats(names), _, _) ->
