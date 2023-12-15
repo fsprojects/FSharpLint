@@ -49,73 +49,97 @@
     "maxLinesInLambdaFunction": {
         "enabled": false,
         "config": {
-            "maxLines": 7
+            "maxLines": 7,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInMatchLambdaFunction": {
         "enabled": false,
         "config": {
-            "maxLines": 100
+            "maxLines": 100,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInValue": {
         "enabled": false,
         "config": {
-            "maxLines": 100
+            "maxLines": 100,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInFunction": {
         "enabled": false,
         "config": {
-            "maxLines": 100
+            "maxLines": 100,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInMember": {
         "enabled": false,
         "config": {
-            "maxLines": 100
+            "maxLines": 100,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInConstructor": {
         "enabled": false,
         "config": {
-            "maxLines": 100
+            "maxLines": 100,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInProperty": {
         "enabled": false,
         "config": {
-            "maxLines": 70
+            "maxLines": 70,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInModule": {
         "enabled": false,
         "config": {
-            "maxLines": 1000
+            "maxLines": 1000,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInRecord": {
         "enabled": false,
         "config": {
-            "maxLines": 500
+            "maxLines": 500,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInEnum": {
         "enabled": false,
         "config": {
-            "maxLines": 500
+            "maxLines": 500,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInUnion": {
         "enabled": false,
         "config": {
-            "maxLines": 500
+            "maxLines": 500,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "maxLinesInClass": {
         "enabled": false,
         "config": {
-            "maxLines": 500
+            "maxLines": 500,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "interfaceNames": {
@@ -296,7 +320,9 @@
     "maxLinesInFile": {
         "enabled": false,
         "config": {
-            "maxLinesInFile": 1000
+            "maxLinesInFile": 1000,
+            "skipBlankLines": false,
+            "skipComments": false
         }
     },
     "trailingNewLineInFile": { "enabled": false },

@@ -9,7 +9,7 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     | AstNode.TypeDefinition(SynTypeDefn(_, repr, _, _, range)) ->
         match repr with
         | SynTypeDefnRepr.ObjectModel(_) ->
-            Helper.SourceLength.checkSourceLengthRule config range "Classes and interface"
+            Helper.SourceLength.checkSourceLengthRule config range args.FileContent "Classes and interface"
         | _ -> Array.empty
     | _ -> Array.empty
 

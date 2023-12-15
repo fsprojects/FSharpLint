@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.ModuleOrNamespace(SynModuleOrNamespace.SynModuleOrNamespace(_, _, (SynModuleOrNamespaceKind.NamedModule | SynModuleOrNamespaceKind.AnonModule ), _, _, _, _, range)) ->
-        Helper.SourceLength.checkSourceLengthRule config range "Module"
+        Helper.SourceLength.checkSourceLengthRule config range args.FileContent "Module"
     | _ -> Array.empty
 
 let rule config =
