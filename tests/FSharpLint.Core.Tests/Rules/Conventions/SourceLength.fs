@@ -55,7 +55,7 @@ let dog x =
     Bar
     *)
     %s
-    ()""" (generateNewLines (FunctionLength - 3)))
+    ()""" (generateNewLines (FunctionLength - 4)))
         Assert.IsFalse this.ErrorsExist
 
 let LambdaFunctionLength = 5
