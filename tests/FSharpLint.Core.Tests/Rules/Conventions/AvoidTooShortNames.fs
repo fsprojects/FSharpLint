@@ -109,3 +109,36 @@ type Foo<'T> = Option<'T>
 type Foo<'SomeType> = Option<'SomeType>
 """
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_9() =
+        this.Parse """
+let Foo (x: int) =
+    x.ToString()
+"""
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_10() =
+        this.Parse """
+match foo with
+| x -> ()
+"""
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_11() =
+        this.Parse """
+match foo with
+| Some(x) -> ()
+"""
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_12() =
+        this.Parse """
+match foo with
+| Some(x) -> (x)
+"""
+        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsFalse(this.ErrorExistsAt(3, 14))

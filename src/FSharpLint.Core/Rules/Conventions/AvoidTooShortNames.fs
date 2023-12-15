@@ -35,11 +35,24 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
                 Array.singleton (ident, ident.idText, None) |> Array.append acc |> loop tail 
             else
                 loop tail acc
+        | SynPat.Paren(pat, _)::tail ->
+            match pat with
+            | SynPat.Typed(typedPat, _, _) ->
+                loop (typedPat::tail) acc
+            | _ -> loop (pat::tail) acc
+        | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
+            match argPats with
+            | SynArgPats.Pats(pats) -> 
+                loop (List.append pats tail) acc
+            | _ -> 
+                loop tail acc
         | _ -> acc
     loop pats Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
+    | AstNode.Match(SynMatchClause(namePattern, _, _, _, _)) ->
+        getParameterWithBelowMinimumLength [namePattern]
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _)) ->
         match pattern with
         | SynPat.LongIdent(LongIdentWithDots(identifiers, _),_, _, SynArgPats.Pats(names), _, _) ->
@@ -72,18 +85,10 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let runner (args:AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Identifier([identifier], range) when isIdentifierTooShort identifier ->
-        { Range = range
-          Message = Resources.GetString "RulesAvoidTooShortNamesError"
-          SuggestedFix = None
-          TypeChecks = List.empty }
-        |> Array.singleton
-    | _ ->
-        getIdentifiers args
-        |> Array.collect (fun (identifier, idText, typeCheck) ->
-            let suggestions = checkIdentifier identifier idText
-            suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
+    getIdentifiers args
+    |> Array.collect (fun (identifier, idText, typeCheck) ->
+        let suggestions = checkIdentifier identifier idText
+        suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
 
 let rule =
     { Name = "AvoidTooShortNames"
