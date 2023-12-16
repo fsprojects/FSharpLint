@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.7] - 2023-12-16
+
+- Add new rule SuggestUseAutoProperty #625 #596 [@webwarrior-ws]
+- AvoidTooShortNames: fix false negatives and improve warning positions #633 #632 [@Mersho] & [@webwarrior-ws]
+- FavourStaticEmptyFields: properly advise Array.empty instead of List.Empty #631 #630 [@webwarrior-ws]
+- CI: publish prerelease nuget versions for every commit #629 [@knocte]
+- CI: run FSharpLint on itself #609 #628 [@Mersho]
+
+
 ## [0.21.6] - 2023-12-07
 
 - Add new rule AsyncExceptionWithoutReturn #623 #597 [@Mersho]
