@@ -274,6 +274,7 @@
             "symbol": "this"
         }
     },
+    "suggestUseAutoProperty": { "enabled": false },
     "avoidTooShortNames": { "enabled": false },
     "asyncExceptionWithoutReturn": { "enabled": false },
     "indentation": {

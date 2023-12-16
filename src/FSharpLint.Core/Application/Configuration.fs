@@ -321,7 +321,8 @@ type ConventionsConfig =
       numberOfItems:NumberOfItemsConfig option
       binding:BindingConfig option
       favourReRaise:EnabledConfig option
-      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option }
+      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
+      suggestUseAutoProperty:EnabledConfig option}
 with
     member this.Flatten() =
         [|
@@ -342,6 +343,7 @@ with
             this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+            this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
         |] |> Array.concat
 
 type TypographyConfig =
@@ -460,7 +462,8 @@ type Configuration =
       MaxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
-      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option }
+      NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
+      SuggestUseAutoProperty:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -547,6 +550,7 @@ with
         TrailingNewLineInFile = None
         NoTabCharacters = None
         NoPartialFunctions = None
+        SuggestUseAutoProperty = None
     }
 
 // fsharplint:enable RecordFieldNames

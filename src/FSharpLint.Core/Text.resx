@@ -351,4 +351,7 @@
   <data name="RulesAsyncExceptionWithoutReturn" xml:space="preserve">
     <value>You should use the 'return' keyword when raising an exception in an async computation expression.</value>
   </data>
+  <data name="RulesSuggestUseAutoProperty" xml:space="preserve">
+    <value>Consider using auto-properties via the 'val' keyword.</value>
+  </data>
 </root>
