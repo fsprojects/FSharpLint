@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <Compile Include="Output.fs" />
+    <Compile Include="Version.fs" />
+    <Compile Include="Daemon.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -37,6 +39,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj" />
+    <ProjectReference Include="..\FSharpLint.Client\FSharpLint.Client.fsproj" />
   </ItemGroup>
 
 </Project>
