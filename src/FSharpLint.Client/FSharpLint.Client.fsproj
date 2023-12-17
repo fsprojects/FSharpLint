@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>FSharpLint.Client</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <Title>FSharpLint.Client</Title>
+    <Description>Companion library to format using FSharpLint tool.</Description>
+    <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Contracts.fsi" />
+    <Compile Include="Contracts.fs" />
+    <Compile Include="LSPFSharpLintServiceTypes.fsi" />
+    <Compile Include="LSPFSharpLintServiceTypes.fs" />
+    <Compile Include="FSharpLintToolLocator.fsi" />
+    <Compile Include="FSharpLintToolLocator.fs" />
+    <Compile Include="LSPFSharpLintService.fsi" />
+    <Compile Include="LSPFSharpLintService.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
