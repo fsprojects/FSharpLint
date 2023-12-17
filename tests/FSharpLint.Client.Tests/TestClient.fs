@@ -50,7 +50,11 @@ let TestDaemonVersion() =
     let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
     let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
     let versionResponse = runVersionCall testHintsFile fsharpLintService
-    
+
+    match versionResponse.Result with
+    | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
+    // | _ -> Assert.Fail("Response should be a version number")
+
     Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.Version, versionResponse.Code)
 
 [<Test>]
