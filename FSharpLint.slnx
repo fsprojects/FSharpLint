@@ -102,6 +102,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FSharpLint.Benchmarks/FSharpLint.Benchmarks.fsproj" />
+    <Project Path="tests/FSharpLint.Client.Tests/FSharpLint.Client.Tests.fsproj" />
     <Project Path="tests/FSharpLint.Console.Tests/FSharpLint.Console.Tests.fsproj" />
     <Project Path="tests/FSharpLint.Core.Tests/FSharpLint.Core.Tests.fsproj" />
     <Project Path="tests/FSharpLint.FunctionalTest/FSharpLint.FunctionalTest.fsproj" />
