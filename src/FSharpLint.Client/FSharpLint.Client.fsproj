@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <RootNamespace>FSharpLint.Client</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <Title>FSharpLint.Client</Title>
+    <Description>Companion library to format using FSharpLint tool.</Description>
+    <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Contracts.fsi" />
+    <Compile Include="Contracts.fs" />
+    <Compile Include="LSPFSharpLintServiceTypes.fsi" />
+    <Compile Include="LSPFSharpLintServiceTypes.fs" />
+    <Compile Include="FSharpLintToolLocator.fsi" />
+    <Compile Include="FSharpLintToolLocator.fs" />
+    <Compile Include="LSPFSharpLintService.fsi" />
+    <Compile Include="LSPFSharpLintService.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SemanticVersioning" />
+    <PackageReference Include="StreamJsonRpc" />
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+
+</Project>

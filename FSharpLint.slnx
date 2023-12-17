@@ -97,6 +97,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/FSharpLint.Console/FSharpLint.Console.fsproj" />
+    <Project Path="src/FSharpLint.Client/FSharpLint.Client.fsproj" />
     <Project Path="src/FSharpLint.Core/FSharpLint.Core.fsproj" />
   </Folder>
   <Folder Name="/tests/">
