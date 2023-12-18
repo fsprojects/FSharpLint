@@ -663,6 +663,25 @@ let loadConfig (configPath:string) =
     File.ReadAllText configPath
     |> parseConfig
 
+/// Combine two configs into one: all values that are Some in second config override 
+/// corresponding values in first config.
+let combineConfigs (baseConfig: Configuration) (overridingConfig: Configuration) : Configuration =
+    let baseFields = FSharp.Reflection.FSharpValue.GetRecordFields baseConfig
+    let partialConfigFields = FSharp.Reflection.FSharpValue.GetRecordFields overridingConfig
+    
+    let resultingRecordFields =
+        Array.map2
+            (fun baseValue overridingValue -> 
+                if isNull overridingValue then
+                    baseValue
+                else
+                    overridingValue)
+            baseFields
+            partialConfigFields
+    
+    FSharp.Reflection.FSharpValue.MakeRecord(typeof<Configuration>, resultingRecordFields) 
+        :?> Configuration
+
 /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
 /// This function loads and returns this default configuration.
 let defaultConfiguration =

@@ -39,6 +39,8 @@ module Lint =
     type ConfigurationParam =
         | Configuration of Configuration
         | FromFile of configPath:string
+        /// Partial config. Contains only differences from default config.
+        | FromFilePartial of configPath:string
         /// Tries to load the config from file `fsharplint.json`.
         /// If this file doesn't exist or is invalid, falls back to the default configuration.
         | Default
