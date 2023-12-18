@@ -58,6 +58,22 @@ let dog x =
     ()""" (generateNewLines (FunctionLength - 4)))
         Assert.IsFalse this.ErrorsExist
 
+    [<Test>]
+    member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
+        this.Parse(sprintf """
+module Program
+
+let dog x =
+    (*
+    Foo (* baz *)
+    let (*) = id
+    Bar
+    *)
+    let (*) a b = a + b
+    %s
+    ()""" (generateNewLines (FunctionLength - 5)))
+        Assert.IsFalse this.ErrorsExist
+
 let LambdaFunctionLength = 5
 [<TestFixture>]
 type TestMaxLinesInLambdaFunction() =
