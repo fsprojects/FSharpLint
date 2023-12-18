@@ -111,3 +111,28 @@ type TorMessageDigest(isSha256: bool) =
 
         Assert.IsTrue this.NoErrorsExist
 
+    [<Test>]
+    member this.InConsistentSelfShouldProduceErrorSuggestedFix() =
+        let source = """
+type Foo =
+    { Bar : Baz }
+    member self.FooBar = 
+        ()
+    member this.FooBarBaz x =
+        failwith "foobarbaz" """
+
+        let expected = """
+type Foo =
+    { Bar : Baz }
+    member this.FooBar = 
+        ()
+    member this.FooBarBaz x =
+        failwith "foobarbaz" """
+
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+        
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
