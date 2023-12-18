@@ -293,6 +293,8 @@ Target.create "SelfCheck" (fun _ ->
             "maxNumberOfFunctionParameters"
             "maxNumberOfMembers"
             "maxNumberOfBooleanOperatorsInCondition"
+            // Running NoPartialFunctions on this file causes a bug in FSharp.Compiler, so skip it for now
+            // "noPartialFunctions"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
