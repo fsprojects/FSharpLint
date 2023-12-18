@@ -25,7 +25,8 @@ let private error name i actual =
 
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 
-let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|(\*\))"
+let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
+let private multilineCommentMarkerRegexCaptureGroupLength = 3
 
 let private stripMultilineComments (source: string) =
     let markers = 
@@ -53,7 +54,8 @@ let private stripMultilineComments (source: string) =
     getTopLevelBalancedPairs markers []
     |> List.fold
         (fun (currSource: string) (startIndex, endIndex) ->
-            currSource.Substring(0, startIndex) + currSource.Substring(endIndex + 2))
+            currSource.Substring(0, startIndex) 
+            + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
         source
 
 let checkSourceLengthRule (config:Config) range fileContents errorName =
