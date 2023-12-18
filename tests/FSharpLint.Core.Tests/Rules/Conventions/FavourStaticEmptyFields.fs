@@ -168,3 +168,45 @@ match foo with
 | head::_ -> false"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.FavourStaticEmptyFieldsSuggestedFixForString() =
+        let source = "let foo = \"\""
+
+        let expected = "let foo = String.Empty"
+        
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.FavourStaticEmptyFieldsSuggestedFixForList() =
+        let source = "let foo = []"
+
+        let expected = "let foo = List.Empty"
+        
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.FavourStaticEmptyFieldsSuggestedFixForArray() =
+        let source = "let foo = [||]"
+
+        let expected = "let foo = Array.empty"
+        
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
