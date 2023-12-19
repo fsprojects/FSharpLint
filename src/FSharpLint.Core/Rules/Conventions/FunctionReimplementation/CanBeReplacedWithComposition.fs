@@ -8,11 +8,11 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
-let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
-    let canBeReplacedWithFunctionComposition expression =
+let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda range =
+    let tryReplaceWithFunctionComposition expression =
         let getLastElement = List.rev >> List.head
 
-        let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) numFunctionCalls =
+        let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) (calledFunctionIdents: List<string>) =
             let rec appliedValuesAreConstants appliedValues =
                 match appliedValues with
                 | (SynExpr.Const(_)| SynExpr.Null(_))::rest -> appliedValuesAreConstants rest
@@ -22,34 +22,56 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
             match AstNode.Expression expression with
             | FuncApp(exprs, _) ->
                 match List.map removeParens exprs with
-                | (SynExpr.Ident(_) | SynExpr.LongIdent(_))::appliedValues
+                | (ExpressionUtilities.Identifier(idents, _))::appliedValues
                         when appliedValuesAreConstants appliedValues ->
-
+                    
+                    let funcName = String.Join(".", idents)
+                    let funcStringParts = 
+                        Seq.append
+                            (Seq.singleton funcName)
+                            (appliedValues 
+                                |> Seq.take (appliedValues.Length - 1) 
+                                |> Seq.choose (fun value -> ExpressionUtilities.tryFindTextOfRange value.Range fileContents))
+                    let funcString = String.Join(" ", funcStringParts)
+                    
                     match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when numFunctionCalls > 1 ->
-                        lastArgument.idText = lambdaArgument.idText
+                    | SynExpr.Ident(lastArgument) when calledFunctionIdents.Length > 1 ->
+                        if lastArgument.idText = lambdaArgument.idText then
+                            funcString :: calledFunctionIdents
+                        else
+                            []
                     | SynExpr.App(_, false, _, _, _) as nextFunction ->
-                        lambdaArgumentIsLastApplicationInFunctionCalls nextFunction lambdaArgument (numFunctionCalls + 1)
-                    | _ -> false
-                | _ -> false
-            | _ -> false
+                        lambdaArgumentIsLastApplicationInFunctionCalls 
+                            nextFunction 
+                            lambdaArgument 
+                            (funcString :: calledFunctionIdents)
+                    | _ -> []
+                | _ -> []
+            | _ -> []
 
         match lambda.Arguments with
         | [singleParameter] ->
-            Helper.FunctionReimplementation.getLambdaParamIdent singleParameter
-            |> Option.exists (fun paramIdent -> lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent 1)
-        | _ -> false
+            match Helper.FunctionReimplementation.getLambdaParamIdent singleParameter with
+            | Some paramIdent -> 
+                match lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent [] with
+                | [] -> None
+                | funcStrings -> Some funcStrings
+            | None -> None
+        | _ -> None
 
-    if canBeReplacedWithFunctionComposition lambda.Body then
+    match tryReplaceWithFunctionComposition lambda.Body with
+    | None -> Array.empty
+    | Some funcStrings ->
+        let suggestedFix =
+            lazy(
+                Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
         { Range = range
           Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-          SuggestedFix = None
+          SuggestedFix = Some suggestedFix
           TypeChecks = [] } |> Array.singleton
-    else
-        Array.empty
 
 let runner (args:AstNodeRuleParams) =
-    Helper.FunctionReimplementation.checkLambda args validateLambdaCannotBeReplacedWithComposition
+    Helper.FunctionReimplementation.checkLambda args (validateLambdaCannotBeReplacedWithComposition args.FileContent)
 
 let rule =
     { Name = "CanBeReplacedWithComposition"
