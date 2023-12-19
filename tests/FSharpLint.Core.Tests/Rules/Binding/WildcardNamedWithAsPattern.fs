@@ -21,7 +21,8 @@ match [] with
 module Program
 
 match [] with
-| x -> ()"""
+| x -> ()
+"""
         
         this.Parse source
 
