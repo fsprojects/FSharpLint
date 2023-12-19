@@ -136,3 +136,52 @@ type Foo =
         let result = this.ApplyQuickFix source
 
         Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.InConsistentSelfShouldProduceErrorSuggestedFix2() =
+        let source = """
+type Foo =
+    { Bar : Baz }
+    member this.FooBar = 
+        ()
+    member self.FooBarBaz x =
+        failwith "foobarbaz" """
+
+        let expected = """
+type Foo =
+    { Bar : Baz }
+    member this.FooBar = 
+        ()
+    member this.FooBarBaz x =
+        failwith "foobarbaz" """
+
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(6, 11))
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.InConsistentSelfShouldProduceErrorSuggestedFix3() =
+        let source = """
+type CustomerName(firstName, middleInitial, lastName) =
+    member this.FirstName = firstName
+    member self.MiddleInitial = middleInitial
+    member this.LastName = lastName """
+        let expected = """
+type CustomerName(firstName, middleInitial, lastName) =
+    member this.FirstName = firstName
+    member this.MiddleInitial = middleInitial
+    member this.LastName = lastName """
+
+        this.Parse source
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(4, 11))
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
