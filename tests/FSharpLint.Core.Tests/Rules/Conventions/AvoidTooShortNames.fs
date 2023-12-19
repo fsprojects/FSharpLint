@@ -152,3 +152,13 @@ async {
 } |> Async.RunSynchronously |> ignore<int>"""
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_14() =
+        this.Parse """
+async {
+    let! result = async { return 1 + 2 }
+    return result
+} |> Async.RunSynchronously |> ignore<int>"""
+
+        Assert.IsTrue this.NoErrorsExist
