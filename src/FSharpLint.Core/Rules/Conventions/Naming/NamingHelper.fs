@@ -365,6 +365,22 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> Array.empty
 
 let rec identFromSimplePat = function
-    | SynSimplePat.Id(ident, _, _, _, _, _) -> Some(ident)
+    | SynSimplePat.Id(ident, _, _, _, _, _) -> Some ident
     | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
     | SynSimplePat.Attrib(_) -> None
+
+let rec isNested args nodeIndex =
+    let parent = args.SyntaxArray.[nodeIndex].ParentIndex
+    let actual = args.SyntaxArray.[parent].Actual
+
+    match actual with
+    | AstNode.Expression (SynExpr.LetOrUse _) -> true
+    | _ -> false
+
+let getFunctionIdents (pattern:SynPat) =
+    match pattern with
+    | SynPat.LongIdent (longIdent, _, _, SynArgPats.Pats _, _, _) ->
+        match List.tryLast longIdent.Lid with
+        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | None -> Array.empty
+    | _ -> Array.empty

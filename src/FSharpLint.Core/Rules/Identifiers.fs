@@ -84,3 +84,5 @@ let FavourStaticEmptyFields = identifier 76
 let AvoidSinglePipeOperator = identifier 77
 let AsyncExceptionWithoutReturn = identifier 78
 let SuggestUseAutoProperty = identifier 79
+let UnnestedFunctionNames = identifier 80
+let NestedFunctionNames = identifier 81

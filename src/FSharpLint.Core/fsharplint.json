@@ -237,6 +237,20 @@
             "underscores": "AllowPrefix"
         }
     },
+    "unnestedFunctionNames": {
+        "enabled": false,
+        "config": {
+            "naming": "PascalCase",
+            "underscores": "None"
+        }
+    },
+    "nestedFunctionNames": {
+        "enabled": false,
+        "config": {
+            "naming": "CamelCase",
+            "underscores": "None"
+        }
+    },
     "maxNumberOfItemsInTuple": {
         "enabled": false,
         "config": {

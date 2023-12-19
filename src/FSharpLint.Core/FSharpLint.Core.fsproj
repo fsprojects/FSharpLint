@@ -88,6 +88,8 @@
     <Compile Include="Rules\Conventions\Naming\LiteralNames.fs" />
     <Compile Include="Rules\Conventions\Naming\NamespaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\MemberNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\UnnestedFunctionNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\NestedFunctionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ParameterNames.fs" />
     <Compile Include="Rules\Conventions\Naming\MeasureTypeNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ActivePatternNames.fs" />

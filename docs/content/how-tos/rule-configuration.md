@@ -120,3 +120,5 @@ The following rules can be specified for linting.
 - [AvoidSinglePipeOperator (FL0077)](rules/FL0077.html)
 - [AsyncExceptionWithoutReturn (FL0078)](rules/FL0078.html)
 - [SuggestUseAutoProperty (FL0079)](rules/FL0079.html)
+- [UnnestedFunctionNames (FL0080)](rules/FL0080.html)
+- [NestedFunctionNames (FL0081)](rules/FL0081.html)
