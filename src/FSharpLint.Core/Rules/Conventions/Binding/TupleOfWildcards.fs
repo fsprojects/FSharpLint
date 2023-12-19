@@ -7,7 +7,7 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private checkTupleOfWildcards pattern identifier =
+let private checkTupleOfWildcards fileContents pattern identifier identifierRange =
     let rec isWildcard = function
         | SynPat.Paren(pattern, _) -> isWildcard pattern
         | SynPat.Wild(_) -> true
@@ -16,7 +16,10 @@ let private checkTupleOfWildcards pattern identifier =
     let constructorString numberOfWildcards =
         let constructorName = identifier |> String.concat "."
         let arguments = Array.create numberOfWildcards "_" |> String.concat ", "
-        $"{constructorName}({arguments})"
+        if numberOfWildcards = 1 then
+            sprintf "%s _" constructorName
+        else
+            sprintf "%s(%s)" constructorName arguments
 
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, _, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
@@ -24,7 +27,9 @@ let private checkTupleOfWildcards pattern identifier =
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = constructorString 1
         let error = String.Format(errorFormat, refactorFrom, refactorTo)
-        { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        let suggestedFix = lazy(
+            Some { SuggestedFix.FromRange = identifierRange; FromText = fileContents; ToText = refactorTo })
+        { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
 
 let private isTupleMemberArgs breadcrumbs tupleRange =
@@ -44,11 +49,11 @@ let private isTupleMemberArgs breadcrumbs tupleRange =
 
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, _, range) as pattern, _)]), _, _)) ->
+    | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, _, range) as pattern, _)]), _, identRange)) ->
         let breadcrumbs = args.GetParents 2
         if (not << isTupleMemberArgs breadcrumbs) range then
             let identifier = identifier.LongIdent |> List.map (fun x -> x.idText)
-            checkTupleOfWildcards pattern identifier
+            checkTupleOfWildcards args.FileContent pattern identifier identRange
         else
             Array.empty
     | _ -> Array.empty
