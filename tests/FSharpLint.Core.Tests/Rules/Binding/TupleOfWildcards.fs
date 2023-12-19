@@ -22,6 +22,38 @@ match Persian(1, 3) with
         Assert.IsTrue(this.ErrorExistsAt(7, 10))
 
     [<Test>]
+    member this.``Suggested fix for tuple of wildcards should be single wildcard``() = 
+        let source = """
+match cat with
+| Persian(_, _) -> ()"""
+
+        let expected = """
+match cat with
+| Persian _ -> ()"""
+
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.``Suggested fix for tuple of wildcards in nested pattern should be single wildcard``() = 
+        let source = """
+match maybeCat with
+| Some(Persian(_, _)) -> ()"""
+
+        let expected = """
+match maybeCat with
+| Some(Persian _) -> ()"""
+
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
     member this.``Method's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
         this.Parse """
 module Program
