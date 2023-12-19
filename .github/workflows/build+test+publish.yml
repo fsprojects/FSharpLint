@@ -1,4 +1,4 @@
-name: .NET 5.0
+name: CI
 
 on:
   pull_request:
@@ -7,6 +7,9 @@ on:
       - 'v*'
     branches:
       - '**'
+
+env:
+  DOTNET_VERSION: 5.0.202
 
 jobs:
   buildAndTest:
@@ -17,15 +20,14 @@ jobs:
         - ubuntu-latest
         - windows-latest
         - macOS-latest
-        dotnet: [5.0.202]
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET 5
+    - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
@@ -41,15 +43,14 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        dotnet: [5.0.202]
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET 5
+    - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
@@ -89,3 +90,40 @@ jobs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+
+
+  docsUpdate:
+    needs: publish
+
+    strategy:
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    # old .NET required by old fornax version
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 3.1.x
+
+    - name: Restore tools
+      run: dotnet tool restore
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Run Fornax
+      run: dotnet fake build -t Docs
+    - name: Deploy (if tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        personal_token: ${{ secrets.GITHUB_TOKEN  }}
+        publish_dir: ./docs/_public
+        publish_branch: gh-pages
+        force_orphan: true
