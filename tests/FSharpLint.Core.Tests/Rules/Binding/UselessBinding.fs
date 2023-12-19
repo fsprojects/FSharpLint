@@ -87,3 +87,25 @@ let a = 10
         let result = this.ApplyQuickFix source
 
         Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.UselessBindingWithParensSuggestedFix() =
+        let source = """
+module Program
+
+let a = 10
+let ((a)) = ((a))"""
+
+        let expected = """
+module Program
+
+let a = 10
+"""
+
+        this.Parse source
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
