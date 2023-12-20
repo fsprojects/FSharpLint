@@ -84,3 +84,13 @@ let someFunc someParam =
 """
 
         Assert.IsFalse this.ErrorsExist
+
+
+    [<Test>]
+    member this.``Use pipe operator once to avoid parenthesis on expression with function application``() =
+        this.Parse """
+let someFunc someParam =
+    someOtherFunc1 someParam someParam2 |> someOtherFunc3
+"""
+
+        Assert.IsFalse this.ErrorsExist
