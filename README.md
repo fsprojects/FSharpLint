@@ -49,9 +49,7 @@ Package | Version
 
 ## How to release
 
-1. Update [CHANGELOG.md](./CHANGELOG.md) by adding new entry (`## [X.Y.Z]`) and commit it.
-2. Create version tag (`git tag vX.Y.Z`)
-3. Push the tag to the repo `git push origin vX.Y.Z` - this will start CI process that will create a GitHub release and publish the packages to NuGet
+Please [read the Releasing Guidelines](./RELEASE.md) if you're a maintainer.
 
 ## How to contribute
 
