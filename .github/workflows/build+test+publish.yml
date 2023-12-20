@@ -37,13 +37,10 @@ jobs:
     - name: Run FSharpLint on itself
       run: dotnet fake build -t SelfCheck
 
-  publish:
-    needs: buildAndTest
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+  deployReleaseBinaries:
+    needs: buildAndTest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
@@ -92,13 +89,9 @@ jobs:
         file_glob: true
 
 
-  docsUpdate:
-    needs: publish
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
+  deployReleaseDocs:
+    needs: deployReleaseBinaries
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -108,7 +101,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     # old .NET required by old fornax version
-    - name: Setup .NET
+    - name: Setup old .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 3.1.x
