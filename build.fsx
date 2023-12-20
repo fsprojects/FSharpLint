@@ -76,8 +76,7 @@ let nugetVersion =
     | (_, false) ->
         let current = changelog.LatestEntry.NuGetVersion |> SemVer.parse
         let bumped = { current with
-                            Minor = current.Minor + 1u
-                            Patch = 0u
+                            Patch = current.Patch + 1u
                             Original = None
                             PreRelease = None }
         let bumpedBaseVersion = string bumped

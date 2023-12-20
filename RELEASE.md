@@ -1,6 +1,8 @@
 # Releasing a new version of FSharpLint
 
-1. Update the [changelog](CHANGELOG.md) since last release and get the changes onto master.
+1. Update the [changelog](CHANGELOG.md) since last release and get the changes onto master,
+choosing a version that increases the Major or Minor part of the version by 1, or the Revision
+part of the version by 2, e.g.: 0.20.2 -> 0.23.0 or 0.20.2 -> 1.0 or 0.20.2 -> 0.20.4.
 2. Tag the head of master with the version number in the format `vx.x.x` - for example: `v0.20.2`. 
 3. Push the tag to remote.
 
