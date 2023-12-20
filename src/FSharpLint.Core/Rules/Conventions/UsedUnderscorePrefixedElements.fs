@@ -31,15 +31,19 @@ let runner (args: AstNodeRuleParams) =
         | Some checkResults -> 
             checkResults.GetAllUsesOfAllSymbolsInFile() 
             |> Seq.choose (fun usage ->
-                if not usage.IsFromDefinition && usage.Symbol.FullName.StartsWith "_" then
-                    Some {
-                        Range = usage.Range
-                        Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
-                        SuggestedFix = None
-                        TypeChecks = List.Empty
-                    }
-                else
-                    None)
+                match usage.Symbol with
+                | :? FSharp.Compiler.Symbols.FSharpMemberOrFunctionOrValue as symbol -> 
+                    if not usage.IsFromDefinition && symbol.FullName.StartsWith "_" 
+                            && symbol.FullName <> "_" && not symbol.IsCompilerGenerated then
+                        Some {
+                            Range = usage.Range
+                            Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
+                            SuggestedFix = None
+                            TypeChecks = List.Empty
+                        }
+                    else
+                        None
+                | _ -> None )
             |> Seq.toArray
         | None -> Array.empty
     else
