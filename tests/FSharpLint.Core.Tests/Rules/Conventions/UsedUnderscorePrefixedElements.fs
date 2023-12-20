@@ -73,7 +73,18 @@ module MyModule =
         ()"""
 
         Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.``Use of underscore variable in function should not cause error``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let f _ = System.Random()
+        ()"""
+
+        Assert.IsFalse this.ErrorsExist
         
+    [<Test>]
     member this.``Using field with underscore prefix``() =
         this.Parse """
 type CustomerName(firstName) =
@@ -83,7 +94,7 @@ type CustomerName(firstName) =
 
         Assert.IsFalse this.ErrorsExist
         
-        
+    [<Test>]
     member this.``Using private member with underscore prefix``() =
         this.Parse """
 type CustomerName(firstName) =
@@ -93,6 +104,7 @@ type CustomerName(firstName) =
 
         Assert.IsFalse this.ErrorsExist
 
+    [<Test>]
     member this.``Using private property with underscore prefix``() =
         this.Parse """
 type CustomerName(firstName) =
