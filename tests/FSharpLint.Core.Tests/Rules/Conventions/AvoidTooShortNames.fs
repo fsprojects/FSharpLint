@@ -142,3 +142,23 @@ match foo with
 """
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
         Assert.IsFalse(this.ErrorExistsAt(3, 14))
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_13() =
+        this.Parse """
+async {
+    let! z = async { return 1 + 2 }
+    return z
+} |> Async.RunSynchronously |> ignore<int>"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_14() =
+        this.Parse """
+async {
+    let! result = async { return 1 + 2 }
+    return result
+} |> Async.RunSynchronously |> ignore<int>"""
+
+        Assert.IsTrue this.NoErrorsExist
