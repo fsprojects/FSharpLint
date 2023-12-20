@@ -20,6 +20,39 @@ module MyModule =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.``Use variable with underscore prefix but not immediately after declaration``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let _random = System.Random()
+        ()
+        ()
+        _random"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use variable with underscore prefix inside some expression``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let _random = System.Random()
+        "someString" + _random.ToString()"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use variable with underscore prefix defined in tuple``() =
+        this.Parse """
+module MyModule =
+    let MyFunc () =
+        let (_random, x) = System.Random()
+        printfn "%A" _random
+        () """
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.``Not using variable with underscore prefix``() =
         this.Parse """
 module MyModule =
