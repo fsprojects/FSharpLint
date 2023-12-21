@@ -10,20 +10,6 @@ open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private checkUsedIdent (identifier: Ident) (usages: array<FSharpSymbolUse>) (scopeRange: Range) =
-    usages
-    |> Array.collect (fun usage ->
-        if not usage.IsFromDefinition && usage.Symbol.FullName = identifier.idText 
-            && ExpressionUtilities.rangeContainsOtherRange scopeRange usage.Range then
-            {
-                Range = usage.Range
-                Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            } |> Array.singleton
-        else
-            Array.empty)
-
 let runner (args: AstNodeRuleParams) =
     // hack to only run rule once
     if args.NodeIndex = 0 then
