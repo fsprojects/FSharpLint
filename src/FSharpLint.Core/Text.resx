@@ -396,4 +396,7 @@
   <data name="NoAsyncRunSynchronouslyInLibrary" xml:space="preserve">
     <value>Async.RunSynchronously should not be used in libraries.</value>
   </data>
+  <data name="RulesFavourNestedFunctions" xml:space="preserve">
+    <value>Prefer using local functions over private module-level functions</value>
+  </data>
 </root>
