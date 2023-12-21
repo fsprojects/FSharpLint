@@ -64,7 +64,6 @@ jobs:
       env:
         nuget-key: ${{ secrets.NUGET_KEY }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      if: github.event_name == 'push' && env.nuget-key != null
       run: dotnet fake build -t Push
     - name: Create Release (if tag)
       if: startsWith(github.ref, 'refs/tags/')
