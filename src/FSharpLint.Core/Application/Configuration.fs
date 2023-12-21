@@ -385,7 +385,8 @@ type ConventionsConfig =
       favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       suggestUseAutoProperty:EnabledConfig option
       usedUnderscorePrefixedElements:EnabledConfig option
-      ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option}
+      ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
+      favourNestedFunctions:EnabledConfig option }
 with
     member this.Flatten() =
         Array.concat
@@ -413,6 +414,7 @@ with
                 this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
+                this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -555,7 +557,8 @@ type Configuration =
       FavourAsKeyword:EnabledConfig option 
       InterpolatedStringWithNoSubstitution:EnabledConfig option
       FavourSingleton:EnabledConfig option
-      NoAsyncRunSynchronouslyInLibrary:EnabledConfig option}
+      NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
+      FavourNestedFunctions:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -658,6 +661,7 @@ with
         InterpolatedStringWithNoSubstitution = None
         FavourSingleton = None
         NoAsyncRunSynchronouslyInLibrary = None
+        FavourNestedFunctions = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -862,6 +866,7 @@ let flattenConfig (config:Configuration) =
                 config.InterpolatedStringWithNoSubstitution |> Option.bind (constructRuleIfEnabled InterpolatedStringWithNoSubstitution.rule)
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
                 config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
+                config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules
