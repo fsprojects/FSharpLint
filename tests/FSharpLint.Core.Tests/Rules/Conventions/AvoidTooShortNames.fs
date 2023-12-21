@@ -162,3 +162,15 @@ async {
 } |> Async.RunSynchronously |> ignore<int>"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_15() =
+        this.Parse """
+type SomeDU =
+    | SomeMember of int * string * bool
+
+let fooFunction (arg: SomeDU) =
+    match arg with
+    | SomeDU.SomeMember(x, _, _) -> x"""
+
+        Assert.IsTrue this.ErrorsExist
