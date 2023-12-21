@@ -59,6 +59,8 @@ NUGET
       FSharp.Core (>= 4.7.2)
       System.Reactive (>= 5.0 < 6.0)
     FSharp.Core (6.0.7)
+    FSharpx.Collections (3.1)
+      FSharp.Core (>= 4.3.4)
     Gee.External.Capstone (2.3)
     Iced (1.20)
     Ionide.ProjInfo (0.61.3)

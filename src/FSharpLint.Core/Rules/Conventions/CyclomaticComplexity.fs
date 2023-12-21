@@ -46,20 +46,31 @@ type private BindingStack(maxComplexity: int) =
         let isChildOfCurrent = if List.isEmpty tier1 then
                                     false
                                 else
-                                    args.GetParents args.NodeIndex |> List.tryFind (fun astNode -> Object.ReferenceEquals(tier1.Head.Node, astNode)) |> Option.isSome
+                                    args.GetParents args.NodeIndex
+                                    |> List.tryFind (fun astNode ->
+                                        match (List.tryHead tier1) with
+                                        | Some head -> Object.ReferenceEquals(head.Node, astNode)
+                                        | None -> false)
+                                    |> Option.isSome
         // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
         if not isChildOfCurrent && not (List.isEmpty tier1) then
-            let popped = tier1.Head
-            tier1 <- tier1.Tail
-            if popped.Complexity > maxComplexity then
-                tier2.Add popped |> ignore<bool>
+            let popped = List.tryHead tier1
+            match popped with
+            | Some value ->
+                tier1 <- tier1.Tail
+                if value.Complexity > maxComplexity then
+                    tier2.Add value |> ignore<bool>
+            | None -> ()
         // finally, push the item on to the stack
         tier1 <- bs::tier1
         
     member this.IncrComplexityOfCurrentScope incr =
-        let head = tier1.Head
-        let complexity = head.Complexity + incr
-        tier1 <- {head with Complexity = complexity}::tier1.Tail
+        let head = List.tryHead tier1
+        match head with
+        | Some value ->
+            let complexity = value.Complexity + incr
+            tier1 <- {value with Complexity = complexity}::tier1.Tail
+        | None -> ()
         
     interface IEnumerable<BindingScope> with
         member this.GetEnumerator() =

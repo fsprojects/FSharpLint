@@ -263,7 +263,10 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                 if not (fullyQualifiedInstanceMember.Contains ".") then
                     failwith "Please use fully qualified name for the instance member"
                 let nameSegments = fullyQualifiedInstanceMember.Split '.'
-                let instanceMemberNameOnly = Array.last nameSegments
+                let instanceMemberNameOnly =
+                    match Array.tryLast nameSegments with
+                    | Some value -> value
+                    | None -> failwith "Instance member name cannot be parsed."
                 let isSourcePropSameAsReplacementProp = List.tryFind (fun sourceInstanceMemberName -> sourceInstanceMemberName = instanceMemberNameOnly) names
                 match isSourcePropSameAsReplacementProp with
                 | Some _ ->

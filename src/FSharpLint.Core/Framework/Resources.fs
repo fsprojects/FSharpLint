@@ -6,8 +6,14 @@ open System.Resources
 /// Provides a way of getting string values from the framework's resource files (files in src/FSharpLint.Framework/Resources/).
 /// Used to retrieve multi-lingual strings inside of the app.
 type Resources() =
-    static let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                              |> Seq.find (fun resource -> resource.EndsWith("Text.resources", System.StringComparison.Ordinal))
+    static let resourceName =
+        let name =
+            Assembly.GetExecutingAssembly().GetManifestResourceNames()
+            |> Seq.tryFind (fun resource -> resource.EndsWith("Text.resources", System.StringComparison.Ordinal))
+
+        match name with
+        | Some value -> value
+        | None -> failwith "There were no resources found."
 
     static let resourceManager = ResourceManager(resourceName.Replace(".resources", System.String.Empty), typeof<Resources>.GetTypeInfo().Assembly)
 

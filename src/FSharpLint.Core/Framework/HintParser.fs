@@ -272,10 +272,9 @@ module HintParser =
 
         let private getIdentifierHashCode = function
             | identifier when (List.isEmpty >> not) identifier ->
-                identifier
-                |> Seq.last
-                |> ExpressionUtilities.identAsCompiledOpName
-                |> hash
+                match (Seq.tryLast identifier) with
+                | Some value -> value |> ExpressionUtilities.identAsCompiledOpName |> hash
+                | None -> failwith "There's no last element in identifier."
             | _ -> 0
 
         let rec private getHashCode node =
@@ -497,7 +496,10 @@ module HintParser =
         let private pescapechar: Parser<char, unit> =
             skipChar '\\'
             >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
-            |>> fun escapeChar -> Map.find escapeChar escapeMap
+            |>> fun escapeChar ->
+                match (Map.tryFind escapeChar escapeMap) with
+                | Some value -> value
+                | None -> failwith "Invalid escape character."
 
         let private pnonescapechars: Parser<char, unit> =
             skipChar '\\'

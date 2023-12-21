@@ -86,8 +86,10 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
     if arguments.Contains ToolArgs.Version then
         let version = 
             Assembly.GetExecutingAssembly().GetCustomAttributes false
-            |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
-        sprintf "Current version: %s" version |> output.WriteInfo
+            |> Seq.tryPick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
+        match version with
+        | Some ver -> sprintf "Current version: %s" ver |> output.WriteInfo
+        | None -> output.WriteInfo "No version information found in assembly attributes."
         ()
 
     let handleError (str:string) =
