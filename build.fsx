@@ -186,7 +186,22 @@ Target.create "Push" (fun _ ->
         | None ->
             Console.WriteLine "No nuget-key env var found, skipping..."
         | Some key ->
-            push key
+            if isTag then
+                push key
+            else
+                match getBuildParam "GITHUB_SHA" with
+                | None ->
+                    failwith "GITHUB_SHA should have been populated"
+                | Some commitHash ->
+                    let gitArgs = sprintf "describe --exact-match --tags %s" commitHash
+                    let proc =
+                        CreateProcess.fromRawCommandLine "git" gitArgs
+                        |> Proc.run
+                    if proc.ExitCode <> 0 then
+                        // commit is not a tag, so go ahead pushing a prerelease
+                        push key
+                    else
+                        Console.WriteLine "Commit mapped to a tag, skipping pushing prerelease..."
     | _ ->
         Console.WriteLine "Github event name not 'push', skipping..."
 
