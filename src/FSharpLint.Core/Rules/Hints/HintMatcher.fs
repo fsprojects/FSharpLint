@@ -13,6 +13,16 @@ open FSharpLint.Framework.ExpressionUtilities
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.Rules
 
+type ToStringConfig =
+    {
+        Replace: bool
+        ParentAstNode: AstNode option
+        Args: AstNodeRuleParams
+        MatchedVariables: Dictionary<char, SynExpr>
+        ParentHintNode: option<HintNode>
+        HintNode: HintNode
+    }
+
 type Config =
     { HintTrie:MergeSyntaxTrees.Edges }
 
@@ -503,15 +513,24 @@ module private FormatHint =
             Debug.Assert(false, "Expected operator to be an expression identifier, but was " + expression.ToString())
             String.Empty
 
-    let rec toString replace parentAstNode (args:AstNodeRuleParams) (matchedVariables:Dictionary<_, SynExpr>) parentHintNode hintNode =
-        let toString = toString replace parentAstNode args matchedVariables (Some hintNode)
+    let rec toString (config: ToStringConfig) =
+        let toString hintNode =
+            toString
+                {
+                    Replace = config.Replace
+                    ParentAstNode = config.ParentAstNode
+                    Args = config.Args
+                    MatchedVariables = config.MatchedVariables
+                    ParentHintNode = (Some config.HintNode)
+                    HintNode = hintNode
+                }
 
         let str =
-            match hintNode with
-            | HintExpr(Expression.Variable(varChar)) when replace ->
-                match matchedVariables.TryGetValue varChar with
+            match config.HintNode with
+            | HintExpr(Expression.Variable(varChar)) when config.Replace ->
+                match config.MatchedVariables.TryGetValue varChar with
                 | true, expr ->
-                    match ExpressionUtilities.tryFindTextOfRange expr.Range args.FileContent with
+                    match ExpressionUtilities.tryFindTextOfRange expr.Range config.Args.FileContent with
                     | Some(replacement) -> replacement
                     | _ -> varChar.ToString()
                 | _ -> varChar.ToString()
@@ -547,7 +566,7 @@ module private FormatHint =
             | HintPat(Pattern.Parentheses(hint)) -> "(" + toString (HintPat hint) + ")"
             | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) ->
                 "fun "
-                + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments
+                + lambdaArgumentsToString config.Replace config.ParentAstNode config.Args config.MatchedVariables arguments
                 + " -> " + toString (HintExpr body)
             | HintExpr(Expression.LambdaArg(argument)) ->
                 toString (HintExpr argument)
@@ -573,33 +592,70 @@ module private FormatHint =
                 "else " + toString (HintExpr expr)
             | HintExpr(Expression.Null)
             | HintPat(Pattern.Null) -> "null"
-        if replace && Precedence.requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then "(" + str + ")"
+        if config.Replace && Precedence.requiresParenthesis config.MatchedVariables config.HintNode config.ParentAstNode config.ParentHintNode then "(" + str + ")"
         else str
     and private lambdaArgumentsToString replace parentAstNode args matchedVariables (arguments:LambdaArg list) =
+        let exprToString expr =
+            toString
+                {
+                    Replace = replace
+                    ParentAstNode = parentAstNode
+                    Args = args
+                    MatchedVariables = matchedVariables
+                    ParentHintNode = None
+                    HintNode = (HintExpr expr)
+                }
         arguments
-        |> List.map (fun (LambdaArg expr) -> toString replace parentAstNode args matchedVariables None (HintExpr expr))
+        |> List.map (fun (LambdaArg expr) -> exprToString expr)
         |> String.concat " "
 
-let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVariables parentAstNode =
-    let matched = FormatHint.toString false None args matchedVariables None hint.MatchedNode
+type HintErrorConfig =
+    {
+        TypeChecks: (unit -> bool) list
+        Hint: Hint
+        Args: AstNodeRuleParams
+        Range: FSharp.Compiler.Text.Range
+        MatchedVariables: Dictionary<char, SynExpr>
+        ParentAstNode: AstNode option
+    }
 
-    match hint.Suggestion with
+let private hintError (config: HintErrorConfig) =
+    let toStringConfig =
+        {
+            ToStringConfig.Replace = false
+            ToStringConfig.ParentAstNode = None
+            ToStringConfig.Args = config.Args
+            ToStringConfig.MatchedVariables = config.MatchedVariables
+            ToStringConfig.ParentHintNode = None
+            ToStringConfig.HintNode = config.Hint.MatchedNode
+        }
+
+    let matched = FormatHint.toString toStringConfig
+
+    match config.Hint.Suggestion with
     | Suggestion.Expr(expr) ->
-        let suggestion = FormatHint.toString false None args matchedVariables None (HintExpr expr)
+        let suggestion = FormatHint.toString { toStringConfig with HintNode = (HintExpr expr) }
         let errorFormatString = Resources.GetString("RulesHintRefactor")
         let error = System.String.Format(errorFormatString, matched, suggestion)
 
-        let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
+        let toText =
+            FormatHint.toString
+                {
+                    toStringConfig with
+                        Replace = true
+                        ParentAstNode = config.ParentAstNode
+                        HintNode = (HintExpr expr)
+                }
 
         let suggestedFix = lazy(
-            ExpressionUtilities.tryFindTextOfRange range args.FileContent
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = toText }))
+            ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
+            |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
 
-        { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
+        { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
     | Suggestion.Message(message) ->
         let errorFormatString = Resources.GetString("RulesHintSuggestion")
         let error = System.String.Format(errorFormatString, matched, message)
-        { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
+        { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
     let symbol =
@@ -655,7 +711,15 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
     | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
     | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern (pattern, hintPattern) ->
-        hintError List.Empty hint args pattern.Range (Dictionary<_, _>()) None
+        hintError
+            {
+                TypeChecks = List.Empty
+                Hint = hint
+                Args = args
+                Range = pattern.Range
+                MatchedVariables = (Dictionary<_, _>())
+                ParentAstNode = None
+            }
         |> suggestions.Add
     | AstNode.Expression(expr), HintExpr(hintExpr) ->
         let arguments =
@@ -669,7 +733,15 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
         match MatchExpression.matchHintExpr arguments with
         | MatchExpression.Match(typeChecks) ->
             let suggest checks =
-                hintError checks hint args expr.Range arguments.MatchedVariables (List.tryHead breadcrumbs)
+                hintError
+                    {
+                        TypeChecks = checks
+                        Hint = hint
+                        Args = args
+                        Range = expr.Range
+                        MatchedVariables = arguments.MatchedVariables
+                        ParentAstNode = (List.tryHead breadcrumbs)
+                    }
                 |> suggestions.Add
 
             match (hint.MatchedNode, hint.Suggestion) with
