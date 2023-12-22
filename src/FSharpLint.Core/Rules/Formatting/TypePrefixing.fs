@@ -16,18 +16,31 @@ type Mode =
 [<RequireQualifiedAccess>]
 type Config = { Mode: Mode }
 
-let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName typeArgs isPostfix =
+type CheckTypePrefixingConfig =
+    {
+        Config: Config
+        Args: AstNodeRuleParams
+        Range: FSharp.Compiler.Text.Range
+        TypeName: SynType
+        TypeArgs: string option
+        IsPostfix: bool
+    }
+
+let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
     let recommendPostfixErrMsg = lazy(Resources.GetString("RulesFormattingF#PostfixGenericError"))
-    match typeName with
+    match typePrefixingConfig.TypeName with
     | SynType.LongIdent lid ->
         let prefixSuggestion typeName =
             let suggestedFix = lazy(
-                (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeName}<{typeArgs}>" }))
-            { Range = range
-              Message = Resources.GetString("RulesFormattingGenericPrefixError")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = List.Empty } |> Some
+                (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
+                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeName}<{typeArgs}>" }))
+            {
+                Range = typePrefixingConfig.Range
+                Message = Resources.GetString("RulesFormattingGenericPrefixError")
+                SuggestedFix = Some suggestedFix
+                TypeChecks = List.Empty
+            }
+            |> Some
 
         match lid |> longIdentWithDotsToString with
         | "list"
@@ -38,39 +51,45 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
         | "Ref" as typeName ->
 
             // Prefer postfix.
-            if not isPostfix && config.Mode <> Mode.Always
+            if not typePrefixingConfig.IsPostfix && typePrefixingConfig.Config.Mode <> Mode.Always
             then
                 let suggestedFix = lazy(
-                    (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                    ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeArgs} {typeName}" }))
-                { Range = range
-                  Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
-                  SuggestedFix = Some suggestedFix
-                  TypeChecks = List.Empty } |> Some
+                    (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
+                    ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} {typeName}" }))
+                {
+                    Range = typePrefixingConfig.Range
+                    Message = String.Format(recommendPostfixErrMsg.Value, typeName)
+                    SuggestedFix = Some suggestedFix
+                    TypeChecks = List.Empty
+                }
+                |> Some
             else
-                if isPostfix && config.Mode = Mode.Always then
+                if typePrefixingConfig.IsPostfix && typePrefixingConfig.Config.Mode = Mode.Always then
                     prefixSuggestion typeName
                 else
                     None
 
-        | "array" when config.Mode <> Mode.Always ->
+        | "array" when typePrefixingConfig.Config.Mode <> Mode.Always ->
             // Prefer special postfix (e.g. int []).
             let suggestedFix = lazy(
-                (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeArgs} []" }))
-            { Range = range
-              Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = List.Empty } |> Some
+                (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
+                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} []" }))
+            {
+                Range = typePrefixingConfig.Range
+                Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
+                SuggestedFix = Some suggestedFix
+                TypeChecks = List.Empty
+            }
+            |> Some
 
         | typeName ->
-            match (isPostfix, config.Mode) with
+            match (typePrefixingConfig.IsPostfix, typePrefixingConfig.Config.Mode) with
             | true, Mode.Never ->
                 None
             | true, _ ->
                 prefixSuggestion typeName
             | false, Mode.Never ->
-                { Range = range
+                { Range = typePrefixingConfig.Range
                   Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
                   // TODO
                   SuggestedFix = None
@@ -84,7 +103,15 @@ let runner (config:Config) args =
     match args.AstNode with
     | AstNode.Type (SynType.App (typeName, _, typeArgs, _, _, isPostfix, range)) ->
         let typeArgs = typeArgsToString args.FileContent typeArgs
-        checkTypePrefixing config args range typeName typeArgs isPostfix
+        checkTypePrefixing
+            {
+                Config = config
+                Args = args
+                Range = range
+                TypeName = typeName
+                TypeArgs = typeArgs
+                IsPostfix = isPostfix
+            }
         |> Option.toArray
     | AstNode.Type (SynType.Array (1, _elementType, range)) when config.Mode = Mode.Always ->
         { Range = range

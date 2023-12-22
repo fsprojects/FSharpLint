@@ -119,11 +119,32 @@ module Lint =
         member TryGetSuccess : byref<Suggestion.LintWarning list> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
 
+    type RunAstNodeRulesConfig =
+        {
+            Rules: RuleMetadata<AstNodeRuleConfig>[]
+            GlobalConfig: Rules.GlobalRuleConfig
+            TypeCheckResults: FSharpCheckFileResults option
+            FilePath: string
+            FileContent: string
+            Lines: string[]
+            SyntaxArray: AbstractSyntaxArray.Node array
+        }
+
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RuleMetadata<AstNodeRuleConfig> [] -> Rules.GlobalRuleConfig -> FSharpCheckFileResults option -> string -> string -> string [] -> AbstractSyntaxArray.Node [] -> Suggestion.LintWarning [] * Context
+    val runAstNodeRules : RunAstNodeRulesConfig -> Suggestion.LintWarning [] * Context
+
+    type RunLineRulesConfig =
+        {
+            LineRules: Configuration.LineRules
+            GlobalConfig: Rules.GlobalRuleConfig
+            FilePath: string
+            FileContent: string
+            Lines: string[]
+            Context: Context
+        }
 
     /// Runs all rules which take a line of text as input.
-    val runLineRules : LineRules -> Rules.GlobalRuleConfig -> string -> string -> string [] -> Context -> Suggestion.LintWarning []
+    val runLineRules : RunLineRulesConfig -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
