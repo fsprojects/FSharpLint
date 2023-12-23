@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
     <PackageReference Include="SemanticVersioning" />
     <PackageReference Include="StreamJsonRpc" />
     <PackageReference Include="System.Text.Json" />
