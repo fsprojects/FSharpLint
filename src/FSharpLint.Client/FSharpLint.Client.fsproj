@@ -19,8 +19,5 @@
     <Compile Include="LSPFSharpLintService.fsi" />
     <Compile Include="LSPFSharpLintService.fs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj" />
-  </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
