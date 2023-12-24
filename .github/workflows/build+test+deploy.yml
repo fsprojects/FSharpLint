@@ -9,7 +9,7 @@ on:
       - '**'
 
 env:
-  DOTNET_VERSION: 5.0.202
+  DOTNET_VERSION: 6.0.417
 
 jobs:
   buildAndTest:
