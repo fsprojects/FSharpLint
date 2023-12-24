@@ -209,7 +209,7 @@ Target.create "Push" (fun _ ->
 
 
 Target.create "SelfCheck" (fun _ ->
-    let frameworkVersion = "net5.0"
+    let frameworkVersion = "net6.0"
     let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
