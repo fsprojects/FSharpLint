@@ -354,4 +354,7 @@
   <data name="RulesSuggestUseAutoProperty" xml:space="preserve">
     <value>Consider using auto-properties via the 'val' keyword.</value>
   </data>
+  <data name="RulesFavourNestedFunctions" xml:space="preserve">
+    <value>Prefer using local functions over private module-level functions</value>
+  </data>
 </root>

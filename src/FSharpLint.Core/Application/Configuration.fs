@@ -322,7 +322,8 @@ type ConventionsConfig =
       binding:BindingConfig option
       favourReRaise:EnabledConfig option
       favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
-      suggestUseAutoProperty:EnabledConfig option}
+      suggestUseAutoProperty:EnabledConfig option
+      favourNestedFunctions:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -344,6 +345,7 @@ with
             this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
+            this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
         |] |> Array.concat
 
 type TypographyConfig =
@@ -463,7 +465,8 @@ type Configuration =
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
       NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
-      SuggestUseAutoProperty:EnabledConfig option }
+      SuggestUseAutoProperty:EnabledConfig option
+      FavourNestedFunctions:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -551,6 +554,7 @@ with
         NoTabCharacters = None
         NoPartialFunctions = None
         SuggestUseAutoProperty = None
+        FavourNestedFunctions = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -701,6 +705,7 @@ let flattenConfig (config:Configuration) =
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
+            config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&
