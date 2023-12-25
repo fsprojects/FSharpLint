@@ -63,6 +63,20 @@ module Program =
         this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
 
     [<Test>]
+    member this.``Error for Option.Value (List.tryHead test case)``() =
+        this.Parse("""
+namespace Foo
+module Program =
+    let foo = []
+
+    let printFoo() =
+        System.Console.WriteLine ((List.tryHead foo).Value.ToString())""")
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(7, 34))
+        this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
+
+    [<Test>]
     member this.``No error for value property in DU``() =
         this.Parse("
 namespace Foo
