@@ -4,6 +4,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ReferenceTests.fs" />
     <Compile Include="TestClient.fs" />
   </ItemGroup>
   <ItemGroup>
