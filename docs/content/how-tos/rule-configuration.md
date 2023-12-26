@@ -123,3 +123,4 @@ The following rules can be specified for linting.
 - [UnnestedFunctionNames (FL0080)](rules/FL0080.html)
 - [NestedFunctionNames (FL0081)](rules/FL0081.html)
 - [UsedUnderscorePrefixedElements (FL0082)](rules/FL0082.html)
+- [AvoidMisleadingRecursiveKeywordInNonRecursiveFuncs (FL0083)](rules/FL0083.html)
