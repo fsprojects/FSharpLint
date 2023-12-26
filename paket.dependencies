@@ -13,7 +13,7 @@ nuget Ionide.ProjInfo.FCS ~> 0.53.0
 nuget FSharp.Core
 nuget nunit
 nuget NUnit3TestAdapter
-nuget Microsoft.NET.Test.Sdk
+nuget Microsoft.NET.Test.Sdk 17.7.2
 nuget Newtonsoft.Json
 nuget Microsoft.Build.Locator
 
