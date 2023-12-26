@@ -369,7 +369,7 @@ let rec identFromSimplePat = function
     | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
     | SynSimplePat.Attrib(_) -> None
 
-let rec isNested args nodeIndex =
+let isNested args nodeIndex =
     let parent = args.SyntaxArray.[nodeIndex].ParentIndex
     let actual = args.SyntaxArray.[parent].Actual
 
