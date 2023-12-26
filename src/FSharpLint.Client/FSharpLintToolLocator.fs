@@ -65,8 +65,13 @@ let private runToolListCmd (Folder workingDir: Folder) (globalFlag: bool) : Resu
     else
         ps.EnvironmentVariables.Add("DOTNET_CLI_UI_LANGUAGE", "en-us")
 
+    let toolArguments = 
+        Option.ofObj (Environment.GetEnvironmentVariable "FSHARPLINT_SEARCH_PATH_OVERRIDE")
+        |> Option.map(fun env -> $" --tool-path %s{env}")
+        |> Option.defaultValue (if globalFlag then "-g" else String.Empty)
+
     ps.CreateNoWindow <- true
-    ps.Arguments <- if globalFlag then "tool list -g" else "tool list"
+    ps.Arguments <- $"tool list %s{toolArguments}"
     ps.RedirectStandardOutput <- true
     ps.RedirectStandardError <- true
     ps.UseShellExecute <- false
@@ -125,7 +130,9 @@ let private isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 // Find an executable fsharplint file on the PATH
 let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintVersion) option =
     let fsharpLintExecutableOnPathOpt =
-        match Option.ofObj (Environment.GetEnvironmentVariable("PATH")) with
+        Option.ofObj (Environment.GetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE"))
+        |> Option.orElse (Option.ofObj (Environment.GetEnvironmentVariable("PATH")))
+        |> function
         | Some s -> s.Split([| if isWindows then ';' else ':' |], StringSplitOptions.RemoveEmptyEntries)
         | None -> Array.empty
         |> Seq.choose (fun folder ->
