@@ -13,6 +13,30 @@ let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".
 let fsharpLintConsoleDll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> "Release" </> "net6.0" </> "dotnet-fsharplint.dll"
 let fsharpConsoleOutputDir = Path.GetFullPath (Path.GetDirectoryName(fsharpLintConsoleDll))
 
+[<RequireQualifiedAccess>]
+type ToolStatus = | Available | NotAvailable
+type ToolLocationOverride(toolStatus: ToolStatus) =
+    let tempFolder = Path.GetTempFileName()
+
+    do match toolStatus with
+       | ToolStatus.Available -> Environment.SetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE", fsharpConsoleOutputDir)
+       | ToolStatus.NotAvailable -> 
+            let path = Environment.GetEnvironmentVariable("PATH")
+            // ensure bin dir is not in path
+            if path.Contains(fsharpConsoleOutputDir, StringComparison.InvariantCultureIgnoreCase) then
+                Assert.Inconclusive()
+
+            File.Delete(tempFolder)
+            Directory.CreateDirectory(tempFolder) |> ignore
+
+            // set search path to an empty dir
+            Environment.SetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE", tempFolder)
+            
+    interface IDisposable with
+        member this.Dispose() =
+            if File.Exists tempFolder then
+                File.Delete tempFolder
+
 let runVersionCall filePath (service: FSharpLintService) =
     async {
         let request = 
@@ -24,55 +48,46 @@ let runVersionCall filePath (service: FSharpLintService) =
     }
     |> Async.RunSynchronously
 
-// ensure current FSharpLint.Console output is in PATH so it can use its daemon if needed
-let ensureDaemonPath wantBuiltDaemon =
-    let path = Environment.GetEnvironmentVariable("PATH")
-    if wantBuiltDaemon then
-        if not <| path.Contains(fsharpConsoleOutputDir, StringComparison.InvariantCultureIgnoreCase) then
-            Environment.SetEnvironmentVariable("PATH", $"{fsharpConsoleOutputDir}:{path})")
-    else if path.Contains(fsharpConsoleOutputDir, StringComparison.InvariantCultureIgnoreCase) then
-        Assert.Inconclusive()
-
 [<Test>]
 let TestDaemonNotFound() =
-    ensureDaemonPath false
-
-    let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-    let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-    let versionResponse = runVersionCall testHintsFile fsharpLintService
+    using (new ToolLocationOverride(ToolStatus.NotAvailable)) <| fun _ ->
     
-    Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ToolNotFound, versionResponse.Code)
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runVersionCall testHintsFile fsharpLintService
+        
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ToolNotFound, versionResponse.Code)
 
 [<Test>]
 let TestDaemonVersion() =
-    ensureDaemonPath true
+    using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
-    let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-    let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-    let versionResponse = runVersionCall testHintsFile fsharpLintService
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runVersionCall testHintsFile fsharpLintService
 
-    match versionResponse.Result with
-    | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
-    // | _ -> Assert.Fail("Response should be a version number")
+        match versionResponse.Result with
+        | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
+        // | _ -> Assert.Fail("Response should be a version number")
 
-    Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.Version, versionResponse.Code)
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.Version, versionResponse.Code)
 
 [<Test>]
 let TestFilePathShouldBeAbsolute() =
-    ensureDaemonPath true
+    using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
-    let testHintsFile = ".." </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-    let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-    let versionResponse = runVersionCall testHintsFile fsharpLintService
-    
-    Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FilePathIsNotAbsolute, versionResponse.Code)
+        let testHintsFile = ".." </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runVersionCall testHintsFile fsharpLintService
+        
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FilePathIsNotAbsolute, versionResponse.Code)
 
 [<Test>]
 let TestFileShouldExists() =
-    ensureDaemonPath true
+    using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
-    let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHintsOOOPS.fs"
-    let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-    let versionResponse = runVersionCall testHintsFile fsharpLintService
-    
-    Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FileNotFound, versionResponse.Code)
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHintsOOOPS.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runVersionCall testHintsFile fsharpLintService
+        
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FileNotFound, versionResponse.Code)
