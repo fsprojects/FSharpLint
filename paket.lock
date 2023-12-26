@@ -252,7 +252,7 @@ NUGET
       System.Threading.Tasks (>= 4.3)
     System.Collections.Immutable (5.0) - restriction: || (&& (== net5.0) (== net6.0)) (== netstandard2.0)
       System.Memory (>= 4.5.4) - restriction: || (&& (== net6.0) (>= net461)) (&& (== net6.0) (< netcoreapp2.1)) (&& (== net6.0) (< netstandard2.0)) (&& (== net6.0) (>= uap10.1)) (== netstandard2.0)
-    System.Configuration.ConfigurationManager (5.0) - copy_local: false, restriction: || (&& (== net5.0) (== net6.0)) (== netstandard2.0)
+    System.Configuration.ConfigurationManager (5.0) - copy_local: false
       System.Security.Cryptography.ProtectedData (>= 5.0)
       System.Security.Permissions (>= 5.0)
     System.Diagnostics.Debug (4.3) - restriction: || (&& (== net5.0) (== net6.0)) (== netstandard2.0)
