@@ -11,7 +11,7 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
         | SynTypeDefnRepr.Simple(simpleRepr, _) ->
             match simpleRepr with
             | SynTypeDefnSimpleRepr.Record(_) ->
-                Helper.SourceLength.checkSourceLengthRule config range "Record"
+                Helper.SourceLength.checkSourceLengthRule config range args.FileContent "Record"
             | _ -> Array.empty
         | _ -> Array.empty
     | _ -> Array.empty

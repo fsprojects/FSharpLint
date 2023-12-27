@@ -31,6 +31,49 @@ let dog x =
     ()""" (generateNewLines (FunctionLength - 4)))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
+    [<Test>]
+    member this.FunctionTooManyLinesWithComment() =
+        this.Parse(sprintf """
+module Program
+
+let dog x =
+    // Foo
+    // Bar
+    // Buzz
+    %s
+    ()""" (generateNewLines (FunctionLength - 3)))
+        Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.FunctionTooManyLinesWithMultiLineComment() =
+        this.Parse(sprintf """
+module Program
+
+let dog x =
+    (*
+    Foo
+    Bar
+    *)
+    %s
+    ()""" (generateNewLines (FunctionLength - 4)))
+        Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
+        this.Parse(sprintf """
+module Program
+
+let dog x =
+    (*
+    Foo (* baz *)
+    let (*) = id
+    Bar
+    *)
+    let (*) a b = a + b
+    %s
+    ()""" (generateNewLines (FunctionLength - 5)))
+        Assert.IsFalse this.ErrorsExist
+
 let LambdaFunctionLength = 5
 [<TestFixture>]
 type TestMaxLinesInLambdaFunction() =
@@ -261,7 +304,7 @@ type TestMaxLinesInModule() =
         this.Parse(sprintf """
 module Program
 %s
-// Some exception.
+let foo = ""
 exception SomeException of string""" (generateNewLines ModuleLength))
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
 
@@ -270,6 +313,6 @@ exception SomeException of string""" (generateNewLines ModuleLength))
         this.Parse(sprintf """
 module Program
 %s
-// Some exception.
+let foo = ""
 exception SomeException of string""" (generateNewLines (ModuleLength - 4)))
         Assert.IsFalse(this.ErrorExistsAt(2, 0))

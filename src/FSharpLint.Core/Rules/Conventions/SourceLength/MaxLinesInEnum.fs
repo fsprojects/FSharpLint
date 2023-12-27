@@ -11,7 +11,7 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
         | SynTypeDefnRepr.Simple(simpleRepr, _) ->
             match simpleRepr with
             | SynTypeDefnSimpleRepr.Enum(_) ->
-                Helper.SourceLength.checkSourceLengthRule config range "Enum"
+                Helper.SourceLength.checkSourceLengthRule config range args.FileContent "Enum"
             | _ -> Array.empty
         | _ -> Array.empty
     | _ -> Array.empty
