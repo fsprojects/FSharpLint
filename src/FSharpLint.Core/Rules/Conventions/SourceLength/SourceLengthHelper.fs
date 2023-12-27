@@ -11,8 +11,6 @@ open FSharpLint.Framework.ExpressionUtilities
 type Config = 
     { 
         MaxLines:int
-        SkipBlankLines: bool
-        SkipComments: bool
     }
 
 type private MultilineCommentMarker =
@@ -62,25 +60,16 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
         let sourceCode =
-            if config.SkipComments then
-                stripMultilineComments sourceCode
-            else
-                sourceCode
+            stripMultilineComments sourceCode
 
         let commentLinesCount = 
-            if config.SkipComments then
-                singleLineCommentRegex.Matches(sourceCode).Count
-            else
-                0
+            singleLineCommentRegex.Matches(sourceCode).Count
 
         let sourceCodeLines = sourceCode.Split([| '\n'; '\r' |]) 
         let blankLinesCount = 
-            if config.SkipBlankLines then
-                sourceCodeLines
-                |> Seq.filter (fun line -> line.Trim().Length > 0)
-                |> Seq.length
-            else
-                0
+            sourceCodeLines
+            |> Seq.filter (fun line -> line.Trim().Length > 0)
+            |> Seq.length
 
         let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount
         if skipResult > config.MaxLines then
