@@ -228,8 +228,27 @@ let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range
     |> Seq.choose (tryFindTypedExpression range)
     |> Seq.tryHead
 
-let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names (range: Range) :(Option<WarningDetails>) =
+let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType) : Option<bool> =
+    match typeName with
+    | "Option" ->
+        // see https://stackoverflow.com/a/70282499/544947
+        (fsharpType.HasTypeDefinition
+        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Core"
+        && fsharpType.TypeDefinition.CompiledName = "option`1")
+        |> Some
+    | "Map" ->
+        (fsharpType.HasTypeDefinition
+        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
+        && fsharpType.TypeDefinition.CompiledName = "FSharpMap`2")
+        |> Some
+    | "List" ->
+        (fsharpType.HasTypeDefinition
+        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
+        && fsharpType.TypeDefinition.CompiledName = "list`1")
+        |> Some
+    | _ -> None
 
+let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
     let typeChecks =
         (partialInstanceMemberIdentifiers
         |> Map.toList
@@ -244,40 +263,36 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                 match isSourcePropSameAsReplacementProp with
                 | Some _ ->
                     let typeName = fullyQualifiedInstanceMember.Substring(0, fullyQualifiedInstanceMember.Length - instanceMemberNameOnly.Length - 1)                    
-                    let partialAssemblySignature = checkFile.PartialAssemblySignature
 
-                    let isEntityOfType (entity:FSharpEntity) =
-                        match entity.TryFullName with
-                        | Some name when name = typeName -> true
-                        | _ -> false
+                    let instanceIdentifier = 
+                        String.concat
+                            "."
+                            (List.takeWhile 
+                                (fun sourceInstanceMemberName -> sourceInstanceMemberName <> instanceMemberNameOnly) 
+                                names)
+                    
+                    let instanceIdentifierSymbol = 
+                        let maybeSymbolUse = 
+                            checkFile.GetSymbolUseAtLocation(
+                                range.EndLine,
+                                range.EndColumn - ((String.concat "." names).Length - instanceIdentifier.Length),
+                                lineText,
+                                List.singleton instanceIdentifier)
+                        match maybeSymbolUse with
+                        | Some symbolUse ->
+                            match symbolUse.Symbol with
+                            | :? FSharpMemberOrFunctionOrValue as symbol -> Some symbol
+                            | _ -> None
+                        | _ -> None
+                    
+                    match instanceIdentifierSymbol with
+                    | Some identifierSymbol ->
+                        let typeMatches =
+                             let fsharpType = identifierSymbol.FullType
+                             match matchesBuiltinFSharpType typeName fsharpType with
+                             | Some value -> value
+                             | None -> identifierSymbol.FullType.TypeDefinition.FullName = typeName
 
-                    let entityForType =
-                        if partialAssemblySignature.Entities.Count > 1 then
-                            Seq.tryFind isEntityOfType partialAssemblySignature.Entities
-                        else
-                            Some partialAssemblySignature.Entities.[0]
-
-                    match entityForType with
-                    | Some moduleEnt ->
-                        let getFunctionValTypeName (fnVal:FSharpMemberOrFunctionOrValue) =
-                             let fsharpType = fnVal.FullType
-                             match typeName with
-                             | "Option" ->
-                                // see https://stackoverflow.com/a/70282499/544947
-                                fsharpType.HasTypeDefinition
-                                && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Core"
-                                && fsharpType.TypeDefinition.CompiledName = "option`1"
-                             | "Map" ->
-                                fsharpType.HasTypeDefinition
-                                && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-                                && fsharpType.TypeDefinition.CompiledName = "FSharpMap`2"
-                             | "List" ->
-                                fsharpType.HasTypeDefinition
-                                && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-                                && fsharpType.TypeDefinition.CompiledName = "list`1"
-                             | _ -> fnVal.FullName = typeName
-
-                        let typeMatches = moduleEnt.MembersFunctionsAndValues.Any(Func<FSharpMemberOrFunctionOrValue, bool>(getFunctionValTypeName))
                         if typeMatches then
                             match replacementStrategy with
                              | PatternMatch ->
@@ -312,21 +327,9 @@ let private checkMemberCallOnExpression
             let fsharpType = expression.Type
 
             let matchesType =
-                match typeName with
-                | "Option" ->
-                    // see https://stackoverflow.com/a/70282499/544947
-                    fsharpType.HasTypeDefinition
-                    && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Core"
-                    && fsharpType.TypeDefinition.CompiledName = "option`1"
-                | "Map" ->
-                    fsharpType.HasTypeDefinition
-                    && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-                    && fsharpType.TypeDefinition.CompiledName = "FSharpMap`2"
-                | "List" ->
-                    fsharpType.HasTypeDefinition
-                    && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-                    && fsharpType.TypeDefinition.CompiledName = "list`1"
-                | _ -> 
+                match matchesBuiltinFSharpType typeName fsharpType with
+                | Some value -> value
+                | None -> 
                     fsharpType.HasTypeDefinition
                     && fsharpType.TypeDefinition.FullName = typeName
 
@@ -357,7 +360,8 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
         | Some partialIdent ->
             partialIdent |> Array.singleton
         | _ ->
-            let nonStaticInstanceMemberTypeCheckResult = isNonStaticInstanceMemberCall checkInfo identifier range
+            let lineText = args.Lines.[range.EndLine - 1]
+            let nonStaticInstanceMemberTypeCheckResult = isNonStaticInstanceMemberCall checkInfo identifier lineText range
             match nonStaticInstanceMemberTypeCheckResult with
             | Some warningDetails ->
                 warningDetails |> Array.singleton
