@@ -6,9 +6,7 @@ Revision (Z) part of the version by 2, e.g.: `0.23.2 -> 0.24.0` or `0.23.2 -> 1.
 (ideally one line per PR or commit).
 3. Commit, but don't push yet!
 4. Tag the head of master with the version number in the format `vx.x.x` - e.g.: `git tag v0.20.4`.
-5. Push to remote: `git push origin vX.Y.Z && git push origin master` - this will start CI processes that will create a GitHub release and publish the packages to NuGet.
-
-After pushing the tag to remote, the publish pipeline will be kicked off which will:
+5. Push to remote: `git push origin vX.Y.Z && git push origin master` - this will start CI processes that will:
 * Build the package
 * Create a github release
 * Pushes the package to NuGet
