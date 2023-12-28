@@ -9,7 +9,7 @@ open FSharpLint.Framework.Suggestion
 
 let runner (args: AstNodeRuleParams) =
     match args.AstNode, args.CheckInfo with
-    | AstNode.ModuleDeclaration (SynModuleDecl.Let (isRecursive, bindings, _)), Some checkInfo when isRecursive ->
+    | AstNode.ModuleDeclaration (SynModuleDecl.Let (isRecursive, bindings, letRange)), Some checkInfo when isRecursive ->
         match bindings with
         | SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent (LongIdentWithDots([ident], _), _, _, _, _, range), _, _, _, _) :: _ ->
             let symbolUses = checkInfo.GetAllUsesOfAllSymbolsInFile()
@@ -17,7 +17,11 @@ let runner (args: AstNodeRuleParams) =
 
             let functionCalls =
                 symbolUses
-                |> Seq.filter (fun (symbol) -> symbol.Symbol.DisplayName = funcName)
+                |> Seq.filter (fun usage ->
+                    usage.Symbol.DisplayName = funcName
+                    && usage.Range.StartLine >= letRange.StartLine
+                    && usage.Range.EndLine <= letRange.EndLine)
+
 
             if (functionCalls |> Seq.length) <= 1 then
                 { Range = range
