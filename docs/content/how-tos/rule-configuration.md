@@ -125,3 +125,4 @@ The following rules can be specified for linting.
 - [UsedUnderscorePrefixedElements (FL0082)](rules/FL0082.html)
 - [UnneededRecKeyword (FL0083)](rules/FL0083.html)
 - [FavourNonMutablePropertyInitialization (FL0084)](rules/FL0084.html)
+- [EnsureTailCallDiagnosticsInRecursiveFunctions (FL0085)](rules/FL0085.html)
