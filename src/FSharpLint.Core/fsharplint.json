@@ -331,6 +331,7 @@
             "additionalPartials": []
         }
     },
+    "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": false },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
