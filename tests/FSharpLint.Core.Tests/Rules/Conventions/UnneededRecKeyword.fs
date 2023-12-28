@@ -20,9 +20,25 @@ let rec Foo () =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError() =
+    member this.UnneededRecKeywordShouldProduceError_1() =
         this.Parse """
 let rec Foo someParam =
     ()"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.UnneededRecKeywordShouldProduceError_2() =
+        this.Parse """
+let rec Foo someParam =
+    ()
+
+[<EntryPoint>]
+let main args =
+    let Foo () =
+        ()
+
+    Foo()
+    0"""
 
         Assert.IsTrue this.ErrorsExist
