@@ -243,6 +243,9 @@
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
   </data>
+  <data name="RulesUsedUnderscorePrefixedElements" xml:space="preserve">
+    <value>Avoid using underscore-prefixed elements for the elements that are being used in the code.</value>
+  </data>
   <data name="RulesRedundantNewKeyword" xml:space="preserve">
     <value>Usage of `new` keyword here is redundant.</value>
   </data>
