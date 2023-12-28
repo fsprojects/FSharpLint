@@ -32,7 +32,9 @@ jobs:
       run: dotnet tool restore
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build and run tests
+    - name: Build
+      run: dotnet fake build -t Build
+    - name: Run tests
       run: dotnet fake build -t Test
     - name: Run FSharpLint on itself
       run: dotnet fake build -t SelfCheck
