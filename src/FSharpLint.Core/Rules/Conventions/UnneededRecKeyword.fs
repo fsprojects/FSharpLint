@@ -1,4 +1,4 @@
-﻿module FSharpLint.Rules.AvoidMisleadingRecursiveKeywordInNonRecursiveFuncs
+﻿module FSharpLint.Rules.UnneededRecKeyword
 
 open System
 open FSharp.Compiler.Syntax
@@ -23,7 +23,7 @@ let runner (args: AstNodeRuleParams) =
                 { Range = range
                   Message =
                     String.Format(
-                        Resources.GetString "RulesAvoidMisleadingRecursiveKeywordInNonRecursiveFuncs",
+                        Resources.GetString "RulesUnneededRecKeyword",
                         funcName
                     )
                   SuggestedFix = None
@@ -36,8 +36,8 @@ let runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "AvoidMisleadingRecursiveKeywordInNonRecursiveFuncs"
-      Identifier = Identifiers.AvoidMisleadingRecursiveKeywordInNonRecursiveFuncs
+    { Name = "UnneededRecKeyword"
+      Identifier = Identifiers.UnneededRecKeyword
       RuleConfig =
         { AstNodeRuleConfig.Runner = runner
           Cleanup = ignore } }

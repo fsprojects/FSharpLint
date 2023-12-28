@@ -42,7 +42,7 @@
     <Compile Include="Rules\Formatting\TypedItemSpacing.fs" />
     <Compile Include="Rules\Formatting\TypePrefixing.fs" />
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
-    <Compile Include="Rules\Conventions\AvoidMisleadingRecursiveKeywordInNonRecursiveFuncs.fs" />
+    <Compile Include="Rules\Conventions\UnneededRecKeyword.fs" />
     <Compile Include="Rules\Conventions\AsyncExceptionWithoutReturn.fs" />
     <Compile Include="Rules\Conventions\FavourStaticEmptyFields.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />

@@ -292,7 +292,7 @@
     "suggestUseAutoProperty": { "enabled": false },
     "avoidTooShortNames": { "enabled": false },
     "asyncExceptionWithoutReturn": { "enabled": false },
-    "avoidMisleadingRecursiveKeywordInNonRecursiveFuncs": { "enabled": true },
+    "unneededRecKeyword": { "enabled": true },
     "indentation": {
         "enabled": false
     },
