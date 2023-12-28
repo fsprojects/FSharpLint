@@ -366,4 +366,7 @@
   <data name="RulesFavourNonMutablePropertyInitializationError" xml:space="preserve">
     <value>Consider using non-mutable property initialization.</value>
   </data>
+  <data name="RulesEnsureTailCallDiagnosticsInRecursiveFunctions" xml:space="preserve">
+    <value>The '{0}' function has a "rec" keyword, but no [&lt;TailCall&gt;] attribute. Consider adding [&lt;TailCall&gt;] attribute to the function and &lt;WarningsAsErrors&gt;FS3569&lt;/WarningsAsErrors&gt; property to project file (but only on .NET 8 and higher).</value>
+  </data>  
 </root>

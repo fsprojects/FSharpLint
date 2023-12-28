@@ -45,6 +45,7 @@
     <Compile Include="Rules\Conventions\SuggestUseAutoProperty.fs" />
     <Compile Include="Rules\Conventions\UsedUnderscorePrefixedElements.fs" />
     <Compile Include="Rules\Conventions\FavourNonMutablePropertyInitialization.fs" />
+    <Compile Include="Rules\Conventions\EnsureTailCallDiagnosticsInRecursiveFunctions.fs" />
     <Compile Include="Rules\Conventions\Naming\NamingHelpers.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
