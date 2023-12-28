@@ -1,6 +1,6 @@
 source https://api.nuget.org/v3/index.json
 
-framework: netstandard2.0, net5.0
+framework: netstandard2.0, net6.0
 storage: none
 
 nuget Argu
@@ -13,7 +13,7 @@ nuget Ionide.ProjInfo.FCS ~> 0.53.0
 nuget FSharp.Core
 nuget nunit
 nuget NUnit3TestAdapter
-nuget Microsoft.NET.Test.Sdk
+nuget Microsoft.NET.Test.Sdk 17.7.2
 nuget Newtonsoft.Json
 nuget Microsoft.Build.Locator
 
@@ -39,8 +39,9 @@ group Docs
 group Build
   source https://api.nuget.org/v3/index.json
 
-  framework: netstandard2.0
+  framework: net6.0
   storage: none
+  strategy: min
 
   nuget Fake.Core.Target
   nuget Fake.Core.Process
