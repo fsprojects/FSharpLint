@@ -32,7 +32,7 @@ Package | Version
 
 ## How to build application
 
-1. Make sure you've installed .Net Core version defined in [global.json](global.json)
+1. Make sure you've installed the .NET version defined in [global.json](global.json)
 2. Run `dotnet tool restore` to install all developer tools required to build the project
 3. Run `dotnet fake build` to build default target of [build script](build.fsx)
 4. To run tests use `dotnet fake build -t Test`
@@ -40,7 +40,7 @@ Package | Version
 
 ## How to work with documentation
 
-1. Make sure you've installed .Net Core version defined in [global.json](global.json)
+1. Make sure you've installed the .NET version defined in [global.json](global.json)
 2. Run `dotnet tool restore` to install all developer tools required to build the project
 3. Run `dotnet fake build` to build default target of [build script](build.fsx)
 4. Build documentation to make sure everything is fine with `dotnet fake build -t Docs`
