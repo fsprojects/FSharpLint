@@ -68,7 +68,7 @@ let private runToolListCmd (Folder workingDir: Folder) (globalFlag: bool) : Resu
     let toolArguments = 
         Option.ofObj (Environment.GetEnvironmentVariable "FSHARPLINT_SEARCH_PATH_OVERRIDE")
         |> Option.map(fun env -> $" --tool-path %s{env}")
-        |> Option.defaultValue (if globalFlag then "-g" else String.Empty)
+        |> Option.defaultValue (if globalFlag then "--global" else String.Empty)
 
     ps.CreateNoWindow <- true
     ps.Arguments <- $"tool list %s{toolArguments}"
