@@ -30,7 +30,7 @@ Package | Version
 [dotnet tool](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/v/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/)
 [API](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/)
 
-## How to build application
+## How to build
 
 1. Make sure you've installed the .NET version defined in [global.json](global.json)
 2. Run `dotnet tool restore` to install all developer tools required to build the project
