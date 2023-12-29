@@ -23,14 +23,21 @@ module Tests =
             sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
 
     let dotnetFslint arguments =
-        let binDir =
+        let configDirName =
             #if DEBUG
                 "Debug"
             #else
                 "Release"
             #endif
 
-        let dll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> binDir </> "net6.0" </> "dotnet-fsharplint.dll"
+        let binDir =
+            basePath </> "src" </> "FSharpLint.Console" </> "bin" </> configDirName |> DirectoryInfo
+
+        let dll =
+            match Seq.tryExactlyOne (binDir.EnumerateDirectories()) with
+            | Some dllDir ->
+                dllDir.FullName </> "dotnet-fsharplint.dll"
+            | None -> failwithf "No folder (or too many of them) found in %s" binDir.FullName
 
         let startInfo = ProcessStartInfo
                                 (FileName = "dotnet",
