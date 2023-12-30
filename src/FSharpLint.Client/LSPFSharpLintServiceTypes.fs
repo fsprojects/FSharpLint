@@ -2,6 +2,7 @@
 
 open System
 open System.Diagnostics
+open System.IO
 open StreamJsonRpc
 
 type FSharpLintResponseCode =
@@ -14,7 +15,18 @@ type FSharpLintResponseCode =
 
 type FSharpLintVersion = FSharpLintVersion of string
 type FSharpLintExecutableFile = FSharpLintExecutableFile of string
-type Folder = Folder of path: string
+type Folder = private Folder of string 
+with 
+    static member from (filePath: string) =
+        if File.Exists(filePath) then 
+            let folder = Path.GetFullPath(filePath) |> Path.GetDirectoryName
+            if DirectoryInfo(folder).Exists then
+                folder |> Folder |> Some
+            else
+                None
+        else
+            None
+    static member unwrap(Folder f) = f
 
 [<RequireQualifiedAccess>]
 type FSharpLintToolStartInfo =

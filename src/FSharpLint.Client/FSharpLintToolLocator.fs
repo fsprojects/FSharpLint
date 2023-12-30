@@ -56,9 +56,9 @@ let private startProcess (ps: ProcessStartInfo) : Result<Process, ProcessStartEr
         )
     | ex -> Error(ProcessStartError.UnExpectedException(ps.FileName, ps.Arguments, ex.Message))
 
-let private runToolListCmd (Folder workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
+let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
     let ps = ProcessStartInfo("dotnet")
-    ps.WorkingDirectory <- workingDir
+    ps.WorkingDirectory <- Folder.unwrap workingDir 
     ps.EnvironmentVariables.["DOTNET_CLI_UI_LANGUAGE"] <- "en-us" //ensure we have predictible output for parsing
 
     let toolArguments = 
@@ -194,9 +194,9 @@ let findFSharpLintTool (workingDir: Folder) : Result<FSharpLintToolFound, FSharp
 let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintTool, ProcessStartError> =
     let processStart =
         match startInfo with
-        | FSharpLintToolStartInfo.LocalTool(Folder workingDirectory) ->
+        | FSharpLintToolStartInfo.LocalTool(workingDirectory: Folder) ->
             let ps = ProcessStartInfo("dotnet")
-            ps.WorkingDirectory <- workingDirectory
+            ps.WorkingDirectory <- Folder.unwrap workingDirectory
             ps.Arguments <- $"{fsharpLintToolName} --daemon"
             ps
         | FSharpLintToolStartInfo.GlobalTool ->
