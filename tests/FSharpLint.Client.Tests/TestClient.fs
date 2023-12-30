@@ -56,7 +56,7 @@ let TestDaemonNotFound() =
         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
-        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ToolNotFound, versionResponse.Code)
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrToolNotFound, versionResponse.Code)
 
 [<Test>]
 let TestDaemonVersion() =
@@ -70,7 +70,7 @@ let TestDaemonVersion() =
         | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
         // | _ -> Assert.Fail("Response should be a version number")
 
-        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.Version, versionResponse.Code)
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
 
 [<Test>]
 let TestFilePathShouldBeAbsolute() =
@@ -80,7 +80,7 @@ let TestFilePathShouldBeAbsolute() =
         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
-        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FilePathIsNotAbsolute, versionResponse.Code)
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFilePathIsNotAbsolute, versionResponse.Code)
 
 [<Test>]
 let TestFileShouldExists() =
@@ -90,4 +90,4 @@ let TestFileShouldExists() =
         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
-        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.FileNotFound, versionResponse.Code)
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFileNotFound, versionResponse.Code)
