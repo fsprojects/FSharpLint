@@ -10,10 +10,10 @@ let getErrorsFromOutput (output:string) =
     set [ for i in 1..splitOutput.Length - 1 do
             if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
-type TemporaryFile(config, extension) =
+type TemporaryFile(fileContent, extension) =
     let filename = Path.ChangeExtension(Path.GetTempFileName(), extension)
     do
-        File.WriteAllText(filename, config)
+        File.WriteAllText(filename, fileContent)
 
     member __.FileName = filename
 
@@ -35,12 +35,12 @@ let main input =
 type TestConsoleApplication() =
     [<Test>]
     member __.``Lint file, expected rules are triggered.``() =
-        let config = """
+        let fileContent = """
         type Signature =
             abstract member Encoded : string
             abstract member PathName : string
         """
-        use input = new TemporaryFile(config, "fs")
+        use input = new TemporaryFile(fileContent, "fs")
 
         let (returnCode, errors) = main [| "lint"; input.FileName |]
 
@@ -62,14 +62,14 @@ type TestConsoleApplication() =
 
     [<Test>]
     member __.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
-        let config = """
+        let fileContent = """
         {
             "InterfaceNames": {
                 "enabled": false
             }
         }
         """
-        use config = new TemporaryFile(config, "json")
+        use config = new TemporaryFile(fileContent, "json")
 
         let input = """
         type Signature =
