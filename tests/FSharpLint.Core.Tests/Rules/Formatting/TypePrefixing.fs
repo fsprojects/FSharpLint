@@ -237,3 +237,27 @@ type T = Generic<int>
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
+[<TestFixture>]
+type TestFormattingAlwaysTypePrefixing() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Always })
+
+    [<Test>]
+    member this.``Error for generic type postfix syntax (like hybrid)``() =
+        this.Parse """
+    module Program
+
+    type X = int Generic
+    """
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``No error for generic type prefix syntax (like hybrid)``() =
+        this.Parse """
+    module Program
+
+    type X = Generic<int>
+    """
+
+        Assert.IsTrue this.NoErrorsExist
+
