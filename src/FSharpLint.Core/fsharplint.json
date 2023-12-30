@@ -144,7 +144,7 @@
     },
     "recordFieldNames": {
         "enabled": true,
-        "config":  {
+        "config": {
             "naming": "PascalCase",
             "underscores": "None"
         }
