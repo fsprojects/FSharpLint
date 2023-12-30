@@ -12,7 +12,10 @@ type FSharpLintVersion = FSharpLintVersion of string
 
 type FSharpLintExecutableFile = FSharpLintExecutableFile of string
 
-type Folder = Folder of path: string
+type Folder = private Folder of string
+with
+    static member from: string -> Folder option
+    static member unwrap: Folder -> string
 
 [<RequireQualifiedAccess>]
 type FSharpLintToolStartInfo =
