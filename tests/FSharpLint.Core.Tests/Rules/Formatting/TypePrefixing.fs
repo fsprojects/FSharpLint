@@ -261,3 +261,22 @@ type TestFormattingAlwaysTypePrefixing() =
 
         Assert.IsTrue this.NoErrorsExist
 
+    [<Test>]
+    member this.``No error for F# Option type prefix syntax``() =
+        this.Parse """
+    module Program
+
+    type T = Option<int>
+    """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Error for F# Option type postfix syntax``() =
+        this.Parse """
+    module Program
+
+    type T = int option
+    """
+
+        Assert.IsTrue this.ErrorsExist
