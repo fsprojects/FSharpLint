@@ -1,12 +1,12 @@
 module FSharpLint.Client.LSPFSharpLintServiceTypes
 
 type FSharpLintResponseCode =
-    | ToolNotFound = 1
-    | FileNotFound = 2
-    | FilePathIsNotAbsolute = 3
-    | CancellationWasRequested = 4
-    | DaemonCreationFailed = 5
-    | Version = 6
+    | ErrToolNotFound = -5
+    | ErrFileNotFound = -4
+    | ErrFilePathIsNotAbsolute = -3
+    | ErrCancellationWasRequested = -2
+    | ErrDaemonCreationFailed = -1
+    | OkCurrentDaemonVersion = 0
 
 type FSharpLintVersion = FSharpLintVersion of string
 
