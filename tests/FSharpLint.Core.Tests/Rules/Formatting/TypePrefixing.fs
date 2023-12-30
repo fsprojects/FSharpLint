@@ -280,3 +280,27 @@ type TestFormattingAlwaysTypePrefixing() =
     """
 
         Assert.IsTrue this.ErrorsExist
+
+[<TestFixture>]
+type TestFormattingNeverTypePrefixing() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Never })
+
+    [<Test>]
+    member this.``Error for F# Option type prefix syntax (like hybrid)``() =
+        this.Parse """
+    module Program
+
+    type T = Option<int>
+    """
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``No error for F# Option type postfix syntax (like hybrid)``() =
+        this.Parse """
+    module Program
+
+    type T = int option
+    """
+
+        Assert.IsTrue this.NoErrorsExist
