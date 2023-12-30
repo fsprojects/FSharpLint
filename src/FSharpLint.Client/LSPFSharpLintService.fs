@@ -150,10 +150,9 @@ let private getFolderFor filePath (): Result<Folder, FSharpLintServiceError> =
     let handleFile filePath =
         if not (isPathAbsolute filePath) then
             Error FSharpLintServiceError.FilePathIsNotAbsolute
-        elif not (File.Exists filePath) then
-            Error FSharpLintServiceError.FileDoesNotExist
-        else
-            Path.GetDirectoryName filePath |> Folder |> Ok
+        else match Folder.from filePath with
+             | None -> Error FSharpLintServiceError.FileDoesNotExist
+             | Some folder -> Ok folder
     
     handleFile filePath
 
