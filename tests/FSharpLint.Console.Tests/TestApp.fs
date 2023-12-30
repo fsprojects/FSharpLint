@@ -95,3 +95,25 @@ type TestConsoleApplication() =
         
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)
+
+    [<Test>]
+    member __.``Regression test: typePrefixing rule with old config format should still work``() =
+        let fileContent = """
+        {
+            "typePrefixing": {
+                "enabled": true
+            }
+        }
+        """
+        use config = new TemporaryFile(fileContent, "json")
+
+        let input = """
+        module Program
+
+        type X = int Generic
+        """
+
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+
+        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
