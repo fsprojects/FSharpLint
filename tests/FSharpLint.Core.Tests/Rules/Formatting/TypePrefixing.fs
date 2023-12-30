@@ -303,6 +303,17 @@ type T = int array
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorWithMessageExistsAt("Use prefix syntax for generic type.", 4, 9))
 
+    [<Test>]
+    member this.``Error for F# array type special postfix syntax``() =
+        this.Parse """
+module Program
+
+type T = int []
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use prefix syntax for generic type (array<'Foo>).", 4, 9))
+
 [<TestFixture>]
 type TestFormattingNeverTypePrefixing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Never })
