@@ -17,6 +17,7 @@ type Mode =
 type Config = { Mode: Mode }
 
 let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName typeArgs isPostfix =
+    let recommendPostfixErrMsg = lazy(Resources.GetString("RulesFormattingF#PostfixGenericError"))
     match typeName with
     | SynType.LongIdent lid ->
         let prefixSuggestion typeName =
@@ -39,12 +40,11 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             // Prefer postfix.
             if not isPostfix && config.Mode <> Mode.Always
             then
-                let errorFormatString = Resources.GetString("RulesFormattingF#PostfixGenericError")
                 let suggestedFix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
                 { Range = range
-                  Message =  String.Format(errorFormatString, typeName)
+                  Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
                   SuggestedFix = Some suggestedFix
                   TypeChecks = [] } |> Some
             else
@@ -62,10 +62,18 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
               SuggestedFix = Some suggestedFix
               TypeChecks = [] } |> Some
         | typeName ->
-            // Prefer prefix.
-            if isPostfix then
+            match (isPostfix, config.Mode) with
+            | true, Mode.Never ->
+                None
+            | true, _ ->
                 prefixSuggestion typeName
-            else
+            | false, Mode.Never ->
+                { Range = range
+                  Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
+                  // TODO
+                  SuggestedFix = None
+                  TypeChecks = List.Empty } |> Some
+            | false, _ ->
                 None
     | _ ->
         None
