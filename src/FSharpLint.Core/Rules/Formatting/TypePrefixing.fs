@@ -52,7 +52,8 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
                     prefixSuggestion typeName
                 else
                     None
-        | "array" ->
+
+        | "array" when config.Mode <> Mode.Always ->
             // Prefer special postfix (e.g. int []).
             let suggestedFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
@@ -61,6 +62,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
               SuggestedFix = Some suggestedFix
               TypeChecks = [] } |> Some
+
         | typeName ->
             match (isPostfix, config.Mode) with
             | true, Mode.Never ->
