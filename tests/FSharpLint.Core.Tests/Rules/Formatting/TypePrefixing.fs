@@ -304,3 +304,24 @@ type TestFormattingNeverTypePrefixing() =
     """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``No error for generic type postfix syntax (unlike any other mode)``() =
+        this.Parse """
+    module Program
+
+    type X = int Generic
+    """
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Error for generic type prefix syntax (unlike any other mode)``() =
+        this.Parse """
+    module Program
+
+    type X = Generic<int>
+    """
+
+        Assert.IsTrue this.ErrorsExist
+
