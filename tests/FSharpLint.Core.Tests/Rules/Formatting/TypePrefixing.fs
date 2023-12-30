@@ -87,6 +87,7 @@ type T = int array
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use special postfix syntax for F# type array.", 4, 9))
 
     [<Test>]
     member this.``No error for F# array type special postfix syntax``() =
@@ -280,6 +281,27 @@ type TestFormattingAlwaysTypePrefixing() =
     """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``No error for F# array type prefix syntax``() =
+        this.Parse """
+module Program
+
+type T = array<int>
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Error for F# array type standard postfix syntax``() =
+        this.Parse """
+module Program
+
+type T = int array
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use prefix syntax for generic type.", 4, 9))
 
 [<TestFixture>]
 type TestFormattingNeverTypePrefixing() =
