@@ -2,10 +2,11 @@ module FSharpLint.Core.Tests.Rules.Formatting.TypePrefixing
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Rules.TypePrefixing
 
 [<TestFixture>]
-type TestFormattingTypePrefixing() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule)
+type TestFormattingHybridTypePrefixing() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Hybrid })
 
     [<Test>]
     member this.``Error for F# List type prefix syntax``() =

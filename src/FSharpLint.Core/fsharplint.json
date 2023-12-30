@@ -11,7 +11,12 @@
             "typedItemStyle": "NoSpaces"
         }
     },
-    "typePrefixing": { "enabled": false },
+    "typePrefixing": {
+        "enabled": false,
+        "config": {
+            "mode": "Hybrid"
+        }
+    },
     "unionDefinitionIndentation": { "enabled": false },
     "moduleDeclSpacing": { "enabled": false },
     "classMemberSpacing": { "enabled": false },

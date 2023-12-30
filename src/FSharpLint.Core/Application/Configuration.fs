@@ -165,7 +165,7 @@ with
 
 type FormattingConfig =
     { typedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
-      typePrefixing:EnabledConfig option
+      typePrefixing:RuleConfig<TypePrefixing.Config> option
       unionDefinitionIndentation:EnabledConfig option
       moduleDeclSpacing:EnabledConfig option
       classMemberSpacing:EnabledConfig option
@@ -175,7 +175,7 @@ with
     member this.Flatten() =
         [|
             this.typedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule) |> Option.toArray
-            this.typePrefixing |> Option.bind (constructRuleIfEnabled TypePrefixing.rule) |> Option.toArray
+            this.typePrefixing |> Option.bind (constructRuleWithConfig TypePrefixing.rule) |> Option.toArray
             this.unionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule) |> Option.toArray
             this.moduleDeclSpacing |> Option.bind (constructRuleIfEnabled ModuleDeclSpacing.rule) |> Option.toArray
             this.classMemberSpacing |> Option.bind (constructRuleIfEnabled ClassMemberSpacing.rule) |> Option.toArray
@@ -389,7 +389,7 @@ type Configuration =
       ignoreFiles:string [] option
       Hints:HintConfig option
       TypedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
-      TypePrefixing:EnabledConfig option
+      TypePrefixing:RuleConfig<TypePrefixing.Config> option
       UnionDefinitionIndentation:EnabledConfig option
       ModuleDeclSpacing:EnabledConfig option
       ClassMemberSpacing:EnabledConfig option
@@ -628,7 +628,7 @@ let flattenConfig (config:Configuration) =
     let allRules =
         [|
             config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
-            config.TypePrefixing |> Option.bind (constructRuleIfEnabled TypePrefixing.rule)
+            config.TypePrefixing |> Option.bind (constructRuleWithConfig TypePrefixing.rule)
             config.UnionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule)
             config.ModuleDeclSpacing |> Option.bind (constructRuleIfEnabled ModuleDeclSpacing.rule)
             config.ClassMemberSpacing |> Option.bind (constructRuleIfEnabled ClassMemberSpacing.rule)
