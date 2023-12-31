@@ -318,6 +318,7 @@ type ConventionsConfig =
       favourStaticEmptyFields:EnabledConfig option
       asyncExceptionWithoutReturn:EnabledConfig option
       unneededRecKeyword:EnabledConfig option
+      favourNonMutablePropertyInitialization:EnabledConfig option
       nestedStatements:RuleConfig<NestedStatements.Config> option
       cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
       reimplementsFunction:EnabledConfig option
@@ -338,6 +339,7 @@ with
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
             this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray           
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
+            this.favourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
             this.favourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule) |> Option.toArray
             this.asyncExceptionWithoutReturn |> Option.bind (constructRuleIfEnabled AsyncExceptionWithoutReturn.rule) |> Option.toArray
@@ -412,6 +414,7 @@ type Configuration =
       RecursiveAsyncFunction:EnabledConfig option
       AvoidTooShortNames:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
+      FavourNonMutablePropertyInitialization:EnabledConfig option
       FavourReRaise:EnabledConfig option
       FavourStaticEmptyFields:EnabledConfig option
       AsyncExceptionWithoutReturn:EnabledConfig option
@@ -501,6 +504,7 @@ with
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
         RedundantNewKeyword = None
+        FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
         FavourStaticEmptyFields = None
         AsyncExceptionWithoutReturn = None
@@ -653,6 +657,7 @@ let flattenConfig (config:Configuration) =
             config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
             config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
             config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
+            config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)
             config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
             config.FavourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule)
             config.AsyncExceptionWithoutReturn |> Option.bind (constructRuleIfEnabled AsyncExceptionWithoutReturn.rule)
