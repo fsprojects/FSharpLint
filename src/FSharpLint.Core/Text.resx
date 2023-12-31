@@ -357,4 +357,7 @@
   <data name="RulesSuggestUseAutoProperty" xml:space="preserve">
     <value>Consider using auto-properties via the 'val' keyword.</value>
   </data>
+  <data name="RulesFavourNonMutablePropertyInitializationError" xml:space="preserve">
+    <value>Consider using non-mutable property initialization.</value>
+  </data>
 </root>
