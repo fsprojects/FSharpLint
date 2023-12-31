@@ -192,10 +192,10 @@ let private daemonNotFoundResponse filePath (error: GetDaemonError) : Task<FShar
                                                                                        error)) ->
             $"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` inside working directory \"{workingDirectory}\" but could not find \"%s{executableFile}\" on the PATH (%s{pathEnvironmentVariable}). Error: %s{error}",
             FSharpLintResponseCode.ErrDaemonCreationFailed
-        | GetDaemonError.DotNetToolListError(DotNetToolListError.ProcessStartError(ProcessStartError.UnExpectedException(executableFile,
+        | GetDaemonError.DotNetToolListError(DotNetToolListError.ProcessStartError(ProcessStartError.UnexpectedException(executableFile,
                                                                                                                          arguments,
                                                                                                                          error)))
-        | GetDaemonError.FSharpLintProcessStart(ProcessStartError.UnExpectedException(executableFile, arguments, error)) ->
+        | GetDaemonError.FSharpLintProcessStart(ProcessStartError.UnexpectedException(executableFile, arguments, error)) ->
             $"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` but failed with \"%s{error}\"",
             FSharpLintResponseCode.ErrDaemonCreationFailed
         | GetDaemonError.DotNetToolListError(DotNetToolListError.ExitCodeNonZero(executableFile,
