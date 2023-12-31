@@ -1,4 +1,4 @@
-﻿module FSharpLint.Client.LSPFSharpLintServiceTypes
+module FSharpLint.Client.LSPFSharpLintServiceTypes
 
 open System
 open System.Diagnostics
@@ -19,7 +19,9 @@ type Folder = private Folder of string
 with 
     static member from (filePath: string) =
         if File.Exists(filePath) then 
-            let folder = Path.GetFullPath(filePath) |> Path.GetDirectoryName
+            let folder = 
+                Path.GetFullPath(filePath) // to resolves path like /foo/bar/../baz
+                |> Path.GetDirectoryName
             if DirectoryInfo(folder).Exists then
                 folder |> Folder |> Some
             else
