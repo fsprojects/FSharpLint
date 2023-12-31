@@ -54,7 +54,7 @@ let private startProcess (ps: ProcessStartInfo) : Result<Process, ProcessStartEr
                 win32ex.Message
             )
         )
-    | ex -> Error(ProcessStartError.UnExpectedException(ps.FileName, ps.Arguments, ex.Message))
+    | ex -> Error(ProcessStartError.UnexpectedException(ps.FileName, ps.Arguments, ex.Message))
 
 let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
     let ps = ProcessStartInfo("dotnet")
@@ -166,7 +166,7 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
                 else 
                     None)
         | Error(ProcessStartError.ExecutableFileNotFound _)
-        | Error(ProcessStartError.UnExpectedException _) -> None)
+        | Error(ProcessStartError.UnexpectedException _) -> None)
 
 let findFSharpLintTool (workingDir: Folder) : Result<FSharpLintToolFound, FSharpLintToolError> =
     // First try and find a local tool for the folder.
@@ -248,5 +248,5 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
                 else
                     ex.Message
 
-            Error(ProcessStartError.UnExpectedException(processStart.FileName, processStart.Arguments, error))
+            Error(ProcessStartError.UnexpectedException(processStart.FileName, processStart.Arguments, error))
     | Error err -> Error err

@@ -55,7 +55,7 @@ type ProcessStartError =
         workingDirectory: string *
         pathEnvironmentVariable: string *
         error: string
-    | UnExpectedException of executableFile: string * arguments: string * error: string
+    | UnexpectedException of executableFile: string * arguments: string * error: string
 
 [<RequireQualifiedAccess>]
 type DotNetToolListError =
