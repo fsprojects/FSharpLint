@@ -281,7 +281,7 @@
     "uselessBinding": { "enabled": true },
     "tupleOfWildcards": { "enabled": true },
     "favourTypedIgnore": { "enabled": false },
-    "favourNonMutablePropertyInitialization": { "enabled": false },
+    "favourNonMutablePropertyInitialization": { "enabled": true },
     "favourReRaise": { "enabled": true },
     "favourStaticEmptyFields": { "enabled": false },
     "favourConsistentThis": {
