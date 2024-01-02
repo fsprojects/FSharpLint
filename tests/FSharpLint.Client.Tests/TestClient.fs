@@ -6,6 +6,8 @@ open System
 open Contracts
 open LSPFSharpLintService
 open LSPFSharpLintServiceTypes
+open NUnit.Framework
+open StreamJsonRpc
 
 let (</>) path1 path2 = Path.Combine(path1, path2)
 
@@ -15,15 +17,15 @@ let fsharpConsoleOutputDir = Path.GetFullPath (Path.GetDirectoryName(fsharpLintC
 
 [<RequireQualifiedAccess>]
 type ToolStatus = | Available | NotAvailable
-type ToolLocationOverride(toolStatus: ToolStatus) =
+type ToolLocationOverride(toolStatus: ToolStatus, consoleDllPath: string) =
     let tempFolder = Path.GetTempFileName()
 
     do match toolStatus with
-       | ToolStatus.Available -> Environment.SetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE", fsharpConsoleOutputDir)
+       | ToolStatus.Available -> Environment.SetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE", consoleDllPath)
        | ToolStatus.NotAvailable ->
             let path = Environment.GetEnvironmentVariable("PATH")
             // ensure bin dir is not in path
-            if path.Contains(fsharpConsoleOutputDir, StringComparison.InvariantCultureIgnoreCase) then
+            if path.Contains(consoleDllPath, StringComparison.InvariantCultureIgnoreCase) then
                 Assert.Inconclusive()
 
             File.Delete(tempFolder)
@@ -37,7 +39,9 @@ type ToolLocationOverride(toolStatus: ToolStatus) =
             if File.Exists tempFolder then
                 File.Delete tempFolder
 
-let runVersionCall filePath (service: IFSharpLintService) =
+    new (toolStatus: ToolStatus) = new ToolLocationOverride(toolStatus, fsharpConsoleOutputDir)
+
+let runVersionCall filePath (service: FSharpLintService) =
     async {
         let request =
             {
@@ -50,7 +54,7 @@ let runVersionCall filePath (service: IFSharpLintService) =
 
 let runLintFileCall filePath (service: FSharpLintService) =
     async {
-        let request = 
+        let request =
             {
                 FilePath = filePath
                 LintConfigPath = None
@@ -76,6 +80,20 @@ let ``Daemon answer with its version number``() =
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
         let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
+        let versionResponse = runVersionCall testHintsFile fsharpLintService
+
+        match versionResponse.Result with
+        | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
+        | _ -> Assert.Fail("Response should be a version number")
+
+        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
+
+[<Test>]
+let ``[1] Daemon answer with its version number``() =
+    using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
+
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
 
         match versionResponse.Result with
@@ -114,7 +132,7 @@ let ``Daemon can lint a file with success``() =
 
         match versionResponse.Result with
         | Content result -> Assert.Fail("Should be a lint result")
-        | LintResult warnings -> 
+        | LintResult warnings ->
             Assert.IsNotEmpty warnings
 
             warnings
@@ -133,6 +151,14 @@ let ``Daemon can lint a file with success``() =
 
             Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLint, versionResponse.Code)
 
+[<Test>]
+let ``[1] Daemon doesn't know LintFile method``() =
+    using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
+
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        Assert.Throws<RemoteMethodNotFoundException>(fun () -> runLintFileCall testHintsFile fsharpLintService |> ignore)
+
 [<Test; Ignore("not sure how to make file parsing fail")>]
 let ``LintError if Daemon lint an unparsable file``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
@@ -143,6 +169,6 @@ let ``LintError if Daemon lint an unparsable file``() =
 
         match versionResponse.Result with
         | Content result -> Assert.Fail("Should be a lint result")
-        | LintResult warnings -> 
+        | LintResult warnings ->
             Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLintError, versionResponse.Code)
             Assert.IsEmpty warnings
