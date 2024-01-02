@@ -72,7 +72,8 @@ let traverseSynModule (declarations: List<SynModuleDecl>) (identifiers: List<str
         | SynModuleDecl.Let(_, bindings, _)::rest ->
             match bindings with
             | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), app, _), _), _, _)::nrest
-            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, app, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), _, _), _), _), _, _)::nrest ->
+            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, app, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), _, _), _), _), _, _)::nrest 
+            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), app, _), _, _), _), _, _)::nrest ->
                 let instanceMethodCall = extraInstanceMethod app instancesWithMethodCall
                 let instances = extraFromBindings bindings classInstances
                 match List.tryLast identifiers with
