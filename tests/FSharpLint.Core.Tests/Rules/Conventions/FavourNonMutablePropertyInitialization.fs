@@ -90,6 +90,22 @@ module Program =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.FavourNonMutablePropertyInitializationShouldProduceError_6() =
+        this.Parse """
+type SomeClass() =
+    member val SomeProperty1 = 0 with get, set
+    member val SomeProperty2 = 10 with get, set
+
+module Program =
+    let someFunction =
+        let someInstance = SomeClass()
+        someInstance.SomeProperty1 <- 2
+        someInstance.SomeProperty2 <- 3"""
+
+        Assert.IsTrue <| this.ErrorExistsAt(9, 21)
+        Assert.IsTrue <| this.ErrorExistsAt(10, 21)
+
+    [<Test>]
     member this.FavourNonMutablePropertyInitializationShouldNotProduceError_1() =
         this.Parse """
 type SomeClass() =
