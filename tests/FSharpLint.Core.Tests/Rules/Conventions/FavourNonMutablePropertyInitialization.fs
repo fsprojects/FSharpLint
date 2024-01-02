@@ -74,6 +74,22 @@ module Program =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.FavourNonMutablePropertyInitializationShouldProduceError_5() =
+        this.Parse """
+type SomeClass() =
+    let mutable myInternalValue = 1
+    // A write-only property.
+    member this.MyWriteOnlyProperty with set (value) = myInternalValue <- value
+
+module Program =
+    let someFunction() =
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2
+        ()"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.FavourNonMutablePropertyInitializationShouldNotProduceError1() =
         this.Parse """
 type SomeClass() =
