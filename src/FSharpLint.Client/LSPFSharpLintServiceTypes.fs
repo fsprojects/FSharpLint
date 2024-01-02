@@ -19,9 +19,8 @@ type Folder = private Folder of string
 with 
     static member from (filePath: string) =
         if File.Exists(filePath) then 
-            let folder = 
-                Path.GetFullPath(filePath) // to resolves path like /foo/bar/../baz
-                |> Path.GetDirectoryName
+            // Path.GetFullPath to resolve path like /foo/bar/../baz
+            let folder = ((filePath |> Path.GetFullPath |> FileInfo).Directory).FullName
             if DirectoryInfo(folder).Exists then
                 folder |> Folder |> Some
             else
