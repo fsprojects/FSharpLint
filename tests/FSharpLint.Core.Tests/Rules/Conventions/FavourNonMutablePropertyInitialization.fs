@@ -165,3 +165,13 @@ module Program =
         ()"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should not produce error on local variables``() =
+        this.Parse """
+let someFunc () =
+    let mutable current = 23
+    current <- 2
+    ()"""
+
+        Assert.IsTrue this.NoErrorsExist
