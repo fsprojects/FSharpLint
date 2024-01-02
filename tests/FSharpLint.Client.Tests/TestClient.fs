@@ -48,8 +48,20 @@ let runVersionCall filePath (service: IFSharpLintService) =
     }
     |> Async.RunSynchronously
 
+let runLintFileCall filePath (service: FSharpLintService) =
+    async {
+        let request = 
+            {
+                FilePath = filePath
+                LintConfigPath = None
+            }
+        let! lintResult = service.LintFileAsync(request) |> Async.AwaitTask
+        return lintResult
+    }
+    |> Async.RunSynchronously
+
 [<Test>]
-let TestDaemonNotFound() =
+let ``Daemon cannot be found``() =
     using (new ToolLocationOverride(ToolStatus.NotAvailable)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
@@ -59,7 +71,7 @@ let TestDaemonNotFound() =
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrToolNotFound, versionResponse.Code)
 
 [<Test>]
-let TestDaemonVersion() =
+let ``Daemon answer with its version number``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
@@ -68,12 +80,12 @@ let TestDaemonVersion() =
 
         match versionResponse.Result with
         | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
-        // | _ -> Assert.Fail("Response should be a version number")
+        | _ -> Assert.Fail("Response should be a version number")
 
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
 
 [<Test>]
-let TestFilePathShouldBeAbsolute() =
+let ``Daemon cannot work with relative path``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = ".." </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
@@ -83,7 +95,7 @@ let TestFilePathShouldBeAbsolute() =
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFilePathIsNotAbsolute, versionResponse.Code)
 
 [<Test>]
-let TestFileShouldExists() =
+let ``Daemon cannot work with non-existing file``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHintsOOOPS.fs"
@@ -91,3 +103,17 @@ let TestFileShouldExists() =
         let versionResponse = runVersionCall testHintsFile fsharpLintService
 
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFileNotFound, versionResponse.Code)
+
+[<Test>]
+let ``Daemon can lint a file with success``() =
+    using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
+
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runLintFileCall testHintsFile fsharpLintService
+
+        match versionResponse.Result with
+        | Content result -> Assert.Fail("Should be a lint result")
+        | LintResult warnings -> 
+            Assert.IsNotEmpty warnings
+            Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLint, versionResponse.Code)

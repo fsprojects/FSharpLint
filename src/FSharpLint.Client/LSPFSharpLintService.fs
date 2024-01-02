@@ -257,3 +257,26 @@ type LSPFSharpLintService() =
                           Result = Content task.Result
                           FilePath = versionRequest.FilePath }))
             |> mapResultToResponse versionRequest.FilePath
+
+        member _.LintFileAsync(lintFileRequest: LintFileRequest, ?cancellationToken: CancellationToken) : Task<FSharpLintResponse> =
+            isCancellationRequested cts.IsCancellationRequested
+            |> Result.bind (getFolderFor (lintFileRequest.FilePath))
+            |> Result.bind (getDaemon agent)
+            |> Result.map (fun client ->
+                client
+                    .InvokeWithCancellationAsync<Result<ClientLintWarning list, string>>(
+                        Methods.LintFile,
+                        arguments = [| lintFileRequest |],
+                        cancellationToken = Option.defaultValue cts.Token cancellationToken
+                    )
+                    .ContinueWith(fun (t: Task<Result<ClientLintWarning list, string>>) ->
+                        match t.Result with
+                        | Ok lintResult ->
+                            { Code = int FSharpLintResponseCode.OkLint
+                              FilePath = lintFileRequest.FilePath
+                              Result = LintResult lintResult }
+                        | Error msg -> 
+                            { Code = int FSharpLintResponseCode.OkLintError
+                              FilePath = lintFileRequest.FilePath
+                              Result = Content msg }))
+            |> mapResultToResponse lintFileRequest.FilePath

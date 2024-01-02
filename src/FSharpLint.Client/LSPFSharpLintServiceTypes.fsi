@@ -7,6 +7,8 @@ type FSharpLintResponseCode =
     | ErrCancellationWasRequested = -2
     | ErrDaemonCreationFailed = -1
     | OkCurrentDaemonVersion = 0
+    | OkLint = 1
+    | OkLintError = 2
 
 type File = private File of string
 with
