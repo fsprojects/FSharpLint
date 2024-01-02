@@ -86,6 +86,12 @@ let runner (config:Config) args =
         let typeArgs = typeArgsToString args.FileContent typeArgs
         checkTypePrefixing config args range typeName typeArgs isPostfix
         |> Option.toArray
+    | AstNode.Type (SynType.Array (1, _elementType, range)) when config.Mode = Mode.Always ->
+        { Range = range
+          Message = Resources.GetString("RulesFormattingF#ArrayPrefixError")
+          SuggestedFix = None
+          TypeChecks = List.Empty } 
+        |> Array.singleton
     | _ ->
         Array.empty
 
