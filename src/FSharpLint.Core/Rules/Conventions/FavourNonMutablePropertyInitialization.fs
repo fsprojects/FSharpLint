@@ -70,15 +70,15 @@ let traverseSynModule (declarations: List<SynModuleDecl>) (identifiers: List<str
         | SynModuleDecl.NestedModule(_componentInfo, _, moduleDeclarations, _, _)::_ ->
             traverse moduleDeclarations classInstances instancesWithMethodCall
         | SynModuleDecl.Let(_, bindings, _)::rest ->
-            match bindings with
-            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), app, _), _), _, _)::nrest
-            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, app, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), _, _), _), _), _, _)::nrest 
-            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), app, _), _, _), _), _, _)::nrest when identifiers.Length > 1 ->
-                let instanceMethodCall = extraInstanceMethod app instancesWithMethodCall
+            let issueWargnings (bindings: List<SynBinding>) (identifiers: LongIdent) (restOfBindings: List<SynBinding>) (maybeApp: Option<SynExpr>) =
+                let instanceMethodCall = 
+                    match maybeApp with
+                    | Some app -> extraInstanceMethod app instancesWithMethodCall
+                    | None -> instancesWithMethodCall
                 let instances = extraFromBindings bindings classInstances
                 match List.tryLast identifiers with
                 | None ->
-                    traverse rest (extraFromBindings nrest classInstances) instancesWithMethodCall
+                    traverse rest (extraFromBindings restOfBindings classInstances) instancesWithMethodCall
                 | Some last ->
                     if containsInstance identifiers.[0].idText instances then
                         if not (containsInstance identifiers.[0].idText instanceMethodCall) then
@@ -86,7 +86,20 @@ let traverseSynModule (declarations: List<SynModuleDecl>) (identifiers: List<str
                         else
                             Array.empty
                     else
-                        traverse rest (extraFromBindings nrest classInstances) instancesWithMethodCall
+                        traverse rest (extraFromBindings restOfBindings classInstances) instancesWithMethodCall
+
+            match bindings with
+            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), app, _), _), _, _)::nrest
+            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, app, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), _, _), _), _), _, _)::nrest when identifiers.Length > 1 ->
+                match app with
+                | SynExpr.LongIdentSet(LongIdentWithDots(headIdentifiers, _), _, _) when headIdentifiers.Length > 1 ->
+                    Array.append
+                        (issueWargnings bindings headIdentifiers List.empty None)
+                        (issueWargnings bindings identifiers nrest None)
+                | _ ->
+                    issueWargnings bindings identifiers nrest (Some app)
+            | SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, SynExpr.Sequential(_, _, SynExpr.LongIdentSet(LongIdentWithDots(identifiers, _), _, _), _, _), _), _, _)::nrest when identifiers.Length > 1 ->
+                issueWargnings bindings identifiers nrest None
             | _ -> traverse rest (extraFromBindings bindings classInstances) instancesWithMethodCall
         | _::rest -> traverse rest classInstances instancesWithMethodCall
         | [] -> Array.empty
