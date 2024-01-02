@@ -74,7 +74,7 @@ module Program =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError_5() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceError5() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -163,5 +163,15 @@ module Program =
         // System.Net.Cookie implementation lives in a referenced assembly
         let someInstance = Cookie(Domain = "example.com")
         ()"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should not produce error on local variables``() =
+        this.Parse """
+let someFunc () =
+    let mutable current = 23
+    current <- 2
+    ()"""
 
         Assert.IsTrue this.NoErrorsExist
