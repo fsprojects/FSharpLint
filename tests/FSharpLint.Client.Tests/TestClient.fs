@@ -116,6 +116,21 @@ let ``Daemon can lint a file with success``() =
         | Content result -> Assert.Fail("Should be a lint result")
         | LintResult warnings -> 
             Assert.IsNotEmpty warnings
+
+            warnings
+            |> List.iter(fun warning ->
+                Assert.IsNotEmpty warning.RuleName
+                Assert.IsTrue (warning.RuleIdentifier.StartsWith("FL"))
+                Assert.IsNotEmpty warning.ErrorText
+                Assert.IsNotEmpty warning.FilePath
+
+                Assert.IsNotEmpty warning.Details.Message
+                Assert.Positive warning.Details.Range.StartLine
+                Assert.Positive warning.Details.Range.StartColumn
+                Assert.Positive warning.Details.Range.EndLine
+                Assert.Positive warning.Details.Range.EndColumn
+                Assert.IsTrue <| Option.isSome warning.Details.SuggestedFix)
+
             Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLint, versionResponse.Code)
 
 [<Test; Ignore("not sure how to make file parsing fail")>]
