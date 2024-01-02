@@ -96,9 +96,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(0, returnCode)
         Assert.AreEqual(Set.empty, errors)
 
-(* disabling regression test for now until I finish the development of new config
     [<Test>]
-*)
     member __.``Regression test: typePrefixing rule with old config format should still work``() =
         let fileContent = """
         {
