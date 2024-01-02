@@ -48,10 +48,7 @@ module FSharpJsonConverter =
         |]
 
     let serializerSettings =
-        let settings = JsonSerializerSettings()
-        settings.NullValueHandling <- NullValueHandling.Ignore
-        settings.Converters <- converters
-        settings
+        JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, Converters = converters)
 
 module IgnoreFiles =
 
