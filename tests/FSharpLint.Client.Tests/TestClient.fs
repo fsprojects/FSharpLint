@@ -117,3 +117,17 @@ let ``Daemon can lint a file with success``() =
         | LintResult warnings -> 
             Assert.IsNotEmpty warnings
             Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLint, versionResponse.Code)
+
+[<Test>]
+let ``LintError if Daemon lint an unparsable file``() =
+    using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
+
+        let testHintsFile = basePath </> "tests" </> "FSharpLint.Client.Tests" </> "UnparsableFile.fs"
+        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let versionResponse = runLintFileCall testHintsFile fsharpLintService
+
+        match versionResponse.Result with
+        | Content result -> Assert.Fail("Should be a lint result")
+        | LintResult warnings -> 
+            Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLintError, versionResponse.Code)
+            Assert.IsEmpty warnings
