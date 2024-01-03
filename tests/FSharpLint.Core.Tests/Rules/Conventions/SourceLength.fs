@@ -1,10 +1,25 @@
 module FSharpLint.Core.Tests.Rules.Conventions.SourceLength
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Rules.Helper.SourceLength
 
-let generateNewLines numNewLines = Array.create numNewLines "\n" |> String.concat ""
+let generateNewLines numNewLines numIndents =
+    Array.mapi
+        (fun index _ ->
+            let indentationChars =
+                if index = 0 then
+                    String.Empty
+                else
+                    String.replicate numIndents " "
+            sprintf "%sprintf System.String.Empty\n" indentationChars)
+            (Array.create numNewLines "")
+    |> String.concat ""
+
+let generateAbstractMembers numMembers numIndents =
+    Array.init numMembers (fun index -> sprintf "abstract member Foo%i : unit -> unit\n" index)
+    |> String.concat (String.replicate numIndents " ")
 
 let FunctionLength = 70
 [<TestFixture>]
@@ -18,7 +33,7 @@ module Program
 
 let dog x =
     %s
-    ()""" (generateNewLines FunctionLength))
+    ()""" (generateNewLines FunctionLength 4))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
@@ -28,7 +43,7 @@ module Program
 
 let dog x =
     %s
-    ()""" (generateNewLines (FunctionLength - 4)))
+    ()""" (generateNewLines (FunctionLength - 4) 4))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
     [<Test>]
@@ -41,7 +56,7 @@ let dog x =
     // Bar
     // Buzz
     %s
-    ()""" (generateNewLines (FunctionLength - 3)))
+    ()""" (generateNewLines (FunctionLength - 3) 4))
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
@@ -55,7 +70,7 @@ let dog x =
     Bar
     *)
     %s
-    ()""" (generateNewLines (FunctionLength - 4)))
+    ()""" (generateNewLines (FunctionLength - 4) 4))
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
@@ -71,7 +86,7 @@ let dog x =
     *)
     let (*) a b = a + b
     %s
-    ()""" (generateNewLines (FunctionLength - 5)))
+    ()""" (generateNewLines (FunctionLength - 5) 4))
         Assert.IsFalse this.ErrorsExist
 
 let LambdaFunctionLength = 5
@@ -90,7 +105,7 @@ let dog = fun x ->
             %s
             ()
         | None -> ()
-        """ (generateNewLines LambdaFunctionLength))
+        """ (generateNewLines LambdaFunctionLength 12))
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
@@ -104,7 +119,7 @@ let dog = fun x y ->
             %s
             ()
         | None -> ()
-        """ (generateNewLines LambdaFunctionLength))
+        """ (generateNewLines LambdaFunctionLength 12))
 
         Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
 
@@ -135,7 +150,7 @@ let dog = function
 | Some(x) ->
     %s
     ()
-| None -> ()""" (generateNewLines MatchLambdaFunctionLength))
+| None -> ()""" (generateNewLines MatchLambdaFunctionLength 4))
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
@@ -147,7 +162,7 @@ let dog = function
 | Some(x) ->
     %s
     ()
-| None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5)))
+| None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5) 4))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
 let ValueLength = 70
@@ -162,7 +177,7 @@ module Program
 
 let dog =
     %s
-    ()""" (generateNewLines ValueLength))
+    ()""" (generateNewLines ValueLength 4))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
@@ -172,7 +187,7 @@ module Program
 
 let dog =
     %s
-    ()""" (generateNewLines (ValueLength - 4)))
+    ()""" (generateNewLines (ValueLength - 4) 4))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
 let ConstructorLength = 70
@@ -188,7 +203,7 @@ type MyClass(x) =
     new() =
       %s
       MyClass(0)
-      """ (generateNewLines ConstructorLength))
+      """ (generateNewLines ConstructorLength 6))
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
@@ -230,8 +245,9 @@ type TestMaxLinesInClass() =
         this.Parse(sprintf """
 module Program
   type MyClass2() as this =
-    %s
-    member this.PrintMessage() = ()""" (generateNewLines ClassLength))
+    do
+        %s
+    member this.PrintMessage() = ()""" (generateNewLines ClassLength 8))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
@@ -248,7 +264,7 @@ module Program
 module Program
   type IPrintable =
     %s
-    abstract member Print : unit -> unit""" (generateNewLines ClassLength))
+    abstract member Print : unit -> unit""" (generateAbstractMembers ClassLength 4))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
@@ -278,7 +294,7 @@ module Program
     {
       %s
       dog: int
-    }""" (generateNewLines RecordLength))
+    }""" (generateNewLines RecordLength 6))
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
@@ -305,7 +321,7 @@ type TestMaxLinesInModule() =
 module Program
 %s
 let foo = ""
-exception SomeException of string""" (generateNewLines ModuleLength))
+exception SomeException of string""" (generateNewLines ModuleLength 0))
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
 
     [<Test>]
@@ -314,5 +330,5 @@ exception SomeException of string""" (generateNewLines ModuleLength))
 module Program
 %s
 let foo = ""
-exception SomeException of string""" (generateNewLines (ModuleLength - 4)))
+exception SomeException of string""" (generateNewLines (ModuleLength - 4) 0))
         Assert.IsFalse(this.ErrorExistsAt(2, 0))
