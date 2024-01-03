@@ -57,11 +57,11 @@ type FSharpLintDaemon(sender: Stream, reader: Stream) as this =
     member _.Version() : string = FSharpLint.Console.Version.get ()
 
     [<JsonRpcMethod(Methods.LintFile)>]
-    member _.LintFile(request: LintFileRequest) : Result<ClientLintWarning list, string> =
+    member _.LintFile(request: LintFileRequest, cancellationToken: CancellationToken option) : Result<ClientLintWarning list, string> =
         let lintConfig = 
             match request.LintConfigPath with
             | Some path -> 
-                { CancellationToken = None
+                { CancellationToken = cancellationToken
                   ReceivedWarning = None
                   Configuration = FromFile path
                   ReportLinterProgress = None }
