@@ -68,7 +68,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
         let sourceCodeLines = sourceCode.Split([| '\n'; '\r' |]) 
         let blankLinesCount = 
             sourceCodeLines
-            |> Seq.filter (fun line -> line.Trim().Length > 0)
+            |> Seq.filter (fun line -> line.Trim().Length = 0)
             |> Seq.length
 
         let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount
