@@ -106,6 +106,77 @@ module Program =
         Assert.IsTrue <| this.ErrorExistsAt(10, 21)
 
     [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should produce error in match expression``() =
+        this.Parse """
+type SomeClass() =
+    member val MyWriteOnlyProperty = 0 with set
+
+let someValue =
+    match () with
+    | _ ->
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should produce error in lambda function``() =
+        this.Parse """
+type SomeClass() =
+    member val MyWriteOnlyProperty = 0 with set
+
+let someLambda =
+    fun x ->
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should produce error in try-with block``() =
+        this.Parse """
+type SomeClass() =
+    member val MyWriteOnlyProperty = 0 with set
+
+let someValue =
+    try
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2
+    with
+    | _ -> ()"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should produce error in finally block``() =
+        this.Parse """
+type SomeClass() =
+    member val MyWriteOnlyProperty = 0 with set
+
+let someValue =
+    try
+        ()
+    finally
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``FavourNonMutablePropertyInitialization should produce error in computation expression``() =
+        this.Parse """
+type SomeClass() =
+    member val MyWriteOnlyProperty = 0 with set
+
+let someValue =
+    async {
+        let someInstance = SomeClass()
+        someInstance.MyWriteOnlyProperty <- 2
+    }"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.FavourNonMutablePropertyInitializationShouldNotProduceError_1() =
         this.Parse """
 type SomeClass() =
