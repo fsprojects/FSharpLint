@@ -94,3 +94,20 @@ let someFunc someParam =
 """
 
         Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.``Suggest not using pipe operator if it's used once``() =
+        let source = """
+let someFunc someParam =
+    someParam
+    |> someOtherFunc
+"""
+        let expected = """
+let someFunc someParam =
+    someOtherFunc someParam
+"""
+        
+        this.Parse source
+        let fixedSource = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, fixedSource)

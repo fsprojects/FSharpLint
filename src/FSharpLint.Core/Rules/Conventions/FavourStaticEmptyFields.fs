@@ -24,21 +24,28 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
 
     errorMessageKey |> formatError
 
-let private generateError (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+    let suggestedFix = lazy(
+        let replacementText =
+            match emptyLiteralType with
+            | EmptyStringLiteral -> "String.Empty"
+            | EmptyListLiteral -> "List.Empty"
+            | EmptyArrayLiteral -> "Array.empty"
+        Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
     { Range = range
       Message = getStaticEmptyErrorMessage range emptyLiteralType
-      SuggestedFix = None
+      SuggestedFix = Some suggestedFix
       TypeChecks = List.Empty }
     |> Array.singleton
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.Const (SynConst.String ("", _, range), _)) -> 
-        generateError range EmptyStringLiteral
+        generateError args.FileContent range EmptyStringLiteral
     | AstNode.Expression(SynExpr.ArrayOrList (isArray, [], range)) ->
         let emptyLiteralType =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
-        generateError range emptyLiteralType
+        generateError args.FileContent range emptyLiteralType
     | _ -> Array.empty
 
 
