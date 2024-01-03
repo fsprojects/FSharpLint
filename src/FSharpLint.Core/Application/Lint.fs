@@ -261,17 +261,18 @@ module Lint =
         ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
 
     let private runProcess (workingDir:string) (exePath:string) (args:string) =
-        let psi = System.Diagnostics.ProcessStartInfo()
-        psi.FileName <- exePath
-        psi.WorkingDirectory <- workingDir
-        psi.RedirectStandardOutput <- true
-        psi.RedirectStandardError <- true
-        psi.Arguments <- args
-        psi.CreateNoWindow <- true
-        psi.UseShellExecute <- false
+        let psi = 
+            System.Diagnostics.ProcessStartInfo(
+                FileName = exePath,
+                WorkingDirectory = workingDir,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                Arguments = args,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            )
 
-        use p = new System.Diagnostics.Process()
-        p.StartInfo <- psi
+        use p = new System.Diagnostics.Process(StartInfo = psi)
         let sbOut = System.Text.StringBuilder()
         p.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore)
         let sbErr = System.Text.StringBuilder()
