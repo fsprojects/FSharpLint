@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.6] - 2024-01-05
+
+- Fix recent regression in MaxLinesIn* rules #667 [@webwarrior-ws] & [@Mersho]
+- Migrate from .NET5 to .NET6 #655 #606 #604 [@Numpsy] & [@knocte] & [@webwarrior-ws]
+- CI: better separation of main lane steps #654 [@knocte]
+
+
 ## [0.23.0] - 2023-12-28
 
 - A new rule that deters from using underscore-prefixed elements #643 #573 #591 [@tehraninasab] & [@webwarrior-ws]
