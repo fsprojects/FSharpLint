@@ -89,3 +89,30 @@ with
     raise ex """
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``using raise ex must generate error suggested fix``() =
+        let source = """
+try
+    foo ()
+with
+| ex ->
+    if someCondition then
+        raise ex """
+        
+        let expected = """
+try
+    foo ()
+with
+| ex ->
+    if someCondition then
+        reraise() """
+        
+        this.Parse source
+
+        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ErrorExistsAt(7, 8))
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)

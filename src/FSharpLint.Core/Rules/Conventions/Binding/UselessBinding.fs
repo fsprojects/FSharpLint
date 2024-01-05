@@ -9,7 +9,7 @@ open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pattern expr range =
+let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pattern expr range maybeSuggestedFix =
     match checkInfo with
     | Some checkInfo ->
         let rec findBindingIdentifier = function
@@ -42,17 +42,23 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         |> Option.map (fun ident ->
             { Range = range
               Message = Resources.GetString("RulesUselessBindingError")
-              SuggestedFix = None
+              SuggestedFix = Some (lazy(maybeSuggestedFix))
               TypeChecks = [ checkNotMutable ident ] })
         |> Option.toArray
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =
+    let maybeSuggestedFix = 
+        match args.GetParents(args.NodeIndex) with
+        | AstNode.ModuleDeclaration(SynModuleDecl.Let(_, _, range)) :: _ ->
+            Some({ FromRange = range; FromText = "let"; ToText = "" })
+        | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, range)) :: _ -> 
+            Some({ FromRange = range; FromText = "use"; ToText = "" })
+        | _ -> None
     match args.AstNode with
     | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
-            when Helper.Binding.isLetBinding args.NodeIndex args.SyntaxArray
-                 && not isMutable ->
-        checkForUselessBinding args.CheckInfo pattern expr range
+        when maybeSuggestedFix.IsSome && not isMutable ->
+            checkForUselessBinding args.CheckInfo pattern expr range maybeSuggestedFix
     | _ ->
         Array.empty
 
