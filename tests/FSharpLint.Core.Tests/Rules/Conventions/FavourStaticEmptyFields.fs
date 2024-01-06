@@ -9,42 +9,42 @@ type TestConventionsFavourStaticEmptyFields() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourStaticEmptyFields.rule)
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_1() =
+    member this.FavourStaticEmptyFieldsShouldProduceError1() =
         this.Parse "let foo = \"\""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_2() =
+    member this.FavourStaticEmptyFieldsShouldProduceError2() =
         this.Parse "System.Console.WriteLine \"\""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_3() =
+    member this.FavourStaticEmptyFieldsShouldProduceError3() =
         this.Parse "let aList = []"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_4() =
+    member this.FavourStaticEmptyFieldsShouldProduceError4() =
         this.Parse "let aList = [ ]"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_5() =
+    member this.FavourStaticEmptyFieldsShouldProduceError5() =
         this.Parse "System.Console.WriteLine([].Length)"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_6() =
+    member this.FavourStaticEmptyFieldsShouldProduceError6() =
         this.Parse """
 let foo a =
     if a = 0 then
@@ -56,70 +56,70 @@ let foo a =
         Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_7() =
+    member this.FavourStaticEmptyFieldsShouldProduceError7() =
         this.Parse "let anArray = [||]"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_8() =
+    member this.FavourStaticEmptyFieldsShouldProduceError8() =
         this.Parse "let anArray = [| |]"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError_9() =
+    member this.FavourStaticEmptyFieldsShouldProduceError9() =
         this.Parse "System.Console.WriteLine([||].Length)"
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_1() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError1() =
         this.Parse "let bar = String.Empty"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_2() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError2() =
         this.Parse "let foo = \"My Name\""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_3() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError3() =
         this.Parse "System.Console.WriteLine System.String.Empty"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_4() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError4() =
         this.Parse "let aList = List.Empty"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_5() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError5() =
         this.Parse "System.Console.WriteLine(List.Empty.Length.ToString())"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_6() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError6() =
         this.Parse "let anArray = Array.empty"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_7() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError7() =
         this.Parse "System.Console.WriteLine(Array.empty.Length.ToString())"
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError_8() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceError8() =
         this.Parse """
 match foo with
 | [] -> true

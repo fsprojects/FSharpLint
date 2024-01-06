@@ -20,7 +20,7 @@ let rec Foo () =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError_1() =
+    member this.UnneededRecKeywordShouldProduceError1() =
         this.Parse """
 let rec Foo someParam =
     ()"""
@@ -28,7 +28,7 @@ let rec Foo someParam =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError_2() =
+    member this.UnneededRecKeywordShouldProduceError2() =
         this.Parse """
 let rec Foo someParam =
     ()

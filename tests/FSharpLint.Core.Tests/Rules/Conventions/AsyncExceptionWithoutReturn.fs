@@ -47,7 +47,7 @@ let someAsyncFunction =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithfWithoutReturn_1() =          
+    member this.AsyncFailwithfWithoutReturn1() =
         this.Parse("""
 namespace Program
 
@@ -61,7 +61,7 @@ let someAsyncFunction =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithfWithoutReturn_2() =          
+    member this.AsyncFailwithfWithoutReturn2() =
         this.Parse("""
 namespace Program
 

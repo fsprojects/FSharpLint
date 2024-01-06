@@ -21,7 +21,7 @@ type Foo =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceError() =
+    member this.InconsistentSelfShouldProduceError1() =
         this.Parse """
 type Foo =
     { Bar : Baz }
@@ -34,7 +34,7 @@ type Foo =
         Assert.IsTrue(this.ErrorExistsAt(4, 11))
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceError_2() =
+    member this.InconsistentSelfShouldProduceError2() =
         this.Parse """
 type Foo =
     { Bar : Baz }
@@ -47,7 +47,7 @@ type Foo =
         Assert.IsTrue(this.ErrorExistsAt(6, 11))
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceError_3() =
+    member this.InconsistentSelfShouldProduceError3() =
         this.Parse """
 type CustomerName(firstName, middleInitial, lastName) =
     member this.FirstName = firstName
