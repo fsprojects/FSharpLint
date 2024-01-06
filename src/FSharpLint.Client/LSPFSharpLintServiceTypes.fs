@@ -20,9 +20,9 @@ with
     static member from (filePath: string) =
         if File.Exists(filePath) then 
             // Path.GetFullPath to resolve path like /foo/bar/../baz
-            let folder = ((filePath |> Path.GetFullPath |> FileInfo).Directory).FullName
-            if DirectoryInfo(folder).Exists then
-                folder |> Folder |> Some
+            let folder = ((filePath |> Path.GetFullPath |> FileInfo).Directory)
+            if folder.Exists then
+                folder.FullName |> Folder |> Some
             else
                 None
         else
