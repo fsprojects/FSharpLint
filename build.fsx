@@ -270,8 +270,8 @@ Target.create "SelfCheck" (fun _ ->
             (*
             "nestedStatements" // not enable for now
             "cyclomaticComplexity" rule is too complex and we can enable it later
-            "avoidSinglePipeOperator" rule must be improved and we can enable it later
             *)
+            "avoidSinglePipeOperator"
             "maxLinesInLambdaFunction"
             "maxLinesInMatchLambdaFunction"
             "maxLinesInValue"
