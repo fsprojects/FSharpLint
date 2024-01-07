@@ -35,13 +35,12 @@ let rec Foo someParam =
 let rec Foo someParam =
     ()
 
-[<EntryPoint>]
-let main args =
+let Bar () =
     let Foo () =
         ()
 
     Foo()
-    0
+    ()
 """
 
         Assert.IsTrue this.ErrorsExist

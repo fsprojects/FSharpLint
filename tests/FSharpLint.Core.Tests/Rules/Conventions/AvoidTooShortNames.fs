@@ -11,7 +11,7 @@ type TestConventionsAvoidTooShortNames() =
     [<Test>]
     member this.AvoidTooShortNamesShouldNotProduceError1() =
         this.Parse """
-open System
+module Program
 
 let foo = 1
 let bar baz =
@@ -24,7 +24,7 @@ let bar baz =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError2() =
         this.Parse """
-open System
+module Program
 
 let f = 1
 let bar baz =
@@ -37,7 +37,7 @@ let bar baz =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError3() =
         this.Parse """
-open System
+module Program
 
 let foo = 1
 let b baz n =
@@ -50,7 +50,7 @@ let b baz n =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError4() =
         this.Parse """
-open System
+module Program
 
 let foo = 1
 let bar b =
@@ -63,7 +63,7 @@ let bar b =
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError5() =
         this.Parse """
-open System
+module Program
 
 let foo = 1
 let bar baz =
@@ -175,10 +175,12 @@ async {
         this.Parse """
 type SomeDU =
     | SomeMember of int * string * bool
+    | SomeOtherMember of int
 
 let fooFunction (arg: SomeDU) =
     match arg with
     | SomeDU.SomeMember(x, _, _) -> x
+    | SomeDU.SomeOtherMember theInt -> theInt
 """
 
         Assert.IsTrue this.ErrorsExist

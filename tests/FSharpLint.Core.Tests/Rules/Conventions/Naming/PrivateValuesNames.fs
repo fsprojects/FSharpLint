@@ -21,6 +21,7 @@ module Program
 
 let main =
     let (Cat, _) = 1, 0
+    ()
 """
 
         Assert.IsTrue(this.ErrorExistsAt(5, 9))
@@ -256,7 +257,9 @@ let foo x = 0
     member this.ForLoopIdentifierIsCamelCase() =
         this.Parse """
 module Program
-for i = 10 downto 1 do System.Console.Write(i)
+
+let someFunc() =
+    for i = 10 downto 1 do System.Console.Write(i)
 """
 
         this.AssertNoWarnings()
@@ -265,16 +268,20 @@ for i = 10 downto 1 do System.Console.Write(i)
     member this.ForLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
-for I = 10 downto 1 do System.Console.Write(I)
+
+let someFunc() =
+    for I = 10 downto 1 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.ForEachLoopIdentifierIsCamelCase() =
         this.Parse """
 module Program
-for i in 1..10 do System.Console.Write(i)
+
+let someFunc() =
+    for i in 1..10 do System.Console.Write(i)
 """
 
         this.AssertNoWarnings()
@@ -283,10 +290,12 @@ for i in 1..10 do System.Console.Write(i)
     member this.ForEachLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
-for I in 1..10 do System.Console.Write(I)
+
+let someFunc() =
+    for I in 1..10 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =

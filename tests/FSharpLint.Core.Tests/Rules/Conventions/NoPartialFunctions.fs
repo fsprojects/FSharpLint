@@ -53,8 +53,6 @@ printf foo.Value
     [<Test>]
     member this.``Error for Option.Value (complex test case)``() =
         this.Parse """
-namespace Foo
-
 module Program =
     let foo = None
 
@@ -63,13 +61,12 @@ module Program =
 """
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(8, 34))
+        Assert.IsTrue(this.ErrorExistsAt(6, 34))
         this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
 
     [<Test>]
     member this.``No error for calling Value on ref type (regression)``() =
         this.Parse """
-namespace Foo
 module Program =
     let foo = None
     let bar = ref 0
@@ -83,7 +80,6 @@ module Program =
     [<Test>]
     member this.``Error for Option.Value (List.tryHead test case)``() =
         this.Parse """
-namespace Foo
 module Program =
     let foo = []
 
@@ -92,20 +88,21 @@ module Program =
 """
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(7, 34))
+        Assert.IsTrue(this.ErrorExistsAt(6, 34))
         this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
 
     [<Test>]
     member this.``No error for value property in DU``() =
         this.Parse """
-namespace Foo
+module Program
 
-module Program =
 type SomeTypeThatsNotOption =
     | Value of string
     | Count of int
 
-let foo = SomeTypeThatsNotOption.Value
+let Foo (foo: SomeTypeThatsNotOption) =
+    let foo = SomeTypeThatsNotOption.Value
+    ()
 """
 
         this.AssertNoWarnings()

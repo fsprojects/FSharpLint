@@ -44,8 +44,8 @@ extern int PyThreadState_SetAsyncExcLLP64(uint id, IntPtr exc)
     member this.PublicTupleIsCamelCase() =
         this.Parse """
 module Program
-  let main =
-    let (cat, _) = 1, 0
+
+let (cat, _) = 1, 0
 """
 
         this.AssertNoWarnings()
