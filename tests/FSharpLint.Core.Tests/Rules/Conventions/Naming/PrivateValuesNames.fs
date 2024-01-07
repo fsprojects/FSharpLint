@@ -20,7 +20,8 @@ type TestConventionsPrivateValuesNames() =
 module Program
 
   let main =
-    let (Cat, _) = 1, 0"""
+    let (Cat, _) = 1, 0
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 9))
 
@@ -28,7 +29,8 @@ module Program
     member this.PrivateTupleIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat, private dog = 1, 0"""
+  let private Cat, private dog = 1, 0
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
@@ -36,7 +38,8 @@ module Program
     member this.PrivateFunctionNameIsPascalCase() =
         this.Parse """
 module Program
-  let private Main () = ()"""
+  let private Main () = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
@@ -48,7 +51,8 @@ module Program
   let main =
     match true with
     | _dog -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -59,7 +63,8 @@ module Program
   let main =
     match true with
     | d_og -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsOnLine(5))
 
@@ -69,7 +74,8 @@ module Program
 module Program
   let main =
     match true with
-    | dog -> ()"""
+    | dog -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -79,7 +85,8 @@ module Program
 module Program
   let main =
     match true with
-    | _ as Dog -> ()"""
+    | _ as Dog -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 11))
 
@@ -89,7 +96,8 @@ module Program
 module Program
   let main =
     match true with
-    | _ as dog -> ()"""
+    | _ as dog -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -99,7 +107,8 @@ module Program
 module program
   let main () =
     let Main () = ()
-    ()"""
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
@@ -109,7 +118,8 @@ module program
 module Program
   let main () =
     let bain () = ()
-    ()"""
+    ()
+"""
 
         this.AssertNoWarnings()
     [<Test>]
@@ -120,7 +130,8 @@ module Program
 type Dog() =
     let cat() = ()
 
-    member this.Goat() = ()"""
+    member this.Goat() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -132,7 +143,8 @@ module program
 type Dog() =
     let Cat() = ()
 
-    member this.Goat() = ()"""
+    member this.Goat() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
@@ -144,7 +156,8 @@ module Program
 type Cat() =
   member this.ContainsBinding() =
     let Goat = 0
-    ()"""
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 8))
 
@@ -156,7 +169,8 @@ module Program
 type Cat() =
   member this.ContainsBinding() =
     let goat = 0
-    ()"""
+    ()
+"""
 
         this.AssertNoWarnings()
 
@@ -170,7 +184,8 @@ module Program
   let main =
     match true with
     | Dog -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -183,7 +198,7 @@ module Program
 let foo () =
     let ``¯\_(ツ)_/¯`` = ignore
     ()
-        """
+"""
 
         this.AssertNoWarnings()
 
@@ -195,7 +210,7 @@ module Program
 let foo () =
     let żcieżka = 0
     ()
-        """
+"""
 
         this.AssertNoWarnings()
 
@@ -203,7 +218,8 @@ let foo () =
     member this.FunctionParameterIsPascalCase() =
         this.Parse """
 module Program
-  let main Dog = ()"""
+  let main Dog = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 11))
 
@@ -262,18 +278,19 @@ for I in 1..10 do System.Console.Write(I)
 
     [<Test>]
     member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
 
-let (SingleCaseDU MyInt) = (SingleCaseDU 5)""")
+let (SingleCaseDU MyInt) = (SingleCaseDU 5)
+"""
 
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
     member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
@@ -282,7 +299,8 @@ let extractInt (SingleCaseDU MyInt) =
 
 let singleCaseDU = SingleCaseDU 5
 
-let result = extractInt singleCaseDU""")
+let result = extractInt singleCaseDU
+"""
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -290,7 +308,8 @@ let result = extractInt singleCaseDU""")
     member this.PrivateVariableIsCamelCase() =
         this.Parse """
 module Program
-  let private cat = 1"""
+  let private cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -298,7 +317,8 @@ module Program
     member this.PrivateVariableIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat = 1"""
+  let private Cat = 1
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3,14))
 
@@ -306,7 +326,8 @@ module Program
     member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let Cat = 1"""
+  let Cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -315,7 +336,8 @@ module Program
     member this.ExplicitPublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let public Cat = 1"""
+  let public Cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -323,6 +345,7 @@ module Program
     member this.InternalVariableIsNotReported() =
         this.Parse """
 module Program
-  let internal Cat = 1"""
+  let internal Cat = 1
+"""
 
         this.AssertNoWarnings()

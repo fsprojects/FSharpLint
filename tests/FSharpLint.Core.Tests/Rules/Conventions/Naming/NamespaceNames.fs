@@ -18,14 +18,16 @@ type TestConventionsNamespaceNames() =
     [<Test>]
     member this.NamespaceIsPascalCase() =
         this.Parse """
-namespace Matt.Dog.Cat"""
+namespace Matt.Dog.Cat
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.NamespaceIsCamelCase() =
         this.Parse """
-namespace matt.dog.cat"""
+namespace matt.dog.cat
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
 

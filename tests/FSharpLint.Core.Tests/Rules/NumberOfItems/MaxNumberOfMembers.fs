@@ -18,7 +18,8 @@ type Test() =
     member val Three = 0 with get, set
     member val Four = 0 with get, set
     member val Five = 0 with get, set
-    member val Six = 0 with get, set"""
+    member val Six = 0 with get, set
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
@@ -32,7 +33,8 @@ type Test() =
     member val Two = 0 with get, set
     member val Three = 0 with get, set
     member val Four = 0 with get, set
-    member val Five = 0 with get, set"""
+    member val Five = 0 with get, set
+"""
 
         this.AssertNoWarnings()
 
@@ -47,7 +49,8 @@ type Test() =
     abstract member Three: unit -> unit
     abstract member Four: unit -> unit
     abstract member Five: unit -> unit
-    abstract member Six: unit -> unit"""
+    abstract member Six: unit -> unit
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
@@ -61,7 +64,8 @@ type Test() =
     abstract member Two: unit -> unit
     abstract member Three: unit -> unit
     abstract member Four: unit -> unit
-    abstract member Five: unit -> unit"""
+    abstract member Five: unit -> unit
+"""
 
         this.AssertNoWarnings()
 
@@ -76,7 +80,8 @@ type Test() =
     member this.Three() = ()
     member this.Four() = ()
     member this.Five() = ()
-    member this.Six() = ()"""
+    member this.Six() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(10, 4))
 
@@ -91,7 +96,8 @@ type Test() =
     member this.Three() = ()
     member this.Four() = ()
     member this.Five() = ()
-    private member this.Six() = ()"""
+    private member this.Six() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -105,6 +111,7 @@ type Test() =
     member this.Two() = ()
     member this.Three() = ()
     member this.Four() = ()
-    member this.Five() = ()"""
+    member this.Five() = ()
+"""
 
         this.AssertNoWarnings()

@@ -11,7 +11,8 @@ type TestBindingFavourTypedIgnore() =
     member this.``typed ignore has no error``() =
         this.Parse
             """
-Console.ReadLine() |> ignore<string>"""
+Console.ReadLine() |> ignore<string>
+"""
 
         this.AssertNoWarnings()
 
@@ -19,7 +20,8 @@ Console.ReadLine() |> ignore<string>"""
     member this.``typed ignore has no error (without pipe)``() =
         this.Parse
             """
- ignore<string>(Console.ReadLine())"""
+ ignore<string>(Console.ReadLine())
+ """
 
         this.AssertNoWarnings()
 
@@ -28,7 +30,8 @@ Console.ReadLine() |> ignore<string>"""
         this.Parse
             """
 Console.ReadLine()
-|> ignore"""
+|> ignore
+"""
 
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
@@ -39,7 +42,8 @@ Console.ReadLine()
             """
 ignore(
     Console.ReadLine()
-)"""
+)
+"""
 
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(2, 0))

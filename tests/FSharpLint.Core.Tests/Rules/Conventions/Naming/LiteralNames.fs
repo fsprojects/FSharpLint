@@ -19,7 +19,8 @@ type TestConventionsLiteralNames() =
 module Program
 
 [<Literal>]
-let Cat = 5"""
+let Cat = 5
+"""
 
         this.AssertNoWarnings()
 
@@ -29,7 +30,8 @@ let Cat = 5"""
 module program
 
 [<Literal>]
-let cat = 5"""
+let cat = 5
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
@@ -39,7 +41,8 @@ let cat = 5"""
 module program
 
 [<Literal>]
-let (cat) = 5"""
+let (cat) = 5
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 5))
 
@@ -49,7 +52,8 @@ let (cat) = 5"""
 module Program
 
 [<Microsoft.FSharp.Core.Literal>]
-let Cat = 5"""
+let Cat = 5
+"""
 
         this.AssertNoWarnings()
 
@@ -59,7 +63,8 @@ let Cat = 5"""
 module program
 
 [<Microsoft.FSharp.Core.Literal>]
-let cat = 5"""
+let cat = 5
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 

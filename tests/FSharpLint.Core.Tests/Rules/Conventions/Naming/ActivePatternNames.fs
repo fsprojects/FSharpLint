@@ -24,7 +24,8 @@ let (|Even|Odd|) = function
 
 match 4 with
 | Even -> ()
-| Odd -> ()"""
+| Odd -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -34,7 +35,8 @@ match 4 with
 module Program
 let (|Even|_|) = function
 | i when i % 2 = 0 -> Some(i)
-| _ -> None"""
+| _ -> None
+"""
 
         this.AssertNoWarnings()
 
@@ -46,7 +48,8 @@ let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
 
 match 4 with
 | Ev_en -> ()
-| Odd -> ()"""
+| Odd -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
@@ -58,7 +61,8 @@ let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 
 match 4 with
 | Even -> ()
-| Odd -> ()"""
+| Odd -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -70,7 +74,8 @@ let (|Ev_en|_|) input = if input % 2 = 0 then Some 4 else None
 
 match 3 with
 | Ev_en(x) -> ()
-| dog -> ()"""
+| dog -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 5))
 
@@ -82,7 +87,8 @@ let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
 
 match 3 with
 | Even(x) -> ()
-| dog -> ()"""
+| dog -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -90,7 +96,8 @@ match 3 with
     [<Test>]
     member this.NoWarningForMeasureType() =
         this.Parse """
-type [<Measure>] kg"""
+type [<Measure>] kg
+"""
 
         this.AssertNoWarnings()
 

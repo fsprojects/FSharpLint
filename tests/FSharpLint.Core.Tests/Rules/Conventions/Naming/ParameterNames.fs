@@ -17,7 +17,8 @@ type TestConventionsParameterNames() =
     member this.FunctionParameterIsCamelCase() =
         this.Parse """
 module Program
-  let main dog = ()"""
+  let main dog = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -26,7 +27,8 @@ module Program
         this.Parse """
 module Program
   type MyClass2(Cats) as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 16))
 
@@ -35,7 +37,8 @@ module Program
         this.Parse """
 module Program
   type MyClass2(cats) as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -50,7 +53,7 @@ module Program
 
     [<Test>]
     member this.ParameterUnionCaseContainingValueDoesNotGenerateWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
@@ -59,7 +62,8 @@ let extractInt (SingleCaseDU myInt) =
 
 let singleCaseDU = SingleCaseDU 5
 
-let result = extractInt singleCaseDU""")
+let result = extractInt singleCaseDU
+"""
 
         this.AssertNoWarnings()
 

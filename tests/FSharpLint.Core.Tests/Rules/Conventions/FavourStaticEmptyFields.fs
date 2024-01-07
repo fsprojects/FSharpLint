@@ -50,7 +50,8 @@ let foo a =
     if a = 0 then
         "0"
     else 
-        "" """
+        ""
+"""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")

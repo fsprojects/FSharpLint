@@ -15,7 +15,8 @@ let rec Foo () =
     if someParam then
         Foo()
     else
-        ()"""
+        ()
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -23,7 +24,8 @@ let rec Foo () =
     member this.UnneededRecKeywordShouldProduceError1() =
         this.Parse """
 let rec Foo someParam =
-    ()"""
+    ()
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -39,6 +41,7 @@ let main args =
         ()
 
     Foo()
-    0"""
+    0
+"""
 
         Assert.IsTrue this.ErrorsExist

@@ -16,7 +16,8 @@ open System
 let foo = 1
 let bar baz =
     let foobar = "x"
-    foobar """
+    foobar
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -28,7 +29,8 @@ open System
 let f = 1
 let bar baz =
     let foobar = "x"
-    foobar """
+    foobar
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -40,7 +42,8 @@ open System
 let foo = 1
 let b baz n =
     let foobar = "x"
-    foobar """
+    foobar
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -52,7 +55,8 @@ open System
 let foo = 1
 let bar b =
     let foobar = "x"
-    foobar """
+    foobar
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -64,7 +68,8 @@ open System
 let foo = 1
 let bar baz =
     let x = "x"
-    x """
+    x
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -149,7 +154,8 @@ match foo with
 async {
     let! z = async { return 1 + 2 }
     return z
-} |> Async.RunSynchronously |> ignore<int>"""
+} |> Async.RunSynchronously |> ignore<int>
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -159,7 +165,8 @@ async {
 async {
     let! result = async { return 1 + 2 }
     return result
-} |> Async.RunSynchronously |> ignore<int>"""
+} |> Async.RunSynchronously |> ignore<int>
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -171,13 +178,15 @@ type SomeDU =
 
 let fooFunction (arg: SomeDU) =
     match arg with
-    | SomeDU.SomeMember(x, _, _) -> x"""
+    | SomeDU.SomeMember(x, _, _) -> x
+"""
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.AvoidTooShortNamesShouldProduceError17() =
         this.Parse """
-fun x -> x + 1 |> ignore"""
+fun x -> x + 1 |> ignore
+"""
 
         Assert.IsTrue this.ErrorsExist

@@ -13,7 +13,8 @@ type TestBindingWildcardNamedWithAsPattern() =
 module Program
 
 match [] with
-    | _ as x -> ()"""
+    | _ as x -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 6))
 
@@ -23,7 +24,8 @@ match [] with
 module Program
 
 match [] with
-    | x -> ()"""
+    | x -> ()
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
@@ -33,7 +35,8 @@ match [] with
 module Program
 
 match [] with
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 

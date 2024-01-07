@@ -13,7 +13,8 @@ type TestMaxNumberOfBooleanOperatorsInCondition() =
 module Program
 
 if not true && (false && false) || true then
-    ()"""
+    ()
+"""
 
         this.AssertNoWarnings()
 
@@ -23,6 +24,7 @@ if not true && (false && false) || true then
 module Program
 
 if not true && (false && false) || true (&&) (false) then
-    ()"""
+    ()
+"""
 
         Assert.ErrorExistsAt(this, (4, 3))

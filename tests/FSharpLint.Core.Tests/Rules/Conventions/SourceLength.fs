@@ -133,7 +133,8 @@ let dog = fun x ->
         | Some(x) ->
             ()
         | None -> ()
-        """
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(4, 10))
 
 let MatchLambdaFunctionLength = 70
@@ -211,7 +212,9 @@ type MyClass(x) =
         this.Parse """
 module Program
 type MyClass(x) =
-    new() = MyClass(0)"""
+    new() = MyClass(0)
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
 let MemberLength = 70
@@ -232,7 +235,8 @@ module Program
   type Class() =
     let mutable value = 10
     member this.Property1 with get() =
-        value"""
+        value
+"""
         Assert.IsFalse(this.ErrorExistsAt(5, 31))
 
 let ClassLength = 500
@@ -255,7 +259,9 @@ module Program
         this.Parse """
 module Program
   type MyClass2() as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
     [<Test>]
@@ -265,6 +271,7 @@ module Program
   type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateAbstractMembers ClassLength 4))
+
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
@@ -272,7 +279,9 @@ module Program
         this.Parse """
 module Program
   type IPrintable =
-    abstract member Print : unit -> unit"""
+    abstract member Print : unit -> unit
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
 let UnionLength = 500
@@ -301,7 +310,9 @@ module Program
     member this.RecordNotTooManyLines() =
         this.Parse """
 module Program
-  type Record = { dog: int }"""
+  type Record = { dog: int }
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(3, 7))
 
 let EnumLength = 1000

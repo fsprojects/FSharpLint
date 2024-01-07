@@ -15,7 +15,8 @@ module MyModule =
     let MyFunc () =
         let _random = System.Random()
         printfn "%A" _random
-        () """
+        ()
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -27,7 +28,8 @@ module MyModule =
         let _random = System.Random()
         ()
         ()
-        _random"""
+        _random
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -37,7 +39,8 @@ module MyModule =
 module MyModule =
     let MyFunc () =
         let _random = System.Random()
-        "someString" + _random.ToString()"""
+        "someString" + _random.ToString()
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -48,7 +51,8 @@ module MyModule =
     let MyFunc () =
         let (_random, x) = System.Random()
         printfn "%A" _random
-        () """
+        ()
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -59,7 +63,8 @@ module MyModule =
     let MyFunc () =
         let _random = System.Random()
         printfn "_random is not used here"
-        () """
+        ()
+"""
 
         Assert.IsFalse this.ErrorsExist
         
@@ -70,7 +75,8 @@ module MyModule =
     let MyFunc () =
         let random = System.Random()
         printfn "%A" random
-        ()"""
+        ()
+"""
 
         Assert.IsFalse this.ErrorsExist
 
@@ -80,7 +86,8 @@ module MyModule =
 module MyModule =
     let MyFunc () =
         let f _ = System.Random()
-        ()"""
+        ()
+"""
 
         Assert.IsFalse this.ErrorsExist
         
@@ -90,7 +97,8 @@ module MyModule =
 type CustomerName(firstName) =
     member this._FirstName = firstName
     member this.MyFunc () =
-        printfn "%A" this._FirstName"""
+        printfn "%A" this._FirstName
+"""
 
         Assert.IsFalse this.ErrorsExist
         
@@ -100,7 +108,8 @@ type CustomerName(firstName) =
 type CustomerName(firstName) =
     member private this._FirstName = firstName
     member this.MyFunc () =
-        printfn "%A" this._FirstName"""
+        printfn "%A" this._FirstName
+"""
 
         Assert.IsFalse this.ErrorsExist
 
@@ -111,6 +120,7 @@ type CustomerName(firstName) =
     member val private _FirstName = firstName with get, set
     
     member this.MyFunc () =
-        printfn "%A" this._FirstName"""
+        printfn "%A" this._FirstName
+"""
 
         Assert.IsFalse this.ErrorsExist

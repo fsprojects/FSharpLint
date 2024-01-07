@@ -17,7 +17,8 @@ type TestConventionsTypeNames() =
     member this.TypeAbbreviationIsPascalCase() =
         this.Parse """
 module Program
-  type Cat = int"""
+  type Cat = int
+"""
 
         this.AssertNoWarnings()
 
@@ -25,7 +26,8 @@ module Program
     member this.TypeAbbreviationIsCamelCase() =
         this.Parse """
 module Program
-  type cat = int"""
+  type cat = int
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -34,7 +36,8 @@ module Program
         this.Parse """
 module Program
   type MyClass2() as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -43,7 +46,8 @@ module Program
         this.Parse """
 module Program
   type myClass2() as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -52,7 +56,8 @@ module Program
         this.Parse """
 module Program
   type Union =
-    | Some"""
+    | Some
+"""
 
         this.AssertNoWarnings()
 
@@ -61,7 +66,8 @@ module Program
         this.Parse """
 module Program
   type union =
-    | Some"""
+    | Some
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -69,7 +75,8 @@ module Program
     member this.RecordNameIsPascalCase() =
         this.Parse """
 module Program
-  type Record = { Dog: int }"""
+  type Record = { Dog: int }
+"""
 
         this.AssertNoWarnings()
 
@@ -77,7 +84,8 @@ module Program
     member this.RecordNameIsCamelCase() =
         this.Parse """
 module Program
-  type record = { Dog: int }"""
+  type record = { Dog: int }
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -85,7 +93,8 @@ module Program
     member this.DelegateNameIsPascalCase() =
         this.Parse """
 module Program
-  type Delegate2 = delegate of int * int -> int"""
+  type Delegate2 = delegate of int * int -> int
+"""
 
         this.AssertNoWarnings()
 
@@ -93,7 +102,8 @@ module Program
     member this.DelegateNameIsCamelCase() =
         this.Parse """
 module program
-  type delegate2 = delegate of int * int -> int"""
+  type delegate2 = delegate of int * int -> int
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -106,7 +116,8 @@ module Program
       val X: float
       val Y: float
       new(x: float, y: float) = { X = x; Y = y }
-    end"""
+    end
+"""
 
         this.AssertNoWarnings()
 
@@ -119,7 +130,8 @@ module program
       val X: float
       val Y: float
       new(x: float, y: float) = { X = x; Y = y }
-    end"""
+    end
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -132,7 +144,8 @@ type myClass() =
     member this.F() = 100
 
 type myClass with
-    member this.Goat() = 200"""
+    member this.Goat() = 200
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(7, 5))
 
@@ -145,19 +158,21 @@ type MyClass() =
     member this.F() = 100
 
 type MyClass with
-    member this.Goat() = 200"""
+    member this.Goat() = 200
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
-        this.Parse ("""
+        this.Parse """
 module Program
 
 type Abbreviation = LiteralAttribute
 
 [<Abbreviation>]
-let Dog = 6""")
+let Dog = 6
+"""
 
         this.AssertNoWarnings()
 
@@ -167,7 +182,7 @@ let Dog = 6""")
 module Program
 
 type Ścieżka = Ścieżka of string
-        """
+"""
 
         this.AssertNoWarnings()
 
@@ -211,7 +226,8 @@ type Cat = | Foo
         this.Parse """
 module Program
   type MyEnum =
-    | EnumCase = 1"""
+    | EnumCase = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -220,7 +236,8 @@ module Program
         this.Parse """
 module Program
   type myEnum =
-    | EnumCase = 1"""
+    | EnumCase = 1
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 

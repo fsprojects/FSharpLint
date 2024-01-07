@@ -248,7 +248,7 @@ type TestFormattingAlwaysTypePrefixing() =
     module Program
 
     type X = int Generic
-    """
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -258,7 +258,7 @@ type TestFormattingAlwaysTypePrefixing() =
     module Program
 
     type X = Generic<int>
-    """
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -268,7 +268,7 @@ type TestFormattingAlwaysTypePrefixing() =
     module Program
 
     type T = Option<int>
-    """
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -278,7 +278,7 @@ type TestFormattingAlwaysTypePrefixing() =
     module Program
 
     type T = int option
-    """
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -324,7 +324,7 @@ type TestFormattingNeverTypePrefixing() =
     module Program
 
     type T = Option<int>
-    """
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -334,7 +334,7 @@ type TestFormattingNeverTypePrefixing() =
     module Program
 
     type T = int option
-    """
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -344,7 +344,7 @@ type TestFormattingNeverTypePrefixing() =
     module Program
 
     type X = int Generic
-    """
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -354,7 +354,7 @@ type TestFormattingNeverTypePrefixing() =
     module Program
 
     type X = Generic<int>
-    """
+"""
 
         Assert.IsTrue this.ErrorsExist
 

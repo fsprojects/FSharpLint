@@ -18,7 +18,8 @@ type TestConventionsUnionCasesNames() =
         this.Parse """
 module Program
   type Union =
-    | UnionCase"""
+    | UnionCase
+"""
 
         this.AssertNoWarnings()
 
@@ -27,7 +28,8 @@ module Program
         this.Parse """
 module Program
   type Union =
-    | unionCase"""
+    | unionCase
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 6))
 
@@ -38,7 +40,8 @@ module Program
 
 type Foo = Foo of bool
 
-let Foo(foo) = Foo(true)"""
+let Foo(foo) = Foo(true)
+"""
 
         this.AssertNoWarnings()
 
@@ -49,7 +52,8 @@ module Program
 
 type Foo = Foo of bool
 
-let foo (Foo(v)) = ()"""
+let foo (Foo(v)) = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -60,7 +64,8 @@ module Program
 
 type Foo = Foo of bool
 
-for Foo(foo) in [Foo(true)] do ()"""
+for Foo(foo) in [Foo(true)] do ()
+"""
 
         this.AssertNoWarnings()
 
@@ -73,7 +78,8 @@ module String10 =
 
     let create str = String10 str
 
-    let value (String10 str) = str"""
+    let value (String10 str) = str
+"""
 
         this.Parse source
 
@@ -81,12 +87,13 @@ module String10 =
 
     [<Test>]
     member this.UnionCaseWithoutValueDoesNotGenerateWarningWhenTypeCheckingInput() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDUNoValues = | SingleCaseDUNoValues
 
-let foo SingleCaseDUNoValues = ()""")
+let foo SingleCaseDUNoValues = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -95,9 +102,11 @@ let foo SingleCaseDUNoValues = ()""")
     member this.``Single long ident union case in func arg does must not suggest rename``() =
         let source = """
 module Program
+
 type WithCamel = YesCamel
 
-let SomeCamel WithCamel.YesCamel = 12  """
+let SomeCamel WithCamel.YesCamel = 12
+"""
 
         this.Parse source
 

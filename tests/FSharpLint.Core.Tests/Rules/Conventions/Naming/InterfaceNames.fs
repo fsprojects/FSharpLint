@@ -18,7 +18,8 @@ type TestConventionsInterfaceNames() =
         this.Parse """
 module Program
   type IPrintable =
-    abstract member Print : unit -> unit"""
+    abstract member Print : unit -> unit
+"""
 
         this.AssertNoWarnings()
 
@@ -29,7 +30,8 @@ module Program
         this.Parse """
 module Program
   type Printable =
-    static member Print() = ()"""
+    static member Print() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -39,7 +41,8 @@ module Program
     member this.TypeAliasIsNotTreatedAsInterface() =
         this.Parse """
 module Program
-  type Matrix = int[,]"""
+  type Matrix = int[,]
+"""
 
         this.AssertNoWarnings()
 
@@ -48,7 +51,8 @@ module Program
         this.Parse """
 module Program
   type Printable =
-    abstract member Print : unit -> unit"""
+    abstract member Print : unit -> unit
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
@@ -58,7 +62,8 @@ module Program
 module Program
   [<AbstractClass>]
   type Printable() =
-    abstract member Print : unit -> unit"""
+    abstract member Print : unit -> unit
+"""
 
         this.AssertNoWarnings()
 

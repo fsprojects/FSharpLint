@@ -13,7 +13,8 @@ type TestTypographyIndentation() =
 module P
 
 let x =
-  x"""
+  x
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 0))
 
@@ -23,7 +24,8 @@ let x =
 module P
 
 let x =
-    x"""
+    x
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -34,7 +36,8 @@ module P
 
 let rainbow =
     { X = "X"
-          Y = "Y"}"""
+          Y = "Y"}
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 0))
 
@@ -45,7 +48,8 @@ module P
 
 let rainbow =
     { X = "X"
-      Y = "Y"}"""
+      Y = "Y"}
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -54,7 +58,8 @@ let rainbow =
         this.Parse """
 type T =
     { X : int
-      Y : string }"""
+      Y : string }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -65,7 +70,8 @@ module P
 
 let rainbow =
     { X = "X"; Z = "Z"
-      Y = "Y"; W = "W"}"""
+      Y = "Y"; W = "W"}
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -78,7 +84,8 @@ let rainbow =
     { X =
         (fun x ->
             x + 1)
-      Y = "Y"}"""
+      Y = "Y"}
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -91,7 +98,8 @@ let pascalsTriangle =
     [| 1
        2
        3
-    |]"""
+    |]
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -103,7 +111,8 @@ module P
 let pascalsTriangle =
     (1,
      2,
-     3)"""
+     3)
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -117,7 +126,8 @@ let pascalsTriangle =
     [ 1
       2
       3
-    ]"""
+    ]
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -128,7 +138,8 @@ module P
 
 let res = 1
           |> add 2
-          |> sub 3"""
+          |> sub 3
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -138,7 +149,8 @@ let res = 1
 module P
 
 let res = add 2
-          >> sub 3"""
+          >> sub 3
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -149,7 +161,8 @@ module P
 
 let res = 1
           + 2
-          + 3"""
+          + 3
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -158,7 +171,8 @@ let res = 1
         this.Parse """
 module P
 
-let res = 1 |> add 2"""
+let res = 1 |> add 2
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -170,7 +184,8 @@ module P
 let res =
     1
     |> add 2
-    |> sub 3"""
+    |> sub 3
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -183,7 +198,8 @@ let res = 1
           |> (fun x ->
               x + 1)
           |> (fun x ->
-              x - 3)"""
+              x - 3)
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -198,7 +214,8 @@ let comparer =
               let rev (s : String) =
                   new String (Array.rev (s.ToCharArray()))
               let reversed = rev s1 i
-              reversed.CompareTo (rev s2) }"""
+              reversed.CompareTo (rev s2) }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -210,7 +227,8 @@ let comparer =
           ChildNodes: AstNode list
 
           /// A list of parent nodes e.g. parent, grand parent, grand grand parent.
-          Breadcrumbs: AstNode list }"""
+          Breadcrumbs: AstNode list }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -223,7 +241,8 @@ let comparer =
       LineRules =
         { GenericLineRules = lineRules.ToArray()
           IndentationRule = indentationRule
-          NoTabCharactersRule = noTabCharactersRule } }"""
+          NoTabCharactersRule = noTabCharactersRule } }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -232,7 +251,8 @@ let comparer =
         this.Parse """
 let opchars =
     [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
-      '#';'^';'!';'?';'/';'.';':';',' ]"""
+      '#';'^';'!';'?';'/';'.';':';',' ]
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -245,7 +265,8 @@ match args.AstNode with
              && not isMutable ->
     checkForUselessBinding args.CheckInfo pattern expr range
 | _ ->
-    Array.empty"""
+    Array.empty
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -259,7 +280,8 @@ match args.AstNode with
                            Pats([SynPat.Tuple(_, [lhs; rhs], _)]), _, _)
                 when identifier.idText = "op_ColonColon" ->
             Some(lhs, rhs)
-        | _ -> None"""
+        | _ -> None
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -268,7 +290,8 @@ match args.AstNode with
         this.Parse """
         match x with
         | X { y = y
-              z = z } -> ()"""
+              z = z } -> ()
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
@@ -278,6 +301,7 @@ match args.AstNode with
         do pstringelemImpl :=
             choice
                 [ attempt pstringchar
-                  skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]"""
+                  skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]
+"""
 
         Assert.IsTrue(this.NoErrorsExist)

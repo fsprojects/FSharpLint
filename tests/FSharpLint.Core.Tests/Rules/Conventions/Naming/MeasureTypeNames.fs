@@ -18,13 +18,15 @@ type TestConventionsMeasureTypesNames() =
         this.Parse """
 [<Measure>] type L
 
-[<Measure>] type usGal"""
+[<Measure>] type usGal
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``Unit of measure issues underscore naming warning.``() =
         this.Parse """
-[<Measure>] type us_Gal"""
+[<Measure>] type us_Gal
+"""
 
         Assert.IsTrue(this.ErrorsExist)

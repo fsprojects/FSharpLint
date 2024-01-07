@@ -17,7 +17,8 @@ type TestConventionsModuleNames() =
     member this.ModuleNameIsPascalCase() =
         this.Parse """
 module Program
-  let main = ()"""
+  let main = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -25,6 +26,7 @@ module Program
     member this.ModuleNameIsCamelCase() =
         this.Parse """
 module program
-  let main = ()"""
+  let main = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 7))

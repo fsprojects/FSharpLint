@@ -18,7 +18,8 @@ type TestConventionsEnumCasesNames() =
         this.Parse """
 module Program
   type MyEnum =
-    | EnumCase = 1"""
+    | EnumCase = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -27,6 +28,7 @@ module Program
         this.Parse """
 module Program
   type MyEnum =
-    | enumCase = 1"""
+    | enumCase = 1
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 6))

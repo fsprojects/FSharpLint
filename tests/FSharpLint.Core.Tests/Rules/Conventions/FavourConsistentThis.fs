@@ -16,7 +16,8 @@ type Foo =
     member this.FooBar = 
         ()
     member this.FooBarBaz x =
-        failwith "foobarbaz" """
+        failwith "foobarbaz"
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -28,7 +29,8 @@ type Foo =
     member self.FooBar = 
         ()
     member this.FooBarBaz x =
-        failwith "foobarbaz" """
+        failwith "foobarbaz"
+"""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(4, 11))
@@ -41,7 +43,8 @@ type Foo =
     member this.FooBar = 
         ()
     member self.FooBarBaz x =
-        failwith "foobarbaz" """
+        failwith "foobarbaz"
+"""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(6, 11))
@@ -52,7 +55,8 @@ type Foo =
 type CustomerName(firstName, middleInitial, lastName) =
     member this.FirstName = firstName
     member self.MiddleInitial = middleInitial
-    member this.LastName = lastName """
+    member this.LastName = lastName
+"""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(4, 11))
@@ -62,7 +66,8 @@ type CustomerName(firstName, middleInitial, lastName) =
         this.Parse """
 type Connection() =
     static member Connect() =
-        printfn "New World!" """
+        printfn "New World!"
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -71,7 +76,8 @@ type Connection() =
         this.Parse """
 type Connection() =
     let tryGetConnectionRequest() =
-        printfn "New World!" """
+        printfn "New World!"
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -80,7 +86,8 @@ type Connection() =
         this.Parse """
 type Connection() =
     member __.AcceptClient() =
-        printfn "New World!" """
+        printfn "New World!"
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -89,7 +96,8 @@ type Connection() =
         this.Parse """
 module Command =
     [<Literal>]
-    let AuthChallenge = 130uy """
+    let AuthChallenge = 130uy
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -97,7 +105,8 @@ module Command =
     member this.NewShouldNotProduceError() =
         this.Parse """
 type TorMessageDigest(isSha256: bool) =
-    new() = TorMessageDigest false """
+    new() = TorMessageDigest false
+"""
 
         Assert.IsTrue this.NoErrorsExist
 

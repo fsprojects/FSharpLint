@@ -19,7 +19,8 @@ type TestConventionsMemberNames() =
         this.Parse """
 module Program
   type MyClass2() as this =
-    member this.PrintMessage() = ()"""
+    member this.PrintMessage() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -28,7 +29,8 @@ module Program
         this.Parse """
 module Program
   type MyClass2() as this =
-    member this.printMessage() = ()"""
+    member this.printMessage() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 16))
 
@@ -38,7 +40,8 @@ module Program
         this.Parse """
 module Program
 type MyClass(x) =
-    new() = MyClass(0)"""
+    new() = MyClass(0)
+"""
 
         this.AssertNoWarnings()
 
@@ -51,7 +54,8 @@ type MyClass(x) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
-    member this.CenterX with get() = x and set xval = x <- xval"""
+    member this.CenterX with get() = x and set xval = x <- xval
+"""
 
         this.AssertNoWarnings()
 
@@ -62,7 +66,8 @@ type MyClass(x) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
-    member this.centerX with get() = x and set xval = x <- xval"""
+    member this.centerX with get() = x and set xval = x <- xval
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 16))
 
@@ -72,7 +77,8 @@ type MyClass(x) =
 module Program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
-    abstract member Rotate: float -> unit"""
+    abstract member Rotate: float -> unit
+"""
 
         this.AssertNoWarnings()
 
@@ -82,7 +88,8 @@ module Program
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
-    abstract member rotate: float -> unit"""
+    abstract member rotate: float -> unit
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 20))
 
@@ -92,7 +99,8 @@ module program
 module Program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
-    abstract Area : float with get"""
+    abstract Area : float with get
+"""
 
         this.AssertNoWarnings()
 
@@ -102,7 +110,8 @@ module Program
 module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
-    abstract area : float with get"""
+    abstract area : float with get
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 13))
 
@@ -113,7 +122,8 @@ module Program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
-    default this.Rotate(angle) = ()"""
+    default this.Rotate(angle) = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -124,7 +134,8 @@ module program
   [<AbstractClass>]
   type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit
-    default this.rotate(angle) = ()"""
+    default this.rotate(angle) = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 17))
 
@@ -137,7 +148,8 @@ type MyClass() =
     member this.F() = 100
 
 type MyClass with
-    member this.Goat() = 200"""
+    member this.Goat() = 200
+"""
 
         this.AssertNoWarnings()
 
@@ -150,7 +162,8 @@ type MyClass() =
     member this.F() = 100
 
 type MyClass with
-    member this.goat() = 200"""
+    member this.goat() = 200
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(8, 16))
 
@@ -162,7 +175,8 @@ type MyClass with
 module Program
 
 type Cat() =
-    member x.Pri_nt() = ()"""
+    member x.Pri_nt() = ()
+"""
 
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
@@ -174,7 +188,8 @@ type Cat() =
 module Program
 
 type Cat() =
-    member x.__Print() = ()"""
+    member x.__Print() = (
+"""
 
         this.AssertNoWarnings()
 

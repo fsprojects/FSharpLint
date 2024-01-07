@@ -15,7 +15,8 @@ module Program
 type Cat = | Persian of int * int
 
 match Persian(1, 3) with
-    | Persian(_, _) -> ()"""
+    | Persian(_, _) -> ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(7, 14))
 
@@ -25,7 +26,8 @@ match Persian(1, 3) with
 module Program
 
 type Cat() = 
-    member __.Persian(_, _) = ()"""
+    member __.Persian(_, _) = ()
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
@@ -37,7 +39,8 @@ module Program
 type Cat() = 
     new(_, _) = Cat()
 
-    member __.Persian(_) = ()"""
+    member __.Persian(_) = ()
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
@@ -47,7 +50,8 @@ type Cat() =
 module Program
 
 type Cat() = 
-    member __.Persian<'t>(_, _) = ()"""
+    member __.Persian<'t>(_, _) = ()
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
@@ -61,6 +65,7 @@ type I =
 
 let x =
     { new I with
-        member __.Two(_, _) = false }"""
+        member __.Two(_, _) = false }
+"""
 
         Assert.IsFalse(this.ErrorsExist)

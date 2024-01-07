@@ -59,7 +59,7 @@ type CustomerName(firstName) =
     member this.someFunc someParam =
         someParam
         |> someOtherFunc
-        """
+"""
 
         Assert.IsTrue <| this.ErrorExistsAt(5, 8)
 
@@ -71,7 +71,7 @@ type CustomerName(firstName) =
         someParam
         |> someOtherFunc
         |> yetAnotherFunc
-        """
+"""
 
         Assert.IsFalse this.ErrorsExist
 

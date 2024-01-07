@@ -18,11 +18,12 @@ type TestHintMatcher() =
     member this.MatchNotEqualHint() =
         this.SetConfig(["not (a = b) ===> a <> b"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 let (a, b) = (1, 2)
-let valid = not (a = b)""")
+let valid = not (a = b)
+"""
 
         Assert.ErrorExistsAt(this, (5, 12))
 
@@ -30,10 +31,11 @@ let valid = not (a = b)""")
     member this.MatchFunctionApplication() =
         this.SetConfig(["List.fold (+) 0 x ===> List.sum x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-List.fold (+) 0 x""")
+List.fold (+) 0 x
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -41,10 +43,11 @@ List.fold (+) 0 x""")
     member this.MatchInfixExpression() =
         this.SetConfig(["4 + 4 ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-4 + 4""")
+4 + 4
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -52,10 +55,11 @@ module Goat
     member this.MatchPrefixExpression() =
         this.SetConfig(["4 + %4 ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-4 + %4""")
+4 + %4
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -63,10 +67,11 @@ module Goat
     member this.``Match address of operator with a single ampersand in expression``() =
         this.SetConfig(["4 + &4 ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-4 + &4""")
+4 + &4
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -74,10 +79,11 @@ module Goat
     member this.``Match address of operator with two ampersands in expression``() =
         this.SetConfig(["4 + &&4 ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-4 + &&4""")
+4 + &&4
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -85,10 +91,11 @@ module Goat
     member this.MatchParenthesesInHintExpression() =
         this.SetConfig(["6 + (4 / (5)) ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-6 + 4 / 5""")
+6 + 4 / 5
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -96,10 +103,11 @@ module Goat
     member this.MatchParenthesesExpression() =
         this.SetConfig(["6 + (4 + (5)) ===> 8"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-6 + (4 + (5))""")
+6 + (4 + (5))
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -107,10 +115,11 @@ module Goat
     member this.MatchLambda() =
         this.SetConfig(["fun x _ y -> x + y ===> 0"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun x y z -> x + z""")
+let f = fun x y z -> x + z
+"""
 
         Assert.ErrorExistsAt(this, (4, 8))
 
@@ -118,10 +127,11 @@ let f = fun x y z -> x + z""")
     member this.MatchWildcardLambda() =
         this.SetConfig(["fun _ -> 1 ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun _ -> 1""")
+let f = fun _ -> 1
+"""
 
         Assert.ErrorExistsAt(this, (4, 8))
 
@@ -129,10 +139,11 @@ let f = fun _ -> 1""")
     member this.MatchMultipleWildcardLambda() =
         this.SetConfig(["fun _ _ -> 1 ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun _ _ -> 1""")
+let f = fun _ _ -> 1
+"""
 
         Assert.ErrorExistsAt(this, (4, 8))
 
@@ -140,10 +151,11 @@ let f = fun _ _ -> 1""")
     member this.MatchMultipleWildcardAndVariableLambda() =
         this.SetConfig(["fun _ a _ b -> 1 ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun _ a _ x -> 1""")
+let f = fun _ a _ x -> 1
+"""
 
         Assert.ErrorExistsAt(this, (4, 8))
 
@@ -151,10 +163,11 @@ let f = fun _ a _ x -> 1""")
     member this.MatchIdLambda() =
         this.SetConfig(["fun x -> x ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun x -> x""")
+let f = fun x -> x
+"""
 
         Assert.ErrorExistsAt(this, (4, 8))
 
@@ -162,10 +175,11 @@ let f = fun x -> x""")
     member this.DontMatchIdLambda() =
         this.SetConfig(["fun x -> x ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let f = fun x -> 1""")
+let f = fun x -> 1
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 8))
 
@@ -173,10 +187,11 @@ let f = fun x -> 1""")
     member this.MatchFunctionApplicationWithBackwardPipe() =
         this.SetConfig(["(+) 1 x ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-(+) 1 <| 2 + 3""")
+(+) 1 <| 2 + 3
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -184,10 +199,11 @@ module Goat
     member this.MatchFunctionApplicationWithForwardPipe() =
         this.SetConfig(["List.fold (+) 0 x ===> List.sum x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-[1;2;3] |> List.fold (+) 0""")
+[1;2;3] |> List.fold (+) 0
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -195,10 +211,11 @@ module Goat
     member this.MatchMultipleFunctionApplications() =
         this.SetConfig(["List.head (List.sort x) ===> List.min x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-[1;2;3] |> List.sort |> List.head""")
+[1;2;3] |> List.sort |> List.head
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -206,10 +223,11 @@ module Goat
     member this.MatchTupleApplication() =
         this.SetConfig(["fst (x, y) ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-fst (1, 0) |> ignore""")
+fst (1, 0) |> ignore
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -217,10 +235,11 @@ fst (1, 0) |> ignore""")
     member this.MatchListAppendItem() =
         this.SetConfig(["x::[] ===> [x]"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-1::[] |> ignore""")
+1::[] |> ignore
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -228,10 +247,11 @@ module Goat
     member this.MatchAppendListToList() =
         this.SetConfig(["[x]@[y] ===> [x;y]"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-[1]@[2] |> ignore""")
+[1]@[2] |> ignore
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -239,12 +259,13 @@ module Goat
     member this.MatchListAppendItemInPattern() =
         this.SetConfig(["pattern: x::[] ===> [x]"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match [] with
 | x::[] -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 2))
 
@@ -252,12 +273,13 @@ match [] with
     member this.MatchTupleInPattern() =
         this.SetConfig(["pattern: (_, []) ===> []"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match ([], []) with
 | (_, []) -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 3))
 
@@ -265,12 +287,13 @@ match ([], []) with
     member this.MatchIntegerConstantInPattern() =
         this.SetConfig(["pattern: 0 ===> 0"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match 0 with
 | 0 -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 2))
 
@@ -278,12 +301,13 @@ match 0 with
     member this.MatchListInPattern() =
         this.SetConfig(["pattern: [0; 1; 2] ===> 0"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match [] with
 | [0; 1; 2;] -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 2))
 
@@ -291,12 +315,13 @@ match [] with
     member this.MatchArrayInPattern() =
         this.SetConfig(["pattern: [|0; 1; 2|] ===> 0"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match [] with
 | [|0; 1; 2;|] -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 2))
 
@@ -304,10 +329,11 @@ match [] with
     member this.MatchEmptyArray() =
         this.SetConfig(["Array.isEmpty [||] ===> true"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-Array.isEmpty [||]""")
+Array.isEmpty [||]
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -315,12 +341,13 @@ Array.isEmpty [||]""")
     member this.MatchOrPattern() =
         this.SetConfig(["pattern: [] | [0] ===> []"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match [] with
 | [] | [0] -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.ErrorExistsAt(this, (5, 2))
 
@@ -328,10 +355,11 @@ match [] with
     member this.MatchIfStatement() =
         this.SetConfig(["if x then true else false ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-if true then true else false""")
+if true then true else false
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -339,10 +367,11 @@ if true then true else false""")
     member this.MatchElseIfStatement() =
         this.SetConfig(["if x then true else if y then true else false ===> x || y"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-if true then true else if true then true else false""")
+if true then true else if true then true else false
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -350,10 +379,11 @@ if true then true else if true then true else false""")
     member this.MatchSingleParamStaticMethod() =
         this.SetConfig(["System.String.Copy x ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-System.String.Copy("dog")""")
+System.String.Copy("dog")
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -361,10 +391,11 @@ System.String.Copy("dog")""")
     member this.MatchMultiParamStaticMethod() =
         this.SetConfig(["System.String.Compare(x, y) ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-System.String.Compare("dog", "cat")""")
+System.String.Compare("dog", "cat")
+"""
 
         Assert.ErrorExistsAt(this, (4, 0))
 
@@ -372,13 +403,14 @@ System.String.Compare("dog", "cat")""")
     member this.NamedParameterShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     static member SomeMethod(foo:bool) = ()
 
-Bar.SomeMethod(foo = true)""")
+Bar.SomeMethod(foo = true)
+"""
 
         Assert.NoErrors(this)
 
@@ -386,13 +418,14 @@ Bar.SomeMethod(foo = true)""")
     member this.``Named parameter in object method call should not be treated as infix operation``() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member this.SomeMethod(foo: bool) = ()
 
-Bar().SomeMethod(foo = true)""")
+Bar().SomeMethod(foo = true)
+"""
 
         Assert.NoErrors(this)
 
@@ -400,13 +433,14 @@ Bar().SomeMethod(foo = true)""")
     member this.NamedParameterWithMoreThanOneParameterShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     static member SomeMethod(woof: int, foo: bool) = ()
 
-Bar.SomeMethod(woof = 5, foo = true)""")
+Bar.SomeMethod(woof = 5, foo = true)
+"""
 
         Assert.NoErrors(this)
 
@@ -430,13 +464,14 @@ do
     member this.``Named parameter in object method call with more than one arg should not be treated as infix operation``() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member this.SomeMethod(woof: int, foo: bool) = ()
 
-Bar().SomeMethod(woof = 5, foo = true)""")
+Bar().SomeMethod(woof = 5, foo = true)
+"""
 
         Assert.NoErrors(this)
 
@@ -444,13 +479,14 @@ Bar().SomeMethod(woof = 5, foo = true)""")
     member this.PropertyInitShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member val Foo = true with get, set
 
-Bar(Foo = true) |> ignore""")
+Bar(Foo = true) |> ignore
+"""
 
         Assert.NoErrors(this)
 
@@ -458,13 +494,14 @@ Bar(Foo = true) |> ignore""")
     member this.PropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member val Foo = true with get, set
 
-new Bar(Foo = true) |> ignore""")
+new Bar(Foo = true) |> ignore
+"""
 
         Assert.NoErrors(this)
 
@@ -472,14 +509,15 @@ new Bar(Foo = true) |> ignore""")
     member this.MultiplePropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member val Foo = true with get, set
     member val Bar = true with get, set
 
-new Bar(Foo = true, Bar = true) |> ignore""")
+new Bar(Foo = true, Bar = true) |> ignore
+"""
 
         Assert.NoErrors(this)
 
@@ -489,13 +527,14 @@ new Bar(Foo = true, Bar = true) |> ignore""")
     member this.PropertyInitWithTypeArgsShouldNotBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar<'a>() =
     member val Foo = true with get, set
 
-Bar<_>(Foo = true) |> ignore""")
+Bar<_>(Foo = true) |> ignore
+"""
 
         Assert.NoErrors(this)
 
@@ -503,13 +542,14 @@ Bar<_>(Foo = true) |> ignore""")
     member this.PropertyEqualityOperationShouldBeTreatedAsInfixOperation() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Bar() =
     member val Foo = true with get, set
 
-    member this.X() = this.Foo = true""")
+    member this.X() = this.Foo = true
+"""
 
         Assert.IsTrue(this.ErrorExistsOnLine(7))
 
@@ -518,10 +558,11 @@ type Bar() =
     member this.ParenthesesAroundAMatchedExpressionShouldNotCauseAnExtraMatch() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
-let foo x = if (x = true) then 0 else 1""")
+let foo x = if (x = true) then 0 else 1
+"""
 
         Assert.IsTrue((this.ErrorExistsAt >> not)(4, 15) && this.ErrorExistsAt(4, 16))
 
@@ -530,12 +571,13 @@ let foo x = if (x = true) then 0 else 1""")
     member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() =
         this.SetConfig(["pattern: [0] | [1] ===> []"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 match [] with
 | ([0] | [1]) -> ()
-| _ -> ()""")
+| _ -> ()
+"""
 
         Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
 
@@ -544,13 +586,14 @@ match [] with
     member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type.``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type TakesDelegate() =
     member this.Foo(del:System.Action<string>) = ()
 
-TakesDelegate().Foo(fun _ -> ())""")
+TakesDelegate().Foo(fun _ -> ())
+"""
 
         Assert.NoErrors(this)
 
@@ -559,13 +602,14 @@ TakesDelegate().Foo(fun _ -> ())""")
     member this.``Lambdas should not be suggested to be functions if in method call that takes delegate type (more than one argument).``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type TakesDelegate() =
     member this.Foo(foo:string, del:System.Action<string>) = ()
 
-TakesDelegate().Foo("", fun _ -> ())""")
+TakesDelegate().Foo("", fun _ -> ())
+"""
 
         Assert.NoErrors(this)
 
@@ -574,13 +618,14 @@ TakesDelegate().Foo("", fun _ -> ())""")
     member this.``Lambdas should be suggested to be functions if in method call that takes function type.``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type TakesDelegate() =
     member this.Foo(foo:string, del:string -> unit) = ()
 
-TakesDelegate().Foo("", fun _ -> ())""")
+TakesDelegate().Foo("", fun _ -> ())
+"""
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -589,14 +634,15 @@ TakesDelegate().Foo("", fun _ -> ())""")
     member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type (multiple args).``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type TakesDelegate() =
     member this.Foo(foo:string, del:System.Action<string>) = ()
 
 let object = TakesDelegate()
-object.Foo("", fun _ -> ())""")
+object.Foo("", fun _ -> ())
+"""
 
         Assert.NoErrors(this)
 
@@ -605,14 +651,15 @@ object.Foo("", fun _ -> ())""")
     member this.``Lambdas should not be suggested to be functions if in obj method call that takes function type.``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type TakesDelegate() =
     member this.Foo(del:System.Action<string>) = ()
 
 let object = TakesDelegate()
-object.Foo(fun _ -> ())""")
+object.Foo(fun _ -> ())
+"""
 
         Assert.NoErrors(this)
 
@@ -620,11 +667,12 @@ object.Foo(fun _ -> ())""")
     member this.``Operator identifier is correctly written out as an operator symbol in the error message.``() =
         this.SetConfig(["0 ===> FSharpLint.(+)"])
 
-        this.Parse("""
+        this.Parse"""
 module Goat
 
 do
-    ignore 0""")
+    ignore 0
+"""
 
         this.AssertErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.")
 
@@ -632,11 +680,12 @@ do
     member this.``Suggestion as a message presents correct error message.``() =
         this.SetConfig(["() ===> m\"Message\""])
 
-        this.Parse("""
+        this.Parse"""
 module Goat
 
 do
-    ()""")
+    ()
+"""
 
         this.AssertErrorWithMessageExists("`()`; suggestion: Message.")
 
@@ -644,12 +693,13 @@ do
     member this.``Hints matches null in an expression correctly.``() =
         this.SetConfig(["x = null ===> m\"Use pattern matching to null check\""])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 do
     let x = System.Collections.ArrayList()
-    x = null |> ignore""")
+    x = null |> ignore
+"""
 
         this.AssertErrorWithMessageExists("`x = null`; suggestion: Use pattern matching to null check.")
 
@@ -658,11 +708,12 @@ do
     member this.``Lambda hint correctly matches expression with parameters.``() =
         this.SetConfig(["fun x -> x ===> id"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 do
-    [(1,2,3)] |> Seq.groupBy(fun (store, app, script) -> store)  |> ignore""")
+    [(1,2,3)] |> Seq.groupBy(fun (store, app, script) -> store)  |> ignore
+"""
 
         this.AssertNoWarnings()
 
@@ -671,12 +722,13 @@ do
     member this.``Lambda hint does not ignore curried parameters.``() =
         this.SetConfig(["fun _ -> () ===> ignore"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 do
     let log = fun data medium -> ()
-    ()""")
+    ()
+"""
 
         this.AssertNoWarnings()
 
@@ -685,7 +737,7 @@ do
     member this.``Equality hint must not match an expression that's assigning a field within a constructor.``() =
         this.SetConfig(["x = true ===> x"])
 
-        this.Parse("""
+        this.Parse """
 module Goat
 
 type Foo =
@@ -695,7 +747,8 @@ type Foo =
 
 do
     let _ = Foo(X = true)
-    ()""")
+    ()
+"""
 
         this.AssertNoWarnings()
 

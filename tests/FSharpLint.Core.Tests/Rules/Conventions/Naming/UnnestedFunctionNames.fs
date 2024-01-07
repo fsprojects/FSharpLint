@@ -20,7 +20,8 @@ type TestConventionsUnnestedFunctionNames() =
 module Program =
     let CylinderVolume radius length =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -30,7 +31,8 @@ module Program =
 module Program =
     let Cylinder_Volume radius length =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 8))
 
@@ -40,7 +42,8 @@ module Program =
 module Program =
     let cylinderVolume radius length =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 8))
 
@@ -50,7 +53,8 @@ module Program =
 module Program =
     let cylinderVolume() =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 8))
 
@@ -60,7 +64,8 @@ module Program =
 module Program =
     let CylinderVolume() =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -71,7 +76,8 @@ module Program
     let cylinderVolume =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -81,7 +87,8 @@ module Program
 module Program =
     let private cylinderVolume() =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 16))
 
@@ -91,7 +98,8 @@ module Program =
 module Program =
     let public cylinderVolume() =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(3, 15))
 
@@ -102,7 +110,8 @@ module Program =
 module Program =
     let private CylinderVolume() =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -111,7 +120,8 @@ module Program =
         this.Parse """
 type MyClass(initX:int) =
    let x = initX
-   member this.method() = printf "x=%i" x"""
+   member this.method() = printf "x=%i" x
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 15))
 
@@ -122,7 +132,8 @@ type Record =
     { Dog: int }
     member this.cylinderVolume length radius =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 16))
 
@@ -135,7 +146,8 @@ module Program =
             arg1 + 1
 
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -148,7 +160,8 @@ type Record =
         let nestedFunction arg1 =
             arg1 + 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -164,7 +177,8 @@ module Program =
     let CylinderVolume2() =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -180,6 +194,7 @@ module Program =
     let cylinderVolume2() =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(8, 8))

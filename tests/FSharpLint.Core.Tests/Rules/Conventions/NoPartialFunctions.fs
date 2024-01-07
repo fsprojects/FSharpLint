@@ -42,48 +42,54 @@ type TestConventionsNoPartialFunctions() =
 
     [<Test>]
     member this.``Error for Option.Value (simple test case)``() =
-        this.Parse("""
+        this.Parse """
 let foo = None
-printf foo.Value""")
+printf foo.Value
+"""
+
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(3, 7))
 
     [<Test>]
     member this.``Error for Option.Value (complex test case)``() =
-        this.Parse("""
+        this.Parse """
 namespace Foo
+
 module Program =
     let foo = None
 
     let printFoo() =
-        System.Console.WriteLine (foo.Value.ToString())""")
+        System.Console.WriteLine (foo.Value.ToString())
+"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(7, 34))
+        Assert.IsTrue(this.ErrorExistsAt(8, 34))
         this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Option.Value'.")
 
     [<Test>]
     member this.``No error for calling Value on ref type (regression)``() =
-        this.Parse("""
+        this.Parse """
 namespace Foo
 module Program =
     let foo = None
     let bar = ref 0
 
     let printFoo() =
-        System.Console.WriteLine (bar.Value.ToString())""")
+        System.Console.WriteLine (bar.Value.ToString())
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
     member this.``Error for Option.Value (List.tryHead test case)``() =
-        this.Parse("""
+        this.Parse """
 namespace Foo
 module Program =
     let foo = []
 
     let printFoo() =
-        System.Console.WriteLine ((List.tryHead foo).Value.ToString())""")
+        System.Console.WriteLine ((List.tryHead foo).Value.ToString())
+"""
 
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(7, 34))
@@ -91,70 +97,78 @@ module Program =
 
     [<Test>]
     member this.``No error for value property in DU``() =
-        this.Parse("
+        this.Parse """
 namespace Foo
+
 module Program =
 type SomeTypeThatsNotOption =
     | Value of string
     | Count of int
 
-let foo = SomeTypeThatsNotOption.Value")
+let foo = SomeTypeThatsNotOption.Value
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``No error for option methods other than Option.Value``() =
-        this.Parse("
+        this.Parse """
 let foo = None
 if foo.IsNone then
-    System.Console.WriteLine (foo.ToString())")
+    System.Console.WriteLine (foo.ToString())
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``No error for Map methods that are not Item``() =
-        this.Parse("
+        this.Parse """
 let foo = Map.empty
 if foo.IsEmpty then
-    System.Console.WriteLine foo.Count")
+    System.Console.WriteLine foo.Count
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``Error for Map.Item``() =
-        this.Parse("
+        this.Parse """
 let foo = Map.empty
 if foo.Item 1 then
-    System.Console.WriteLine foo.Count")
+    System.Console.WriteLine foo.Count
+"""
 
         Assert.IsTrue this.ErrorsExist
         this.AssertErrorWithMessageExists("Consider using 'Map.tryFind' instead of partial function/method 'Map.Item'.")
 
     [<Test>]
     member this.``No error for List methods that are not Item``() =
-        this.Parse("
+        this.Parse """
 let foo = List.empty
 if foo.IsEmpty then
-    System.Console.WriteLine foo.Length")
+    System.Console.WriteLine foo.Length
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``Error for List.Item``() =
-        this.Parse("
+        this.Parse """
 let foo = List.empty
 if foo.Item 1 then
-    System.Console.WriteLine foo.Length")
+    System.Console.WriteLine foo.Length
+"""
 
         Assert.IsTrue this.ErrorsExist
         this.AssertErrorWithMessageExists("Consider using 'List.tryFind' instead of partial function/method 'List.Item'.")
 
     [<Test>]
     member this.``Error for List.Head``() =
-        this.Parse("
+        this.Parse """
 let foo = List.empty
 if foo.Head 1 then
-    System.Console.WriteLine foo.Length")
+    System.Console.WriteLine foo.Length
+"""
 
         Assert.IsTrue this.ErrorsExist
         this.AssertErrorWithMessageExists("Consider using 'List.tryHead' instead of partial function/method 'List.Head'.")

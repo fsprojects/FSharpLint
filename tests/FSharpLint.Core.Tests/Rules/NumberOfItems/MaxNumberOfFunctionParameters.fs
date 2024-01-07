@@ -12,7 +12,8 @@ type TestMaxNumberOfFunctionParameters() =
         this.Parse """
 module Program
 
-let foo one two three four five six = ()"""
+let foo one two three four five six = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 32))
 
@@ -21,6 +22,7 @@ let foo one two three four five six = ()"""
         this.Parse """
 module Program
 
-let foo one two three four five = ()"""
+let foo one two three four five = ()
+"""
 
         this.AssertNoWarnings()

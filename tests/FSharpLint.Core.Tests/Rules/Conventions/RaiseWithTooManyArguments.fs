@@ -12,7 +12,8 @@ type TestConventionsFailwithWithSingleArg() =
         this.Parse """
 module Program
 
-failwith "" """
+failwith ""
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -21,7 +22,8 @@ failwith "" """
         this.Parse """
 module Program
 
-failwith "" "" """
+failwith "" ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -30,7 +32,8 @@ failwith "" "" """
         this.Parse """
 module Program
 
-failwith "" "" "" "" """
+failwith "" "" "" ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -39,7 +42,8 @@ failwith "" "" "" "" """
         this.Parse """
 module Program
 
-"" |> failwith "" """
+"" |> failwith ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -52,7 +56,8 @@ type TestConventionsRaiseWithSingleArg() =
         this.Parse """
 module Program
 
-raise (System.ArgumentException("Divisor cannot be zero!")) """
+raise (System.ArgumentException("Divisor cannot be zero!"))
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -61,7 +66,8 @@ raise (System.ArgumentException("Divisor cannot be zero!")) """
         this.Parse """
 module Program
 
-raise (System.ArgumentException("Divisor cannot be zero!")) "" """
+raise (System.ArgumentException("Divisor cannot be zero!")) ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -74,7 +80,8 @@ type TestConventionsFailwithfWithArugmentMatchingFormatString() =
         this.Parse """
 module Program
 
-failwithf "%d %s" 4 "dog" """
+failwithf "%d %s" 4 "dog"
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -83,7 +90,8 @@ failwithf "%d %s" 4 "dog" """
         this.Parse """
 module Program
 
-failwithf "%d %s" 4 "dog" 5 """
+failwithf "%d %s" 4 "dog" 5
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -92,7 +100,8 @@ failwithf "%d %s" 4 "dog" 5 """
         this.Parse """
 module Program
 
-failwithf "%d %% %s" 4 "dog" 5 """
+failwithf "%d %% %s" 4 "dog" 5
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -105,7 +114,8 @@ type TestConventionsNullArgWithSingleArg() =
         this.Parse """
 module Program
 
-nullArg "" """
+nullArg ""
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -114,7 +124,8 @@ nullArg "" """
         this.Parse """
 module Program
 
-nullArg "" "" """
+nullArg "" ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -127,7 +138,8 @@ type TestConventionsInvalidOpWithSingleArg() =
         this.Parse """
 module Program
 
-invalidOp "" """
+invalidOp ""
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -136,7 +148,8 @@ invalidOp "" """
         this.Parse """
 module Program
 
-invalidOp "" "" """
+invalidOp "" ""
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
 
@@ -149,7 +162,8 @@ type TestConventionsInvalidArgWithTwoArguments() =
         this.Parse """
 module Program
 
-invalidArg "month" "Expected value to be between 1 and 12" """
+invalidArg "month" "Expected value to be between 1 and 12"
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(4, 0))
 
@@ -158,6 +172,7 @@ invalidArg "month" "Expected value to be between 1 and 12" """
         this.Parse """
 module Program
 
-invalidArg "month" "Expected value to be between 1 and 12" "some other arg" """
+invalidArg "month" "Expected value to be between 1 and 12" "some other arg"
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 0))
