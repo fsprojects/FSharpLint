@@ -36,7 +36,7 @@ namespace matt.dog.cat
     member this.``Linter must not complain about naming of fsx file``() =
         this.Parse("""
 type MyClass2() as this =
-  member this.PrintMessage() = ()""", fileName = "3i-3.fsx")
+    member this.PrintMessage() = ()""", fileName = "3i-3.fsx")
 
         this.AssertNoWarnings()
 
@@ -45,7 +45,7 @@ type MyClass2() as this =
     member this.``Linter must not complain about naming of fsx file with long name``() =
         this.Parse("""
 type MyClass2() as this =
-  member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
+    member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
 
         this.AssertNoWarnings()
 

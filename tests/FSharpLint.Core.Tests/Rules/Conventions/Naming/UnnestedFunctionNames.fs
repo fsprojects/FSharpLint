@@ -119,11 +119,11 @@ module Program =
     member this.FunctionNameInTypeIsCamelCase() =
         this.Parse """
 type MyClass(initX:int) =
-   let x = initX
-   member this.method() = printf "x=%i" x
+    let x = initX
+    member this.method() = printf "x=%i" x
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 15))
+        Assert.IsTrue(this.ErrorExistsAt(4, 16))
 
     [<Test>]
     member this.FunctionNameInRecordIsCamelCase() =

@@ -19,7 +19,7 @@ type TestConventionsPublicValuesNames() =
         this.Parse """
 module Program
 
-    let (Cat, _) = 1, 0
+let (Cat, _) = 1, 0
 """
 
         this.AssertNoWarnings()
@@ -55,7 +55,8 @@ module Program
     member this.PublicFunctionNameIsPascalCase() =
         this.Parse """
 module Program
-  let Main () = ()
+
+let Main () = ()
 """
 
         this.AssertNoWarnings()
@@ -64,7 +65,8 @@ module Program
     member this.PublicFunctionNameIsCamelCase() =
         this.Parse """
 module Program
-  let main () = ()
+
+let main () = ()
 """
 
         this.AssertNoWarnings()

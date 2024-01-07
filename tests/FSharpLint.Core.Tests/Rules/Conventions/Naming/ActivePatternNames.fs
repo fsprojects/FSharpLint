@@ -18,6 +18,7 @@ type TestConventionsActivePatternNames() =
     member this.PatternFunctionValidActivePattern() =
         this.Parse """
 module Program
+
 let (|Even|Odd|) = function
 | i when i % 2 = 0 -> Even
 | _ -> Odd
@@ -33,6 +34,7 @@ match 4 with
     member this.PatternFunctionValidPartialActivePattern() =
         this.Parse """
 module Program
+
 let (|Even|_|) = function
 | i when i % 2 = 0 -> Some(i)
 | _ -> None
@@ -44,6 +46,7 @@ let (|Even|_|) = function
     member this.ActivePatternContainsUnderscore() =
         this.Parse """
 module program
+
 let (|Ev_en|Odd|) input = if input % 2 = 0 then Ev_en else Odd
 
 match 4 with
@@ -51,12 +54,13 @@ match 4 with
 | Odd -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 5))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
         this.Parse """
 module Program
+
 let (|Even|Odd|) input = if input % 2 = 0 then Even else Odd
 
 match 4 with
@@ -70,6 +74,7 @@ match 4 with
     member this.PartialActivePatternContainsUnderscore() =
         this.Parse """
 module program
+
 let (|Ev_en|_|) input = if input % 2 = 0 then Some 4 else None
 
 match 3 with
@@ -77,12 +82,13 @@ match 3 with
 | dog -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 5))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.PartialActivePatternDoesNotContainUnderscore() =
         this.Parse """
 module Program
+
 let (|Even|_|) input = if input % 2 = 0 then Some 5 else None
 
 match 3 with

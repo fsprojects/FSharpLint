@@ -23,8 +23,8 @@ let _ = ()
 module Program
 
 let (_) =
-  let x = 4 + 4
-  ()
+    let x = 4 + 4
+    ()
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))

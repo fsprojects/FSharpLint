@@ -17,7 +17,8 @@ type TestConventionsTypeNames() =
     member this.TypeAbbreviationIsPascalCase() =
         this.Parse """
 module Program
-  type Cat = int
+
+type Cat = int
 """
 
         this.AssertNoWarnings()
@@ -26,16 +27,18 @@ module Program
     member this.TypeAbbreviationIsCamelCase() =
         this.Parse """
 module Program
-  type cat = int
+
+type cat = int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.ClassNameIsPascalCase() =
         this.Parse """
 module Program
-  type MyClass2() as this =
+
+type MyClass2() as this =
     member this.PrintMessage() = ()
 """
 
@@ -45,18 +48,20 @@ module Program
     member this.ClassNameIsCamelCase() =
         this.Parse """
 module Program
-  type myClass2() as this =
+
+type myClass2() as this =
     member this.PrintMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.UnionNameIsPascalCase() =
         this.Parse """
 module Program
-  type Union =
-    | Some
+
+type Union =
+| Some
 """
 
         this.AssertNoWarnings()
@@ -65,17 +70,19 @@ module Program
     member this.UnionNameIsCamelCase() =
         this.Parse """
 module Program
-  type union =
-    | Some
+
+type union =
+| Some
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.RecordNameIsPascalCase() =
         this.Parse """
 module Program
-  type Record = { Dog: int }
+
+type Record = { Dog: int }
 """
 
         this.AssertNoWarnings()
@@ -84,16 +91,18 @@ module Program
     member this.RecordNameIsCamelCase() =
         this.Parse """
 module Program
-  type record = { Dog: int }
+
+type record = { Dog: int }
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.DelegateNameIsPascalCase() =
         this.Parse """
 module Program
-  type Delegate2 = delegate of int * int -> int
+
+type Delegate2 = delegate of int * int -> int
 """
 
         this.AssertNoWarnings()
@@ -102,20 +111,22 @@ module Program
     member this.DelegateNameIsCamelCase() =
         this.Parse """
 module program
-  type delegate2 = delegate of int * int -> int
+
+type delegate2 = delegate of int * int -> int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.StructNameIsPascalCase() =
         this.Parse """
 module Program
-  type Point2D =
+
+type Point2D =
     struct
-      val X: float
-      val Y: float
-      new(x: float, y: float) = { X = x; Y = y }
+        val X: float
+        val Y: float
+        new(x: float, y: float) = { X = x; Y = y }
     end
 """
 
@@ -125,15 +136,16 @@ module Program
     member this.StructNameIsCamelCase() =
         this.Parse """
 module program
-  type point2D =
+
+type point2D =
     struct
-      val X: float
-      val Y: float
-      new(x: float, y: float) = { X = x; Y = y }
+        val X: float
+        val Y: float
+        new(x: float, y: float) = { X = x; Y = y }
     end
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.TypeExtensionTypeIsCamelCase() =
@@ -225,8 +237,9 @@ type Cat = | Foo
     member this.EnumNameIsPascalCase() =
         this.Parse """
 module Program
-  type MyEnum =
-    | EnumCase = 1
+
+type MyEnum =
+| EnumCase = 1
 """
 
         this.AssertNoWarnings()
@@ -235,9 +248,10 @@ module Program
     member this.EnumNameIsCamelCase() =
         this.Parse """
 module Program
-  type myEnum =
-    | EnumCase = 1
+
+type myEnum =
+| EnumCase = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 

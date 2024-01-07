@@ -451,6 +451,7 @@ Bar.SomeMethod(woof = 5, foo = true)
 
         this.Parse("""
 module Goat
+
 do
     let parser = UnionArgParser.Create<'T>()
     let results =

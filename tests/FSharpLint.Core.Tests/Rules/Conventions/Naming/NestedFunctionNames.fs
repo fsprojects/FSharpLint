@@ -43,15 +43,15 @@ module Program =
     member this.NestedFunctionNameIsPascalCase() =
         this.Parse """
 module Program =
-let CylinderVolume radius length =
-    let NestedFunction arg1 =
-        arg1 + 1
+    let CylinderVolume radius length =
+        let NestedFunction arg1 =
+            arg1 + 1
 
-    let pi = 3.14159
-    length * pi * radius * radius
+        let pi = 3.14159
+        length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
     member this.NestedFunctionNameInTypeIsPascalCase() =

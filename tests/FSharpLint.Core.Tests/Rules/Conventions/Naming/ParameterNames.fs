@@ -17,7 +17,8 @@ type TestConventionsParameterNames() =
     member this.FunctionParameterIsCamelCase() =
         this.Parse """
 module Program
-  let main dog = ()
+
+let main dog = ()
 """
 
         this.AssertNoWarnings()
@@ -26,17 +27,19 @@ module Program
     member this.ConstructorParameterIsPascalCase() =
         this.Parse """
 module Program
-  type MyClass2(Cats) as this =
+
+type MyClass2(Cats) as this =
     member this.PrintMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 16))
+        Assert.IsTrue(this.ErrorExistsAt(4, 14))
 
     [<Test>]
     member this.ConstructorParameterIsCamelCase() =
         this.Parse """
 module Program
-  type MyClass2(cats) as this =
+
+type MyClass2(cats) as this =
     member this.PrintMessage() = ()
 """
 
@@ -46,6 +49,7 @@ module Program
     member this.CompilerGeneratedArgumentName() =
         this.Parse """
 module Program
+
 (fun _ -> ())
 """
 
@@ -57,8 +61,9 @@ module Program
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
+
 let extractInt (SingleCaseDU myInt) =
-  myInt
+    myInt
 
 let singleCaseDU = SingleCaseDU 5
 

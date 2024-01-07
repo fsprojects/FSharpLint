@@ -19,7 +19,7 @@ type TestConventionsPrivateValuesNames() =
         this.Parse """
 module Program
 
-  let main =
+let main =
     let (Cat, _) = 1, 0
 """
 
@@ -29,26 +29,29 @@ module Program
     member this.PrivateTupleIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat, private dog = 1, 0
+
+let private Cat, private dog = 1, 0
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
     member this.PrivateFunctionNameIsPascalCase() =
         this.Parse """
 module Program
-  let private Main () = ()
+
+let private Main () = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
     [<Test>]
     member this.MnemonicWildcardInPatternMatch() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | _dog -> ()
     | _ -> ()
@@ -60,19 +63,21 @@ module Program
     member this.UnderscoreInMatchPatternIdent() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | d_og -> ()
     | _ -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine(5))
+        Assert.IsTrue(this.ErrorExistsOnLine 6)
 
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | dog -> ()
 """
@@ -83,18 +88,20 @@ module Program
     member this.PatternMatchAsIsPascalCase() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | _ as Dog -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+        Assert.IsTrue(this.ErrorExistsAt(6, 11))
 
     [<Test>]
     member this.PatternMatchAsIsCamelCase() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | _ as dog -> ()
 """
@@ -105,23 +112,26 @@ module Program
     member this.FunctionNameNestedInBindingIsPascalCase() =
         this.Parse """
 module program
-  let main () =
+
+let main () =
     let Main () = ()
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.FunctionNameNestedInBindingIsCamelCase() =
         this.Parse """
 module Program
-  let main () =
+
+let main () =
     let bain () = ()
     ()
 """
 
         this.AssertNoWarnings()
+
     [<Test>]
     member this.CamelCaseLetBindingInType() =
         this.Parse """
@@ -154,12 +164,12 @@ type Dog() =
 module Program
 
 type Cat() =
-  member this.ContainsBinding() =
-    let Goat = 0
-    ()
+    member this.ContainsBinding() =
+        let Goat = 0
+        ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 8))
+        Assert.IsTrue(this.ErrorExistsAt(6, 12))
 
     [<Test>]
     member this.CamelCaseLetBindingInMethod() =
@@ -167,9 +177,9 @@ type Cat() =
 module Program
 
 type Cat() =
-  member this.ContainsBinding() =
-    let goat = 0
-    ()
+    member this.ContainsBinding() =
+        let goat = 0
+        ()
 """
 
         this.AssertNoWarnings()
@@ -178,10 +188,11 @@ type Cat() =
     member this.LiteralPatternMatchExpectNoErrors() =
         this.Parse """
 module Program
-  [<Literal>]
-  let Dog = true
 
-  let main =
+[<Literal>]
+let Dog = true
+
+let main =
     match true with
     | Dog -> ()
     | _ -> ()
@@ -218,10 +229,11 @@ let foo () =
     member this.FunctionParameterIsPascalCase() =
         this.Parse """
 module Program
-  let main Dog = ()
+
+let main Dog = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 11))
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
 
     [<Test>]
     member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() =
@@ -295,7 +307,7 @@ module Program
 
 type SingleCaseDU = SingleCaseDU of int
 let extractInt (SingleCaseDU MyInt) =
-  MyInt
+    MyInt
 
 let singleCaseDU = SingleCaseDU 5
 
@@ -308,7 +320,8 @@ let result = extractInt singleCaseDU
     member this.PrivateVariableIsCamelCase() =
         this.Parse """
 module Program
-  let private cat = 1
+
+let private cat = 1
 """
 
         this.AssertNoWarnings()
@@ -317,16 +330,18 @@ module Program
     member this.PrivateVariableIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat = 1
+
+let private Cat = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3,14))
+        Assert.IsTrue(this.ErrorExistsAt(4,12))
 
     [<Test>]
     member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let Cat = 1
+
+let Cat = 1
 """
 
         this.AssertNoWarnings()
@@ -336,7 +351,8 @@ module Program
     member this.ExplicitPublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let public Cat = 1
+
+let public Cat = 1
 """
 
         this.AssertNoWarnings()
@@ -345,7 +361,8 @@ module Program
     member this.InternalVariableIsNotReported() =
         this.Parse """
 module Program
-  let internal Cat = 1
+
+let internal Cat = 1
 """
 
         this.AssertNoWarnings()

@@ -17,7 +17,8 @@ type TestConventionsRecordFieldNames() =
     member this.RecordFieldIsPascalCase() =
         this.Parse """
 module Program
-  type Record = { Dog: int }
+
+type Record = { Dog: int }
 """
 
         this.AssertNoWarnings()
@@ -26,16 +27,17 @@ module Program
     member this.RecordFieldIsCamelCase() =
         this.Parse """
 module Program
-  type Record = { dog: int }
+
+type Record = { dog: int }
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 18))
+        Assert.IsTrue(this.ErrorExistsAt(4, 16))
 
     [<Test>]
     member this.RecordFieldRuleDoesntApplyToUnionCaseFields() =
         this.Parse """
-  type Test =
-    | InfixOperator of operatorIdentifier:Expression * Expression * Expression
+type Test =
+| InfixOperator of operatorIdentifier:Expression * Expression * Expression
 """
 
         Assert.IsTrue(this.NoErrorsExist)

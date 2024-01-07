@@ -17,7 +17,8 @@ type TestConventionsInterfaceNames() =
     member this.InterfaceNameBeginsWithI() =
         this.Parse """
 module Program
-  type IPrintable =
+
+type IPrintable =
     abstract member Print : unit -> unit
 """
 
@@ -29,7 +30,8 @@ module Program
     member this.StaticClassIsNotTreatedAsInterface() =
         this.Parse """
 module Program
-  type Printable =
+
+type Printable =
     static member Print() = ()
 """
 
@@ -41,7 +43,8 @@ module Program
     member this.TypeAliasIsNotTreatedAsInterface() =
         this.Parse """
 module Program
-  type Matrix = int[,]
+
+type Matrix = int[,]
 """
 
         this.AssertNoWarnings()
@@ -50,18 +53,20 @@ module Program
     member this.InterfaceNameDoesNotBeginWithI() =
         this.Parse """
 module Program
-  type Printable =
+
+type Printable =
     abstract member Print : unit -> unit
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.AbstractClassNameDoesNotBeginWithI() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Printable() =
+
+[<AbstractClass>]
+type Printable() =
     abstract member Print : unit -> unit
 """
 
@@ -71,13 +76,15 @@ module Program
     member this.``Quick fix for prefixes adds missing prefix to identifier.``() =
         let source = """
 module Program
-  type Printable =
+
+type Printable =
     abstract member Print : unit -> unit
 """
 
         let expected = """
 module Program
-  type IPrintable =
+
+type IPrintable =
     abstract member Print : unit -> unit
 """
 

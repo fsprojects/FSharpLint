@@ -18,7 +18,8 @@ type TestConventionsMemberNames() =
     member this.ClassMemberIsPascalCase() =
         this.Parse """
 module Program
-  type MyClass2() as this =
+
+type MyClass2() as this =
     member this.PrintMessage() = ()
 """
 
@@ -28,17 +29,19 @@ module Program
     member this.ClassMemberIsCamelCase() =
         this.Parse """
 module Program
-  type MyClass2() as this =
+
+type MyClass2() as this =
     member this.printMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 16))
+        Assert.IsTrue(this.ErrorExistsAt(5, 16))
 
     /// The new member (constructor) is not pascal case so check it does not post an error.
     [<Test>]
     member this.ConstructorDoesNotPostError() =
         this.Parse """
 module Program
+
 type MyClass(x) =
     new() = MyClass(0)
 """
@@ -50,7 +53,7 @@ type MyClass(x) =
     [<Test>]
     member this.PropertyIsPascalCase() =
         this.Parse """
-  type Shape2D(x0 : float, y0 : float) =
+type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
@@ -62,7 +65,7 @@ type MyClass(x) =
     [<Test>]
     member this.PropertyIsCamelCase() =
         this.Parse """
-  type Shape2D(x0 : float, y0 : float) =
+type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
@@ -75,8 +78,9 @@ type MyClass(x) =
     member this.AbstractMemberNameIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
 """
 
@@ -86,19 +90,21 @@ module Program
     member this.AbstractMemberNameIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 20))
+        Assert.IsTrue(this.ErrorExistsAt(6, 20))
 
     [<Test>]
     member this.AbstractPropertyNameIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract Area : float with get
 """
 
@@ -108,19 +114,21 @@ module Program
     member this.AbstractPropertyNameIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract area : float with get
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 13))
+        Assert.IsTrue(this.ErrorExistsAt(6, 13))
 
     [<Test>]
     member this.DefaultMemberIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
     default this.Rotate(angle) = ()
 """
@@ -131,13 +139,14 @@ module Program
     member this.DefaultMemberIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit
     default this.rotate(angle) = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 17))
+        Assert.IsTrue(this.ErrorExistsAt(7, 17))
 
     [<Test>]
     member this.TypeExtensionMethodIsPascalCase() =

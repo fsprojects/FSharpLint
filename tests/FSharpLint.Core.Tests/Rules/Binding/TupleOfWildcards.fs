@@ -15,10 +15,10 @@ module Program
 type Cat = | Persian of int * int
 
 match Persian(1, 3) with
-    | Persian(_, _) -> ()
+| Persian(_, _) -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 14))
+        Assert.IsTrue(this.ErrorExistsAt(7, 10))
 
     [<Test>]
     member this.``Method's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
