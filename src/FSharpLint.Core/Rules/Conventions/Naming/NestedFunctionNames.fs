@@ -8,7 +8,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args: AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding (SynBinding (_, _, _, _, _attributes, _, _, pattern, _, _, _, _)) ->
+    | AstNode.Binding (SynBinding (_, _, _, _, _attributes, _, _, pattern, _, _, _, _, _)) ->
         if isNested args args.NodeIndex then
             let maxAccessibility = AccessControlLevel.Public
             getPatternIdents maxAccessibility (fun _a11y innerPattern -> getFunctionIdents innerPattern) true pattern

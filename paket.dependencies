@@ -7,11 +7,14 @@ nuget Argu
 nuget BenchmarkDotNet
 nuget BenchmarkDotNet.Diagnostics.Windows
 nuget FParsec
-nuget FSharp.Compiler.Service ~> 40.0
-nuget Ionide.ProjInfo.ProjectSystem ~> 0.53.0
-nuget Ionide.ProjInfo.FCS ~> 0.53.0
-nuget FSharp.Core
-nuget nunit
+nuget FSharp.Compiler.Service ~> 41.0.1
+nuget Ionide.ProjInfo.ProjectSystem == 0.58.0
+nuget Ionide.ProjInfo.FCS == 0.58.0
+nuget Ionide.ProjInfo == 0.58.0
+nuget Ionide.ProjInfo.Sln == 0.58.0
+nuget FSharp.Core ~> 6.0
+nuget nunit ~> 3.0
+nuget System.Reactive ~> 5
 nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk 17.7.2
 nuget Newtonsoft.Json
@@ -20,10 +23,10 @@ nuget Microsoft.Build.Locator
 # don't expose as a package reference
 nuget Microsoft.SourceLink.GitHub copy_local: true
 # don't copy runtime assets
-nuget Microsoft.Build.Framework copy_local: false
+nuget Microsoft.Build.Framework == 16.11.0 copy_local: false
 nuget Microsoft.Build.Tasks.Core copy_local: false
-nuget Microsoft.Build.Utilities.Core copy_local: false
-nuget Microsoft.Build copy_local: false
+nuget Microsoft.Build.Utilities.Core == 16.11.0 copy_local: false
+nuget Microsoft.Build == 16.11.0 copy_local: false
 
 group Docs
   source https://api.nuget.org/v3/index.json
@@ -43,6 +46,9 @@ group Build
   storage: none
   strategy: min
 
+  nuget System.Reactive ~> 5
+  nuget MSBuild.StructuredLogger == 2.1.815
+  nuget FSharp.Core ~> 5.0
   nuget Fake.Core.Target
   nuget Fake.Core.Process
   nuget Fake.DotNet.Cli

@@ -7,7 +7,8 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
-    | SynExpr.Ident(ident)::arguments when List.length arguments > maxArgs && ident.idText = identifier ->
+    | ExpressionUtilities.Identifier([ ident ], _)::arguments 
+        when List.length arguments > maxArgs && ident.idText = identifier ->
         Some()
     | _ -> None
 

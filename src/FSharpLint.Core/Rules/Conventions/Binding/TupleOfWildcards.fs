@@ -30,7 +30,7 @@ let private checkTupleOfWildcards pattern identifier =
 let private isTupleMemberArgs breadcrumbs tupleRange =
     let (|MemberBindingArgs|_|) bindingPattern =
         match bindingPattern with
-        | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _) ->
+        | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _, _) ->
             match args with
             | SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_) as args, _)]) -> Some(args)
             | _ -> None
@@ -47,7 +47,7 @@ let private runner (args:AstNodeRuleParams) =
     | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, range) as pattern, _)]), _, _)) ->
         let breadcrumbs = args.GetParents 2
         if (not << isTupleMemberArgs breadcrumbs) range then
-            let identifier = identifier.Lid |> List.map (fun x -> x.idText)
+            let identifier = identifier.LongIdent |> List.map (fun x -> x.idText)
             checkTupleOfWildcards pattern identifier
         else
             Array.empty

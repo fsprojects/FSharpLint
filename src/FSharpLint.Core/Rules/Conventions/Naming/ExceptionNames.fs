@@ -9,7 +9,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, unionCase, _, _, _, _)) ->
         match unionCase with
-        | SynUnionCase(_, identifier, _, _, _, _) ->
+        | SynUnionCase(_, SynIdent(identifier, _), _, _, _, _, _) ->
             (identifier, identifier.idText, None) |> Array.singleton
     | _ -> Array.empty
 

@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private isAsyncCompExpr = function
-    | SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.CompExpr _), _)
+    | SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.ComputationExpr _), _)
         when compExprName.idText = "async" ->
         true
     | _ -> false
@@ -38,7 +38,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
             match crumb with
             | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _)) ->
                 bindings
-            | AstNode.Expression (SynExpr.LetOrUse (true, false, bindings, _, _)) ->
+            | AstNode.Expression (SynExpr.LetOrUse (true, false, bindings, _, _, _)) ->
                 bindings
             | _ -> [])
         |> List.choose getFunctionNameFromAsyncCompExprBinding

@@ -18,14 +18,14 @@ type TestAst() =
     let astToExpr ast =
         let (|Module|_|) x =
             match x with
-            | SynModuleOrNamespace(_, _, _, SynModuleDecl.DoExpr(_, app, _)::_, _, _, _, _) ->
+            | SynModuleOrNamespace(_, _, _, SynModuleDecl.Expr(app, _)::_, _, _, _, _, _) ->
                 Some(app)
             | _ -> None
 
         match ast with
         | ParsedInput.ImplFile(x) ->
             match x with
-            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _) ->
+            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _) ->
                 app
             | _ -> failwith "Expected at least one module or namespace."
         | _ -> failwith "Expected an implementation file."

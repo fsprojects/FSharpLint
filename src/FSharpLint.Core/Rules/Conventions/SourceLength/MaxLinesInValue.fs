@@ -7,7 +7,7 @@ open FSharpLint.Framework.Rules
 
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, _, _, valData, _, _, _, _, _) as binding) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, _, _, valData, _, _, _, _, _, _) as binding) ->
         match identifierTypeFromValData valData with
         | Value -> Helper.SourceLength.checkSourceLengthRule config binding.RangeOfBindingWithRhs args.FileContent "Value"
         | _ -> Array.empty

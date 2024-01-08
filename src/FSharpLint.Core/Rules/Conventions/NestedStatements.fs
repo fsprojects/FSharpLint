@@ -18,7 +18,7 @@ let private error (depth:int) =
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
 /// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
 let private isCompilerGeneratedMatch = function
-    | SynExpr.Match(_, SynExpr.Ident(ident), _, _) when ident.idText.StartsWith("_arg") -> true
+    | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
     | _ -> false
 
 let private areChildrenNested = function

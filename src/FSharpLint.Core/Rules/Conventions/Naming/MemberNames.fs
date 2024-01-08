@@ -8,7 +8,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getMemberIdents _ =  function
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
-        match List.tryLast longIdent.Lid with
+        match List.tryLast longIdent.LongIdent with
         | Some(ident) when ident.idText.StartsWith "op_" ->
             // Ignore members prefixed with op_, they are a special case used for operator overloading.
             Array.empty
@@ -24,7 +24,7 @@ let private isImplementingInterface parents =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         let parents = args.GetParents 3
         if not (isLiteral attributes) && not (isImplementingInterface parents) then
             match identifierTypeFromValData valData with
@@ -35,7 +35,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             Array.empty
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.AbstractSlot(SynValSig(_, identifier, _, _, _, _, _, _, _, _, _), _, _) ->
+        | SynMemberDefn.AbstractSlot(SynValSig(_, SynIdent(identifier, _), _, _, _, _, _, _, _, _, _, _), _, _) ->
             (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty

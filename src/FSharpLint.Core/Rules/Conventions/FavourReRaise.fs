@@ -24,16 +24,16 @@ let private runner (args: AstNodeRuleParams) =
                 | Some id when id = ident.idText ->
                     generateError range
                 | _ -> Array.empty
-            | SynExpr.LongIdent (_, LongIdentWithDots (id, _), _, range) -> generateError range
+            | SynExpr.LongIdent (_, SynLongIdent (id, _, _), _, range) -> generateError range
             | _ -> Array.empty
-        | SynExpr.TryWith (expressions, _, clauseList, _expression, _range, _, _) as expr ->
+        | SynExpr.TryWith (expressions, clauseList, _range, _, _, _) as expr ->
             clauseList
             |> List.toArray
             |> Array.collect (fun clause ->
                 match clause with
-                | SynMatchClause (pat, _, app, _, _) ->
+                | SynMatchClause (pat, _, app, _, _, _) ->
                     match pat with
-                    | SynPat.Named (_, id, _, _, _) -> checkExpr app (Some id.idText)
+                    | SynPat.Named (SynIdent(id, _), _, _, _) -> checkExpr app (Some id.idText)
                     | _ -> checkExpr app None)
         | SynExpr.IfThenElse (_, expr, _, _, _, _, _) -> checkExpr expr maybeIdent
         | _ -> Array.empty
