@@ -357,4 +357,7 @@
   <data name="RulesSuggestUseAutoProperty" xml:space="preserve">
     <value>Consider using auto-properties via the 'val' keyword.</value>
   </data>
+  <data name="RulesUnneededRecKeyword" xml:space="preserve">
+    <value>The '{0}' function has a "rec" keyword, but it is not really recursive, consider removing it.</value>
+  </data>
 </root>
