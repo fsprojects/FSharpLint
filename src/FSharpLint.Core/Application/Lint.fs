@@ -64,7 +64,7 @@ module Lint =
                             sprintf "failed to parse file %s, message: %s" x.FileName x.Message
 
                         String.Join(", ", failures |> Array.map getFailureReason)
-                    | ParseFile.AbortedTypeCheck -> "Aborted type check."
+                    | ParseFile.AbortedTypeCheck -> "Type check failed. You might want to build your solution/project first and try again."
 
                 match this with
                 | ProjectFileCouldNotBeFound projectPath ->
