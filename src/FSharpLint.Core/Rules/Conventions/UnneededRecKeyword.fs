@@ -11,7 +11,7 @@ let runner (args: AstNodeRuleParams) =
     match args.AstNode, args.CheckInfo with
     | AstNode.ModuleDeclaration (SynModuleDecl.Let (isRecursive, bindings, letRange)), Some checkInfo when isRecursive ->
         match bindings with
-        | SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent (LongIdentWithDots([ident], _), _, _, _, _, range), _, _, _, _) :: _ ->
+        | SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent (SynLongIdent([ident], _, _), _, _, _, _, range), _, _, _, _, _) :: _ ->
             let symbolUses = checkInfo.GetAllUsesOfAllSymbolsInFile()
             let funcName = ident.idText
 
