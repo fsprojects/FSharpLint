@@ -519,7 +519,7 @@ module Lint =
                 { ParseFile.Text = parsedFileInfo.Source
                   ParseFile.Ast = parsedFileInfo.Ast
                   ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
-                  ParseFile.File = "/home/user/Dog.Test.fsx" }
+                  ParseFile.File = "<inline source>" }
 
             lint lintInformation parsedFileInfo
 
