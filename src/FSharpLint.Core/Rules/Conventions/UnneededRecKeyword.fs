@@ -33,7 +33,7 @@ let internal functionCallsItself (checkInfo: FSharpCheckFileResults) (func: Recu
         usage.Symbol.DisplayName = funcName 
         && ExpressionUtilities.rangeContainsOtherRange func.Body.Range usage.Range)
 
-let internal emitWarning (func: RecursiveFunctionInfo) =
+let private emitWarning (func: RecursiveFunctionInfo) =
     { Range = func.Range
       Message =
           String.Format(

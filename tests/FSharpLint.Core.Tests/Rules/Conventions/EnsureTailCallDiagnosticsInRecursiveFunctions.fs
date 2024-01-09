@@ -32,7 +32,7 @@ let rec Foo someParam =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.``Should error when function is defined with rec keyword but is not recursive``() =
+    member this.``Should not error when function is defined with rec keyword but is not recursive``() =
         this.Parse """
 let rec Foo someParam =
     ()
@@ -40,8 +40,4 @@ let rec Foo someParam =
 module Bar =    
     let Foo = 0"""
 
-        Assert.IsTrue 
-            <| this.ErrorWithMessageExistsAt(
-                """The 'Foo' function has a "rec" keyword, but it is not really recursive, consider removing it.""", 
-                2, 
-                8)
+        Assert.IsTrue this.NoErrorsExist

@@ -36,7 +36,7 @@ let runner (args: AstNodeRuleParams) =
             else
                 emitWarning func |> Array.singleton
         else
-            UnneededRecKeyword.emitWarning func |> Array.singleton
+            Array.empty
     | _ -> Array.empty
 
 let rule =
