@@ -362,7 +362,10 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.Wild(_)
     | SynPat.OptionalVal(_)
     | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> Array.empty
-    | SynPat.As(_) -> failwith "Not implemented"
+    | SynPat.As(lhsPat, rhsPat, _) -> 
+        Array.append
+            (getPatternIdents accessibility getIdents false lhsPat)
+            (getPatternIdents accessibility getIdents false rhsPat)
 
 let rec identFromSimplePat = function
     | SynSimplePat.Id(ident, _, _, _, _, _) -> Some ident
