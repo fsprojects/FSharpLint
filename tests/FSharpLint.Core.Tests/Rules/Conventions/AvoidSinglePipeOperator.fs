@@ -16,7 +16,7 @@ let someFunc someParam =
     |> someOtherFunc
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue <| this.ErrorExistsAt(4, 4)
 
     [<Test>]
     member this.``Use pipe operator twice``() =
@@ -38,7 +38,7 @@ module MyModule =
         |> someOtherFunc
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue <| this.ErrorExistsAt(5, 8)
 
     [<Test>]
     member this.``Use pipe operator twice in module``() =
@@ -61,7 +61,7 @@ type CustomerName(firstName) =
         |> someOtherFunc
         """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue <| this.ErrorExistsAt(5, 8)
 
     [<Test>]
     member this.``Use pipe operator twice in type``() =

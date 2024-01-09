@@ -23,7 +23,7 @@ let runner (args: AstNodeRuleParams) =
             match synExpr with
             | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range) ->
                 match funcExpr with
-                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range) ->
+                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range) ->
                     match funcExpr with
                     | ExpressionUtilities.Identifier([ ident ], _) ->
                         if ident.idText = "op_PipeRight" then
@@ -31,7 +31,7 @@ let runner (args: AstNodeRuleParams) =
                             | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
                                 Array.empty 
                             | _ ->
-                                errors range
+                                errors ident.idRange
                         else
                             Array.empty
                     | _ ->
