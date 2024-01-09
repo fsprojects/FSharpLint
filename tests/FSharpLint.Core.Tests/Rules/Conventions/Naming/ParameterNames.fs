@@ -96,3 +96,11 @@ let foo _x = 0
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``As pattern is processed correctly (GetPatternIdents regression)``() =
+        this.Parse """
+let foo ((x, y) as bar_coord) = bar_coord
+"""
+        
+        Assert.IsTrue this.ErrorsExist
