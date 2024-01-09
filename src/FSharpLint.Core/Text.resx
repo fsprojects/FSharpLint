@@ -273,6 +273,9 @@
   <data name="RulesFormattingF#PostfixGenericError" xml:space="preserve">
     <value>Use postfix syntax for F# type {0}.</value>
   </data>
+  <data name="RulesFormattingF#ArrayPrefixError" xml:space="preserve">
+    <value>Use prefix syntax for generic type (array&lt;'Foo&gt;).</value>
+  </data>
   <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
     <value>Use prefix syntax for generic type.</value>
   </data>
