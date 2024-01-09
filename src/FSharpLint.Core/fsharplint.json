@@ -290,6 +290,7 @@
         }
     },
     "suggestUseAutoProperty": { "enabled": false },
+    "disallowShadowing": { "enabled": false },
     "avoidTooShortNames": { "enabled": false },
     "asyncExceptionWithoutReturn": { "enabled": false },
     "unneededRecKeyword": { "enabled": true },
