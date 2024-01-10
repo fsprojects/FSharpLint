@@ -57,8 +57,13 @@ let private runner (args:AstNodeRuleParams) =
         Array.empty
 
 let rule =
-    { Name = "UselessBinding"
-      Identifier = Identifiers.UselessBinding
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
-
+    AstNodeRule
+        {
+            Name = "UselessBinding"
+            Identifier = Identifiers.UselessBinding
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

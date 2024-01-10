@@ -52,11 +52,21 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
             if spacesBeforeColon <> expectedSpacesBefore || spacesAfterColon <> expectedSpacesAfter then
                 let trimmedOtherText = otherText.TrimEnd(' ')
                 let trimmedTypeText = typeText.TrimStart(' ')
-                let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
-                let spacesAfterString = " " |> String.replicate expectedSpacesAfter
-                let suggestedFix = lazy(
-                    { FromRange = range; FromText = text; ToText = trimmedOtherText + spacesBeforeString + ":" + spacesAfterString + trimmedTypeText }
-                    |> Some)
+                let spacesBeforeString = String.replicate expectedSpacesBefore " "
+                let spacesAfterString = String.replicate expectedSpacesAfter " "
+                let suggestedFix =
+                    lazy
+                        (Some
+                            {
+                                FromRange = range
+                                FromText = text
+                                ToText =
+                                    trimmedOtherText
+                                    + spacesBeforeString
+                                    + ":"
+                                    + spacesAfterString
+                                    + trimmedTypeText
+                            })
                 let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                 Some
                     {
@@ -83,7 +93,13 @@ let runner (config:Config) (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { Name = "TypedItemSpacing"
-      Identifier = Identifiers.TypedItemSpacing
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TypedItemSpacing"
+            Identifier = Identifiers.TypedItemSpacing
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

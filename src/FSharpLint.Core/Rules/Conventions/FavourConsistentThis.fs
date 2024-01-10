@@ -25,11 +25,13 @@ let runner (config: Config) args =
                 match identifiers  with
                 | head::_ when isNotConsistent head.idText symbol ->
                     let error =
-                        { Range = range
-                          Message = String.Format(Resources.GetString "RulesFavourConsistentThis", config.Symbol)
-                          SuggestedFix = None
-                          TypeChecks = List.Empty }
-                        |> Array.singleton
+                        Array.singleton
+                            {
+                                Range = range
+                                Message = String.Format(Resources.GetString "RulesFavourConsistentThis", config.Symbol)
+                                SuggestedFix = None
+                                TypeChecks = List.Empty
+                            }
                     error
                 | _ -> Array.empty
             else
@@ -38,7 +40,13 @@ let runner (config: Config) args =
     | _ -> Array.empty
 
 let rule config =
-    { Name = "FavourConsistentThis"
-      Identifier = Identifiers.FavourConsistentThis
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourConsistentThis"
+            Identifier = Identifiers.FavourConsistentThis
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

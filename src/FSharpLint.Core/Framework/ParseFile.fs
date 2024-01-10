@@ -45,10 +45,13 @@ module ParseFile =
 
         match checkFileAnswer with
         | FSharpCheckFileAnswer.Succeeded(typeCheckResults) ->
-            { Text = source
-              Ast = parseResults.ParseTree
-              TypeCheckResults = Some(typeCheckResults)
-              File = file } |> Success
+            Success
+                {
+                    Text = source
+                    Ast = parseResults.ParseTree
+                    TypeCheckResults = Some(typeCheckResults)
+                    File = file
+                }
         | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
 
     let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =

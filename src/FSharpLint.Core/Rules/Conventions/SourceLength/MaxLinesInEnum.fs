@@ -17,7 +17,13 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { Name = "MaxLinesInEnum"
-      Identifier = Identifiers.MaxLinesInEnum
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxLinesInEnum"
+            Identifier = Identifiers.MaxLinesInEnum
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

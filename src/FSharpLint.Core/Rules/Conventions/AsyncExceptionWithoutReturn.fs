@@ -36,19 +36,20 @@ let rec checkExpression (expression: SynExpr) (range: range) =
 
         match elseExpr with
         | Some elseExpression ->
-            checkThen
-            |> Array.append (checkExpression elseExpression range)
+            Array.append (checkExpression elseExpression range) checkThen
         | None -> checkThen
     | SynExpr.App (_, _, SynExpr.Ident failwithId, _, _) when
         failwithId.idText = "failwith"
         || failwithId.idText = "failwithf"
         || failwithId.idText = "raise"
         ->
-        { Range = range
-          Message = Resources.GetString "RulesAsyncExceptionWithoutReturn"
-          SuggestedFix = None
-          TypeChecks = List.Empty }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString "RulesAsyncExceptionWithoutReturn"
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     | SynExpr.App (_, _, funcExpr, _, range) ->
         checkExpression funcExpr range
     | SynExpr.LetOrUse (_, _, _, body, range, _) ->
@@ -65,9 +66,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "AsyncExceptionWithoutReturn"
-      Identifier = Identifiers.AsyncExceptionWithoutReturn
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "AsyncExceptionWithoutReturn"
+            Identifier = Identifiers.AsyncExceptionWithoutReturn
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -41,13 +41,13 @@ let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
         | _ -> false
 
     if canBeReplacedWithFunctionComposition lambda.Body then
-        {
-            Range = range
-            Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -55,7 +55,13 @@ let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaCannotBeReplacedWithComposition
 
 let rule =
-    { Name = "CanBeReplacedWithComposition"
-      Identifier = Identifiers.CanBeReplacedWithComposition
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "CanBeReplacedWithComposition"
+            Identifier = Identifiers.CanBeReplacedWithComposition
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -59,7 +59,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.Expression(SynExpr.Lambda(_, _, lambdaArgs, _, _, _, _)) ->
         let lambdaIdent = FunctionReimplementation.getLambdaParamIdent lambdaArgs
         match lambdaIdent with
-        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | Some ident -> Array.singleton (ident, ident.idText, None)
         | None -> Array.empty
     | AstNode.Match(SynMatchClause(namePattern, _, _, _, _, _)) ->
         getParameterWithBelowMinimumLength [namePattern]
@@ -75,10 +75,10 @@ let private getIdentifiers (args:AstNodeRuleParams) =
                     result
             | _ -> Array.empty
         | SynPat.Named(SynIdent(identifier, _), _, _, _) when isIdentifierTooShort identifier.idText ->
-            (identifier, identifier.idText, None) |> Array.singleton
+            Array.singleton (identifier, identifier.idText, None)
         | _ -> Array.empty
     | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
-        (identifier, identifier.idText, None) |> Array.singleton
+        Array.singleton (identifier, identifier.idText, None)
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _, _)) ->
         let checkTypes types =
             seq {
@@ -93,19 +93,23 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             | Some types -> checkTypes types.TyparDecls |> Array.ofSeq
             | None -> Array.empty
     | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) when isIdentifierTooShort id.idText ->
-        (id, id.idText, None) |> Array.singleton
+        Array.singleton (id, id.idText, None)
     | _ -> Array.empty
 
 let runner (args:AstNodeRuleParams) =
     getIdentifiers args
     |> Array.collect (fun (identifier, idText, typeCheck) ->
         let suggestions = checkIdentifier identifier idText
-        suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
+        Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }) suggestions)
 
 let rule =
-    { Name = "AvoidTooShortNames"
-      Identifier = Identifiers.AvoidTooShortNames
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "AvoidTooShortNames"
+            Identifier = Identifiers.AvoidTooShortNames
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -14,13 +14,13 @@ let private checkForBindingToAWildcard pattern range =
         | _ -> false
 
     if findWildAndIgnoreParens pattern then
-        {
-            Range = range
-            Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -33,7 +33,13 @@ let private runner (args:AstNodeRuleParams) =
 
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
-    { Name = "FavourIgnoreOverLetWild"
-      Identifier = Identifiers.FavourIgnoreOverLetWild
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourIgnoreOverLetWild"
+            Identifier = Identifiers.FavourIgnoreOverLetWild
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

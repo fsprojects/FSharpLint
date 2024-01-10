@@ -9,7 +9,7 @@ open FSharpLint.Rules.Helper.Naming
 let private getMemberIdents _ = function
     | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) ->
-        (ident, ident.idText, None) |> Array.singleton
+        Array.singleton (ident, ident.idText, None)
     | _ -> Array.empty
 
 let private getValueOrFunctionIdents typeChecker _accessibility pattern =
@@ -22,7 +22,7 @@ let private getValueOrFunctionIdents typeChecker _accessibility pattern =
     | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) when not (isActivePattern ident) ->
         let checkNotUnionCase = checkNotUnionCase ident
-        (ident, ident.idText, Some checkNotUnionCase) |> Array.singleton
+        Array.singleton (ident, ident.idText, Some checkNotUnionCase)
     | _ -> Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =

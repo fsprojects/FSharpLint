@@ -55,7 +55,13 @@ let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args validateLambdaIsNotPointless
 
 let rule =
-    { Name = "ReimplementsFunction"
-      Identifier = Identifiers.ReimplementsFunction
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "ReimplementsFunction"
+            Identifier = Identifiers.ReimplementsFunction
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

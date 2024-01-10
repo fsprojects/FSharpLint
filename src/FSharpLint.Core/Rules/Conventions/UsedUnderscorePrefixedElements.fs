@@ -42,7 +42,13 @@ let runner (args: AstNodeRuleParams) =
         Array.empty
 
 let rule =
-    { Name = "UsedUnderscorePrefixedElements"
-      Identifier = Identifiers.UsedUnderscorePrefixedElements
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "UsedUnderscorePrefixedElements"
+            Identifier = Identifiers.UsedUnderscorePrefixedElements
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

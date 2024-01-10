@@ -13,14 +13,13 @@ let private getMemberIdents _ =  function
             // Ignore members prefixed with op_, they are a special case used for operator overloading.
             Array.empty
         | None -> Array.empty
-        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | Some ident -> Array.singleton (ident, ident.idText, None)
     | _ -> Array.empty
 
 let private isImplementingInterface parents =
-    parents
-    |> List.exists (function
+    List.exists (function
         | AstNode.MemberDefinition (SynMemberDefn.Interface _) -> true
-        | _ -> false)
+        | _ -> false) parents
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
@@ -36,7 +35,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
         | SynMemberDefn.AbstractSlot(SynValSig(_, SynIdent(identifier, _), _, _, _, _, _, _, _, _, _, _), _, _) ->
-            (identifier, identifier.idText, None) |> Array.singleton
+            Array.singleton (identifier, identifier.idText, None)
         | _ -> Array.empty
     | _ -> Array.empty
 

@@ -14,13 +14,13 @@ open FSharpLint.Rules.Helper
 let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
     let choose (expr: SynExpr) (nextExpr: SynExpr) =
         if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
-            {
-                Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
-                Message = Resources.GetString("RulesFormattingTupleIndentationError")
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-            |> Some
+            Some
+                {
+                    Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
+                    Message = Resources.GetString("RulesFormattingTupleIndentationError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
             None
 
@@ -34,7 +34,13 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleIndentation
 
 let rule =
-    { Name = "TupleIndentation"
-      Identifier = Identifiers.TupleIndentation
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TupleIndentation"
+            Identifier = Identifiers.TupleIndentation
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

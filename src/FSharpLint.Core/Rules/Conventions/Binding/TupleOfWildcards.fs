@@ -14,7 +14,7 @@ let private checkTupleOfWildcards pattern identifier =
         | _ -> false
 
     let constructorString numberOfWildcards =
-        let constructorName = identifier |> String.concat "."
+        let constructorName = String.concat "." identifier
         let arguments = Array.create numberOfWildcards "_" |> String.concat ", "
         constructorName + "(" + arguments + ")"
 
@@ -24,13 +24,13 @@ let private checkTupleOfWildcards pattern identifier =
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = (constructorString 1)
         let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
-        {
-            Range = range
-            Message = error
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     | _ -> Array.empty
 
 let private isTupleMemberArgs breadcrumbs tupleRange =
@@ -53,14 +53,20 @@ let private runner (args:AstNodeRuleParams) =
     | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, range) as pattern, _)]), _, _)) ->
         let breadcrumbs = args.GetParents 2
         if (not << isTupleMemberArgs breadcrumbs) range then
-            let identifier = identifier.LongIdent |> List.map (fun ident -> ident.idText)
+            let identifier = List.map (fun (ident: Ident) -> ident.idText) identifier.LongIdent
             checkTupleOfWildcards pattern identifier
         else
             Array.empty
     | _ -> Array.empty
 
 let rule =
-    { Name = "TupleOfWildcards"
-      Identifier = Identifiers.TupleOfWildcards
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TupleOfWildcards"
+            Identifier = Identifiers.TupleOfWildcards
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }
