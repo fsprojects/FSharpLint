@@ -86,18 +86,16 @@ let private matchExpression len =
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
     let patterns = Seq.map (sprintf "| \"%d\"") [| 1..len-1 |] |> String.concat NewLine
-    $"""match "dummyString" with
+    makeProgram "f()" $"""match "dummyString" with
 {patterns}
 | _ -> ()"""
-    |> makeProgram "f()"
 
 /// Generates a body of code containing a match function with multiple patterns.
 let private matchFunction len =
-    $"""    function 
+    makeProgram "f" $"""    function 
 {(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)} 
     | _ -> ()
 f "dummyString" """
-    |> makeProgram "f"
 
 /// Generates a computational expression with a match! expression containing multiple patterns.
 let private matchBang len =

@@ -44,7 +44,7 @@ let runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "EnsureTailCallDiagnosticsInRecursiveFunctions"
-      Identifier = Identifiers.EnsureTailCallDiagnosticsInRecursiveFunctions
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        { Name = "EnsureTailCallDiagnosticsInRecursiveFunctions"
+          Identifier = Identifiers.EnsureTailCallDiagnosticsInRecursiveFunctions
+          RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }

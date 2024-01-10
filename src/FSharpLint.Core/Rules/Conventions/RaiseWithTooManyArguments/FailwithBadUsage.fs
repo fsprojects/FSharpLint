@@ -52,11 +52,13 @@ let private runner (args: AstNodeRuleParams) =
             | NullMessage -> "consider using a non-null error messages as parameter"
 
         let error =
-            { Range = range
-              Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
-              SuggestedFix = suggestedFix
-              TypeChecks = List.Empty }
-            |> Array.singleton
+            Array.singleton
+                { 
+                    Range = range
+                    Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
+                    SuggestedFix = suggestedFix
+                    TypeChecks = List.Empty
+                }
 
         error
 
@@ -127,9 +129,13 @@ let private runner (args: AstNodeRuleParams) =
 let cleanup () = failwithMessages <- Set.empty
 
 let rule =
-    { Name = "FailwithBadUsage"
-      Identifier = Identifiers.FailwithBadUsage
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = cleanup } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FailwithBadUsage"
+            Identifier = Identifiers.FailwithBadUsage
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = cleanup
+                }
+        }

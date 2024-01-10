@@ -40,11 +40,11 @@ module QuickFixes =
         else String.Empty
 
     let toPascalCase (ident:Ident) = lazy(
-        let pascalCaseIdent = ident.idText |> mapFirstChar Char.ToUpper
+        let pascalCaseIdent = mapFirstChar Char.ToUpper ident.idText
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = pascalCaseIdent })
 
     let toCamelCase (ident:Ident) = lazy(
-        let camelCaseIdent = ident.idText |> mapFirstChar Char.ToLower
+        let camelCaseIdent = mapFirstChar Char.ToLower ident.idText
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
 
 [<Literal>]
@@ -128,23 +128,22 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         | _ -> None
 
     let prefixError =
-        config.Prefix
-        |> Option.bind (fun prefix ->
+        Option.bind (fun prefix ->
             prefixRule prefix idText
-            |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix)))
+            |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))) config.Prefix
 
     let suffixError =
-        config.Suffix
-        |> Option.bind (fun suffix ->
+        Option.bind (fun suffix ->
             suffixRule suffix idText
-            |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix)))
+            |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))) config.Suffix
 
-    [|
-        casingError
-        underscoresError
-        prefixError
-        suffixError
-    |] |> Array.choose id
+    Array.choose id
+        [|
+            casingError
+            underscoresError
+            prefixError
+            suffixError
+        |]
 
 let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
     if notOperator idText && isNotDoubleBackTickedIdent identifier then
@@ -164,7 +163,7 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
         namingRule.RuleConfig.GetIdentifiersToCheck args
         |> Array.collect (fun (identifier, idText, typeCheck) ->
             let suggestions = checkIdentifier namingRule.RuleConfig.Config identifier idText
-            suggestions |> Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }))
+            Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }) suggestions)
 
     {
         RuleMetadata.Name = namingRule.Name
@@ -344,8 +343,7 @@ let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:Ge
         let accessibility = checkAccessibility accessibility access
         getIdents accessibility pattern
     | SynPat.Or(p1, p2, _, _) ->
-        [|p1; p2|]
-        |> Array.collect (getPatternIdents accessibility getIdents false)
+        Array.collect (getPatternIdents accessibility getIdents false) [|p1; p2|]
     | SynPat.Paren(pat, _) ->
         getPatternIdents accessibility getIdents false pat
     | SynPat.Ands(pats, _)
@@ -386,6 +384,6 @@ let getFunctionIdents (pattern:SynPat) =
     match pattern with
     | SynPat.LongIdent (longIdent, _, _, SynArgPats.Pats _, _, _) ->
         match List.tryLast longIdent.LongIdent with
-        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | Some ident -> Array.singleton (ident, ident.idText, None)
         | None -> Array.empty
     | _ -> Array.empty

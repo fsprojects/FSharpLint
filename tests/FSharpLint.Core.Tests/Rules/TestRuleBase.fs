@@ -48,7 +48,7 @@ type TestRuleBase () =
 
     // prevent tests from passing if errors exist, just not on the line being checked
     member _.NoErrorsExist =
-        suggestions |> Seq.isEmpty
+        Seq.isEmpty suggestions
 
     member _.ErrorsExist =
         suggestions |> Seq.isEmpty |> not
@@ -80,7 +80,7 @@ type TestRuleBase () =
             |> Seq.choose (fun linterSuggestion -> linterSuggestion.Details.SuggestedFix)
             |> Seq.tryHead
 
-        match firstSuggestedFix |> Option.bind (fun suggestedFix -> suggestedFix.Value) with
+        match Option.bind (fun (suggestedFix: Lazy<option<SuggestedFix>>) -> suggestedFix.Value) firstSuggestedFix with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source

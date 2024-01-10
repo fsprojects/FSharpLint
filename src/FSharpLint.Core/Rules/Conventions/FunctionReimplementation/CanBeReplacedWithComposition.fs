@@ -65,16 +65,23 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
         let suggestedFix =
             lazy(
                 Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
-        { Range = range
-          Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-          SuggestedFix = Some suggestedFix
-          TypeChecks = List.Empty } |> Array.singleton
+        Array.singleton
+            { Range = range
+              Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+              SuggestedFix = Some suggestedFix
+              TypeChecks = List.Empty }
 
 let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args (validateLambdaCannotBeReplacedWithComposition args.FileContent)
 
 let rule =
-    { Name = "CanBeReplacedWithComposition"
-      Identifier = Identifiers.CanBeReplacedWithComposition
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "CanBeReplacedWithComposition"
+            Identifier = Identifiers.CanBeReplacedWithComposition
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

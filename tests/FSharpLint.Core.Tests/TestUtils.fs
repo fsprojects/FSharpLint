@@ -34,7 +34,7 @@
             match !memoizedResult with
             | Some(result) -> result
             | None ->
-                let text = performanceTestSourceFile |> File.ReadAllText
+                let text = File.ReadAllText performanceTestSourceFile
                 let result = (generateAst text, text)
                 memoizedResult := Some(result)
                 result

@@ -59,5 +59,4 @@ type MSBuildOutput () =
                 <| warning.RuleIdentifier
                 <| warning.Details.Message
         member _.WriteError (error:string) =
-            $"FSharpLint error: {error}"
-            |> Console.Error.WriteLine
+            Console.Error.WriteLine $"FSharpLint error: {error}"

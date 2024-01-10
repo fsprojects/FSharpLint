@@ -39,13 +39,13 @@ let private validateCondition (maxBooleanOperators:int) condition =
     if numberOfBooleanOperators > maxBooleanOperators then
         let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
         let error = String.Format(errorFormatString, maxBooleanOperators)
-        {
-            Range = condition.Range
-            Message = error
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = condition.Range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -63,7 +63,13 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
     | _ -> Array.empty
 
 let rule config =
-    { Name = "MaxNumberOfBooleanOperatorsInCondition"
-      Identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxNumberOfBooleanOperatorsInCondition"
+            Identifier = Identifiers.MaxNumberOfBooleanOperatorsInCondition
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

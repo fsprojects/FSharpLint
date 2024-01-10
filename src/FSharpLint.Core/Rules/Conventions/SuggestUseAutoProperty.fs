@@ -15,24 +15,21 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
             let exists memberDef =
                 match memberDef with
                 | SynMemberDefn.LetBindings (bindings, _, _, _) ->
-                    bindings
-                    |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
+                    List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
                         match headPat with
                         | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
                             bindingIdent.idText = ident.idText
-                        | _ -> false)
+                        | _ -> false) bindings
                 | _ -> false
 
             match args.GetParents args.NodeIndex with
             | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _, _)) :: _ ->
-                members
-                |> List.exists exists
+                List.exists exists members
             | _ -> false
 
         not isMutableVariable
     | SynExpr.ArrayOrList (_, elements, _) ->
-        elements
-        |> List.forall (isImmutableValueExpression args)
+        List.forall (isImmutableValueExpression args) elements
     | SynExpr.ArrayOrListComputed (_, innerExpr, _) ->
         isImmutableValueExpression args innerExpr
         || isImmutableSequentialExpression args innerExpr
@@ -101,18 +98,22 @@ let private runner (args: AstNodeRuleParams) =
                                       ToText = $"val {memberName.idText}" }
                             | _ -> None)
             
-                { Range = memberRange
-                  Message = Resources.GetString "RulesSuggestUseAutoProperty"
-                  SuggestedFix = Some suggestedFix
-                  TypeChecks = List.Empty }
-                |> Array.singleton
+                Array.singleton
+                    { Range = memberRange
+                      Message = Resources.GetString "RulesSuggestUseAutoProperty"
+                      SuggestedFix = Some suggestedFix
+                      TypeChecks = List.Empty }
         | _ -> Array.empty
     | _ -> Array.empty
 
 let rule =
-    { Name = "SuggestUseAutoProperty"
-      Identifier = Identifiers.SuggestUseAutoProperty
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "SuggestUseAutoProperty"
+            Identifier = Identifiers.SuggestUseAutoProperty
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -28,10 +28,10 @@ let private isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) =
     if numChildrenI = numChildrenJ then
         let numChildren = numChildrenI
 
-        { 0..numChildren } |> Seq.forall (fun child -> 
+        Seq.forall (fun child -> 
             iIndex + child < nodeArray.Length && 
             jIndex + child < nodeArray.Length && 
-            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode)
+            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode) { 0..numChildren }
     else false
 
 let inline private isParen (node:AbstractSyntaxArray.Node) =
@@ -41,7 +41,7 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
 
 /// Compares the hint trie against a given location in the abstract syntax array.
 let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<_, _>) notify =
-    trie.MatchedHint |> List.iter notify
+    List.iter notify trie.MatchedHint
 
     if index < nodeArray.Length then
         let node = nodeArray.[index]
@@ -66,6 +66,5 @@ let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVaria
                 | true, _ -> ()
             | None -> checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
 
-        trie.Edges.AnyMatch
-        |> List.iter (fun (var, trie) -> collect var trie)
+        List.iter (fun (var, trie) -> collect var trie) trie.Edges.AnyMatch
 

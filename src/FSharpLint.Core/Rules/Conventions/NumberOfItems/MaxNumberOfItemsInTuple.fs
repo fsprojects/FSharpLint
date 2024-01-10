@@ -24,13 +24,13 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
         let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
         let error = String.Format(errorFormatString, maxItems)
-        {
-            Range = items.[maxItems].Range
-            Message = error
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = items.[maxItems].Range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -45,7 +45,13 @@ let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
         Array.empty
 
 let rule config =
-    { Name = "MaxNumberOfItemsInTuple"
-      Identifier = Identifiers.MaxNumberOfItemsInTuple
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxNumberOfItemsInTuple"
+            Identifier = Identifiers.MaxNumberOfItemsInTuple
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

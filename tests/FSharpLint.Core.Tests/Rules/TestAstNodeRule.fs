@@ -26,7 +26,7 @@ type TestAstNodeRuleBase (rule:Rule) =
             | AstNodeRule rule -> rule
             | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -51,6 +51,6 @@ type TestAstNodeRuleBase (rule:Rule) =
 
             rule.RuleConfig.Cleanup()
 
-            suggestions |> Array.iter this.PostSuggestion
+            Array.iter this.PostSuggestion suggestions
         | _ ->
             failwithf "Failed to parse"

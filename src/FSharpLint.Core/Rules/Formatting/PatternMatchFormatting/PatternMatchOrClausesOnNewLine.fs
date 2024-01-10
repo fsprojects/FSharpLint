@@ -11,13 +11,13 @@ open FSharpLint.Rules.Helper
 let check args _ (clauses:SynMatchClause list) _ =
     let choose (clauseOne: SynPat) (clauseTwo: SynPat) = 
         if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
-            {
-                Range = clauseTwo.Range
-                Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-            |> Some
+            Some
+                {
+                    Range = clauseTwo.Range
+                    Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
             None
 
@@ -33,7 +33,13 @@ let check args _ (clauses:SynMatchClause list) _ =
 let runner (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args check
 
 let rule =
-    { Name = "PatternMatchOrClausesOnNewLine"
-      Identifier = Identifiers.PatternMatchOrClausesOnNewLine
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "PatternMatchOrClausesOnNewLine"
+            Identifier = Identifiers.PatternMatchOrClausesOnNewLine
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

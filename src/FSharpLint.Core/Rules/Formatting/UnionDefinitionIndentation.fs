@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let getUnionCaseStartColumn (SynUnionCase (attrs, _, _, _, _, range, _)) =
-    match attrs |> List.tryHead with
+    match List.tryHead attrs with
     | Some attr ->
         // startcolumn of the attributes now includes the `[<` starter sigil, so we can just use it!
         attr.Range.StartColumn
@@ -24,26 +24,26 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
         | firstCase :: _ ->
             let indentationLevelError =
                 if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
-                    {
-                        Range = firstCase.Range
-                        Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
-                        SuggestedFix = None
-                        TypeChecks = List.Empty
-                    }
-                    |> Some
+                    Some
+                        {
+                            Range = firstCase.Range
+                            Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
+                            SuggestedFix = None
+                            TypeChecks = List.Empty
+                        }
                 else
                     None
 
             let consistentIndentationErrors =
                 let choose caseOne caseTwo = 
                     if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
-                        {
-                            Range = caseTwo.Range
-                            Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
-                            SuggestedFix = None
-                            TypeChecks = List.Empty
-                        }
-                        |> Some
+                        Some
+                            {
+                                Range = caseTwo.Range
+                                Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
+                                SuggestedFix = None
+                                TypeChecks = List.Empty
+                            }
                     else
                         None
 
@@ -52,11 +52,11 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                 |> Array.pairwise
                 |> Array.choose (fun (caseOne, caseTwo) -> choose caseOne caseTwo)
 
-            [|
-                indentationLevelError |> Option.toArray
-                consistentIndentationErrors
-            |]
-            |> Array.concat
+            Array.concat
+                [|
+                    Option.toArray indentationLevelError
+                    consistentIndentationErrors
+                |]
     | _ -> Array.empty
 
 let runner args =
@@ -70,7 +70,13 @@ let runner args =
         Array.empty
 
 let rule =
-    { Name = "UnionDefinitionIndentation"
-      Identifier = Identifiers.UnionDefinitionIndentation
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "UnionDefinitionIndentation"
+            Identifier = Identifiers.UnionDefinitionIndentation
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

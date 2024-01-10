@@ -26,13 +26,13 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
                     (Position.mkPos (memberOne.Range.EndLine + 1) 0)
                     (Position.mkPos (memberTwo.Range.StartLine + endOffset) 0)
 
-            {
-                Range = intermediateRange
-                Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-            |> Some
+            Some
+                {
+                    Range = intermediateRange
+                    Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
             None
 
@@ -50,7 +50,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "ClassMemberSpacing"
-      Identifier = Identifiers.ClassMemberSpacing
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "ClassMemberSpacing"
+            Identifier = Identifiers.ClassMemberSpacing
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

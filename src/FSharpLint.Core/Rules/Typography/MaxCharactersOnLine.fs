@@ -15,18 +15,23 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     if lineLength > maxCharacters then
         let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber (maxCharacters + 1)) (Position.mkPos args.LineNumber lineLength)
         let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
-        {
-            Range = range
-            Message = String.Format(errorFormatString, (maxCharacters + 1))
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = String.Format(errorFormatString, (maxCharacters + 1))
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
 let rule config =
-    { Name = "MaxCharactersOnLine"
-      Identifier = Identifiers.MaxCharactersOnLine
-      RuleConfig = { LineRuleConfig.Runner = checkMaxCharactersOnLine config } }
-    |> LineRule
+    LineRule
+        {
+            Name = "MaxCharactersOnLine"
+            Identifier = Identifiers.MaxCharactersOnLine
+            RuleConfig =
+                {
+                    LineRuleConfig.Runner = checkMaxCharactersOnLine config
+                }
+        }
