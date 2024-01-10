@@ -29,17 +29,15 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
 
                     ExpressionUtilities.tryFindTextOfRange constRange args.FileContent
                     |> Option.bind (fun constText ->
-
-                        lazy (Some { FromText = text; FromRange = fromRange; ToText = $"{constText} as {ident.idText}"})
-                        |> Some
+                        Some (lazy (Some { FromText = text; FromRange = fromRange; ToText = $"{constText} as {ident.idText}"}))
                     )
-
                 )
 
-            { Range = fromRange
-              Message = Resources.GetString("RulesFavourAsKeyword")
-              SuggestedFix = suggestedFix
-              TypeChecks = List.Empty } |> Array.singleton
+            Array.singleton
+                { Range = fromRange
+                  Message = Resources.GetString("RulesFavourAsKeyword")
+                  SuggestedFix = suggestedFix
+                  TypeChecks = List.Empty }
 
         | _ -> Array.empty
     | _ -> Array.empty
@@ -52,7 +50,7 @@ let private runner (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourAsKeyword"
-      Identifier = Identifiers.FavourAsKeyword
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        { Name = "FavourAsKeyword"
+          Identifier = Identifiers.FavourAsKeyword
+          RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }

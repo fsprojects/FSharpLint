@@ -52,9 +52,13 @@ let private runner (args: AstNodeRuleParams) =
 
 /// Checks if any code uses untyped ignore
 let rule =
-    { Name = "FavourTypedIgnore"
-      Identifier = Identifiers.FavourTypedIgnore
-      RuleConfig =
-          { AstNodeRuleConfig.Runner = runner
-            Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourTypedIgnore"
+            Identifier = Identifiers.FavourTypedIgnore
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

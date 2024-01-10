@@ -69,10 +69,9 @@ let private matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArg
             |> List.map matchLambdaArgument
 
         let allArgsMatch =
-            matches
-            |> List.forall (function
+            List.forall (function
                 | LambdaArgumentMatch.NoMatch -> false
-                | _ -> true)
+                | _ -> true) matches
 
         if allArgsMatch then
             matches
@@ -186,7 +185,7 @@ module private MatchExpression =
             let ident = identAsDecompiledOpName ident
             Some(Expression.Identifier([ident]))
         | AstNode.Expression(SynExpr.LongIdent(_, ident, _, _)) ->
-            let identifier = ident.LongIdent |> List.map (fun ident -> ident.idText)
+            let identifier = List.map (fun (ident: Ident) -> ident.idText) ident.LongIdent
             Some(Expression.Identifier(identifier))
         | AstNode.Expression(SynExpr.Const(constant, _)) ->
             matchConst constant |> Option.map Expression.Constant
@@ -257,7 +256,7 @@ module private MatchExpression =
         let arguments = { arguments with Expression = expr }
 
         match arguments.Hint with
-        | Expression.Variable(variable) when arguments.LambdaArguments |> Map.containsKey variable ->
+        | Expression.Variable(variable) when Map.containsKey variable arguments.LambdaArguments ->
             match expr with
             | AstNode.Expression(ExpressionUtilities.Identifier([identifier], _))
                     when identifier.idText = arguments.LambdaArguments.[variable] ->
@@ -301,7 +300,7 @@ module private MatchExpression =
     and private matchFunctionApplication arguments =
         match (arguments.Expression, arguments.Hint) with
         | FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
-            let expressions = exprs |> List.map AstNode.Expression
+            let expressions = List.map AstNode.Expression exprs
             doExpressionsMatch expressions hintExprs arguments
         | _ -> NoMatch
 
@@ -397,7 +396,7 @@ module private MatchPattern =
 
     let private matchPattern = function
         | SynPat.LongIdent(ident, _, _, _, _, _) ->
-            let identifier = ident.LongIdent |> List.map (fun ident -> ident.idText)
+            let identifier = List.map (fun (ident: Ident) -> ident.idText) (ident.LongIdent)
             Some(Pattern.Identifier(identifier))
         | SynPat.Const(constant, _) ->
             matchConst constant |> Option.map Pattern.Constant
@@ -542,7 +541,7 @@ module private FormatHint =
                         each)
                 |> String.concat "."
             | HintExpr(Expression.FunctionApplication(expressions)) ->
-                expressions |> surroundExpressionsString (HintExpr >> toString) String.Empty String.Empty " "
+                surroundExpressionsString (HintExpr >> toString) String.Empty String.Empty " " expressions
             | HintExpr(Expression.InfixOperator(operator, leftHint, rightHint)) ->
                 $"{toString (HintExpr leftHint)} {opToString operator} {toString (HintExpr rightHint)}"
             | HintPat(Pattern.Cons(leftHint, rightHint)) ->
@@ -562,17 +561,17 @@ module private FormatHint =
             | HintExpr(Expression.LambdaBody(body)) ->
                 toString (HintExpr body)
             | HintExpr(Expression.Tuple(expressions)) ->
-                expressions |> surroundExpressionsString (HintExpr >> toString) "(" ")" ","
+                surroundExpressionsString (HintExpr >> toString) "(" ")" "," expressions
             | HintExpr(Expression.List(expressions)) ->
-                expressions |> surroundExpressionsString (HintExpr >> toString) "[" "]" ";"
+                surroundExpressionsString (HintExpr >> toString) "[" "]" ";" expressions
             | HintExpr(Expression.Array(expressions)) ->
-                expressions |> surroundExpressionsString (HintExpr >> toString) "[|" "|]" ";"
+                surroundExpressionsString (HintExpr >> toString) "[|" "|]" ";" expressions
             | HintPat(Pattern.Tuple(expressions)) ->
-                expressions |> surroundExpressionsString (HintPat >> toString) "(" ")" ","
+                surroundExpressionsString (HintPat >> toString) "(" ")" "," expressions
             | HintPat(Pattern.List(expressions)) ->
-                expressions |> surroundExpressionsString (HintPat >> toString) "[" "]" ";"
+                surroundExpressionsString (HintPat >> toString) "[" "]" ";" expressions
             | HintPat(Pattern.Array(expressions)) ->
-                expressions |> surroundExpressionsString (HintPat >> toString) "[|" "|]" ";"
+                surroundExpressionsString (HintPat >> toString) "[|" "|]" ";" expressions
             | HintExpr(Expression.If(cond, expr, None)) ->
                 $"if {toString (HintExpr cond)} then {toString (HintExpr expr)}"
             | HintExpr(Expression.If(cond, expr, Some(elseExpr))) ->
@@ -652,13 +651,13 @@ let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent:
             methodIdent.Range.StartLine,
             methodIdent.Range.EndColumn,
             String.Empty,
-            methodIdent.LongIdent |> List.map (fun ident -> ident.idText))
+            List.map (fun (ident: Ident) -> ident.idText) methodIdent.LongIdent)
 
     match symbol with
     | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
         let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
-        if symbol.IsMember then symbol.CurriedParameterGroups |> Seq.tryHead
+        if symbol.IsMember then Seq.tryHead symbol.CurriedParameterGroups
         else None
     | _ -> None
 
@@ -679,7 +678,7 @@ let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range
     match filterParens breadcrumbs with
     | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
     | AstNode.Expression(SynExpr.Tuple(_, exprs, _, _))::AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.LongIdent(_, methodIdent, _, _), _, _))::_ ->
-        match exprs |> List.tryFindIndex (fun expr -> expr.Range = range) with
+        match List.tryFindIndex (fun (expr: SynExpr) -> expr.Range = range) exprs with
         | Some(index) -> RequiresCheck(index, methodIdent)
         | None -> CannotBeReplaced
     | AstNode.Expression(SynExpr.App(ExprAtomicFlag.Atomic, _, SynExpr.DotGet(_, _, methodIdent, _), _, _))::_
@@ -761,7 +760,13 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
     result
 
 let rule config =
-    { Name = "Hints"
-      Identifier = Identifiers.Hints
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "Hints"
+            Identifier = Identifiers.Hints
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

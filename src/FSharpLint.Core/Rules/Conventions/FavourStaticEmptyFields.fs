@@ -22,7 +22,7 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     let formatError errorName =
         Resources.GetString errorName
 
-    errorMessageKey |> formatError
+    formatError errorMessageKey
 
 let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
     let suggestedFix = lazy(
@@ -32,11 +32,11 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
             | EmptyListLiteral -> "List.Empty"
             | EmptyArrayLiteral -> "Array.empty"
         Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
-    { Range = range
-      Message = getStaticEmptyErrorMessage range emptyLiteralType
-      SuggestedFix = Some suggestedFix
-      TypeChecks = List.Empty }
-    |> Array.singleton
+    Array.singleton
+        { Range = range
+          Message = getStaticEmptyErrorMessage range emptyLiteralType
+          SuggestedFix = Some suggestedFix
+          TypeChecks = List.Empty }
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
@@ -66,9 +66,13 @@ let private runner (args: AstNodeRuleParams) =
 
 
 let rule =
-    { Name = "FavourStaticEmptyFields"
-      Identifier = Identifiers.FavourStaticEmptyFields
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourStaticEmptyFields"
+            Identifier = Identifiers.FavourStaticEmptyFields
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

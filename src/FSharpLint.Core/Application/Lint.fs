@@ -64,7 +64,7 @@ module Lint =
                         let getFailureReason (fSharpDiagnostic:FSharpDiagnostic) =
                             $"failed to parse file {fSharpDiagnostic.FileName}, message: {fSharpDiagnostic.Message}"
 
-                        String.Join(", ", failures |> Array.map getFailureReason)
+                        String.Join(", ", Array.map getFailureReason failures)
                     | ParseFile.AbortedTypeCheck -> "Type check failed. You might want to build your solution/project first and try again."
 
                 match this with
@@ -153,8 +153,9 @@ module Lint =
             indentationRuleState <- Indentation.ContextBuilder.builder indentationRuleState astNode.Actual
             noTabCharactersRuleState <- NoTabCharacters.ContextBuilder.builder noTabCharactersRuleState astNode.Actual
 
-            config.Rules
-            |> Array.collect (fun rule -> runAstNodeRule rule astNodeParams)
+            Array.collect
+                (fun (rule: RuleMetadata<AstNodeRuleConfig>) -> runAstNodeRule rule astNodeParams)
+                config.Rules
 
         // Collect suggestions for AstNode rules, and build context for following rules.
         let astNodeSuggestions =
@@ -166,7 +167,7 @@ module Lint =
             { IndentationRuleContext = indentationRuleState
               NoTabCharactersRuleContext = noTabCharactersRuleState }
 
-        config.Rules |> Array.iter (fun rule -> rule.RuleConfig.Cleanup())
+        Array.iter (fun (rule: RuleMetadata<AstNodeRuleConfig>) -> rule.RuleConfig.Cleanup()) config.Rules
         (astNodeSuggestions, context)
 
     type RunLineRulesConfig =
@@ -192,21 +193,22 @@ module Lint =
                 }
 
             let indentationError =
-                config.LineRules.IndentationRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule config.Context.IndentationRuleContext lineParams)
+                Option.map
+                    (fun rule -> runLineRuleWithContext rule config.Context.IndentationRuleContext lineParams)
+                    config.LineRules.IndentationRule
 
             let noTabCharactersError =
-                config.LineRules.NoTabCharactersRule
-                |> Option.map (fun rule -> runLineRuleWithContext rule config.Context.NoTabCharactersRuleContext lineParams)
+                Option.map
+                    (fun rule -> runLineRuleWithContext rule config.Context.NoTabCharactersRuleContext lineParams)
+                    config.LineRules.NoTabCharactersRule
 
             let lineErrors =
-                config.LineRules.GenericLineRules
-                |> Array.collect (fun rule -> runLineRule rule lineParams)
+                Array.collect (fun rule -> runLineRule rule lineParams) config.LineRules.GenericLineRules
 
             [|
-                indentationError |> Option.toArray
-                noTabCharactersError |> Option.toArray
-                lineErrors |> Array.singleton
+                Option.toArray indentationError
+                Option.toArray noTabCharactersError
+                Array.singleton lineErrors
             |]
 
         config.FileContent
@@ -242,8 +244,8 @@ module Lint =
             [|
                 enabledRules.LineRules.IndentationRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
                 enabledRules.LineRules.NoTabCharactersRule |> Option.map (fun rule -> rule.Name) |> Option.toArray
-                enabledRules.LineRules.GenericLineRules |> Array.map (fun rule -> rule.Name)
-                enabledRules.AstNodeRules |> Array.map (fun rule -> rule.Name)
+                Array.map (fun rule -> rule.Name) enabledRules.LineRules.GenericLineRules
+                Array.map (fun rule -> rule.Name) enabledRules.AstNodeRules
             |] |> Array.concat |> Set.ofArray
 
         let suppressionInfo = Suppression.parseSuppressionInfo allRuleNames (Array.toList lines)
@@ -307,7 +309,7 @@ module Lint =
         with
         | exn -> Failed(fileInfo.File, exn) |> lintInfo.ReportLinterProgress
 
-        ReachedEnd(fileInfo.File, fileWarnings |> Seq.toList) |> lintInfo.ReportLinterProgress
+        ReachedEnd(fileInfo.File, Seq.toList fileWarnings) |> lintInfo.ReportLinterProgress
 
     let private runProcess (workingDir:string) (exePath:string) (args:string) =
         let psi = 
@@ -453,7 +455,7 @@ module Lint =
                 let warningReceived (warning:Suggestion.LintWarning) =
                     lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
-                    optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
+                    Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
 
                 let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
@@ -476,7 +478,7 @@ module Lint =
                         |> List.filter (not << isIgnoredFile)
                         |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
 
-                    let failedFiles = parsedFiles |> List.choose getFailedFiles
+                    let failedFiles = List.choose getFailedFiles parsedFiles
 
                     if List.isEmpty failedFiles then
                         parsedFiles
@@ -563,7 +565,7 @@ module Lint =
             let warningReceived (warning:Suggestion.LintWarning) =
                 lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
-                optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
+                Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
             let lintInformation =
                 { Configuration = config
                   CancellationToken = optionalParams.CancellationToken
@@ -605,7 +607,7 @@ module Lint =
             let warningReceived (warning:Suggestion.LintWarning) =
                 lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
 
-                optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
+                Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
 
             let lintInformation =
                 { Configuration = config

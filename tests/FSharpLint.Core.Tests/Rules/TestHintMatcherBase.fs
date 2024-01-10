@@ -49,7 +49,7 @@ type TestHintMatcherBase () =
             | Rules.AstNodeRule rule -> rule
             | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -70,6 +70,6 @@ type TestHintMatcherBase () =
                         SyntaxArray = syntaxArray
                     }
                 |> fst
-            suggestions |> Array.iter this.PostSuggestion
+            Array.iter this.PostSuggestion suggestions
         | _ ->
             failwithf "Failed to parse"

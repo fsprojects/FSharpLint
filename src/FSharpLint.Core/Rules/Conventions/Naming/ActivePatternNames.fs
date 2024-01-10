@@ -11,13 +11,13 @@ let private getValueOrFunctionIdents _ pattern =
     | SynPat.LongIdent(longIdent, _, _, _, _, _) ->
         match List.tryLast longIdent.LongIdent with
         | Some ident when isActivePattern ident ->
-            ident |> Array.singleton
+            Array.singleton ident
         | _ ->
             Array.empty
     | SynPat.Named(SynIdent(ident, _), _, _, _)
     | SynPat.OptionalVal(ident, _) ->
         if isActivePattern ident then
-            ident |> Array.singleton
+            Array.singleton ident
         else
             Array.empty
     | _ -> Array.empty

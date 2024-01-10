@@ -131,13 +131,12 @@ let private countBooleanOperators expression =
     | SynExpr.MatchBang(_, _, clauses, _, _)
     | SynExpr.MatchLambda(_, _, clauses, _, _) 
     | SynExpr.Match(_, _, clauses, _, _) ->
-        clauses |> List.sumBy (fun matchClause -> 
-                                      match matchClause with
-                                      | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
-                                          match whenExprOpt with
-                                          | Some whenExpr ->
-                                              countOperators 0 whenExpr
-                                          | None -> 0)
+        List.sumBy (fun matchClause ->
+            match matchClause with
+            | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
+                match whenExprOpt with
+                | Some whenExpr -> countOperators 0 whenExpr
+                | None -> 0) clauses
                
     | _ -> count
     // kick off the calculation
@@ -181,7 +180,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
             | SynExpr.MatchBang(_, _, clauses, _, _)
             | SynExpr.MatchLambda(_, _, clauses, _, _)
             | SynExpr.Match(_, _, clauses, _, _) ->
-                let numCases = clauses |> List.sumBy countCasesInMatchClause // determine the number of cases in the match expression 
+                let numCases = List.sumBy countCasesInMatchClause clauses // determine the number of cases in the match expression 
                 bindingStack.IncrComplexityOfCurrentScope (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
             | _ -> ()
         | _ -> ()
@@ -199,7 +198,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
             let ret = match warningDetails with
                       | Some warning -> warning::fromStack
                       | None -> fromStack
-            ret |> List.toArray
+            List.toArray ret
     else
         Array.empty
   
@@ -211,8 +210,13 @@ let cleanup () =
 
 /// Generator function for a rule instance.
 let rule config =
-    { Name = "CyclomaticComplexity"
-      Identifier = Identifiers.CyclomaticComplexity
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config
-                     Cleanup = cleanup } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "CyclomaticComplexity"
+            Identifier = Identifiers.CyclomaticComplexity
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = cleanup
+                }
+        }

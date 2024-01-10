@@ -25,8 +25,7 @@ let private getValueOrFunctionIdents typeChecker accessControlLevel pattern =
         | Some ident when singleIdentifier ->
             let checkNotUnionCase = checkNotUnionCase ident
             if accessControlLevel = AccessControlLevel.Public && isNotActivePattern ident then
-                (ident, ident.idText, Some checkNotUnionCase)
-                |> Array.singleton
+                Array.singleton (ident, ident.idText, Some checkNotUnionCase)
             else
                 Array.empty
         | None | Some _ -> Array.empty

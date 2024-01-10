@@ -226,7 +226,7 @@ module HintParser =
             | HintExpr(Expression.FunctionApplication(exprs))
             | HintExpr(Expression.Tuple(exprs))
             | HintExpr(Expression.List(exprs))
-            | HintExpr(Expression.Array(exprs)) -> exprs |> List.map HintExpr
+            | HintExpr(Expression.Array(exprs)) -> List.map HintExpr exprs
             | HintExpr(Expression.If(ifCond, bodyExpr, Some(elseExpr))) ->
                 [HintExpr ifCond; HintExpr bodyExpr; HintExpr elseExpr]
             | HintExpr(Expression.If(ifCond, bodyExpr, None)) ->
@@ -241,7 +241,7 @@ module HintParser =
             | HintPat(Pattern.Or(lhs, rhs)) -> [HintPat lhs; HintPat rhs]
             | HintPat(Pattern.Array(patterns))
             | HintPat(Pattern.List(patterns))
-            | HintPat(Pattern.Tuple(patterns)) -> patterns |> List.map HintPat
+            | HintPat(Pattern.Tuple(patterns)) -> List.map HintPat patterns
             | HintPat(Pattern.Parentheses(pattern)) -> [HintPat pattern]
             | HintPat(Pattern.Variable(_))
             | HintPat(Pattern.Identifier(_))
@@ -301,7 +301,7 @@ module HintParser =
 
             depthFirstTraversal hint.MatchedNode 0
 
-            (nodes |> Seq.toList, hint)
+            (Seq.toList nodes, hint)
 
         type private HintList = (HintNode * int) list * Hint
 
@@ -480,16 +480,19 @@ module HintParser =
             char(System.Convert.ToInt32(dec, 10))
 
         let private escapeMap =
-            [ ('"', '\"')
-              ('\\', '\\')
-              ('\'', '\'')
-              ('n', '\n')
-              ('t', '\t')
-              ('b', '\b')
-              ('r', '\r')
-              ('a', '\a')
-              ('f', '\f')
-              ('v', '\v') ] |> Map.ofList
+            Map.ofList
+                [
+                    ('"', '\"')
+                    ('\\', '\\')
+                    ('\'', '\'')
+                    ('n', '\n')
+                    ('t', '\t')
+                    ('b', '\b')
+                    ('r', '\r')
+                    ('a', '\a')
+                    ('f', '\f')
+                    ('v', '\v')
+                ]
 
         let private pescapechar: Parser<char, unit> =
             skipChar '\\'
@@ -828,7 +831,7 @@ module HintParser =
             .>> skipString "then"
             .>>. pexpression
             .>>. opt (skipString "else" >>. pexpression)
-            |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, elseExpr |> Option.map Expression.Else)
+            |>> fun ((condition, expr), elseExpr) -> Expression.If(condition, expr, Option.map Expression.Else elseExpr)
 
         let plambda: Parser<Expression, unit> =
             let plambdastart: Parser<Expression list, unit> =
@@ -847,7 +850,7 @@ module HintParser =
                 let! body = plambdaend
 
                 return Expression.Lambda
-                    (arguments |> List.map (Expression.LambdaArg >> LambdaArg),
+                    (List.map (Expression.LambdaArg >> LambdaArg) arguments,
                      LambdaBody(Expression.LambdaBody(body)))
             }
 

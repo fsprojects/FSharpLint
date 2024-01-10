@@ -15,13 +15,13 @@ type TestLineRuleBase (rule:Rule) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
-        let fileName = fileName |> Option.defaultValue "Test.fsx"
+        let fileName = Option.defaultValue "Test.fsx" fileName
 
         let projectOptions, _ = checker.GetProjectOptionsFromScript(fileName, sourceText) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         let parseResults = checker.ParseFile("test.fsx", sourceText, parsingOptions) |> Async.RunSynchronously
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         let rule =
             match rule with

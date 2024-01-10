@@ -34,16 +34,15 @@ module ContextBuilder =
     let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:Range) =
         let absoluteOverride = (rangeToUpdate.StartLine, (true, expectedIndentation))
         let relativeOverrides =
-            [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
-            |> List.map (fun offsetLine ->
-                (offsetLine, (false, expectedIndentation)))
+            List.map (fun offsetLine ->
+                (offsetLine, (false, expectedIndentation))) [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
         (absoluteOverride::relativeOverrides)
 
     let rec private collectRecordFields = function
         | (SynExpr.Record ( _, _, fields, _)) ->
             let subRecords =
                 fields
-                |> List.choose (fun (SynExprRecordField(_, _, expr, _)) -> expr |> Option.map collectRecordFields)
+                |> List.choose (fun (SynExprRecordField(_, _, expr, _)) -> Option.map collectRecordFields expr)
                 |> List.concat
             fields::subRecords
         | _ ->
@@ -53,10 +52,13 @@ module ContextBuilder =
         match ranges with
         | (first::others) ->
             let expectedIndentation = first.StartColumn
-            others 
-            |> List.collect (fun other -> 
-                [ for lineNumber=other.StartLine to other.EndLine do 
-                    yield (lineNumber, (true, expectedIndentation)) ])
+            List.collect
+                (fun (other: Range) ->
+                    [
+                        for lineNumber = other.StartLine to other.EndLine do
+                            yield (lineNumber, (true, expectedIndentation))
+                    ])
+                others
         | _ -> List.Empty
 
     let private indentationOverridesForNode (node:AstNode) =
@@ -144,37 +146,37 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then
                 let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                {
-                    Range = range
-                    Message = errorString
-                    SuggestedFix = None
-                    TypeChecks = List.Empty
-                }
-                |> Some
+                Some
+                    {
+                        Range = range
+                        Message = errorString
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
             else
                 None
         | (false, indentationOffset) ->
             if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
                 let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
 
-                {
-                    Range = range
-                    Message = String.Format(errorFormatString, expectedSpaces)
-                    SuggestedFix = None
-                    TypeChecks = List.Empty
-                }
-                |> Some
+                Some
+                    {
+                        Range = range
+                        Message = String.Format(errorFormatString, expectedSpaces)
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
             else
                 None
     elif numLeadingSpaces % expectedSpaces <> 0 then
         let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
-        {
-            Range = range
-            Message = String.Format(errorFormatString, expectedSpaces)
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Some
+        Some
+            {
+                Range = range
+                Message = String.Format(errorFormatString, expectedSpaces)
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         None
 
@@ -183,7 +185,9 @@ let runner context args =
     |> Option.toArray
 
 let rule =
-    { Name = "Indentation"
-      Identifier = Identifiers.Indentation
-      RuleConfig = { Runner = runner } }
-    |> IndentationRule
+    IndentationRule
+        {
+            Name = "Indentation"
+            Identifier = Identifiers.Indentation
+            RuleConfig = { Runner = runner }
+        }

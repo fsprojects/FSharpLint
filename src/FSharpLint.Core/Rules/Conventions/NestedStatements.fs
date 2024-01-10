@@ -136,8 +136,13 @@ let cleanup () =
     skipToIndex <- None
 
 let rule config =
-    { Name = "NestedStatements"
-      Identifier = Identifiers.NestedStatements
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config
-                     Cleanup = cleanup } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "NestedStatements"
+            Identifier = Identifiers.NestedStatements
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = cleanup
+                }
+        }

@@ -12,12 +12,12 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     let map text = 
         let suggestedFix =
             lazy
-                ({
-                    FromRange = range
-                    FromText = text
-                    ToText = $"({text})"
-                 }
-                 |> Some)
+                (Some 
+                    {
+                        FromRange = range
+                        FromText = text
+                        ToText = $"({text})"
+                     })
 
         {
             Range = range
@@ -37,7 +37,13 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses
 
 let rule =
-    { Name = "TupleParentheses"
-      Identifier = Identifiers.TupleParentheses
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TupleParentheses"
+            Identifier = Identifiers.TupleParentheses
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

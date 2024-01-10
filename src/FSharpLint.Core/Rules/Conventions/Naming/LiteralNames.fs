@@ -11,7 +11,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         if isLiteral attributes then
             let rec getLiteralIdents = function
                 | SynPat.Named(SynIdent(identifier, _), _, _, _) ->
-                    (identifier, identifier.idText, None) |> Array.singleton
+                    Array.singleton (identifier, identifier.idText, None)
                 | SynPat.Paren(pat, _) -> getLiteralIdents pat
                 | _ -> Array.empty
 

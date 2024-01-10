@@ -23,13 +23,13 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                     String.Empty
                     (Position.mkPos (declOne.Range.EndLine + 1) 0)
                     (Position.mkPos (declTwo.Range.StartLine + endOffset) 0)
-            {
-                Range = intermediateRange
-                Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-            |> Some
+            Some
+                {
+                    Range = intermediateRange
+                    Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
             None
 
@@ -47,7 +47,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "ModuleDeclSpacing"
-      Identifier = Identifiers.ModuleDeclSpacing
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "ModuleDeclSpacing"
+            Identifier = Identifiers.ModuleDeclSpacing
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

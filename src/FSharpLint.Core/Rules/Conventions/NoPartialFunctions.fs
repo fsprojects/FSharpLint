@@ -22,54 +22,55 @@ type private Replacement =
     | Function of functionName:string
 
 let private partialFunctionIdentifiers =
-    [
-        // Option
-        ("Option.get", PatternMatch)
+    Map.ofList
+        [
+            // Option
+            ("Option.get", PatternMatch)
 
-        // Map
-        ("Map.find", Function "Map.tryFind")
-        ("Map.findKey", Function "Map.tryFindKey")
+            // Map
+            ("Map.find", Function "Map.tryFind")
+            ("Map.findKey", Function "Map.tryFindKey")
 
-        // Array
-        ("Array.exactlyOne", Function "Array.tryExactlyOne")
-        ("Array.get", Function "Array.tryItem")
-        ("Array.item", Function "Array.tryItem")
-        ("Array.find", Function "Array.tryFind")
-        ("Array.findIndex", Function "Array.tryFindIndex")
-        ("Array.findBack", Function "Array.tryFindBack")
-        ("Array.head", Function "Array.tryHead")
-        ("Array.last", Function "Array.tryLast")
-        ("Array.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
-        ("Array.reduce", Function "Array.fold")
-        ("Array.reduceBack", Function "Array.foldBack")
-        ("Array.pick", Function "Array.tryPick")
+            // Array
+            ("Array.exactlyOne", Function "Array.tryExactlyOne")
+            ("Array.get", Function "Array.tryItem")
+            ("Array.item", Function "Array.tryItem")
+            ("Array.find", Function "Array.tryFind")
+            ("Array.findIndex", Function "Array.tryFindIndex")
+            ("Array.findBack", Function "Array.tryFindBack")
+            ("Array.head", Function "Array.tryHead")
+            ("Array.last", Function "Array.tryLast")
+            ("Array.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
+            ("Array.reduce", Function "Array.fold")
+            ("Array.reduceBack", Function "Array.foldBack")
+            ("Array.pick", Function "Array.tryPick")
 
-        // Seq
-        ("Seq.exactlyOne", Function "Seq.tryExactlyOne")
-        ("Seq.item", Function "Seq.tryItem")
-        ("Seq.find", Function "Seq.tryFind")
-        ("Seq.findIndex", Function "Seq.tryFindIndex")
-        ("Seq.findBack", Function "Seq.tryFindBack")
-        ("Seq.head", Function "Seq.tryHead")
-        ("Seq.last", Function "Seq.tryLast")
-        ("Seq.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
-        ("Seq.reduce", Function "Seq.fold")
-        ("Seq.reduceBack", Function "Seq.foldBack")
-        ("Seq.pick", Function "Seq.tryPick")
+            // Seq
+            ("Seq.exactlyOne", Function "Seq.tryExactlyOne")
+            ("Seq.item", Function "Seq.tryItem")
+            ("Seq.find", Function "Seq.tryFind")
+            ("Seq.findIndex", Function "Seq.tryFindIndex")
+            ("Seq.findBack", Function "Seq.tryFindBack")
+            ("Seq.head", Function "Seq.tryHead")
+            ("Seq.last", Function "Seq.tryLast")
+            ("Seq.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
+            ("Seq.reduce", Function "Seq.fold")
+            ("Seq.reduceBack", Function "Seq.foldBack")
+            ("Seq.pick", Function "Seq.tryPick")
 
-        // List
-        ("List.exactlyOne", Function "List.tryExactlyOne")
-        ("List.item", Function "List.tryItem")
-        ("List.find", Function "List.tryFind")
-        ("List.findIndex", Function "List.tryFindIndex")
-        ("List.findBack", Function "List.tryFindBack")
-        ("List.head", Function "List.tryHead")
-        ("List.last", Function "List.tryLast")
-        ("List.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
-        ("List.reduce", Function "List.fold")
-        ("List.reduceBack", Function "List.foldBack")
-        ("List.pick", Function "List.tryPick")
-    ] |> Map.ofList
+            // List
+            ("List.exactlyOne", Function "List.tryExactlyOne")
+            ("List.item", Function "List.tryItem")
+            ("List.find", Function "List.tryFind")
+            ("List.findIndex", Function "List.tryFindIndex")
+            ("List.findBack", Function "List.tryFindBack")
+            ("List.head", Function "List.tryHead")
+            ("List.last", Function "List.tryLast")
+            ("List.tail", Function "FSharpx.Collections.Seq.tryHeadTail")
+            ("List.reduce", Function "List.fold")
+            ("List.reduceBack", Function "List.foldBack")
+            ("List.pick", Function "List.tryPick")
+        ]
 
 /// List of tuples (fully qualified instance member name, namespace, argument compiled type name, replacement strategy)
 let private partialInstanceMemberIdentifiers =
@@ -125,13 +126,13 @@ let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) =
         | FSharpExprPatterns.AddressSet(lvalueExpr, rvalueExpr) -> 
             tryFindTypedExpression range lvalueExpr |> Option.orElse (tryFindTypedExpression range rvalueExpr)
         | FSharpExprPatterns.Application(funcExpr, _typeArgs, argExprs) -> 
-            (funcExpr :: argExprs) |> tryFindFirst
+            tryFindFirst (funcExpr :: argExprs)
         | FSharpExprPatterns.Call(objExprOpt, _memberOrFunc, _typeArgs1, _typeArgs2, argExprs) ->
-            (List.append (Option.toList objExprOpt) argExprs) |> tryFindFirst
+            tryFindFirst (List.append (Option.toList objExprOpt) argExprs)
         | FSharpExprPatterns.Coerce(_targetType, inpExpr) -> 
             tryFindTypedExpression range inpExpr
         | FSharpExprPatterns.FastIntegerForLoop(startExpr, limitExpr, consumeExpr, _isUp, _, _) -> 
-            [ startExpr; limitExpr; consumeExpr ] |> tryFindFirst
+            tryFindFirst [ startExpr; limitExpr; consumeExpr ]
         | FSharpExprPatterns.ILAsm(_asmCode, _typeArgs, argExprs) -> 
             tryFindFirst argExprs
         | FSharpExprPatterns.ILFieldGet (objExprOpt, _fieldType, _fieldName) -> 
@@ -139,7 +140,7 @@ let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) =
         | FSharpExprPatterns.ILFieldSet (objExprOpt, _fieldType, _fieldName, valueExpr) -> 
             objExprOpt |> Option.bind (tryFindTypedExpression range) |> Option.orElse (tryFindTypedExpression range valueExpr)
         | FSharpExprPatterns.IfThenElse (guardExpr, thenExpr, elseExpr) -> 
-            [ guardExpr; thenExpr; elseExpr ] |> tryFindFirst
+            tryFindFirst [ guardExpr; thenExpr; elseExpr ]
         | FSharpExprPatterns.Lambda(_lambdaVar, bodyExpr) -> 
             tryFindTypedExpression range bodyExpr
         | FSharpExprPatterns.Let((_bindingVar, bindingExpr, _), bodyExpr) -> 
@@ -232,15 +233,15 @@ let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range
 
 let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType) : Option<bool> =
     let matchingPartialInstanceMember =
-        partialInstanceMemberIdentifiers
-        |> List.tryFind (fun (memberName, _, _, _) -> memberName.Split('.').[0] = typeName)
+        List.tryFind (fun (memberName: string, _, _, _) -> memberName.Split('.').[0] = typeName) partialInstanceMemberIdentifiers
     
     match matchingPartialInstanceMember with
     | Some(_, typeNamespace, compiledTypeName, _) ->
-        (fsharpType.HasTypeDefinition
-         && fsharpType.TypeDefinition.Namespace = typeNamespace
-         && fsharpType.TypeDefinition.CompiledName = compiledTypeName)
-        |> Some
+        Some(
+            fsharpType.HasTypeDefinition
+            && fsharpType.TypeDefinition.Namespace = typeNamespace
+            && fsharpType.TypeDefinition.CompiledName = compiledTypeName
+        )
     | None -> None
 
 let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
@@ -328,8 +329,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                     | _ -> None
                 | _ -> None
 
-        (partialInstanceMemberIdentifiers
-        |> List.map map)
+        List.map map partialInstanceMemberIdentifiers
     match List.tryFind(fun (typeCheck:Option<WarningDetails>) -> typeCheck.IsSome) typeChecks with
     | None -> None
     | Some instanceMember -> instanceMember
@@ -407,13 +407,13 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
 
         match checkPartialIdentifier with
         | Some partialIdent ->
-            partialIdent |> Array.singleton
+            Array.singleton partialIdent
         | _ ->
             let lineText = args.Lines.[range.EndLine - 1]
             let nonStaticInstanceMemberTypeCheckResult = isNonStaticInstanceMemberCall checkInfo identifier lineText range
             match nonStaticInstanceMemberTypeCheckResult with
             | Some warningDetails ->
-                warningDetails |> Array.singleton
+                Array.singleton warningDetails
             | _ -> Array.Empty()
     | (Ast.Expression(SynExpr.DotGet(expr, _, SynLongIdent(_identifiers, _, _), _range)), Some checkInfo) ->
         let originalRange = expr.Range
@@ -423,8 +423,13 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule config =
-    { Name = "NoPartialFunctions"
-      Identifier = Identifiers.NoPartialFunctions
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config
-                     Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "NoPartialFunctions"
+            Identifier = Identifiers.NoPartialFunctions
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

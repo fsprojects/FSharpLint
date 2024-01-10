@@ -29,7 +29,7 @@ let private extractRules (rules:Set<String>) (str:string) =
 
 /// Parses a given file to find lines containing rule suppressions.
 let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
-    let rules = rules |> Set.map (fun rule -> rule.ToLowerInvariant())
+    let rules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) rules
 
     let choose lineNum line = 
         let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
@@ -77,7 +77,7 @@ let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list
                         Set.union disabledRules rules
                     else
                         disabledRules
-            lineSuppression.Suppressions |> List.fold innerFold disabledRules
+            List.fold innerFold disabledRules lineSuppression.Suppressions
 
         let disabledRules =
             lineSuppressions

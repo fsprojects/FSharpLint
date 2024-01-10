@@ -17,7 +17,7 @@ let private isSymbol character =
         [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
           '#';'^';'!';'?';'/';'.';':';',';'(';')';'[';']';'{';'}' ]
 
-    symbols |> List.exists ((=) character)
+    List.exists ((=) character) symbols
 
 let private doesStringNotEndWithWhitespace (config:Config) (str:string) =
     match (config.NumberOfSpacesAllowed, config.OneSpaceAllowedAfterOperator) with
@@ -47,18 +47,23 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
     if stringEndsWithWhitespace then
         let whitespaceLength = lengthOfWhitespaceOnEnd line
         let range = Range.mkRange String.Empty (Position.mkPos lineNumber (line.Length - whitespaceLength)) (Position.mkPos lineNumber line.Length)
-        {
-            Range = range
-            Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-        |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
 let rule config =
-    { Name = "TrailingWhitespaceOnLine"
-      Identifier = Identifiers.TrailingWhitespaceOnLine
-      RuleConfig = { LineRuleConfig.Runner = checkTrailingWhitespaceOnLine config } }
-    |> LineRule
+    LineRule
+        {
+            Name = "TrailingWhitespaceOnLine"
+            Identifier = Identifiers.TrailingWhitespaceOnLine
+            RuleConfig =
+                {
+                    LineRuleConfig.Runner = checkTrailingWhitespaceOnLine config
+                }
+        }

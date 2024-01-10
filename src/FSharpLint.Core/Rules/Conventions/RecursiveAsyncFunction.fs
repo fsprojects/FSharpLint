@@ -43,13 +43,13 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
                          ToText = "return!"
                      }))
 
-        {
-            Range = range
-            Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
-            SuggestedFix = Some suggestedFix
-            TypeChecks = List.Empty
-        }
-        |> Some
+        Some
+            {
+                Range = range
+                Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
+                SuggestedFix = Some suggestedFix
+                TypeChecks = List.Empty
+            }
 
     match doBangExpr with
     | SynExpr.App (funcExpr=(SynExpr.Ident callerIdent)) ->
@@ -75,7 +75,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "RecursiveAsyncFunction"
-      Identifier = Identifiers.RecursiveAsyncFunction
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "RecursiveAsyncFunction"
+            Identifier = Identifiers.RecursiveAsyncFunction
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

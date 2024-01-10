@@ -86,7 +86,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourNonMutablePropertyInitialization"
-      Identifier = Identifiers.FavourNonMutablePropertyInitialization
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourNonMutablePropertyInitialization"
+            Identifier = Identifiers.FavourNonMutablePropertyInitialization
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }
