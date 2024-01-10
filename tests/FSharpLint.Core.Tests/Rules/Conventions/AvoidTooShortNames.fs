@@ -174,3 +174,10 @@ let fooFunction (arg: SomeDU) =
     | SomeDU.SomeMember(x, _, _) -> x"""
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError_17() =
+        this.Parse """
+fun x -> x + 1 |> ignore"""
+
+        Assert.IsTrue this.ErrorsExist
