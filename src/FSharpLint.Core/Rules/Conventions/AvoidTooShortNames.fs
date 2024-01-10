@@ -6,6 +6,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
+open FSharpLint.Rules.Helper
 
 let private isIdentifierTooShort (identifier: string) =
     identifier.Length < 2 && not (identifier.StartsWith '_')
@@ -55,6 +56,11 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.LetOrUseBang(_, _, _, pat, _, _, _, _, _)) ->
         getParameterWithBelowMinimumLength [pat]
+    | AstNode.Expression(SynExpr.Lambda(_, _, lambdaArgs, _, _, _, _)) ->
+        let lambdaIdent = FunctionReimplementation.getLambdaParamIdent lambdaArgs
+        match lambdaIdent with
+        | Some ident -> (ident, ident.idText, None) |> Array.singleton
+        | None -> Array.empty
     | AstNode.Match(SynMatchClause(namePattern, _, _, _, _, _)) ->
         getParameterWithBelowMinimumLength [namePattern]
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _, _)) ->
