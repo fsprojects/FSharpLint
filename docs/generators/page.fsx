@@ -12,10 +12,5 @@ let generate' (ctx : SiteContents) (page: string) =
     Layout.layout ctx [ !! post.content ] post.title
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
-    try
-      generate' ctx page
-      |> Layout.render ctx
-    with
-    | ex ->
-        printfn "ERROR IN PAGE GENERATION:\n%A" ex
-        ""
+    generate' ctx page
+    |> Layout.render ctx
