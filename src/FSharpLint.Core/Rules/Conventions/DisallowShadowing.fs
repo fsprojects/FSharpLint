@@ -26,7 +26,7 @@ let rec private extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : L
 let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : array<WarningDetails> =
     let name = identifier.idText
     match args.CheckInfo with
-    | Some checkResults -> 
+    | Some checkResults when not (name.StartsWith '_') -> 
         let allUsages = checkResults.GetAllUsesOfAllSymbolsInFile()
         let definitionsWithSameName = 
             allUsages 
@@ -115,7 +115,7 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
         else
             Array.empty
                 
-    | None -> Array.empty
+    | _ -> Array.empty
 
 let runner (args: AstNodeRuleParams) =
     match args.AstNode with

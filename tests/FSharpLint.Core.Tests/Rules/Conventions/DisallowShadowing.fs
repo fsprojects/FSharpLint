@@ -137,3 +137,13 @@ module Foo =
 let foo = 1"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Should not produce error when variable name starts with underscore``() =
+        this.Parse """
+let _foo = 0
+
+module Foo =
+    let _foo = 1"""
+
+        Assert.IsTrue this.NoErrorsExist
