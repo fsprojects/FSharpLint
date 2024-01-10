@@ -71,16 +71,18 @@ let private partialFunctionIdentifiers =
         ("List.pick", Function "List.tryPick")
     ] |> Map.ofList
 
+/// List of tuples (fully qualified instance member name, namespace, argument compiled type name, replacement strategy)
 let private partialInstanceMemberIdentifiers =
     [
-        ("Option.Value", PatternMatch)
-        ("Map.Item", Function "Map.tryFind")
-        ("List.Item", Function "List.tryFind")
-        ("List.Head", Function "List.tryHead")
+        // see https://stackoverflow.com/a/70282499/544947
+        ("Option.Value", Some "Microsoft.FSharp.Core", "option`1", PatternMatch)
+        ("Map.Item", Some "Microsoft.FSharp.Collections", "FSharpMap`2", Function "Map.tryFind")
+        ("List.Item", Some "Microsoft.FSharp.Collections", "list`1", Function "List.tryFind")
+        ("List.Head", Some "Microsoft.FSharp.Collections", "list`1", Function "List.tryHead")
 
         // As an example for future additions (see commented Foo.Bar.Baz tests)
-        //("Foo.Bar.Baz", PatternMatch)
-    ] |> Map.ofList
+        //("Foo.Bar.Baz", None, "string", PatternMatch)
+    ]
 
 let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:Range) =
     if List.contains identifier config.AllowedPartials then
@@ -229,32 +231,24 @@ let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range
     |> Seq.tryHead
 
 let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType) : Option<bool> =
-    match typeName with
-    | "Option" ->
-        // see https://stackoverflow.com/a/70282499/544947
+    let matchingPartialInstanceMember =
+        partialInstanceMemberIdentifiers
+        |> List.tryFind (fun (memberName, _, _, _) -> memberName.Split('.').[0] = typeName)
+    
+    match matchingPartialInstanceMember with
+    | Some(_, typeNamespace, compiledTypeName, _) ->
         (fsharpType.HasTypeDefinition
-        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Core"
-        && fsharpType.TypeDefinition.CompiledName = "option`1")
+         && fsharpType.TypeDefinition.Namespace = typeNamespace
+         && fsharpType.TypeDefinition.CompiledName = compiledTypeName)
         |> Some
-    | "Map" ->
-        (fsharpType.HasTypeDefinition
-        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-        && fsharpType.TypeDefinition.CompiledName = "FSharpMap`2")
-        |> Some
-    | "List" ->
-        (fsharpType.HasTypeDefinition
-        && fsharpType.TypeDefinition.Namespace = Some "Microsoft.FSharp.Collections"
-        && fsharpType.TypeDefinition.CompiledName = "list`1")
-        |> Some
-    | _ -> None
+    | None -> None
 
 let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
     let typeChecks =
         (partialInstanceMemberIdentifiers
-        |> Map.toList
         |> List.map (fun replacement ->
             match replacement with
-            | (fullyQualifiedInstanceMember, replacementStrategy) ->
+            | (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
                 if not (fullyQualifiedInstanceMember.Contains ".") then
                     failwith "Please use fully qualified name for the instance member"
                 let nameSegments = fullyQualifiedInstanceMember.Split '.'
@@ -321,8 +315,7 @@ let private checkMemberCallOnExpression
     match getTypedExpressionForRange checkFile range with
     | Some expression ->
         partialInstanceMemberIdentifiers
-        |> Map.toList
-        |> List.choose (fun (fullyQualifiedInstanceMember, replacementStrategy) ->
+        |> List.choose (fun (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
             let typeName = fullyQualifiedInstanceMember.Split(".").[0]
             let fsharpType = expression.Type
 
