@@ -131,7 +131,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
   <ItemGroup>
     <PackageReference Include="FSharp.Compiler.Service" />
     <PackageReference Include="FParsec" />
