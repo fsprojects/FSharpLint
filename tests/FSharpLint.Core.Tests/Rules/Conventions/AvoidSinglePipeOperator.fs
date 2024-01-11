@@ -94,3 +94,13 @@ let someFunc someParam =
 """
 
         Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator after an if expression``() =
+        this.Parse """
+let foo param =
+    if param then true else false
+    |> bar
+"""
+
+        Assert.True this.NoErrorsExist
