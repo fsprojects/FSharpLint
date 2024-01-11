@@ -9,14 +9,14 @@
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13" />
     <PackageVersion Include="CommandLineParser" Version="2.8" />
     <PackageVersion Include="FParsec" Version="1.1.1" />
-    <PackageVersion Include="FSharp.Compiler.Service" Version="40.0.0" />
+    <PackageVersion Include="FSharp.Compiler.Service" Version="41.0.7" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="5.0.2" />
     <PackageVersion Include="FSharp.Formatting" Version="4.0" />
     <PackageVersion Include="Iced" Version="1.12" />
-    <PackageVersion Include="Ionide.ProjInfo" Version="0.53.1" />
-    <PackageVersion Include="Ionide.ProjInfo.ProjectSystem" Version="0.53.1" />
-    <PackageVersion Include="Ionide.ProjInfo.FCS" Version="0.53.1" />
-    <PackageVersion Include="Ionide.ProjInfo.Sln" Version="0.53.1" />
+    <PackageVersion Include="Ionide.ProjInfo" Version="0.58" />
+    <PackageVersion Include="Ionide.ProjInfo.ProjectSystem" Version="0.58" />
+    <PackageVersion Include="Ionide.ProjInfo.FCS" Version="0.58" />
+    <PackageVersion Include="Ionide.ProjInfo.Sln" Version="0.58" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0" />
     <PackageVersion Include="Microsoft.Build" Version="16.10" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="17.2.0" />

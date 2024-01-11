@@ -6,6 +6,6 @@
         <PackageReference Update="FSharp.Core"
                           Condition="'$(MSBuildProjectExtension)' == '.fsproj' And '$(DisableImplicitFSharpCoreReference)' != 'true' And '$(UpdateImplicitFSharpCoreReference)' != 'false'"
                           IsImplicitlyDefined="true"
-                          Version="5.0.2" />
+                          Version="6.0.0" />
     </ItemGroup>
 </Project>
