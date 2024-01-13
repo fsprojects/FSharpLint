@@ -14,7 +14,8 @@ Happy 10 year anniversary to FSharpLint!
 - Make inline source filePath less confusing #677 #674 [@webwarrior-ws]
 - Add new rule UnnecessaryRecKeyword #650 #652 #671 [@Mersho] & [@webwarrior-ws]
 - TypePrefixing: new modes "Always", "Hybrid", "Never" (default: Hybrid) #661 [@knocte] & [@webwarrior-ws]
-- Less hardcoding of .NET version #659 [@knocte]
+- Less hardcoding of .NET versions #659 [@knocte]
+
 
 ## [0.23.6] - 2024-01-05
 
@@ -79,7 +80,7 @@ Happy 10 year anniversary to FSharpLint!
 - Paket: use Packages storage #615 [@Numpsy]
 - Fix VS2022 build #613 [@Thorium]
 - Dotnet version SDK to allow minor version difference fwd #607 [@Thorium]
-- docs: fix Shortcuts typo in the menu #584 [@pirrman]
+- docs: fix Shortcuts typo in the menu #584 [@pirrmann]
 - Fix false negatives in AvoidTooShortNames #548 [@janus]
 - Fix cyclomatic complexity yielding redundant messages #559 #579 [@davidtgillard]
 - Refactoring: rename DU #565 [@webwarrior-ws]
