@@ -331,7 +331,8 @@ type ConventionsConfig =
       favourReRaise:EnabledConfig option
       favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       suggestUseAutoProperty:EnabledConfig option
-      usedUnderscorePrefixedElements:EnabledConfig option }
+      usedUnderscorePrefixedElements:EnabledConfig option
+      disallowShadowing:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -355,6 +356,7 @@ with
             this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
+            this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
         |] |> Array.concat
 
 type TypographyConfig =
@@ -476,7 +478,8 @@ type Configuration =
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
       NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
-      SuggestUseAutoProperty:EnabledConfig option }
+      SuggestUseAutoProperty:EnabledConfig option
+      DisallowShadowing:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -566,6 +569,7 @@ with
         NoTabCharacters = None
         NoPartialFunctions = None
         SuggestUseAutoProperty = None
+        DisallowShadowing = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -718,6 +722,7 @@ let flattenConfig (config:Configuration) =
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
+            config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&
