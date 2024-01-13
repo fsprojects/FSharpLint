@@ -66,3 +66,24 @@ module Program
         new Int32() |> ignore""")
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``new keyword is required.``() =
+        this.Parse(
+            """
+open System
+
+type ISomeInterfaceWithDisposable =
+    interface
+        inherit IDisposable
+    end
+
+type SomeDisposableType() =
+    interface ISomeInterfaceWithDisposable with
+        member _.Dispose() = ()
+
+module Program =
+    let foo = new SomeDisposableType() :> ISomeInterfaceWithDisposable"""
+        )
+
+        this.AssertNoWarnings()
