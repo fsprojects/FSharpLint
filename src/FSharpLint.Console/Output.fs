@@ -37,7 +37,9 @@ type StandardOutput () =
         member __.WriteInfo (info:string) = writeLine info ConsoleColor.White Console.Out
         member this.WriteWarning (warning:Suggestion.LintWarning) =
             let highlightedErrorText = highlightErrorText warning.Details.Range warning.ErrorText
+            let ruleUrlHint = sprintf "See https://fsprojects.github.io/FSharpLint/how-tos/rules/%s.html" warning.RuleIdentifier
             let str = warning.Details.Message + Environment.NewLine + highlightedErrorText
+                    + Environment.NewLine + ruleUrlHint
             writeLine str ConsoleColor.Yellow Console.Out
             String.replicate 80 "-" |> (this :> IOutput).WriteInfo
         member __.WriteError (error:string) =  writeLine error ConsoleColor.Red Console.Error
