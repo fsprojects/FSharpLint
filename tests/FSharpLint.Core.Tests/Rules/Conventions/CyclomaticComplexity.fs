@@ -123,7 +123,7 @@ type TestConventionsCyclomaticComplexity() =
             yield ifThenExpressionWithMultipleAndConditionals num
             yield ifThenExpressionWithMultipleOrConditionals num
             yield whileWithBooleanOperatorsInConditionExpressions num
-        } |> Seq.map box |> Seq.map Array.singleton // return an enumerable of obj arrays
+        } |> Seq.map (box >> Array.singleton) // return an enumerable of obj arrays
     
     /// Generator for source code test cases which have cyclomatic complexity greater than maxComplexity.
     /// Yields an enumerable of (source code snippet, errorLocation) pairs.
@@ -244,7 +244,7 @@ let f() =
     | "A" -> ()
     | "B" -> ()"""
         // create a snippet of code with 10 match clauses
-        let matchClauses = [ 1..10 ] |> List.map genMatchClause |> List.map (indent 4) |> String.concat NewLine
+        let matchClauses = [ 1..10 ] |> List.map (genMatchClause >> (indent 4)) |> String.concat NewLine
         let code = """Module Program
 let f (str: string) =
     match str with""" + NewLine + matchClauses

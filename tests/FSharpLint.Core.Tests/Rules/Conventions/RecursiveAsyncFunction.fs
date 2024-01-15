@@ -9,33 +9,35 @@ type TestConventionsRecursiveAsyncFunction() =
 
     [<Test>]
     member this.``Error for recursive async function ending in recursive do!``() = 
-        this.Parse("""
+        this.Parse """
 namespace Program
 
 module X = 
     let rec f x = async {
         let y = x + 1
         do! f y
-    }""")
+    }
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(7, 8))
 
     [<Test>]
     member this.``No error for recursive async function ending in recursive return!``() = 
-        this.Parse("""
+        this.Parse """
 namespace Program
 
 module X = 
     let rec f x = async {
         let y = x + 1
         return! f y
-    }""")
+    }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
     member this.``No error for recursive async function ending in non-recursive do!``() = 
-        this.Parse("""
+        this.Parse """
 namespace Program
 
 module X = 
@@ -43,7 +45,8 @@ module X =
         let f = (fun _ ->  async.Return ())
         let y = x + 1
         do! f y
-    }""")
+    }
+"""
 
         Assert.IsTrue(this.NoErrorsExist)
 

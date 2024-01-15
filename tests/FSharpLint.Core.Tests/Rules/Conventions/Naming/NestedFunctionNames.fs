@@ -20,7 +20,8 @@ type TestConventionsNestedFunctionNames() =
 module Program =
     let CylinderVolume radius length =
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -33,7 +34,8 @@ module Program =
             arg1 + 1
 
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -41,14 +43,15 @@ module Program =
     member this.NestedFunctionNameIsPascalCase() =
         this.Parse """
 module Program =
-let CylinderVolume radius length =
-    let NestedFunction arg1 =
-        arg1 + 1
+    let CylinderVolume radius length =
+        let NestedFunction arg1 =
+            arg1 + 1
 
-    let pi = 3.14159
-    length * pi * radius * radius"""
+        let pi = 3.14159
+        length * pi * radius * radius
+"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
     member this.NestedFunctionNameInTypeIsPascalCase() =
@@ -59,7 +62,8 @@ type Record =
         let NestedFunction arg1 =
             arg1 + 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 12))
 
@@ -75,7 +79,8 @@ module Program =
     let CylinderVolume2() =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -86,7 +91,8 @@ module Program =
     let private CylinderVolume() =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()
 
@@ -97,6 +103,7 @@ module Program =
     let private cylinderVolume() =
         let radius = 1
         let pi = 3.14159
-        length * pi * radius * radius"""
+        length * pi * radius * radius
+"""
 
         this.AssertNoWarnings()

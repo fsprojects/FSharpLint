@@ -19,7 +19,8 @@ type TestConventionsPublicValuesNames() =
         this.Parse """
 module Program
 
-    let (Cat, _) = 1, 0"""
+let (Cat, _) = 1, 0
+"""
 
         this.AssertNoWarnings()
         
@@ -35,7 +36,7 @@ open System.Runtime.InteropServices
 
 [<DllImport(@"python37", EntryPoint = "PyThreadState_SetAsyncExc", CallingConvention = CallingConvention.Cdecl)>]
 extern int PyThreadState_SetAsyncExcLLP64(uint id, IntPtr exc)
-    """
+"""
         
         this.AssertNoWarnings()
 
@@ -43,8 +44,9 @@ extern int PyThreadState_SetAsyncExcLLP64(uint id, IntPtr exc)
     member this.PublicTupleIsCamelCase() =
         this.Parse """
 module Program
-  let main =
-    let (cat, _) = 1, 0"""
+
+let (cat, _) = 1, 0
+"""
 
         this.AssertNoWarnings()
 
@@ -53,7 +55,9 @@ module Program
     member this.PublicFunctionNameIsPascalCase() =
         this.Parse """
 module Program
-  let Main () = ()"""
+
+let Main () = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -61,27 +65,31 @@ module Program
     member this.PublicFunctionNameIsCamelCase() =
         this.Parse """
 module Program
-  let main () = ()"""
+
+let main () = ()
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.UnionCaseInBindingContainingValueDoesNotGenerateWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
 
-let (SingleCaseDU myInt) = (SingleCaseDU 5)""")
+let (SingleCaseDU myInt) = (SingleCaseDU 5)
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.``ActivePatternDoesNotGenerateWarning`` () =
-         this.Parse("""
+         this.Parse """
 let (|Empty|_|) str =
     match str with
     | "" -> Some Empty
-    | _ -> None""")
+    | _ -> None
+"""
 
          this.AssertNoWarnings()

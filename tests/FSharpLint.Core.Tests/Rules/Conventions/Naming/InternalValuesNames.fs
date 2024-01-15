@@ -17,7 +17,9 @@ type TestConventionsInternalValuesNames() =
     member this.InternalVariableIsCamelCase() =
         this.Parse """
 module Program
-  let internal cat = 1"""
+
+let internal cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -25,15 +27,19 @@ module Program
     member this.InternalVariableIsPascalCase() =
         this.Parse """
 module Program
-  let internal Cat = 1"""
 
-        Assert.IsTrue(this.ErrorExistsAt(3,15))
+let internal Cat = 1
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4,13))
 
     [<Test>]
     member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let Cat = 1"""
+
+let Cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -41,6 +47,8 @@ module Program
     member this.PascalCaseLetBindingInTypeIsNotReported() =
         this.Parse """
 module program
-  let Cat() = ()"""
+
+let Cat() = ()
+"""
 
         this.AssertNoWarnings()

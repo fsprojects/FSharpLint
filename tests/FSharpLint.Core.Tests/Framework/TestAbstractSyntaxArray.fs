@@ -11,8 +11,8 @@ open TestUtils
 
 [<TestFixture>]
 type TestAst() =
-    let unionCaseName (x:'a) =
-        match FSharpValue.GetUnionFields(x, typeof<'a>) with
+    let unionCaseName (x:'T) =
+        match FSharpValue.GetUnionFields(x, typeof<'T>) with
         | case, _ -> case.Name
 
     let astToExpr ast =

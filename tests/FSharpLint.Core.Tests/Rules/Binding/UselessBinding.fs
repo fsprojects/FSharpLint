@@ -9,11 +9,12 @@ type TestBindingUselessBinding() =
 
     [<Test>]
     member this.UselessBinding() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 let a = 10
-let a = a""")
+let a = a
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
@@ -23,7 +24,8 @@ let a = a""")
 module Program
 
 let mutable a = 10
-let a = a"""
+let a = a
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
@@ -33,17 +35,19 @@ let a = a"""
 module Program
 
 let a = 10
-let mutable a = a"""
+let mutable a = a
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
     member this.UselessBindingWithParens() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 let a = 10
-let ((a)) = ((a))""")
+let ((a)) = ((a))
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
@@ -51,12 +55,13 @@ let ((a)) = ((a))""")
     /// (a use binding will dispose the value so is not useless)
     [<Test>]
     member this.UseBindingWithSameNameDoesNotCauseUselessBindingError() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type Cat() =
     static member CreateList(reader:TextReader) =
         use reader = reader
-        reader.ReadToEnd()""")
+        reader.ReadToEnd()
+"""
 
         Assert.IsFalse(this.ErrorsExist)

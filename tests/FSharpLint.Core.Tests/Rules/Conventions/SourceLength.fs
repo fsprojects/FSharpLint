@@ -101,11 +101,11 @@ module Program
 
 let dog = fun x ->
     match x with
-        | Some(x) ->
-            %s
-            ()
-        | None -> ()
-        """ (generateNewLines LambdaFunctionLength 12))
+    | Some(x) ->
+        %s
+        ()
+    | None -> ()
+        """ (generateNewLines LambdaFunctionLength 8))
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
@@ -115,11 +115,11 @@ module Program
 
 let dog = fun x y ->
     match x with
-        | Some(x) ->
-            %s
-            ()
-        | None -> ()
-        """ (generateNewLines LambdaFunctionLength 12))
+    | Some(x) ->
+        %s
+        ()
+    | None -> ()
+        """ (generateNewLines LambdaFunctionLength 8))
 
         Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
 
@@ -130,10 +130,11 @@ module Program
 
 let dog = fun x ->
     match x with
-        | Some(x) ->
-            ()
-        | None -> ()
-        """
+    | Some(x) ->
+        ()
+    | None -> ()
+"""
+
         Assert.IsFalse(this.ErrorExistsAt(4, 10))
 
 let MatchLambdaFunctionLength = 70
@@ -199,20 +200,24 @@ type TestMaxLinesInConstructor() =
     member this.ConstructorTooManyLines() =
         this.Parse(sprintf """
 module Program
+
 type MyClass(x) =
     new() =
-      %s
-      MyClass(0)
-      """ (generateNewLines ConstructorLength 6))
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        %s
+        MyClass(0)
+      """ (generateNewLines ConstructorLength 8))
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
     member this.ConstructorNotTooManyLines() =
         this.Parse """
 module Program
+
 type MyClass(x) =
-    new() = MyClass(0)"""
-        Assert.IsFalse(this.ErrorExistsAt(4, 4))
+    new() = MyClass(0)
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 4))
 
 let MemberLength = 70
 [<TestFixture>]
@@ -229,11 +234,13 @@ type TestMaxLinesInProperty() =
     member this.PropertyNotTooManyLines() =
         this.Parse """
 module Program
-  type Class() =
+
+type Class() =
     let mutable value = 10
     member this.Property1 with get() =
-        value"""
-        Assert.IsFalse(this.ErrorExistsAt(5, 31))
+        value
+"""
+        Assert.IsFalse(this.ErrorExistsAt(6, 31))
 
 let ClassLength = 500
 [<TestFixture>]
@@ -244,36 +251,45 @@ type TestMaxLinesInClass() =
     member this.ClassTooManyLines() =
         this.Parse(sprintf """
 module Program
-  type MyClass2() as this =
+
+type MyClass2() as this =
     do
         %s
     member this.PrintMessage() = ()""" (generateNewLines ClassLength 8))
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.ClassNotTooManyLines() =
         this.Parse """
 module Program
-  type MyClass2() as this =
-    member this.PrintMessage() = ()"""
-        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
+type MyClass2() as this =
+    member this.PrintMessage() = ()
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.InterfaceTooManyLines() =
         this.Parse(sprintf """
 module Program
-  type IPrintable =
+
+type IPrintable =
     %s
     abstract member Print : unit -> unit""" (generateAbstractMembers ClassLength 4))
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.InterfaceNotTooManyLines() =
         this.Parse """
 module Program
-  type IPrintable =
-    abstract member Print : unit -> unit"""
-        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
+type IPrintable =
+    abstract member Print : unit -> unit
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
 let UnionLength = 500
 [<TestFixture>]
@@ -290,19 +306,23 @@ type TestMaxLinesInRecord() =
     member this.RecordTooManyLines() =
         this.Parse(sprintf """
 module Program
-  type Record =
+
+type Record =
     {
-      %s
-      dog: int
-    }""" (generateNewLines RecordLength 6))
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
+        %s
+        dog: int
+    }""" (generateNewLines RecordLength 8))
+        Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
     member this.RecordNotTooManyLines() =
         this.Parse """
 module Program
-  type Record = { dog: int }"""
-        Assert.IsFalse(this.ErrorExistsAt(3, 7))
+
+type Record = { dog: int }
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
 let EnumLength = 1000
 [<TestFixture>]

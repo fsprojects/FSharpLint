@@ -15,7 +15,8 @@ module Program
 type Test(a,b,c,d,e,f) =
     member this.One() = ()
 
-let dog = Test(1,2,3,4,5,6)"""
+let dog = Test(1,2,3,4,5,6)
+"""
 
         this.AssertNoWarnings()
 
@@ -26,7 +27,8 @@ let dog = Test(1,2,3,4,5,6)"""
     [<Test>]
     member this.``Tuple with too many items in a functiona application must never issue a warning.``() =
         this.Parse """
-foo (1,2,3,4,5,6)"""
+foo (1,2,3,4,5,6)
+"""
 
         this.AssertNoWarnings()
 
@@ -38,7 +40,8 @@ module Program
 type Test(a,b,c,d,e,f) =
     member this.One() = ()
 
-let dog = new Test(1,2,3,4,5,6)"""
+let dog = new Test(1,2,3,4,5,6)
+"""
 
         this.AssertNoWarnings()
 
@@ -53,7 +56,8 @@ type Test() =
 let test = Test()
 
 let dog =
-    test.One(1,2,3,4,5,6)"""
+    test.One(1,2,3,4,5,6)
+"""
 
         this.AssertNoWarnings()
 
@@ -62,7 +66,8 @@ let dog =
         this.Parse """
 module Program
 
-let foo = (1, 2, 3, 4, 5, 6)"""
+let foo = (1, 2, 3, 4, 5, 6)
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 26))
 
@@ -71,6 +76,7 @@ let foo = (1, 2, 3, 4, 5, 6)"""
         this.Parse """
 module Program
 
-let foo = (1, 2, 3, 4, 5)"""
+let foo = (1, 2, 3, 4, 5)
+"""
 
         this.AssertNoWarnings()

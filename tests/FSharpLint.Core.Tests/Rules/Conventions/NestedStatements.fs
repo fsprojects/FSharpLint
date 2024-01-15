@@ -21,7 +21,8 @@ let dog =
                     if true then
                         if true then
                             ()
-    ()"""
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(9, 20))
 
@@ -45,7 +46,8 @@ let dog =
                     if true then
                         if true then
                             ()
-    ()"""
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(9, 20))
         Assert.IsTrue(this.ErrorExistsAt(16, 20))
@@ -75,7 +77,8 @@ let dog =
     else if true then
         ()
     else
-        ()"""
+        ()
+"""
 
         Assert.IsFalse(this.ErrorExistsAt(13, 4))
 
@@ -84,7 +87,8 @@ let dog =
         this.Parse """
 module Program
 
-let dog = (fun _ _ _ _ _ _ _ _ -> ())"""
+let dog = (fun _ _ _ _ _ _ _ _ -> ())
+"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
@@ -93,7 +97,8 @@ let dog = (fun _ _ _ _ _ _ _ _ -> ())"""
         this.Parse """
 module Program
 
-let dog = (fun a b c d e f g h i j -> ())"""
+let dog = (fun a b c d e f g h i j -> ())
+"""
 
         Assert.IsFalse(this.ErrorExistsOnLine(4))
 
@@ -102,7 +107,8 @@ let dog = (fun a b c d e f g h i j -> ())"""
         this.Parse """
 module Program
 
-let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())"""
+let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 47))
         
@@ -122,7 +128,8 @@ module Program
     member this.Create6 (i: uint32) = { Value=Convert.ToInt32(i)}
     member this.Create7 (i: uint16) = { Value=Convert.ToInt32(i)}
     member this.Create8 (i: byte) = { Value=Convert.ToInt32(i)}
-    member this.Create9 (i: char) = { Value=Convert.ToInt32(i)}"""
+    member this.Create9 (i: char) = { Value=Convert.ToInt32(i)}
+"""
     
         Assert.IsFalse(this.ErrorsExist)
 
@@ -140,6 +147,7 @@ type DummyRecord =
                             if true then
                                 if true then
                                     if true then
-                                        ()"""
+                                        ()
+"""
     
         Assert.IsTrue(this.ErrorExistsAt(11, 32))

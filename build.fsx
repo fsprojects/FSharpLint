@@ -212,12 +212,8 @@ Target.create "SelfCheck" (fun _ ->
     let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
-    printfn "Checking %s..." consoleProj.FullName
-    exec "dotnet" (sprintf "run lint %s" consoleProj.FullName) consoleProj.Directory.FullName
-
-    let coreProj = Path.Combine(srcDir.FullName, "FSharpLint.Core", "FSharpLint.Core.fsproj") |> FileInfo
-    printfn "Checking %s..." coreProj.FullName
-    exec "dotnet" (sprintf "run lint %s" coreProj.FullName) consoleProj.Directory.FullName
+    let sol = Path.Combine(rootDir.FullName, "FSharpLint.sln") |> FileInfo
+    exec "dotnet" (sprintf "run lint %s" sol.FullName) consoleProj.Directory.FullName
 )
 
 // --------------------------------------------------------------------------------------

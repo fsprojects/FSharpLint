@@ -12,7 +12,8 @@ type TestBindingFavourIgnoreOverLetWild() =
         this.Parse """
 module Program
 
-let _ = ()"""
+let _ = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -22,8 +23,9 @@ let _ = ()"""
 module Program
 
 let (_) =
-  let x = 4 + 4
-  ()"""
+    let x = 4 + 4
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -32,7 +34,8 @@ let (_) =
         this.Parse """
 module Program
 
-let ((((_)))) = List.iter (fun x -> ()) []"""
+let ((((_)))) = List.iter (fun x -> ()) []
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
@@ -41,7 +44,8 @@ let ((((_)))) = List.iter (fun x -> ()) []"""
         this.Parse """
 module Program
 
-let a = List.iter (fun x -> ()) []"""
+let a = List.iter (fun x -> ()) []
+"""
 
         Assert.IsFalse(this.ErrorsExist)
 

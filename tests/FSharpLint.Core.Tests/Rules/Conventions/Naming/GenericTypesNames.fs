@@ -24,7 +24,7 @@ type Foo<'T> = Option<'T>
     member this.``generic type name shouldn't be camelCase``() =
         this.Parse """
 type Foo<'a> = Option<'a>
-    """
+"""
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsOnLine 2)
 

@@ -15,30 +15,32 @@ let rec Foo () =
     if someParam then
         Foo()
     else
-        ()"""
+        ()
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError_1() =
+    member this.UnneededRecKeywordShouldProduceError1() =
         this.Parse """
 let rec Foo someParam =
-    ()"""
+    ()
+"""
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError_2() =
+    member this.UnneededRecKeywordShouldProduceError2() =
         this.Parse """
 let rec Foo someParam =
     ()
 
-[<EntryPoint>]
-let main args =
+let Bar () =
     let Foo () =
         ()
 
     Foo()
-    0"""
+    ()
+"""
 
         Assert.IsTrue this.ErrorsExist

@@ -18,8 +18,10 @@ type TestConventionsMemberNames() =
     member this.ClassMemberIsPascalCase() =
         this.Parse """
 module Program
-  type MyClass2() as this =
-    member this.PrintMessage() = ()"""
+
+type MyClass2() as this =
+    member this.PrintMessage() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -27,18 +29,22 @@ module Program
     member this.ClassMemberIsCamelCase() =
         this.Parse """
 module Program
-  type MyClass2() as this =
-    member this.printMessage() = ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 16))
+type MyClass2() as this =
+    member this.printMessage() = ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 16))
 
     /// The new member (constructor) is not pascal case so check it does not post an error.
     [<Test>]
     member this.ConstructorDoesNotPostError() =
         this.Parse """
 module Program
+
 type MyClass(x) =
-    new() = MyClass(0)"""
+    new() = MyClass(0)
+"""
 
         this.AssertNoWarnings()
 
@@ -47,22 +53,24 @@ type MyClass(x) =
     [<Test>]
     member this.PropertyIsPascalCase() =
         this.Parse """
-  type Shape2D(x0 : float, y0 : float) =
+type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
-    member this.CenterX with get() = x and set xval = x <- xval"""
+    member this.CenterX with get() = x and set xval = x <- xval
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.PropertyIsCamelCase() =
         this.Parse """
-  type Shape2D(x0 : float, y0 : float) =
+type Shape2D(x0 : float, y0 : float) =
     let mutable x, y = x0, y0
     let mutable rotAngle = 0.0
 
-    member this.centerX with get() = x and set xval = x <- xval"""
+    member this.centerX with get() = x and set xval = x <- xval
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(6, 16))
 
@@ -70,9 +78,11 @@ type MyClass(x) =
     member this.AbstractMemberNameIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
-    abstract member Rotate: float -> unit"""
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
+    abstract member Rotate: float -> unit
+"""
 
         this.AssertNoWarnings()
 
@@ -80,19 +90,23 @@ module Program
     member this.AbstractMemberNameIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
-    abstract member rotate: float -> unit"""
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 20))
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
+    abstract member rotate: float -> unit
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 20))
 
     [<Test>]
     member this.AbstractPropertyNameIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
-    abstract Area : float with get"""
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
+    abstract Area : float with get
+"""
 
         this.AssertNoWarnings()
 
@@ -100,20 +114,24 @@ module Program
     member this.AbstractPropertyNameIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
-    abstract area : float with get"""
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 13))
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
+    abstract area : float with get
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 13))
 
     [<Test>]
     member this.DefaultMemberIsPascalCase() =
         this.Parse """
 module Program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
+
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
-    default this.Rotate(angle) = ()"""
+    default this.Rotate(angle) = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -121,12 +139,14 @@ module Program
     member this.DefaultMemberIsCamelCase() =
         this.Parse """
 module program
-  [<AbstractClass>]
-  type Shape2D(x0 : float, y0 : float) =
-    abstract member rotate: float -> unit
-    default this.rotate(angle) = ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 17))
+[<AbstractClass>]
+type Shape2D(x0 : float, y0 : float) =
+    abstract member rotate: float -> unit
+    default this.rotate(angle) = ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(7, 17))
 
     [<Test>]
     member this.TypeExtensionMethodIsPascalCase() =
@@ -137,7 +157,8 @@ type MyClass() =
     member this.F() = 100
 
 type MyClass with
-    member this.Goat() = 200"""
+    member this.Goat() = 200
+"""
 
         this.AssertNoWarnings()
 
@@ -150,7 +171,8 @@ type MyClass() =
     member this.F() = 100
 
 type MyClass with
-    member this.goat() = 200"""
+    member this.goat() = 200
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(8, 16))
 
@@ -162,7 +184,8 @@ type MyClass with
 module Program
 
 type Cat() =
-    member x.Pri_nt() = ()"""
+    member x.Pri_nt() = ()
+"""
 
         let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
 
@@ -174,7 +197,8 @@ type Cat() =
 module Program
 
 type Cat() =
-    member x.__Print() = ()"""
+    member x.__Print() = (
+"""
 
         this.AssertNoWarnings()
 

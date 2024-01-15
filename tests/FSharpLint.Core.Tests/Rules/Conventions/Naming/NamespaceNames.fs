@@ -18,14 +18,16 @@ type TestConventionsNamespaceNames() =
     [<Test>]
     member this.NamespaceIsPascalCase() =
         this.Parse """
-namespace Matt.Dog.Cat"""
+namespace Matt.Dog.Cat
+"""
 
         this.AssertNoWarnings()
 
     [<Test>]
     member this.NamespaceIsCamelCase() =
         this.Parse """
-namespace matt.dog.cat"""
+namespace matt.dog.cat
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
@@ -34,7 +36,7 @@ namespace matt.dog.cat"""
     member this.``Linter must not complain about naming of fsx file``() =
         this.Parse("""
 type MyClass2() as this =
-  member this.PrintMessage() = ()""", fileName = "3i-3.fsx")
+    member this.PrintMessage() = ()""", fileName = "3i-3.fsx")
 
         this.AssertNoWarnings()
 
@@ -43,7 +45,7 @@ type MyClass2() as this =
     member this.``Linter must not complain about naming of fsx file with long name``() =
         this.Parse("""
 type MyClass2() as this =
-  member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
+    member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
 
         this.AssertNoWarnings()
 

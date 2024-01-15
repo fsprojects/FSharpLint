@@ -16,7 +16,8 @@ try
 with
 | ex ->
     if someCondition then
-        reraise() """
+        reraise()
+"""
 
         this.AssertNoWarnings()
 
@@ -29,7 +30,8 @@ with
  with
  | ex ->
      if someCondition then
-         raise ex """
+         raise ex
+"""
 
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(7, 9))
@@ -46,7 +48,8 @@ let function1 x y =
      with
       | InnerError(str) -> printfn "Error1 %s" str
    finally
-      printfn "Always print this." """
+      printfn "Always print this."
+"""
 
         this.AssertNoWarnings()
 
@@ -60,7 +63,8 @@ with
 | ex ->
     let e = ex.InnerException
     if null <> e then
-        raise e """
+        raise e
+"""
 
         this.AssertNoWarnings()
 
@@ -73,7 +77,8 @@ try
 with
 | ex ->
     let e = Exception("baz", ex)
-    raise e """
+    raise e
+"""
 
         this.AssertNoWarnings()
 
@@ -86,6 +91,7 @@ try
 with
 | e ->
     let ex = Exception("baz", e)
-    raise ex """
+    raise ex
+"""
 
         this.AssertNoWarnings()

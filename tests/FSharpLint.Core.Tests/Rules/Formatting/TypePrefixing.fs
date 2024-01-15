@@ -245,40 +245,40 @@ type TestFormattingAlwaysTypePrefixing() =
     [<Test>]
     member this.``Error for generic type postfix syntax (like hybrid)``() =
         this.Parse """
-    module Program
+module Program
 
-    type X = int Generic
-    """
+type X = int Generic
+"""
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.``No error for generic type prefix syntax (like hybrid)``() =
         this.Parse """
-    module Program
+module Program
 
-    type X = Generic<int>
-    """
+type X = Generic<int>
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
     member this.``No error for F# Option type prefix syntax``() =
         this.Parse """
-    module Program
+module Program
 
-    type T = Option<int>
-    """
+type T = Option<int>
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
     member this.``Error for F# Option type postfix syntax``() =
         this.Parse """
-    module Program
+module Program
 
-    type T = int option
-    """
+type T = int option
+"""
 
         Assert.IsTrue this.ErrorsExist
 
@@ -321,40 +321,40 @@ type TestFormattingNeverTypePrefixing() =
     [<Test>]
     member this.``Error for F# Option type prefix syntax (like hybrid)``() =
         this.Parse """
-    module Program
+module Program
 
-    type T = Option<int>
-    """
+type T = Option<int>
+"""
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.``No error for F# Option type postfix syntax (like hybrid)``() =
         this.Parse """
-    module Program
+module Program
 
-    type T = int option
-    """
+type T = int option
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
     member this.``No error for generic type postfix syntax (unlike any other mode)``() =
         this.Parse """
-    module Program
+module Program
 
-    type X = int Generic
-    """
+type X = int Generic
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
     member this.``Error for generic type prefix syntax (unlike any other mode)``() =
         this.Parse """
-    module Program
+module Program
 
-    type X = Generic<int>
-    """
+type X = Generic<int>
+"""
 
         Assert.IsTrue this.ErrorsExist
 

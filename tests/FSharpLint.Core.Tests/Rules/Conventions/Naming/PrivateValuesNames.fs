@@ -19,8 +19,10 @@ type TestConventionsPrivateValuesNames() =
         this.Parse """
 module Program
 
-  let main =
-    let (Cat, _) = 1, 0"""
+let main =
+    let (Cat, _) = 1, 0
+    ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 9))
 
@@ -28,27 +30,33 @@ module Program
     member this.PrivateTupleIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat, private dog = 1, 0"""
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+let private Cat, private dog = 1, 0
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
     member this.PrivateFunctionNameIsPascalCase() =
         this.Parse """
 module Program
-  let private Main () = ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+let private Main () = ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
     [<Test>]
     member this.MnemonicWildcardInPatternMatch() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | _dog -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -56,20 +64,24 @@ module Program
     member this.UnderscoreInMatchPatternIdent() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
     | d_og -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
-        Assert.IsTrue(this.ErrorExistsOnLine(5))
+        Assert.IsTrue(this.ErrorExistsOnLine 6)
 
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
-    | dog -> ()"""
+    | dog -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -77,19 +89,23 @@ module Program
     member this.PatternMatchAsIsPascalCase() =
         this.Parse """
 module Program
-  let main =
-    match true with
-    | _ as Dog -> ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+let main =
+    match true with
+    | _ as Dog -> ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(6, 11))
 
     [<Test>]
     member this.PatternMatchAsIsCamelCase() =
         this.Parse """
 module Program
-  let main =
+
+let main =
     match true with
-    | _ as dog -> ()"""
+    | _ as dog -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -97,21 +113,26 @@ module Program
     member this.FunctionNameNestedInBindingIsPascalCase() =
         this.Parse """
 module program
-  let main () =
-    let Main () = ()
-    ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+let main () =
+    let Main () = ()
+    ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.FunctionNameNestedInBindingIsCamelCase() =
         this.Parse """
 module Program
-  let main () =
+
+let main () =
     let bain () = ()
-    ()"""
+    ()
+"""
 
         this.AssertNoWarnings()
+
     [<Test>]
     member this.CamelCaseLetBindingInType() =
         this.Parse """
@@ -120,7 +141,8 @@ module Program
 type Dog() =
     let cat() = ()
 
-    member this.Goat() = ()"""
+    member this.Goat() = ()
+"""
 
         this.AssertNoWarnings()
 
@@ -132,7 +154,8 @@ module program
 type Dog() =
     let Cat() = ()
 
-    member this.Goat() = ()"""
+    member this.Goat() = ()
+"""
 
         Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
@@ -142,11 +165,12 @@ type Dog() =
 module Program
 
 type Cat() =
-  member this.ContainsBinding() =
-    let Goat = 0
-    ()"""
+    member this.ContainsBinding() =
+        let Goat = 0
+        ()
+"""
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 8))
+        Assert.IsTrue(this.ErrorExistsAt(6, 12))
 
     [<Test>]
     member this.CamelCaseLetBindingInMethod() =
@@ -154,9 +178,10 @@ type Cat() =
 module Program
 
 type Cat() =
-  member this.ContainsBinding() =
-    let goat = 0
-    ()"""
+    member this.ContainsBinding() =
+        let goat = 0
+        ()
+"""
 
         this.AssertNoWarnings()
 
@@ -164,13 +189,15 @@ type Cat() =
     member this.LiteralPatternMatchExpectNoErrors() =
         this.Parse """
 module Program
-  [<Literal>]
-  let Dog = true
 
-  let main =
+[<Literal>]
+let Dog = true
+
+let main =
     match true with
     | Dog -> ()
-    | _ -> ()"""
+    | _ -> ()
+"""
 
         this.AssertNoWarnings()
 
@@ -183,7 +210,7 @@ module Program
 let foo () =
     let ``¯\_(ツ)_/¯`` = ignore
     ()
-        """
+"""
 
         this.AssertNoWarnings()
 
@@ -195,7 +222,7 @@ module Program
 let foo () =
     let żcieżka = 0
     ()
-        """
+"""
 
         this.AssertNoWarnings()
 
@@ -203,9 +230,11 @@ let foo () =
     member this.FunctionParameterIsPascalCase() =
         this.Parse """
 module Program
-  let main Dog = ()"""
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 11))
+let main Dog = ()
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 9))
 
     [<Test>]
     member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() =
@@ -228,7 +257,9 @@ let foo x = 0
     member this.ForLoopIdentifierIsCamelCase() =
         this.Parse """
 module Program
-for i = 10 downto 1 do System.Console.Write(i)
+
+let someFunc() =
+    for i = 10 downto 1 do System.Console.Write(i)
 """
 
         this.AssertNoWarnings()
@@ -237,16 +268,20 @@ for i = 10 downto 1 do System.Console.Write(i)
     member this.ForLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
-for I = 10 downto 1 do System.Console.Write(I)
+
+let someFunc() =
+    for I = 10 downto 1 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.ForEachLoopIdentifierIsCamelCase() =
         this.Parse """
 module Program
-for i in 1..10 do System.Console.Write(i)
+
+let someFunc() =
+    for i in 1..10 do System.Console.Write(i)
 """
 
         this.AssertNoWarnings()
@@ -255,34 +290,38 @@ for i in 1..10 do System.Console.Write(i)
     member this.ForEachLoopIdentifierIsPascalCase() =
         this.Parse """
 module program
-for I in 1..10 do System.Console.Write(I)
+
+let someFunc() =
+    for I in 1..10 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue(this.ErrorExistsAt(5, 8))
 
     [<Test>]
     member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
 
-let (SingleCaseDU MyInt) = (SingleCaseDU 5)""")
+let (SingleCaseDU MyInt) = (SingleCaseDU 5)
+"""
 
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
     member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
-        this.Parse("""
+        this.Parse """
 module Program
 
 type SingleCaseDU = SingleCaseDU of int
 let extractInt (SingleCaseDU MyInt) =
-  MyInt
+    MyInt
 
 let singleCaseDU = SingleCaseDU 5
 
-let result = extractInt singleCaseDU""")
+let result = extractInt singleCaseDU
+"""
 
         Assert.IsTrue(this.ErrorsExist)
 
@@ -290,7 +329,9 @@ let result = extractInt singleCaseDU""")
     member this.PrivateVariableIsCamelCase() =
         this.Parse """
 module Program
-  let private cat = 1"""
+
+let private cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -298,15 +339,19 @@ module Program
     member this.PrivateVariableIsPascalCase() =
         this.Parse """
 module Program
-  let private Cat = 1"""
 
-        Assert.IsTrue(this.ErrorExistsAt(3,14))
+let private Cat = 1
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4,12))
 
     [<Test>]
     member this.PublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let Cat = 1"""
+
+let Cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -315,7 +360,9 @@ module Program
     member this.ExplicitPublicVariableIsNotReported() =
         this.Parse """
 module Program
-  let public Cat = 1"""
+
+let public Cat = 1
+"""
 
         this.AssertNoWarnings()
 
@@ -323,6 +370,8 @@ module Program
     member this.InternalVariableIsNotReported() =
         this.Parse """
 module Program
-  let internal Cat = 1"""
+
+let internal Cat = 1
+"""
 
         this.AssertNoWarnings()
