@@ -170,6 +170,17 @@ if foo.Head 1 then
         Assert.IsTrue this.ErrorsExist
         this.AssertErrorWithMessageExists("Consider using 'List.tryHead' instead of partial function/method 'List.Head'.")
 
+    [<Test>]
+    member this.``Regression found when parsing Console/Program_fs``() =
+        this.Parse """
+module Program =
+    type Foo = Foo of string
+    do
+        typeof<int>.GetCustomAttributes false
+        |> ignore
+"""
+
+        this.AssertNoWarnings()
 (*
     // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers
 
