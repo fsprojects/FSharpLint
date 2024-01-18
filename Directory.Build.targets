@@ -6,7 +6,7 @@
         <PackageReference Update="FSharp.Core"
                           Condition="'$(MSBuildProjectExtension)' == '.fsproj' And '$(DisableImplicitFSharpCoreReference)' != 'true' And '$(UpdateImplicitFSharpCoreReference)' != 'false'"
                           IsImplicitlyDefined="true"
-                          Version="6.0.0" />
+                          Version="[6.0.7]" />
     </ItemGroup>
     <!-- Download and copy packages used by Fornax as these are no longer managed using Paket -->
     <ItemGroup>
