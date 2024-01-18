@@ -363,4 +363,7 @@
   <data name="RulesUnneededRecKeyword" xml:space="preserve">
     <value>The '{0}' function has a "rec" keyword, but it is not really recursive, consider removing it.</value>
   </data>
+  <data name="RulesFavourNonMutablePropertyInitializationError" xml:space="preserve">
+    <value>Consider using non-mutable property initialization.</value>
+  </data>
 </root>
