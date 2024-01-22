@@ -78,6 +78,20 @@ let foo a =
         Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
 
     [<Test>]
+    member this.FavourStaticEmptyFieldsShouldProduceError10() =
+        this.Parse """
+type Person =
+    {
+        FirstName: string
+        Nicknames: List<string>
+    }
+
+{ FirstName = "Foo"; Nicknames = [] } |> ignore"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
+
+    [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError1() =
         this.Parse "let bar = String.Empty"
 
