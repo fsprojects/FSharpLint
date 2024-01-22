@@ -92,6 +92,19 @@ type Person =
         Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
 
     [<Test>]
+    member this.FavourStaticEmptyFieldsShouldProduceError11() =
+        this.Parse """
+type Person =
+    {
+        FirstName: string
+    }
+
+{ FirstName = "" } |> ignore"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+
+    [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError1() =
         this.Parse "let bar = String.Empty"
 
