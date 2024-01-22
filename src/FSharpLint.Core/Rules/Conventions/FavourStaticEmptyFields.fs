@@ -48,6 +48,8 @@ let private runner (args: AstNodeRuleParams) =
                 | Some(SynExpr.ArrayOrList(isArray, [], range)) ->
                     let emptyLiteralType = if isArray then EmptyArrayLiteral else EmptyListLiteral
                     generateError range emptyLiteralType
+                | Some(SynExpr.Const (SynConst.String ("", _, range), _)) ->
+                    generateError range EmptyStringLiteral
                 | _ -> Array.empty)
         |> Array.concat
     | _ -> Array.empty
