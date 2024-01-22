@@ -13,8 +13,18 @@ type FSharpLintResponseCode =
     | ErrDaemonCreationFailed = -1
     | OkCurrentDaemonVersion = 0
 
+type File = private File of string 
+with 
+    static member From (filePath: string) =
+        if File.Exists(filePath) then
+            filePath |> File |> Some
+        else
+            None
+
+    static member Unwrap(File f) = f
+
 type FSharpLintVersion = FSharpLintVersion of string
-type FSharpLintExecutableFile = FSharpLintExecutableFile of string
+type FSharpLintExecutableFile = FSharpLintExecutableFile of File
 type Folder = private Folder of string 
 with 
     static member from (filePath: string) =

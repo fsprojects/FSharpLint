@@ -141,10 +141,11 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
                 if File.Exists fsharpLint then Some fsharpLint
                 else None)
         |> Seq.tryHead
+        |> Option.bind File.From
 
     fsharpLintExecutableOnPathOpt
     |> Option.bind (fun fsharpLintExecutablePath ->
-        let processStart = ProcessStartInfo(fsharpLintExecutablePath)
+        let processStart = ProcessStartInfo(File.Unwrap fsharpLintExecutablePath)
         processStart.Arguments <- "--version"
         processStart.RedirectStandardOutput <- true
         processStart.CreateNoWindow <- true
@@ -210,7 +211,7 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
             ps.Arguments <- "--daemon"
             ps
         | FSharpLintToolStartInfo.ToolOnPath(FSharpLintExecutableFile executableFile) ->
-            let ps = ProcessStartInfo(executableFile)
+            let ps = ProcessStartInfo(File.Unwrap executableFile)
             ps.Arguments <- "--daemon"
             ps
 
