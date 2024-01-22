@@ -82,18 +82,19 @@ NUGET
     Ionide.ProjInfo.Sln (0.61.3)
     Microsoft.Bcl.AsyncInterfaces (8.0) - restriction: || (&& (== net6.0) (>= net462)) (&& (== net6.0) (< netstandard2.1)) (== netstandard2.0)
       System.Threading.Tasks.Extensions (>= 4.5.4) - restriction: || (&& (== net6.0) (>= net462)) (&& (== net6.0) (< netstandard2.1)) (== netstandard2.0)
-    Microsoft.Build (16.11) - copy_local: false
-      Microsoft.Build.Framework (>= 16.11) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-      Microsoft.NET.StringTools (>= 1.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-      Microsoft.Win32.Registry (>= 4.3) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net5.0))
-      System.Collections.Immutable (>= 5.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-      System.Configuration.ConfigurationManager (>= 4.7) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-      System.Reflection.Metadata (>= 1.6) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net5.0))
-      System.Security.Principal.Windows (>= 4.7) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net5.0))
-      System.Text.Encoding.CodePages (>= 4.0.1) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net5.0))
-      System.Text.Json (>= 4.7) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-      System.Threading.Tasks.Dataflow (>= 4.9) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net5.0))
-    Microsoft.Build.Framework (16.11) - copy_local: false
+    Microsoft.Build (17.2) - copy_local: false
+      Microsoft.Build.Framework (>= 17.2) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+      Microsoft.NET.StringTools (>= 1.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+      Microsoft.Win32.Registry (>= 4.3) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net6.0))
+      System.Collections.Immutable (>= 5.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+      System.Configuration.ConfigurationManager (>= 4.7) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+      System.Reflection.Metadata (>= 1.6) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net6.0))
+      System.Security.Principal.Windows (>= 4.7) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net6.0))
+      System.Text.Encoding.CodePages (>= 4.0.1) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net6.0))
+      System.Text.Json (>= 6.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+      System.Threading.Tasks.Dataflow (>= 6.0) - restriction: || (== net6.0) (&& (== netstandard2.0) (>= net472)) (&& (== netstandard2.0) (>= net6.0))
+    Microsoft.Build.Framework (17.2) - copy_local: false
+      Microsoft.Win32.Registry (>= 4.3)
       System.Security.Permissions (>= 4.7)
     Microsoft.Build.Locator (1.6.10)
     Microsoft.Build.Tasks.Core (17.8.3) - copy_local: false
@@ -114,14 +115,14 @@ NUGET
       System.Text.Encoding.CodePages (>= 7.0)
       System.Threading.Tasks.Dataflow (>= 7.0)
     Microsoft.Build.Tasks.Git (8.0) - copy_local: true
-    Microsoft.Build.Utilities.Core (16.11) - copy_local: false
-      Microsoft.Build.Framework (>= 16.11)
+    Microsoft.Build.Utilities.Core (17.2) - copy_local: false
+      Microsoft.Build.Framework (>= 17.2)
       Microsoft.NET.StringTools (>= 1.0)
       Microsoft.Win32.Registry (>= 4.3)
       System.Collections.Immutable (>= 5.0)
       System.Configuration.ConfigurationManager (>= 4.7)
-      System.Security.Permissions (>= 4.7)
-      System.Text.Encoding.CodePages (>= 4.0.1)
+      System.Security.Permissions (>= 4.7) - restriction: == netstandard2.0
+      System.Text.Encoding.CodePages (>= 4.0.1) - restriction: == netstandard2.0
     Microsoft.CodeAnalysis.Analyzers (3.3.4)
     Microsoft.CodeAnalysis.Common (4.8)
       Microsoft.CodeAnalysis.Analyzers (>= 3.3.4)
