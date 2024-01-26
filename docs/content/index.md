@@ -36,7 +36,7 @@ FSharpLint can be used in several ways:
 The following program:
 
     type ExampleInterface =
-       abstract member print : unit -> unit
+        abstract member print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
@@ -65,7 +65,7 @@ Run against the lint tool generates the following errors:
 Refactored using lint's warnings:
 
     type IExampleInterface =
-       abstract member Print : unit -> unit
+        abstract member Print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
@@ -83,7 +83,7 @@ If we run lint again it will find a new error, it's worth running the tool until
 After refactoring again we have with no lint errors:
 
     type IExampleInterface =
-       abstract member Print : unit -> unit
+        abstract member Print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
