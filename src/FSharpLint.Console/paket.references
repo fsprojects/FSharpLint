@@ -2,3 +2,4 @@ Argu
 FSharp.Compiler.Service
 FSharp.Core
 Microsoft.SourceLink.GitHub
+StreamJsonRpc
