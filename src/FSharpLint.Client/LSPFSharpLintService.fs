@@ -29,6 +29,35 @@ type Msg =
     | Reset of AsyncReplyChannel<unit>
 
 let private createAgent (ct: CancellationToken) =
+    let tryGetVersionFromCache state version folder (replyChannel: AsyncReplyChannel<Result<JsonRpc, GetDaemonError>>) =
+        let daemon = Map.tryFind version state.Daemons
+
+        match daemon with
+        | Some daemon ->
+            // We have a daemon for the required version in the cache, check if we can still use it.
+            if daemon.Process.HasExited then
+                // weird situation where the process has crashed.
+                // Trying to reboot
+                (daemon :> IDisposable).Dispose()
+
+                let newDaemonResult = createFor daemon.StartInfo
+
+                match newDaemonResult with
+                | Ok newDaemon ->
+                    replyChannel.Reply(Ok newDaemon.RpcClient)
+
+                    Some { FolderToVersion = Map.add folder version state.FolderToVersion
+                           Daemons = Map.add version newDaemon state.Daemons }
+                | Error pse ->
+                    replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
+                    Some state
+            else
+                // return running client
+                replyChannel.Reply(Ok daemon.RpcClient)
+
+                Some { state with FolderToVersion = Map.add folder version state.FolderToVersion }
+        | None -> None
+
     MailboxProcessor.Start(
         (fun inbox ->
             let rec messageLoop (state: ServiceState) =
@@ -41,44 +70,17 @@ let private createAgent (ct: CancellationToken) =
                             // get the version for that folder
                             // look in the cache first
                             let versionFromCache = Map.tryFind folder state.FolderToVersion
-
                             match versionFromCache with
                             | Some version ->
-                                let daemon = Map.tryFind version state.Daemons
-
-                                match daemon with
-                                | Some daemon ->
-                                    // We have a daemon for the required version in the cache, check if we can still use it.
-                                    if daemon.Process.HasExited then
-                                        // weird situation where the process has crashed.
-                                        // Trying to reboot
-                                        (daemon :> IDisposable).Dispose()
-
-                                        let newDaemonResult = createFor daemon.StartInfo
-
-                                        match newDaemonResult with
-                                        | Ok newDaemon ->
-                                            replyChannel.Reply(Ok newDaemon.RpcClient)
-
-                                            { FolderToVersion = Map.add folder version state.FolderToVersion
-                                              Daemons = Map.add version newDaemon state.Daemons }
-                                        | Error pse ->
-                                            replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
-                                            state
-                                    else
-                                        // return running client
-                                        replyChannel.Reply(Ok daemon.RpcClient)
-
-                                        { state with
-                                            FolderToVersion = Map.add folder version state.FolderToVersion }
-                                | None ->
+                                tryGetVersionFromCache state version folder replyChannel
+                                |> Option.defaultWith(fun () -> 
                                     // This is a strange situation, we know what version is linked to that folder but there is no daemon
                                     // The moment a version is added, is also the moment a daemon is re-used or created
                                     replyChannel.Reply(
                                         Error(GetDaemonError.CompatibleVersionIsKnownButNoDaemonIsRunning version)
                                     )
 
-                                    state
+                                    state)
                             | None ->
                                 // Try and find a version of fsharplint daemon for our current folder
                                 let fsharpLintToolResult: Result<FSharpLintToolFound, FSharpLintToolError> =
@@ -86,17 +88,20 @@ let private createAgent (ct: CancellationToken) =
 
                                 match fsharpLintToolResult with
                                 | Ok(FSharpLintToolFound(version, startInfo)) ->
-                                    let createDaemonResult = createFor startInfo
+                                    tryGetVersionFromCache state version folder replyChannel
+                                    |> Option.defaultWith(fun () -> 
+                                        let createDaemonResult = createFor startInfo
 
-                                    match createDaemonResult with
-                                    | Ok daemon ->
-                                        replyChannel.Reply(Ok daemon.RpcClient)
+                                        match createDaemonResult with
+                                        | Ok daemon ->
+                                            replyChannel.Reply(Ok daemon.RpcClient)
 
-                                        { Daemons = Map.add version daemon state.Daemons
-                                          FolderToVersion = Map.add folder version state.FolderToVersion }
-                                    | Error pse ->
-                                        replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
-                                        state
+                                            { Daemons = Map.add version daemon state.Daemons
+                                              FolderToVersion = Map.add folder version state.FolderToVersion }
+                                        | Error pse ->
+                                            replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
+                                            state
+                                    )
                                 | Error FSharpLintToolError.NoCompatibleVersionFound ->
                                     replyChannel.Reply(Error GetDaemonError.InCompatibleVersionFound)
                                     state
