@@ -15,7 +15,8 @@ let rec Foo someParam =
     if someParam then
         Foo false
     else
-        ()"""
+        ()
+"""
 
         Assert.IsTrue <| this.ErrorExistsAt(2, 8)
 
@@ -27,7 +28,8 @@ let rec Foo someParam =
     if someParam then
         Foo false
     else
-        ()"""
+        ()
+"""
 
         Assert.IsTrue this.NoErrorsExist
 
@@ -38,6 +40,7 @@ let rec Foo someParam =
     ()
 
 module Bar =    
-    let Foo = 0"""
+    let Foo = 0
+"""
 
         Assert.IsTrue this.NoErrorsExist
