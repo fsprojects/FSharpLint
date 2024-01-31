@@ -63,7 +63,7 @@ module ContextBuilder =
         match node with
         | TypeDefinition (SynTypeDefn(_, SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _), _, _, _, _)) ->
             fields
-            |> List.map (fun (SynField (_, _, _, _, _, _, _, range)) -> range)
+            |> List.map (fun (SynField (_, _, _, _, _, _, _, range, _)) -> range)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Expression (SynExpr.Tuple (_, exprs, _, _)) ->

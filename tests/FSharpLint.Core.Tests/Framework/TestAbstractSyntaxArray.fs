@@ -26,7 +26,7 @@ type TestAst() =
         match ast with
         | ParsedInput.ImplFile(x) ->
             match x with
-            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _) ->
+            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _, _) ->
                 app
             | _ -> failwith "Expected at least one module or namespace."
         | _ -> failwith "Expected an implementation file."
