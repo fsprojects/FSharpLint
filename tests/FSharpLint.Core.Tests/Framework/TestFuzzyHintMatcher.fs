@@ -11,6 +11,8 @@ open NUnit.Framework
 open FParsec
 open TestUtils
 
+// fsharplint:disable MaxLinesInValue
+
 let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify = 
     for i = 0 to syntaxArray.Length - 1 do
         let node = syntaxArray.[i]
