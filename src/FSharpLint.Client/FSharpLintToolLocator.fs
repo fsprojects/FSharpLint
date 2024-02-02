@@ -19,10 +19,10 @@ let private (|CompatibleVersion|_|) (version: string) =
         else
             None
     | _ -> None
-let [<Literal>] fsharpLintToolName = "dotnet-fsharplint"
+let [<Literal>] FSharpLintToolName = "dotnet-fsharplint"
 
 let private (|CompatibleToolName|_|) toolName =
-    if toolName = fsharpLintToolName then
+    if toolName = FSharpLintToolName then
         Some toolName
     else
         None
@@ -58,10 +58,10 @@ let private startProcess (ps: ProcessStartInfo) : Result<Process, ProcessStartEr
 
 let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
     let ps = ProcessStartInfo("dotnet")
-    ps.WorkingDirectory <- Folder.unwrap workingDir 
+    ps.WorkingDirectory <- Folder.unwrap workingDir
     ps.EnvironmentVariables.["DOTNET_CLI_UI_LANGUAGE"] <- "en-us" //ensure we have predictible output for parsing
 
-    let toolArguments = 
+    let toolArguments =
         Option.ofObj (Environment.GetEnvironmentVariable "FSHARPLINT_SEARCH_PATH_OVERRIDE")
         |> Option.map(fun env -> $" --tool-path %s{env}")
         |> Option.defaultValue (if globalFlag then "--global" else String.Empty)
@@ -133,11 +133,11 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
         | None -> Array.empty
         |> Seq.choose (fun folder ->
             if isWindows then
-                let fsharpLintExe = Path.Combine(folder, $"{fsharpLintToolName}.exe")
+                let fsharpLintExe = Path.Combine(folder, $"{FSharpLintToolName}.exe")
                 if File.Exists fsharpLintExe then Some fsharpLintExe
                 else None
             else
-                let fsharpLint = Path.Combine(folder, fsharpLintToolName)
+                let fsharpLint = Path.Combine(folder, FSharpLintToolName)
                 if File.Exists fsharpLint then Some fsharpLint
                 else None)
         |> Seq.tryHead
@@ -146,7 +146,7 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
     fsharpLintExecutableOnPathOpt
     |> Option.bind (fun fsharpLintExecutablePath ->
         let processStart = ProcessStartInfo(
-            FileName = File.Unwrap fsharpLintExecutablePath, 
+            FileName = File.Unwrap fsharpLintExecutablePath,
             Arguments = "--version",
             CreateNoWindow = true,
             RedirectStandardOutput = true,
@@ -199,12 +199,12 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
             ProcessStartInfo(
                 FileName = "dotnet",
                 WorkingDirectory = Folder.unwrap workingDirectory,
-                Arguments = $"{fsharpLintToolName} --daemon")
+                Arguments = $"{FSharpLintToolName} --daemon")
         | FSharpLintToolStartInfo.GlobalTool ->
             let userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
 
             let fsharpLintExecutable =
-                let fileName = if isWindows then $"{fsharpLintToolName}.exe" else fsharpLintToolName
+                let fileName = if isWindows then $"{FSharpLintToolName}.exe" else FSharpLintToolName
                 Path.Combine(userProfile, ".dotnet", "tools", fileName)
 
             ProcessStartInfo(
