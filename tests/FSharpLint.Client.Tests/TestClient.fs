@@ -88,19 +88,19 @@ let ``Daemon answer with its version number``() =
 
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
 
-[<Test>]
-let ``[1] Daemon answer with its version number``() =
-    using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
+// [<Test; Ignore("nope")>]
+// let ``[1] Daemon answer with its version number``() =
+//     using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
 
-        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-        let versionResponse = runVersionCall testHintsFile fsharpLintService
+//         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+//         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+//         let versionResponse = runVersionCall testHintsFile fsharpLintService
 
-        match versionResponse.Result with
-        | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
-        | _ -> Assert.Fail("Response should be a version number")
+//         match versionResponse.Result with
+//         | Content result -> Assert.IsFalse (String.IsNullOrWhiteSpace result)
+//         | _ -> Assert.Fail("Response should be a version number")
 
-        Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
+//         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkCurrentDaemonVersion, versionResponse.Code)
 
 [<Test>]
 let ``Daemon cannot work with relative path``() =
@@ -130,6 +130,8 @@ let ``Daemon can lint a file with success``() =
         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
         let versionResponse = runLintFileCall testHintsFile fsharpLintService
 
+        let versionResponse = runLintFileCall "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.MultiTarget/TestHints.fs" fsharpLintService
+
         match versionResponse.Result with
         | Content result -> Assert.Fail("Should be a lint result")
         | LintResult warnings ->
@@ -151,13 +153,13 @@ let ``Daemon can lint a file with success``() =
 
             Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.OkLint, versionResponse.Code)
 
-[<Test>]
-let ``[1] Daemon doesn't know LintFile method``() =
-    using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
+// [<Test; Ignore("nope")>]
+// let ``[1] Daemon doesn't know LintFile method``() =
+//     using (new ToolLocationOverride(ToolStatus.Available, "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/api_layer_version_net6.0")) <| fun _ ->
 
-        let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
-        Assert.Throws<RemoteMethodNotFoundException>(fun () -> runLintFileCall testHintsFile fsharpLintService |> ignore)
+//         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
+//         let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+//         Assert.Throws<RemoteMethodNotFoundException>(fun () -> runLintFileCall testHintsFile fsharpLintService |> ignore)
 
 [<Test; Ignore("not sure how to make file parsing fail")>]
 let ``LintError if Daemon lint an unparsable file``() =

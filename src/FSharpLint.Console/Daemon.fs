@@ -9,6 +9,7 @@ open FSharp.Core
 open FSharpLint.Application
 open Newtonsoft.Json
 open FSharpLint.Client.Contracts
+open System
 
 let private toClientLintWarning (lintWarning: FSharpLint.Framework.Suggestion.LintWarning): ClientLintWarning =
     {
@@ -57,21 +58,34 @@ type FSharpLintDaemon(sender: Stream, reader: Stream) as this =
     member _.Version() : string = FSharpLint.Console.Version.get ()
 
     [<JsonRpcMethod(Methods.LintFile)>]
-    member _.LintFile(request: LintFileRequest, cancellationToken: CancellationToken option) : Result<ClientLintWarning list, string> =
+    member _.LintFile(request: LintFileRequest, cancellationToken: CancellationToken) : Result<ClientLintWarning list, string> =
+        System.IO.File.AppendAllText("/home/vince/fslinter.log", $"[{DateTime.Now.ToLongTimeString()}] received lint request for {request.FilePath}\n")
+
         let lintConfig = 
             match request.LintConfigPath with
             | Some path -> 
-                { CancellationToken = cancellationToken
+                { CancellationToken = Some cancellationToken
                   ReceivedWarning = None
                   Configuration = FromFile path
                   ReportLinterProgress = None }
             | None -> Lint.OptionalLintParameters.Default
 
-        let lintResult = Lint.lintFile lintConfig (request.FilePath)
-        match lintResult with
-        | LintResult.Success warnings ->
-            let result = warnings |> List.map toClientLintWarning
-            Debug.Assert (JsonConvert.SerializeObject result <> "")
+        // Thread.Sleep (TimeSpan.FromSeconds 5) |> ignore
+        if cancellationToken.IsCancellationRequested then
+            System.IO.File.AppendAllText("/home/vince/fslinter.log", $"[{DateTime.Now.ToLongTimeString()}] cancelled for {request.FilePath}\n")
+            Error "Cancelled"
+        else
+            // Thread.Sleep (TimeSpan.FromSeconds 5) |> ignore
+            System.IO.File.AppendAllText("/home/vince/fslinter.log", $"[{DateTime.Now.ToLongTimeString()}] linting {request.FilePath}\n")
 
-            Ok result
-        | LintResult.Failure failure -> Error failure.Description
+            let lintResult = Lint.lintFile lintConfig (request.FilePath)
+
+            System.IO.File.AppendAllText("/home/vince/fslinter.log", $"[{DateTime.Now.ToLongTimeString()}] linting {request.FilePath} done...\n")
+
+            match lintResult with
+            | LintResult.Success warnings ->
+                let result = warnings |> List.map toClientLintWarning
+                Debug.Assert (JsonConvert.SerializeObject result <> "")
+
+                Ok result
+            | LintResult.Failure failure -> Error failure.Description

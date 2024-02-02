@@ -9,7 +9,7 @@ open System.Runtime.InteropServices
 open StreamJsonRpc
 open FSharpLint.Client.LSPFSharpLintServiceTypes
 
-let private supportedRange = SemanticVersioning.Range(">=v0.21.3") //TODO: proper version
+let private supportedRange = SemanticVersioning.Range(">=v0.23.0") //TODO: proper version
 
 let private (|CompatibleVersion|_|) (version: string) =
     match SemanticVersioning.Version.TryParse version with
