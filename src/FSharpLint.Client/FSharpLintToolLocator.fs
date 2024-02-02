@@ -145,13 +145,13 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
 
     fsharpLintExecutableOnPathOpt
     |> Option.bind (fun fsharpLintExecutablePath ->
-        let processStart = ProcessStartInfo(File.Unwrap fsharpLintExecutablePath)
-        processStart.Arguments <- "--version"
-        processStart.RedirectStandardOutput <- true
-        processStart.CreateNoWindow <- true
-        processStart.RedirectStandardOutput <- true
-        processStart.RedirectStandardError <- true
-        processStart.UseShellExecute <- false
+        let processStart = ProcessStartInfo(
+            FileName = File.Unwrap fsharpLintExecutablePath, 
+            Arguments = "--version",
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false)
 
         match startProcess processStart with
         | Ok p ->
@@ -196,10 +196,10 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
     let processStart =
         match startInfo with
         | FSharpLintToolStartInfo.LocalTool(workingDirectory: Folder) ->
-            let ps = ProcessStartInfo("dotnet")
-            ps.WorkingDirectory <- Folder.unwrap workingDirectory
-            ps.Arguments <- $"{fsharpLintToolName} --daemon"
-            ps
+            ProcessStartInfo(
+                FileName = "dotnet",
+                WorkingDirectory = Folder.unwrap workingDirectory,
+                Arguments = $"{fsharpLintToolName} --daemon")
         | FSharpLintToolStartInfo.GlobalTool ->
             let userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
 
@@ -207,13 +207,13 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
                 let fileName = if isWindows then $"{fsharpLintToolName}.exe" else fsharpLintToolName
                 Path.Combine(userProfile, ".dotnet", "tools", fileName)
 
-            let ps = ProcessStartInfo(fsharpLintExecutable)
-            ps.Arguments <- "--daemon"
-            ps
+            ProcessStartInfo(
+                FileName = fsharpLintExecutable,
+                Arguments = "--daemon")
         | FSharpLintToolStartInfo.ToolOnPath(FSharpLintExecutableFile executableFile) ->
-            let ps = ProcessStartInfo(File.Unwrap executableFile)
-            ps.Arguments <- "--daemon"
-            ps
+            ProcessStartInfo(
+                FileName = File.Unwrap executableFile,
+                Arguments = "--daemon")
 
     processStart.UseShellExecute <- false
     processStart.RedirectStandardInput <- true
