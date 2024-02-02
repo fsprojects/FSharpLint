@@ -239,7 +239,7 @@ type LSPFSharpLintService() =
     interface FSharpLintService with
         member this.Dispose() =
             if not cts.IsCancellationRequested then
-                let _ = agent.PostAndReply Reset
+                agent.PostAndReply Reset |> ignore
                 cts.Cancel()
 
         member _.VersionAsync(versionRequest: VersionRequest, ?cancellationToken: CancellationToken) : Task<FSharpLintResponse> =
