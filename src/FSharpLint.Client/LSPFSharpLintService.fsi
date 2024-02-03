@@ -1,6 +1,6 @@
 module FSharpLint.Client.LSPFSharpLintService
 
 type LSPFSharpLintService =
-    interface Contracts.FSharpLintService
+    interface Contracts.IFSharpLintService
 
     new: unit -> LSPFSharpLintService
