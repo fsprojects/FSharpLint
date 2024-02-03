@@ -27,7 +27,7 @@ type FSharpLintVersion = FSharpLintVersion of string
 type FSharpLintExecutableFile = FSharpLintExecutableFile of File
 type Folder = private Folder of string 
 with 
-    static member from (filePath: string) =
+    static member From (filePath: string) =
         if File.Exists(filePath) then 
             // Path.GetFullPath to resolve path like /foo/bar/../baz
             let folder = ((filePath |> Path.GetFullPath |> FileInfo).Directory)
@@ -37,7 +37,7 @@ with
                 None
         else
             None
-    static member unwrap(Folder f) = f
+    static member Unwrap(Folder f) = f
 
 [<RequireQualifiedAccess>]
 type FSharpLintToolStartInfo =

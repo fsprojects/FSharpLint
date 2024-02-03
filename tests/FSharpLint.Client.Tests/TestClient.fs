@@ -7,6 +7,8 @@ open Contracts
 open LSPFSharpLintService
 open LSPFSharpLintServiceTypes
 
+// fsharplint:disable RedundantNewKeyword
+
 let (</>) x y = Path.Combine(x, y)
 
 let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
@@ -37,7 +39,7 @@ type ToolLocationOverride(toolStatus: ToolStatus) =
             if File.Exists tempFolder then
                 File.Delete tempFolder
 
-let runVersionCall filePath (service: FSharpLintService) =
+let runVersionCall filePath (service: IFSharpLintService) =
     async {
         let request = 
             {
@@ -53,7 +55,7 @@ let TestDaemonNotFound() =
     using (new ToolLocationOverride(ToolStatus.NotAvailable)) <| fun _ ->
     
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrToolNotFound, versionResponse.Code)
@@ -63,7 +65,7 @@ let TestDaemonVersion() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
 
         match versionResponse.Result with
@@ -77,7 +79,7 @@ let TestFilePathShouldBeAbsolute() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = ".." </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFilePathIsNotAbsolute, versionResponse.Code)
@@ -87,7 +89,7 @@ let TestFileShouldExists() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHintsOOOPS.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
         let versionResponse = runVersionCall testHintsFile fsharpLintService
         
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFileNotFound, versionResponse.Code)

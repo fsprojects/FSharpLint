@@ -150,7 +150,7 @@ let private getFolderFor filePath (): Result<Folder, FSharpLintServiceError> =
     let handleFile filePath =
         if not (isPathAbsolute filePath) then
             Error FSharpLintServiceError.FilePathIsNotAbsolute
-        else match Folder.from filePath with
+        else match Folder.From filePath with
              | None -> Error FSharpLintServiceError.FileDoesNotExist
              | Some folder -> Ok folder
     
@@ -236,7 +236,7 @@ type LSPFSharpLintService() =
     let cts = new CancellationTokenSource()
     let agent = createAgent cts.Token
 
-    interface FSharpLintService with
+    interface IFSharpLintService with
         member this.Dispose() =
             if not cts.IsCancellationRequested then
                 agent.PostAndReply Reset |> ignore

@@ -23,7 +23,7 @@ type FSharpLintResponse = {
     Result : FSharpLintResult
 }
 
-type FSharpLintService =
+type IFSharpLintService =
     interface
         inherit IDisposable
 

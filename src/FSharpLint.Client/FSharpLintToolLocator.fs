@@ -58,7 +58,7 @@ let private startProcess (ps: ProcessStartInfo) : Result<Process, ProcessStartEr
 
 let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
     let ps = ProcessStartInfo("dotnet")
-    ps.WorkingDirectory <- Folder.unwrap workingDir
+    ps.WorkingDirectory <- Folder.Unwrap workingDir
     ps.EnvironmentVariables.["DOTNET_CLI_UI_LANGUAGE"] <- "en-us" //ensure we have predictible output for parsing
 
     let toolArguments =
@@ -198,7 +198,7 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
         | FSharpLintToolStartInfo.LocalTool(workingDirectory: Folder) ->
             ProcessStartInfo(
                 FileName = "dotnet",
-                WorkingDirectory = Folder.unwrap workingDirectory,
+                WorkingDirectory = Folder.Unwrap workingDirectory,
                 Arguments = $"{FSharpLintToolName} --daemon")
         | FSharpLintToolStartInfo.GlobalTool ->
             let userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
@@ -223,9 +223,12 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
 
     match startProcess processStart with
     | Ok daemonProcess ->
+        // fsharplint:disable-next-line RedundantNewKeyword
         let handler = new HeaderDelimitedMessageHandler(
             daemonProcess.StandardInput.BaseStream,
             daemonProcess.StandardOutput.BaseStream)
+
+        // fsharplint:disable-next-line RedundantNewKeyword
         let client = new JsonRpc(handler)
 
         do client.StartListening()
