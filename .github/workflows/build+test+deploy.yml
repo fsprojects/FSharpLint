@@ -56,6 +56,11 @@ jobs:
       run: dotnet fake build
     - name: Pack
       run: dotnet fake build -t Pack
+    - name: Publish binaries as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries
+        path: ./out
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1.1.0
