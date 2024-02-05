@@ -10,6 +10,6 @@ let main _ =
     BenchmarkRunner
         .Run<Benchmark>(
             DefaultConfig.Instance
-                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core21))
+                .AddJob(Job.Default)
                 .AddDiagnoser(EtwProfiler())) |> ignore
     0
