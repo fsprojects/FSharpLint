@@ -132,7 +132,6 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         Environment.Exit 0
 
     if arguments.Contains ToolArgs.Daemon then
-        // fsharplint:disable-next-line RedundantNewKeyword
         let daemon = new FSharpLintDaemon(Console.OpenStandardOutput(), Console.OpenStandardInput())
         AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> (daemon :> IDisposable).Dispose())
 
