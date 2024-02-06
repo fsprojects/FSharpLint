@@ -94,6 +94,35 @@ jobs:
         overwrite: true
         file_glob: true
 
+  testReleaseBinariesInWindows8:
+    needs: deployReleaseBinaries
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.101
+    
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: binaries
+        path: ./artifacts
+        
+    - name: Install FSharpLint from downloaded binaries
+      run: |
+        ls .\artifacts
+        dotnet tool install --global dotnet-fsharplint --add-source .\artifacts
+    
+    - name: REmove global.json so that .NET 8 is used
+      run: |
+        del .\global.json
+        dotnet --info
+    
+    - name: Run installed FSharpLint
+      run: dotnet fsharplint lint .\src\FSharpLint.Core\FSharpLint.Core.fsproj
 
   deployReleaseDocs:
     needs: deployReleaseBinaries
