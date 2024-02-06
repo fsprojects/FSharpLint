@@ -7,8 +7,6 @@ open Contracts
 open LSPFSharpLintService
 open LSPFSharpLintServiceTypes
 
-// fsharplint:disable RedundantNewKeyword
-
 let (</>) x y = Path.Combine(x, y)
 
 let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."

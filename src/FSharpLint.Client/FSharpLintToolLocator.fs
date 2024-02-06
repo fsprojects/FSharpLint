@@ -223,12 +223,10 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
 
     match startProcess processStart with
     | Ok daemonProcess ->
-        // fsharplint:disable-next-line RedundantNewKeyword
         let handler = new HeaderDelimitedMessageHandler(
             daemonProcess.StandardInput.BaseStream,
             daemonProcess.StandardOutput.BaseStream)
             
-        // fsharplint:disable-next-line RedundantNewKeyword
         let client = new JsonRpc(handler)
 
         do client.StartListening()
