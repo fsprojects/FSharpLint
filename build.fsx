@@ -226,47 +226,37 @@ Target.create "SelfCheck" (fun _ ->
     let fsharplintJsonDir = Path.Combine("src", "FSharpLint.Core", "fsharplint.json")
     let fsharplintJsonText = File.ReadAllText fsharplintJsonDir
 
-    let recommendedRules =
-        [ 
-            "recursiveAsyncFunction"
-            "nestedStatements"
-            (*
-            "cyclomaticComplexity" rule is too complex and we can enable it later
-            *)
-            "avoidSinglePipeOperator"
-            "maxLinesInLambdaFunction"
-            "maxLinesInMatchLambdaFunction"
-            "maxLinesInValue"
-            "maxLinesInFunction"
-            "maxLinesInMember"
-            "maxLinesInConstructor"
-            "maxLinesInProperty"
-            "maxLinesInModule"
-            "maxLinesInRecord"
-            "maxLinesInEnum"
-            "maxLinesInUnion"
-            "maxLinesInClass"
-            "favourTypedIgnore"
-            "favourStaticEmptyFields"
-            "favourConsistentThis"
-            "avoidTooShortNames"
-            "asyncExceptionWithoutReturn"
-            "maxNumberOfItemsInTuple"
-            "maxNumberOfFunctionParameters"
-            "maxNumberOfMembers"
-            "maxNumberOfBooleanOperatorsInCondition"
-            "noPartialFunctions"
-            "suggestUseAutoProperty"
-            "maxLinesInFile"
+    let excludedRules =
+        [
+            "typedItemSpacing"
+            "typePrefixing"
+            "unionDefinitionIndentation"
+            "moduleDeclSpacing"
+            "classMemberSpacing"
+            "tupleCommaSpacing"
+            "tupleIndentation"
+            "tupleParentheses"
+            "patternMatchClausesOnNewLine"
+            "patternMatchOrClausesOnNewLine"
+            "patternMatchClauseIndentation"
+            "patternMatchExpressionIndentation"
+            // rule is too complex and we can enable it later
+            "cyclomaticComplexity"
+            "unnestedFunctionNames"
+            "nestedFunctionNames"
+            "indentation"
+            "maxCharactersOnLine"
+            "trailingWhitespaceOnLine"
+            "trailingNewLineInFile"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
 
-    for key in recommendedRules do
-        let token = jsonObj.SelectToken key
+    for pair in jsonObj do
+        let isRule = (jsonObj.SelectToken pair.Key).SelectToken("enabled")
 
-        if not (isNull token) then
-            token.SelectToken("enabled").Replace(JValue true) |> ignore<unit>
+        if not (isNull isRule) && not (List.contains pair.Key excludedRules) then
+            isRule.Replace(JValue true) |> ignore<unit>
 
     File.WriteAllText(fsharplintJsonDir, jsonObj.ToString())
 
