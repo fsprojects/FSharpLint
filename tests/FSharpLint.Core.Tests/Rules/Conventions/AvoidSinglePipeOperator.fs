@@ -122,3 +122,21 @@ let someFunc someParam =
 
         Assert.IsTrue this.ErrorsExist
 
+    [<Test>]
+    member this.``Use pipe operator twice on record``() =
+        this.Parse """
+type Person =
+    {
+        FirstName: string
+    }
+
+let someFunc someParam =
+    if someParam then
+        { FirstName = "Bar" }
+        |> someOtherFunc
+        |> yetAnotherFunc
+    else
+        Array.empty
+"""
+
+        Assert.IsTrue this.NoErrorsExist
