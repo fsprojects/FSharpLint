@@ -13,6 +13,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.ExpressionUtilities
 open FSharpLint.Framework.HintParser
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.HintParserTypes
 
 type ToStringConfig =
     {
@@ -60,7 +61,7 @@ type private LambdaMatch =
     | Match of Map<char, string>
     | NoMatch
 
-let private matchLambdaArguments (hintArgs:HintParser.LambdaArg list) (actualArgs:SynSimplePats list) =
+let private matchLambdaArguments (hintArgs:HintParserTypes.LambdaArg list) (actualArgs:SynSimplePats list) =
     if List.length hintArgs <> List.length actualArgs then
         LambdaMatch.NoMatch
     else
@@ -693,7 +694,7 @@ let private (|SuggestingReplacementOfLambda|OtherSuggestion|) = function
 let [<Literal>] private MaxBreadcrumbs = 6
 let private suggestions = ResizeArray()
 
-let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParser.Hint) =
+let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hint) =
     let breadcrumbs = args.GetParents MaxBreadcrumbs
     match (args.AstNode, hint.MatchedNode) with
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
