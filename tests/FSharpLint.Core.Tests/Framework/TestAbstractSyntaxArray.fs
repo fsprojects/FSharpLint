@@ -8,6 +8,7 @@ open FSharp.Compiler.Syntax
 open Microsoft.FSharp.Reflection
 open NUnit.Framework
 open TestUtils
+open FSharpLint.Framework.ExpressionUtilities
 
 [<TestFixture>]
 type TestAst() =

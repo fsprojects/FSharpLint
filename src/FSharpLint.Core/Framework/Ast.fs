@@ -45,11 +45,6 @@ module Ast =
         attrs
         |> List.collect (fun attrList -> attrList.Attributes)
 
-    /// Extracts an expression from parentheses e.g. ((x + 4)) -> x + 4
-    let rec removeParens = function
-        | SynExpr.Paren(x, _, _, _) -> removeParens x
-        | x -> x
-
     /// Inlines pipe operators to give a flat function application expression
     /// e.g. `x |> List.map id` to `List.map id x`.
     let (|FuncApp|_|) functionApplication =

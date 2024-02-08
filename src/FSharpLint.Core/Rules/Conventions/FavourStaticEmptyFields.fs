@@ -50,6 +50,8 @@ let private runner (args: AstNodeRuleParams) =
                     generateError range emptyLiteralType
                 | Some(SynExpr.Const (SynConst.String ("", _, range), _)) ->
                     generateError range EmptyStringLiteral
+                | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
+                    generateError range EmptyStringLiteral
                 | _ -> Array.empty)
         |> Array.concat
     | _ -> Array.empty

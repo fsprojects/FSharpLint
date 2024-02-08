@@ -6,6 +6,7 @@ open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.ExpressionUtilities
 
 let private validateLambdaCannotBeReplacedWithComposition _ lambda range =
     let canBeReplacedWithFunctionComposition expression =
