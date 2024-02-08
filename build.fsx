@@ -296,6 +296,7 @@ Target.create "SelfCheck" (fun _ ->
             // Running NoPartialFunctions on this file causes a bug in FSharp.Compiler, so skip it for now
             // "noPartialFunctions"
             "suggestUseAutoProperty"
+            "maxLinesInFile"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
