@@ -17,6 +17,8 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Prelude.fs" />
     <Compile Include="Framework/Utilities.fs" />
+    <Compile Include="Framework\HintParserTypes.fs" />
+    <Compile Include="Framework\HintParserUtilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
     <Compile Include="Framework\Suggestion.fs" />
     <Compile Include="Framework\Ast.fs" />

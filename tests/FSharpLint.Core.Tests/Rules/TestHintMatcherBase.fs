@@ -6,7 +6,7 @@ open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintParser.MergeSyntaxTrees
+open FSharpLint.Framework.MergeSyntaxTrees
 open FSharpLint.Framework.ParseFile
 open FSharpLint.Rules
 

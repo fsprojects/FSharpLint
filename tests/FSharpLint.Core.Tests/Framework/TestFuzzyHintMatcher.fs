@@ -6,7 +6,7 @@ open FSharpLint.Rules.Helper.Hints
 open FSharpLint.Framework
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintParser.MergeSyntaxTrees
+open FSharpLint.Framework.MergeSyntaxTrees
 open NUnit.Framework
 open FParsec
 open TestUtils
