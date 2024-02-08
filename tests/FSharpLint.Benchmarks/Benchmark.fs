@@ -6,6 +6,7 @@ open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text
 open FSharpLint.Application.Lint
 open FSharpLint.Framework
+open FSharpLint.Framework.Utilities
 
 type Benchmark () =
 
@@ -22,8 +23,6 @@ type Benchmark () =
             |> Async.RunSynchronously
 
         parseResults.ParseTree
-
-    let (</>) basePath relativePath = Path.Combine(basePath, relativePath)
 
     let basePath = ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".."
     let sourceFile = basePath </> "TypeChecker.fs"
