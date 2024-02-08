@@ -8,8 +8,7 @@ module TestApi =
     open FSharpLint.Application.Lint
     open FSharp.Compiler.CodeAnalysis
     open FSharp.Compiler.Text
-
-    let (</>) basePath relativePath = Path.Combine(basePath, relativePath)
+    open FSharpLint.Framework.Utilities
 
     let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 
