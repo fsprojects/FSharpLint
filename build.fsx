@@ -257,6 +257,7 @@ Target.create "SelfCheck" (fun _ ->
             "maxNumberOfBooleanOperatorsInCondition"
             "noPartialFunctions"
             "suggestUseAutoProperty"
+            "maxLinesInFile"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
