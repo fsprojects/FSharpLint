@@ -16,30 +16,35 @@ let runner (args: AstNodeRuleParams) =
             SuggestedFix = None
             TypeChecks = List.Empty
         } |> Array.singleton
+    
+    let checkExpr (expr: SynExpr) =
+        match expr with
+        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range) ->
+            match funcExpr with
+            | ExpressionUtilities.Identifier([ ident ], _) ->
+                if ident.idText = "op_PipeRight" then
+                    match argExpr with
+                    | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
+                        Array.empty
+                    | SynExpr.IfThenElse _ ->
+                        Array.empty
+                    | _ ->
+                        errors ident.idRange
+                else
+                    Array.empty
+            | _ ->
+                Array.empty
+        | _ ->
+            Array.empty
 
     let error =
         match args.AstNode with
         | AstNode.Binding (SynBinding(_synAcc, _synBinding, _mustInline, _isMut, _synAttribs, _preXmlDoc, _synValData, _headPat, _synBindingRet, synExpr, _range, _debugPointAtBinding, _)) ->
             match synExpr with
             | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range) ->
-                match funcExpr with
-                | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range) ->
-                    match funcExpr with
-                    | ExpressionUtilities.Identifier([ ident ], _) ->
-                        if ident.idText = "op_PipeRight" then
-                            match argExpr with
-                            | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
-                                Array.empty
-                            | SynExpr.IfThenElse _ ->
-                                Array.empty
-                            | _ ->
-                                errors ident.idRange
-                        else
-                            Array.empty
-                    | _ ->
-                        Array.empty
-                | _ ->
-                    Array.empty
+                checkExpr funcExpr
+            | SynExpr.IfThenElse(_, SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range), _, _, _, _, _) ->
+                checkExpr funcExpr
             | _ ->
                 Array.empty
         | _ ->
