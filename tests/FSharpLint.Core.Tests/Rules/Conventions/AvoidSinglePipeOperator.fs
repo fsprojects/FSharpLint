@@ -106,7 +106,7 @@ let foo param =
         Assert.True this.NoErrorsExist
 
     [<Test>]
-    member this.``Use pipe operator once on record``() =
+    member this.``Use pipe operator once on record within a if statement``() =
         this.Parse """
 type Person =
     {
@@ -123,7 +123,7 @@ let someFunc someParam =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.``Use pipe operator twice on record``() =
+    member this.``Use pipe operator twice on record within a if statement``() =
         this.Parse """
 type Person =
     {
@@ -146,6 +146,26 @@ let someFunc someParam =
         this.Parse """
 let someFunc () =
     [| "Foo" |> String.replicate 2 |]
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator once on record within a nested if statement``() =
+        this.Parse """
+type Person =
+    {
+        FirstName: string
+    }
+
+let someFunc someParam barParam =
+    if someParam then
+        if barParam then
+            { FirstName = "Bar" } |> someOtherFunc
+        else
+            Array.empty
+    else
+        Array.empty
 """
 
         Assert.IsTrue this.ErrorsExist
