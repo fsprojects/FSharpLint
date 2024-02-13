@@ -17,7 +17,13 @@ let runner (args: AstNodeRuleParams) =
             TypeChecks = List.Empty
         } |> Array.singleton
     
-    let checkExpr (expr: SynExpr) =
+    let rec checkExpr (expr: SynExpr) (parentList: AstNode list): WarningDetails array =
+        let checkParentPiped (expr: AstNode) =
+            match expr with
+            | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
+                (checkExpr funcExpr []).Length = 0
+            | _ -> false
+
         match expr with
         | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range) ->
             match funcExpr with
@@ -29,7 +35,14 @@ let runner (args: AstNodeRuleParams) =
                     | SynExpr.IfThenElse _ ->
                         Array.empty
                     | _ ->
-                        errors ident.idRange
+                        let isParentPiped =
+                            match parentList with
+                            | head::_ -> checkParentPiped head
+                            | [] -> false
+                        if isParentPiped then
+                            Array.empty
+                        else
+                            errors ident.idRange
                 else
                     Array.empty
             | _ ->
@@ -39,16 +52,8 @@ let runner (args: AstNodeRuleParams) =
 
     let error =
         match args.AstNode with
-        | AstNode.Binding (SynBinding(_synAcc, _synBinding, _mustInline, _isMut, _synAttribs, _preXmlDoc, _synValData, _headPat, _synBindingRet, synExpr, _range, _debugPointAtBinding, _)) ->
-            match synExpr with
-            | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range) ->
-                checkExpr funcExpr
-            | SynExpr.IfThenElse(_, SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range), _, _, _, _, _) ->
-                checkExpr funcExpr
-            | SynExpr.ArrayOrListComputed(_, SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range), _) ->
-                checkExpr funcExpr
-            | _ ->
-                Array.empty
+        | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
+            checkExpr funcExpr (args.GetParents args.NodeIndex)
         | _ ->
             Array.empty
 
