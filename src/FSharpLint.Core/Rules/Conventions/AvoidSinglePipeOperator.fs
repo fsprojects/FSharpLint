@@ -45,6 +45,8 @@ let runner (args: AstNodeRuleParams) =
                 checkExpr funcExpr
             | SynExpr.IfThenElse(_, SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range), _, _, _, _, _) ->
                 checkExpr funcExpr
+            | SynExpr.ArrayOrListComputed(_, SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range), _) ->
+                checkExpr funcExpr
             | _ ->
                 Array.empty
         | _ ->
