@@ -140,3 +140,12 @@ let someFunc someParam =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator once inside of an array``() =
+        this.Parse """
+let someFunc () =
+    [| "Foo" |> String.replicate 2 |]
+"""
+
+        Assert.IsTrue this.ErrorsExist
