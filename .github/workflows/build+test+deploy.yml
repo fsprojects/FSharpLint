@@ -33,7 +33,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet fake build -t Build
+      run: dotnet fsi scripts/build.fsx
     - name: Run tests
       run: dotnet fake build -t Test
     - name: Run FSharpLint on itself
