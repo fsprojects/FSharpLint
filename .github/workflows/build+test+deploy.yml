@@ -55,7 +55,7 @@ jobs:
     - name: Build
       run: dotnet fsi scripts/default.fsx
     - name: Pack
-      run: dotnet fake build -t Pack
+      run: dotnet fsi scripts/pack.fsx
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1.1.0
