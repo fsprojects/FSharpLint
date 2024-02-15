@@ -169,3 +169,23 @@ let someFunc someParam barParam =
 """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator once without binding``() =
+        this.Parse """
+module Foo
+
+-1.0 |> printf "%d"
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator twice without binding``() =
+        this.Parse """
+module Foo
+
+-1.0 |> printf "%d" |> ignore
+"""
+
+        Assert.IsTrue this.NoErrorsExist
