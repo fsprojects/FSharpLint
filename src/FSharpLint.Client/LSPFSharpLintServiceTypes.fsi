@@ -19,7 +19,8 @@ type FSharpLintExecutableFile = FSharpLintExecutableFile of File
 
 type Folder = private Folder of string
 with
-    static member From: string -> Folder option
+    static member FromFile: string -> Folder option
+    static member FromFolder: string -> Folder option
     static member Unwrap: Folder -> string
 
 [<RequireQualifiedAccess>]
