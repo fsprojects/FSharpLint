@@ -37,7 +37,7 @@ jobs:
     - name: Run tests
       run: dotnet fsi scripts/test.fsx
     - name: Run FSharpLint on itself
-      run: dotnet fake build -t SelfCheck
+      run: dotnet fsi scripts/selfcheck.fsx
 
 
   deployReleaseBinaries:
