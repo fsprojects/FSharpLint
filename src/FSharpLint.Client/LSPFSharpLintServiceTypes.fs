@@ -27,14 +27,19 @@ type FSharpLintVersion = FSharpLintVersion of string
 type FSharpLintExecutableFile = FSharpLintExecutableFile of File
 type Folder = private Folder of string 
 with 
-    static member From (filePath: string) =
+    static member FromFile (filePath: string) =
         if File.Exists(filePath) then 
-            // Path.GetFullPath to resolve path like /foo/bar/../baz
-            let folder = ((filePath |> Path.GetFullPath |> FileInfo).Directory)
+            let folder = (FileInfo filePath).Directory
             if folder.Exists then
                 folder.FullName |> Folder |> Some
             else
                 None
+        else
+            None
+    static member FromFolder (folderPath: string) =
+        if Directory.Exists(folderPath) then 
+            let folder = DirectoryInfo folderPath
+            folder.FullName |> Folder |> Some
         else
             None
     static member Unwrap(Folder f) = f
