@@ -53,7 +53,7 @@ jobs:
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
-      run: dotnet fake build
+      run: dotnet fsi scripts/default.fsx
     - name: Pack
       run: dotnet fake build -t Pack
     - name: Get Changelog Entry
