@@ -189,3 +189,13 @@ module Foo
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator thrice without binding``() =
+        this.Parse """
+module Foo
+
+-1.0 |> printf "%d" |> ignore |> someOtherFunc
+"""
+
+        Assert.IsTrue this.NoErrorsExist
