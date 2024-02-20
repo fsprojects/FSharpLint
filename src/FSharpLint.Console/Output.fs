@@ -23,8 +23,8 @@ type StandardOutput () =
             if String.length errorLine = 0 then "^"
             else
                 errorLine
-                |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
-                |> Seq.reduce (+)
+                |> Seq.mapi (fun index _ -> if index = range.StartColumn then "^" else " ")
+                |> Seq.fold (+) String.Empty
         getErrorMessage range + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =

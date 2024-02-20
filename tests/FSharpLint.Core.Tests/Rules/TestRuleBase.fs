@@ -26,29 +26,26 @@ type TestRuleBase () =
 
     member __.ErrorRanges =
         suggestions
-        |> Seq.map (fun s -> (s.Details.Range.StartLine, s.Details.Range.StartColumn))
+        |> Seq.map (fun linterSuggestion -> (linterSuggestion.Details.Range.StartLine, linterSuggestion.Details.Range.StartColumn))
         |> List.ofSeq
 
     member __.ErrorExistsAt(startLine, startColumn) =
-        suggestions
-        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
+        Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine && linterSuggestion.Details.Range.StartColumn = startColumn) suggestions
 
     member __.ErrorsAt(startLine, startColumn) =
-        suggestions
-        |> Seq.filter (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
+        Seq.filter (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine && linterSuggestion.Details.Range.StartColumn = startColumn) suggestions
 
     member __.ErrorExistsOnLine(startLine) =
-        suggestions
-        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
+        Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine) suggestions
 
     member __.NoErrorExistsOnLine(startLine) =
         suggestions
-        |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
+        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine)
         |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
     member __.NoErrorsExist =
-        suggestions |> Seq.isEmpty
+        Seq.isEmpty suggestions
 
     member __.ErrorsExist =
         suggestions |> Seq.isEmpty |> not
@@ -58,18 +55,18 @@ type TestRuleBase () =
         | xs when xs.Count = 0 -> "No errors"
         | _ ->
             suggestions
-            |> Seq.map (fun s -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
-                s.Details.Range.StartRange.StartLine s.Details.Range.StartColumn
-                s.Details.Range.EndRange.EndLine s.Details.Range.EndRange.EndColumn s.Details.Message ))
-            |> (fun x -> String.Join("; ", x))
+            |> Seq.map (fun linterSuggestion -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
+                linterSuggestion.Details.Range.StartRange.StartLine linterSuggestion.Details.Range.StartColumn
+                linterSuggestion.Details.Range.EndRange.EndLine linterSuggestion.Details.Range.EndRange.EndColumn linterSuggestion.Details.Message ))
+            |> (fun suggestionMsg -> String.Join("; ", suggestionMsg))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
         this.ErrorsAt(startLine, startColumn)
-        |> Seq.exists (fun s -> s.Details.Message = message)
+        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Message = message)
 
     member __.AssertErrorWithMessageExists(message) =
-        let foundSuggestions = suggestions |> Seq.map (fun s -> s.Details.Message)
-        Assert.IsTrue(foundSuggestions |> Seq.contains message, sprintf "Couldn't find message '%s', found: [%s]" message (String.concat "," foundSuggestions))
+        let foundSuggestions = Seq.map (fun linterSuggestion -> linterSuggestion.Details.Message) suggestions
+        Assert.IsTrue(Seq.contains message foundSuggestions, sprintf "Couldn't find message '%s', found: [%s]" message (String.concat "," foundSuggestions))
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
@@ -77,10 +74,10 @@ type TestRuleBase () =
     member this.ApplyQuickFix (source:string) =
         let firstSuggestedFix =
             suggestions
-            |> Seq.choose (fun x -> x.Details.SuggestedFix)
+            |> Seq.choose (fun linterSuggestion -> linterSuggestion.Details.SuggestedFix)
             |> Seq.tryHead
 
-        match firstSuggestedFix |> Option.bind (fun x -> x.Value) with
+        match Option.bind (fun (suggestedFix: Lazy<option<SuggestedFix>>) -> suggestedFix.Value) firstSuggestedFix with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source

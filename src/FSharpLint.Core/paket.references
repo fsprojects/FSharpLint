@@ -11,3 +11,4 @@ Microsoft.Build.Framework
 Microsoft.Build.Locator
 Microsoft.Build.Utilities.Core
 Microsoft.Build
+FSharpx.Collections

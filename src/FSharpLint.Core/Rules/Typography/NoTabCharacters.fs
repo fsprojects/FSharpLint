@@ -18,25 +18,30 @@ module ContextBuilder =
             current
 
 let private isInLiteralString literalStrings range =
-    literalStrings |> Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range)
+     Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range) literalStrings
 
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
-        let range = Range.mkRange "" (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
+        let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
         if isInLiteralString literalStrings range |> not then
-            { Range = range
-              Message = Resources.GetString("RulesTypographyTabCharacterError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Array.singleton
+            Array.singleton
+                {
+                    Range = range
+                    Message = Resources.GetString("RulesTypographyTabCharacterError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
             Array.empty
     else
         Array.empty
 
 let rule =
-    { Name = "NoTabCharacters"
-      Identifier = Identifiers.NoTabCharacters
-      RuleConfig = { Runner = checkNoTabCharacters } }
-    |> NoTabCharactersRule
+    NoTabCharactersRule
+        {
+            Name = "NoTabCharacters"
+            Identifier = Identifiers.NoTabCharacters
+            RuleConfig = { Runner = checkNoTabCharacters }
+        }

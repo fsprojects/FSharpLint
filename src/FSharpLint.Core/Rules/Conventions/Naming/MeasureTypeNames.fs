@@ -19,7 +19,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
                 match List.tryLast identifier with
                 | Some typeIdentifier ->
                     if isMeasureType attrs then
-                        (typeIdentifier, typeIdentifier.idText, None) |> Array.singleton
+                        Array.singleton (typeIdentifier, typeIdentifier.idText, None)
                     else
                         Array.empty
                 | _ -> Array.empty

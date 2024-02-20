@@ -12,21 +12,21 @@ let private MaxComplexity = 5
 let private NewLine = "\n"
 
 /// Indent all lines of a string equally by the given number of spaces.
-let private indent numSpaces (s: string) =
+let private indent numSpaces (inputText: string) =
     let indentStr = String.replicate numSpaces " "
-    let result = indentStr + s.Replace(NewLine, $"{NewLine}{indentStr}")
+    let result = indentStr + inputText.Replace(NewLine, $"{NewLine}{indentStr}")
     result
     
 /// Generates a body of code containing a match expression.
 let private makeMatchSnippet len =
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| \"%d\" -> ()" i)) [| 1..len-1 |] |> String.concat NewLine}
+{Seq.map (fun index -> (sprintf "| \"%d\" -> ()" index)) [| 1..len-1 |] |> String.concat NewLine}
 | _ -> ()"""
 
 /// Generates a body of code containing a match expression with a when clause containing a logical operator in each pattern.
 let private makeMatchSnippetWithLogicalOperatorsInWhenClause len =
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (i*len) (i*len+1))) [| 1..len-1 |] |> String.concat NewLine}
+{Seq.map (fun index -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (index*len) (index*len+1))) [| 1..len-1 |] |> String.concat NewLine}
 | _ -> ()"""
     
 /// module declaration and let binding declaration for a body of code
@@ -37,9 +37,8 @@ let {funcString} =
 
 /// Generates a body of code consisting of if-else expressions.
 let private ifElseExpressions len =
-    $"""if true then ()
+    makeProgram "f()" $"""if true then ()
     {String.replicate (len-1) (sprintf "%selif true then ()" NewLine)}"""
-    |> makeProgram "f()"
 
 /// Generates a body of code containing for expressions.
 let private forExpressions len =
@@ -59,20 +58,17 @@ let private whileExpressions len =
 /// Generates a body of code containing a while expression with multiple logical operators in the condition.
 let private whileWithBooleanOperatorsInConditionExpressions len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""while true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true do ()"""
-    |> makeProgram "f()" 
+    makeProgram "f()" $"""while true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true do ()"""
 
 /// Generates a body of code containing an if statement with multiple && conditional operators 
 let private ifThenExpressionWithMultipleAndConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""if true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true then ()"""
-    |> makeProgram "f()" 
+    makeProgram "f()" $"""if true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true then ()"""
 
 /// Generates a body of code containing an if statement with multiple || conditional operators    
 let private ifThenExpressionWithMultipleOrConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""if true || {String.replicate (len-2) (sprintf "%sfalse ||" NewLine)} true then ()"""
-    |> makeProgram "f()"
+    makeProgram "f()" $"""if true || {String.replicate (len-2) (sprintf "%sfalse ||" NewLine)} true then ()"""
     
 /// Generates a body of code containing a match expression with multiple patterns.
 let private matchExpression len =
@@ -81,27 +77,24 @@ let private matchExpression len =
     
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
-    $"""match "dummyString" with
-{(Seq.map (fun i -> (sprintf "| \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+    makeProgram "f()" $"""match "dummyString" with
+{(Seq.map (fun index -> (sprintf "| \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)}
 | _ -> ()"""
-    |> makeProgram "f()"
 
 /// Generates a body of code containing a match function with multiple patterns.
 let private matchFunction len =
-    $"""    function 
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)} 
+    makeProgram "f" $"""    function 
+{(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)} 
     | _ -> ()
 f "dummyString" """
-    |> makeProgram "f"
    
 /// Generates a computational expression with a match! expression containing multiple patterns.
 let private matchBang len =
-    $"""async {{
+    makeProgram "a" $"""async {{
     match! async {{ return "dummyString" }} with
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)}
     | _ -> ()
 }}"""
-    |> makeProgram "a"
      
 /// Tests for the cyclomatic complexity rule.
 type TestConventionsCyclomaticComplexity() =
@@ -229,7 +222,7 @@ let f() =
         let code = $"""Module Program
 let f() = 
     let g() =
-        {(makeMatchSnippet (MaxComplexity+1)) |> indent 8}
+        {indent 8 (makeMatchSnippet (MaxComplexity+1))}
     let h() =
 {makeMatchSnippet MaxComplexity |> indent 8} 
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    
@@ -240,7 +233,7 @@ let f() =
     [<Test>]
     member this.EnsureRedundantWarningsNotReported() =
         // generates a vapid match clause
-        let genMatchClause i = $"""| "{i}" -> match str with
+        let genMatchClause index = $"""| "{index}" -> match str with
     | "A" -> ()
     | "B" -> ()"""
         // create a snippet of code with 10 match clauses

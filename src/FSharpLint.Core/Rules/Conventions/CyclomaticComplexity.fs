@@ -38,7 +38,7 @@ type private BindingScopeComparer() =
     
 ///  A two-tiered stack-like structure for containing BindingScopes.
 type private BindingStack(maxComplexity: int) =
-    let mutable tier1 = []
+    let mutable tier1 = List.Empty
     let mutable tier2 = SortedSet<BindingScope>(BindingScopeComparer())
     
     member this.Push (args:AstNodeRuleParams) (bs: BindingScope) =
@@ -46,20 +46,31 @@ type private BindingStack(maxComplexity: int) =
         let isChildOfCurrent = if List.isEmpty tier1 then
                                     false
                                 else
-                                    args.GetParents args.NodeIndex |> List.tryFind (fun x -> Object.ReferenceEquals(tier1.Head.Node, x)) |> Option.isSome
+                                    args.GetParents args.NodeIndex
+                                    |> List.tryFind (fun astNode ->
+                                        match (List.tryHead tier1) with
+                                        | Some head -> Object.ReferenceEquals(head.Node, astNode)
+                                        | None -> false)
+                                    |> Option.isSome
         // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
         if not isChildOfCurrent && not (List.isEmpty tier1) then
-            let popped = tier1.Head
-            tier1 <- tier1.Tail
-            if popped.Complexity > maxComplexity then
-                tier2.Add popped |> ignore
+            let popped = List.tryHead tier1
+            match popped with
+            | Some value ->
+                tier1 <- tier1.Tail
+                if value.Complexity > maxComplexity then
+                    tier2.Add value |> ignore<bool>
+            | None -> ()
         // finally, push the item on to the stack
         tier1 <- bs::tier1
         
     member this.IncrComplexityOfCurrentScope incr =
-        let h = tier1.Head
-        let complexity = h.Complexity + incr
-        tier1 <- {h with Complexity = complexity}::tier1.Tail
+        let head = List.tryHead tier1
+        match head with
+        | Some value ->
+            let complexity = value.Complexity + incr
+            tier1 <- {value with Complexity = complexity}::tier1.Tail
+        | None -> ()
         
     interface IEnumerable<BindingScope> with
         member this.GetEnumerator() =
@@ -76,7 +87,7 @@ type private BindingStack(maxComplexity: int) =
         
     /// Clears the stack.
     member this.Clear() =
-        tier1 <- []
+        tier1 <- List.Empty
         tier2.Clear()
 
 /// A stack to track the current cyclomatic complexity of a binding scope.
@@ -131,13 +142,12 @@ let private countBooleanOperators expression =
     | SynExpr.MatchBang(_, _, clauses, _, _)
     | SynExpr.MatchLambda(_, _, clauses, _, _) 
     | SynExpr.Match(_, _, clauses, _, _) ->
-        clauses |> List.sumBy (fun c -> 
-                                      match c with
-                                      | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
-                                          match whenExprOpt with
-                                          | Some whenExpr ->
-                                              countOperators 0 whenExpr
-                                          | None -> 0)
+        List.sumBy (fun matchClause ->
+            match matchClause with
+            | SynMatchClause(_, whenExprOpt, _, _, _, _) ->
+                match whenExprOpt with
+                | Some whenExpr -> countOperators 0 whenExpr
+                | None -> 0) clauses
                
     | _ -> count
     // kick off the calculation
@@ -181,7 +191,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
             | SynExpr.MatchBang(_, _, clauses, _, _)
             | SynExpr.MatchLambda(_, _, clauses, _, _)
             | SynExpr.Match(_, _, clauses, _, _) ->
-                let numCases = clauses |> List.sumBy countCasesInMatchClause // determine the number of cases in the match expression 
+                let numCases = List.sumBy countCasesInMatchClause clauses // determine the number of cases in the match expression 
                 bindingStack.IncrComplexityOfCurrentScope (numCases + countBooleanOperators expression) // include the number of boolean operators in any when expressions, if applicable
             | _ -> ()
         | _ -> ()
@@ -194,12 +204,12 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
                                  pos.Column, pos.Line)
                             |> Seq.map (fun scope -> // transform into WarningDetails
                                 let errMsg = String.Format(Resources.GetString("RulesCyclomaticComplexityError"), scope.Complexity, config.MaxComplexity)
-                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = [] })
+                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = List.Empty })
                             |> Seq.toList
             let ret = match warningDetails with
-                      | Some x -> x::fromStack
+                      | Some warning -> warning::fromStack
                       | None -> fromStack
-            ret |> List.toArray
+            List.toArray ret
     else
         Array.empty
   
@@ -211,8 +221,13 @@ let cleanup () =
 
 /// Generator function for a rule instance.
 let rule config =
-    { Name = "CyclomaticComplexity"
-      Identifier = Identifiers.CyclomaticComplexity
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config
-                     Cleanup = cleanup } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "CyclomaticComplexity"
+            Identifier = Identifiers.CyclomaticComplexity
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = cleanup
+                }
+        }

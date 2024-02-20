@@ -6,10 +6,12 @@ open FSharpLint.Rules.Helper.Hints
 open FSharpLint.Framework
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintParser.MergeSyntaxTrees
+open FSharpLint.Framework.MergeSyntaxTrees
 open NUnit.Framework
 open FParsec
 open TestUtils
+
+// fsharplint:disable MaxLinesInValue MaxLinesInMember
 
 let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify = 
     for i = 0 to syntaxArray.Length - 1 do

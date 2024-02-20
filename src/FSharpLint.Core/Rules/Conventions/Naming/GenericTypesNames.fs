@@ -20,7 +20,7 @@ let private getIdentifiers (args: AstNodeRuleParams) =
             | Some types -> checkTypes types.TyparDecls |> Array.ofSeq
             | None -> Array.empty
     | AstNode.Type(SynType.Var(SynTypar(id, _, _), _)) ->
-        (id, id.idText, None) |> Array.singleton
+        Array.singleton (id, id.idText, None)
     | _ -> Array.empty
 
 let rule config =

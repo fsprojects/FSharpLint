@@ -10,18 +10,19 @@ open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
     let errors range =
-        {
-            Range = range
-            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        } |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     
     let rec checkExpr (expr: SynExpr) (parentList: AstNode list): WarningDetails array =
         let checkParentPiped (expr: AstNode) =
             match expr with
             | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-                checkExpr funcExpr [] |> Seq.isEmpty
+                checkExpr funcExpr List.Empty |> Seq.isEmpty
             | _ -> false
 
         match expr with
@@ -61,7 +62,13 @@ let runner (args: AstNodeRuleParams) =
 
 
 let rule =
-    { Name = "AvoidSinglePipeOperator"
-      Identifier = Identifiers.AvoidSinglePipeOperator
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "AvoidSinglePipeOperator"
+            Identifier = Identifiers.AvoidSinglePipeOperator
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

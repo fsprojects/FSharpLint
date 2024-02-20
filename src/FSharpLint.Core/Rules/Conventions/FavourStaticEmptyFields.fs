@@ -22,14 +22,16 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     let formatError errorName =
         Resources.GetString errorName
 
-    errorMessageKey |> formatError
+    formatError errorMessageKey
 
 let private generateError (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    { Range = range
-      Message = getStaticEmptyErrorMessage range emptyLiteralType
-      SuggestedFix = None
-      TypeChecks = List.Empty }
-    |> Array.singleton
+    Array.singleton
+        {
+            Range = range
+            Message = getStaticEmptyErrorMessage range emptyLiteralType
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
@@ -40,8 +42,7 @@ let private runner (args: AstNodeRuleParams) =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
         generateError range emptyLiteralType
     | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
-        synExprRecordField
-        |> List.map (fun field ->
+        let map (field: SynExprRecordField) =
             match field with
             | SynExprRecordField(_, _, expr, _) ->
                 match expr with
@@ -52,15 +53,22 @@ let private runner (args: AstNodeRuleParams) =
                     generateError range EmptyStringLiteral
                 | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
                     generateError range EmptyStringLiteral
-                | _ -> Array.empty)
+                | _ -> Array.empty
+
+        synExprRecordField
+        |> List.map map
         |> Array.concat
     | _ -> Array.empty
 
 
 let rule =
-    { Name = "FavourStaticEmptyFields"
-      Identifier = Identifiers.FavourStaticEmptyFields
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourStaticEmptyFields"
+            Identifier = Identifiers.FavourStaticEmptyFields
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

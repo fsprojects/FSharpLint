@@ -16,23 +16,20 @@ let runner (args: AstNodeRuleParams) =
             let funcName = ident.idText
 
             let functionCalls =
-                symbolUses
-                |> Seq.filter (fun usage ->
+                Seq.filter (fun (usage: FSharp.Compiler.CodeAnalysis.FSharpSymbolUse) ->
                     usage.Symbol.DisplayName = funcName
                     && usage.Range.StartLine >= letRange.StartLine
-                    && usage.Range.EndLine <= letRange.EndLine)
+                    && usage.Range.EndLine <= letRange.EndLine) symbolUses
 
 
-            if (functionCalls |> Seq.length) <= 1 then
-                { Range = range
-                  Message =
-                    String.Format(
-                        Resources.GetString "RulesUnneededRecKeyword",
-                        funcName
-                    )
-                  SuggestedFix = None
-                  TypeChecks = list.Empty }
-                |> Array.singleton
+            if (Seq.length functionCalls) <= 1 then
+                Array.singleton
+                    {
+                        Range = range
+                        Message = String.Format(Resources.GetString "RulesUnneededRecKeyword", funcName)
+                        SuggestedFix = None
+                        TypeChecks = list.Empty
+                    }
             else
                 Array.empty
         | _ -> Array.empty
@@ -40,9 +37,13 @@ let runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "UnneededRecKeyword"
-      Identifier = Identifiers.UnneededRecKeyword
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "UnneededRecKeyword"
+            Identifier = Identifiers.UnneededRecKeyword
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

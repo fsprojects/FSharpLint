@@ -19,13 +19,13 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         
         let isNotMutable (symbol:FSharpSymbolUse) =
             match symbol.Symbol with
-            | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+            | :? FSharpMemberOrFunctionOrValue as fSharpMemberOrFunctionOrValue -> not fSharpMemberOrFunctionOrValue.IsMutable
             | _ -> true
 
         let checkNotMutable (ident:Ident) = fun () ->
             let symbol =
                 checkInfo.GetSymbolUseAtLocation(
-                    ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                    ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
             match symbol with
             | Some(symbol) -> isNotMutable symbol
@@ -57,8 +57,13 @@ let private runner (args:AstNodeRuleParams) =
         Array.empty
 
 let rule =
-    { Name = "UselessBinding"
-      Identifier = Identifiers.UselessBinding
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
-
+    AstNodeRule
+        {
+            Name = "UselessBinding"
+            Identifier = Identifiers.UselessBinding
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -13,7 +13,13 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
             when List.length parameters > maxParameters ->
         let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
         let error = String.Format(errorFormatString, maxParameters)
-        { Range = parameters.[maxParameters].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            {
+                Range = parameters.[maxParameters].Range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     | _ -> Array.empty
 
 let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
@@ -23,7 +29,13 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
     | _ -> Array.empty
 
 let rule config =
-    { Name = "MaxNumberOfFunctionParameters"
-      Identifier = Identifiers.MaxNumberOfFunctionParameters
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxNumberOfFunctionParameters"
+            Identifier = Identifiers.MaxNumberOfFunctionParameters
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }
