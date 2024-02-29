@@ -1,0 +1,236 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | Overview
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/custom.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li class="dd-item">
+            <a href="https://fsprojects.github.io/FSharpLint" class="active">
+              Overview
+            </a>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              How-To Guides
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="">
+                  Install Dotnet Tool
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="">
+                  Setup MSBuild Task
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="">
+                  Rule Config
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="">
+                  Rule Suppression
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              API References
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="">
+                  FSharpLint.Core
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortcuts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <h1>Overview</h1>
+<p>FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
+The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.</p>
+<p>The project aims to let the user know of problems through <a href="./how-tos/rules/FL0065.html">matching user defined hints</a>
+a la <a href="http://community.haskell.org/%7Endm/hlint/">HLint</a>, and also by using custom rules written in F# similar to the rules
+in <a href="http://mascot.x9c.fr/manual.html">Mascot</a> and <a href="http://stylecop.codeplex.com/">StyleCop</a>.</p>
+<p>Using a <code>.fsproj</code> (F# project) or <code>.sln</code> (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for
+code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.</p>
+<h2>Usage</h2>
+<p>FSharpLint can be used in several ways:</p>
+<ul>
+<li><a href="./how-tos/install-dotnet-tool.html">Running as dotnet tool from command line</a>.</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=Ionide.Ionide-fsharp">In VS Code using the Ionide-FSharp plugin</a>.</li>
+<li><a href="./how-tos/msbuild-task.html">In other IDEs (Visual Studio, Rider) as an MSBuild Task</a>.</li>
+<li><a href="https://github.com/fsharp/FsAutoComplete">In other editors through FsAutoComplete Language Server</a></li>
+</ul>
+<h3>Example Usage</h3>
+<p>The following program:</p>
+<pre><code>type ExampleInterface =
+   abstract member print : unit -&gt; unit
+
+[&lt;EntryPoint&gt;]
+let main argv =
+    let x = List.fold (fun x y -&gt; x + y) 0 [1;2;3]
+    printfn &quot;%d&quot; x
+    0
+</code></pre>
+<p>Run against the lint tool generates the following errors:</p>
+<pre><code>FL0036: Consider changing `ExampleInterface` to be prefixed with `I`.
+Consider changing `ExampleInterface` to be prefixed with `I`.
+Error in file Program.fs on line 1 starting at column 5
+type ExampleInterface =
+     ^
+
+FL0045: Consider changing `print` to PascalCase.
+Error in file Program.fs on line 2 starting at column 19
+   abstract member print : unit -&gt; unit
+                   ^
+
+FL0034: If `( + )` has no mutable arguments partially applied then the lambda can be removed.
+Error in file Program.fs on line 6 starting at column 23
+    let x = List.fold (fun x y -&gt; x + y) 0 [1;2;3]
+                       ^
+</code></pre>
+<p>Refactored using lint's warnings:</p>
+<pre><code>type IExampleInterface =
+   abstract member Print : unit -&gt; unit
+
+[&lt;EntryPoint&gt;]
+let main argv =
+    let x = List.fold (+) 0 [1;2;3]
+    printfn &quot;%d&quot; x
+    0
+</code></pre>
+<p>If we run lint again it will find a new error, it's worth running the tool until it no longer finds any errors:</p>
+<pre><code>FL0065: `List.fold ( + ) 0 x` might be able to be refactored into `List.sum x`.
+Error in file Program.fs on line 6 starting at column 12
+let x = List.fold (+) 0 [1;2;3]
+        ^
+</code></pre>
+<p>After refactoring again we have with no lint errors:</p>
+<pre><code>type IExampleInterface =
+   abstract member Print : unit -&gt; unit
+
+[&lt;EntryPoint&gt;]
+let main argv =
+    let x = List.sum [1;2;3]
+    printfn &quot;%d&quot; x
+    0
+</code></pre>
+<h2>Configuration Files</h2>
+<p>Configuration of the tool is done using JSON.
+A single JSON file containing the default configuration for all rules
+is <a href="https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/fsharplint.json">included inside of the software</a>.</p>
+<p>By default, FSharpLint will use the default configuration. You can override this to point
+to a different file, for example by using the <code>--lint-config</code> flag in the dotnet tool.</p>
+<p>See the <a href="./how-tos/rule-configuration.html">Rule Configuration page</a> for more info.</p>
+<h2>Suppressing rules in code</h2>
+<p>Rules can be disabled within the code using structured comments. See the <a href="./how-tos/rule-suppression.html">Suppressing Warnings</a> page for more information.</p>
+<h2>Running Lint From An Application</h2>
+<p>Install the <a href="https://www.nuget.org/packages/FSharpLint.Core/"><code>FSharp.Core</code> nuget package</a>.</p>
+<p>The namespace <code>FSharpLint.Application</code> contains a module named <code>Lint</code> which provides several functions
+to lint a project/source file/source string.</p>
+
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>
