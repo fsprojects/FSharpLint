@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.2] - 2024-02-29
+
+- New rule EnsureTailCallDiagnosticsInRecursiveFunctions #673 #651 [@webwarrior-ws]
+- Fix AvoidSinglePipeOperator false negatives #697 [@Mersho]
+- Fix AvoidSinglePipeOperator false negative #696 [@Mersho]
+- Fix FavourStaticEmptyFields false negative #695 [@Mersho]
+- Benchmarks: stop forcing .NETCore2.1 runtime #694 #620 [@Numpsy]
+- paket: upgrade Ionide.ProjInfo to 0.61.3 #688 [@webwarrior-ws]
+- Fix FavourStaticEmptyFields false negative #689 [@Mersho]
+- build: change NoWarn to WarningsNotAsErrors #691 [@webwarrior-ws]
+- New rule FavourNonMutablePropertyInitialization #683 #662 #535 [@webwarrior-ws]
+- Workaround for NoPartialFuncs bug #682 [@webwarrior-ws]
+- Fix AvoidSinglePipeOperator false positive #684 [@Mersho]
+- docs(CSS): capitalize <h1> rather than uppercase [@knocte]
+- Simplify SelfCheck #679 [@knocte]
+
+
 ## [0.24.0] - 2024-01-13
 
 Happy 10 year anniversary to FSharpLint!
