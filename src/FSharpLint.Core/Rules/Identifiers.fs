@@ -89,3 +89,4 @@ let NestedFunctionNames = identifier 81
 let UsedUnderscorePrefixedElements = identifier 82
 let UnneededRecKeyword = identifier 83
 let FavourNonMutablePropertyInitialization = identifier 84
+let EnsureTailCallDiagnosticsInRecursiveFunctions = identifier 85
