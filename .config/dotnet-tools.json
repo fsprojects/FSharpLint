@@ -8,12 +8,6 @@
         "fake"
       ]
     },
-    "paket": {
-      "version": "7.2.1",
-      "commands": [
-        "paket"
-      ]
-    },
     "fornax": {
       "version": "0.13.1",
       "commands": [

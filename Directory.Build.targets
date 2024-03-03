@@ -1,0 +1,31 @@
+<!-- Workaround for Central Package Management taken from
+     https://github.com/NuGet/Home/issues/11949 and
+     https://github.com/microsoft/MSBuildSdks/blob/22cee25ad037827b54b75b6ee1c59a5bc75a744f/src/CentralPackageVersions/Sdk/Sdk.targets#L70-L76 -->
+<Project>
+    <ItemGroup Condition=" '$(EnableCentralPackageVersions)' != 'false' ">
+        <PackageReference Update="FSharp.Core"
+                          Condition="'$(MSBuildProjectExtension)' == '.fsproj' And '$(DisableImplicitFSharpCoreReference)' != 'true' And '$(UpdateImplicitFSharpCoreReference)' != 'false'"
+                          IsImplicitlyDefined="true"
+                          Version="[6.0.7]" />
+    </ItemGroup>
+    <!-- Download and copy packages used by Fornax as these are no longer managed using Paket -->
+    <ItemGroup>
+        <PackageDownload Include="FSharp.Formatting" version="[4.0.0]" />
+        <PackageDownload Include="Markdig" version="[0.34.0]" />
+        <PackageDownload Include="Newtonsoft.Json" version="[13.0.3]" />
+    </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <ItemGroup>
+            <FSharpFormattingDlls Include="$(NugetPackageRoot)fsharp.formatting/4.0.0/lib/netstandard2.0/*.dll"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(FSharpFormattingDlls)"
+              DestinationFolder="$(MSBuildThisFileDirectory)packages/docs/FSharp.Formatting/lib/netstandard2.0/"
+              ContinueOnError="false" />
+        <Copy SourceFiles="$(NugetPackageRoot)markdig/0.34.0/lib/netstandard2.0/Markdig.dll"
+              DestinationFolder="$(MSBuildThisFileDirectory)packages/docs/Markdig/lib/netstandard2.0/"
+              ContinueOnError="false" />
+        <Copy SourceFiles="$(NugetPackageRoot)newtonsoft.json/13.0.3/lib/netstandard2.0/Newtonsoft.Json.dll"
+              DestinationFolder="$(MSBuildThisFileDirectory)packages/docs/Newtonsoft.Json/lib/netstandard2.0/"
+              ContinueOnError="false" />
+    </Target>
+</Project>
