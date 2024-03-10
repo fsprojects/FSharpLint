@@ -150,6 +150,7 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Sarif.Sdk" />
   </ItemGroup>
 
 </Project>
