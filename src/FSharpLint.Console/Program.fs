@@ -29,6 +29,8 @@ type ExitCode =
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
+    | [<Unique>] Report of string
+    | [<Unique>] Code_Root of string
     | Version
 with
     interface IArgParserTemplate with
@@ -36,6 +38,8 @@ with
             match this with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
+            | Report _ -> "Write the result messages to a (sarif) report file."
+            | Code_Root _ -> "Root of the current code repository, used in the sarif report to construct the relative file path. The current working directory is used by default."
             | Version -> "Prints current version."
 
 // TODO: investigate erroneous warning on this type definition
@@ -127,6 +131,8 @@ let main argv =
         (lintArgs: ParseResults<LintArgs>)
         (output: Output.IOutput)
         (toolsPath:Ionide.ProjInfo.Types.ToolsPath)
+        (sarifReportPath: string option)
+        (codeRoot: string option)
         : ExitCode =
         let mutable exitCode = ExitCode.Success
 
@@ -138,6 +144,10 @@ let main argv =
             | LintResult.Success(warnings) ->
                 String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
                 |> output.WriteInfo
+
+                sarifReportPath 
+                |> Option.iter (fun report -> Sarif.writeReport warnings codeRoot report output)
+
                 if not (List.isEmpty warnings) then
                     exitCode <- ExitCode.Failure
             | LintResult.Failure(failure) ->
@@ -208,7 +218,10 @@ let main argv =
 
         match arguments.GetSubCommand() with
         | Lint lintArgs ->
-            lint lintArgs output toolsPath
+            let sarifReportPath = arguments.TryGetResult Report
+            let codeRoot = arguments.TryGetResult Code_Root
+
+            lint lintArgs output toolsPath sarifReportPath codeRoot
         | _ ->
             ExitCode.Failure
 
