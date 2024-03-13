@@ -80,7 +80,7 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
         Assert.AreEqual(0, returnCode)
-        Assert.AreEqual(Set.empty, errors)
+        Assert.IsEmpty errors
         
     [<Test>]
     member __.``Lint source with error suppressed, no error is given.``() =
@@ -94,7 +94,7 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; input |]
         
         Assert.AreEqual(0, returnCode)
-        Assert.AreEqual(Set.empty, errors)
+        Assert.IsEmpty errors
 
     [<Test>]
     member __.``Regression test: typePrefixing rule with old config format should still work``() =

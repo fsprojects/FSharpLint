@@ -5,7 +5,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let rec getLambdaParamIdent = function
-    | SynSimplePats.SimplePats([pattern], _) -> 
+    | SynSimplePats.SimplePats([pattern], _, _) -> 
         let rec getIdent = function
             | SynSimplePat.Id(ident, _, _, _, _, _) -> ident
             | SynSimplePat.Typed(simplePattern, _, _)
@@ -14,8 +14,6 @@ let rec getLambdaParamIdent = function
 
         getIdent pattern |> Some
     | SynSimplePats.SimplePats(_) -> None
-    | SynSimplePats.Typed(simplePatterns, _, _) -> 
-        getLambdaParamIdent simplePatterns
 
 let checkLambda (args:AstNodeRuleParams) checker =
     match args.AstNode with

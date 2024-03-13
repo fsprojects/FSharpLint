@@ -202,9 +202,9 @@ let f() =
     member this.EnsureComplexityOfFunctionsAreIndependent() =
         let code = $"""Module Program
 let f() =
-    {makeMatchSnippet (MaxComplexity + 1) |> indent 4}
+{makeMatchSnippet (MaxComplexity + 1) |> indent 4}
 let g() =
-    {makeMatchSnippet MaxComplexity |> indent 4}"""
+{makeMatchSnippet MaxComplexity |> indent 4}"""
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length)
         Assert.IsTrue(this.ErrorExistsAt(2, 4))
@@ -226,10 +226,11 @@ let f() =
     /// Verifies that the cyclomatic complexity is calculated on nested functions independently by checking that a nested function that comes after another nested function with a cyclomatic complexity that is flagged as too high need not be flagged.
     [<Test>]
     member this.EnsureComplexityOfNestedFunctionsAreIndependent() =
+        let gSnippet = makeMatchSnippet (MaxComplexity+1) |> indent 8
         let code = $"""Module Program
 let f() = 
     let g() =
-        {(makeMatchSnippet (MaxComplexity+1)) |> indent 8}
+{gSnippet}
     let h() =
 {makeMatchSnippet MaxComplexity |> indent 8} 
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    

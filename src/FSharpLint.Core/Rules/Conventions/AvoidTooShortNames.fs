@@ -40,7 +40,7 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
             match pat with
             | SynPat.Typed(typedPat, _, _) ->
                 loop (typedPat::tail) acc
-            | SynPat.Tuple(_, elementPats, _) ->
+            | SynPat.Tuple(_, elementPats, _, _) ->
                 loop elementPats acc
             | _ -> loop (pat::tail) acc
         | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
@@ -77,12 +77,12 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         | SynPat.Named(SynIdent(identifier, _), _, _, _) when isIdentifierTooShort identifier.idText ->
             (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
-    | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
+    | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
         (identifier, identifier.idText, None) |> Array.singleton
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _, _)) ->
         let checkTypes types =
             seq {
-                for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
+                for SynTyparDecl(_attr, SynTypar(id, _, _), _, _) in types do
                     if isIdentifierTooShort id.idText then
                         yield (id, id.idText, None)
             }

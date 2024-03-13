@@ -35,7 +35,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             Array.empty
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.AbstractSlot(SynValSig(_, SynIdent(identifier, _), _, _, _, _, _, _, _, _, _, _), _, _) ->
+        | SynMemberDefn.AbstractSlot(SynValSig(_, SynIdent(identifier, _), _, _, _, _, _, _, _, _, _, _), _, _, _) ->
             (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty
