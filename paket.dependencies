@@ -19,6 +19,8 @@ nuget NUnit3TestAdapter
 nuget Microsoft.NET.Test.Sdk 17.7.2
 nuget Newtonsoft.Json
 nuget Microsoft.Build.Locator
+nuget SemanticVersioning 2.0.2
+nuget StreamJsonRpc ~> 2.8.28
 
 # don't expose as a package reference
 nuget Microsoft.SourceLink.GitHub copy_local: true
