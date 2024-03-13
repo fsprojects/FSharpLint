@@ -6,7 +6,13 @@ menu_order: 1
 
 # Overview
 
-FSharpLint is a style checking tool for F#. It points out locations where a set of rules on how F# is to be styled have been broken.
+FSharpLint is a static analysis tool for F#. Like many other software linters, it analyzes your source code (via typed and untyped syntax trees), and then it points out locations where a set of rules on how 
+F# is to be styled have been broken. There are various kinds of rules:
+
+* Conventions: name your public or private API/ABI members to respect project or solution-wide conventions.
+* Smells: get warned on logic that might pose maintainability problems or potential downsides.
+* Formatting: indent and structure your code to follow a specific set of cosmetic standards.
+
 The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
 
 The project aims to let the user know of problems through [matching user defined hints](./how-tos/rules/FL0065.html)
@@ -30,7 +36,7 @@ FSharpLint can be used in several ways:
 The following program:
 
     type ExampleInterface =
-       abstract member print : unit -> unit
+        abstract member print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
@@ -59,7 +65,7 @@ Run against the lint tool generates the following errors:
 Refactored using lint's warnings:
 
     type IExampleInterface =
-       abstract member Print : unit -> unit
+        abstract member Print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
@@ -77,7 +83,7 @@ If we run lint again it will find a new error, it's worth running the tool until
 After refactoring again we have with no lint errors:
 
     type IExampleInterface =
-       abstract member Print : unit -> unit
+        abstract member Print : unit -> unit
 
     [<EntryPoint>]
     let main argv =
