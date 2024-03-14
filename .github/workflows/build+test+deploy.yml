@@ -121,6 +121,9 @@ jobs:
         dotnet tool install --global paket --version 7.2.1
         paket restore
 
+    - name: Build FSharpLint.Core
+      run: dotnet build .\src\FSharpLint.Core\FSharpLint.Core.fsproj
+
     - name: Remove global.json so that .NET 8 is used
       run: |
         del .\global.json
