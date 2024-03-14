@@ -116,7 +116,12 @@ jobs:
         ls .\artifacts
         dotnet tool install --global dotnet-fsharplint --prerelease --add-source .\artifacts
     
-    - name: REmove global.json so that .NET 8 is used
+    - name: Setup Paket
+      run: |
+        dotnet tool install --global paket --version 7.2.1
+        paket restore
+
+    - name: Remove global.json so that .NET 8 is used
       run: |
         del .\global.json
         dotnet --info
