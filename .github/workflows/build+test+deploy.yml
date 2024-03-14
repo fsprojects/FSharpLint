@@ -114,7 +114,7 @@ jobs:
     - name: Install FSharpLint from downloaded binaries
       run: |
         ls .\artifacts
-        dotnet tool install --global dotnet-fsharplint --add-source .\artifacts
+        dotnet tool install --global dotnet-fsharplint --prerelease --add-source .\artifacts
     
     - name: REmove global.json so that .NET 8 is used
       run: |
