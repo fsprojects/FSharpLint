@@ -56,6 +56,11 @@ jobs:
       run: dotnet fake build
     - name: Pack
       run: dotnet fake build -t Pack
+    - name: Publish binaries as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries
+        path: ./out
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1.1.0
@@ -89,6 +94,43 @@ jobs:
         overwrite: true
         file_glob: true
 
+  testReleaseBinariesInWindows8:
+    needs: deployReleaseBinaries
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.101
+    
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: binaries
+        path: ./artifacts
+        
+    - name: Install FSharpLint from downloaded binaries
+      run: |
+        ls .\artifacts
+        dotnet tool install --global dotnet-fsharplint --prerelease --add-source .\artifacts
+    
+    - name: Setup Paket
+      run: |
+        dotnet tool install --global paket --version 7.2.1
+        paket restore
+
+    - name: Build FSharpLint.Core
+      run: dotnet build .\src\FSharpLint.Core\FSharpLint.Core.fsproj
+
+    - name: Remove global.json so that .NET 8 is used
+      run: |
+        del .\global.json
+        dotnet --info
+    
+    - name: Run installed FSharpLint
+      run: dotnet fsharplint lint .\src\FSharpLint.Core\FSharpLint.Core.fsproj
 
   deployReleaseDocs:
     needs: deployReleaseBinaries
