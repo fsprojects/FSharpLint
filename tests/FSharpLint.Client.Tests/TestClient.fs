@@ -41,7 +41,7 @@ type ToolLocationOverride(toolStatus: ToolStatus, consoleDllPath: string) =
 
     new (toolStatus: ToolStatus) = new ToolLocationOverride(toolStatus, fsharpConsoleOutputDir)
 
-let runVersionCall filePath (service: FSharpLintService) =
+let runVersionCall filePath (service: IFSharpLintService) =
     async {
         let request =
             {
@@ -52,7 +52,7 @@ let runVersionCall filePath (service: FSharpLintService) =
     }
     |> Async.RunSynchronously
 
-let runLintFileCall filePath (service: FSharpLintService) =
+let runLintFileCall filePath (service: IFSharpLintService) =
     async {
         let request =
             {
@@ -117,7 +117,7 @@ let ``Daemon cannot work with non-existing file``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHintsOOOPS.fs"
-        let fsharpLintService: IFSharpLintService = new LSPFSharpLintService() :> IFSharpLintService
+        let fsharpLintService = new LSPFSharpLintService()
         let versionResponse = runVersionCall testHintsFile fsharpLintService
 
         Assert.AreEqual(LanguagePrimitives.EnumToValue FSharpLintResponseCode.ErrFileNotFound, versionResponse.Code)
@@ -127,7 +127,7 @@ let ``Daemon can lint a file with success``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore" </> "TestHints.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService = new LSPFSharpLintService()
         let versionResponse = runLintFileCall testHintsFile fsharpLintService
 
         let versionResponse = runLintFileCall "/home/vince/src/github/mrluje/FSharpLint.worktrees/rw/make_it_all_6/tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.MultiTarget/TestHints.fs" fsharpLintService
@@ -166,7 +166,7 @@ let ``LintError if Daemon lint an unparsable file``() =
     using (new ToolLocationOverride(ToolStatus.Available)) <| fun _ ->
 
         let testHintsFile = basePath </> "tests" </> "FSharpLint.Client.Tests" </> "UnparsableFile.fs"
-        let fsharpLintService: FSharpLintService = new LSPFSharpLintService() :> FSharpLintService
+        let fsharpLintService = new LSPFSharpLintService()
         let versionResponse = runLintFileCall testHintsFile fsharpLintService
 
         match versionResponse.Result with
