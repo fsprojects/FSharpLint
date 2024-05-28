@@ -80,6 +80,7 @@
     <Compile Include="Rules\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Binding\WildcardNamedWithAsPattern.fs" />
     <Compile Include="Rules\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Binding\FavourAsKeyword.fs" />
     <Compile Include="Rules\Hints\HintMatcher.fs" />
   </ItemGroup>
 
