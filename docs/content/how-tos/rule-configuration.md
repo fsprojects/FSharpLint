@@ -126,3 +126,4 @@ The following rules can be specified for linting.
 - [UnneededRecKeyword (FL0083)](rules/FL0083.html)
 - [FavourNonMutablePropertyInitialization (FL0084)](rules/FL0084.html)
 - [EnsureTailCallDiagnosticsInRecursiveFunctions (FL0085)](rules/FL0085.html)
+- [FavourAsKeyword (FL0086)](rules/FL0086.html)
