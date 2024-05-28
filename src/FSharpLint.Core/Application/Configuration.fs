@@ -297,6 +297,7 @@ type BindingConfig =
       wildcardNamedWithAsPattern:EnabledConfig option
       uselessBinding:EnabledConfig option
       tupleOfWildcards:EnabledConfig option
+      favourAsKeyword:EnabledConfig option
       favourTypedIgnore:EnabledConfig option }
 with
     member this.Flatten() =
@@ -306,6 +307,7 @@ with
             this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
             this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
             this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
+            this.favourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule) |> Option.toArray
         |] |> Array.concat
 
 type ConventionsConfig =
@@ -479,7 +481,8 @@ type Configuration =
       NoTabCharacters:EnabledConfig option
       NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
       SuggestUseAutoProperty:EnabledConfig option
-      EnsureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option }
+      EnsureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
+      FavourAsKeyword:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -571,6 +574,7 @@ with
         NoPartialFunctions = None
         SuggestUseAutoProperty = None
         EnsureTailCallDiagnosticsInRecursiveFunctions = None
+        FavourAsKeyword = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -725,6 +729,7 @@ let flattenConfig (config:Configuration) =
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
             config.EnsureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule)
+            config.FavourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule)
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&

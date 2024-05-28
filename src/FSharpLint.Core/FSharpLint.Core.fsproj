@@ -112,6 +112,7 @@
     <Compile Include="Rules\Conventions\Binding\WildcardNamedWithAsPattern.fs" />
     <Compile Include="Rules\Conventions\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Conventions\Binding\TupleOfWildcards.fs" />
+    <Compile Include="Rules\Conventions\Binding\FavourAsKeyword.fs" />
     <Compile Include="Rules\Conventions\AvoidTooShortNames.fs" />
     <Compile Include="Rules\Typography\Indentation.fs" />
     <Compile Include="Rules\Typography\MaxCharactersOnLine.fs" />
