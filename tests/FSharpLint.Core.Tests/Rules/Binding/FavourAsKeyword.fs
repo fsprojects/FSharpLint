@@ -8,7 +8,7 @@ type TestBindingFavourAsKeyword() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourAsKeyword.rule)
 
     [<Test>]
-    member this.FavourAsKeywordShouldQuickFixAndProduceError() =
+    member this.FavourAsKeywordShouldQuickFix() =
         let source = """
 module Program
 
@@ -26,7 +26,18 @@ match "" with
 """
 
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-        this.AssertErrorWithMessageExists("Prefer using the as pattern to match a constant and bind it to a variable.")
+
+
+    [<Test>]
+    member this.FavourAsKeywordShouldProduceError() =
+        this.Parse """
+module Program
+
+match "" with
+| bar when bar = "baz" -> ()
+"""
+
+        this.AssertErrorWithMessageExists("Prefer using the 'as' pattern to match a constant and bind it to a variable.")
 
 
     [<Test>]
