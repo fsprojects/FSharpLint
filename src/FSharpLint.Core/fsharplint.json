@@ -332,6 +332,7 @@
         }
     },
     "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": false },
+    "favourAsKeyword": { "enabled": true },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
