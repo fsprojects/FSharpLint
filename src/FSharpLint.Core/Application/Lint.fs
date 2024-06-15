@@ -383,7 +383,7 @@ module Lint =
             | ex -> Error (string ex)
         | Default ->
             try
-                Configuration.loadConfig "./fsharplint.json"
+                Configuration.loadConfig $"./{Configuration.SettingsFileName}"
                 |> Ok
             with
             | :? System.IO.FileNotFoundException ->
