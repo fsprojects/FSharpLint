@@ -112,7 +112,7 @@ module Lint =
         { CancellationToken:CancellationToken option
           ErrorReceived:Suggestion.LintWarning -> unit
           ReportLinterProgress:ProjectProgress -> unit
-          Configuration:Configuration.Configuration }
+          Rules:Configuration.LoadedRules }
 
     type Context =
         { IndentationRuleContext:Map<int,bool*int>
@@ -206,7 +206,7 @@ module Lint =
             | Some(x) -> not x.IsCancellationRequested
             | None -> true
 
-        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
+        let enabledRules = lintInfo.Rules
 
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line)
         let allRuleNames =
@@ -383,7 +383,7 @@ module Lint =
             | ex -> Error (string ex)
         | Default ->
             try
-                Configuration.loadConfig "./fsharplint.json"
+                Configuration.loadConfig $"./{Configuration.SettingsFileName}"
                 |> Ok
             with
             | :? System.IO.FileNotFoundException ->
@@ -410,7 +410,7 @@ module Lint =
 
                 let parseFilesInProject files projectOptions =
                     let lintInformation =
-                        { Configuration = config
+                        { Rules = Configuration.flattenConfig config
                           CancellationToken = optionalParams.CancellationToken
                           ErrorReceived = warningReceived
                           ReportLinterProgress = projectProgress }
@@ -511,7 +511,7 @@ module Lint =
 
                 optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
             let lintInformation =
-                { Configuration = config
+                { Rules = Configuration.flattenConfig config
                   CancellationToken = optionalParams.CancellationToken
                   ErrorReceived = warningReceived
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
@@ -554,7 +554,7 @@ module Lint =
                 optionalParams.ReceivedWarning |> Option.iter (fun func -> func warning)
 
             let lintInformation =
-                { Configuration = config
+                { Rules = Configuration.flattenConfig config
                   CancellationToken = optionalParams.CancellationToken
                   ErrorReceived = warningReceived
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
