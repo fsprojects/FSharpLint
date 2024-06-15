@@ -14,18 +14,24 @@ type IOutput =
 
 type StandardOutput () =
 
-    let getErrorMessage (range:Range) =
+    let getErrorMessage (range:Range) (filePath:string) =
         let error = Resources.GetString("LintSourceError")
-        String.Format(error, range.StartLine, range.StartColumn)
-
-    let highlightErrorText (range:Range) (errorLine:string) =
+        let startLine = range.StartLine
+        let startColumn = range.StartColumn
+        String.Format(
+            error,
+            startLine,
+            startColumn,
+            sprintf "%s(%i,%i)" filePath startLine startColumn
+        )
+    let highlightErrorText (filePath: string) (range:Range) (errorLine:string) =
         let highlightColumnLine =
             if String.length errorLine = 0 then "^"
             else
                 errorLine
                 |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
                 |> Seq.reduce (+)
-        getErrorMessage range + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
+        getErrorMessage range filePath + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
         let originalColour = Console.ForegroundColor
@@ -36,7 +42,7 @@ type StandardOutput () =
     interface IOutput with
         member __.WriteInfo (info:string) = writeLine info ConsoleColor.White Console.Out
         member this.WriteWarning (warning:Suggestion.LintWarning) =
-            let highlightedErrorText = highlightErrorText warning.Details.Range warning.ErrorText
+            let highlightedErrorText = highlightErrorText warning.FilePath warning.Details.Range warning.ErrorText
             let ruleUrlHint = sprintf "See https://fsprojects.github.io/FSharpLint/how-tos/rules/%s.html" warning.RuleIdentifier
             let str = warning.Details.Message + Environment.NewLine + highlightedErrorText
                     + Environment.NewLine + ruleUrlHint
