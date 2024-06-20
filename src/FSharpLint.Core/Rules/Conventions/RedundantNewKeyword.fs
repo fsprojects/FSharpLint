@@ -43,8 +43,9 @@ let private generateFix (text:string) range = lazy(
 
 let runner args =
     match args.AstNode, args.CheckInfo with
-    | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
-    | AstNode.Expression(SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
+    | AstNode.Expression (SynExpr.Upcast (SynExpr.New (_, SynType.LongIdent (identifier), _, range), _, _)), Some checkInfo
+    | AstNode.Expression (SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
+    | AstNode.Expression (SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
         { Range = range
           Message = Resources.GetString("RulesRedundantNewKeyword")
           SuggestedFix = Some (generateFix args.FileContent range)
