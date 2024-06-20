@@ -108,9 +108,11 @@ module Ast =
         match pattern with
         | SynPat.LongIdent(SynLongIdent([identifier], _, _),
                            _, _,
-                           SynArgPats.Pats([SynPat.Tuple(_, [lhs; rhs], _)]), _, _)
+                           SynArgPats.Pats([SynPat.Tuple(_, [lhs; rhs], _, _)]), _, _)
                 when identifier.idText = "op_ColonColon" ->
             Some(lhs, rhs)
+        | SynPat.ListCons(lhsPat, rhsPat, _, _) ->
+            Some(lhsPat, rhsPat)
         | _ -> None
 
     /// Gets a string literal from the AST.
@@ -146,12 +148,19 @@ module Ast =
         | SynType.App(synType, _, types, _, _, _, _) ->
             types |> List.revIter (Type >> add)
             add <| Type synType
-        | SynType.Tuple(_, types, _) ->
-            types |> List.revIter (snd >> Type >> add)
+        | SynType.Tuple(_, typeSegments, _) ->
+            typeSegments 
+            |> List.revIter 
+                (fun segment ->
+                    match segment with
+                    | SynTupleTypeSegment.Type(typ) -> typ |> Type |> add
+                    | _ -> ())
         | SynType.Fun(synType, synType1, _, _)
-        | SynType.StaticConstantNamed(synType, synType1, _)
-        | SynType.MeasureDivide(synType, synType1, _) ->
+        | SynType.Or(synType, synType1, _, _)
+        | SynType.StaticConstantNamed(synType, synType1, _) ->
             add <| Type synType1
+            add <| Type synType
+        | SynType.MeasurePower(synType, _, _) ->
             add <| Type synType
         | SynType.Var(_)
         | SynType.Anon(_)
@@ -166,20 +175,26 @@ module Ast =
             typeNames |> List.revIter (snd >> Type >> add)
         | SynType.Paren(innerType, _) ->
             add <| Type innerType
+        | SynType.FromParseError(_)  ->
+            ()
+        | SynType.Intersection(_, types, _, _) ->
+            types |> List.revIter (Type >> add)
+        | SynType.SignatureParameter(_, _, _, synType, _) ->
+            add <| Type synType
+        
 
     /// Concatenates the typed-or-untyped structure of `SynSimplePats` into a `SynSimplePat list` to keep other code
     /// mostly unchanged.
     let inline extractPatterns (simplePats:SynSimplePats) =
-        let rec loop pat acc =
+        let loop pat acc =
             match pat with
-            | SynSimplePats.SimplePats(patterns, _range) -> patterns @ acc
-            | SynSimplePats.Typed(patterns, _type, _range) -> loop patterns acc
+            | SynSimplePats.SimplePats(patterns, _, _range) -> patterns @ acc
         loop simplePats []
 
     let inline private memberDefinitionChildren node add =
         match node with
         | SynMemberDefn.Member(binding, _) -> add <| Binding binding
-        | SynMemberDefn.ImplicitCtor(_, _, patterns, _, _, _) ->
+        | SynMemberDefn.ImplicitCtor(_, _, patterns, _, _, _, _) ->
             let combinedPatterns = extractPatterns patterns
             combinedPatterns |> List.revIter (SimplePattern >> add)
         | SynMemberDefn.ImplicitInherit(synType, expression, _, _) ->
@@ -195,10 +210,10 @@ module Ast =
         | SynMemberDefn.AbstractSlot(_) -> ()
         | SynMemberDefn.ValField(field, _) -> add <| Field field
         | SynMemberDefn.NestedType(typeDefinition, _, _) -> add <| TypeDefinition typeDefinition
-        | SynMemberDefn.AutoProperty(_, _, _, Some(synType), _, _, _, _, _, expression, _, _, _) ->
+        | SynMemberDefn.AutoProperty(_, _, _, Some(synType), _, _, _, _, _, expression, _, _) ->
             add <| Expression expression
             add <| Type synType
-        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, _, expression, _, _, _) ->
+        | SynMemberDefn.AutoProperty(_, _, _, None, _, _, _, _, _, expression, _, _) ->
             add <| Expression expression
         | SynMemberDefn.GetSetMember(memberDefnForGet, memberDefnForSet, _, _) ->
             memberDefnForGet |> Option.iter (Binding >> add)
@@ -215,7 +230,7 @@ module Ast =
             add <| Pattern pattern1
             add <| Pattern pattern
         | SynPat.ArrayOrList(_, patterns, _)
-        | SynPat.Tuple(_, patterns, _)
+        | SynPat.Tuple(_, patterns, _,  _)
         | SynPat.Ands(patterns, _) -> patterns |> List.revIter (Pattern >> add)
         | SynPat.Attrib(pattern, _, _)
         | SynPat.Paren(pattern, _) -> add <| Pattern pattern
@@ -225,10 +240,9 @@ module Ast =
         | SynPat.Wild(_)
         | SynPat.FromParseError(_)
         | SynPat.InstanceMember(_)
-        | SynPat.DeprecatedCharRange(_)
         | SynPat.Null(_)
         | SynPat.OptionalVal(_) -> ()
-        | Cons(lhs, rhs) ->
+        | SynPat.ListCons(lhs, rhs, _, _) ->
             add <| Pattern rhs
             add <| Pattern lhs
         | SynPat.LongIdent(_, _, _, constructorArguments, _, _) ->
@@ -277,9 +291,9 @@ module Ast =
         | SynExpr.ArrayOrList(_, expressions, _) -> expressions |> List.revIter (Expression >> add)
         | SynExpr.Record(_, Some(expr, _), _, _) -> add <| Expression expr
         | SynExpr.Record(_, None, _, _) -> ()
-        | SynExpr.AnonRecd(_, Some (expr,_), _, _) ->
+        | SynExpr.AnonRecd(_, Some (expr,_), _, _, _) ->
             add <| Expression expr
-        | SynExpr.AnonRecd(_, None, _, _) -> ()
+        | SynExpr.AnonRecd(_, None, _, _, _) -> ()
         | SynExpr.ObjExpr(synType, _, _, bindings, _, _, _, _) ->
             bindings |> List.revIter (Binding >> add)
             add <| Type synType
@@ -362,6 +376,13 @@ module Ast =
         | SynExpr.IndexRange(expr1, _, expr2, _, _, _) -> 
             expr1 |> Option.iter (Expression >> add)
             expr2 |> Option.iter (Expression >> add)
+        | SynExpr.DotLambda(expr, _, _) ->
+            expr |> Expression |> add
+        | SynExpr.Typar(typar, _) ->
+            ()
+        | SynExpr.WhileBang(_, whileExpr, doExpr, _) ->
+            add <| Expression whileExpr
+            add <| Expression doExpr
 
     let inline private typeSimpleRepresentationChildren node add =
         match node with
@@ -376,11 +397,8 @@ module Ast =
 
     let inline private simplePatternsChildren node add =
         match node with
-        | SynSimplePats.SimplePats(simplePatterns, _) ->
+        | SynSimplePats.SimplePats(simplePatterns, _, _) ->
             simplePatterns |> List.revIter (SimplePattern >> add)
-        | SynSimplePats.Typed(simplePatterns, synType, _) ->
-            add <| Type synType
-            add <| SimplePatterns simplePatterns
 
     let inline private simplePatternChildren node add =
         match node with
@@ -404,7 +422,7 @@ module Ast =
         match node with
         | SynArgPats.Pats(patterns) ->
             patterns |> List.revIter (Pattern >> add)
-        | SynArgPats.NamePatPairs(namePatterns, _) ->
+        | SynArgPats.NamePatPairs(namePatterns, _, _) ->
             namePatterns |> List.revIter (fun (_, _, pattern) -> pattern |> Pattern |> add)
 
     let inline private typeRepresentationChildren node add =
@@ -443,7 +461,7 @@ module Ast =
         | Type(x) -> typeChildren x add
         | Match(x) -> matchChildren x add
         | MemberDefinition(x) -> memberDefinitionChildren x add
-        | Field(SynField(_, _, _, synType, _, _, _, _)) -> add <| Type synType
+        | Field(SynField(_, _, _, synType, _, _, _, _, _)) -> add <| Type synType
         | Pattern(x) -> patternChildren x add
         | ConstructorArguments(x) -> constructorArgumentsChildren x add
         | SimplePattern(x) -> simplePatternChildren x add
@@ -462,7 +480,7 @@ module Ast =
         | Else(x)
         | Expression(x) -> expressionChildren x add
 
-        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _, _))) ->
+        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _, _, _))) ->
             moduleOrNamespaces |> List.revIter (ModuleOrNamespace >> add)
 
         | UnionCase(x) -> unionCaseChildren x add

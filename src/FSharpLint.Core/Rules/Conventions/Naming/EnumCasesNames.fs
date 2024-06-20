@@ -7,7 +7,7 @@ open FSharpLint.Rules.Helper.Naming
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.EnumCase(SynEnumCase(_, SynIdent(identifier, _), _, _, _, _, _)) ->
+    | AstNode.EnumCase(SynEnumCase(_, SynIdent(identifier, _), _, _, _, _)) ->
         (identifier, identifier.idText, None) |> Array.singleton
     | _ -> Array.empty
 
