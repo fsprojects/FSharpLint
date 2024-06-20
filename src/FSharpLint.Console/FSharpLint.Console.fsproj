@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="Output.fs" />
+    <Compile Include="Sarif.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
