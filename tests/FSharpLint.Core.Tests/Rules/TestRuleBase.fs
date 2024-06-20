@@ -75,24 +75,27 @@ type TestRuleBase () =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
 
     member this.ApplyQuickFix (source:string) =
-        let firstSuggestedFix =
+        let suggestedFixes =
             suggestions
             |> Seq.choose (fun x -> x.Details.SuggestedFix)
-            |> Seq.tryHead
 
-        match firstSuggestedFix |> Option.bind (fun x -> x.Value) with
-        | Some(fix) ->
-            let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
-            let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
+        Seq.fold 
+            (fun (source: string) (lazyFix: Lazy<Option<SuggestedFix>>) ->
+                match lazyFix.Value with
+                | Some(fix) ->
+                    let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
+                    let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
 
-            match (startIndex, endIndex) with
-            | (Some(startIndex), Some(endIndex)) ->
-                (StringBuilder source)
-                    .Remove(startIndex, endIndex - startIndex)
-                    .Insert(startIndex, fix.ToText)
-                    .ToString()
-            | _ -> source
-        | None -> source
+                    match (startIndex, endIndex) with
+                    | (Some(startIndex), Some(endIndex)) ->
+                        (StringBuilder source)
+                            .Remove(startIndex, endIndex - startIndex)
+                            .Insert(startIndex, fix.ToText)
+                            .ToString()
+                    | _ -> source
+                | None -> source )
+            source
+            suggestedFixes
 
     [<SetUp>]
     member __.SetUp() = suggestions.Clear()
