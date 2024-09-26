@@ -139,17 +139,18 @@ let PackageReleaseNotes baseProps =
 Target.create "Clean" (fun _ ->
     Shell.cleanDirs [buildDir; nugetDir]
 )
-
+let idx (x:DotNet.BuildOptions) = {x with MSBuildParams = { x.MSBuildParams with DisableInternalBinLog = true }} 
+let idx2 (x:DotNet.RestoreOptions) = {x with MSBuildParams = { x.MSBuildParams with DisableInternalBinLog = true }} 
 Target.create "Build" (fun _ ->
-    DotNet.build id "FSharpLint.sln"
+    DotNet.build idx "FSharpLint.sln"
 )
 
-let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
+let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release; MSBuildParams = { p.MSBuildParams with DisableInternalBinLog = true } }
 
 Target.create "Test" (fun _ ->
   DotNet.test filterPerformanceTests "tests/FSharpLint.Core.Tests"
   DotNet.test filterPerformanceTests "tests/FSharpLint.Console.Tests"
-  DotNet.restore id "tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.sln"
+  DotNet.restore idx2 "tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.sln"
   DotNet.test filterPerformanceTests "tests/FSharpLint.FunctionalTest"
 )
 
@@ -168,7 +169,7 @@ Target.create "BuildRelease" (fun _ ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
             OutputPath = Some buildDir
-            MSBuildParams = { p.MSBuildParams with Properties = properties }
+            MSBuildParams = { p.MSBuildParams with Properties = properties; DisableInternalBinLog = true }
         }
     ) "FSharpLint.sln"
 )
@@ -188,7 +189,7 @@ Target.create "Pack" (fun _ ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
             OutputPath = Some nugetDir
-            MSBuildParams = { p.MSBuildParams with Properties = properties }
+            MSBuildParams = { p.MSBuildParams with Properties = properties; DisableInternalBinLog = true }
         }
     ) "FSharpLint.sln"
 )

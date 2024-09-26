@@ -83,7 +83,7 @@ module IgnoreFiles =
             |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
 
     let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
-        let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) =
+        let rec getRemainingGlobSeqForMatches (pathSegment:string) (globSeqs:Regex list list) =
             globSeqs |> List.choose (function
                 | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
                 | _ -> None)
