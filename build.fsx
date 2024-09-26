@@ -1,8 +1,34 @@
 // --------------------------------------------------------------------------------------
 // FAKE build script
 // --------------------------------------------------------------------------------------
+#if FAKE
 #r "paket: groupref build //"
 #load ".fake/build.fsx/intellisense.fsx"
+#else
+#r "nuget: MSBuild.StructuredLogger"
+#r "nuget: Fake.Core"
+#r "nuget: Fake.Core.Target"
+#r "nuget: Fake.Core.Process"
+#r "nuget: Fake.DotNet.Cli"
+#r "nuget: Fake.Core.ReleaseNotes"
+#r "nuget: Fake.DotNet.AssemblyInfoFile"
+#r "nuget: Fake.DotNet.Paket"
+#r "nuget: Fake.Tools.Git"
+#r "nuget: Fake.Core.Environment"
+#r "nuget: Fake.Core.UserInput"
+#r "nuget: Fake.IO.FileSystem"
+#r "nuget: Fake.DotNet.MsBuild"
+#r "nuget: Fake.Api.GitHub"
+// Boilerplate
+System.Environment.GetCommandLineArgs()
+|> Array.skip 2 // skip fsi.exe; build.fsx
+|> Array.toList
+|> Fake.Core.Context.FakeExecutionContext.Create false __SOURCE_FILE__
+|> Fake.Core.Context.RuntimeContext.Fake
+|> Fake.Core.Context.setExecutionContext
+
+#endif
+
 
 open Fake.Core
 open Fake.DotNet

@@ -23,10 +23,10 @@ nuget Microsoft.Build.Locator
 # don't expose as a package reference
 nuget Microsoft.SourceLink.GitHub copy_local: true
 # don't copy runtime assets
-nuget Microsoft.Build.Framework == 17.2.0 copy_local: false
+nuget Microsoft.Build.Framework copy_local: false
 nuget Microsoft.Build.Tasks.Core copy_local: false
-nuget Microsoft.Build.Utilities.Core == 17.2.0 copy_local: false
-nuget Microsoft.Build == 17.2.0 copy_local: false
+nuget Microsoft.Build.Utilities.Core copy_local: false
+nuget Microsoft.Build copy_local: false
 
 group Docs
   source https://api.nuget.org/v3/index.json
@@ -47,8 +47,8 @@ group Build
   strategy: min
 
   nuget System.Reactive ~> 5
-  nuget MSBuild.StructuredLogger == 2.1.815
-  nuget FSharp.Core ~> 5.0
+  nuget MSBuild.StructuredLogger
+  nuget FSharp.Core
   nuget Fake.Core.Target
   nuget Fake.Core.Process
   nuget Fake.DotNet.Cli
