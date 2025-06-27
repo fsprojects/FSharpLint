@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
@@ -12,6 +12,7 @@
     <Description>API to programmatically run FSharpLint.</Description>
     <PackageTags>F#;fsharp;lint;FSharpLint;fslint;api</PackageTags>
   </PropertyGroup>
+
   <ItemGroup>
     <!-- Framework -->
     <Compile Include="AssemblyInfo.fs" />
@@ -133,5 +134,21 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" PrivateAssets="all" />
+    <PackageReference Include="FSharp.Compiler.Service" />
+    <PackageReference Include="Ionide.ProjInfo.ProjectSystem" />
+    <PackageReference Include="Ionide.ProjInfo.FCS" />
+    <PackageReference Include="Ionide.ProjInfo" />
+    <PackageReference Include="Ionide.ProjInfo.Sln" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Microsoft.Build.Locator" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Framework" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="Microsoft.Build" />
+  </ItemGroup>
+
 </Project>
