@@ -447,14 +447,7 @@ module private MatchPattern =
 
     and private matchConsPattern (pattern, hint) =
         match (pattern, hint) with
-        | SynPat.LongIdent(
-                            SynLongIdent([ident], _, _),
-                            _,
-                            _,
-                            SynArgPats.Pats([SynPat.Tuple(_, [leftPattern;rightPattern], _, _)]),
-                            _,
-                            _), Pattern.Cons(left, right)
-                when ident.idText = "op_ColonColon" ->
+        | Cons(leftPattern, rightPattern), Pattern.Cons(left, right) ->
             matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
         | _ -> false
 

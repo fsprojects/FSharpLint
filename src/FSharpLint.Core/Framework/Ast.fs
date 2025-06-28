@@ -106,6 +106,8 @@ module Ast =
 
     let (|Cons|_|) pattern =
         match pattern with
+        | SynPat.ListCons(lhs, rhs, _, _) ->
+            Some(lhs, rhs)
         | SynPat.LongIdent(SynLongIdent([identifier], _, _),
                            _, _,
                            SynArgPats.Pats([SynPat.Tuple(_, [lhs; rhs], _, _)]), _, _)
