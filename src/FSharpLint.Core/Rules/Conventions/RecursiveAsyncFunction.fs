@@ -1,9 +1,9 @@
 module FSharpLint.Rules.RecursiveAsyncFunction
 
-open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
+open FSharpLint.Framework
+open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -60,7 +60,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
 
 let runner args =
     match args.AstNode with
-    | AstNode.Expression (SynExpr.DoBang (expr, range)) ->
+    | AstNode.Expression (SynExpr.DoBang (expr, range, _)) ->
         let parents = args.GetParents 5
         checkRecursiveAsyncFunction args range expr parents
     | _ -> Array.empty

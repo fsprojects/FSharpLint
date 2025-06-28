@@ -83,7 +83,7 @@ module IgnoreFiles =
             |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
 
     let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
-        let rec getRemainingGlobSeqForMatches pathSegment (globSeqs:Regex list list) =
+        let rec getRemainingGlobSeqForMatches (pathSegment:string) (globSeqs:Regex list list) =
             globSeqs |> List.choose (function
                 | globSegment::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
                 | _ -> None)
@@ -337,7 +337,7 @@ with
     member this.Flatten() =
         [|
             this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
-            this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray           
+            this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray
             this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
             this.favourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule) |> Option.toArray
             this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray

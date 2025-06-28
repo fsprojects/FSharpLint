@@ -1,9 +1,9 @@
 ﻿module FSharpLint.Rules.SuggestUseAutoProperty
 
 open System
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -38,7 +38,7 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
 
 and isImmutableSequentialExpression args expression =
     match expression with
-    | SynExpr.Sequential (_, _, expr1, expr2, _) ->
+    | SynExpr.Sequential (_, _, expr1, expr2, _, _) ->
         isImmutableValueExpression args expr1
         && (isImmutableSequentialExpression args expr2
             || isImmutableValueExpression args expr2)

@@ -10,10 +10,10 @@ let private getIdentifiers (args: AstNodeRuleParams) =
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _, _)) ->
         let checkTypes types =
             seq {
-                for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
+                for SynTyparDecl(_attr, SynTypar(id, _, _), _, _) in types do
                     yield (id, id.idText, None)
             }
-            
+
         match componentInfo with
         | SynComponentInfo(_attrs, maybeTypes, _, _identifier, _, _, _, _) ->
             match maybeTypes with

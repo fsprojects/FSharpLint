@@ -15,7 +15,8 @@ let private getMembers (members:SynMemberDefn list) =
     let isPublicMember = function
         | SynMemberDefn.AbstractSlot(_) -> true
         | SynMemberDefn.Member(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _, _), _)
-        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, access, _, _, _, _, _) -> isPublic access
+        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, _, SynValSigAccess.Single (access), _, _, _) -> isPublic access
+        | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, _, SynValSigAccess.GetSet (access, _, _), _, _, _) -> isPublic access
         | _ -> false
 
     members

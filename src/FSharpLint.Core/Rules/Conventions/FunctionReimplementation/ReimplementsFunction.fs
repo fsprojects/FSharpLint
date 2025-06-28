@@ -1,9 +1,9 @@
 module FSharpLint.Rules.ReimplementsFunction
 
 open System
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -25,8 +25,8 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
         let identifier =
             identifier
             |> List.map (fun x ->
-                if PrettyNaming.IsMangledOpName x.idText then
-                    PrettyNaming.DecompileOpName x.idText |> sprintf "( %s )"
+                if PrettyNaming.IsLogicalOpName x.idText then
+                    PrettyNaming.ConvertValLogicalNameToDisplayNameCore x.idText |> sprintf "( %s )"
                 else
                     x.idText)
             |> String.concat "."

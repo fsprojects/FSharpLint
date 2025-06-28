@@ -16,7 +16,7 @@ let private checkIdentifierPart (identifier:Ident) (idText:string) =
         String.Format(Resources.GetString errorName, idText)
 
     "RulesAvoidTooShortNamesError" |> formatError |> Array.singleton
-    
+
 let private checkIdentifier (identifier:Ident) (idText:string) =
     if isIdentifierTooShort idText then
         checkIdentifierPart identifier idText
@@ -33,21 +33,21 @@ let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * str
         match patArray with
         | SynPat.Named(SynIdent(ident, _), _, _, _)::tail ->
             if isIdentifierTooShort ident.idText then
-                Array.singleton (ident, ident.idText, None) |> Array.append acc |> loop tail 
+                Array.singleton (ident, ident.idText, None) |> Array.append acc |> loop tail
             else
                 loop tail acc
         | SynPat.Paren(pat, _)::tail ->
             match pat with
             | SynPat.Typed(typedPat, _, _) ->
                 loop (typedPat::tail) acc
-            | SynPat.Tuple(_, elementPats, _) ->
+            | SynPat.Tuple(_, elementPats, _, _) ->
                 loop elementPats acc
             | _ -> loop (pat::tail) acc
         | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
             match argPats with
-            | SynArgPats.Pats(pats) -> 
+            | SynArgPats.Pats(pats) ->
                 loop (List.append pats tail) acc
-            | _ -> 
+            | _ ->
                 loop tail acc
         | _ -> acc
     loop pats Array.empty
@@ -70,23 +70,23 @@ let private getIdentifiers (args:AstNodeRuleParams) =
             | head::_  ->
                 let result: (Ident * string * (unit -> bool) option) array = getParameterWithBelowMinimumLength names
                 if isIdentifierTooShort head.idText then
-                    Array.append result (Array.singleton (head, head.idText, None))  
-                else 
+                    Array.append result (Array.singleton (head, head.idText, None))
+                else
                     result
             | _ -> Array.empty
         | SynPat.Named(SynIdent(identifier, _), _, _, _) when isIdentifierTooShort identifier.idText ->
             (identifier, identifier.idText, None) |> Array.singleton
         | _ -> Array.empty
-    | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
+    | AstNode.Field(SynField(_, _, Some identifier, _, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
         (identifier, identifier.idText, None) |> Array.singleton
     | AstNode.TypeDefinition(SynTypeDefn(componentInfo, _typeDef, _, _, _, _)) ->
         let checkTypes types =
             seq {
-                for SynTyparDecl(_attr, SynTypar(id, _, _)) in types do
+                for SynTyparDecl(_attr, SynTypar(id, _, _), _, _) in types do
                     if isIdentifierTooShort id.idText then
                         yield (id, id.idText, None)
             }
-            
+
         match componentInfo with
         | SynComponentInfo(_attrs, maybeTypes, _, _identifier, _, _, _, _) ->
             match maybeTypes with
