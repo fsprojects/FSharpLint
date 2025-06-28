@@ -1,5 +1,6 @@
 module FSharpLint.Core.Tests.Rules.Conventions.CyclomaticComplexity
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules.CyclomaticComplexity
 
@@ -202,9 +203,9 @@ let f() =
     member this.EnsureComplexityOfFunctionsAreIndependent() =
         let code = $"""Module Program
 let f() =
-    {makeMatchSnippet (MaxComplexity + 1) |> indent 4}
+{makeMatchSnippet (MaxComplexity + 1) |> indent 4}
 let g() =
-    {makeMatchSnippet MaxComplexity |> indent 4}"""
+{makeMatchSnippet MaxComplexity |> indent 4}"""
         this.Parse code
         Assert.AreEqual(1, this.ErrorRanges.Length)
         Assert.IsTrue(this.ErrorExistsAt(2, 4))
@@ -229,9 +230,9 @@ let f() =
         let code = $"""Module Program
 let f() = 
     let g() =
-        {(makeMatchSnippet (MaxComplexity+1)) |> indent 8}
+{makeMatchSnippet (MaxComplexity+1) |> indent 8}
     let h() =
-{makeMatchSnippet MaxComplexity |> indent 8} 
+{makeMatchSnippet MaxComplexity |> indent 8}
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""    
         this.Parse code
         Assert.AreEqual(2, this.ErrorRanges.Length)
