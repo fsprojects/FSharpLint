@@ -104,7 +104,7 @@ type TestAst() =
         let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
 
         Assert.Less(result, 200)
-        System.Console.WriteLine(sprintf "Built array in an average of %d milliseconds." result)
+        TestContext.Out.WriteLine(sprintf "Built array in an average of %d milliseconds." result)
 
     [<Test>]
     member __.``Syntax array constructed from AST in valid order.``() =

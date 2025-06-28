@@ -58,7 +58,7 @@ module TestApi =
             let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
 
             Assert.Less(result, 250)
-            System.Console.WriteLine(sprintf "Average runtime of linter on parsed file: %d (milliseconds)."  result)
+            TestContext.Out.WriteLine(sprintf "Average runtime of linter on parsed file: %d (milliseconds)."  result)
 
         [<Test>]
         member __.``Lint project via absolute path``() =
