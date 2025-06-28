@@ -56,8 +56,9 @@ module Tests =
     let getErrorsFromOutput (output:string) =
         let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
 
-        set [ for i in 1..splitOutput.Length - 1 do
-                if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
+        set [ for line in splitOutput do
+                if line.StartsWith "`" && line.Contains "might be able to be refactored into" then
+                    yield line ]
 
     let expectedErrors =
         set [
