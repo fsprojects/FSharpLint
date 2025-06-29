@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove `NoPartialFunctions` compiler workaround (#698) [@webwarrior-ws]
 - Add `SLNX` and `SLNF` format support and migrate to SLNX solution #723 [@xperiandri]\
   Remove `Ionide.ProjInfo.Sln` NuGet package dependency
+- Remove `Newtonsoft.Json` NuGet dependency #725 [@xperiandri]
 
 ## [0.24.2] - 2024-02-29
 

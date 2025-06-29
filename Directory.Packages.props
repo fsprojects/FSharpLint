@@ -21,9 +21,9 @@
     <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="17.14.8" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NUnit" Version="3.14.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 </Project>
