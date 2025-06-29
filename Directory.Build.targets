@@ -1,0 +1,47 @@
+<!--
+This file allows overriding of properties for all projects in the directory.
+See https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-by-directory?view=vs-2022#directorybuildprops-and-directorybuildtargets
+-->
+<Project>
+
+  <PropertyGroup>
+    <_BuildProjBaseIntermediateOutputPath>$(MSBuildThisFileDirectory)build/obj/</_BuildProjBaseIntermediateOutputPath>
+    <_DotnetToolManifestFile>$(MSBuildThisFileDirectory).config/dotnet-tools.json</_DotnetToolManifestFile>
+    <_DotnetToolRestoreOutputFile>$(_BuildProjBaseIntermediateOutputPath)/dotnet-tool-restore-$(NETCoreSdkVersion)-$(OS)</_DotnetToolRestoreOutputFile>
+    <_DotnetFantomasOutputFile>$(BaseIntermediateOutputPath)dotnet-fantomas-msbuild-$(NETCoreSdkVersion)-$(OS)</_DotnetFantomasOutputFile>
+  </PropertyGroup>
+
+  <!-- Make sure that dotnet tools are up to date before restoring any project -->
+  <Target Name="ToolUpdate"
+          BeforeTargets="ResolveNuGetPackageAssets;BeforeCompile"
+          Condition=" '$(BuildingProject)' == 'false' OR '$(DesignTimeBuild)' == 'true' "
+          Inputs="$(_DotnetToolManifestFile)"
+          Outputs="$(_DotnetToolUpdateOutputFile)">
+    <Message Text="Updating dotnet tools..." Importance="High" />
+    <Exec Command="dotnet tool update --all" WorkingDirectory="$(MSBuildThisFileDirectory)" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <MakeDir Directories="$(_BuildProjBaseIntermediateOutputPath)"/>
+    <Touch Files="$(_DotnetToolUpdateOutputFile)" AlwaysCreate="True" ForceTouch="True" />
+    <Message Text="All tools updated successfully. Updates marked as complete." Importance="High" />
+  </Target>
+
+  <!-- Make sure that dotnet tools are restored before restoring any project -->
+  <Target Name="ToolRestore"
+          BeforeTargets="ResolveNuGetPackageAssets;BeforeCompile"
+          AfterTargets="ToolUpdate"
+          Condition=" '$(BuildingProject)' == 'false' OR '$(DesignTimeBuild)' == 'true' "
+          Inputs="$(_DotnetToolManifestFile)"
+          Outputs="$(_DotnetToolRestoreOutputFile)">
+    <Message Text="Restoring dotnet tools..." Importance="High" />
+    <Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildThisFileDirectory)" StandardOutputImportance="High" StandardErrorImportance="High" />
+    <MakeDir Directories="$(_BuildProjBaseIntermediateOutputPath)"/>
+    <Touch Files="$(_DotnetToolRestoreOutputFile)" AlwaysCreate="True" ForceTouch="True" />
+    <Message Text="All .NET tools restored successfully." Importance="High" />
+  </Target>
+
+  <!-- Make sure that files are formatted before building -->
+  <Target Name="Format" Condition=" '$(MSBuildProjectExtension)' == '.fsproj' AND '$(DesignTimeBuild)' != 'true' " BeforeTargets="BeforeBuild" Inputs="@(Compile)" Outputs="$(_DotnetFantomasOutputFile)" >
+    <Exec Command="dotnet tool run fantomas $(MSBuildProjectDirectory)" StandardOutputImportance="High" StandardErrorImportance="High" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="WarnAndContinue" />
+    <Touch Files="$(_DotnetFantomasOutputFile)" AlwaysCreate="True" ForceTouch="True" />
+  </Target>
+
+</Project>
