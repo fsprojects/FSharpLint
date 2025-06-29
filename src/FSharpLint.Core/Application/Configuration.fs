@@ -4,7 +4,8 @@ module FSharpLint.Framework.Configuration
 open System
 open System.IO
 open System.Reflection
-open Newtonsoft.Json
+open System.Text.Json
+open System.Text.Json.Serialization
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.HintParser
@@ -15,40 +16,16 @@ let SettingsFileName = "fsharplint.json"
 
 exception ConfigurationException of string
 
-module FSharpJsonConverter =
-    open Microsoft.FSharp.Reflection
+module internal FSharpJsonConverter =
 
-    type OptionConverter() =
-        inherit JsonConverter()
-
-        override x.CanConvert(t) =
-            t.IsGenericType && t.GetGenericTypeDefinition() = typedefof<_ option>
-
-        override x.WriteJson(writer, value, serializer) =
-            let value =
-                if isNull value then null
-                else
-                    let _,fields = FSharpValue.GetUnionFields(value, value.GetType())
-                    fields.[0]
-            serializer.Serialize(writer, value)
-
-        override x.ReadJson(reader, t, _, serializer) =
-            let innerType = t.GetGenericArguments().[0]
-            let innerType =
-                if innerType.IsValueType then (typedefof<Nullable<_>>).MakeGenericType([|innerType|])
-                else innerType
-            let value = serializer.Deserialize(reader, innerType)
-            let cases = FSharpType.GetUnionCases(t)
-            if isNull value then FSharpValue.MakeUnion(cases.[0], [||])
-            else FSharpValue.MakeUnion(cases.[1], [|value|])
-
-    let private converters =
-        [|
-            OptionConverter() :> JsonConverter
-        |]
-
-    let serializerSettings =
-        JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, Converters = converters)
+    let jsonOptions =
+        let options =
+            JsonSerializerOptions(
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            )
+        options.Converters.Add(JsonStringEnumConverter())
+        options
 
 module IgnoreFiles =
 
@@ -582,7 +559,7 @@ with
 /// Tries to parse the provided config text.
 let parseConfig (configText:string) =
     try
-        JsonConvert.DeserializeObject<Configuration>(configText, FSharpJsonConverter.serializerSettings)
+        JsonSerializer.Deserialize<Configuration>(configText, FSharpJsonConverter.jsonOptions)
     with
     | ex -> raise <| ConfigurationException $"Couldn't parse config, error=%s{ex.Message}"
 
