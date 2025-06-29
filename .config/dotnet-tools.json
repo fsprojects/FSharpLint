@@ -15,6 +15,13 @@
         "fornax"
       ],
       "rollForward": false
+    },
+    "fantomas": {
+      "version": "7.0.2",
+      "commands": [
+        "fantomas"
+      ],
+      "rollForward": false
     }
   }
 }
