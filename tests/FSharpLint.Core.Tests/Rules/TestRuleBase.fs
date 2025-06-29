@@ -58,9 +58,7 @@ type TestRuleBase () =
         | xs when xs.Count = 0 -> "No errors"
         | _ ->
             suggestions
-            |> Seq.map (fun s -> (sprintf "((%i, %i) - (%i, %i) -> %s)"
-                s.Details.Range.StartRange.StartLine s.Details.Range.StartColumn
-                s.Details.Range.EndRange.EndLine s.Details.Range.EndRange.EndColumn s.Details.Message ))
+            |> Seq.map (fun s -> $"(({s.Details.Range.StartRange.StartLine}, {s.Details.Range.StartColumn}) - ({s.Details.Range.EndRange.EndLine}, {s.Details.Range.EndRange.EndColumn}) -> {s.Details.Message})")
             |> (fun x -> String.Join("; ", x))
 
     member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
@@ -69,7 +67,8 @@ type TestRuleBase () =
 
     member _.AssertErrorWithMessageExists(message) =
         let foundSuggestions = suggestions |> Seq.map (fun s -> s.Details.Message)
-        Assert.IsTrue(foundSuggestions |> Seq.contains message, sprintf "Couldn't find message '%s', found: [%s]" message (String.concat "," foundSuggestions))
+        let foundSuggestionsStr = String.concat "," foundSuggestions
+        Assert.IsTrue(foundSuggestions |> Seq.contains message, $"Couldn't find message '{message}', found: [{foundSuggestionsStr}]")
 
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
