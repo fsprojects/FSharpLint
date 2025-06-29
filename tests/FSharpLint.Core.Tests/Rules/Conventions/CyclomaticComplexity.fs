@@ -21,14 +21,16 @@ let private indent numSpaces (s: string) =
 
 /// Generates a body of code containing a match expression.
 let private makeMatchSnippet len =
+    let patterns = Seq.map (fun i -> $"| \"%d{i}\" -> ()") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| \"%d\" -> ()" i)) [| 1..len-1 |] |> String.concat NewLine}
+{patterns}
 | _ -> ()"""
 
 /// Generates a body of code containing a match expression with a when clause containing a logical operator in each pattern.
 let private makeMatchSnippetWithLogicalOperatorsInWhenClause len =
+    let patterns = Seq.map (fun i -> $"| x when x = \"%d{i*len}\" || x = \"%d{i*len+1}\" -> ()") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
-{Seq.map (fun i -> (sprintf "| x when x = \"%d\" || x = \"%d\" -> ()" (i*len) (i*len+1))) [| 1..len-1 |] |> String.concat NewLine}
+{patterns}
 | _ -> ()"""
 
 /// module declaration and let binding declaration for a body of code
@@ -40,40 +42,40 @@ let {funcString} =
 /// Generates a body of code consisting of if-else expressions.
 let private ifElseExpressions len =
     $"""if true then ()
-    {String.replicate (len-1) (sprintf "%selif true then ()" NewLine)}"""
+    {String.replicate (len-1) $"%s{NewLine}elif true then ()"}"""
     |> makeProgram "f()"
 
 /// Generates a body of code containing for expressions.
 let private forExpressions len =
-    String.replicate len (sprintf "for i = 0 to 1 do ()%s" NewLine)
+    String.replicate len $"for i = 0 to 1 do ()%s{NewLine}"
     |> makeProgram "f()"
 
 /// Generates a body of code containing foreach expressions.
 let private foreachExpressions len =
-    String.replicate len (sprintf "for _ in [] do ()%s" NewLine)
+    String.replicate len $"for _ in [] do ()%s{NewLine}"
     |> makeProgram "f()"
 
 /// Generates a body of code containing while expressions.
 let private whileExpressions len =
-    String.replicate len (sprintf "while false do ()%s" NewLine)
+    String.replicate len $"while false do ()%s{NewLine}"
     |> makeProgram "f()"
 
 /// Generates a body of code containing a while expression with multiple logical operators in the condition.
 let private whileWithBooleanOperatorsInConditionExpressions len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""while true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true do ()"""
+    $"""while true && {String.replicate (len-2) $"%s{NewLine}false &&"} true do ()"""
     |> makeProgram "f()"
 
 /// Generates a body of code containing an if statement with multiple && conditional operators
 let private ifThenExpressionWithMultipleAndConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""if true && {String.replicate (len-2) (sprintf "%sfalse &&" NewLine)} true then ()"""
+    $"""if true && {String.replicate (len-2) $"%s{NewLine}false &&"} true then ()"""
     |> makeProgram "f()"
 
 /// Generates a body of code containing an if statement with multiple || conditional operators
 let private ifThenExpressionWithMultipleOrConditionals len =
     if len < 2 then invalidArg (nameof len) "must be > 2"
-    $"""if true || {String.replicate (len-2) (sprintf "%sfalse ||" NewLine)} true then ()"""
+    $"""if true || {String.replicate (len-2) $"%s{NewLine}false ||"} true then ()"""
     |> makeProgram "f()"
 
 /// Generates a body of code containing a match expression with multiple patterns.
@@ -83,8 +85,9 @@ let private matchExpression len =
 
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
+    let patterns = Seq.map (fun i -> $"| \"%d{i}\"") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
-{(Seq.map (fun i -> (sprintf "| \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{patterns}
 | _ -> ()"""
     |> makeProgram "f()"
 
@@ -98,9 +101,10 @@ f "dummyString" """
 
 /// Generates a computational expression with a match! expression containing multiple patterns.
 let private matchBang len =
+    let patterns = Seq.map (fun i -> $"    | \"%d{i}\"") [| 1..len-1 |] |> String.concat NewLine
     $"""async {{
     match! async {{ return "dummyString" }} with
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{patterns}
     | _ -> ()
 }}"""
     |> makeProgram "a"

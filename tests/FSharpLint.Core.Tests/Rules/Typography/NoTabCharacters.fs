@@ -1,5 +1,6 @@
 module FSharpLint.Core.Tests.Rules.Typography.NoTabCharacters
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
@@ -16,12 +17,13 @@ type TestTypographyTabCharacterInFile() =
 
     [<Test>]
     member this.``Tab character in literal strings are not reported``() =
-        this.Parse (sprintf """
-            let a = @"a%sb"
-            let b = %s
-            a%sb
-            %s
-            """ "\t" "\"\"\"" "\t" "\"\"\"")
+        let source = String.Format("""
+            let a = @"a{0}b"
+            let b = {1}
+            a{0}b
+            {1}
+            """, "\t", "\"\"\"")
+        this.Parse (source)
 
         Assert.IsFalse(this.ErrorExistsAt(2, 23))
         Assert.IsFalse(this.ErrorExistsAt(4, 13))
