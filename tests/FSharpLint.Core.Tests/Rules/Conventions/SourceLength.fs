@@ -13,12 +13,12 @@ let generateNewLines numNewLines numIndents =
                     String.Empty
                 else
                     String.replicate numIndents " "
-            sprintf "%sprintf System.String.Empty\n" indentationChars)
+            $"{indentationChars}printf System.String.Empty\n")
             (Array.create numNewLines "")
     |> String.concat ""
 
 let generateAbstractMembers numMembers numIndents =
-    Array.init numMembers (fun index -> sprintf "abstract member Foo%i : unit -> unit\n" index)
+    Array.init numMembers (fun index -> $"abstract member Foo%i{index} : unit -> unit\n")
     |> String.concat (String.replicate numIndents " ")
 
 let FunctionLength = 70
@@ -28,40 +28,40 @@ type TestMaxLinesInFunction() =
 
     [<Test>]
     member this.FunctionTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog x =
-    %s
-    ()""" (generateNewLines FunctionLength 4))
+    %s{generateNewLines FunctionLength 4}
+    ()""")
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
     member this.FunctionNotTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog x =
-    %s
-    ()""" (generateNewLines (FunctionLength - 4) 4))
+    %s{generateNewLines (FunctionLength - 4) 4}
+    ()""")
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
     [<Test>]
     member this.FunctionTooManyLinesWithComment() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog x =
     // Foo
     // Bar
     // Buzz
-    %s
-    ()""" (generateNewLines (FunctionLength - 3) 4))
+    %s{generateNewLines (FunctionLength - 3) 4}
+    ()""")
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
     member this.FunctionTooManyLinesWithMultiLineComment() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog x =
@@ -69,13 +69,13 @@ let dog x =
     Foo
     Bar
     *)
-    %s
-    ()""" (generateNewLines (FunctionLength - 4) 4))
+    %s{generateNewLines (FunctionLength - 4) 4}
+    ()""")
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
     member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog x =
@@ -85,8 +85,8 @@ let dog x =
     Bar
     *)
     let (*) a b = a + b
-    %s
-    ()""" (generateNewLines (FunctionLength - 5) 4))
+    %s{generateNewLines (FunctionLength - 5) 4}
+    ()""")
         Assert.IsFalse this.ErrorsExist
 
 let LambdaFunctionLength = 5
@@ -96,30 +96,30 @@ type TestMaxLinesInLambdaFunction() =
 
     [<Test>]
     member this.LambdaFunctionTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog = fun x ->
     match x with
     | Some(x) ->
-        %s
+        %s{generateNewLines LambdaFunctionLength 8}
         ()
     | None -> ()
-        """ (generateNewLines LambdaFunctionLength 8))
+        """)
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
     member this.``Multiple arguments in a lamba should not be treated as separate lambdas.``() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog = fun x y ->
     match x with
     | Some(x) ->
-        %s
+        %s{generateNewLines LambdaFunctionLength 8}
         ()
     | None -> ()
-        """ (generateNewLines LambdaFunctionLength 8))
+        """)
 
         Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
 
@@ -144,26 +144,26 @@ type TestMaxLinesInMatchLambdaFunction() =
 
     [<Test>]
     member this.MatchFunctionTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog = function
 | Some(x) ->
-    %s
+    %s{generateNewLines MatchLambdaFunctionLength 4}
     ()
-| None -> ()""" (generateNewLines MatchLambdaFunctionLength 4))
+| None -> ()""")
         Assert.IsTrue(this.ErrorExistsAt(4, 10))
 
     [<Test>]
     member this.MatchFunctionNotTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog = function
 | Some(x) ->
-    %s
+    %s{generateNewLines (MatchLambdaFunctionLength - 5) 4}
     ()
-| None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5) 4))
+| None -> ()""")
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
 let ValueLength = 70
@@ -173,22 +173,22 @@ type TestMaxLinesInValue() =
 
     [<Test>]
     member this.ValueTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog =
-    %s
-    ()""" (generateNewLines ValueLength 4))
+    %s{generateNewLines ValueLength 4}
+    ()""")
         Assert.IsTrue(this.ErrorExistsAt(4, 4))
 
     [<Test>]
     member this.ValueNotTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 let dog =
-    %s
-    ()""" (generateNewLines (ValueLength - 4) 4))
+    %s{generateNewLines (ValueLength - 4) 4}
+    ()""")
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
 let ConstructorLength = 70
@@ -198,14 +198,14 @@ type TestMaxLinesInConstructor() =
 
     [<Test>]
     member this.ConstructorTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 type MyClass(x) =
     new() =
-        %s
+        %s{generateNewLines ConstructorLength 8}
         MyClass(0)
-      """ (generateNewLines ConstructorLength 8))
+      """)
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
     [<Test>]
@@ -249,13 +249,13 @@ type TestMaxLinesInClass() =
 
     [<Test>]
     member this.ClassTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 type MyClass2() as this =
     do
-        %s
-    member this.PrintMessage() = ()""" (generateNewLines ClassLength 8))
+        %s{generateNewLines ClassLength 8}
+    member this.PrintMessage() = ()""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
@@ -271,12 +271,12 @@ type MyClass2() as this =
 
     [<Test>]
     member this.InterfaceTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 type IPrintable =
-    %s
-    abstract member Print : unit -> unit""" (generateAbstractMembers ClassLength 4))
+    %s{generateAbstractMembers ClassLength 4}
+    abstract member Print : unit -> unit""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
@@ -304,14 +304,14 @@ type TestMaxLinesInRecord() =
 
     [<Test>]
     member this.RecordTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
 
 type Record =
-    {
-        %s
+    {{
+        %s{generateNewLines RecordLength 8}
         dog: int
-    }""" (generateNewLines RecordLength 8))
+    }}""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
@@ -337,18 +337,18 @@ type TestMaxLinesInModule() =
 
     [<Test>]
     member this.ModuleTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
-%s
+{generateNewLines ModuleLength 0}
 let foo = ""
-exception SomeException of string""" (generateNewLines ModuleLength 0))
+exception SomeException of string""")
         Assert.IsTrue(this.ErrorExistsAt(2, 0))
 
     [<Test>]
     member this.ModuleNotTooManyLines() =
-        this.Parse(sprintf """
+        this.Parse($"""
 module Program
-%s
+{generateNewLines (ModuleLength - 4) 0}
 let foo = ""
-exception SomeException of string""" (generateNewLines (ModuleLength - 4) 0))
+exception SomeException of string""")
         Assert.IsFalse(this.ErrorExistsAt(2, 0))
