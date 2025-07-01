@@ -1,8 +1,9 @@
 module FSharpLint.Core.Tests.Rules.Conventions.FailwithBadUsage
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules
-open System
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsFailwithBadUsage() =
@@ -163,7 +164,7 @@ let failIfNone (opt: 'a option) : 'a =
         this.Parse """
 [<DllImport("LibFoo")>]
 extern bool Foo()
-        
+
 [<DllImport("LibFoo")>]
 extern bool Bar()
 """

@@ -3,6 +3,7 @@ module FSharpLint.Core.Tests.Rules.Conventions.ParameterNames
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 let config =
     { NamingConfig.Naming = Some NamingCase.CamelCase
@@ -111,5 +112,5 @@ let foo _x = 0
         this.Parse """
 let foo ((x, y) as bar_coord) = bar_coord
 """
-        
+
         Assert.IsTrue this.ErrorsExist

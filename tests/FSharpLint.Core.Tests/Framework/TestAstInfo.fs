@@ -1,4 +1,4 @@
-﻿module TestAstInfo
+﻿module FSharpLint.Core.Tests.TestAstInfo
 
 open NUnit.Framework
 open FSharpLint.Framework.AstInfo
@@ -7,7 +7,7 @@ open FSharpLint.Framework.AstInfo
 type TestAstInfo() =
 
     [<Test>]
-    member _.IsOperator() = 
+    member _.IsOperator() =
         Assert.IsTrue(isOperator "op_LeftShift")
 
         Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")

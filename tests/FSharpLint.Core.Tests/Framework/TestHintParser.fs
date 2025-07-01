@@ -1,4 +1,4 @@
-﻿module TestHintParser
+﻿module FSharpLint.Core.Tests.TestHintParser
 
 // fsharplint:disable TupleIndentation
 

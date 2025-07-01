@@ -1,4 +1,4 @@
-module TestSuppression
+module FSharpLint.Core.Tests.TestSuppression
 
 open NUnit.Framework
 open FSharpLint.Framework

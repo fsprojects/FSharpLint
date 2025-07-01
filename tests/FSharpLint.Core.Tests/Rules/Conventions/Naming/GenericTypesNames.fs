@@ -3,6 +3,7 @@
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 let config =
     { NamingConfig.Naming = Some NamingCase.PascalCase
@@ -19,7 +20,7 @@ type TestConventionsGenericTypesNames() =
 type Foo<'T> = Option<'T>
 """
         this.AssertNoWarnings()
-        
+
     [<Test>]
     member this.``generic type name shouldn't be camelCase``() =
         this.Parse """

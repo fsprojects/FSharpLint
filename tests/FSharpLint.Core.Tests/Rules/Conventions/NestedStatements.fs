@@ -3,6 +3,7 @@ module FSharpLint.Core.Tests.Rules.Conventions.NestedStatements
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Rules.NestedStatements
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsNestedStatements() =
@@ -111,8 +112,8 @@ let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())
 """
 
         Assert.IsTrue(this.ErrorExistsAt(4, 47))
-        
-    
+
+
     [<Test>]
     member this.RecordMembersMustNotCountAsNestedStatements() =
         this.Parse """
@@ -130,7 +131,7 @@ module Program
     member this.Create8 (i: byte) = { Value=Convert.ToInt32(i)}
     member this.Create9 (i: char) = { Value=Convert.ToInt32(i)}
 """
-    
+
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
@@ -149,5 +150,5 @@ type DummyRecord =
                                     if true then
                                         ()
 """
-    
+
         Assert.IsTrue(this.ErrorExistsAt(11, 32))

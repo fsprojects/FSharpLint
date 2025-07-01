@@ -1,8 +1,9 @@
 module FSharpLint.Core.Tests.Rules.Conventions.FavourStaticEmptyFields
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules
-open System
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsFavourStaticEmptyFields() =

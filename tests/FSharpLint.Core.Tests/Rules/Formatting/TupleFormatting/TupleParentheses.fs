@@ -2,6 +2,7 @@ module FSharpLint.Core.Tests.Rules.Formatting.TupleParentheses
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestFormattingTupleParentheses() =
@@ -15,11 +16,11 @@ module Program
 let x = 1, 2""")
 
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
-        
+
     [<Test>]
     member this.``No tuple instantiation error for cons operator``() =
         this.Parse("""let x = "" :: aStringList""")
-        
+
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]

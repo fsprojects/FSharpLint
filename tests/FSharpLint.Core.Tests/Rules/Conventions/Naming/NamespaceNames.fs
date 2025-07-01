@@ -5,6 +5,7 @@ module FSharpLint.Core.Tests.Rules.Conventions.NamespaceNames
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 let config =
     { NamingConfig.Naming = Some NamingCase.PascalCase

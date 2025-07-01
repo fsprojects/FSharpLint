@@ -1,4 +1,4 @@
-﻿module TestNoTabCharactersRuleBase
+﻿module FSharpLint.Core.Tests.TestNoTabCharactersRuleBase
 
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text

@@ -6,10 +6,10 @@ open FSharpLint.Rules
 
 [<TestFixture>]
 type TestAsyncExceptionWithoutReturn() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AsyncExceptionWithoutReturn.rule)
+    inherit FSharpLint.Core.Tests.TestAstNodeRuleBase.TestAstNodeRuleBase(AsyncExceptionWithoutReturn.rule)
 
     [<Test>]
-    member this.AsyncRaiseWithoutReturn() = 
+    member this.AsyncRaiseWithoutReturn() =
         this.Parse("""
 module Program
 
@@ -22,7 +22,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncRaiseWithReturn() = 
+    member this.AsyncRaiseWithReturn() =
         this.Parse("""
 module Program
 
@@ -34,7 +34,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncFailWithWithoutReturn() =          
+    member this.AsyncFailWithWithoutReturn() =
         this.Parse("""
 module Program
 
@@ -74,7 +74,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithWithReturn() = 
+    member this.AsyncFailwithWithReturn() =
         this.Parse("""
 module Program
 
@@ -86,7 +86,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncFailwithfWithReturn() = 
+    member this.AsyncFailwithfWithReturn() =
         this.Parse("""
 module Program
 
@@ -99,7 +99,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncRaiseWithReturnInnerExpression() = 
+    member this.AsyncRaiseWithReturnInnerExpression() =
         this.Parse("""
 module Program
 
@@ -114,7 +114,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncRaiseWithoutReturnInnerExpression() = 
+    member this.AsyncRaiseWithoutReturnInnerExpression() =
         this.Parse("""
 module Program
 
