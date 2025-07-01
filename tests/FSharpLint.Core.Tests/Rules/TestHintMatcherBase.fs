@@ -1,4 +1,4 @@
-﻿module TestHintMatcherBase
+﻿module FSharpLint.Core.Tests.TestHintMatcherBase
 
 open FParsec
 open FSharp.Compiler.CodeAnalysis

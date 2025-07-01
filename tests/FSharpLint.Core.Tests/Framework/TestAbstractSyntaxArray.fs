@@ -1,4 +1,4 @@
-﻿module TestAbstractSyntaxArray
+﻿module FSharpLint.Core.Tests.TestAbstractSyntaxArray
 
 open System.Diagnostics
 open FSharpLint.Framework

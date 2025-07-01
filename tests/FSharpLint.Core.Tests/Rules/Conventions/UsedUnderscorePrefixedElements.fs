@@ -1,8 +1,8 @@
 module FSharpLint.Core.Tests.Rules.Conventions.UsedUnderscorePrefixedElements
 
 open NUnit.Framework
-
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsUsedUnderscorePrefixedElements() =
@@ -67,7 +67,7 @@ module MyModule =
 """
 
         Assert.IsFalse this.ErrorsExist
-        
+
     [<Test>]
     member this.``Using variable without underscore prefix``() =
         this.Parse """
@@ -90,7 +90,7 @@ module MyModule =
 """
 
         Assert.IsFalse this.ErrorsExist
-        
+
     [<Test>]
     member this.``Using field with underscore prefix``() =
         this.Parse """
@@ -101,7 +101,7 @@ type CustomerName(firstName) =
 """
 
         Assert.IsFalse this.ErrorsExist
-        
+
     [<Test>]
     member this.``Using private member with underscore prefix``() =
         this.Parse """
@@ -118,7 +118,7 @@ type CustomerName(firstName) =
         this.Parse """
 type CustomerName(firstName) =
     member val private _FirstName = firstName with get, set
-    
+
     member this.MyFunc () =
         printfn "%A" this._FirstName
 """

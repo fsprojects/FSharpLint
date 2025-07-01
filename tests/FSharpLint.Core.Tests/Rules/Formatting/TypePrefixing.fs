@@ -3,6 +3,7 @@ module FSharpLint.Core.Tests.Rules.Formatting.TypePrefixing
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Rules.TypePrefixing
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestFormattingHybridTypePrefixing() =

@@ -3,6 +3,7 @@ module FSharpLint.Core.Tests.Rules.Formatting.TypedItemSpacing
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Rules.TypedItemSpacing
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestFormattingTypedItemSpaceAfter() =

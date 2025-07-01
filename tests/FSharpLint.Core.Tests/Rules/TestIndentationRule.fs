@@ -1,4 +1,4 @@
-﻿module TestIndentationRuleBase
+﻿module FSharpLint.Core.Tests.TestIndentationRuleBase
 
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text

@@ -1,4 +1,4 @@
-﻿module TestAstNodeRuleBase
+﻿module FSharpLint.Core.Tests.TestAstNodeRuleBase
 
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application

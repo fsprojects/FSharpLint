@@ -4,6 +4,7 @@ module FSharpLint.Core.Tests.Rules.Typography.TrailingWhitespaceOnLine
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =

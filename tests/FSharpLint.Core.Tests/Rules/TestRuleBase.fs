@@ -1,4 +1,4 @@
-﻿module TestRuleBase
+﻿module FSharpLint.Core.Tests.TestRuleBase
 
 open System
 open System.Text
