@@ -52,8 +52,8 @@ let authors = "Matthew Mcveigh"
 
 let gitOwner = "fsprojects"
 let gitName = "FSharpLint"
-let gitHome = "https://github.com/" + gitOwner
-let gitUrl = gitHome + "/" + gitName
+let gitHome = $"https://github.com/{gitOwner}"
+let gitUrl = $"{gitHome}/{gitName}"
 
 // --------------------------------------------------------------------------------------
 // Helpers

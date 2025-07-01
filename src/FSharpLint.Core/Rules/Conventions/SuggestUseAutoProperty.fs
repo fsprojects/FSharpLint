@@ -80,7 +80,7 @@ let private runner (args: AstNodeRuleParams) =
                          Some
                              { FromText = args.FileContent
                                FromRange = memberIdentifier.Range
-                               ToText = "val " + memberName.idText }
+                               ToText = $"val {memberName.idText}" }
                      | _ -> None)
 
             { Range = memberRange

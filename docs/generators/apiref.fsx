@@ -78,10 +78,10 @@ let generateType ctx (page: ApiPageInfo<Type>) =
         div [Class "api-page"] [
             h2 [] [!! t.Name]
             b [] [!! "Namespace: "]
-            a [Href (sprintf "%s.html" page.NamespaceUrlName) ] [!! page.NamespaceName]
+            a [Href ($"%s{page.NamespaceUrlName}.html")] [!! page.NamespaceName]
             br []
             b [] [!! "Parent: "]
-            a [Href (sprintf "%s.html" page.ParentUrlName)] [!! page.ParentName]
+            a [Href ($"%s{page.ParentUrlName}.html")] [!! page.ParentName]
             span [] [!! (getComment t.Comment)]
             br []
             if not (String.IsNullOrWhiteSpace t.Category) then
@@ -127,10 +127,10 @@ let generateModule ctx (page: ApiPageInfo<Module>) =
         div [Class "api-page"] [
             h2 [] [!!m.Name]
             b [] [!! "Namespace: "]
-            a [Href (sprintf "%s.html" page.NamespaceUrlName) ] [!! page.NamespaceName]
+            a [Href ($"%s{page.NamespaceUrlName}.html")] [!! page.NamespaceName]
             br []
             b [] [!! "Parent: "]
-            a [Href (sprintf "%s.html" page.ParentUrlName)] [!! page.ParentName]
+            a [Href ($"%s{page.ParentUrlName}.html")] [!! page.ParentName]
             span [] [!! (getComment m.Comment)]
             br []
             if not (String.IsNullOrWhiteSpace m.Category) then
@@ -147,7 +147,7 @@ let generateModule ctx (page: ApiPageInfo<Module>) =
                     ]
                     for t in m.NestedTypes do
                         tr [] [
-                            td [] [a [Href (sprintf "%s.html" t.UrlName )] [!! t.Name ]]
+                            td [] [a [Href ($"%s{t.UrlName}.html")] [!! t.Name ]]
                             td [] [!! (getComment t.Comment)]
                         ]
                 ]
@@ -162,7 +162,7 @@ let generateModule ctx (page: ApiPageInfo<Module>) =
                     ]
                     for t in m.NestedModules do
                         tr [] [
-                            td [] [a [Href (sprintf "%s.html" t.UrlName )] [!! t.Name ]]
+                            td [] [a [Href ($"%s{t.UrlName}.html")] [!! t.Name ]]
                             td [] [!! (getComment t.Comment)]
                         ]
                 ]
@@ -206,7 +206,7 @@ let generateNamespace ctx (n: Namespace)  =
                     ]
                     for t in n.Types do
                         tr [] [
-                            td [] [a [Href (sprintf "%s.html" t.UrlName )] [!! t.Name ]]
+                            td [] [a [Href ($"%s{t.UrlName}.html")] [!! t.Name ]]
                             td [] [!!(getComment t.Comment)]
                         ]
                 ]
@@ -222,7 +222,7 @@ let generateNamespace ctx (n: Namespace)  =
                     ]
                     for t in n.Modules do
                         tr [] [
-                            td [] [a [Href (sprintf "%s.html" t.UrlName )] [!! t.Name ]]
+                            td [] [a [Href ($"%s{t.UrlName}.html")] [!! t.Name ]]
                             td [] [!! (getComment t.Comment)]
                         ]
                 ]
@@ -257,12 +257,12 @@ let generate' (ctx : SiteContents)  =
             b [] [!! "Declared namespaces"]
             br []
             for (n, _) in namespaces do
-                a [Href (sprintf "%s.html"  n)] [!!n]
+                a [Href ($"%s{n}.html")] [!!n]
                 br []
           ] n.Label
 
         [("index" , ref); yield! namespaces; yield! modules; yield! types]
-        |> List.map (fun (x, y) -> (sprintf "%s/%s" n.Label x), y)
+        |> List.map (fun (x, y) -> $"%s{n.Label}/%s{x}", y)
       )
 
 

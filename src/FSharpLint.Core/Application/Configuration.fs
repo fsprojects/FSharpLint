@@ -64,7 +64,7 @@ module IgnoreFiles =
     let parseIgnorePath (path:string) =
         let globToRegex glob =
             Regex(
-                "^" + Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
+                $"""^{Regex.Escape(glob).Replace(@"\*", ".*").Replace(@"\?", ".")}$""",
                 RegexOptions.IgnoreCase ||| RegexOptions.Singleline)
 
         let isDirectory = path.EndsWith("/")
@@ -584,7 +584,7 @@ let parseConfig (configText:string) =
     try
         JsonConvert.DeserializeObject<Configuration>(configText, FSharpJsonConverter.serializerSettings)
     with
-    | ex -> raise <| ConfigurationException(sprintf "Couldn't parse config, error=%s" ex.Message)
+    | ex -> raise <| ConfigurationException $"Couldn't parse config, error=%s{ex.Message}"
 
 /// Tries to parse the config file at the provided path.
 let loadConfig (configPath:string) =
@@ -628,7 +628,7 @@ let private parseHints (hints:string []) =
         match FParsec.CharParsers.run HintParser.phint hint with
         | FParsec.CharParsers.Success(hint, _, _) -> hint
         | FParsec.CharParsers.Failure(error, _, _) ->
-            raise <| ConfigurationException("Failed to parse hint: " + hint + "\n" + error)
+            raise <| ConfigurationException $"Failed to parse hint: {hint}{Environment.NewLine}{error}"
 
     hints
     |> Array.filter (System.String.IsNullOrWhiteSpace >> not)

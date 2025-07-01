@@ -91,7 +91,7 @@ let menu (ctx : SiteContents) (page: string) =
       ]
       script [Type "text/javascript"; Src (rootUrl + "/static/js/lunr.min.js")] []
       script [Type "text/javascript"; Src (rootUrl + "/static/js/auto-complete.js")] []
-      script [Type "text/javascript";] [!! (sprintf "var baseurl ='%s'" rootUrl)]
+      script [Type "text/javascript";] [!! ($"var baseurl ='%s{rootUrl}'")]
       script [Type "text/javascript"; Src (rootUrl + "/static/js/search.js")] []
     ]
     div [Class "highlightable"] [

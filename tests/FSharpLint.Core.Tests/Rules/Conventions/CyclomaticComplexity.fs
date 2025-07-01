@@ -21,7 +21,7 @@ let private indent numSpaces (s: string) =
 
 /// Generates a body of code containing a match expression.
 let private makeMatchSnippet len =
-    let patterns = Seq.map (fun i -> $"| \"%d{i}\" -> ()") [| 1..len-1 |] |> String.concat NewLine
+    let patterns = Seq.map (sprintf "| \"%d\" -> ()") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
 {patterns}
 | _ -> ()"""
@@ -85,7 +85,7 @@ let private matchExpression len =
 
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
-    let patterns = Seq.map (fun i -> $"| \"%d{i}\"") [| 1..len-1 |] |> String.concat NewLine
+    let patterns = Seq.map (sprintf "| \"%d\"") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
 {patterns}
 | _ -> ()"""
@@ -94,14 +94,14 @@ let private matchExpressionWithCombinedPatterns len =
 /// Generates a body of code containing a match function with multiple patterns.
 let private matchFunction len =
     $"""    function
-{(Seq.map (fun i -> (sprintf "    | \"%d\"" i)) [| 1..len-1 |] |> String.concat NewLine)}
+{(Seq.map (sprintf "    | \"%d\"") [| 1..len-1 |] |> String.concat NewLine)}
     | _ -> ()
 f "dummyString" """
     |> makeProgram "f"
 
 /// Generates a computational expression with a match! expression containing multiple patterns.
 let private matchBang len =
-    let patterns = Seq.map (fun i -> $"    | \"%d{i}\"") [| 1..len-1 |] |> String.concat NewLine
+    let patterns = Seq.map (sprintf "    | \"%d\"") [| 1..len-1 |] |> String.concat NewLine
     $"""async {{
     match! async {{ return "dummyString" }} with
 {patterns}

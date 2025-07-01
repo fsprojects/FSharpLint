@@ -131,18 +131,18 @@ module AbstractSyntaxArray =
         | TypeRepresentation(_)
         | File(_)
         | LambdaArg(_)
-        | LambdaBody(_) 
-        | Else(_) 
+        | LambdaBody(_)
+        | Else(_)
         | ComponentInfo(_) -> SyntaxNode.Other
         | EnumCase(_) -> SyntaxNode.EnumCase
         | UnionCase(_) -> SyntaxNode.UnionCase
-        
+
     [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type TempNode(hashcode: int, actual: AstNode) =
         member _.Hashcode = hashcode
         member _.Actual = actual
-        
-        member private _.DebuggerDisplay = "AstNode: " + string actual
+
+        member private _.DebuggerDisplay = $"AstNode: {string actual}"
 
     [<NoEquality; NoComparison>]
     type Node =
@@ -248,7 +248,7 @@ module AbstractSyntaxArray =
             let depth = stackedNode.Depth
 
             tryAddPossibleSkips depth
-            
+
             // Strip out "extra info".
             let node =
                 let extractExtraInfo actual extraInfoNode =
@@ -279,7 +279,7 @@ module AbstractSyntaxArray =
             let skip = skips.[i]
             let node = nodes.[skip.Index]
 
-            result.[skip.Index] <- 
+            result.[skip.Index] <-
                 { Hashcode = node.Hashcode
                   Actual = node.Actual
                   NumberOfChildren = skip.NumberOfChildren

@@ -37,9 +37,9 @@ let private runner (args: AstNodeRuleParams) =
                 Some(
                     lazy
                         (Some
-                            { FromText = sprintf "%s %s" failwithKeyword failwithErrorMessage
+                            { FromText = $"%s{failwithKeyword} %s{failwithErrorMessage}"
                               FromRange = range
-                              ToText = sprintf "raise <| Exception(\"%s\", %s)" failwithErrorMessage param })
+                              ToText = $"raise <| Exception(\"%s{failwithErrorMessage}\", %s{param})" })
                 )
             | _ -> None
 

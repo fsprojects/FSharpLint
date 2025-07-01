@@ -242,7 +242,7 @@ let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
 /// Is an attribute with a given name?
 /// e.g. check for Literal attribute.
 let isAttribute name (attributes:SynAttributes) =
-    let fullName = name + "Attribute"
+    let fullName = $"{name}Attribute"
 
     let attributeHasExpectedName (attribute:SynAttribute) =
         match List.tryLast attribute.TypeName.LongIdent with
