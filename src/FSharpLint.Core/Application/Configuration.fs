@@ -464,6 +464,8 @@ type Configuration =
       NonPublicValuesNames:RuleConfig<NamingConfig> option
       PrivateValuesNames:RuleConfig<NamingConfig> option
       InternalValuesNames:RuleConfig<NamingConfig> option
+      UnnestedFunctionNames:RuleConfig<NamingConfig> option
+      NestedFunctionNames:RuleConfig<NamingConfig> option
       MaxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
       MaxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
       MaxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
@@ -556,6 +558,8 @@ with
         NonPublicValuesNames = None
         PrivateValuesNames = None
         InternalValuesNames = None
+        UnnestedFunctionNames = None
+        NestedFunctionNames = None 
         MaxNumberOfItemsInTuple = None
         MaxNumberOfFunctionParameters = None
         MaxNumberOfMembers = None
@@ -712,6 +716,8 @@ let flattenConfig (config:Configuration) =
             config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
             config.PrivateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
             config.InternalValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
+            config.UnnestedFunctionNames |> Option.bind (constructRuleWithConfig UnnestedFunctionNames.rule)
+            config.NestedFunctionNames |> Option.bind (constructRuleWithConfig NestedFunctionNames.rule)
             config.MaxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule)
             config.MaxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule)
             config.MaxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule)
@@ -728,6 +734,7 @@ let flattenConfig (config:Configuration) =
             config.TrailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule)
             config.NoTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule)
             config.NoPartialFunctions |> Option.bind (constructRuleWithConfig NoPartialFunctions.rule)
+            config.SuggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule)
             config.EnsureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule)
             config.FavourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule)
         |] |> Array.choose id
