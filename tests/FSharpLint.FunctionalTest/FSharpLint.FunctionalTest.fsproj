@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="TestConsoleApplication.fs" />
     <Compile Include="TestApi.fs" />
+    <Compile Include="Attributes.fs" />
   </ItemGroup>
 
   <ItemGroup>
