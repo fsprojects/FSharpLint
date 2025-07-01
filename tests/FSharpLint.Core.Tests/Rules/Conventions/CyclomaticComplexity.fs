@@ -110,6 +110,7 @@ let private matchBang len =
     |> makeProgram "a"
 
 /// Tests for the cyclomatic complexity rule.
+[<SingleThreaded>]
 type TestConventionsCyclomaticComplexity() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(rule { Config.MaxComplexity = MaxComplexity; })
 

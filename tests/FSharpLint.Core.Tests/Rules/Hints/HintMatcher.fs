@@ -11,7 +11,7 @@ type Assert with
     else
         raise (NUnit.Framework.AssertionException($"No errors were expected, but there were some errors. Errors were:\n{this.ErrorMsg}"))
 
-[<TestFixture>]
+[<TestFixture; SingleThreaded>]
 type TestHintMatcher() =
     inherit TestHintMatcherBase.TestHintMatcherBase()
 

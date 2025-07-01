@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate to .NET `9.0.201` and FCS `43.9.201` #722 [@xperiandri]
 - Write test logs to test context output #722 [@xperiandri]
 - Use string interpolation instead of `+` concatenation #724 [@xperiandri]
+- Run tests in parallel #728 [@xperiandri]
 
 ## [0.24.2] - 2024-02-29
 
