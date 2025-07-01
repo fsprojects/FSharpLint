@@ -47,6 +47,7 @@ Target.initEnvironment()
 // --------------------------------------------------------------------------------------
 
 let project = "FSharpLint"
+let solutionFileName = "FSharpLint.slnx"
 
 let authors = "Matthew Mcveigh"
 
@@ -139,7 +140,7 @@ Target.create "Clean" (fun _ ->
 )
 
 Target.create "Build" (fun _ ->
-    DotNet.build id "FSharpLint.sln"
+    DotNet.build id solutionFileName
 )
 
 let filterPerformanceTests (p:DotNet.TestOptions) = { p with Filter = Some "\"TestCategory!=Performance\""; Configuration = DotNet.Release }
@@ -168,7 +169,7 @@ Target.create "BuildRelease" (fun _ ->
             OutputPath = Some buildDir
             MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
-    ) "FSharpLint.sln"
+    ) solutionFileName
 )
 
 
@@ -188,7 +189,7 @@ Target.create "Pack" (fun _ ->
             OutputPath = Some nugetDir
             MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
-    ) "FSharpLint.sln"
+    ) solutionFileName
 )
 
 Target.create "Push" (fun _ ->
@@ -250,7 +251,7 @@ Target.create "SelfCheck" (fun _ ->
     let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
-    let sol = Path.Combine(rootDir.FullName, "FSharpLint.sln") |> FileInfo
+    let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
     exec "dotnet" $"run lint %s{sol.FullName}" consoleProj.Directory.FullName
 )
 
