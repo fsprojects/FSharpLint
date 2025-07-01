@@ -16,6 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>FSharpLint.Console.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Output.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

@@ -3,9 +3,9 @@
 open Argu
 open System
 open System.IO
+open System.Reflection
 open FSharpLint.Framework
 open FSharpLint.Application
-open System.Reflection
 
 /// Output format the linter will use.
 type private OutputFormat =
@@ -13,7 +13,7 @@ type private OutputFormat =
     | MSBuild = 2
 
 /// File type the linter is running against.
-type private FileType =
+type internal FileType =
     | Project = 1
     | Solution = 2
     | File = 3
@@ -24,7 +24,7 @@ type private FileType =
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
-    | Version 
+    | Version
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -63,12 +63,12 @@ let private parserProgress (output:Output.IOutput) = function
         |> output.WriteError
 
 /// Infers the file type of the target based on its file extension.
-let private inferFileType (target:string) =
+let internal inferFileType (target:string) =
     if target.EndsWith ".fs" || target.EndsWith ".fsx" then
         FileType.File
     else if target.EndsWith ".fsproj" then
         FileType.Project
-    else if target.EndsWith ".sln" then
+    else if target.EndsWith ".slnx" || target.EndsWith ".sln" then
         FileType.Solution
     else
         FileType.Source
@@ -84,7 +84,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | None -> Output.StandardOutput() :> Output.IOutput
 
     if arguments.Contains ToolArgs.Version then
-        let version = 
+        let version =
             Assembly.GetExecutingAssembly().GetCustomAttributes false
             |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
         sprintf "Current version: %s" version |> output.WriteInfo
@@ -139,7 +139,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
     | _ -> ()
 
     exitCode
-    
+
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
 let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
