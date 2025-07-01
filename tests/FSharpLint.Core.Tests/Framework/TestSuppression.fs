@@ -11,7 +11,7 @@ let lines text =
 [<TestFixture>]
 type TestSuppression() =
     [<Test>]
-    member __.``Disable next line with rules specified suppresses as expected``() =
+    member _.``Disable next line with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-next-line TypePrefixing TypedItemSpacing
 
@@ -29,7 +29,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 4 suppressionInfo)
 
     [<Test>]
-    member __.``Disable next line with no rules specified suppresses as expected``() =
+    member _.``Disable next line with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-next-line
 
@@ -47,7 +47,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 4 suppressionInfo)
 
     [<Test>]
-    member __.``Disable current line with rules specified suppresses as expected``() =
+    member _.``Disable current line with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-line TypePrefixing TypedItemSpacing
 
@@ -64,7 +64,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
 
     [<Test>]
-    member __.``Disable current line with no rules specified suppresses as expected``() =
+    member _.``Disable current line with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable-line
 
@@ -81,7 +81,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 3 suppressionInfo)
 
     [<Test>]
-    member __.``Disable and re-renable with no rules specified suppresses as expected``() =
+    member _.``Disable and re-renable with no rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable
 
@@ -104,7 +104,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
 
     [<Test>]
-    member __.``Disable and re-renable with rules specified suppresses as expected``() =
+    member _.``Disable and re-renable with rules specified suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing  TypedItemSpacing
 
@@ -127,7 +127,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 5 suppressionInfo)
 
     [<Test>]
-    member __.``Disable line within disable section suppresses as expected``() =
+    member _.``Disable line within disable section suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing
 
@@ -151,7 +151,7 @@ type TestSuppression() =
         Assert.IsFalse(Suppression.isSuppressed "TupleCommaSpacing" 6 suppressionInfo)
 
     [<Test>]
-    member __.``Disable within disable section suppresses as expected``() =
+    member _.``Disable within disable section suppresses as expected``() =
         let text = lines """
 // fsharplint:disable TypePrefixing
 

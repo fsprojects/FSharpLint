@@ -15,10 +15,10 @@ type TemporaryFile(fileContent : string, extension) =
     do
         File.WriteAllText(filename, fileContent)
 
-    member __.FileName = filename
+    member _.FileName = filename
 
     interface System.IDisposable with
-        member __.Dispose() =
+        member _.Dispose() =
             File.Delete(filename)
 
 let main input =
@@ -34,7 +34,7 @@ let main input =
 [<TestFixture>]
 type TestConsoleApplication() =
     [<Test>]
-    member __.``Lint file, expected rules are triggered.``() =
+    member _.``Lint file, expected rules are triggered.``() =
         let fileContent = """
         type Signature =
             abstract member Encoded : string
@@ -48,7 +48,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
     [<Test>]
-    member __.``Lint source without any config, rule enabled in default config is triggered for given source.``() =
+    member _.``Lint source without any config, rule enabled in default config is triggered for given source.``() =
         let input = """
         type Signature =
             abstract member Encoded : string
@@ -61,7 +61,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
     [<Test>]
-    member __.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
+    member _.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
         let fileContent = """
         {
             "InterfaceNames": {
@@ -83,7 +83,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(Set.empty<string>, errors)
 
     [<Test>]
-    member __.``Lint source with error suppressed, no error is given.``() =
+    member _.``Lint source with error suppressed, no error is given.``() =
         let input = """
         // fsharplint:disable-next-line
         type Signature =
@@ -97,7 +97,7 @@ type TestConsoleApplication() =
         Assert.AreEqual(Set.empty<string>, errors)
 
     [<Test>]
-    member __.``Regression test: typePrefixing rule with old config format should still work``() =
+    member _.``Regression test: typePrefixing rule with old config format should still work``() =
         let fileContent = """
         {
             "typePrefixing": {

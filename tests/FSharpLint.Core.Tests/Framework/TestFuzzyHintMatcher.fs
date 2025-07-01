@@ -29,7 +29,7 @@ type TestAst() =
 
     [<Category("Performance")>]
     [<Test>]
-    member __.``Performance of matching fuzzy matching hints``() = 
+    member _.``Performance of matching fuzzy matching hints``() = 
         let (tree, _) = getPerformanceTestInput ()
 
         let array = astToArray tree
@@ -150,7 +150,7 @@ type TestAst() =
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Lambda with wildcard argument is correctly found by fuzzy matcher``() = 
+    member _.``Lambda with wildcard argument is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let y = fun _ -> ()
@@ -168,7 +168,7 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Function application is correctly found by fuzzy matcher``() = 
+    member _.``Function application is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let y = List.isEmpty []
@@ -186,7 +186,7 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Infix application is correctly found by fuzzy matcher``() = 
+    member _.``Infix application is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let y = 1 + 0
@@ -204,7 +204,7 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Prefix application is correctly found by fuzzy matcher``() = 
+    member _.``Prefix application is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let y = ~~~1
@@ -222,7 +222,7 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Function application with variable is correctly found by fuzzy matcher``() = 
+    member _.``Function application with variable is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let numbers = [1;2;3]
@@ -241,7 +241,7 @@ do
         
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Lambda with variable argument is correctly found by fuzzy matcher``() = 
+    member _.``Lambda with variable argument is correctly found by fuzzy matcher``() = 
         let source = @"
 do
     let y = fun x -> x
@@ -259,7 +259,7 @@ do
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member __.``Lambda with variable argument is correctly discarded by fuzzy matcher``() = 
+    member _.``Lambda with variable argument is correctly discarded by fuzzy matcher``() = 
         let source = @"
 do
     let y = fun x -> 0

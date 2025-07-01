@@ -7,7 +7,7 @@ open FSharpLint.Framework.AstInfo
 type TestAstInfo() =
 
     [<Test>]
-    member __.IsOperator() = 
+    member _.IsOperator() = 
         Assert.IsTrue(isOperator "op_LeftShift")
 
         Assert.IsTrue(isOperator "op_TwiddleEqualsDivideComma")

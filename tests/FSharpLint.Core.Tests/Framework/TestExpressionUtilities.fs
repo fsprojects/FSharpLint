@@ -7,7 +7,7 @@ open FSharpLint.Framework.ExpressionUtilities
 [<TestFixture>]
 type TestExpressionUtilities() =
     [<Test>]
-    member __.``TryFindTextOfRange gets expected text from given ranges``() = 
+    member _.``TryFindTextOfRange gets expected text from given ranges``() = 
         let text = "123\n345\n678"
 
         let textOfRange (line1, col1) (line2, col2) = 

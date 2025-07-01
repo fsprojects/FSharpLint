@@ -7,13 +7,13 @@ open FSharpLint.Rules.Helper.Naming
 type TestConventionsNamingHelpers() =
 
     [<Test>]
-    member __.IsPascalCase() =
+    member _.IsPascalCase() =
         Assert.IsTrue(isPascalCase "DogInBin")
 
         Assert.IsFalse(isPascalCase "dogInBin")
 
     [<Test>]
-    member __.IsCamelCase() =
+    member _.IsCamelCase() =
         Assert.IsTrue(isCamelCase "dogInBin")
 
         Assert.IsFalse(isCamelCase "DogInBin")

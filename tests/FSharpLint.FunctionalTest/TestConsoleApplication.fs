@@ -78,7 +78,7 @@ module Tests =
             basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
 
         [<Test>]
-        member __.InvalidConfig() =
+        member _.InvalidConfig() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let lintConfigPath = projectPath </> "fsharplint.json"
             let arguments = sprintf "lint --lint-config %s %s" lintConfigPath projectFile
@@ -92,7 +92,7 @@ module Tests =
             Assert.IsTrue(output.Contains("Failed while reading from config at run time"), sprintf "Output:\n%s" output)
 
         [<Test>]
-        member __.UnableToFindProjectFile() =
+        member _.UnableToFindProjectFile() =
             let projectFile = projectPath </> "iuniubi.fsproj"
             let arguments = sprintf "lint %s" projectFile
 
@@ -103,7 +103,7 @@ module Tests =
                 sprintf "Output:\n%s" output)
 
         [<Test>]
-        member __.FunctionalTestConsoleApplication() =
+        member _.FunctionalTestConsoleApplication() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let arguments = sprintf "lint %s" projectFile
 
@@ -119,7 +119,7 @@ module Tests =
                 "Complete output: " + output)
 
         [<Test>]
-        member __.FunctionalTestConsoleApplicationSolution() =
+        member _.FunctionalTestConsoleApplicationSolution() =
             let solutionFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.sln"
             let arguments = sprintf "lint %s" solutionFile
 

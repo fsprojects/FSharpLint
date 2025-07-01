@@ -13,7 +13,7 @@ type TestRuleBase () =
 
     abstract Parse : string * ?fileName:string * ?checkFile:bool * ?globalConfig:GlobalRuleConfig -> unit
 
-    member __.PostSuggestion (suggestion:Suggestion.LintWarning) =
+    member _.PostSuggestion (suggestion:Suggestion.LintWarning) =
         if not suggestion.Details.TypeChecks.IsEmpty then
             let successfulTypeCheck =
                 (true, suggestion.Details.TypeChecks)
@@ -24,36 +24,36 @@ type TestRuleBase () =
         else
             suggestions.Add(suggestion)
 
-    member __.ErrorRanges =
+    member _.ErrorRanges =
         suggestions
         |> Seq.map (fun s -> (s.Details.Range.StartLine, s.Details.Range.StartColumn))
         |> List.ofSeq
 
-    member __.ErrorExistsAt(startLine, startColumn) =
+    member _.ErrorExistsAt(startLine, startColumn) =
         suggestions
         |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
 
-    member __.ErrorsAt(startLine, startColumn) =
+    member _.ErrorsAt(startLine, startColumn) =
         suggestions
         |> Seq.filter (fun s -> s.Details.Range.StartLine = startLine && s.Details.Range.StartColumn = startColumn)
 
-    member __.ErrorExistsOnLine(startLine) =
+    member _.ErrorExistsOnLine(startLine) =
         suggestions
         |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
 
-    member __.NoErrorExistsOnLine(startLine) =
+    member _.NoErrorExistsOnLine(startLine) =
         suggestions
         |> Seq.exists (fun s -> s.Details.Range.StartLine = startLine)
         |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
-    member __.NoErrorsExist =
+    member _.NoErrorsExist =
         suggestions |> Seq.isEmpty
 
-    member __.ErrorsExist =
+    member _.ErrorsExist =
         suggestions |> Seq.isEmpty |> not
 
-    member __.ErrorMsg =
+    member _.ErrorMsg =
         match suggestions with
         | xs when xs.Count = 0 -> "No errors"
         | _ ->
@@ -67,7 +67,7 @@ type TestRuleBase () =
         this.ErrorsAt(startLine, startColumn)
         |> Seq.exists (fun s -> s.Details.Message = message)
 
-    member __.AssertErrorWithMessageExists(message) =
+    member _.AssertErrorWithMessageExists(message) =
         let foundSuggestions = suggestions |> Seq.map (fun s -> s.Details.Message)
         Assert.IsTrue(foundSuggestions |> Seq.contains message, sprintf "Couldn't find message '%s', found: [%s]" message (String.concat "," foundSuggestions))
 
@@ -95,4 +95,4 @@ type TestRuleBase () =
         | None -> source
 
     [<SetUp>]
-    member __.SetUp() = suggestions.Clear()
+    member _.SetUp() = suggestions.Clear()

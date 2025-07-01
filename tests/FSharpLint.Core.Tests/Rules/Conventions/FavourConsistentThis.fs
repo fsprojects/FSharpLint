@@ -85,7 +85,7 @@ type Connection() =
     member this.UnderScoreMethodShouldNotProduceError() =
         this.Parse """
 type Connection() =
-    member __.AcceptClient() =
+    member _.AcceptClient() =
         printfn "New World!"
 """
 

@@ -30,7 +30,7 @@ type Foo(content: int) =
     member this.``Should suggest usage of auto-property for property that only returns immutable value (__ self-identifier)`` () =
         this.Parse """
 type Foo(content: int) =
-    member __.Content = content
+    member _.Content = content
 """
 
         Assert.IsTrue(this.ErrorsExist)

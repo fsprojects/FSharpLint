@@ -139,10 +139,10 @@ module AbstractSyntaxArray =
         
     [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type TempNode(hashcode: int, actual: AstNode) =
-        member __.Hashcode = hashcode
-        member __.Actual = actual
+        member _.Hashcode = hashcode
+        member _.Actual = actual
         
-        member private __.DebuggerDisplay = "AstNode: " + string actual
+        member private _.DebuggerDisplay = "AstNode: " + string actual
 
     [<NoEquality; NoComparison>]
     type Node =
@@ -153,8 +153,8 @@ module AbstractSyntaxArray =
 
     [<Struct>]
     type private PossibleSkip(skipPosition: int, depth: int) =
-        member __.SkipPosition = skipPosition
-        member __.Depth = depth
+        member _.SkipPosition = skipPosition
+        member _.Depth = depth
 
     /// We just want a hash of the last identifier.
     let rec private getIdentHash = function
@@ -206,15 +206,15 @@ module AbstractSyntaxArray =
 
     [<Struct; NoEquality; NoComparison>]
     type private StackedNode(node: AstNode, depth: int) =
-        member __.Node = node
-        member __.Depth = depth
+        member _.Node = node
+        member _.Depth = depth
 
     /// Keep index of position so skip array can be created in the correct order.
     [<Struct>]
     type private TempSkip(numberOfChildren: int, parentIndex: int, index: int) =
-        member __.NumberOfChildren = numberOfChildren
-        member __.Index = index
-        member __.ParentIndex = parentIndex
+        member _.NumberOfChildren = numberOfChildren
+        member _.Index = index
+        member _.ParentIndex = parentIndex
 
     /// Contains information on the current node being visited.
     [<NoEquality; NoComparison>]

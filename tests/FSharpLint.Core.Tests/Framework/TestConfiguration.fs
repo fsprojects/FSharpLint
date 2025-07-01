@@ -14,7 +14,7 @@ let configWithHints hints =
 [<TestFixture>]
 type TestConfiguration() =
     [<Test>]
-    member __.``Ignore all files ignores any given file.``() =
+    member _.``Ignore all files ignores any given file.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "*" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -23,7 +23,7 @@ type TestConfiguration() =
         |> Assert.IsTrue
 
     [<Test>]
-    member __.``Ignoring a file name not inside a path does not ignore the path``() =
+    member _.``Ignoring a file name not inside a path does not ignore the path``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "cat" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -32,7 +32,7 @@ type TestConfiguration() =
         |> Assert.IsFalse
 
     [<Test>]
-    member __.``Ignoring a file doesn't ignore a directory.``() =
+    member _.``Ignoring a file doesn't ignore a directory.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "dog" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -41,7 +41,7 @@ type TestConfiguration() =
         |> Assert.IsFalse
 
     [<Test>]
-    member __.``Ignoring a directory doesn't ignore a file.``() =
+    member _.``Ignoring a directory doesn't ignore a file.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "source.fs/" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -50,7 +50,7 @@ type TestConfiguration() =
         |> Assert.IsFalse
 
     [<Test>]
-    member __.``Ignoring all files in a given directory ignores a given file from the directory.``() =
+    member _.``Ignoring all files in a given directory ignores a given file from the directory.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "dog/*" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -59,7 +59,7 @@ type TestConfiguration() =
         |> Assert.IsTrue
 
     [<Test>]
-    member __.``Ignoring a file that does not exist inside a directory that does exist does not ignore the file.``() =
+    member _.``Ignoring a file that does not exist inside a directory that does exist does not ignore the file.``() =
         let ignorePaths = [ IgnoreFiles.parseIgnorePath "dog/source1" ]
 
         let path = @"D:\dog\source.fs".ToPlatformIndependentPath()
@@ -68,7 +68,7 @@ type TestConfiguration() =
         |> Assert.IsFalse
 
     [<Test>]
-    member __.``Ignoring the contents of a directory and then negating a specific file ignores all files other than the negated file.``() =
+    member _.``Ignoring the contents of a directory and then negating a specific file ignores all files other than the negated file.``() =
         let ignorePaths =
             [ IgnoreFiles.parseIgnorePath "dog/*"
               IgnoreFiles.parseIgnorePath "!source.*" ]
@@ -84,7 +84,7 @@ type TestConfiguration() =
         |> Assert.IsTrue
 
     [<Test>]
-    member __.``Ingoring a file that was previously negated ignores the file.``() =
+    member _.``Ingoring a file that was previously negated ignores the file.``() =
         let ignorePaths =
             [ IgnoreFiles.parseIgnorePath "dog/*"
               IgnoreFiles.parseIgnorePath "!source.*"
@@ -96,7 +96,7 @@ type TestConfiguration() =
         |> Assert.IsTrue
 
     [<Test>]
-    member __.``Camel case JSON config correctly parsed into expected config records`` () =
+    member _.``Camel case JSON config correctly parsed into expected config records`` () =
         let expectedConfig = 
             { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
 

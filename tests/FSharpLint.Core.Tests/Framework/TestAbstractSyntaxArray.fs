@@ -34,49 +34,49 @@ type TestAst() =
     let astNodeName = removeParens >> unionCaseName
 
     [<Test>]
-    member __.``Flatten with right pipe adds lhs to end of function application.``() =
+    member _.``Flatten with right pipe adds lhs to end of function application.``() =
         match generateAst "x |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with left pipe adds rhs to end of function application.``() =
+    member _.``Flatten with left pipe adds rhs to end of function application.``() =
         match generateAst "List.map (fun x -> x) <| x" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() =
+    member _.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() =
         match generateAst "x |> List.map (fun x -> x) 1" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with binary operator on lhs of right pipe.``() =
+    member _.``Flatten with binary operator on lhs of right pipe.``() =
         match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with function application on lhs of right pipe.``() =
+    member _.``Flatten with function application on lhs of right pipe.``() =
         match generateAst "foo x |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with multiple right pipes.``() =
+    member _.``Flatten with multiple right pipes.``() =
         match generateAst "x |> foo |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Flatten with multiple left pipes.``() =
+    member _.``Flatten with multiple left pipes.``() =
         match generateAst "List.map (fun x -> x) <| 1 <| x" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
             Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
@@ -84,7 +84,7 @@ type TestAst() =
 
     [<Category("Performance")>]
     [<Test>]
-    member __.``Performance of building syntax array``() =
+    member _.``Performance of building syntax array``() =
         let (tree, _) = getPerformanceTestInput ()
 
         let iterations = 100
@@ -107,7 +107,7 @@ type TestAst() =
         fprintf TestContext.Out "Built array in an average of %d milliseconds." result
 
     [<Test>]
-    member __.``Syntax array constructed from AST in valid order.``() =
+    member _.``Syntax array constructed from AST in valid order.``() =
         let tree = generateAst "List.map (fun x y -> id x) woofs"
 
         let array = astToArray tree
@@ -153,7 +153,7 @@ type TestAst() =
 
     /// e.g. a lambda arg shouldn't have the body of the lambda in its child nodes (that should be a sibling).
     [<Test>]
-    member __.``Syntax array's extra info nodes do not contain children of node they're generated from.``() =
+    member _.``Syntax array's extra info nodes do not contain children of node they're generated from.``() =
         let tree = generateAst "fun x -> x"
 
         let array = astToArray tree

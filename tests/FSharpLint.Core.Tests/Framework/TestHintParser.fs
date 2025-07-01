@@ -13,7 +13,7 @@ open System.Collections.Generic
 type TestMergeSyntaxTrees() =
 
     [<Test>]
-    member __.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() =
+    member _.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() =
         let toDictionary list =
             let dictionary = Dictionary<int, Node>()
             for (x, y) in list do dictionary.Add(x, y)
@@ -48,20 +48,20 @@ type TestMergeSyntaxTrees() =
         | _ -> Assert.Fail()
 
     [<Test>]
-    member __.``Merge no hints gives no merged lists``() =
+    member _.``Merge no hints gives no merged lists``() =
         Assert.AreEqual(MergeSyntaxTrees.Edges.Empty, MergeSyntaxTrees.mergeHints [])
 
 [<TestFixture>]
 type TestHintOperators() =
 
     [<Test>]
-    member __.Plus() =
+    member _.Plus() =
         match run Operators.poperator "+" with
         | Success(hint, _, _) -> Assert.AreEqual("+", hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.PlusMinus() =
+    member _.PlusMinus() =
         match run Operators.poperator "+-" with
         | Success(hint, _, _) -> Assert.AreEqual("+-", hint)
         | Failure(message, _, _) -> Assert.Fail(message)
@@ -70,37 +70,37 @@ type TestHintOperators() =
 type TestHintIdentifiers() =
 
     [<Test>]
-    member __.Identifier() =
+    member _.Identifier() =
         match run Identifiers.plongidentorop "duck" with
         | Success(hint, _, _) -> Assert.AreEqual(["duck"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.BackTickedIdentifier() =
+    member _.BackTickedIdentifier() =
         match run Identifiers.plongidentorop "``du+ck``" with
         | Success(hint, _, _) -> Assert.AreEqual(["du+ck"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.LongIdent() =
+    member _.LongIdent() =
         match run Identifiers.plongidentorop "Dog.``du+ck``.goats" with
         | Success(hint, _, _) -> Assert.AreEqual(["Dog";"du+ck";"goats"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.LongIdentWithOperator() =
+    member _.LongIdentWithOperator() =
         match run Identifiers.plongidentorop "Dog.``du+ ck``.cat.(+)" with
         | Success(hint, _, _) -> Assert.AreEqual(["Dog";"du+ ck";"cat";"+"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.OperatorIdentifier() =
+    member _.OperatorIdentifier() =
         match run Identifiers.plongidentorop "(+)" with
         | Success(hint, _, _) -> Assert.AreEqual(["+"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.OperatorIdentifierWithWhitespace() =
+    member _.OperatorIdentifierWithWhitespace() =
         match run Identifiers.plongidentorop "(  +-?  )" with
         | Success(hint, _, _) -> Assert.AreEqual(["+-?"], hint)
         | Failure(message, _, _) -> Assert.Fail(message)
@@ -109,49 +109,49 @@ type TestHintIdentifiers() =
 type TestHintStringAndCharacterLiterals() =
 
     [<Test>]
-    member __.ByteCharacter() =
+    member _.ByteCharacter() =
         match run StringAndCharacterLiterals.pbytechar "'x'B" with
         | Success(hint, _, _) -> Assert.AreEqual(Byte('x'B), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ByteArray() =
+    member _.ByteArray() =
         match run StringAndCharacterLiterals.pbytearray "\"dog\"B" with
         | Success(hint, _, _) -> Assert.AreEqual(Bytes("dog"B), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Character() =
+    member _.Character() =
         match run StringAndCharacterLiterals.pcharacter "'x'" with
         | Success(hint, _, _) -> Assert.AreEqual(Char('x'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.UnicodeCharacter() =
+    member _.UnicodeCharacter() =
         match run StringAndCharacterLiterals.pcharacter "'\\u0040'" with
         | Success(hint, _, _) -> Assert.AreEqual(Char('@'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.EscapeCharacter() =
+    member _.EscapeCharacter() =
         match run StringAndCharacterLiterals.pcharacter "'\\n'" with
         | Success(hint, _, _) -> Assert.AreEqual(Char('\n'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.TrigraphCharacter() =
+    member _.TrigraphCharacter() =
         match run StringAndCharacterLiterals.pcharacter "'\\064'" with
         | Success(hint, _, _) -> Assert.AreEqual(Char('@'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.StringIncludingSingleQuote() =
+    member _.StringIncludingSingleQuote() =
         match run StringAndCharacterLiterals.pliteralstring "\"'\"" with
         | Success(hint, _, _) -> Assert.AreEqual("'", hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.String() =
+    member _.String() =
         match run StringAndCharacterLiterals.pliteralstring "\"d\\tog\\064\\u0040\\U00000040goat\"" with
         | Success(hint, _, _) -> Assert.AreEqual("d\tog@@@goat", hint)
         | Failure(message, _, _) -> Assert.Fail(message)
@@ -160,151 +160,151 @@ type TestHintStringAndCharacterLiterals() =
 type TestHintParserNumericLiterals() =
 
     [<Test>]
-    member __.ByteMin() =
+    member _.ByteMin() =
         match run NumericLiterals.pbyte "0b0uy" with
         | Success(hint, _, _) -> Assert.AreEqual(Byte(System.Byte.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ByteMax() =
+    member _.ByteMax() =
         match run NumericLiterals.pbyte "0b11111111uy" with
         | Success(hint, _, _) -> Assert.AreEqual(Byte(System.Byte.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.SignedByteMax() =
+    member _.SignedByteMax() =
         match run NumericLiterals.psbyte "-128y" with
         | Success(hint, _, _) -> Assert.AreEqual(SByte(System.SByte.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.SignedByteMin() =
+    member _.SignedByteMin() =
         match run NumericLiterals.psbyte "127y" with
         | Success(hint, _, _) -> Assert.AreEqual(SByte(System.SByte.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int16Min() =
+    member _.Int16Min() =
         match run NumericLiterals.pint16 "-32768s" with
         | Success(hint, _, _) -> Assert.AreEqual(Int16(System.Int16.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int16Max() =
+    member _.Int16Max() =
         match run NumericLiterals.pint16 "32767s" with
         | Success(hint, _, _) -> Assert.AreEqual(Int16(System.Int16.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint16Min() =
+    member _.Uint16Min() =
         match run NumericLiterals.puint16 "0us" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt16(System.UInt16.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint16Max() =
+    member _.Uint16Max() =
         match run NumericLiterals.puint16 "65535us" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt16(System.UInt16.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int32Withl() =
+    member _.Int32Withl() =
         match run NumericLiterals.pint32 "-2147483648l" with
         | Success(hint, _, _) -> Assert.AreEqual(Int32(System.Int32.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int32Max() =
+    member _.Int32Max() =
         match run NumericLiterals.pint32 "2147483647" with
         | Success(hint, _, _) -> Assert.AreEqual(Int32(System.Int32.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint32() =
+    member _.Uint32() =
         match run NumericLiterals.puint32 "984u" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt32(984u), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint32Max() =
+    member _.Uint32Max() =
         match run NumericLiterals.puint32 "0xFFFFFFFFu" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt32(System.UInt32.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int64Min() =
+    member _.Int64Min() =
         match run NumericLiterals.pint64 "-9223372036854775808L" with
         | Success(hint, _, _) -> Assert.AreEqual(Int64(System.Int64.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int64Max() =
+    member _.Int64Max() =
         match run NumericLiterals.pint64 "9223372036854775807L" with
         | Success(hint, _, _) -> Assert.AreEqual(Int64(System.Int64.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint64() =
+    member _.Uint64() =
         match run NumericLiterals.puint64 "984UL" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt64(984UL), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Uint64Max() =
+    member _.Uint64Max() =
         match run NumericLiterals.puint64 "0xFFFFFFFFFFFFFFFFuL" with
         | Success(hint, _, _) -> Assert.AreEqual(UInt64(System.UInt64.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.SingleMax() =
+    member _.SingleMax() =
         match run NumericLiterals.psingle "3.40282347e+38f" with
         | Success(hint, _, _) -> Assert.AreEqual(Single(System.Single.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.SingleMin() =
+    member _.SingleMin() =
         match run NumericLiterals.psingle "-3.40282347e+38f" with
         | Success(hint, _, _) -> Assert.AreEqual(Single(System.Single.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.DoubleLarge() =
+    member _.DoubleLarge() =
         match run NumericLiterals.pdouble "1.7E+308" with
         | Success(hint, _, _) -> Assert.AreEqual(Double(1.7E+308), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.DoubleSmall() =
+    member _.DoubleSmall() =
         match run NumericLiterals.pdouble "-1.7E+308" with
         | Success(hint, _, _) -> Assert.AreEqual(Double(-1.7E+308), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.BigNum() =
+    member _.BigNum() =
         match run NumericLiterals.pbignum "1243124124124124124124214214124124124I" with
         | Success(hint, _, _) -> Assert.AreEqual(UserNum(1243124124124124124124214214124124124I, 'I'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.FloatingDecimal() =
+    member _.FloatingDecimal() =
         match run NumericLiterals.pdecimal "1.7E+10m" with
         | Success(hint, _, _) -> Assert.AreEqual(Decimal(1.7E+10m), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.DecimalMax() =
+    member _.DecimalMax() =
         match run NumericLiterals.pdecimal "79228162514264337593543950335m" with
         | Success(hint, _, _) -> Assert.AreEqual(Decimal(System.Decimal.MaxValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.DecimalMin() =
+    member _.DecimalMin() =
         match run NumericLiterals.pdecimal "-79228162514264337593543950335m" with
         | Success(hint, _, _) -> Assert.AreEqual(Decimal(System.Decimal.MinValue), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.DecimalInt() =
+    member _.DecimalInt() =
         match run NumericLiterals.pdecimal "55m" with
         | Success(hint, _, _) -> Assert.AreEqual(Decimal(55m), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
@@ -313,43 +313,43 @@ type TestHintParserNumericLiterals() =
 type TestConstantParser() =
 
     [<Test>]
-    member __.Bool() =
+    member _.Bool() =
         match run Constants.pconstant "true" with
         | Success(hint, _, _) -> Assert.AreEqual(Bool(true), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Unit() =
+    member _.Unit() =
         match run Constants.pconstant "()" with
         | Success(hint, _, _) -> Assert.AreEqual(Unit, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.LiteralString() =
+    member _.LiteralString() =
         match run Constants.pconstant "\"dog\"" with
         | Success(hint, _, _) -> Assert.AreEqual(String("dog"), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int16() =
+    member _.Int16() =
         match run Constants.pconstant "14s" with
         | Success(hint, _, _) -> Assert.AreEqual(Int16(14s), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Int32() =
+    member _.Int32() =
         match run Constants.pconstant "14" with
         | Success(hint, _, _) -> Assert.AreEqual(Int32(14), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Double() =
+    member _.Double() =
         match run Constants.pconstant "14.1" with
         | Success(hint, _, _) -> Assert.AreEqual(Double(14.1), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Decimal() =
+    member _.Decimal() =
         match run Constants.pconstant "14.1m" with
         | Success(hint, _, _) -> Assert.AreEqual(Decimal(14.1m), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
@@ -358,25 +358,25 @@ type TestConstantParser() =
 type TestHintParser() =
 
     [<Test>]
-    member __.Variable() =
+    member _.Variable() =
         match run Expressions.pvariable "x " with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Variable('x'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ArgumentVariable() =
+    member _.ArgumentVariable() =
         match run Expressions.pargumentvariable "x " with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Variable('x'), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Wildcard() =
+    member _.Wildcard() =
         match run Expressions.pwildcard "_" with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Wildcard, hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.LambdaArguments() =
+    member _.LambdaArguments() =
         let expected =
             [ Expression.Variable('x')
               Expression.Variable('y')
@@ -389,37 +389,37 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionIdentifier() =
+    member _.ExpressionIdentifier() =
         match run Expressions.pexpression "id" with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Identifier(["id"]), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Keyword should not be parsed as identifier.``() =
+    member _.``Keyword should not be parsed as identifier.``() =
         match run Expressions.pexpression "fun" with
         | Success(_) -> Assert.Fail()
         | Failure(_) -> Assert.Pass()
 
     [<Test>]
-    member __.``Keyword in back ticks should be parsed as identifier.``() =
+    member _.``Keyword in back ticks should be parsed as identifier.``() =
         match run Expressions.pexpression "``fun``" with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Identifier(["fun"]), hint)
         | Failure(_) -> Assert.Fail()
 
     [<Test>]
-    member __.ExpressionUnit() =
+    member _.ExpressionUnit() =
         match run Expressions.pexpression "(   )" with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Constant(Unit), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionParenAroundUnit() =
+    member _.ExpressionParenAroundUnit() =
         match run Expressions.pexpression "((   ))" with
         | Success(hint, _, _) -> Assert.AreEqual(Expression.Parentheses(Expression.Constant(Unit)), hint)
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionAdd() =
+    member _.ExpressionAdd() =
         match run Expressions.pexpression "4+5" with
         | Success(hint, _, _) ->
             Assert.AreEqual(
@@ -431,7 +431,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionAddAndMultiply() =
+    member _.ExpressionAddAndMultiply() =
         let expected =
             Expression.InfixOperator(
                 Expression.Identifier(["+"]),
@@ -445,7 +445,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionPrefixOperator() =
+    member _.ExpressionPrefixOperator() =
         let expected = Expression.PrefixOperator(Expression.Identifier(["~"]), Expression.Constant(Constant.Int32(4)))
 
         match run Expressions.pexpression "~4" with
@@ -453,7 +453,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Prefix operator of multiple tildes parsed correctly``() =
+    member _.``Prefix operator of multiple tildes parsed correctly``() =
         let expected = Expression.PrefixOperator(Expression.Identifier(["~~~"]), Expression.Constant(Constant.Int32(4)))
 
         match run Expressions.pexpression "~~~4" with
@@ -461,7 +461,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Bang prefix operator parsed correctly``() =
+    member _.``Bang prefix operator parsed correctly``() =
         let expected = Expression.PrefixOperator(Expression.Identifier(["!!!/<=>@!!!*"]), Expression.Constant(Constant.Int32(4)))
 
         match run Expressions.pexpression "!!!/<=>@!!!*4" with
@@ -469,7 +469,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionPrefixAddition() =
+    member _.ExpressionPrefixAddition() =
         let expected =
             Expression.InfixOperator(Expression.Identifier(["+"]),
                 Expression.Constant(Constant.Int32(4)),
@@ -480,7 +480,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionBracketedAddAndMultiply() =
+    member _.ExpressionBracketedAddAndMultiply() =
         let expected =
             Expression.InfixOperator(Expression.Identifier(["*"]),
                 Expression.Constant(Constant.Int32(4)),
@@ -493,7 +493,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ExpressionNotTrue() =
+    member _.ExpressionNotTrue() =
         match run Expressions.pexpression "not true" with
         | Success(hint, _, _) ->
             Assert.AreEqual(
@@ -504,7 +504,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Lambda() =
+    member _.Lambda() =
         let expected =
             Expression.Lambda(
                 [ LambdaArg(Expression.LambdaArg(Expression.Variable('x')))
@@ -523,7 +523,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.XEqualsXHint() =
+    member _.XEqualsXHint() =
         let expected =
             { MatchedNode = Expression.Variable('x') |> HintExpr
               Suggestion = Suggestion.Expr(Expression.Variable('x')) }
@@ -533,7 +533,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.NotTrueIsFalseHint() =
+    member _.NotTrueIsFalseHint() =
         let expected =
             { MatchedNode = Expression.FunctionApplication
                   [ Expression.Identifier(["not"])
@@ -545,7 +545,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.FoldAddIntoSumHint() =
+    member _.FoldAddIntoSumHint() =
         let expected =
             { MatchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "fold"])
@@ -562,7 +562,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.MapToSumIntoSumByHint() =
+    member _.MapToSumIntoSumByHint() =
         let expected =
             { MatchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "sum"])
@@ -582,7 +582,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.MapToAverageIntoAverageByHint() =
+    member _.MapToAverageIntoAverageByHint() =
         let expected =
             { MatchedNode = Expression.FunctionApplication
                         [ Expression.Identifier(["List"; "average"])
@@ -602,7 +602,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.TupleTakeAndSkipIntoSplitAtHint() =
+    member _.TupleTakeAndSkipIntoSplitAtHint() =
         let expected =
             { MatchedNode =
                 Expression.Tuple(
@@ -625,7 +625,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.IdHint() =
+    member _.IdHint() =
         let expected =
             { MatchedNode = Expression.Lambda
                 ([LambdaArg(Expression.LambdaArg(Expression.Variable('x')))],
@@ -637,7 +637,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Tuple() =
+    member _.Tuple() =
         let expected = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')])
 
         match run Expressions.ptuple "(x, y)" with
@@ -645,7 +645,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.List() =
+    member _.List() =
         let expected = Expression.List([Expression.Variable('x');Expression.Variable('y')])
 
         match run Expressions.plist "[x; y]" with
@@ -653,7 +653,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.EmptyList() =
+    member _.EmptyList() =
         let expected = Expression.List([])
 
         match run Expressions.plist "[]" with
@@ -661,7 +661,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.EmptyListWithWhitespace() =
+    member _.EmptyListWithWhitespace() =
         let expected =
             Expression.List([])
 
@@ -670,7 +670,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.Array() =
+    member _.Array() =
         let expected = Expression.Array([Expression.Variable('x');Expression.Variable('y')])
 
         match run Expressions.parray "[|x; y|]" with
@@ -678,7 +678,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.EmptyArray() =
+    member _.EmptyArray() =
         let expected = Expression.Array([])
 
         match run Expressions.parray "[||]" with
@@ -686,7 +686,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.EmptyArrayWithWhitespace() =
+    member _.EmptyArrayWithWhitespace() =
         let expected = Expression.Array([])
 
         match run Expressions.parray "[|  |]" with
@@ -694,7 +694,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.TupleHint() =
+    member _.TupleHint() =
         let expected =
             { MatchedNode = Expression.Tuple([Expression.Variable('x');Expression.Variable('y')]) |> HintExpr
               Suggestion = Suggestion.Expr(Expression.Identifier(["id"])) }
@@ -704,7 +704,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.TupleInFunctionApplication() =
+    member _.TupleInFunctionApplication() =
         let expected =
             { MatchedNode =
                 Expression.FunctionApplication(
@@ -717,7 +717,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ListHint() =
+    member _.ListHint() =
         let expected =
             { MatchedNode = Expression.InfixOperator(Expression.Identifier(["::"]),
                                                Expression.Variable('x'),
@@ -729,7 +729,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.ArrayHint() =
+    member _.ArrayHint() =
         let expected =
             { MatchedNode = Expression.Array([Expression.Variable('x')]) |> HintExpr
               Suggestion = Suggestion.Expr(Expression.Variable('x')) }
@@ -739,7 +739,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.IfStatementHint() =
+    member _.IfStatementHint() =
         let expected =
             { MatchedNode =
                 Expression.If(
@@ -753,7 +753,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.MultipleFunctionApplicationsHint() =
+    member _.MultipleFunctionApplicationsHint() =
         let expected =
             { MatchedNode =
                 Expression.FunctionApplication(
@@ -772,7 +772,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Suggestion with literal string message parsed correctly.``() =
+    member _.``Suggestion with literal string message parsed correctly.``() =
         let expected =
             { MatchedNode = Expression.Constant(Constant.Unit) |> HintExpr
               Suggestion = Suggestion.Message("Message") }
@@ -782,7 +782,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Suggestion with verbatim literal string message parsed correctly.``() =
+    member _.``Suggestion with verbatim literal string message parsed correctly.``() =
         let expected =
             { MatchedNode = Expression.Constant(Constant.Unit) |> HintExpr
               Suggestion = Suggestion.Message("Message") }
@@ -792,7 +792,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Suggestion with triple quoted string message parsed correctly.``() =
+    member _.``Suggestion with triple quoted string message parsed correctly.``() =
         let expected =
             { MatchedNode = Expression.Constant(Constant.Unit) |> HintExpr
               Suggestion = Suggestion.Message("Message") }
@@ -802,7 +802,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses null inside expression as expected.``() =
+    member _.``Parses null inside expression as expected.``() =
         let expected =
             { MatchedNode = Expression.Null |> HintExpr
               Suggestion = Suggestion.Message("Message") }
@@ -812,7 +812,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses null inside pattern as expected.``() =
+    member _.``Parses null inside pattern as expected.``() =
         let expected =
             { MatchedNode = Pattern.Null |> HintPat
               Suggestion = Suggestion.Message("Message") }
@@ -822,7 +822,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses boolean constant inside pattern as expected.``() =
+    member _.``Parses boolean constant inside pattern as expected.``() =
         let expected =
             { MatchedNode = Pattern.Constant(Constant.Bool(true)) |> HintPat
               Suggestion = Suggestion.Message("Message") }
@@ -832,7 +832,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses cons inside pattern as expected.``() =
+    member _.``Parses cons inside pattern as expected.``() =
         let expected =
             { MatchedNode = Pattern.Cons(Pattern.Constant(Constant.Bool(true)), Pattern.List([])) |> HintPat
               Suggestion = Suggestion.Message("Message") }
@@ -842,7 +842,7 @@ type TestHintParser() =
         | Failure(message, _, _) -> Assert.Fail(message)
 
     [<Test>]
-    member __.``Parses or inside pattern as expected.``() =
+    member _.``Parses or inside pattern as expected.``() =
         let expected =
             { MatchedNode = Pattern.Or(Pattern.Constant(Constant.Bool(true)), Pattern.Constant(Constant.Bool(false))) |> HintPat
               Suggestion = Suggestion.Message("Message") }

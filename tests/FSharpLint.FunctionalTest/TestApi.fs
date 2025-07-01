@@ -36,7 +36,7 @@ module TestApi =
 
         [<Category("Performance")>]
         [<Test>]
-        member __.``Performance of linting an existing file``() =
+        member _.``Performance of linting an existing file``() =
             let text = File.ReadAllText sourceFile
             let tree = text |> generateAst
             let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None }
@@ -61,7 +61,7 @@ module TestApi =
             fprintf TestContext.Out "Average runtime of linter on parsed file: %d (milliseconds)."  result
 
         [<Test>]
-        member __.``Lint project via absolute path``() =
+        member _.``Lint project via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
@@ -74,7 +74,7 @@ module TestApi =
                 Assert.True(false, string err)
 
         [<Test>]
-        member __.``Lint multi-targeted project``() =
+        member _.``Lint multi-targeted project``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
@@ -87,7 +87,7 @@ module TestApi =
                 Assert.True(false, string err)
 
         [<Test>]
-        member __.``Lint project with default config tries to load fsharplint.json``() =
+        member _.``Lint project with default config tries to load fsharplint.json``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let tempConfigFile = TestContext.CurrentContext.TestDirectory </> "fsharplint.json"
@@ -103,7 +103,7 @@ module TestApi =
                 Assert.True(false, string err)
 
         [<Test>]
-        member __.``Lint solution via absolute path``() =
+        member _.``Lint solution via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
 
@@ -117,7 +117,7 @@ module TestApi =
 
 #if NETCOREAPP // GetRelativePath is netcore-only
         [<Test>]
-        member __.``Lint project via relative path``() =
+        member _.``Lint project via relative path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
@@ -133,7 +133,7 @@ module TestApi =
             ()
 
         [<Test>]
-        member __.``Lint solution via relative path``() =
+        member _.``Lint solution via relative path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
 
