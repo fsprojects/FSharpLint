@@ -1,4 +1,4 @@
-﻿module TestFuzzyHintMatcher
+﻿module FSharpLint.Core.Tests.TestFuzzyHintMatcher
 
 open System.Collections.Generic
 open System.Diagnostics
@@ -11,10 +11,10 @@ open NUnit.Framework
 open FParsec
 open TestUtils
 
-let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify = 
+let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify =
     for i = 0 to syntaxArray.Length - 1 do
         let node = syntaxArray.[i]
-        
+
         match hintTrie.Lookup.TryGetValue node.Hashcode with
         | true, trie -> checkTrie (i + 1) trie syntaxArray (Dictionary<_, _>()) (notify i)
         | false, _ -> ()
@@ -29,7 +29,7 @@ type TestAst() =
 
     [<Category("Performance")>]
     [<Test>]
-    member _.``Performance of matching fuzzy matching hints``() = 
+    member _.``Performance of matching fuzzy matching hints``() =
         let (tree, _) = getPerformanceTestInput ()
 
         let array = astToArray tree
@@ -139,9 +139,9 @@ type TestAst() =
                 toHint @"f >> id ===> f" ]
 
         let hintTrie = MergeSyntaxTrees.mergeHints hints
-    
+
         let stopwatch = Stopwatch.StartNew()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         stopwatch.Stop()
@@ -150,7 +150,7 @@ type TestAst() =
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Lambda with wildcard argument is correctly found by fuzzy matcher``() = 
+    member _.``Lambda with wildcard argument is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let y = fun _ -> ()
@@ -161,14 +161,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun _ -> () ===> ignore"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Function application is correctly found by fuzzy matcher``() = 
+    member _.``Function application is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let y = List.isEmpty []
@@ -179,14 +179,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.isEmpty [] ===> true"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Infix application is correctly found by fuzzy matcher``() = 
+    member _.``Infix application is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let y = 1 + 0
@@ -197,14 +197,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"x + 0 ===> x"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Prefix application is correctly found by fuzzy matcher``() = 
+    member _.``Prefix application is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let y = ~~~1
@@ -215,14 +215,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"~~~1 ===> x"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Function application with variable is correctly found by fuzzy matcher``() = 
+    member _.``Function application with variable is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let numbers = [1;2;3]
@@ -234,14 +234,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.rev (List.rev x) ===> x"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
-        
+
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Lambda with variable argument is correctly found by fuzzy matcher``() = 
+    member _.``Lambda with variable argument is correctly found by fuzzy matcher``() =
         let source = @"
 do
     let y = fun x -> x
@@ -252,14 +252,14 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(1, matches.Count)
 
     [<Category("Hint Matcher")>]
     [<Test>]
-    member _.``Lambda with variable argument is correctly discarded by fuzzy matcher``() = 
+    member _.``Lambda with variable argument is correctly discarded by fuzzy matcher``() =
         let source = @"
 do
     let y = fun x -> 0
@@ -270,7 +270,7 @@ do
         let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
 
         let matches = ResizeArray()
-        
+
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
 
         Assert.AreEqual(0, matches.Count)

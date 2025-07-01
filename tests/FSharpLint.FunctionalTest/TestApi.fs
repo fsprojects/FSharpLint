@@ -87,7 +87,7 @@ module TestApi =
                 Assert.True(false, string err)
 
         [<Test>]
-        member _.``Lint project with default config tries to load fsharplint.json``() =
+        member _.``Lint project with default config tries to load fsharplint_json``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let tempConfigFile = TestContext.CurrentContext.TestDirectory </> "fsharplint.json"

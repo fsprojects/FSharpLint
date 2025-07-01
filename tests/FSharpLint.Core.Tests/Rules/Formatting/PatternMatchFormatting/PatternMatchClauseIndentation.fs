@@ -2,6 +2,7 @@ module FSharpLint.Core.Tests.Rules.Formatting.PatternMatchClauseIndentation
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestFormattingPatternMatchClauseIndentation() =

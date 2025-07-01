@@ -3,9 +3,10 @@ module rec FSharpLint.Core.Tests.Rules.Hints.HintMatcher
 // fsharplint:disable TupleIndentation
 
 open NUnit.Framework
+open FSharpLint.Core.Tests
 
 type Assert with
-  static member NoErrors(this:TestHintMatcher) = 
+  static member NoErrors(this:TestHintMatcher) =
     if this.NoErrorsExist then ()
     else
         raise (NUnit.Framework.AssertionException($"No errors were expected, but there were some errors. Errors were:\n{this.ErrorMsg}"))

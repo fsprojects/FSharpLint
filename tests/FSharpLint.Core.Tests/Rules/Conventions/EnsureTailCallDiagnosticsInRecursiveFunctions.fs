@@ -1,8 +1,8 @@
 ﻿module FSharpLint.Core.Tests.Rules.Conventions.EnsureTailCallDiagnosticsInRecursiveFunctions
 
 open NUnit.Framework
-
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestEnsureTailCallDiagnosticsInRecursiveFunctions() =
@@ -39,7 +39,7 @@ let rec Foo someParam =
 let rec Foo someParam =
     ()
 
-module Bar =    
+module Bar =
     let Foo = 0
 """
 

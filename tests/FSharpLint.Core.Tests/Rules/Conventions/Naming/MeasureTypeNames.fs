@@ -3,6 +3,7 @@ module FSharpLint.Core.Tests.Rules.Conventions.MeasureTypeNames
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 let config =
     { NamingConfig.Naming = None

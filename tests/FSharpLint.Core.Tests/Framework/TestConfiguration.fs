@@ -1,4 +1,4 @@
-﻿module TestConfiguration
+﻿module FSharpLint.Core.Tests.TestConfiguration
 
 open NUnit.Framework
 open FSharpLint.Framework.Configuration
@@ -97,7 +97,7 @@ type TestConfiguration() =
 
     [<Test>]
     member _.``Camel case JSON config correctly parsed into expected config records`` () =
-        let expectedConfig = 
+        let expectedConfig =
             { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
 
 
