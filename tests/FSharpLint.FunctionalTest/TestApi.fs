@@ -102,40 +102,26 @@ module TestApi =
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 
-        [<Test>]
-        member _.``Lint solution via absolute path``() =
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.sln", 18, TestName = "SLN: lint solution (absolute path)")>]
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnx", 18, TestName = "SLNX: lint solution (absolute path)")>]
+        member _.``Lint solution via absolute path``(solutionFileName: string, expectedWarnings: int) =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+            let solutionFile = projectPath </> solutionFileName
 
             let result = lintSolution OptionalLintParameters.Default solutionFile toolsPath
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(18, warnings.Length)
+                Assert.AreEqual(expectedWarnings, warnings.Length)
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 
-#if NETCOREAPP // GetRelativePath is netcore-only
-        [<Test>]
-        member _.``Lint project via relative path``() =
-            let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
-            let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
-
-            let relativePathToProjectFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), projectFile)
-
-            let result = lintProject OptionalLintParameters.Default relativePathToProjectFile toolsPath
-
-            match result with
-            | LintResult.Success warnings ->
-                Assert.AreEqual(9, warnings.Length)
-            | LintResult.Failure err ->
-                Assert.True(false, string err)
-            ()
-
-        [<Test>]
-        member _.``Lint solution via relative path``() =
+#if NETCOREAPP
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.sln", 18, TestName = "SLN: lint solution (relative path)")>]
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnx", 18, TestName = "SLNX: lint solution (relative path)")>]
+        member _.``Lint solution via relative path``(solutionFileName: string, expectedWarnings: int) =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
-            let solutionFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.sln"
+            let solutionFile = projectPath </> solutionFileName
 
             let relativePathToSolutionFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), solutionFile)
 
@@ -143,7 +129,7 @@ module TestApi =
 
             match result with
             | LintResult.Success warnings ->
-                Assert.AreEqual(18, warnings.Length)
+                Assert.AreEqual(expectedWarnings, warnings.Length)
             | LintResult.Failure err ->
                 Assert.True(false, string err)
 #endif

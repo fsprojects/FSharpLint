@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FSharpLint.FunctionalTest.TestedProject.MultiTarget/FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj" />
+  <Project Path="FSharpLint.FunctionalTest.TestedProject.NetCore/FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj" />
+</Solution>
