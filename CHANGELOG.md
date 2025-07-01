@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrate from `Paket` to `Directory.Packages.props` #722 [@xperiandri]
 - Migrate to .NET `9.0.201` and FCS `43.9.201` #722 [@xperiandri]
 - Write test logs to test context output #722 [@xperiandri]
+- Add SLNX support and migrate to SLNX solution #723 [@xperiandri]\
+  Remove `Ionide.ProjInfo.Sln` NuGet package dependency
 
 ## [0.24.2] - 2024-02-29
 
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New rule FavourNonMutablePropertyInitialization #683 #662 #535 [@webwarrior-ws]
 - Workaround for NoPartialFuncs bug #682 [@webwarrior-ws]
 - Fix AvoidSinglePipeOperator false positive #684 [@Mersho]
-- docs(CSS): capitalize <h1> rather than uppercase [@knocte]
+- docs(CSS): capitalize `<h1>` rather than uppercase [@knocte]
 - Simplify SelfCheck #679 [@knocte]
 
 

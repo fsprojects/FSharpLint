@@ -14,7 +14,6 @@
     <PackageVersion Include="Ionide.ProjInfo.ProjectSystem" Version="0.70.2" />
     <PackageVersion Include="Ionide.ProjInfo.FCS" Version="0.70.2" />
     <PackageVersion Include="Ionide.ProjInfo" Version="0.70.2" />
-    <PackageVersion Include="Ionide.ProjInfo.Sln" Version="0.68.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Build" Version="17.14.8" />
     <PackageVersion Include="Microsoft.Build.Locator" Version="1.9.1" />
