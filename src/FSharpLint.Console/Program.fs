@@ -3,9 +3,9 @@
 open Argu
 open System
 open System.IO
+open System.Reflection
 open FSharpLint.Framework
 open FSharpLint.Application
-open System.Reflection
 
 /// Output format the linter will use.
 type private OutputFormat =
@@ -13,7 +13,7 @@ type private OutputFormat =
     | MSBuild = 2
 
 /// File type the linter is running against.
-type private FileType =
+type internal FileType =
     | Project = 1
     | Solution = 2
     | File = 3
@@ -60,12 +60,12 @@ let private parserProgress (output:Output.IOutput) = function
         |> output.WriteError
 
 /// Infers the file type of the target based on its file extension.
-let private inferFileType (target:string) =
+let internal inferFileType (target:string) =
     if target.EndsWith ".fs" || target.EndsWith ".fsx" then
         FileType.File
     else if target.EndsWith ".fsproj" then
         FileType.Project
-    else if target.EndsWith ".sln" then
+    else if target.EndsWith ".slnx" || target.EndsWith ".sln" then
         FileType.Solution
     else
         FileType.Source
