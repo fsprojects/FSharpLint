@@ -179,12 +179,12 @@ let activePatternIdentifiers (identifier:Ident) =
     |> Array.filter (fun x -> not <| String.IsNullOrEmpty(x) && x.Trim() <> "_")
 
 
-/// Specifies access control level as described in 
+/// Specifies access control level as described in
 /// https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/access-control .
-/// Higher levels also include lower levels, so e.g. identifier marked with Public 
+/// Higher levels also include lower levels, so e.g. identifier marked with Public
 /// is also accessible in Internal and Private scopes.
 /// Public scope is the widest, then goes Internal, then Private.
-type AccessControlLevel = 
+type AccessControlLevel =
     | Public
     | Private
     | Internal
@@ -203,7 +203,7 @@ let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) i =
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
             | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
             | UnionCase(SynUnionCase(_, _, _, _, access, _, _))
-            | Field(SynField(_, _, _, _, _, _, access, _))
+            | Field(SynField(_, _, _, _, _, _, access, _, _))
             | ComponentInfo(SynComponentInfo(_, _, _, _, _, _, access, _))
             | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _, _))
             | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
@@ -318,12 +318,12 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
 
         let hasNoArgs =
             match args with
-            | SynArgPats.NamePatPairs(pats, _) -> pats.IsEmpty
+            | SynArgPats.NamePatPairs(pats, _, _) -> pats.IsEmpty
             | SynArgPats.Pats(pats) -> pats.IsEmpty
 
         let argSuggestions =
             match args with
-            | SynArgPats.NamePatPairs(pats, _) ->
+            | SynArgPats.NamePatPairs(pats, _, _) ->
                 pats
                 |> List.toArray
                 |> Array.collect (fun(_, _, synPat) -> getPatternIdents AccessControlLevel.Private getIdents false synPat)
@@ -347,7 +347,7 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.Paren(p, _) ->
         getPatternIdents accessibility getIdents false p
     | SynPat.Ands(pats, _)
-    | SynPat.Tuple(_, pats, _)
+    | SynPat.Tuple(_, pats, _, _)
     | SynPat.ArrayOrList(_, pats, _) ->
         pats
         |> List.toArray
@@ -361,16 +361,16 @@ let rec getPatternIdents<'T> (accessibility:AccessControlLevel) (getIdents:GetId
     | SynPat.Const(_)
     | SynPat.Wild(_)
     | SynPat.OptionalVal(_)
-    | SynPat.DeprecatedCharRange(_) | SynPat.InstanceMember(_) | SynPat.FromParseError(_) -> Array.empty
-    | SynPat.As(lhsPat, rhsPat, _) -> 
+    | SynPat.InstanceMember(_)
+    | SynPat.FromParseError(_) -> Array.empty
+    | SynPat.As(lhsPat, rhsPat, _) ->
         Array.append
             (getPatternIdents accessibility getIdents false lhsPat)
             (getPatternIdents accessibility getIdents false rhsPat)
-
-let rec identFromSimplePat = function
-    | SynSimplePat.Id(ident, _, _, _, _, _) -> Some ident
-    | SynSimplePat.Typed(p, _, _) -> identFromSimplePat p
-    | SynSimplePat.Attrib(_) -> None
+    | SynPat.ListCons(lhs, rhs, _, _) ->
+        Array.append
+            (getPatternIdents accessibility getIdents false lhs)
+            (getPatternIdents accessibility getIdents false rhs)
 
 let isNested args nodeIndex =
     let parent = args.SyntaxArray.[nodeIndex].ParentIndex

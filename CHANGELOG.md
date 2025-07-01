@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- Migrate from `Paket` to `Directory.Packages.props` #722 [@xperiandri]
+- Migrate to .NET `9.0.201` and FCS `43.9.201` #722 [@xperiandri]
+- Write test logs to test context output #722 [@xperiandri]
+
 ## [0.24.2] - 2024-02-29
 
 - New rule EnsureTailCallDiagnosticsInRecursiveFunctions #673 #651 [@webwarrior-ws]

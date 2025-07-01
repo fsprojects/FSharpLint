@@ -26,7 +26,7 @@ type TestAst() =
         match ast with
         | ParsedInput.ImplFile(x) ->
             match x with
-            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _) ->
+            | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _, _) ->
                 app
             | _ -> failwith "Expected at least one module or namespace."
         | _ -> failwith "Expected an implementation file."
@@ -104,7 +104,7 @@ type TestAst() =
         let result = times |> Seq.sum |> (fun totalMilliseconds -> totalMilliseconds / int64 iterations)
 
         Assert.Less(result, 200)
-        System.Console.WriteLine(sprintf "Built array in an average of %d milliseconds." result)
+        fprintf TestContext.Out "Built array in an average of %d milliseconds." result
 
     [<Test>]
     member __.``Syntax array constructed from AST in valid order.``() =
@@ -132,7 +132,7 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
-        
+
         let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex)) |> Array.toList
         Assert.AreEqual([ (14, 0)
                           (13, 0)

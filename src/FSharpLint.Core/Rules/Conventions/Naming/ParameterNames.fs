@@ -23,18 +23,20 @@ let private getValueOrFunctionIdents typeChecker _accessibility pattern =
     | SynPat.OptionalVal(ident, _) when not (isActivePattern ident) ->
         let checkNotUnionCase = checkNotUnionCase ident
         (ident, ident.idText, Some checkNotUnionCase) |> Array.singleton
+    | SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, SynArgPats.Pats([]), _, _) when not (isActivePattern ident) ->
+        // Handle constructor parameters that are represented as LongIdent (e.g., PascalCase parameters)
+        let checkNotUnionCase = checkNotUnionCase ident
+        (ident, ident.idText, Some checkNotUnionCase) |> Array.singleton
     | _ -> Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.MemberDefinition(memberDef) ->
         match memberDef with
-        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _) ->
-            ctorArgs
-            |> extractPatterns
-            |> List.toArray
-            |> Array.choose identFromSimplePat
-            |> Array.map (fun ident -> (ident, ident.idText, None))
+        | SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _, _) ->
+            // ctorArgs is a SynPat, not SynSimplePats, so we need to handle it differently
+            let accessControlLevel = getAccessControlLevel args.SyntaxArray args.NodeIndex
+            getPatternIdents accessControlLevel (getValueOrFunctionIdents args.CheckInfo) true ctorArgs
         | _ -> Array.empty
     | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then

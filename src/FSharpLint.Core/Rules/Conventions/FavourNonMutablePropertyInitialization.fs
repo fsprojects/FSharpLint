@@ -45,7 +45,7 @@ let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) :
         | [instanceIdent; propertyIdent] when Set.contains instanceIdent.idText instanceNames ->
             getWarningDetails propertyIdent
         | _ -> Array.empty
-    | SynExpr.Sequential(_, _, expr1, expr2, _) ->
+    | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
         let instanceNames =
             Set.difference
                 instanceNames
@@ -60,7 +60,7 @@ and processExpression (expression: SynExpr) : array<WarningDetails> =
     | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
         let instanceNames = extraFromBindings bindings [] |> Set.ofList
         processLetBinding instanceNames body
-    | SynExpr.Sequential(_, _, expr1, expr2, _) ->
+    | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
         Array.append
             (processExpression expr1)
             (processExpression expr2)

@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Diagnostics
 open FSharp.Compiler.Syntax
+open FSharp.Compiler.SyntaxTrivia
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework
@@ -16,11 +17,8 @@ open FSharpLint.Framework.Rules
 type Config =
     { HintTrie:MergeSyntaxTrees.Edges }
 
-let rec private extractSimplePatterns = function
-    | SynSimplePats.SimplePats(simplePatterns, _) ->
-        simplePatterns
-    | SynSimplePats.Typed(simplePatterns, _, _) ->
-        extractSimplePatterns simplePatterns
+let private extractSimplePatterns (SynSimplePats.SimplePats(simplePatterns, _, _)) =
+    simplePatterns
 
 let rec private extractIdent = function
     | SynSimplePat.Id(ident, _, isCompilerGenerated, _, _, _) -> (ident, isCompilerGenerated)
@@ -215,12 +213,12 @@ module private MatchExpression =
 
     /// Check that an infix equality operation is not actually the assignment of a value to a property in a constructor
     /// or a named parameter in a method call.
-    let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr = 
+    let private notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr =
         match (leftExpr, opExpr) with
         | ExpressionUtilities.Identifier([ident], _), ExpressionUtilities.Identifier([opIdent], _) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
             | Some(checkFile) ->
-                fun () -> 
+                fun () ->
                     let symbolUse =
                         checkFile.GetSymbolUseAtLocation(
                             ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
@@ -443,20 +441,13 @@ module private MatchPattern =
 
     and private matchTuple (pattern, hint) =
         match (pattern, hint) with
-        | SynPat.Tuple(_, patterns, _), Pattern.Tuple(hintExpressions) ->
+        | SynPat.Tuple(_, patterns, _, _), Pattern.Tuple(hintExpressions) ->
             doPatternsMatch patterns hintExpressions
         | _ -> false
 
     and private matchConsPattern (pattern, hint) =
         match (pattern, hint) with
-        | SynPat.LongIdent(
-                            SynLongIdent([ident], _, _),
-                            _,
-                            _,
-                            SynArgPats.Pats([SynPat.Tuple(_, [leftPattern;rightPattern], _)]),
-                            _,
-                            _), Pattern.Cons(left, right)
-                when ident.idText = "op_ColonColon" ->
+        | Cons(leftPattern, rightPattern), Pattern.Cons(left, right) ->
             matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
         | _ -> false
 

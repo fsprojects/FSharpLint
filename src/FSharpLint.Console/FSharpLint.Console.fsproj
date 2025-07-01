@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
 
     <Title>FSharpLint.Console</Title>
     <Description>Console application to run FSharpLint.</Description>
@@ -21,8 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Argu" />
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Newtonsoft.Json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FSharpLint.Core\FSharpLint.Core.fsproj" />
   </ItemGroup>
 
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

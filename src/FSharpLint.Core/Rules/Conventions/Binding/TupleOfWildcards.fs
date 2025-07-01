@@ -1,9 +1,9 @@
 module FSharpLint.Rules.TupleOfWildcards
 
 open System
+open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
-open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -19,7 +19,7 @@ let private checkTupleOfWildcards pattern identifier =
         constructorName + "(" + arguments + ")"
 
     match pattern with
-    | SynPat.Tuple(_isStruct, patterns, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
+    | SynPat.Tuple(_isStruct, patterns, _, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
         let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = (constructorString 1)
@@ -37,14 +37,14 @@ let private isTupleMemberArgs breadcrumbs tupleRange =
         | _ -> None
 
     match breadcrumbs with
-    | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, range)))::AstNode.Expression(SynExpr.ObjExpr(_))::_
-    | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, range)))::AstNode.MemberDefinition(_)::_ ->
+    | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, _, range)))::AstNode.Expression(SynExpr.ObjExpr(_))::_
+    | AstNode.Binding(MemberBindingArgs(SynPat.Tuple(_, _, _, range)))::AstNode.MemberDefinition(_)::_ ->
         tupleRange = range
     | _ -> false
 
 let private runner (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, range) as pattern, _)]), _, _)) ->
+    | AstNode.Pattern(SynPat.LongIdent(identifier, _, _, SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_, _, _, range) as pattern, _)]), _, _)) ->
         let breadcrumbs = args.GetParents 2
         if (not << isTupleMemberArgs breadcrumbs) range then
             let identifier = identifier.LongIdent |> List.map (fun x -> x.idText)

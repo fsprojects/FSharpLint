@@ -146,7 +146,7 @@ type TestAst() =
 
         stopwatch.Stop()
         Assert.Less(stopwatch.ElapsedMilliseconds, 50)
-        System.Console.WriteLine(sprintf "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds)
+        fprintf TestContext.Out "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds
 
     [<Category("Hint Matcher")>]
     [<Test>]

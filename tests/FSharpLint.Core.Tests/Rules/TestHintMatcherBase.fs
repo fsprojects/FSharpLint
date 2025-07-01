@@ -44,7 +44,7 @@ type TestHintMatcherBase () =
                 ParseFile.parseSource input checker
 
         let rule =
-            match HintMatcher.rule { HintTrie = hintTrie }with
+            match HintMatcher.rule { HintTrie = hintTrie } with
             | Rules.AstNodeRule rule -> rule
             | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
 

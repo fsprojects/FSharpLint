@@ -10,7 +10,7 @@ let getErrorsFromOutput (output:string) =
     set [ for i in 1..splitOutput.Length - 1 do
             if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
 
-type TemporaryFile(fileContent, extension) =
+type TemporaryFile(fileContent : string, extension) =
     let filename = Path.ChangeExtension(Path.GetTempFileName(), extension)
     do
         File.WriteAllText(filename, fileContent)
@@ -80,8 +80,8 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
         Assert.AreEqual(0, returnCode)
-        Assert.AreEqual(Set.empty, errors)
-        
+        Assert.AreEqual(Set.empty<string>, errors)
+
     [<Test>]
     member __.``Lint source with error suppressed, no error is given.``() =
         let input = """
@@ -90,11 +90,11 @@ type TestConsoleApplication() =
             abstract member Encoded : string
             abstract member PathName : string
         """
-        
+
         let (returnCode, errors) = main [| "lint"; input |]
-        
+
         Assert.AreEqual(0, returnCode)
-        Assert.AreEqual(Set.empty, errors)
+        Assert.AreEqual(Set.empty<string>, errors)
 
     [<Test>]
     member __.``Regression test: typePrefixing rule with old config format should still work``() =

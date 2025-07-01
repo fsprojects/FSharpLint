@@ -1,4 +1,4 @@
-﻿open BenchmarkDotNet.Configs
+open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Diagnostics.Windows
 open BenchmarkDotNet.Environments
 open BenchmarkDotNet.Jobs

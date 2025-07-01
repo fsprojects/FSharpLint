@@ -54,7 +54,7 @@ match 4 with
 | Odd -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.That(this.ErrorExistsAt(4, 5), Is.True)
 
     [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
@@ -82,7 +82,7 @@ match 3 with
 | dog -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.That(this.ErrorExistsAt(4, 5), Is.True)
 
     [<Test>]
     member this.PartialActivePatternDoesNotContainUnderscore() =

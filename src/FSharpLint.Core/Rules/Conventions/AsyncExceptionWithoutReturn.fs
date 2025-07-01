@@ -1,15 +1,15 @@
 ﻿module FSharpLint.Rules.AsyncExceptionWithoutReturn
 
-open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
+open FSharpLint.Framework
+open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let rec checkExpression (expression: SynExpr) (range: range) =
     match expression with
-    | SynExpr.Sequential (_, _, firstExpression, secondExpression, _) ->
+    | SynExpr.Sequential (_, _, firstExpression, secondExpression, _, _) ->
         let result = checkExpression firstExpression range
         Array.append result (checkExpression secondExpression secondExpression.Range)
     | SynExpr.Paren (innerExpression, _, _, range) -> checkExpression innerExpression range
