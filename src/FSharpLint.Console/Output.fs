@@ -25,7 +25,7 @@ type StandardOutput () =
                 errorLine
                 |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
                 |> Seq.reduce (+)
-        getErrorMessage range + Environment.NewLine + errorLine + Environment.NewLine + highlightColumnLine
+        $"{getErrorMessage range}{Environment.NewLine}{errorLine}{Environment.NewLine}{highlightColumnLine}"
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =
         let originalColour = Console.ForegroundColor
@@ -34,21 +34,23 @@ type StandardOutput () =
         Console.ForegroundColor <- originalColour
 
     interface IOutput with
+
         member _.WriteInfo (info:string) = writeLine info ConsoleColor.White Console.Out
         member this.WriteWarning (warning:Suggestion.LintWarning) =
             let highlightedErrorText = highlightErrorText warning.Details.Range warning.ErrorText
-            let ruleUrlHint = sprintf "See https://fsprojects.github.io/FSharpLint/how-tos/rules/%s.html" warning.RuleIdentifier
-            let str = warning.Details.Message + Environment.NewLine + highlightedErrorText
-                    + Environment.NewLine + ruleUrlHint
+            let ruleUrlHint = $"See https://fsprojects.github.io/FSharpLint/how-tos/rules/%s{warning.RuleIdentifier}.html"
+            let str = $"{warning.Details.Message}{Environment.NewLine}{highlightedErrorText}{Environment.NewLine}{ruleUrlHint}"
             writeLine str ConsoleColor.Yellow Console.Out
             String.replicate 80 "-" |> (this :> IOutput).WriteInfo
         member _.WriteError (error:string) =  writeLine error ConsoleColor.Red Console.Error
 
 type MSBuildOutput () =
+
     interface IOutput with
+
         member _.WriteInfo (info:string) = Console.Out.WriteLine info
         member _.WriteWarning (warning:Suggestion.LintWarning) =
-            sprintf "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
+            fprintf Console.Out "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
                 <| warning.FilePath
                 <| warning.Details.Range.StartLine
                 <| warning.Details.Range.StartColumn
@@ -56,7 +58,6 @@ type MSBuildOutput () =
                 <| warning.Details.Range.EndColumn
                 <| warning.RuleIdentifier
                 <| warning.Details.Message
-            |> Console.Out.WriteLine
         member _.WriteError (error:string) =
-            sprintf "FSharpLint error: %s" error
+            $"FSharpLint error: {error}"
             |> Console.Error.WriteLine

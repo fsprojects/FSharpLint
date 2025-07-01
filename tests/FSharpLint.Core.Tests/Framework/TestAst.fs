@@ -49,7 +49,7 @@ let stubPropertyInitialiser propertyName value =
 type TestAst() =
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithConstructorArgs() =
+    member _.GetSuppressMessageAttributesWithConstructorArgs() =
         let attributes =
             [ [stubConstString "Analyser"; stubConstString "Rule"]
               |> stubTuple
@@ -63,7 +63,7 @@ type TestAst() =
         Assert.AreEqual({ category = "Analyser"; rule = "Rule" }, attrs |> List.head |> fst)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisers() =
+    member _.GetSuppressMessageAttributesWithPropertyInitialisers() =
         let attributes =
             [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "CheckId" "*"]
               |> stubTuple
@@ -77,7 +77,7 @@ type TestAst() =
         Assert.AreEqual({ category = "Analyser"; rule = "*" }, attrs |> List.head |> fst)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() =
+    member _.GetSuppressMessageAttributesWithPropertyInitialisersMissingCategoryProperty() =
         let attributes =
             [ [stubPropertyInitialiser "SomeProp" "Analyser"; stubPropertyInitialiser "CheckId" "*"]
               |> stubTuple
@@ -89,7 +89,7 @@ type TestAst() =
         Assert.IsEmpty(getSuppressMessageAttributes binding)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersMissingCheckIdProperty() =
+    member _.GetSuppressMessageAttributesWithPropertyInitialisersMissingCheckIdProperty() =
         let attributes =
             [ [stubPropertyInitialiser "Category" "Analyser"; stubPropertyInitialiser "SomeProp" "*"]
               |> stubTuple
@@ -101,7 +101,7 @@ type TestAst() =
         Assert.IsEmpty(getSuppressMessageAttributes binding)
 
     [<Test>]
-    member __.GetSuppressMessageAttributesWithPropertyInitialisersWithExtraProperty() =
+    member _.GetSuppressMessageAttributesWithPropertyInitialisersWithExtraProperty() =
         let attributes =
             [ [ stubPropertyInitialiser "AnotherProp" "gwegweg"
                 stubPropertyInitialiser "Category" "Analyser"

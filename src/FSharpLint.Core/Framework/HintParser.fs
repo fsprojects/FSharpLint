@@ -428,7 +428,7 @@ module HintParser =
 
                 let isKeyword = List.exists ((=) identStr) FSharpKeywords.KeywordNames
 
-                if isKeyword then fail (sprintf "Unexpected keyword %s" identStr)
+                if isKeyword then fail $"Unexpected keyword %s{identStr}"
                 else preturn ident
 
         let private pident: (CharStream<unit> -> Reply<char list>) =
@@ -1034,7 +1034,7 @@ module HintParser =
                                         match operator with
                                         | "|" -> Pattern.Or(patLhs, patRhs)
                                         | "::" -> Pattern.Cons(patLhs, patRhs)
-                                        | _ -> failwith ("Unexpected operator " + operator + " in pattern."))
+                                        | _ -> failwith ($"Unexpected operator '{operator}' in pattern."))
             opp.AddOperator(op)
 
         do

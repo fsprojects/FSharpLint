@@ -23,7 +23,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
         let prefixSuggestion typeName =
             let suggestedFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeName + "<" + typeArgs + ">" }))
+                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeName}<{typeArgs}>" }))
             { Range = range
               Message = Resources.GetString("RulesFormattingGenericPrefixError")
               SuggestedFix = Some suggestedFix
@@ -42,7 +42,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             then
                 let suggestedFix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                    ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " " + typeName }))
+                    ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeArgs} {typeName}" }))
                 { Range = range
                   Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
                   SuggestedFix = Some suggestedFix
@@ -57,7 +57,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             // Prefer special postfix (e.g. int []).
             let suggestedFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = typeArgs + " []" }))
+                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = range; ToText = $"{typeArgs} []" }))
             { Range = range
               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
               SuggestedFix = Some suggestedFix
@@ -90,7 +90,7 @@ let runner (config:Config) args =
         { Range = range
           Message = Resources.GetString("RulesFormattingF#ArrayPrefixError")
           SuggestedFix = None
-          TypeChecks = List.Empty } 
+          TypeChecks = List.Empty }
         |> Array.singleton
     | _ ->
         Array.empty

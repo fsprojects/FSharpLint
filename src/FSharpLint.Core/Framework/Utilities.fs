@@ -52,7 +52,7 @@ module ExpressionUtilities =
             PrettyNaming.ConvertValLogicalNameToDisplayNameCore ident.idText
         else ident.idText
 
-    let identAsCompiledOpName (identName: string) = 
+    let identAsCompiledOpName (identName: string) =
         if PrettyNaming.IsOperatorDisplayName identName then
             PrettyNaming.CompileOpName identName
         else
@@ -106,7 +106,7 @@ module ExpressionUtilities =
     let synTypeToString (text:string) = function
         | SynType.Tuple _ as synType ->
             tryFindTextOfRange synType.Range text
-            |> Option.map (fun x -> "(" + x + ")")
+            |> Option.map (fun x -> $"({x})")
         | other ->
             tryFindTextOfRange other.Range text
 

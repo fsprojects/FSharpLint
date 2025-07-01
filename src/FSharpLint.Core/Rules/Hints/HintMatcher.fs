@@ -460,23 +460,23 @@ module private MatchPattern =
 module private FormatHint =
     let private constantToString = function
         | Constant.Bool(x) -> if x then "true" else "false"
-        | Constant.Int16(x) -> x.ToString() + "s"
-        | Constant.Int32(x) -> x.ToString()
-        | Constant.Int64(x) -> x.ToString() + "L"
-        | Constant.UInt16(x) -> x.ToString() + "us"
-        | Constant.UInt32(x) -> x.ToString() + "u"
-        | Constant.UInt64(x) -> x.ToString() + "UL"
-        | Constant.Byte(x) -> x.ToString() + "uy"
-        | Constant.Bytes(x) -> x.ToString()
-        | Constant.Char(x) -> "'" + x.ToString() + "'"
-        | Constant.Decimal(x) -> x.ToString() + "m"
-        | Constant.Double(x) -> x.ToString()
-        | Constant.SByte(x) -> x.ToString() + "y"
-        | Constant.Single(x) -> x.ToString() + "f"
-        | Constant.String(x) -> "\"" + x + "\""
-        | Constant.UIntPtr(x) -> x.ToString()
-        | Constant.IntPtr(x) -> x.ToString()
-        | Constant.UserNum(x, _) -> x.ToString()
+        | Constant.Int16(x) -> $"{x}s"
+        | Constant.Int32(x) -> $"{x}"
+        | Constant.Int64(x) -> $"{x}L"
+        | Constant.UInt16(x) -> $"{x}us"
+        | Constant.UInt32(x) -> $"{x}u"
+        | Constant.UInt64(x) -> $"{x}UL"
+        | Constant.Byte(x) -> $"{x}uy"
+        | Constant.Bytes(x) -> $"{x}"
+        | Constant.Char(x) -> $"'{x}'"
+        | Constant.Decimal(x) -> $"{x}m"
+        | Constant.Double(x) -> $"{x}"
+        | Constant.SByte(x) -> $"{x}y"
+        | Constant.Single(x) -> $"{x}f"
+        | Constant.String(x) -> $"\"{x}\""
+        | Constant.UIntPtr(x) -> $"{x}"
+        | Constant.IntPtr(x) -> $"{x}"
+        | Constant.UserNum(x, _) -> $"{x}"
         | Constant.Unit -> "()"
 
     let private surroundExpressionsString hintToString left right sep expressions =
@@ -490,7 +490,7 @@ module private FormatHint =
     let private opToString = function
         | Expression.Identifier(identifier) -> String.concat "." identifier
         | x ->
-            Debug.Assert(false, "Expected operator to be an expression identifier, but was " + x.ToString())
+            Debug.Assert(false, $"Expected operator to be an expression identifier, but was {x.ToString()}")
             ""
 
     let rec toString replace parentAstNode (args:AstNodeRuleParams) (matchedVariables:Dictionary<_, SynExpr>) parentHintNode hintNode =
@@ -517,28 +517,26 @@ module private FormatHint =
                 identifier
                 |> List.map (fun each ->
                     if PrettyNaming.IsOperatorDisplayName each then
-                        sprintf "( %s )" each
+                        $"( %s{each} )"
                     else
                         each)
                 |> String.concat "."
             | HintExpr(Expression.FunctionApplication(expressions)) ->
                 expressions |> surroundExpressionsString (HintExpr >> toString) "" "" " "
             | HintExpr(Expression.InfixOperator(operator, leftHint, rightHint)) ->
-                toString (HintExpr leftHint) + " " + opToString operator + " " + toString (HintExpr rightHint)
+                $"{toString (HintExpr leftHint)} {opToString operator} {toString (HintExpr rightHint)}"
             | HintPat(Pattern.Cons(leftHint, rightHint)) ->
-                toString (HintPat leftHint) + "::" + toString (HintPat rightHint)
+                $"{toString (HintPat leftHint)}::{toString (HintPat rightHint)}"
             | HintPat(Pattern.Or(leftHint, rightHint)) ->
-                toString (HintPat leftHint) + " | " + toString (HintPat rightHint)
+                $"{toString (HintPat leftHint)} | {toString (HintPat rightHint)}"
             | HintExpr(Expression.AddressOf(singleAmp, hint)) ->
                 (if singleAmp then "&" else "&&") + toString (HintExpr hint)
             | HintExpr(Expression.PrefixOperator(operator, hint)) ->
-                opToString operator + toString (HintExpr hint)
-            | HintExpr(Expression.Parentheses(hint)) -> "(" + toString (HintExpr hint) + ")"
-            | HintPat(Pattern.Parentheses(hint)) -> "(" + toString (HintPat hint) + ")"
+                $"{opToString operator}{toString (HintExpr hint)}"
+            | HintExpr(Expression.Parentheses(hint)) -> $"({toString (HintExpr hint)})"
+            | HintPat(Pattern.Parentheses(hint)) -> $"({toString (HintPat hint)})"
             | HintExpr(Expression.Lambda(arguments, LambdaBody(body))) ->
-                "fun "
-                + lambdaArgumentsToString replace parentAstNode args matchedVariables arguments
-                + " -> " + toString (HintExpr body)
+                $"fun {lambdaArgumentsToString replace parentAstNode args matchedVariables arguments} -> {toString (HintExpr body)}"
             | HintExpr(Expression.LambdaArg(argument)) ->
                 toString (HintExpr argument)
             | HintExpr(Expression.LambdaBody(body)) ->
@@ -556,14 +554,14 @@ module private FormatHint =
             | HintPat(Pattern.Array(expressions)) ->
                 expressions |> surroundExpressionsString (HintPat >> toString) "[|" "|]" ";"
             | HintExpr(Expression.If(cond, expr, None)) ->
-                "if " + toString (HintExpr cond) + " then " + toString (HintExpr expr)
+                $"if {toString (HintExpr cond)} then {toString (HintExpr expr)}"
             | HintExpr(Expression.If(cond, expr, Some(elseExpr))) ->
-                "if " + toString (HintExpr cond) + " then " + toString (HintExpr expr) + " " + toString (HintExpr elseExpr)
+                $"if {toString (HintExpr cond)} then {toString (HintExpr expr)} {toString (HintExpr elseExpr)}"
             | HintExpr(Expression.Else(expr)) ->
-                "else " + toString (HintExpr expr)
+                $"else {toString (HintExpr expr)}"
             | HintExpr(Expression.Null)
             | HintPat(Pattern.Null) -> "null"
-        if replace && Precedence.requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then "(" + str + ")"
+        if replace && Precedence.requiresParenthesis matchedVariables hintNode parentAstNode parentHintNode then $"({str})"
         else str
     and private lambdaArgumentsToString replace parentAstNode args matchedVariables (arguments:LambdaArg list) =
         arguments

@@ -61,7 +61,7 @@ module Lint =
                 let getParseFailureReason = function
                     | ParseFile.FailedToParseFile failures ->
                         let getFailureReason (x:FSharpDiagnostic) =
-                            sprintf "failed to parse file %s, message: %s" x.FileName x.Message
+                            $"failed to parse file {x.FileName}, message: {x.Message}"
 
                         String.Join(", ", failures |> Array.map getFailureReason)
                     | ParseFile.AbortedTypeCheck -> "Type check failed. You might want to build your solution/project first and try again."
@@ -78,10 +78,10 @@ module Lint =
                 | RunTimeConfigError error ->
                     String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error)
                 | FailedToParseFile failure ->
-                    "Lint failed to parse a file. Failed with: " + getParseFailureReason failure
+                    $"Lint failed to parse a file. Failed with: {getParseFailureReason failure}"
                 | FailedToParseFilesInProject failures ->
                     let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
-                    "Lint failed to parse files. Failed with: " + failureReasons
+                    $"Lint failed to parse files. Failed with: {failureReasons}"
 
     [<NoComparison>]
     type Result<'T> =

@@ -29,8 +29,8 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
 
                     ExpressionUtilities.tryFindTextOfRange constRange args.FileContent
                     |> Option.bind (fun constText ->
-                     
-                        lazy (Some { FromText = text; FromRange = fromRange; ToText = constText + " as " +  ident.idText})
+
+                        lazy (Some { FromText = text; FromRange = fromRange; ToText = $"{constText} as {ident.idText}"})
                         |> Some
                     )
 

@@ -16,14 +16,14 @@ let private checkTupleOfWildcards pattern identifier =
     let constructorString numberOfWildcards =
         let constructorName = identifier |> String.concat "."
         let arguments = Array.create numberOfWildcards "_" |> String.concat ", "
-        constructorName + "(" + arguments + ")"
+        $"{constructorName}({arguments})"
 
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, _, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
         let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
         let refactorFrom = constructorString (List.length patterns)
-        let refactorTo = (constructorString 1)
-        let error = System.String.Format(errorFormat, refactorFrom, refactorTo)
+        let refactorTo = constructorString 1
+        let error = String.Format(errorFormat, refactorFrom, refactorTo)
         { Range = range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
     | _ -> Array.empty
 

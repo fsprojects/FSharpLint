@@ -24,7 +24,7 @@ type private FileType =
 type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
-    | Version 
+    | Version
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -56,10 +56,7 @@ let private parserProgress (output:Output.IOutput) = function
         String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
     | Failed (file, parseException) ->
         String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-        "Exception Message:" + Environment.NewLine +
-            parseException.Message + Environment.NewLine +
-            "Exception Stack Trace:" + Environment.NewLine +
-            parseException.StackTrace + Environment.NewLine
+        $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
         |> output.WriteError
 
 /// Infers the file type of the target based on its file extension.
@@ -84,10 +81,10 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | None -> Output.StandardOutput() :> Output.IOutput
 
     if arguments.Contains ToolArgs.Version then
-        let version = 
+        let version =
             Assembly.GetExecutingAssembly().GetCustomAttributes false
             |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
-        sprintf "Current version: %s" version |> output.WriteInfo
+        $"Current version: {version}" |> output.WriteInfo
         ()
 
     let handleError (str:string) =
@@ -134,12 +131,12 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         with
         | e ->
             let target = if fileType = FileType.Source then "source" else target
-            sprintf "Lint failed while analysing %s.\nFailed with: %s\nStack trace: %s" target e.Message e.StackTrace
+            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{e.Message}{Environment.NewLine}Stack trace: {e.StackTrace}"
             |> handleError
     | _ -> ()
 
     exitCode
-    
+
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
 let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
