@@ -9,6 +9,7 @@ open System.Threading
 open FSharp.Compiler.Text
 open FSharp.Compiler.Diagnostics
 open FSharp.Compiler.CodeAnalysis
+open Microsoft.Build.Construction
 open Ionide.ProjInfo.ProjectSystem
 open Ionide.ProjInfo.FCS
 open FSharpLint.Core
@@ -464,36 +465,41 @@ module Lint =
             | Ok config ->
                 let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration config }
 
-                let projectsInSolution =
-                    File.ReadAllText(solutionFilePath)
-                    |> String.toLines
-                    |> Array.filter (fun (s, _, _) ->  s.StartsWith("Project") && s.Contains(".fsproj"))
-                    |> Array.map (fun (s, _, _) ->
-                        let endIndex = s.IndexOf(".fsproj") + 7
-                        let startIndex = s.IndexOf(",") + 1
-                        let projectPath = s.Substring(startIndex, endIndex - startIndex).Trim([|'"'; ' '|])
-                        let projectPath =
-                            if Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
+                try
+                    // Use Microsoft.Build.Construction.SolutionFile for modern solution parsing
+                    let solutionFile = SolutionFile.Parse(solutionFilePath)
+                    
+                    let projectsInSolution =
+                        solutionFile.ProjectsInOrder
+                        |> Seq.filter (fun project -> 
+                            project.ProjectType = SolutionProjectType.KnownToBeMSBuildFormat && 
+                            project.RelativePath.EndsWith(".fsproj"))
+                        |> Seq.map (fun project -> 
+                            let projectPath = Path.Combine(solutionFolder, project.RelativePath)
+                            if RuntimeInformation.IsOSPlatform(OSPlatform.Windows) then
                                 projectPath
-                            else // For non-Windows, we need to convert the project path in the solution to Unix format.
-                                projectPath.Replace("\\", "/")
-                        Path.Combine(solutionFolder, projectPath))
+                            else // For non-Windows, ensure Unix format
+                                projectPath.Replace("\\", "/"))
+                        |> Seq.toArray
 
-                let (successes, failures) =
-                    projectsInSolution
-                    |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath toolsPath)
-                    |> Array.fold (fun (successes, failures) result ->
-                        match result with
-                        | LintResult.Success warnings ->
-                            (List.append warnings successes, failures)
-                        | LintResult.Failure err ->
-                            (successes, err :: failures)) ([], [])
+                    let (successes, failures) =
+                        projectsInSolution
+                        |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath toolsPath)
+                        |> Array.fold (fun (successes, failures) result ->
+                            match result with
+                            | LintResult.Success warnings ->
+                                (List.append warnings successes, failures)
+                            | LintResult.Failure err ->
+                                (successes, err :: failures)) ([], [])
 
-                match failures with
-                | [] ->
-                    LintResult.Success successes
-                | firstErr :: _ ->
-                    LintResult.Failure firstErr
+                    match failures with
+                    | [] ->
+                        LintResult.Success successes
+                    | firstErr :: _ ->
+                        LintResult.Failure firstErr
+                with
+                | ex ->
+                    LintResult.Failure (MSBuildFailedToLoadProjectFile (solutionFilePath, BuildFailure.InvalidProjectFileMessage ex.Message))
 
             | Error err -> LintResult.Failure (RunTimeConfigError err)
         else
