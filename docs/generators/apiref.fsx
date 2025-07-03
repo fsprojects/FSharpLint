@@ -1,7 +1,7 @@
 #r "../_lib/Fornax.Core.dll"
-#r "../../packages/docs/Markdig/lib/netstandard2.0/Markdig.dll"
-#r "../../packages/docs/Newtonsoft.Json/lib/netstandard2.0/Newtonsoft.Json.dll"
-#r "../../packages/docs/FSharp.Formatting/lib/netstandard2.0/FSharp.MetadataFormat.dll"
+#r "../../packages/docs/markdig/0.34.0/lib/netstandard2.0/Markdig.dll"
+#r "../../packages/docs/newtonsoft.json/13.0.3/lib/netstandard2.0/Newtonsoft.Json.dll"
+#r "../../packages/docs/fsharp.formatting/4.1.0/lib/netstandard2.0/FSharp.MetadataFormat.dll"
 
 #if !FORNAX
 #load "../loaders/apirefloader.fsx"
