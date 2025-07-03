@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.56">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)../packages/docs</RestorePackagesPath>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <TargetFramework>net9.0</TargetFramework>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageDownload Include="FSharp.Formatting" version="[4.1.0]" />
+    <PackageDownload Include="Markdig" version="[0.34.0]" />
+    <PackageDownload Include="Newtonsoft.Json" version="[13.0.3]" />
+  </ItemGroup>
+
+</Project>
