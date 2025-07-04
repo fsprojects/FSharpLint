@@ -21,6 +21,7 @@ let generateAbstractMembers numMembers numIndents =
     Array.init numMembers (fun index -> sprintf "abstract member Foo%i : unit -> unit\n" index)
     |> String.concat (String.replicate numIndents " ")
 
+[<Literal>]
 let FunctionLength = 70
 [<TestFixture>]
 type TestMaxLinesInFunction() =
@@ -89,6 +90,7 @@ let dog x =
     ()""" (generateNewLines (FunctionLength - 5) 4))
         Assert.IsFalse this.ErrorsExist
 
+[<Literal>]
 let LambdaFunctionLength = 5
 [<TestFixture>]
 type TestMaxLinesInLambdaFunction() =
@@ -137,6 +139,7 @@ let dog = fun x ->
 
         Assert.IsFalse(this.ErrorExistsAt(4, 10))
 
+[<Literal>]
 let MatchLambdaFunctionLength = 70
 [<TestFixture>]
 type TestMaxLinesInMatchLambdaFunction() =
@@ -166,6 +169,7 @@ let dog = function
 | None -> ()""" (generateNewLines (MatchLambdaFunctionLength - 5) 4))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
+[<Literal>]
 let ValueLength = 70
 [<TestFixture>]
 type TestMaxLinesInValue() =
@@ -191,6 +195,7 @@ let dog =
     ()""" (generateNewLines (ValueLength - 4) 4))
         Assert.IsFalse(this.ErrorExistsAt(4, 4))
 
+[<Literal>]
 let ConstructorLength = 70
 [<TestFixture>]
 type TestMaxLinesInConstructor() =
@@ -219,12 +224,14 @@ type MyClass(x) =
 
         Assert.IsFalse(this.ErrorExistsAt(5, 4))
 
+[<Literal>]
 let MemberLength = 70
 [<TestFixture>]
 type TestMaxLinesInMember() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMember.rule { Config.MaxLines = MemberLength })
     // TODO: Add tests.
 
+[<Literal>]
 let PropertyLength = 70
 [<TestFixture>]
 type TestMaxLinesInProperty() =
@@ -242,6 +249,7 @@ type Class() =
 """
         Assert.IsFalse(this.ErrorExistsAt(6, 31))
 
+[<Literal>]
 let ClassLength = 500
 [<TestFixture>]
 type TestMaxLinesInClass() =
@@ -291,12 +299,14 @@ type IPrintable =
 
         Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
+[<Literal>]
 let UnionLength = 500
 [<TestFixture>]
 type TestMaxLinesInUnion() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInUnion.rule { Config.MaxLines = UnionLength })
     // TODO: Add tests.
 
+[<Literal>]
 let RecordLength = 500
 [<TestFixture>]
 type TestMaxLinesInRecord() =
@@ -324,12 +334,14 @@ type Record = { dog: int }
 
         Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
+[<Literal>]
 let EnumLength = 1000
 [<TestFixture>]
 type TestMaxLinesInEnum() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInEnum.rule { Config.MaxLines = EnumLength })
     // TODO: Add tests.
 
+[<Literal>]
 let ModuleLength = 1000
 [<TestFixture>]
 type TestMaxLinesInModule() =

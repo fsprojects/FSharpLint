@@ -370,7 +370,7 @@ module Ast =
         | SynExpr.DotLambda(_)
         | SynExpr.App(_)
         | SynExpr.Fixed(_)
-        | SynExpr.Typar(_, _) -> ()
+        | SynExpr.Typar(_) -> ()
         | SynExpr.WhileBang(_, expression, expression1, _) ->
             add <| Expression expression1
             add <| Expression expression
