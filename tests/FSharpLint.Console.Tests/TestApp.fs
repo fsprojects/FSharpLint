@@ -1,4 +1,4 @@
-﻿module TestApp
+module FSharpLint.Console.Tests.TestApp
 
 open System
 open System.IO

@@ -1,4 +1,4 @@
-﻿module TestLineRuleBase
+﻿module FSharpLint.Core.Tests.TestLineRuleBase
 
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text

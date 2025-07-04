@@ -4,6 +4,7 @@ open System
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Rules.Helper.SourceLength
+open FSharpLint.Core.Tests
 
 let generateNewLines numNewLines numIndents =
     Array.mapi

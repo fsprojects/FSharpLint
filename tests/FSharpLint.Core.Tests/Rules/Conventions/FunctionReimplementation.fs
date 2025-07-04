@@ -2,6 +2,7 @@ module FSharpLint.Core.Tests.Rules.Conventions.FunctionReimplementation
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsFunctionReimplementation() =

@@ -2,6 +2,7 @@ module FSharpLint.Core.Tests.Rules.Typography.Indentation
 
 open NUnit.Framework
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestTypographyIndentation() =
