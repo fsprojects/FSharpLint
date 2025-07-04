@@ -8,7 +8,6 @@
 #r "nuget: Fake.DotNet.Cli"
 #r "nuget: Fake.Core.ReleaseNotes"
 #r "nuget: Fake.DotNet.AssemblyInfoFile"
-#r "nuget: Fake.DotNet.Paket"
 #r "nuget: Fake.Tools.Git"
 #r "nuget: Fake.Core.Environment"
 #r "nuget: Fake.Core.UserInput"
@@ -194,7 +193,21 @@ Target.create "Pack" (fun _ ->
 
 Target.create "Push" (fun _ ->
     let push key =
-        Paket.push (fun p -> { p with WorkingDir = nugetDir; ApiKey = key; ToolType = ToolType.CreateLocalTool() })
+        let distGlob = nugetDir </> "*.nupkg"
+        distGlob
+        |> DotNet.nugetPush (fun o -> {
+            o with
+                Common = {
+                    o.Common with
+                        WorkingDirectory = nugetDir
+                        CustomParams = Some "--skip-duplicate"
+                }
+                PushParams = {
+                    o.PushParams with
+                        Source = Some "https://api.nuget.org/v3/index.json"
+                        ApiKey = Some key
+                }
+        })
 
     let key = getBuildParam "nuget-key"
     match getBuildParam "GITHUB_EVENT_NAME" with
