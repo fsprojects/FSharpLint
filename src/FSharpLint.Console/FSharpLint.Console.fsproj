@@ -23,7 +23,6 @@
   <ItemGroup>
     <PackageReference Include="Argu" />
     <PackageReference Include="FSharp.Core" />
-    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>
