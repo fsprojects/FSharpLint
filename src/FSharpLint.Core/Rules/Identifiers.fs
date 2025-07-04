@@ -1,9 +1,10 @@
+// fsharplint:disable FL0046
 module FSharpLint.Rules.Identifiers
 
 let [<Literal>] private Prefix = "FL"
 
 let identifier (number:int) =
-    sprintf "%s%04d" Prefix number
+    $"%s{Prefix}%04d{number}"
 
 let TupleCommaSpacing = identifier 1
 let TupleIndentation = identifier 2

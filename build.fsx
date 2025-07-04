@@ -64,7 +64,7 @@ let isNullOrWhiteSpace = System.String.IsNullOrWhiteSpace
 let exec cmd args dir =
     let proc =
         CreateProcess.fromRawCommandLine cmd args
-        |> CreateProcess.ensureExitCodeWithMessage (sprintf "Error while running '%s' with args: %s" cmd args)
+        |> CreateProcess.ensureExitCodeWithMessage $"Error while running '%s{cmd}' with args: %s{args}"
     (if isNullOrWhiteSpace dir then proc
     else proc |> CreateProcess.withWorkingDirectory dir)
     |> Proc.run
@@ -127,7 +127,7 @@ let nugetVersion =
 
 let PackageReleaseNotes baseProps =
     if isTag then
-        ("PackageReleaseNotes", sprintf "%s/blob/v%s/CHANGELOG.md" gitUrl nugetVersion)::baseProps
+        ("PackageReleaseNotes", $"%s{gitUrl}/blob/v%s{nugetVersion}/CHANGELOG.md")::baseProps
     else
         baseProps
 
@@ -218,7 +218,7 @@ Target.create "Push" (fun _ ->
                 | None ->
                     failwith "GITHUB_SHA should have been populated"
                 | Some commitHash ->
-                    let gitArgs = sprintf "describe --exact-match --tags %s" commitHash
+                    let gitArgs = $"describe --exact-match --tags %s{commitHash}"
                     let proc =
                         CreateProcess.fromRawCommandLine "git" gitArgs
                         |> Proc.run
@@ -238,7 +238,7 @@ Target.create "SelfCheck" (fun _ ->
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
     let sol = Path.Combine(rootDir.FullName, "FSharpLint.sln") |> FileInfo
-    exec "dotnet" (sprintf "run lint %s" sol.FullName) consoleProj.Directory.FullName
+    exec "dotnet" $"run lint %s{sol.FullName}" consoleProj.Directory.FullName
 )
 
 // --------------------------------------------------------------------------------------
