@@ -20,7 +20,7 @@ module Tests =
           Code:string }
 
         override this.ToString() =
-            sprintf "{\n    Description=\"%s\"\n    Location=\"%s\"\n    Code=\"%s\"\n}" this.Description this.Location this.Code
+            $"{{%s{Environment.NewLine}    Description=\"%s{this.Description}\"%s{Environment.NewLine}    Location=\"%s{this.Location}\"%s{Environment.NewLine}    Code=\"%s{this.Code}\"%s{Environment.NewLine}}}"
 
     let dotnetFslint arguments =
         let configDirName =
@@ -81,7 +81,7 @@ module Tests =
         member _.InvalidConfig() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
             let lintConfigPath = projectPath </> "fsharplint.json"
-            let arguments = sprintf "lint --lint-config %s %s" lintConfigPath projectFile
+            let arguments = $"lint --lint-config %s{lintConfigPath} %s{projectFile}"
 
             File.WriteAllText(lintConfigPath, "invalid config file contents")
 
@@ -89,47 +89,51 @@ module Tests =
 
             File.Delete(projectPath </> "fsharplint.json")
 
-            Assert.IsTrue(output.Contains("Failed while reading from config at run time"), sprintf "Output:\n%s" output)
+            Assert.IsTrue(output.Contains("Failed while reading from config at run time"), $"Output:%s{Environment.NewLine}%s{output}")
 
         [<Test>]
         member _.UnableToFindProjectFile() =
             let projectFile = projectPath </> "iuniubi.fsproj"
-            let arguments = sprintf "lint %s" projectFile
+            let arguments = $"lint %s{projectFile}"
 
             let output = dotnetFslint arguments
 
             Assert.IsTrue(
-                output.Contains(sprintf "Could not find the file: %s on disk" projectFile),
-                sprintf "Output:\n%s" output)
+                output.Contains($"Could not find the file: %s{projectFile} on disk"),
+                $"Output:%s{Environment.NewLine}%s{output}")
 
         [<Test>]
         member _.FunctionalTestConsoleApplication() =
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
-            let arguments = sprintf "lint %s" projectFile
+            let arguments = $"lint {projectFile}"
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
 
             let expectedMissing = Set.difference expectedErrors errors
             let notExpected = Set.difference errors expectedErrors
+            let expectedMissingStr = String.concat "," expectedMissing
+            let notExpectedStr = String.concat "," notExpected
 
             Assert.AreEqual(expectedErrors, errors,
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]\n" +
-                "Complete output: " + output)
+                $"Did not find the following expected errors: [{expectedMissingStr}]\n" +
+                $"Found the following unexpected warnings: [{notExpectedStr}]\n" +
+                $"Complete output: {output}")
 
         [<Test>]
         member _.FunctionalTestConsoleApplicationSolution() =
             let solutionFile = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.sln"
-            let arguments = sprintf "lint %s" solutionFile
+            let arguments = $"lint {solutionFile}"
 
             let output = dotnetFslint arguments
             let errors = getErrorsFromOutput output
 
             let expectedMissing = Set.difference expectedErrors errors
             let notExpected = Set.difference errors expectedErrors
+            let expectedMissingStr = String.concat "," expectedMissing
+            let notExpectedStr = String.concat "," notExpected
 
             Assert.AreEqual(expectedErrors, errors,
-                "Did not find the following expected errors: [" + String.concat "," expectedMissing + "]\n" +
-                "Found the following unexpected warnings: [" + String.concat "," notExpected + "]\n" +
-                "Complete output: " + output)
+                $"Did not find the following expected errors: [{expectedMissingStr}]\n" +
+                $"Found the following unexpected warnings: [{notExpectedStr}]\n" +
+                $"Complete output: {output}")
