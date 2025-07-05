@@ -25,6 +25,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NUnit" Version="3.14.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
+    <PackageVersion Include="Sarif.Sdk" Version="4.5.4" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
   </ItemGroup>
 </Project>
