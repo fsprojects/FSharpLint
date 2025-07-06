@@ -122,16 +122,18 @@ open FSharpLint.Console.Program
 
 [<TestFixture>]
 type TestFileTypeInference() =
-
+    
     [<TestCase("test.fs", FileType.File, TestName = "inferFileType must recognize .fs files as File type")>]
     [<TestCase("script.fsx", FileType.File, TestName = "inferFileType must recognize .fsx files as File type")>]
     [<TestCase("MyProject.fsproj", FileType.Project, TestName = "inferFileType must recognize .fsproj files as Project type")>]
     [<TestCase("MySolution.sln", FileType.Solution, TestName = "inferFileType must recognize .sln files as Solution type")>]
     [<TestCase("MySolution.slnx", FileType.Solution, TestName = "inferFileType must recognize .slnx files as Solution type")>]
+    [<TestCase("MySolution.slnf", FileType.Solution, TestName = "inferFileType must recognize .slnf files as Solution type")>]
     [<TestCase("unknown.txt", FileType.Source, TestName = "inferFileType must treat unknown extensions as Source type")>]
     [<TestCase("noextension", FileType.Source, TestName = "inferFileType must treat files without extensions as Source type")>]
     [<TestCase("src/MyProject/Program.fs", FileType.File, TestName = "inferFileType must handle .fs files in directories correctly")>]
     [<TestCase(@"C:\Projects\MySolution.slnx", FileType.Solution, TestName = "inferFileType must handle .slnx files with full paths correctly")>]
+    [<TestCase(@"C:\Projects\MySolution.slnf", FileType.Solution, TestName = "inferFileType must handle .slnf files with full paths correctly")>]
     [<TestCase("../MyProject.fsproj", FileType.Project, TestName = "inferFileType must handle .fsproj files with relative paths correctly")>]
     member _.``File type inference test cases``(filename: string, expectedType: int) =
         let result = FSharpLint.Console.Program.inferFileType filename

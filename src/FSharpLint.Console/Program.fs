@@ -65,7 +65,7 @@ let internal inferFileType (target:string) =
         FileType.File
     else if target.EndsWith ".fsproj" then
         FileType.Project
-    else if target.EndsWith ".slnx" || target.EndsWith ".sln" then
+    else if target.EndsWith ".slnx" || target.EndsWith ".slnf" || target.EndsWith ".sln" then
         FileType.Solution
     else
         FileType.Source

@@ -104,6 +104,7 @@ module TestApi =
 
         [<TestCase("FSharpLint.FunctionalTest.TestedProject.sln", 18, TestName = "SLN: lint solution (absolute path)")>]
         [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnx", 18, TestName = "SLNX: lint solution (absolute path)")>]
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnf", 18, TestName = "SLNF: lint solution (absolute path)")>]
         member _.``Lint solution via absolute path``(solutionFileName: string, expectedWarnings: int) =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> solutionFileName
@@ -119,6 +120,7 @@ module TestApi =
 #if NETCOREAPP
         [<TestCase("FSharpLint.FunctionalTest.TestedProject.sln", 18, TestName = "SLN: lint solution (relative path)")>]
         [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnx", 18, TestName = "SLNX: lint solution (relative path)")>]
+        [<TestCase("FSharpLint.FunctionalTest.TestedProject.slnf", 18, TestName = "SLNF: lint solution (relative path)")>]
         member _.``Lint solution via relative path``(solutionFileName: string, expectedWarnings: int) =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> solutionFileName
