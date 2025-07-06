@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "FSharpLint.FunctionalTest.TestedProject.slnx",
+    "projects": [
+      "FSharpLint.FunctionalTest.TestedProject.MultiTarget\\FSharpLint.FunctionalTest.TestedProject.MultiTarget.fsproj",
+      "FSharpLint.FunctionalTest.TestedProject.NetCore\\FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
+    ]
+  }
+}
