@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Write test logs to test context output #722 [@xperiandri]
 - Use string interpolation instead of `+` concatenation #724 [@xperiandri]
 - Run tests in parallel #728 [@xperiandri]
+- Remove `NoPartialFunctions` compiler workaround (#698) [@webwarrior-ws]
 
 ## [0.24.2] - 2024-02-29
 
