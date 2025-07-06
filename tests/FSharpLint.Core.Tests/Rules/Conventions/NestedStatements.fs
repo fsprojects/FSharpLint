@@ -5,7 +5,7 @@ open FSharpLint.Rules
 open FSharpLint.Rules.NestedStatements
 open FSharpLint.Core.Tests
 
-[<TestFixture>]
+[<TestFixture; SingleThreaded>]
 type TestConventionsNestedStatements() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NestedStatements.rule { Config.Depth = 5 })
 
