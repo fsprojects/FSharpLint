@@ -26,6 +26,7 @@ x86/
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
+build/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -405,3 +406,30 @@ tmp/
 temp/
 .fsdocs
 docs/
+
+# ===================================================
+# OS files
+# ===================================================
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Mac desktop service store files
+.DS_Store
+
+# ===================================================
+# FSharpLint project specific
+# ===================================================
+
+# Don't ignore our own task's build directory
+!src/FSharpLint.MSBuild/build/
+
+# Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
+!packaging/*/build/
+
+# BenchmarkDotNet Results
+tests/FSharpLint.Benchmarks/BenchmarkDotNet.Artifacts
