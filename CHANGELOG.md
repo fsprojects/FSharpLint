@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `SLNX` and `SLNF` format support and migrate to SLNX solution #723 [@xperiandri]\
   Remove `Ionide.ProjInfo.Sln` NuGet package dependency
 - Remove `Newtonsoft.Json` NuGet dependency #725 [@xperiandri]
+- Add missing rule checks for FL0079-FL0081 #713 [@BennieCopeland]
 
 ## [0.24.2] - 2024-02-29
 
