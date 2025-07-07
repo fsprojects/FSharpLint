@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <Compile Include="Changelog.fs" />
-    <Compile Include="FsDocs.fs" />
+    <Compile Include="Fornax.fs" />
     <Compile Include="build.fs" />
   </ItemGroup>
 

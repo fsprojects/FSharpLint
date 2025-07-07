@@ -167,51 +167,27 @@ module FSharpAnalyzers =
 
 
 module DocsTool =
-    let quoted s = $"\"%s{s}\""
+    /// <summary>
+    /// Clean Fornax cache and generated files
+    /// </summary>
+    let cleanDocsCache () = Fornax.cleanCache docsDir
 
-    let fsDocsDotnetOptions (o : DotNet.Options) = { o with WorkingDirectory = rootDirectory }
+    /// <summary>
+    /// Build documentation using Fornax
+    /// </summary>
+    let build (configuration) =
+        let result = Fornax.build (fun p -> { p with WorkingDirectory = Some docsDir })
+        result |> ignore
 
-    let fsDocsBuildParams configuration (p : Fsdocs.BuildCommandParams) = {
-        p with
-            Clean = Some true
-            Input = Some (quoted docsSrcDir)
-            Output = Some (quoted docsDir)
-            Eval = Some true
-            Projects = Some (Seq.map quoted (!!srcGlob))
-            Properties = Some ($"Configuration=%s{configuration}")
-            Parameters =
-                Some [
-                    // https://fsprojects.github.io/FSharp.Formatting/content.html#Templates-and-Substitutions
-                    "root", quoted $"{documentationRootUrl}/"
-                    "fsdocs-collection-name", quoted productName
-                    "fsdocs-repository-branch", quoted releaseBranch
-                    "fsdocs-package-version", quoted latestEntry.NuGetVersion
-                    "fsdocs-readme-link", quoted (READMElink.ToString ())
-                    "fsdocs-release-notes-link", quoted (CHANGELOGlink.ToString ())
-                    "fsdocs-logo-src",
-                    quoted ("https://raw.githubusercontent.com/fsprojects/FSharpLint/refs/heads/main/docsSrc/content/logo.png")
-                ]
-            Strict = Some true
-    }
-
-    let cleanDocsCache () = Fsdocs.cleanCache rootDirectory
-
-    let build (configuration) = Fsdocs.build fsDocsDotnetOptions (fsDocsBuildParams configuration)
-
-
+    /// <summary>
+    /// Watch documentation using Fornax with hot reload
+    /// </summary>
     let watch (configuration) =
-        let buildParams bp =
-            let bp =
-                Option.defaultValue Fsdocs.BuildCommandParams.Default bp
-                |> fsDocsBuildParams configuration
-
-            { bp with Output = Some watchDocsDir; Strict = None }
-
-        Fsdocs.watch fsDocsDotnetOptions (fun p -> { p with BuildCommandParams = Some (buildParams p.BuildCommandParams) })
+        let result = Fornax.watch (fun p -> { p with WorkingDirectory = Some docsDir })
+        result |> ignore
 
 let allReleaseChecks () = failOnWrongBranch ()
 //Changelog.failOnEmptyChangelog latestEntry
-
 
 let failOnLocalBuild () =
     if not isCI.Value then
@@ -262,7 +238,6 @@ let dotnetToolRestore _ =
     let result =
         fun () -> DotNet.exec id "tool" "restore"
         |> (retryIfInCI 10)
-
 
     if not result.OK then
         failwithf "Failed to restore .NET tools: %A" result.Errors
