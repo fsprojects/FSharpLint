@@ -1,4 +1,4 @@
-#r "../../_lib/Fornax.Core.dll"
+#r "nuget: Fornax.Core, 0.15.1"
 #if !FORNAX
 #load "../../loaders/contentloader.fsx"
 #load "../../loaders/pageloader.fsx"

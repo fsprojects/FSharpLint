@@ -1,5 +1,4 @@
-#r "../_lib/Fornax.Core.dll"
-
+#r "nuget: Fornax.Core, 0.15.1"
 
 type Shortcut = {
     title: string
