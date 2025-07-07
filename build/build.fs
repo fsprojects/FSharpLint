@@ -52,11 +52,6 @@ let distDir = rootDirectory </> "dist"
 
 let distGlob = distDir </> "*.nupkg"
 
-let coverageThresholdPercent = 0
-
-let coverageReportDir = rootDirectory </> "docs" </> "coverage"
-
-
 let docsDir = rootDirectory </> "docs"
 
 let docsSrcDir = rootDirectory </> "docsSrc"
@@ -93,8 +88,6 @@ let mutable changelogBackupFilename = ""
 
 let publishUrl = "https://www.nuget.org"
 
-let enableCodeCoverage = environVarAsBoolOrDefault "ENABLE_COVERAGE" false
-
 let githubToken = Environment.environVarOrNone "GITHUB_TOKEN"
 
 let nugetToken = Environment.environVarOrNone "NUGET_KEY"
@@ -102,7 +95,6 @@ let nugetToken = Environment.environVarOrNone "NUGET_KEY"
 //-----------------------------------------------------------------------------
 // Helpers
 //-----------------------------------------------------------------------------
-
 
 let isRelease (targets : Target list) =
     targets
@@ -155,8 +147,6 @@ module dotnet =
     let tool optionConfig (command : string) args =
         DotNet.exec optionConfig command args
         |> failOnBadExitAndPrint
-
-    let reportgenerator optionConfig args = tool optionConfig "reportgenerator" args
 
     let sourcelink optionConfig args = tool optionConfig "sourcelink" args
 
@@ -244,7 +234,7 @@ let allPublishChecks () = failOnLocalBuild ()
 let disableBinLog (p : MSBuild.CliArguments) = { p with DisableInternalBinLog = true }
 
 let clean _ =
-    [ "bin"; "temp"; distDir; coverageReportDir ]
+    [ "bin"; "temp"; distDir ]
     |> Shell.cleanDirs
 
     !!srcGlob ++ testsGlob
@@ -357,71 +347,78 @@ let fsharpAnalyzers _ =
     )
 
 let dotnetTest ctx =
-    let excludeCoverage =
-        !!testsGlob
-        |> Seq.map IO.Path.GetFileNameWithoutExtension
-        |> String.concat "|"
+    let args = [ "--no-build" ]
 
-    let isGenerateCoverageReport = ctx.Context.TryFindTarget("GenerateCoverageReport").IsSome
+    // Filter performance tests like in build.fsx
+    let filterPerformanceTests (p : DotNet.TestOptions) = {
+        p with
+            Filter = Some "\"TestCategory!=Performance\""
+            Configuration = configuration (ctx.Context.AllExecutingTargets)
+    }
 
-    DotNet.test
-        (fun testOpts ->
-            if enableCodeCoverage || isGenerateCoverageReport then
-                let prepareOptions =
-                    { Primitive.PrepareOptions.Create() with
+    let testWithCoverageOptions testOpts =
+        if enableCodeCoverage || isGenerateCoverageReport then
+            let prepareOptions =
+                {
+                    Primitive.PrepareOptions.Create () with
                         AssemblyExcludeFilter = [| excludeCoverage |]
                         LocalSource = true
-                    }
-                    |> AltCover.PrepareOptions.Primitive
+                }
+                |> AltCover.PrepareOptions.Primitive
 
-                let collectOptions =
-                    if not isGenerateCoverageReport then
-                        { Primitive.CollectOptions.Create() with
+            let collectOptions =
+                if not isGenerateCoverageReport then
+                    {
+                        Primitive.CollectOptions.Create () with
                             Threshold = string coverageThresholdPercent
-                        }
-                    else
-                        Primitive.CollectOptions.Create()
-                    |> AltCover.CollectOptions.Primitive
+                    }
+                else
+                    Primitive.CollectOptions.Create ()
+                |> AltCover.CollectOptions.Primitive
 
-                testOpts.WithAltCoverOptions prepareOptions collectOptions (DotNet.CLIOptions.Force(false))
-            else
-                testOpts
-            |> fun opts -> {
-                opts with
-                    MSBuildParams = disableBinLog opts.MSBuildParams
-                    Configuration = configuration (ctx.Context.AllExecutingTargets)
-                    Common = opts.Common |> DotNet.Options.withAdditionalArgs ["--no-build"]
-            })
-        sln
+            testOpts.WithAltCoverOptions prepareOptions collectOptions (DotNet.CLIOptions.Force (false))
+        else
+            testOpts
 
-let generateCoverageReport _ =
-    let coverageReports = !! "tests/**/coverage*.xml" |> String.concat ";"
+    // Run the same test projects as in build.fsx
+    DotNet.test
+        (filterPerformanceTests
+         >> testWithCoverageOptions
+         >> fun opts -> {
+             opts with
+                 MSBuildParams = disableBinLog opts.MSBuildParams
+                 Common =
+                     opts.Common
+                     |> DotNet.Options.withAdditionalArgs [ "--no-build" ]
+         })
+        "tests/FSharpLint.Core.Tests"
 
-    let sourceDirs = !!srcGlob |> Seq.map Path.getDirectory |> String.concat ";"
+    DotNet.test
+        (filterPerformanceTests
+         >> testWithCoverageOptions
+         >> fun opts -> {
+             opts with
+                 MSBuildParams = disableBinLog opts.MSBuildParams
+                 Common =
+                     opts.Common
+                     |> DotNet.Options.withAdditionalArgs [ "--no-build" ]
+         })
+        "tests/FSharpLint.Console.Tests"
 
-    let independentArgs = [
-        $"-reports:\"%s{coverageReports}\""
-        $"-targetdir:\"%s{coverageReportDir}\""
-        // Add source dir
-        $"-sourcedirs:\"%s{sourceDirs}\""
-        // Ignore Tests and if AltCover.Recorder.g sneaks in
-        sprintf "-assemblyfilters:\"%s\"" "-*.Tests;-AltCover.Recorder.g"
-        sprintf "-Reporttypes:%s" "Html"
-    ]
+    // Restore the functional test project like in build.fsx
+    DotNet.restore id "tests/FSharpLint.FunctionalTest.TestedProject/FSharpLint.FunctionalTest.TestedProject.sln"
 
-    let args = independentArgs |> String.concat " "
-
-    dotnet.reportgenerator id args
-
-let showCoverageReport _ =
-    failOnCIBuild ()
-
-    coverageReportDir </> "index.html"
-    |> Command.ShellCommand
-    |> CreateProcess.fromCommand
-    |> Proc.start
-    |> ignore
-
+    DotNet.test
+        (filterPerformanceTests
+         >> testWithCoverageOptions
+         >> fun opts -> {
+             opts with
+                 MSBuildParams = disableBinLog opts.MSBuildParams
+                 Common =
+                     opts.Common
+                     |> DotNet.Options.withAdditionalArgs [ "--no-build" ]
+         })
+        "tests/FSharpLint.FunctionalTest"
 
 let watchTests _ =
     !!testsGlob
@@ -646,8 +643,6 @@ let initTargets (ctx : Context.FakeExecutionContext) =
     Target.create "DotnetBuild" dotnetBuild
     Target.create "FSharpAnalyzers" fsharpAnalyzers
     Target.create "DotnetTest" dotnetTest
-    Target.create "GenerateCoverageReport" generateCoverageReport
-    Target.create "ShowCoverageReport" showCoverageReport
     Target.create "WatchTests" watchTests
     Target.create "GenerateAssemblyInfo" generateAssemblyInfo
     Target.create "DotnetPack" dotnetPack
@@ -694,9 +689,6 @@ let initTargets (ctx : Context.FakeExecutionContext) =
 
 
     "DotnetBuild" ==>! "WatchDocs"
-
-    "DotnetTest" ==> "GenerateCoverageReport"
-    ==>! "ShowCoverageReport"
 
     "UpdateChangelog"
     ==> "GenerateAssemblyInfo"
