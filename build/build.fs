@@ -547,6 +547,16 @@ let cleanDocsCache _ = DocsTool.cleanDocsCache ()
 
 let buildDocs ctx =
     let configuration = configuration (ctx.Context.AllExecutingTargets)
+
+    // Build only FSharpLint.Core project for documentation
+    DotNet.build
+        (fun c -> {
+            c with
+                Configuration = DotNet.BuildConfiguration.fromString (string configuration)
+                MSBuildParams = disableBinLog c.MSBuildParams
+        })
+        (rootDirectory </> "src/FSharpLint.Core")
+
     DocsTool.build (string configuration)
 
 let watchDocs ctx =
@@ -628,9 +638,9 @@ let initTargets (ctx : Context.FakeExecutionContext) =
 
     "CleanDocsCache" ==>! "BuildDocs"
 
-    "DotnetBuild" ?=>! "BuildDocs"
-
-    "DotnetBuild" ==>! "BuildDocs"
+    // BuildDocs doesn't need DotnetBuild as it builds FSharpLint.Core itself
+    // "DotnetBuild" ?=>! "BuildDocs"
+    // "DotnetBuild" ==>! "BuildDocs"
 
     "DotnetBuild" ==>! "WatchDocs"
 
