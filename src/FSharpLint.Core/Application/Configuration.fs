@@ -309,7 +309,8 @@ type ConventionsConfig =
       favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
       suggestUseAutoProperty:EnabledConfig option
       usedUnderscorePrefixedElements:EnabledConfig option
-      ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option}
+      ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
+      favourNestedFunctions:EnabledConfig option }
 with
     member this.Flatten() =
         [|
@@ -335,6 +336,7 @@ with
             this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
             this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
+            this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
         |] |> Array.concat
 
 type TypographyConfig =
@@ -459,9 +461,10 @@ type Configuration =
       TrailingNewLineInFile:EnabledConfig option
       NoTabCharacters:EnabledConfig option
       NoPartialFunctions:RuleConfig<NoPartialFunctions.Config> option
-      SuggestUseAutoProperty:EnabledConfig option
       EnsureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
-      FavourAsKeyword:EnabledConfig option }
+      FavourAsKeyword:EnabledConfig option
+      SuggestUseAutoProperty:EnabledConfig option
+      FavourNestedFunctions:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -556,6 +559,7 @@ with
         SuggestUseAutoProperty = None
         EnsureTailCallDiagnosticsInRecursiveFunctions = None
         FavourAsKeyword = None
+        FavourNestedFunctions = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -714,6 +718,7 @@ let flattenConfig (config:Configuration) =
             config.SuggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule)
             config.EnsureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule)
             config.FavourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule)
+            config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
         |] |> Array.choose id
 
     if config.NonPublicValuesNames.IsSome &&
