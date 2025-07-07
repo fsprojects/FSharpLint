@@ -1,4 +1,4 @@
-#r "../../_lib/Fornax.Core.dll"
+#r "nuget: Fornax.Core, 0.15.1"
 #if !FORNAX
 #load "../../loaders/apirefloader.fsx"
 #load "../../loaders/contentloader.fsx"
@@ -7,7 +7,6 @@
 #endif
 
 open Html
-
 
 let menu (ctx : SiteContents) (page: string) =
   let shortcuts = ctx.GetValues<Pageloader.Shortcut> ()
@@ -85,9 +84,9 @@ let menu (ctx : SiteContents) (page: string) =
         h2 [Id "logo"] [!! siteInfo.title]
       ]
       div [Class "searchbox"] [
-        label [Custom("for", "search-by")] [i [Class "fas fa-search"] []]
-        input [Custom ("data-search-input", ""); Id "search-by"; Type "search"; Placeholder "Search..."]
-        span  [Custom ("data-search-clear", "")] [i [Class "fas fa-times"] []]
+        label [HtmlProperties.Custom ("for", "search-by")] [i [Class "fas fa-search"] []]
+        input [HtmlProperties.Custom ("data-search-input", ""); Id "search-by"; Type "search"; Placeholder "Search..."]
+        span  [HtmlProperties.Custom ("data-search-clear", "")] [i [Class "fas fa-times"] []]
       ]
       script [Type "text/javascript"; Src (rootUrl + "/static/js/lunr.min.js")] []
       script [Type "text/javascript"; Src (rootUrl + "/static/js/auto-complete.js")] []

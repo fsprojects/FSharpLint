@@ -84,6 +84,7 @@ let DoNothing = ignore
 
 let buildDir  = "./build/"
 let nugetDir  = "./out/"
+let docsDir   = "./docs/"
 let rootDir = __SOURCE_DIRECTORY__ |> DirectoryInfo
 
 System.Environment.CurrentDirectory <- rootDir.FullName
@@ -153,7 +154,7 @@ Target.create "Test" (fun _ ->
 )
 
 Target.create "Docs" (fun _ ->
-    exec "dotnet"  @"fornax build" "docs"
+    exec "dotnet" "fornax build" docsDir
 )
 
 // --------------------------------------------------------------------------------------

@@ -1,8 +1,7 @@
-open System
-#r "../_lib/Fornax.Core.dll"
-#r "../../packages/docs/Markdig/lib/netstandard2.0/Markdig.dll"
-
+#r "nuget: Fornax.Core, 0.15.1"
+#r "nuget: Markdig, 0.41.3"
 open Markdig
+open System
 open System.IO
 
 type PostConfig = {
