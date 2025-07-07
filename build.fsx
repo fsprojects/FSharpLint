@@ -227,6 +227,8 @@ Target.create "Push" (fun _ ->
         | Some key ->
             if isTag then
                 push key
+            elif getBuildParam "GITHUB_REF_NAME" <> Some "master" then
+                Console.WriteLine "Not a push to master branch, skipping..."
             else
                 match getBuildParam "GITHUB_SHA" with
                 | None ->
