@@ -81,12 +81,12 @@ type TestRuleBase () =
         Seq.fold 
             (fun (source: string) (lazyFix: Lazy<Option<SuggestedFix>>) ->
                 match lazyFix.Value with
-                | Some(fix) ->
+                | Some fix ->
                     let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
                     let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
 
                     match (startIndex, endIndex) with
-                    | (Some(startIndex), Some(endIndex)) ->
+                    | (Some startIndex, Some endIndex) ->
                         (StringBuilder source)
                             .Remove(startIndex, endIndex - startIndex)
                             .Insert(startIndex, fix.ToText)
