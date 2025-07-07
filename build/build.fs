@@ -69,8 +69,10 @@ let releaseBranch = "main"
 let readme = "README.md"
 let changelogFile = "CHANGELOG.md"
 
+// fsharplint:disable FL0046
 let READMElink = Uri (Uri (gitHubRepoUrl), $"blob/{releaseBranch}/{readme}")
 let CHANGELOGlink = Uri (Uri (gitHubRepoUrl), $"blob/{releaseBranch}/{changelogFile}")
+// fsharplint:enable FL0046
 
 let changelogPath = rootDirectory </> changelogFile
 
@@ -155,12 +157,14 @@ module dotnet =
     let fantomas args = DotNet.exec id "fantomas" args
 
 module FSharpAnalyzers =
+    // fsharplint:disable FL0041
     type Arguments =
         | Project of string
         | Analyzers_Path of string
         | Fail_On_Warnings of string list
         | Ignore_Files of string list
         | Verbose
+    // fsharplint:enable FL0041
 
         interface IArgParserTemplate with
             member s.Usage = ""
@@ -563,6 +567,16 @@ let watchDocs ctx =
     let configuration = configuration (ctx.Context.AllExecutingTargets)
     DocsTool.watch (string configuration)
 
+let selfCheck _ =
+    let srcDir = rootDirectory </> "src"
+    let consoleProj = srcDir </> "FSharpLint.Console"
+    let sol = sln
+
+    DotNet.exec
+        (fun opts -> { opts with WorkingDirectory = consoleProj })
+        "run"
+        $"lint %s{sol}"
+    |> failOnBadExitAndPrint
 
 let initTargets (ctx : Context.FakeExecutionContext) =
     BuildServer.install [ GitHubActions.Installer ]
@@ -614,6 +628,7 @@ let initTargets (ctx : Context.FakeExecutionContext) =
     Target.create "CleanDocsCache" cleanDocsCache
     Target.create "BuildDocs" buildDocs
     Target.create "WatchDocs" watchDocs
+    Target.create "SelfCheck" selfCheck
 
     //-----------------------------------------------------------------------------
     // Target Dependencies
