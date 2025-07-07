@@ -200,7 +200,6 @@ Target.create "Push" (fun _ ->
             o with
                 Common = {
                     o.Common with
-                        WorkingDirectory = nugetDir
                         CustomParams = Some "--skip-duplicate"
                 }
                 PushParams = {
