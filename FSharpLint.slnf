@@ -1,0 +1,13 @@
+{
+  "solution": {
+    "path": "FSharpLint.slnx",
+    "projects": [
+      "src\\FSharpLint.Console\\FSharpLint.Console.fsproj",
+      "src\\FSharpLint.Core\\FSharpLint.Core.fsproj",
+      "tests\\FSharpLint.Benchmarks\\FSharpLint.Benchmarks.fsproj",
+      "tests\\FSharpLint.Console.Tests\\FSharpLint.Console.Tests.fsproj",
+      "tests\\FSharpLint.Core.Tests\\FSharpLint.Core.Tests.fsproj",
+      "tests\\FSharpLint.FunctionalTest\\FSharpLint.FunctionalTest.fsproj"
+    ]
+  }
+}

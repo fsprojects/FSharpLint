@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <WarnOn>3390;$(WarnOn)</WarnOn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\launchSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Changelog.fs" />
+    <Compile Include="FsDocs.fs" />
+    <Compile Include="build.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="altcover.fake" />
+    <PackageReference Include="Argu" />
+    <PackageReference Include="Fake.Api.GitHub" />
+    <PackageReference Include="Fake.BuildServer.GitHubActions" />
+    <PackageReference Include="Fake.Core.Environment" />
+    <PackageReference Include="Fake.Core.Process" />
+    <PackageReference Include="Fake.Core.ReleaseNotes" />
+    <PackageReference Include="Fake.Core.Target" />
+    <PackageReference Include="Fake.DotNet.AssemblyInfoFile" />
+    <PackageReference Include="Fake.DotNet.Cli" />
+    <PackageReference Include="Fake.DotNet.Paket" />
+    <PackageReference Include="Fake.IO.FileSystem" />
+    <PackageReference Include="Fake.Tools.Git" />
+    <PackageReference Include="FSharp.Control.Reactive" />
+    <PackageReference Include="MSBuild.StructuredLogger" />
+    <PackageReference Include="NuGet.Common" />
+    <PackageReference Include="NuGet.Protocol" />
+    <PackageReference Include="Octokit" />
+  </ItemGroup>
+</Project>
