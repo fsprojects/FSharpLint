@@ -4,8 +4,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup Label="Main">
-    <PackageVersion Include="altcover" Version="9.0.1" />
-    <PackageVersion Include="altcover.fake" Version="9.0.1" />
     <PackageVersion Include="Argu" Version="6.2.5" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.2" />
@@ -25,6 +23,7 @@
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup Label="Build and Test">
+    <PackageVersion Include="altcover" Version="9.0.1" />
     <PackageVersion Include="Fake.Api.GitHub" Version="6.1.3" />
     <PackageVersion Include="Fake.BuildServer.GitHubActions" Version="6.1.3" />
     <PackageVersion Include="Fake.Core.Environment" Version="6.1.3" />
