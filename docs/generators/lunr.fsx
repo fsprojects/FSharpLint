@@ -42,7 +42,8 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
 
           let gen =
               let ctn =
-                  $"%s{generatorOutput.AssemblyGroup.Name} \n %s{(generatorOutput.AssemblyGroup.Namespaces |> Seq.map (fun n -> n.Name) |> String.concat " ")}"
+                  let namespaces = generatorOutput.AssemblyGroup.Namespaces |> Seq.map (fun n -> n.Name) |> String.concat " "
+                  $"%s{generatorOutput.AssemblyGroup.Name} \n %s{namespaces}"
               {uri = $"{rootUrl}/reference/%s{n.Label}/index.html"; title = $"%s{n.Label} - API Reference"; content = ctn }
 
           let mdlsGen =
