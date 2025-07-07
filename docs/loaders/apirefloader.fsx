@@ -30,64 +30,80 @@ let rec collectModules pn pu nn nu (m: ApiDocEntity) =
 
 let loader (projectRoot: string) (siteContet: SiteContents) =
     try
-      // Try to find FSharpLint.Core.dll in the project build output
+      // Try multiple possible locations for the assembly
       let projectDir = Path.Combine(projectRoot, "..", "src", "FSharpLint.Core")
-      let binDir = Path.Combine(projectDir, "bin", "Release", "net9.0")
-      let dllPath = Path.Combine(binDir, "FSharpLint.Core.dll")
+      let possiblePaths = [
+        // Release build
+        Path.Combine(projectDir, "bin", "Release", "net9.0", "FSharpLint.Core.dll")
+        // Debug build
+        Path.Combine(projectDir, "bin", "Debug", "net9.0", "FSharpLint.Core.dll")
+        // Default build output (no custom output path)
+        Path.Combine(projectDir, "bin", "Release", "FSharpLint.Core.dll")
+        Path.Combine(projectDir, "bin", "Debug", "FSharpLint.Core.dll")
+      ]
       
-      let dlls =
-        [
-          "FSharpLint.Core", dllPath
-        ]
-      let libs =
-        [
-          binDir
-        ]
-      for (label, dll) in dlls do
-        if File.Exists dll then
-          let inputs = [ApiDocInput.FromFile(dll)]
-          let output = ApiDocs.GenerateModel(inputs, label, [], libDirs = libs)
+      let foundDll = possiblePaths |> List.tryFind File.Exists
+      
+      match foundDll with
+      | Some dllPath ->
+          let binDir = Path.GetDirectoryName(dllPath)
+          printfn "Found assembly at: %s" dllPath
+          printfn "Using lib directory: %s" binDir
+          
+          let libs = [binDir]
+          
+          // Try to load with minimal dependencies first
+          let inputs = [ApiDocInput.FromFile(dllPath)]
+          try
+            let output = ApiDocs.GenerateModel(inputs, "FSharpLint.Core", [], libDirs = libs)
+            
+            let allModules =
+                output.Collection.Namespaces
+                |> List.collect (fun n ->
+                    List.collect (collectModules n.Name n.Name n.Name n.Name) n.Entities
+                )
 
-          let allModules =
-              output.Collection.Namespaces
-              |> List.collect (fun n ->
-                  List.collect (collectModules n.Name n.Name n.Name n.Name) n.Entities
-              )
-
-          let allTypes =
-              [
-                  yield!
-                      output.Collection.Namespaces
-                      |> List.collect (fun n ->
-                          n.Entities |> List.choose (fun t ->
-                              if t.IsTypeDefinition then
-                                  Some {ParentName = n.Name; ParentUrlName = n.Name; NamespaceName = n.Name; NamespaceUrlName = n.Name; Info = t}
-                              else
-                                  None)
-                      )
-                  yield!
-                      allModules
-                      |> List.collect (fun n ->
-                          // Get nested types from nested entities
-                          n.Info.NestedEntities
-                          |> List.choose (fun e ->
-                              if e.IsTypeDefinition then
-                                  Some {ParentName = n.Info.Name; ParentUrlName = n.Info.UrlBaseName; NamespaceName = n.NamespaceName; NamespaceUrlName = n.NamespaceUrlName; Info = e}
-                              else
-                                  None)
-                      )
-              ]
-          let entities = {
-            Label = label
-            Modules = allModules
-            Types = allTypes
-            GeneratorOutput = output
-          }
-          siteContet.Add entities
-        else
-          printfn "Warning: Could not find assembly at %s" dll
+            let allTypes =
+                [
+                    yield!
+                        output.Collection.Namespaces
+                        |> List.collect (fun n ->
+                            n.Entities |> List.choose (fun t ->
+                                if t.IsTypeDefinition then
+                                    Some {ParentName = n.Name; ParentUrlName = n.Name; NamespaceName = n.Name; NamespaceUrlName = n.Name; Info = t}
+                                else
+                                    None)
+                        )
+                    yield!
+                        allModules
+                        |> List.collect (fun n ->
+                            // Get nested types from nested entities
+                            n.Info.NestedEntities
+                            |> List.choose (fun e ->
+                                if e.IsTypeDefinition then
+                                    Some {ParentName = n.Info.Name; ParentUrlName = n.Info.UrlBaseName; NamespaceName = n.NamespaceName; NamespaceUrlName = n.NamespaceUrlName; Info = e}
+                                else
+                                    None)
+                        )
+                ]
+            let entities = {
+              Label = "FSharpLint.Core"
+              Modules = allModules
+              Types = allTypes
+              GeneratorOutput = output
+            }
+            siteContet.Add entities
+            printfn "Successfully loaded API documentation for FSharpLint.Core"
+          with
+          | ex ->
+            printfn "Failed to generate API docs from %s: %A" dllPath ex
+            printfn "Continuing without API documentation..."
+      | None ->
+          printfn "Warning: Could not find FSharpLint.Core.dll in any of the expected locations:"
+          possiblePaths |> List.iter (printfn "  - %s")
+          printfn "API documentation will not be generated."
     with
     | ex ->
-      printfn "%A" ex
+      printfn "Error in API reference loader: %A" ex
 
     siteContet

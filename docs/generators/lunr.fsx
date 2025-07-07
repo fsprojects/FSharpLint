@@ -19,8 +19,11 @@ type Entry = {
     content: string
 }
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
-    let siteInfo = ctx.TryGetValue<Globalloader.SiteInfo>().Value
-    let rootUrl = siteInfo.root_url
+    let siteInfo = ctx.TryGetValue<Globalloader.SiteInfo>()
+    let rootUrl = 
+      match siteInfo with
+      | Some info -> info.root_url
+      | None -> ""
 
     let pages = ctx.TryGetValues<Contentloader.Post> () |> Option.defaultValue Seq.empty
     let entries =
