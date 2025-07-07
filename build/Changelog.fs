@@ -14,7 +14,7 @@ let isEmptyChange =
     | Changelog.Change.Security s
     | Changelog.Change.Custom (_, s) -> String.IsNullOrWhiteSpace s.CleanedText
 
-let tagFromVersionNumber versionNumber = sprintf "releases/%s" versionNumber
+let tagFromVersionNumber versionNumber = $"v%s{versionNumber}"
 
 let failOnEmptyChangelog (latestEntry : Changelog.ChangelogEntry) =
     let isEmpty =
