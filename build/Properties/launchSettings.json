@@ -16,6 +16,10 @@
       "commandName": "Project",
       "commandLineArgs": "--target BuildDocs"
     },
+    "SelfCheck": {
+      "commandName": "Project",
+      "commandLineArgs": "--target SelfCheck"
+    },
     "Release": {
       "commandName": "Project",
       "commandLineArgs": "--target Release 0.26.0"
