@@ -124,3 +124,64 @@ type CustomerName(firstName) =
 """
 
         Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
+    member this.``Used variable with underscore prefix should be renamed by removing underscore``() =
+        let source = """
+module MyModule =
+    let MyFunc () =
+        let _random = System.Random()
+        printfn "%A" _random
+        ()
+    
+    let Func2 () = 
+        ()"""
+
+        let expected = """
+module MyModule =
+    let MyFunc () =
+        let random = System.Random()
+        printfn "%A" random
+        ()
+    
+    let Func2 () = 
+        ()"""
+
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.``Used variable with underscore prefix should not be renamed if such renaming clashes with existing variable``() =
+        let source = """
+module MyModule =
+    let MyFunc () =
+        let random = 0
+        let _random = System.Random()
+        printfn "%A" _random
+        () """
+
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(source, result)
+
+    [<Test>]
+    member this.``Used variable with underscore prefix should not be renamed if such renaming clashes with existing variable in outer scope``() =
+        let source = """
+module MyModule =
+    let random = 0
+
+    let MyFunc () =
+        let _random = System.Random()
+        printfn "%A" _random
+        () """
+
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(source, result)
