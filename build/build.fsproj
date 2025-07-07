@@ -12,12 +12,11 @@
 
   <ItemGroup>
     <Compile Include="Changelog.fs" />
-    <Compile Include="FsDocs.fs" />
+    <Compile Include="Fornax.fs" />
     <Compile Include="build.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="altcover.fake" />
     <PackageReference Include="Argu" />
     <PackageReference Include="Fake.Api.GitHub" />
     <PackageReference Include="Fake.BuildServer.GitHubActions" />
