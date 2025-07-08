@@ -33,6 +33,5 @@
     <PackageReference Include="MSBuild.StructuredLogger" />
     <PackageReference Include="NuGet.Common" />
     <PackageReference Include="NuGet.Protocol" />
-    <PackageReference Include="Octokit" />
   </ItemGroup>
 </Project>
