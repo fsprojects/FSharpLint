@@ -32,14 +32,17 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
     try
       // Try multiple possible locations for the assembly
       let projectDir = Path.Combine(projectRoot, "..", "src", "FSharpLint.Core")
+      let dotNetMoniker = "net9.0"
+      let projectName = "FSharpLint.Core"
+      let projectArtifactName = "FSharpLint.Core.dll"
       let possiblePaths = [
         // Release build
-        Path.Combine(projectDir, "bin", "Release", "net9.0", "FSharpLint.Core.dll")
+        Path.Combine(projectDir, "bin", "Release", dotNetMoniker, projectArtifactName)
         // Debug build
-        Path.Combine(projectDir, "bin", "Debug", "net9.0", "FSharpLint.Core.dll")
+        Path.Combine(projectDir, "bin", "Debug", dotNetMoniker, projectArtifactName)
         // Default build output (no custom output path)
-        Path.Combine(projectDir, "bin", "Release", "FSharpLint.Core.dll")
-        Path.Combine(projectDir, "bin", "Debug", "FSharpLint.Core.dll")
+        Path.Combine(projectDir, "bin", "Release", projectArtifactName)
+        Path.Combine(projectDir, "bin", "Debug", projectArtifactName)
       ]
 
       let foundDll = possiblePaths |> List.tryFind File.Exists
@@ -47,15 +50,15 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
       match foundDll with
       | Some dllPath ->
           let binDir = Path.GetDirectoryName(dllPath)
-          printfn "Found assembly at: %s" dllPath
-          printfn "Using lib directory: %s" binDir
+          printfn $"Found assembly at: %s{dllPath}"
+          printfn $"Using lib directory: %s{binDir}"
 
           let libs = [binDir]
 
           // Try to load with minimal dependencies first
           let inputs = [ApiDocInput.FromFile(dllPath)]
           try
-            let output = ApiDocs.GenerateModel(inputs, "FSharpLint.Core", [], libDirs = libs)
+            let output = ApiDocs.GenerateModel(inputs, projectName, [], libDirs = libs)
 
             let allModules =
                 output.Collection.Namespaces
@@ -93,13 +96,13 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
               GeneratorOutput = output
             }
             siteContet.Add entities
-            printfn "Successfully loaded API documentation for FSharpLint.Core"
+            printfn $"Successfully loaded API documentation for {projectName}"
           with
           | ex ->
-            printfn "Failed to generate API docs from %s: %A" dllPath ex
+            printfn $"Failed to generate API docs from %s{dllPath}: %A{ex}"
             printfn "Continuing without API documentation..."
       | None ->
-          printfn "Warning: Could not find FSharpLint.Core.dll in any of the expected locations:"
+          printfn $"Warning: Could not find {projectArtifactName} in any of the expected locations:"
           possiblePaths |> List.iter (printfn "  - %s")
           printfn "API documentation will not be generated."
           Environment.ExitCode <- 1
