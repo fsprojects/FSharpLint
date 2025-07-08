@@ -41,22 +41,22 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
         Path.Combine(projectDir, "bin", "Release", "FSharpLint.Core.dll")
         Path.Combine(projectDir, "bin", "Debug", "FSharpLint.Core.dll")
       ]
-      
+
       let foundDll = possiblePaths |> List.tryFind File.Exists
-      
+
       match foundDll with
       | Some dllPath ->
           let binDir = Path.GetDirectoryName(dllPath)
           printfn "Found assembly at: %s" dllPath
           printfn "Using lib directory: %s" binDir
-          
+
           let libs = [binDir]
-          
+
           // Try to load with minimal dependencies first
           let inputs = [ApiDocInput.FromFile(dllPath)]
           try
             let output = ApiDocs.GenerateModel(inputs, "FSharpLint.Core", [], libDirs = libs)
-            
+
             let allModules =
                 output.Collection.Namespaces
                 |> List.collect (fun n ->
@@ -102,6 +102,7 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
           printfn "Warning: Could not find FSharpLint.Core.dll in any of the expected locations:"
           possiblePaths |> List.iter (printfn "  - %s")
           printfn "API documentation will not be generated."
+          Environment.ExitCode <- 1
     with
     | ex ->
       printfn "Error in API reference loader: %A" ex
