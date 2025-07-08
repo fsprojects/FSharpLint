@@ -31,14 +31,12 @@ jobs:
       env:
         CI: true
         CONFIGURATION: ${{ matrix.configuration }}
-        ENABLE_COVERAGE: true
     - name: Build via Windows
       if: runner.os == 'Windows'
       run: ./build.cmd
       env:
         CI: true
         CONFIGURATION: ${{ matrix.configuration }}
-        ENABLE_COVERAGE: true
 
   # Run SelfCheck once on Linux to check for lint warnings
   selfcheck:
