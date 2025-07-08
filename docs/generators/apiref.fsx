@@ -206,7 +206,7 @@ let generateModule ctx (page: ApiPageInfo<ApiDocEntity>) =
         ]
     m.UrlBaseName, Layout.layout ctx [body] m.Name
 
-let generateNamespace ctx (ns: ApiDocNamespace) (allTypes: ApiPageInfo<ApiDocEntity> list) =
+let generateNamespace ctx (allTypes: ApiPageInfo<ApiDocEntity> list) (ns: ApiDocNamespace) =
     let namespaceTypes = allTypes |> List.filter (fun t -> t.NamespaceName = ns.Name && t.ParentName = ns.Name)
 
     let body =
@@ -256,7 +256,7 @@ let generate' (ctx : SiteContents)  =
         let name = n.GeneratorOutput.Collection.CollectionName
         let namespaces =
           n.GeneratorOutput.Collection.Namespaces
-          |> List.map (fun ns -> generateNamespace ctx ns n.Types)
+          |> List.map (generateNamespace ctx n.Types)
 
         let modules =
           n.Modules
