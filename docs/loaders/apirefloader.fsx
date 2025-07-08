@@ -105,7 +105,7 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
           printfn $"Warning: Could not find {projectArtifactName} in any of the expected locations:"
           possiblePaths |> List.iter (printfn "  - %s")
           printfn "API documentation will not be generated."
-          Environment.ExitCode <- 1
+          Environment.Exit 1
     with
     | ex ->
       printfn "Error in API reference loader: %A" ex
