@@ -31,14 +31,12 @@ jobs:
       env:
         CI: true
         CONFIGURATION: ${{ matrix.configuration }}
-        ENABLE_COVERAGE: true
     - name: Build via Windows
       if: runner.os == 'Windows'
       run: ./build.cmd
       env:
         CI: true
         CONFIGURATION: ${{ matrix.configuration }}
-        ENABLE_COVERAGE: true
     - name: Publish binaries as artifact
       uses: actions/upload-artifact@v4
       with:
