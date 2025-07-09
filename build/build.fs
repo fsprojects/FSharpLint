@@ -1,5 +1,5 @@
 open System
-open System.Xml
+open System.Xml.Linq
 open Fake.Core
 open Fake.DotNet
 open Fake.Tools
@@ -211,34 +211,33 @@ module NuGetConfig =
 
         try
             if IO.File.Exists nugetConfigPath then
-                let doc = XmlDocument()
-                doc.Load(nugetConfigPath)
+                let doc = XDocument.Load(nugetConfigPath)
 
-                let configNode = doc.SelectSingleNode("//configuration")
-                if configNode <> null then
+                match doc.Root with
+                | null ->
+                    Trace.logf "Warning: Invalid XML structure in %s" nugetConfigPath
+                | configRoot ->
                     // Remove existing packageSourceMapping if it exists
-                    let existingMapping = configNode.SelectSingleNode("packageSourceMapping")
-                    if existingMapping <> null then
-                        configNode.RemoveChild(existingMapping) |> ignore
+                    configRoot.Element(XName.Get("packageSourceMapping"))
+                    |> ValueOption.ofObj
+                    |> ValueOption.iter (fun existingMapping -> existingMapping.Remove())
 
                     // Create new packageSourceMapping element
-                    let packageSourceMapping = doc.CreateElement("packageSourceMapping")
+                    let packageSourceMapping = XElement(XName.Get("packageSourceMapping"))
 
                     // Create nuget.org source mapping
-                    let nugetSource = doc.CreateElement("packageSource")
-                    nugetSource.SetAttribute("key", "nuget.org")
+                    let nugetSource = XElement(XName.Get("packageSource"))
+                    nugetSource.SetAttributeValue(XName.Get("key"), "nuget.org")
 
-                    let nugetPattern = doc.CreateElement("package")
-                    nugetPattern.SetAttribute("pattern", "*")
+                    let nugetPattern = XElement(XName.Get("package"))
+                    nugetPattern.SetAttributeValue(XName.Get("pattern"), "*")
 
-                    nugetSource.AppendChild(nugetPattern) |> ignore
-                    packageSourceMapping.AppendChild(nugetSource) |> ignore
-                    configNode.AppendChild(packageSourceMapping) |> ignore
+                    nugetSource.Add(nugetPattern)
+                    packageSourceMapping.Add(nugetSource)
+                    configRoot.Add(packageSourceMapping)
 
                     doc.Save(nugetConfigPath)
                     Trace.log "Successfully updated NuGet package source mapping"
-                else
-                    Trace.logf "Warning: Could not find configuration node in %s" nugetConfigPath
             else
                 Trace.logf "Warning: NuGet config file not found at %s" nugetConfigPath
         with
