@@ -28,6 +28,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FAKE_DETAILED_ERRORS: true
           ENABLE_COVERAGE: false # AltCover doesn't work with Release builds, reports lower coverage than actual
-        run: |
-          chmod +x ./build.sh
-          ./build.sh Publish
+        run: ./build.sh Publish

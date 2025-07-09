@@ -37,9 +37,7 @@ jobs:
           global-json-file: global.json
 
       - name: Build Docs
-        run: |
-          chmod +x ./build.sh
-          ./build.sh builddocs
+        run: ./build.sh builddocs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
