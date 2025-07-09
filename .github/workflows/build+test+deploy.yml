@@ -51,9 +51,7 @@ jobs:
         global-json-file: global.json
 
     - name: Run SelfCheck
-      run: |
-        chmod +x ./build.sh
-        ./build.sh SelfCheck
+      run: ./build.sh SelfCheck
       env:
         CI: true
 
