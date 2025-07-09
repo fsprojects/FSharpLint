@@ -1,4 +1,4 @@
-#r "nuget: Fornax.Core, 0.15.1"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
 #r "nuget: Markdig, 0.41.3"
 open Markdig
 open System

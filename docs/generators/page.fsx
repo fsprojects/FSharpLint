@@ -1,4 +1,4 @@
-#r "nuget: Fornax.Core, 0.15.1"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
 #load "partials/layout.fsx"
 
 open Html

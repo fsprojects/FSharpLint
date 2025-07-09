@@ -1,5 +1,5 @@
-#r "nuget: Fornax.Core, 0.15.1"
-#r "nuget: FSharp.Formatting, 16.1.1"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
+#r "nuget: FSharp.Formatting, 20.0.1"
 
 #if !FORNAX
 #load "../loaders/contentloader.fsx"
