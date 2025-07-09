@@ -6,14 +6,17 @@ on:
       - master
   pull_request:
     branches:
-      - master
+      - '**'
 
 jobs:
   build:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os:
+        - ubuntu-latest
+        - windows-latest
+        - macOS-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -25,9 +28,7 @@ jobs:
 
     - name: Build via Bash
       if: runner.os != 'Windows'
-      run: |
-        chmod +x ./build.sh
-        ./build.sh
+      run: ./build.sh
       env:
         CI: true
         CONFIGURATION: ${{ matrix.configuration }}
@@ -66,6 +67,4 @@ jobs:
     - name: Build and run dev container task
       uses: devcontainers/ci@v0.3
       with:
-        runCmd: |
-          chmod +x ./build.sh
-          ./build.sh
+        runCmd: ./build.sh
