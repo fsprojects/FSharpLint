@@ -7,6 +7,7 @@
     <IsPackable>true</IsPackable>
     <RootNamespace>FSharpLint.Core</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <Title>FSharpLint.Core</Title>
     <Description>API to programmatically run FSharpLint.</Description>
@@ -15,7 +16,7 @@
 
   <ItemGroup>
     <!-- Framework -->
-    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Attributes.fs" />
     <Compile Include="Prelude.fs" />
     <Compile Include="Framework/Utilities.fs" />
     <Compile Include="Framework/HintParser.fs" />

@@ -25,32 +25,6 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Add the GitHub source
-        run: dotnet nuget add source --name "github.com" "https://nuget.pkg.github.com/fsprojects/index.json"
-
-      - name: Ensure NuGet package source mapping
-        shell: pwsh
-        run: |
-          $nugetConfigPath = "$HOME/.nuget/NuGet/NuGet.Config"
-          [xml]$nugetConfig = Get-Content $nugetConfigPath
-
-          $packageSourceMapping = $nugetConfig.configuration.packageSourceMapping
-          if ($packageSourceMapping -ne $null) {
-              $packageSourceMapping.RemoveAll()
-          } else {
-              $packageSourceMapping = $nugetConfig.CreateElement("packageSourceMapping")
-              $nugetConfig.configuration.AppendChild($packageSourceMapping)
-          }
-
-          $nugetSource = $nugetConfig.CreateElement("packageSource")
-          $nugetSource.SetAttribute("key", "nuget.org")
-          $nugetPattern = $nugetConfig.CreateElement("package")
-          $nugetPattern.SetAttribute("pattern", "*")
-          $nugetSource.AppendChild($nugetPattern)
-          $packageSourceMapping.AppendChild($nugetSource)
-
-          $nugetConfig.Save($nugetConfigPath)
-
       - name: Publish to GitHub
         env:
           NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
