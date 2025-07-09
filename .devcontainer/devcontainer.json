@@ -23,7 +23,7 @@
         "ghcr.io/devcontainers-contrib/features/starship:1": {},
         // https://github.com/devcontainers/features/blob/main/src/dotnet/README.md
         "ghcr.io/devcontainers/features/dotnet:2": {
-            "version": "9.0"
+            "version": "9.0.201"
         }
     },
     "overrideFeatureInstallOrder": [
