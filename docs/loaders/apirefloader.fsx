@@ -36,6 +36,8 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
       let projectName = "FSharpLint.Core"
       let projectArtifactName = "FSharpLint.Core.dll"
       let possiblePaths = [
+        // CI build output
+        Path.Combine("..", "build", projectArtifactName)
         // Release build
         Path.Combine(projectDir, "bin", "Release", dotNetMoniker, projectArtifactName)
         // Debug build
