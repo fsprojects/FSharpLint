@@ -1,5 +1,5 @@
 #r "nuget: Fornax.Core, 0.15.1"
-#r "nuget: FSharp.Formatting, 16.1.1"
+#r "nuget: FSharp.Formatting, 20.0.1"
 
 open System
 open System.IO
@@ -58,7 +58,7 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
           let libs = [binDir]
 
           // Try to load with minimal dependencies first
-          let inputs = [ApiDocInput.FromFile(dllPath)]
+          let inputs = [ApiDocInput.FromFile(dllPath, mdcomments = true)]
           try
             let output = ApiDocs.GenerateModel(inputs, projectName, [], libDirs = libs)
 
