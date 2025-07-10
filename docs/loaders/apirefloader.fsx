@@ -27,7 +27,6 @@ let rec collectModules pn pu nn nu (m: ApiDocEntity) =
         yield! m.NestedEntities |> List.collect (collectModules m.Name m.UrlBaseName nn nu)
     ]
 
-
 let loader (projectRoot: string) (siteContet: SiteContents) =
     try
         // We need the console location as it contains all the dependencies
@@ -36,15 +35,17 @@ let loader (projectRoot: string) (siteContet: SiteContents) =
         let projectName = "FSharpLint.Console"
         let projectArtifactName = "FSharpLint.Core.dll"
         // Try multiple possible locations for the assembly
-        let possiblePaths = [
-            // Release build
-            Path.Combine(projectDir, "bin", "Release", dotNetMoniker, projectArtifactName)
-            // Debug build
-            Path.Combine(projectDir, "bin", "Debug", dotNetMoniker, projectArtifactName)
-            // Default build output (no custom output path)
-            Path.Combine(projectDir, "bin", "Release", projectArtifactName)
-            Path.Combine(projectDir, "bin", "Debug", projectArtifactName)
-        ]
+        let possiblePaths =
+            [
+                // Release build
+                Path.Combine(projectDir, "bin", "Release", dotNetMoniker, projectArtifactName)
+                // Debug build
+                Path.Combine(projectDir, "bin", "Debug", dotNetMoniker, projectArtifactName)
+                // Default build output (no custom output path)
+                Path.Combine(projectDir, "bin", "Release", projectArtifactName)
+                Path.Combine(projectDir, "bin", "Debug", projectArtifactName)
+            ]
+            |> List.map Path.GetFullPath
 
         let foundDll = possiblePaths |> List.tryFind File.Exists
 
