@@ -100,7 +100,9 @@ let nugetToken = Environment.environVarOrNone "NUGET_TOKEN"
 let isRelease (targets : Target list) =
     targets
     |> Seq.map (fun t -> t.Name)
-    |> Seq.exists ((=) "PublishToNuGet")
+    |> Seq.exists (fun name ->
+        name = "PublishToNuGet" || name = "PublishToGitHub" || name = "BuildDocs"
+    )
 
 let invokeAsync f = async { f () }
 
@@ -606,14 +608,14 @@ let cleanDocsCache _ = DocsTool.cleanDocsCache ()
 let buildDocs ctx =
     let configuration = configuration (ctx.Context.AllExecutingTargets)
 
-    // Build only FSharpLint.Core project for documentation
+    // Build only FSharpLint.Console project for documentation
     DotNet.build
         (fun c -> {
             c with
                 Configuration = DotNet.BuildConfiguration.fromString (string configuration)
                 MSBuildParams = disableBinLog c.MSBuildParams
         })
-        (rootDirectory </> "src/FSharpLint.Core")
+        (rootDirectory </> "src/FSharpLint.Console")
 
     DocsTool.build (string configuration)
 
