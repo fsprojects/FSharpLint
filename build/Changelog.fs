@@ -101,8 +101,6 @@ let getVersionNumber envVarName ctx =
 
         failwith "Invalid version number"
 
-let mutable changelogBackupFilename = ""
-
 let updateChangelog changelogPath (changelog : Fake.Core.Changelog.Changelog) gitHubRepoUrl ctx =
 
     let verStr = ctx |> getVersionNumber "RELEASE_VERSION"
@@ -174,7 +172,7 @@ let updateChangelog changelogPath (changelog : Fake.Core.Changelog.Changelog) gi
         Changelog.Changelog.New (changelog.Header, changelog.Description, None, newEntry :: changelog.Entries)
 
     // Save changelog to temporary file before making any edits
-    changelogBackupFilename <- System.IO.Path.GetTempFileName ()
+    let changelogBackupFilename = System.IO.Path.GetTempFileName ()
 
     changelogPath |> Shell.copyFile changelogBackupFilename
 
@@ -231,4 +229,4 @@ let updateChangelog changelogPath (changelog : Fake.Core.Changelog.Changelog) gi
     // If build fails after this point but before we commit changes, undo our modifications
     Target.activateBuildFailure "RevertChangelog"
 
-    newEntry
+    (newEntry, changelogBackupFilename)
