@@ -73,11 +73,20 @@ jobs:
     - name: Publish (if tag)
       if: startsWith(github.ref, 'refs/tags/')
       shell: pwsh
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        FAKE_DETAILED_ERRORS: true
+
       run: ./build.ps1 Publish
 
     - name: PublishToGitHub (if master branch)
       if: github.ref == 'refs/heads/master'
       shell: pwsh
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        FAKE_DETAILED_ERRORS: true
       run: ./build.ps1 PublishToGitHub
 
 

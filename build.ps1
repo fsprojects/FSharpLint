@@ -1,5 +1,3 @@
-# PowerShell equivalent of build.sh
-
 $ErrorActionPreference = 'Stop'
 
 # Pass all arguments to dotnet run
