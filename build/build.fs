@@ -77,15 +77,15 @@ let CHANGELOGlink = Uri (Uri (gitHubRepoUrl), $"blob/{releaseBranch}/{changelogF
 
 let changelogPath = rootDirectory </> changelogFile
 
-let changelog = Fake.Core.Changelog.load changelogPath
+let changelog = lazy (Fake.Core.Changelog.load changelogPath)
 
 let mutable latestEntry =
-    if Seq.isEmpty changelog.Entries then
+    if Seq.isEmpty changelog.Value.Entries then
         Changelog.ChangelogEntry.New ("0.0.1", "0.0.1-alpha.1", Some DateTime.Today, None, [], false)
     else
-        changelog.LatestEntry
+        changelog.Value.LatestEntry
 
-let mutable changelogBackupFilename = ""
+let mutable changelogBackupFilename : string voption = ValueNone
 
 let publishUrl = "https://www.nuget.org"
 
@@ -303,34 +303,37 @@ let dotnetToolRestore _ =
         failwithf "Failed to restore .NET tools: %A" result.Errors
 
 let updateChangelog ctx =
-    latestEntry <-
+    let newEntry, backupFilename =
         if not <| isPublishToGitHub ctx then
-            Changelog.updateChangelog changelogPath changelog gitHubRepoUrl ctx
-        elif Seq.isEmpty changelog.Entries then
-            latestEntry
+            let newEntry, backupFilename = Changelog.updateChangelog changelogPath changelog.Value gitHubRepoUrl ctx
+            (newEntry, ValueSome backupFilename)
+        elif Seq.isEmpty changelog.Value.Entries then
+            (latestEntry, ValueNone)
         else
-            let latest = changelog.LatestEntry
+            let latest = changelog.Value.LatestEntry
             let semVer = {
                 latest.SemVer with
                     Original = None
                     Patch = latest.SemVer.Patch + 1u
                     PreRelease = PreRelease.TryParse "ci"
             }
-            {
+            let entry = {
                 latest with
                     SemVer = semVer
                     NuGetVersion = semVer.AsString
                     AssemblyVersion = semVer.AsString
             }
+            (entry, ValueNone)
+    
+    latestEntry <- newEntry
+    changelogBackupFilename <- backupFilename
 
 let revertChangelog _ =
-    if String.isNotNullOrEmpty Changelog.changelogBackupFilename then
-        Changelog.changelogBackupFilename
-        |> Shell.copyFile changelogPath
+    changelogBackupFilename |> ValueOption.iter (Shell.copyFile changelogPath)
 
 let deleteChangelogBackupFile _ =
-    if String.isNotNullOrEmpty Changelog.changelogBackupFilename then
-        Shell.rm Changelog.changelogBackupFilename
+    changelogBackupFilename |> ValueOption.iter Shell.rm
+    changelogBackupFilename <- ValueNone
 
 let getPackageVersionProperty publishToGitHub =
     if publishToGitHub then
@@ -491,7 +494,7 @@ let generateAssemblyInfo _ =
 
 let dotnetPack ctx =
     // Get release notes with properly-linked version number
-    let releaseNotes = Changelog.mkReleaseNotes changelog latestEntry gitHubRepoUrl
+    let releaseNotes = Changelog.mkReleaseNotes changelog.Value latestEntry gitHubRepoUrl
 
     let args = [ getPackageVersionProperty (isPublishToGitHub ctx); $"/p:PackageReleaseNotes=\"{releaseNotes}\"" ]
 
@@ -573,7 +576,7 @@ let githubRelease _ =
 
     let files = !!distGlob
     // Get release notes with properly-linked version number
-    let releaseNotes = Changelog.mkReleaseNotes changelog latestEntry gitHubRepoUrl
+    let releaseNotes = Changelog.mkReleaseNotes changelog.Value latestEntry gitHubRepoUrl
 
     GitHub.createClientWithToken token
     |> GitHub.draftNewRelease
