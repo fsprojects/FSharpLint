@@ -86,54 +86,54 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
         $"Current version: {version}" |> output.WriteInfo
         ()
+    else
+        let handleError (str:string) =
+            output.WriteError str
+            exitCode <- -1
 
-    let handleError (str:string) =
-        output.WriteError str
-        exitCode <- -1
+        match arguments.GetSubCommand() with
+        | Lint lintArgs ->
 
-    match arguments.GetSubCommand() with
-    | Lint lintArgs ->
+            let handleLintResult = function
+                | LintResult.Success(warnings) ->
+                    String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
+                    |> output.WriteInfo
+                    if not (List.isEmpty warnings) then exitCode <- -1
+                | LintResult.Failure(failure) ->
+                    handleError failure.Description
 
-        let handleLintResult = function
-            | LintResult.Success(warnings) ->
-                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
-                |> output.WriteInfo
-                if not (List.isEmpty warnings) then exitCode <- -1
-            | LintResult.Failure(failure) ->
-                handleError failure.Description
+            let lintConfig = lintArgs.TryGetResult Lint_Config
 
-        let lintConfig = lintArgs.TryGetResult Lint_Config
-
-        let configParam =
-            match lintConfig with
-            | Some configPath -> FromFile configPath
-            | None -> Default
+            let configParam =
+                match lintConfig with
+                | Some configPath -> FromFile configPath
+                | None -> Default
 
 
-        let lintParams =
-            { CancellationToken = None
-              ReceivedWarning = Some output.WriteWarning
-              Configuration = configParam
-              ReportLinterProgress = Some (parserProgress output) }
+            let lintParams =
+                { CancellationToken = None
+                  ReceivedWarning = Some output.WriteWarning
+                  Configuration = configParam
+                  ReportLinterProgress = Some (parserProgress output) }
 
-        let target = lintArgs.GetResult Target
-        let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+            let target = lintArgs.GetResult Target
+            let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
-        try
-            let lintResult =
-                match fileType with
-                | FileType.File -> Lint.lintFile lintParams target
-                | FileType.Source -> Lint.lintSource lintParams target
-                | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
-                | FileType.Project
-                | _ -> Lint.lintProject lintParams target toolsPath
-            handleLintResult lintResult
-        with
-        | e ->
-            let target = if fileType = FileType.Source then "source" else target
-            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{e.Message}{Environment.NewLine}Stack trace: {e.StackTrace}"
-            |> handleError
-    | _ -> ()
+            try
+                let lintResult =
+                    match fileType with
+                    | FileType.File -> Lint.lintFile lintParams target
+                    | FileType.Source -> Lint.lintSource lintParams target
+                    | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
+                    | FileType.Project
+                    | _ -> Lint.lintProject lintParams target toolsPath
+                handleLintResult lintResult
+            with
+            | e ->
+                let target = if fileType = FileType.Source then "source" else target
+                $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{e.Message}{Environment.NewLine}Stack trace: {e.StackTrace}"
+                |> handleError
+        | _ -> ()
 
     exitCode
 
