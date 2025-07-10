@@ -1,4 +1,5 @@
 open System
+open System.Xml
 open Fake.Core
 open Fake.DotNet
 open Fake.Tools
@@ -189,6 +190,60 @@ module DocsTool =
     let watch (configuration) =
         let result = Fornax.watch (fun p -> { p with WorkingDirectory = Some docsDir })
         result |> ignore
+
+module NuGetConfig =
+    /// <summary>
+    /// Add GitHub package source to NuGet configuration
+    /// </summary>
+    let addGitHubSource () =
+        let result =
+            DotNet.exec id "nuget" "add source --name \"github.com\" \"https://nuget.pkg.github.com/fsprojects/index.json\""
+
+        if not result.OK then
+            Trace.logf "Warning: Failed to add GitHub source: %A" result.Errors
+
+    /// <summary>
+    /// Ensure NuGet package source mapping configuration
+    /// </summary>
+    let ensurePackageSourceMapping () =
+        let homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+        let nugetConfigPath = homeDir </> ".nuget" </> "NuGet" </> "NuGet.Config"
+
+        try
+            if IO.File.Exists nugetConfigPath then
+                let doc = XmlDocument()
+                doc.Load(nugetConfigPath)
+
+                let configNode = doc.SelectSingleNode("//configuration")
+                if configNode <> null then
+                    // Remove existing packageSourceMapping if it exists
+                    let existingMapping = configNode.SelectSingleNode("packageSourceMapping")
+                    if existingMapping <> null then
+                        configNode.RemoveChild(existingMapping) |> ignore
+
+                    // Create new packageSourceMapping element
+                    let packageSourceMapping = doc.CreateElement("packageSourceMapping")
+
+                    // Create nuget.org source mapping
+                    let nugetSource = doc.CreateElement("packageSource")
+                    nugetSource.SetAttribute("key", "nuget.org")
+
+                    let nugetPattern = doc.CreateElement("package")
+                    nugetPattern.SetAttribute("pattern", "*")
+
+                    nugetSource.AppendChild(nugetPattern) |> ignore
+                    packageSourceMapping.AppendChild(nugetSource) |> ignore
+                    configNode.AppendChild(packageSourceMapping) |> ignore
+
+                    doc.Save(nugetConfigPath)
+                    Trace.log "Successfully updated NuGet package source mapping"
+                else
+                    Trace.logf "Warning: Could not find configuration node in %s" nugetConfigPath
+            else
+                Trace.logf "Warning: NuGet config file not found at %s" nugetConfigPath
+        with
+        | ex ->
+            Trace.logf "Warning: Failed to update NuGet package source mapping: %s" ex.Message
 
 let allReleaseChecks () = failOnWrongBranch ()
 //Changelog.failOnEmptyChangelog latestEntry
@@ -567,6 +622,11 @@ let watchDocs ctx =
     let configuration = configuration (ctx.Context.AllExecutingTargets)
     DocsTool.watch (string configuration)
 
+let configureNuGetForGitHub _ =
+    Trace.log "Configuring NuGet for GitHub package publishing..."
+    NuGetConfig.addGitHubSource ()
+    NuGetConfig.ensurePackageSourceMapping ()
+
 let selfCheck _ =
     let srcDir = rootDirectory </> "src"
     let consoleProj = srcDir </> "FSharpLint.Console"
@@ -607,6 +667,7 @@ let initTargets (ctx : Context.FakeExecutionContext) =
     Target.create "Clean" clean
     Target.create "DotnetRestore" dotnetRestore
     Target.create "DotnetToolRestore" dotnetToolRestore
+    Target.create "ConfigureNuGetForGitHub" configureNuGetForGitHub
     Target.create "UpdateChangelog" updateChangelog
     Target.createBuildFailure "RevertChangelog" revertChangelog // Do NOT put this in the dependency chain
     Target.createFinal "DeleteChangelogBackupFile" deleteChangelogBackupFile // Do NOT put this in the dependency chain
@@ -676,6 +737,7 @@ let initTargets (ctx : Context.FakeExecutionContext) =
     "DotnetRestore"
     =?> ("CheckFormatCode", isCI.Value)
     =?> ("GenerateAssemblyInfo", isPublishToGitHub)
+    =?> ("ConfigureNuGetForGitHub", isPublishToGitHub && isCI.Value && githubToken.IsSome)
     ==> "DotnetBuild"
     ==> "DotnetTest"
     ==> "DotnetPack"
