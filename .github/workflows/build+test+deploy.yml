@@ -14,9 +14,6 @@ on:
     branches:
       - '**'
 
-env:
-  DOTNET_VERSION: 9.0.201
-
 jobs:
   buildAndTest:
 
@@ -33,17 +30,20 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        global-json-file: global.json
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet fsi build.fsx -t Build
+      shell: pwsh
+      run: ./build.ps1 DotnetBuild
     - name: Run tests
-      run: dotnet fsi build.fsx -t Test
+      shell: pwsh
+      run: ./build.ps1 DotnetTest
     - name: Run FSharpLint on itself
-      run: dotnet fsi build.fsx -t SelfCheck
+      shell: pwsh
+      run: ./build.ps1 SelfCheck
 
 
   deployReleaseBinaries:
@@ -55,45 +55,30 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        global-json-file: global.json
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
-      run: dotnet fsi build.fsx
+      shell: pwsh
+      run: ./build.ps1
     - name: Pack
-      run: dotnet fsi build.fsx -t Pack
+      shell: pwsh
+      run: ./build.ps1 DotnetPack
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1
       with:
         version: ${{ github.ref }}
         path: ./CHANGELOG.md
-    - name: Upload binaries to nuget (if nugetKey present)
-      env:
-        nuget-key: ${{ secrets.NUGET_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: dotnet fsi build.fsx -t Push
-    - name: Create Release (if tag)
+    - name: Publish (if tag)
       if: startsWith(github.ref, 'refs/tags/')
-      id: create_release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
-        body: ${{ steps.changelog_reader.outputs.log_entry }}
-        draft: false
-        prerelease: false
-    - name: Upload binaries to release (if tag)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: out/*.nupkg
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
+      shell: pwsh
+      run: ./build.ps1 Publish
+
+    - name: PublishToGitHub (if master branch)
+      if: github.ref == 'refs/heads/master'
+      shell: pwsh
+      run: ./build.ps1 PublishToGitHub
 
 
   deployReleaseDocs:
@@ -105,14 +90,15 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        global-json-file: global.json
 
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
       run: dotnet restore
     - name: Run Fornax
-      run: dotnet fsi build.fsx -t Docs
+      shell: pwsh
+      run: ./build.ps1 BuildDocs
     - name: Deploy (if tag)
       if: startsWith(github.ref, 'refs/tags/')
       uses: peaceiris/actions-gh-pages@v3

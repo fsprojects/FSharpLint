@@ -1,0 +1,24 @@
+{
+  "profiles": {
+    "BuildAndTest": {
+      "commandName": "Project",
+      "commandLineArgs": "--target DotnetTest"
+    },
+    "Publish": {
+      "commandName": "Project",
+      "commandLineArgs": "--target Publish"
+    },
+    "PublishToGitHub": {
+      "commandName": "Project",
+      "commandLineArgs": "--target PublishToGitHub"
+    },
+    "BuildDocs": {
+      "commandName": "Project",
+      "commandLineArgs": "--target BuildDocs"
+    },
+    "Release": {
+      "commandName": "Project",
+      "commandLineArgs": "--target Release 0.24.2"
+    }
+  }
+}
