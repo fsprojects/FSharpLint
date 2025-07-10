@@ -1,9 +1,10 @@
-#r "../_lib/Fornax.Core.dll"
-#r "../../packages/docs/FSharp.Formatting/lib/netstandard2.0/FSharp.MetadataFormat.dll"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
+#r "nuget: FSharp.Formatting, 20.0.1"
 
 open System
 open System.IO
-open FSharp.MetadataFormat
+open FSharp.Formatting.ApiDocs
+open FSharp.Formatting.Templating
 
 type ApiPageInfo<'a> = {
     ParentName: string
@@ -15,58 +16,101 @@ type ApiPageInfo<'a> = {
 
 type AssemblyEntities = {
   Label: string
-  Modules: ApiPageInfo<Module> list
-  Types: ApiPageInfo<Type> list
-  GeneratorOutput: GeneratorOutput
+  Modules: ApiPageInfo<ApiDocEntity> list
+  Types: ApiPageInfo<ApiDocEntity> list
+  GeneratorOutput: ApiDocModel
 }
 
-let rec collectModules pn pu nn nu (m: Module) =
+let rec collectModules pn pu nn nu (m: ApiDocEntity) =
     [
-        yield { ParentName = pn; ParentUrlName = pu; NamespaceName = nn; NamespaceUrlName = nu; Info =  m}
-        yield! m.NestedModules |> List.collect (collectModules m.Name m.UrlName nn nu )
+        yield { ParentName = pn; ParentUrlName = pu; NamespaceName = nn; NamespaceUrlName = nu; Info = m}
+        yield! m.NestedEntities |> List.collect (collectModules m.Name m.UrlBaseName nn nu)
     ]
 
 
 let loader (projectRoot: string) (siteContet: SiteContents) =
     try
-      let dlls =
-        [
-          "FSharpLint.Core", Path.Combine(projectRoot, "..", "build", "FSharpLint.Core.dll")
+        // We need the console location as it contains all the dependencies
+        let projectDir = Path.Combine(projectRoot, "..", "src", "FSharpLint.Console")
+        let dotNetMoniker = "net9.0"
+        let projectName = "FSharpLint.Console"
+        let projectArtifactName = "FSharpLint.Core.dll"
+        // Try multiple possible locations for the assembly
+        let possiblePaths = [
+            // CI build output
+            Path.Combine("..", "build", projectArtifactName)
+            // Release build
+            Path.Combine(projectDir, "bin", "Release", dotNetMoniker, projectArtifactName)
+            // Debug build
+            Path.Combine(projectDir, "bin", "Debug", dotNetMoniker, projectArtifactName)
+            // Default build output (no custom output path)
+            Path.Combine(projectDir, "bin", "Release", projectArtifactName)
+            Path.Combine(projectDir, "bin", "Debug", projectArtifactName)
         ]
-      let libs =
-        [
-          Path.Combine (projectRoot, "..", "build")
-        ]
-      for (label, dll) in dlls do
-        let output = MetadataFormat.Generate(dll, markDownComments = true, publicOnly = true, libDirs = libs)
 
-        let allModules =
-            output.AssemblyGroup.Namespaces
-            |> List.collect (fun n ->
-                List.collect (collectModules n.Name n.Name n.Name n.Name) n.Modules
-            )
+        let foundDll = possiblePaths |> List.tryFind File.Exists
 
-        let allTypes =
-            [
-                yield!
-                    output.AssemblyGroup.Namespaces
+        match foundDll with
+        | Some dllPath ->
+            let binDir = Path.GetDirectoryName(dllPath)
+            printfn $"Found assembly at: %s{dllPath}"
+            printfn $"Using lib directory: %s{binDir}"
+
+            let libs = [binDir]
+
+            // Try to load with minimal dependencies first
+            let inputs = [ApiDocInput.FromFile(dllPath, mdcomments = true)]
+            try
+                let output = ApiDocs.GenerateModel(inputs, projectName, [], libDirs = libs)
+
+                let allModules =
+                    output.Collection.Namespaces
                     |> List.collect (fun n ->
-                        n.Types |> List.map (fun t -> {ParentName = n.Name; ParentUrlName = n.Name; NamespaceName = n.Name; NamespaceUrlName = n.Name; Info = t} )
+                        List.collect (collectModules n.Name n.Name n.Name n.Name) n.Entities
                     )
-                yield!
-                    allModules
-                    |> List.collect (fun n ->
-                        n.Info.NestedTypes |> List.map (fun t -> {ParentName = n.Info.Name; ParentUrlName = n.Info.UrlName; NamespaceName = n.NamespaceName; NamespaceUrlName = n.NamespaceUrlName; Info = t}) )
-            ]
-        let entities = {
-          Label = label
-          Modules = allModules
-          Types = allTypes
-          GeneratorOutput = output
-        }
-        siteContet.Add entities
+
+                let allTypes =
+                    [
+                        yield!
+                            output.Collection.Namespaces
+                            |> List.collect (fun n ->
+                                n.Entities |> List.choose (fun t ->
+                                    if t.IsTypeDefinition then
+                                        Some {ParentName = n.Name; ParentUrlName = n.Name; NamespaceName = n.Name; NamespaceUrlName = n.Name; Info = t}
+                                    else
+                                        None)
+                            )
+                        yield!
+                            allModules
+                            |> List.collect (fun n ->
+                                // Get nested types from nested entities
+                                n.Info.NestedEntities
+                                |> List.choose (fun e ->
+                                    if e.IsTypeDefinition then
+                                        Some {ParentName = n.Info.Name; ParentUrlName = n.Info.UrlBaseName; NamespaceName = n.NamespaceName; NamespaceUrlName = n.NamespaceUrlName; Info = e}
+                                    else
+                                        None)
+                            )
+                    ]
+                let entities = {
+                  Label = "FSharpLint.Core"
+                  Modules = allModules
+                  Types = allTypes
+                  GeneratorOutput = output
+                }
+                siteContet.Add entities
+                printfn $"Successfully loaded API documentation for {projectName}"
+            with
+            | ex ->
+                printfn $"Failed to generate API docs from %s{dllPath}: %A{ex}"
+                printfn "Continuing without API documentation..."
+        | None ->
+            printfn $"Warning: Could not find {projectArtifactName} in any of the expected locations:"
+            possiblePaths |> List.iter (printfn "  - %s")
+            printfn "API documentation will not be generated."
+            Environment.Exit 1
     with
     | ex ->
-      printfn "%A" ex
-
+        printfn "Error in API reference loader: %A" ex
+        Environment.Exit 1
     siteContet

@@ -1,4 +1,4 @@
-#r "../../_lib/Fornax.Core.dll"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
 #if !FORNAX
 #load "../../loaders/contentloader.fsx"
 #load "../../loaders/pageloader.fsx"
@@ -45,7 +45,7 @@ let layout (ctx : SiteContents) bodyCnt (page: string) =
             div [ Class "padding highlightable"] [
               div [Id "body-inner"] [
                 span [Id "sidebar-toggle-span"] [
-                  a [Href "#"; Id "sidebar-toggle"; Custom("data-sidebar-toggle", "") ] [
+                  a [Href "#"; Id "sidebar-toggle"; HtmlProperties.Custom("data-sidebar-toggle", "") ] [
                     i [Class "fas fa-bars"] []
                     !! " navigation"
                   ]

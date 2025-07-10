@@ -1,4 +1,4 @@
-#r "../../_lib/Fornax.Core.dll"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
 #if !FORNAX
 #load "../../loaders/contentloader.fsx"
 #load "../../loaders/pageloader.fsx"
@@ -14,8 +14,8 @@ let footer (ctx : SiteContents)  =
     let rootUrl = siteInfo.root_url
 
     [
-        div [Custom("style", "left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;")] [
-            div [Custom("style", "border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;")] []
+        div [HtmlProperties.Custom("style", "left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;")] [
+            div [HtmlProperties.Custom("style", "border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;")] []
         ]
         script [Src (rootUrl + "/static/js/clipboard.min.js")] []
         script [Src (rootUrl + "/static/js/perfect-scrollbar.min.js")] []

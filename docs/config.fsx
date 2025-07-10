@@ -1,4 +1,4 @@
-#r "_lib/Fornax.Core.dll"
+#r "nuget: Fornax.Core, 0.16.0-beta002"
 
 open Config
 
