@@ -5,7 +5,6 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/Solution Items/">
-    <File Path="build.fsx" />
     <File Path="CHANGELOG.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
@@ -105,4 +104,5 @@
     <Project Path="tests/FSharpLint.Core.Tests/FSharpLint.Core.Tests.fsproj" />
     <Project Path="tests/FSharpLint.FunctionalTest/FSharpLint.FunctionalTest.fsproj" />
   </Folder>
+  <Project Path="build/build.fsproj" />
 </Solution>
