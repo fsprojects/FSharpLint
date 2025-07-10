@@ -66,7 +66,7 @@ let gitHubRepoUrl = $"https://github.com/%s{gitOwner}/%s{gitRepoName}"
 
 let documentationRootUrl = $"https://%s{gitOwner}.github.io/%s{gitRepoName}"
 
-let releaseBranch = "main"
+let releaseBranch = "master"
 let readme = "README.md"
 let changelogFile = "CHANGELOG.md"
 
@@ -324,7 +324,7 @@ let updateChangelog ctx =
                     AssemblyVersion = semVer.AsString
             }
             (entry, ValueNone)
-    
+
     latestEntry <- newEntry
     changelogBackupFilename <- backupFilename
 

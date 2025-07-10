@@ -193,9 +193,10 @@ let updateChangelog changelogPath (changelog : Fake.Core.Changelog.Changelog) gi
 
     let linkReferenceTargets =
         tailLines
-        |> List.skipWhile String.isNullOrWhiteSpace
-        |> List.takeWhile isRef
-        |> List.rev // Now most recent entry is at the head of the list
+        |> Seq.skipWhile String.isNullOrWhiteSpace
+        |> Seq.takeWhile isRef
+        |> Seq.rev // Now most recent entry is at the head of the list
+        |> Seq.toList
 
     let newLinkReferenceTargets =
         match linkReferenceTargets with
@@ -223,7 +224,7 @@ let updateChangelog changelogPath (changelog : Fake.Core.Changelog.Changelog) gi
         List.rev (tailLines |> List.skip skipCount)
         @ newLinkReferenceTargets
 
-    File.write false changelogPath updatedLines
+    System.IO.File.WriteAllLines (changelogPath, updatedLines)
 
     // If build fails after this point but before we commit changes, undo our modifications
     Target.activateBuildFailure "RevertChangelog"
