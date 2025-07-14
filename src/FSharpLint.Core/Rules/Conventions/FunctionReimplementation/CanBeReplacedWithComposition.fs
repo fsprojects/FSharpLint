@@ -25,14 +25,14 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
                 | (ExpressionUtilities.Identifier(idents, _))::appliedValues
                         when appliedValuesAreConstants appliedValues ->
                     
-                    let funcName = String.Join(".", idents)
+                    let funcName = String.Join('.', idents)
                     let funcStringParts = 
                         Seq.append
                             (Seq.singleton funcName)
                             (appliedValues 
                                 |> Seq.take (appliedValues.Length - 1) 
                                 |> Seq.choose (fun value -> ExpressionUtilities.tryFindTextOfRange value.Range fileContents))
-                    let funcString = String.Join(" ", funcStringParts)
+                    let funcString = String.Join(' ', funcStringParts)
                     
                     match getLastElement appliedValues with
                     | SynExpr.Ident(lastArgument) when calledFunctionIdents.Length > 1 ->

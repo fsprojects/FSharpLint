@@ -17,9 +17,9 @@ let private checkTupleOfWildcards fileContents pattern identifier identifierRang
         let constructorName = identifier |> String.concat "."
         let arguments = Array.create numberOfWildcards "_" |> String.concat ", "
         if numberOfWildcards = 1 then
-            sprintf "%s _" constructorName
+            $"%s{constructorName} _"
         else
-            sprintf "%s(%s)" constructorName arguments
+            $"%s{constructorName}(%s{arguments})"
 
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, _, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
