@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Properties\launchSettings.json" Condition="Exists('Properties\launchSettings.json')" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Output.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
