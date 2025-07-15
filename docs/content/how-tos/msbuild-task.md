@@ -12,7 +12,7 @@ To set this up, first [install the FSharpLint dotnet tool](install-dotnet-tool.h
 
 Then, you can add the following to any of your projects to run linting after build completion for that project:
 
-    <Target Name="FSharpLint" AfterTargets="BeforeBuild">
+    <Target Name="FSharpLint" AfterTargets="BeforeBuild" Condition="'$(DesignTimeBuild)' != 'true'">
      <Exec
        Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
        ConsoleToMsBuild="true"
@@ -20,4 +20,12 @@ Then, you can add the following to any of your projects to run linting after bui
      />
     </Target>
 
-If you would like to enable linting for all projects, you can add the above target to either a `Directory.Build.props` or `Directory.Build.targets` file in the root of your repository. This will add the target to all files. See [here](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019) for more info
+If you would like to enable linting for all projects, you can add the following target to either a `Directory.Build.props` or `Directory.Build.targets` file in the root of your repository. This will add the target to all F# projects. See [here](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2019) for more info
+
+    <Target Name="FSharpLint" AfterTargets="BeforeBuild" Condition="'$(MSBuildProjectExtension)'=='.fsproj' AND '$(DesignTimeBuild)' != 'true'">
+     <Exec
+       Command="dotnet fsharplint -f msbuild lint --lint-config $(MSBuildThisFileDirectory)/fsharplint.json $(MSBuildProjectFullPath)"
+       ConsoleToMsBuild="true"
+       IgnoreExitCode="false"
+     />
+    </Target>
