@@ -254,7 +254,7 @@ Target.create "SelfCheck" (fun _ ->
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
     let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
-    exec "dotnet" $"run lint %s{sol.FullName}" consoleProj.Directory.FullName
+    exec "dotnet" $"run --framework net9.0 lint %s{sol.FullName}" consoleProj.Directory.FullName
 )
 
 // --------------------------------------------------------------------------------------

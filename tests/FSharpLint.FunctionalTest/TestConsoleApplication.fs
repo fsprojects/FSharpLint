@@ -34,10 +34,13 @@ module Tests =
             basePath </> "src" </> "FSharpLint.Console" </> "bin" </> configDirName |> DirectoryInfo
 
         let dll =
-            match Seq.tryExactlyOne (binDir.EnumerateDirectories()) with
-            | Some dllDir ->
-                dllDir.FullName </> "dotnet-fsharplint.dll"
-            | None -> failwithf "No folder (or too many of them) found in %s" binDir.FullName
+            let dllDir =
+                binDir.EnumerateDirectories()
+                |> Seq.sortByDescending _.Name
+                |> Seq.tryHead
+            match dllDir with
+            | Some dir -> dir.FullName </> "dotnet-fsharplint.dll"
+            | None -> failwithf "No target framework folder found in %s" binDir.FullName
 
         let startInfo = ProcessStartInfo
                                 (FileName = "dotnet",
