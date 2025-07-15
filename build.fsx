@@ -167,7 +167,6 @@ Target.create "BuildRelease" (fun _ ->
     DotNet.build (fun p ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
-            OutputPath = Some buildDir
             MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
     ) solutionFileName
