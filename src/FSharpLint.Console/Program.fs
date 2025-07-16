@@ -86,6 +86,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
         $"Current version: {version}" |> output.WriteInfo
         Environment.Exit 0
+
     let handleError (str:string) =
         output.WriteError str
         exitCode <- -1
