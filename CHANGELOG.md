@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 - Fix MSBuild integration sample in docs #750 [@xperiandri]
+- Exit after printing out version information #743 [@numpsy]
 
 ## [0.25.0] - 2025-07-11
 
