@@ -454,7 +454,7 @@ module Lint =
             FailedToLoadFile projectFilePath
             |> LintResult.Failure
 
-    /// Lints an entire F# solution by linting all projects specified in the `.sln` file.
+    /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         if IO.File.Exists solutionFilePath then
             let solutionFilePath = Path.GetFullPath solutionFilePath
