@@ -167,7 +167,6 @@ Target.create "BuildRelease" (fun _ ->
     DotNet.build (fun p ->
         { p with
             Configuration = DotNet.BuildConfiguration.Release
-            OutputPath = Some buildDir
             MSBuildParams = { p.MSBuildParams with Properties = properties }
         }
     ) solutionFileName
@@ -254,7 +253,7 @@ Target.create "SelfCheck" (fun _ ->
 
     let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
     let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
-    exec "dotnet" $"run lint %s{sol.FullName}" consoleProj.Directory.FullName
+    exec "dotnet" $"run --framework net9.0 lint %s{sol.FullName}" consoleProj.Directory.FullName
 )
 
 // --------------------------------------------------------------------------------------

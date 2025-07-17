@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsPackable>true</IsPackable>
@@ -146,6 +146,7 @@
     <PackageReference Include="Ionide.ProjInfo.FCS" />
     <PackageReference Include="Ionide.ProjInfo" />
     <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
+    <PackageReference Update="Microsoft.Build" ExcludeAssets="runtime" Condition="$(TargetFramework) == 'net8.0'" VersionOverride="17.11.31" />
     <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" />
