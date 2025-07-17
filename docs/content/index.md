@@ -13,7 +13,7 @@ The project aims to let the user know of problems through [matching user defined
 a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules
 in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](http://stylecop.codeplex.com/).
 
-Using a `.fsproj` (F# project) or `.sln / .slnx / .slnf` (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for
+Using a `.fsproj` (F# project) or `.sln` / `.slnx` / `.slnf` (F# solution) file the tool will analyse all of the F# implementation files in the project/solution looking for
 code that breaks a set of rules governing the style of the code. Examples of rules: lambda functions must be less than 6 lines long, class member identifiers must be PascalCase.
 
 ## Usage
