@@ -1,0 +1,334 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | FL0065
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/custom.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li class="dd-item">
+            <a href="https://fsprojects.github.io/FSharpLint" class="">
+              Overview
+            </a>
+          </li>
+          <li class="dd-item parent">
+            <a class="active">
+              How-To Guides
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="">
+                  Install Dotnet Tool
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="">
+                  Setup MSBuild Task
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="">
+                  Rule Config
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="">
+                  Rule Suppression
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              API References
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="">
+                  FSharpLint.Core
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortcuts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <h1>Hints (FL0065)</h1>
+<h2>Introduction</h2>
+<p>The Hints analyser is inspired by <a href="https://github.com/ndmitchell/hlint">HLint</a>. The hints let users easily write their own rules which are matched against linted code and when matched produce a suggestion that the user provides as part of the hint.</p>
+<p>Every hint is formed of two parts: the match and the suggestion. Both the match and the suggestion are parsed the same way into ASTs, but they have two different purposes; the match AST is analysed against the code being linted looking for any expressions in the code that match the AST, and if there is a match then the suggestion AST is used to display a suggestion on how the code can be refactored.</p>
+<h2>Matching</h2>
+<h3>Match Any Expression</h3>
+<p>Any F# expression can be matched by a variable or wildcard.</p>
+<ul>
+<li>A variable is represented by a single letter e.g. <code>x</code></li>
+<li>A wildcard is represented by the character <code>_</code></li>
+</ul>
+<p>Variables and wildcards are seemingly the same, and in terms of matching they are. The key difference is that using a variable lets you refer to it in the suggestion, enabling you to show where the matched expression should be moved within the matched code.</p>
+<p>For example if we wanted to match the following:</p>
+<pre><code>not ((4 + 4) &gt;= (x + 77 * (9 * y)))
+</code></pre>
+<p>and suggest the following (which is equivalent):</p>
+<pre><code>(4 + 4) &lt; (x + 77 * (9 * y))
+</code></pre>
+<p>We can use variables here, the expression <code>(4 + 4)</code> can be matched by a variable and <code>(x + 77 * (9 * y))</code> by another, this is shown below using the variables <code>a</code> and <code>b</code>.</p>
+<pre><code>not (a &gt;= b) ===&gt; a &lt;  b
+</code></pre>
+<h3>Match An Identifier</h3>
+<p>Identifiers in F# code can be matched by using the same identifier in the hint. It's important to note that since single characters are used to represent variables in hints the identifier must be at least 2 characters long.</p>
+<p>For example the following rule uses identifiers:</p>
+<pre><code>[lang=hint]
+List.fold (+) 0 ===&gt; List.sum
+</code></pre>
+<p><code>List.fold</code> in the hint will match the same identifier in the code. So if <code>List.fold</code> is found anywhere in the F# code being analysed with <code>(+)</code> and <code>0</code> applied to it then the rule will be matched.</p>
+<h3>Match Literal Constants</h3>
+<p>Literal constants can be used to match literal constants in the code, the constants in hints are the same format as constants in F#, so for example if you wanted to match <code>0x4b</code> you could use <code>0x4b</code> in the hint.</p>
+<p>Example:</p>
+<pre><code>[lang=hint]
+not true ===&gt; false
+</code></pre>
+<p>In the example above the boolean literal <code>true</code> is used to match any F# code where <code>true</code> is applied to the <code>not</code> identifier.</p>
+<h3>Match Function Application and Operators</h3>
+<p>Matching function application, prefix operators, and infix operators in hints are all done in the same way as how you'd write it in F# e.g.</p>
+<pre><code>[lang=hint]
+not true ===&gt; false
+4 + 4 ===&gt; 8
+~x ===&gt; someFunc x
+</code></pre>
+<p>The first rule above matches <code>true</code> (boolean literal) applied to the function <code>not</code>, the second matches two literal integers (both <code>4</code>) applied to the <code>+</code> binary operator, and the third matches an expression applied to the <code>~</code> prefix operator.</p>
+<p>Read the below section titled &quot;Order Of Operations&quot; for specifying the order of application in a hint.</p>
+<h3>Match Lambda Functions</h3>
+<p>Lambda functions can be matched using the syntax <code>fun args -&gt; ()</code> e.g. <code>fun x y -&gt; x + y</code>.</p>
+<p>The arguments may be either wildcards (<code>_</code>) or 'variables' (a single character). The 'variable' arguments have a particular use: they match a lambda that has that argument as an identifier, and then if that 'variable' is used in the body of the lambda in the hint then it will match the argument's identifier in the body of the code.</p>
+<p>For example:</p>
+<pre><code>[lang=hint]
+fun x -&gt; x ===&gt; id
+</code></pre>
+<p>The above hint will match a lambda that has a single argument which is an identifier and returns that identifier. <code>fun val -&gt; val</code> would be matched, whereas <code>fun val -&gt; ()</code> would not be matched - to match this you could use the hint: <code>fun _ -&gt; ()</code>.</p>
+<h3>Order Of Operations</h3>
+<p>Generic order of operations can be specified using parentheses. They're described as 'generic' because using parentheses in a hint will also take into account the following operators: <code>|&gt;</code>, <code>||&gt;</code>, <code>|||&gt;</code>, <code>&lt;|</code>, <code>&lt;||</code>, and <code>&lt;|||</code> which are often used to specificy the order of function application.</p>
+<p>Below uses parentheses to match <code>x</code> applied to <code>not</code> and the result of that application applied to <code>someFunc</code>.</p>
+<pre><code>[lang=hint]
+someFunc (not x) ===&gt; someOtherFunc x
+</code></pre>
+<p>In F# several operators are commonly used to show the order of function application, for example in F# <code>someFunc (not x)</code> could also be written as:</p>
+<pre><code>not x |&gt; someFunc
+</code></pre>
+<p>The same code written as a rule <code>not x |&gt; someFunc</code> will match the above, but it is matching against the operator so it will not match <code>someFunc (not x)</code>. However the rule <code>someFunc (not x)</code> will match both.</p>
+<h2>EBNF of a Hint</h2>
+<p>This is incomplete - currently missing a few of the more detailed rules e.g. <code>uint32</code> and <code>infix-operator</code>, for these I'd recommend looking them up in the EBNF for F# as that's what they will be based upon.</p>
+<pre><code>[lang=ebnf]
+whitespace = &quot; &quot; | &quot;\t&quot; | &quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot;;
+
+spaces = [{whitespace}];
+
+spaces1 = whitespace, [{whitespace}];
+
+bool = &quot;true&quot; | &quot;false&quot;;
+
+unit = &quot;(&quot;, [spaces], &quot;)&quot;;
+
+constant = bool
+            | unit
+            | character
+            | literal-string
+            | verbatim-string
+            | byte-char
+            | byte-array
+            | verbatim-byte-array
+            | triple-quoted-string
+            | sbyte
+            | byte
+            | int16
+            | uint16
+            | uint32
+            | native-int
+            | unative-int
+            | int64
+            | uint64
+            | single
+            | big-num
+            | decimal
+            | double
+            | int32;
+
+parentheses = &quot;(&quot; expression &quot;)&quot;;
+
+wildcard = &quot;_&quot;;
+
+variable = letter, -letter;
+
+ident-start-char = &quot;_&quot; | letter;
+
+ident-char = letter | digit | &quot;'&quot; | &quot;_&quot; ;
+
+ident-text = ident-start-char, {ident-char};
+
+ident = ident-text | (&quot;``&quot;, {(-(&quot;`&quot; | &quot;\n&quot; | &quot;\r&quot; | &quot;\t&quot;)) | ((&quot;`&quot;), -(&quot;`&quot; | &quot;\n&quot; | &quot;\r&quot; | &quot;\t&quot;))}, &quot;``&quot;);
+
+ident-or-op = ident | (&quot;(&quot;, spaces, operator, spaces, &quot;)&quot;);
+
+long-ident = {ident, &quot;.&quot;} | ident;
+
+long-ident-or-op = ident, {&quot;.&quot;, ident}, [&quot;.&quot;, ident-or-op]
+                    | ident-or-op
+                    | long-ident;
+
+application = constant
+                | variable
+                | wildcard
+                | long-ident-or-op
+                | parentheses;
+
+function-application = long-ident-or-op, identifier, spaces, {application, spaces}, [application, spaces];
+
+prefix-expr = prefix-operator, spaces, expression
+
+infix-expr = expression, spaces, infix-operator, spaces, expression
+
+identifier = long-ident-or-op -letter;
+
+argument-variable = letter;
+
+argument-wildcard = &quot;_&quot;;
+
+lambda-arguments = [{(argument-variable | argument-wildcard), spaces1}],
+                        (argument-variable | argument-wildcard), [spaces]
+
+lambda = &quot;fun&quot;, spaces1, lambda-arguments, &quot;-&gt;&quot;, spaces, expression;
+
+expression = spaces, (constant | lambda | variable | wildcard | function-application
+                      | identifier | parentheses | infix-expr | prefix-expr), spaces;
+
+suggestion = expression;
+
+match = expression;
+
+hint = match, spaces, &quot;===&gt;&quot;, spaces, suggestion;
+</code></pre>
+<h2>Writing Your Own Hints</h2>
+<p>You can add new hints to your config in the <code>hints</code> object. This config has two fields, <code>add</code> and <code>ignore</code>. <code>add</code> is used to add new hints, while <code>ignore</code> can be used to ignore hints
+added in previous configs (e.g. the default config).</p>
+<p>For example to make the lint tool run with just the two hints: <code>not (a =  b) ===&gt; a &lt;&gt; b</code> and <code>not (a &lt;&gt; b) ===&gt; a =  b</code>, and also ignore the default hint <code>x = true ===&gt; x</code>,
+you could use the following config file.</p>
+<pre><code>[lang=javascript]
+{
+  &quot;hints&quot;: {
+    &quot;add&quot;: [
+      &quot;not (a =  b) ===&gt; a &lt;&gt; b&quot;,
+      &quot;not (a &lt;&gt; b) ===&gt; a =  b&quot;
+    ],
+    &quot;ignore&quot;: [ &quot;x = true ===&gt; x&quot; ]
+  }
+}
+</code></pre>
+<h2>Flaws</h2>
+<ul>
+<li><code>===&gt;</code> is used to split the hints into parts, a hint cannot match this valid F# operator.</li>
+<li>Single letter identifiers are used as variables inside a hint, so attempting to match an identifier that is a single letter is not going to work.</li>
+<li>Operators beginning with <code>.</code> (e.g. <code>.*</code>) will have incorrect precedence and as such should not currently be used in hints.</li>
+</ul>
+<h2>Future Intentions</h2>
+<ul>
+<li>Provide more informative parse errors.</li>
+<li>Allow for adding your own hints and removing select hints rather than always having to override the default with a set of hints.</li>
+<li>Provide support for matching literal lists, literal arrays, literal sequences, tuples, methods, if statements, and match statements.</li>
+</ul>
+
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>
