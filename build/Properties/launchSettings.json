@@ -1,0 +1,28 @@
+{
+  "profiles": {
+    "BuildAndTest": {
+      "commandName": "Project",
+      "commandLineArgs": "--target DotnetTest"
+    },
+    "Publish": {
+      "commandName": "Project",
+      "commandLineArgs": "--target Publish"
+    },
+    "PublishToGitHub": {
+      "commandName": "Project",
+      "commandLineArgs": "--target PublishToGitHub"
+    },
+    "BuildDocs": {
+      "commandName": "Project",
+      "commandLineArgs": "--target BuildDocs"
+    },
+    "SelfCheck": {
+      "commandName": "Project",
+      "commandLineArgs": "--target SelfCheck"
+    },
+    "Release": {
+      "commandName": "Project",
+      "commandLineArgs": "--target Release 0.26.0"
+    }
+  }
+}
