@@ -639,7 +639,7 @@ let selfCheck _ =
     DotNet.exec
         (fun opts -> { opts with WorkingDirectory = consoleProj })
         "run"
-        $"lint %s{sol}"
+        $"--framework net9.0 lint %s{sol}"
     |> failOnBadExitAndPrint
 
 let initTargets (ctx : Context.FakeExecutionContext) =
