@@ -202,6 +202,66 @@ let f = fun x -> x |> tan 0 |> cos |> tan
         Assert.IsTrue(this.ErrorExistsAt(4, 8))
 
     [<Test>]
+    member this.``Test quick fix for nested function calls that can be replaced with composition``() =
+        let source = """
+module Program
+
+let f = fun x -> sin(cos(tan x))
+"""
+        
+        let expected = """
+module Program
+
+let f = tan >> cos >> sin
+"""
+        
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.``Test quick fix for piped function calls that can be replaced with composition``() =
+        let source = """
+module Program
+
+let f = fun x -> x |> tan |> cos |> sin
+"""
+        
+        let expected = """
+module Program
+
+let f = tan >> cos >> sin
+"""
+        
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
+    member this.``Test quick fix for piped function calls with partially applied functions that can be replaced with composition``() =
+        let source = """
+module Program
+
+let f = fun x -> x |> min 0.0 |> cos |> tan
+"""
+        
+        let expected = """
+module Program
+
+let f = min 0.0 >> cos >> tan
+"""
+        
+        this.Parse source
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
+
+    [<Test>]
     member this.``Applying closed over identifier in chain will not issue composition suggestion``() =
         this.Parse """
 module Program
