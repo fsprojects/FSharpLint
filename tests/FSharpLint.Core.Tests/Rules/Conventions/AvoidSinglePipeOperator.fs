@@ -199,3 +199,24 @@ module Foo
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator for function with more than 1 argument``() =
+        this.Parse """
+let someFunc someParam =
+    someParam
+    |> someOtherFunc someOtherParam
+"""
+        
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator for higher-order function with more than 1 argument``() =
+        this.Parse """
+parsedSolution.ProjectsInOrder 
+|> Seq.map(fun proj ->
+    proj.AbsolutePath |> normalizeDirSeparatorsPaths |> FileInfo
+)
+"""
+        
+        Assert.IsTrue this.NoErrorsExist
