@@ -443,6 +443,7 @@
             "pattern: x::[] ===> [x]",
 
             "x @ [] ===> x",
+            "[x] @ y ===> x::y",
 
             "List.isEmpty [] ===> true",
             "Array.isEmpty [||] ===> true",
