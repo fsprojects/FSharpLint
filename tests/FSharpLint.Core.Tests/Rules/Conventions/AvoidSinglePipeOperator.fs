@@ -145,7 +145,7 @@ let someFunc someParam =
     member this.``Use pipe operator once inside of an array``() =
         this.Parse """
 let someFunc () =
-    [| "Foo" |> String.replicate 2 |]
+    [| "Foo" |> String.length |]
 """
 
         Assert.IsTrue this.ErrorsExist
@@ -175,7 +175,7 @@ let someFunc someParam barParam =
         this.Parse """
 module Foo
 
--1.0 |> printf "%d"
+-1.0 |> abs
 """
 
         Assert.IsTrue this.ErrorsExist
@@ -185,7 +185,7 @@ module Foo
         this.Parse """
 module Foo
 
--1.0 |> printf "%d" |> ignore
+-1.0 |> abs |> ignore
 """
 
         Assert.IsTrue this.NoErrorsExist
