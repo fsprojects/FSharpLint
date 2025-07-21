@@ -52,8 +52,13 @@ let runner (args: AstNodeRuleParams) =
 
     let error =
         match args.AstNode with
-        | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-            checkExpr funcExpr (args.GetParents args.NodeIndex)
+        | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _range)) ->
+            match argExpr with
+            | SynExpr.App(_) ->
+                // function has extra arguments
+                Array.empty
+            | _ ->
+                checkExpr funcExpr (args.GetParents args.NodeIndex)
         | _ ->
             Array.empty
 
