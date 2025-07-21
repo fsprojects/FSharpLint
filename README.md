@@ -1,12 +1,12 @@
 # FSharpLint [![GitHub Actions Build Status](https://github.com/fsprojects/FSharpLint/workflows/CI/badge.svg)](https://github.com/fsprojects/FSharpLint/actions?query=branch%3Amaster)
 
-FSharpLint is a static analysis tool for F#. Like many other software linters, it analyzes your source code (via typed and untyped syntax trees), and then it points out locations where a set of rules on how F# is to be styled have been broken. There are various kinds of rules:
+FSharpLint is a static analysis tool for F#. Like many other software linters, it analyzes your source code (using both typed and untyped syntax trees) and highlights any violations of defined F# coding rules. There are various kinds of rules:
 
-* Conventions: name your public or private API/ABI members to respect project or solution-wide conventions.
-* Smells: get warned on logic that might pose maintainability problems or potential downsides.
-* Formatting: indent and structure your code to follow a specific set of cosmetic standards.
+* **Conventions:** ensures that your API members follow project- or solution-wide naming conventions.
+* **Smells:** earns about logic that may pose maintainability problems or potential downsides.
+* **Formatting:** checks that code is indented and structured according to specified cosmetic standards.
 
-The tool is configurable via JSON and can be run from a console app, or as an MSBuild task. It also provides an interface to easily integrate the tool into other software.
+The tool is configurable via JSON and can be run as a console app or as an MSBuild task. It also provides an interface for easy integration into other software.
 
 The project aims to let the user know of problems through [matching user defined hints](https://fsprojects.github.io/FSharpLint/how-tos/rules/FL0065.html) a la [HLint](http://community.haskell.org/~ndm/hlint/), and also by using custom rules written in F# similar to the rules in [Mascot](http://mascot.x9c.fr/manual.html) and [StyleCop](https://github.com/StyleCop/StyleCop).
 
