@@ -145,7 +145,7 @@ let someFunc someParam =
     member this.``Use pipe operator once inside of an array``() =
         this.Parse """
 let someFunc () =
-    [| "Foo" |> String.replicate 2 |]
+    [| "Foo" |> String.length |]
 """
 
         Assert.IsTrue this.ErrorsExist
@@ -175,7 +175,7 @@ let someFunc someParam barParam =
         this.Parse """
 module Foo
 
--1.0 |> printf "%d"
+-1.0 |> abs
 """
 
         Assert.IsTrue this.ErrorsExist
@@ -185,7 +185,7 @@ module Foo
         this.Parse """
 module Foo
 
--1.0 |> printf "%d" |> ignore
+-1.0 |> abs |> ignore
 """
 
         Assert.IsTrue this.NoErrorsExist
@@ -198,4 +198,25 @@ module Foo
 -1.0 |> printf "%d" |> ignore |> someOtherFunc
 """
 
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator for function with more than 1 argument``() =
+        this.Parse """
+let someFunc someParam =
+    someParam
+    |> someOtherFunc someOtherParam
+"""
+        
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Use pipe operator for higher-order function with more than 1 argument``() =
+        this.Parse """
+parsedSolution.ProjectsInOrder 
+|> Seq.map(fun proj ->
+    proj.AbsolutePath |> normalizeDirSeparatorsPaths |> FileInfo
+)
+"""
+        
         Assert.IsTrue this.NoErrorsExist
