@@ -24,10 +24,11 @@ let runner (config: Config) args =
             if identifiers.Length = 2 then
                 match identifiers  with
                 | head::_ when isNotConsistent head.idText symbol ->
+                    let suggestedFix = lazy(Some({ FromRange = head.idRange; FromText = head.idText; ToText = symbol }))
                     let error =
                         { Range = range
                           Message = String.Format(Resources.GetString "RulesFavourConsistentThis", config.Symbol)
-                          SuggestedFix = None
+                          SuggestedFix = Some suggestedFix
                           TypeChecks = List.Empty }
                         |> Array.singleton
                     error
