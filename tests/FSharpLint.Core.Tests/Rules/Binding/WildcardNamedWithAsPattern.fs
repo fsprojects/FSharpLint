@@ -10,14 +10,27 @@ type TestBindingWildcardNamedWithAsPattern() =
 
     [<Test>]
     member this.WildcardNamedWithAsPattern() =
-        this.Parse """
+        let source = """
 module Program
 
 match [] with
 | _ as x -> ()
 """
 
+        let expected = """
+module Program
+
+match [] with
+| x -> ()
+"""
+        
+        this.Parse source
+
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
 
     [<Test>]
     member this.NamedPattern() =
