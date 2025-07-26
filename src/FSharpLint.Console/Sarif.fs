@@ -1,10 +1,10 @@
 ﻿module internal Sarif
 
-open FSharpLint.Framework
-open System.IO
 open System
+open System.IO
 open Microsoft.CodeAnalysis.Sarif
 open Microsoft.CodeAnalysis.Sarif.Writers
+open FSharpLint.Framework
 open FSharpLint.Console.Output
 
 let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option) (report: string) (logger: IOutput) =
@@ -20,14 +20,15 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
         let reportFile = FileInfo(report)
         reportFile.Directory.Create()
 
-        let driver = ToolComponent()
-        driver.Name <- "FSharpLint.Console"
-        driver.InformationUri <- Uri("https://fsprojects.github.io/FSharpLint/")
-        driver.Version <- string<Version> (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version)
-        let tool = Tool()
-        tool.Driver <- driver
-        let run = Run()
-        run.Tool <- tool
+        let driver = 
+            ToolComponent(
+                Name = "FSharpLint.Console",
+                InformationUri = Uri("https://fsprojects.github.io/FSharpLint/"),
+                Version = string<Version> (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version)
+            )
+
+        let tool = Tool(Driver = driver)
+        let run = Run(Tool = tool)
 
         use sarifLogger =
             new SarifLogger(
@@ -43,9 +44,14 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
         sarifLogger.AnalysisStarted()
 
         for analyzerResult in results do
-            let reportDescriptor = ReportingDescriptor()
-            reportDescriptor.Id <- analyzerResult.RuleIdentifier
-            reportDescriptor.Name <- analyzerResult.RuleName
+            let helpUri = $"https://fsprojects.github.io/FSharpLint/how-tos/rules/%s{analyzerResult.RuleIdentifier}.html"
+
+            let reportDescriptor = 
+                ReportingDescriptor(
+                    Id = analyzerResult.RuleIdentifier,
+                    HelpUri = Uri(helpUri),
+                    Name = analyzerResult.RuleName
+                )
 
             (*
             analyzerResult.ShortDescription
@@ -55,12 +61,6 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
             )
             *)
 
-            let helpUri = $"https://fsprojects.github.io/FSharpLint/how-tos/rules/%s{analyzerResult.RuleIdentifier}.html"
-            reportDescriptor.HelpUri <- Uri(helpUri)
-
-            let result = Result()
-            result.RuleId <- reportDescriptor.Id
-            
             (*
             result.Level <-
                 match analyzerResult.Message.Severity with
@@ -69,30 +69,37 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
                 | Severity.Warning -> FailureLevel.Warning
                 | Severity.Error -> FailureLevel.Error
             *)
-            result.Level <- FailureLevel.Warning
 
-            let msg = Message()
-            msg.Text <- analyzerResult.Details.Message
-            result.Message <- msg
+            let msg = Message(Text = analyzerResult.Details.Message)           
 
-            let physicalLocation = PhysicalLocation()
+            let artifactLocation = 
+                ArtifactLocation(
+                    Uri = codeRoot.MakeRelativeUri(Uri(analyzerResult.Details.Range.FileName))
+                )
 
-            physicalLocation.ArtifactLocation <-
-                let al = ArtifactLocation()
-                al.Uri <- codeRoot.MakeRelativeUri(Uri(analyzerResult.Details.Range.FileName))
-                al
+            let region = 
+                Region(
+                    StartLine = analyzerResult.Details.Range.StartLine,
+                    StartColumn = analyzerResult.Details.Range.StartColumn + 1,
+                    EndLine = analyzerResult.Details.Range.EndLine,
+                    EndColumn = analyzerResult.Details.Range.EndColumn + 1
+                )
 
-            physicalLocation.Region <-
-                let r = Region()
-                r.StartLine <- analyzerResult.Details.Range.StartLine
-                r.StartColumn <- analyzerResult.Details.Range.StartColumn + 1
-                r.EndLine <- analyzerResult.Details.Range.EndLine
-                r.EndColumn <- analyzerResult.Details.Range.EndColumn + 1
-                r
+            let physicalLocation = 
+                PhysicalLocation(
+                    ArtifactLocation = artifactLocation,
+                    Region = region 
+                )
 
-            let location: Location = Location()
-            location.PhysicalLocation <- physicalLocation
-            result.Locations <- [| location |]
+            let location = Location(PhysicalLocation = physicalLocation)
+
+            let result = 
+                Result(
+                    RuleId = reportDescriptor.Id,
+                    Level = FailureLevel.Warning,
+                    Locations = [| location |],
+                    Message = msg
+                )
 
             sarifLogger.Log(reportDescriptor, result, System.Nullable())
 
