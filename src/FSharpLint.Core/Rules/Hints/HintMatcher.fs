@@ -696,7 +696,7 @@ let private hintError (config: HintErrorConfig) =
 
         let suggestedFix = lazy(
             ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
+            |> Option.map (fun fromText -> { FromRange = config.Range; ToText = toText }))
 
         { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
     | Suggestion.Message(message) ->

@@ -18,7 +18,7 @@ let private runner (args: AstNodeRuleParams) =
     let rec checkExpr (expr) maybeIdent =
         match expr with
         | SynExpr.App (_, _, SynExpr.Ident raiseId, expression, range) when raiseId.idText = "raise" ->
-            let suggestedFix = lazy(Some({ FromRange = range; FromText = raiseId.idText; ToText = "reraise()" }))
+            let suggestedFix = lazy(Some({ FromRange = range; ToText = "reraise()" }))
             match expression with
             | SynExpr.Ident ident ->
                 match maybeIdent with

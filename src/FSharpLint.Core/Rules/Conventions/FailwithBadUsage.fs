@@ -37,8 +37,7 @@ let private runner (args: AstNodeRuleParams) =
                 Some(
                     lazy
                         (Some
-                            { FromText = $"%s{failwithKeyword} %s{failwithErrorMessage}"
-                              FromRange = range
+                            { FromRange = range
                               ToText = $"raise <| Exception(\"%s{failwithErrorMessage}\", %s{param})" })
                 )
             | _ -> None

@@ -40,7 +40,7 @@ let private generateFix (text:string) range = lazy(
     |> Option.map (fun fromText ->
         let withoutLeadingWhitespace = fromText.TrimStart()
         let newKeywordRemoved = withoutLeadingWhitespace.Substring(3).TrimStart()
-        { FromText = fromText; FromRange = range; ToText = newKeywordRemoved }))
+        { FromRange = range; ToText = newKeywordRemoved }))
 
 
 let runner args =
