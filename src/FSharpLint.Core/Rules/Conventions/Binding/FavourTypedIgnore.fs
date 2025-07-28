@@ -15,8 +15,7 @@ let private runner (args: AstNodeRuleParams) =
                 (ExpressionUtilities.tryFindTextOfRange range text
                  |> Option.map
                      (fun fromText ->
-                         { FromText = fromText
-                           FromRange = range
+                         { FromRange = range
                            ToText = identifier }))
 
         {

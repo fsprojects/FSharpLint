@@ -24,7 +24,7 @@ let runner (config: Config) args =
             if identifiers.Length = 2 then
                 match identifiers  with
                 | head::_ when isNotConsistent head.idText symbol ->
-                    let suggestedFix = lazy(Some({ FromRange = head.idRange; FromText = head.idText; ToText = symbol }))
+                    let suggestedFix = lazy(Some({ FromRange = head.idRange; ToText = symbol }))
                     let error =
                         Array.singleton
                             { Range = range

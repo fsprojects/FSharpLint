@@ -6,9 +6,6 @@ open FSharp.Compiler.Text
 /// Information for consuming applications to provide an automated fix for a lint suggestion.
 [<NoEquality; NoComparison>]
 type SuggestedFix = {
-    /// Text to be replaced.
-    FromText:string
-
     /// Location of the text to be replaced.
     FromRange:Range
 

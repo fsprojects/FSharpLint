@@ -64,7 +64,7 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
     | Some funcStrings ->
         let suggestedFix =
             lazy(
-                Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
+                Some { FromRange = range; ToText = String.Join(" >> ", funcStrings) })
         Array.singleton
             { Range = range
               Message = Resources.GetString("RulesCanBeReplacedWithComposition")

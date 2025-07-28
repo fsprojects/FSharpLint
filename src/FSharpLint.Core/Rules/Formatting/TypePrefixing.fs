@@ -33,7 +33,7 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
         let prefixSuggestion typeName =
             let suggestedFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeName}<{typeArgs}>" }))
+                ||> Option.map2 (fun fromText typeArgs -> { FromRange = typePrefixingConfig.Range; ToText = $"{typeName}<{typeArgs}>" }))
             Some
                 {
                     Range = typePrefixingConfig.Range
@@ -55,7 +55,7 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
             then
                 let suggestedFix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
-                    ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} {typeName}" }))
+                    ||> Option.map2 (fun fromText typeArgs -> { FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} {typeName}" }))
                 Some
                     {
                         Range = typePrefixingConfig.Range
@@ -73,7 +73,7 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
             // Prefer special postfix (e.g. int []).
             let suggestedFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
-                ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} []" }))
+                ||> Option.map2 (fun fromText typeArgs -> { FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} []" }))
             Some
                 {
                     Range = typePrefixingConfig.Range

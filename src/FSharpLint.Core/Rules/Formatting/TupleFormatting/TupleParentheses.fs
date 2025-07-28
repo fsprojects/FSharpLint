@@ -15,7 +15,6 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
                 (Some 
                     {
                         FromRange = range
-                        FromText = text
                         ToText = $"({text})"
                      })
 

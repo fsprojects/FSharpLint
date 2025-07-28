@@ -13,7 +13,7 @@ let private checkForWildcardNamedWithAsPattern fileContents pattern =
         when wildcardRange <> range ->
         let suggestedFix = 
             lazy(
-                Some { FromRange = range; FromText = fileContents; ToText = identifier.idText })
+                Some { FromRange = range; ToText = identifier.idText })
         Array.singleton
             { Range = range
               Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
