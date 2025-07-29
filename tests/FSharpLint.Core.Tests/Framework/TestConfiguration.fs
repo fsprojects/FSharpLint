@@ -4,8 +4,8 @@ open NUnit.Framework
 open FSharpLint.Framework.Configuration
 
 type System.String with
-    member path.ToPlatformIndependentPath() =
-        path.Replace('\\', System.IO.Path.DirectorySeparatorChar)
+    member this.ToPlatformIndependentPath() =
+        this.Replace('\\', System.IO.Path.DirectorySeparatorChar)
 
 let configWithHints hints =
      { Configuration.Zero with Hints = hints }
