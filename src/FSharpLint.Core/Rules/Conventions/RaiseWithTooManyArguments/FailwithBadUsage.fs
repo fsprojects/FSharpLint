@@ -31,7 +31,7 @@ let private runner (args: AstNodeRuleParams) =
         (badUsageType: BadUsageType)
         (exceptionParam: Option<string>)
         =
-        let suggestedFix =
+        let fix =
             match exceptionParam with
             | Some param ->
                 Some(
@@ -52,12 +52,10 @@ let private runner (args: AstNodeRuleParams) =
 
         let error =
             Array.singleton
-                { 
-                    Range = range
-                    Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
-                    SuggestedFix = suggestedFix
-                    TypeChecks = List.Empty
-                }
+                { Range = range
+                  Message = String.Format(Resources.GetString "RulesFailwithBadUsage", message)
+                  Fix = fix
+                  TypeChecks = List.Empty }
 
         error
 

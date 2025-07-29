@@ -5,7 +5,7 @@ open FSharp.Compiler.Text
 
 /// Information for consuming applications to provide an automated fix for a lint suggestion.
 [<NoEquality; NoComparison>]
-type SuggestedFix = {
+type Fix = {
     /// Location of the text to be replaced.
     FromRange:Range
 
@@ -22,7 +22,7 @@ type WarningDetails = {
     Message:string
 
     /// Information to provide an automated fix.
-    SuggestedFix:Lazy<SuggestedFix option> option
+    Fix:Lazy<Fix option> option
 
     /// Type checks to be performed to confirm this suggestion is valid.
     /// Suggestion is only considered valid when all type checks resolve to true.

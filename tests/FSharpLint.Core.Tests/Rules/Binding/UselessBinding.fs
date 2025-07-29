@@ -68,7 +68,7 @@ type Cat() =
         Assert.IsFalse(this.ErrorsExist)
 
     [<Test>]
-    member this.UselessBindingSuggestedFix() =
+    member this.UselessBindingFix() =
         let source = """
 module Program
 
@@ -84,12 +84,12 @@ let a = 10
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.UselessBindingWithParensSuggestedFix() =
+    member this.UselessBindingWithParensFix() =
         let source = """
 module Program
 
@@ -106,6 +106,6 @@ let a = 10
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)

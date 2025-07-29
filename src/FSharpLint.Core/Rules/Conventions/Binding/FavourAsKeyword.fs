@@ -23,7 +23,7 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
 
             let fromRange = Range.mkRange String.Empty range.Start constRange.End
 
-            let suggestedFix =
+            let fix =
                 ExpressionUtilities.tryFindTextOfRange fromRange args.FileContent
                 |> Option.bind (fun text ->
 
@@ -36,8 +36,8 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
             Array.singleton
                 { Range = fromRange
                   Message = Resources.GetString("RulesFavourAsKeyword")
-                  SuggestedFix = suggestedFix
-                  TypeChecks = List.Empty }
+                  Fix = fix
+                  TypeChecks = List.empty }
 
         | _ -> Array.empty
     | _ -> Array.empty

@@ -48,15 +48,10 @@ let runner args =
     | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
     | AstNode.Expression(SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
         Array.singleton
-            {
-                Range = range
-                Message = Resources.GetString("RulesRedundantNewKeyword")
-                SuggestedFix = Some(generateFix args.FileContent range)
-                TypeChecks =
-                    [
-                        fun () -> doesNotImplementIDisposable checkInfo identifier
-                    ]
-            }
+            { Range = range
+              Message = Resources.GetString("RulesRedundantNewKeyword")
+              Fix = Some (generateFix args.FileContent range)
+              TypeChecks = [ fun () -> doesNotImplementIDisposable checkInfo identifier ] }
     | _ -> Array.empty
 
 let rule =

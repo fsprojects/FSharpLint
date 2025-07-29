@@ -74,12 +74,10 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
         let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount
         if skipResult > config.MaxLines then
             Array.singleton
-                {
-                    Range = range
-                    Message = error errorName config.MaxLines skipResult
-                    SuggestedFix = None
-                    TypeChecks = List.Empty
-                }
+                { Range = range
+                  Message = error errorName config.MaxLines skipResult
+                  Fix = None
+                  TypeChecks = List.Empty }
         else
             Array.empty
     | None -> Array.empty

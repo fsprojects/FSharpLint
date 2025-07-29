@@ -40,7 +40,7 @@ let f = List.map (fun (x,_) -> id x) []
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() =
+    member this.``Fix for lambda reimplementing operator is to replace the lambda with the operator.``() =
         let source = """
 module Program
 
@@ -54,7 +54,7 @@ let f = ( * )
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Lambda reimplementing long identifier function issues error``() =
@@ -67,7 +67,7 @@ let f = fun a b -> List.map a b
         Assert.IsTrue(this.ErrorsExist)
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() =
+    member this.``Fix for lambda reimplementing function is to replace the lambda with the func ident.``() =
         let source = """
 module Program
 
@@ -81,7 +81,7 @@ let f = List.map
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -217,7 +217,7 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
@@ -237,7 +237,7 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
@@ -257,7 +257,7 @@ let f = min 0.0 >> cos >> tan
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 

@@ -12,7 +12,7 @@ open FSharpLint.Framework.Utilities
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Symbols
 
-module QuickFixes =
+module Fixes =
     let removeAllUnderscores (ident:Ident) = lazy(
         let toText = ident.idText.Replace("_", String.Empty)
         Some { FromRange = ident.idRange; ToText = toText })
@@ -112,31 +112,31 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         match config.Naming with
         | Some NamingCase.PascalCase ->
             pascalCaseRule idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
+            |> Option.map (formatError >> tryAddFix Fixes.toPascalCase)
         | Some NamingCase.CamelCase ->
             camelCaseRule idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
+            |> Option.map (formatError >> tryAddFix Fixes.toCamelCase)
         | _ -> None
 
     let underscoresError =
         match config.Underscores with
         | Some NamingUnderscores.None ->
             underscoreRule false idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
+            |> Option.map (formatError >> tryAddFix Fixes.removeAllUnderscores)
         | Some NamingUnderscores.AllowPrefix ->
             underscoreRule true idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
+            |> Option.map (formatError >> tryAddFix Fixes.removeNonPrefixingUnderscores)
         | _ -> None
 
     let prefixError =
         Option.bind (fun prefix ->
             prefixRule prefix idText
-            |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))) config.Prefix
+            |> Option.map (formatError2 prefix >> tryAddFix (Fixes.addPrefix prefix))) config.Prefix
 
     let suffixError =
         Option.bind (fun suffix ->
             suffixRule suffix idText
-            |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))) config.Suffix
+            |> Option.map (formatError2 suffix >> tryAddFix (Fixes.addSuffix suffix))) config.Suffix
 
     Array.choose id
         [|
@@ -149,13 +149,11 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
 let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
     if notOperator idText && isNotDoubleBackTickedIdent identifier then
         checkIdentifierPart namingConfig identifier idText
-        |> Array.map (fun (message, suggestedFix) ->
-            {
-                Range = identifier.idRange
-                Message = message
-                SuggestedFix = Some suggestedFix
-                TypeChecks = List.Empty
-            })
+        |> Array.map (fun (message, fix) ->
+            { Range = identifier.idRange
+              Message = message
+              Fix = Some fix
+              TypeChecks = List.Empty })
     else
         Array.empty
 

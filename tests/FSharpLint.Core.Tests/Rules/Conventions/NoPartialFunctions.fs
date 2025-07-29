@@ -21,12 +21,12 @@ type TestConventionsNoPartialFunctions() =
         this.AssertErrorWithMessageExists("Consider using 'List.tryFind' instead of partial function/method 'List.find'.")
 
     [<Test>]
-    member this.``Quickfix for partial function which should be replaced with another function``() =
+    member this.``Fix for partial function which should be replaced with another function``() =
         let source = "let x = List.find 1 [2; 3; 4]"
         this.Parse(source)
 
         let expected = "let x = List.tryFind 1 [2; 3; 4]"
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
         this.AssertErrorWithMessageExists( "Consider using 'List.tryFind' instead of partial function/method 'List.find'.")
 
     [<Test>]

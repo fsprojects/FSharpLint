@@ -25,7 +25,7 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     formatError errorMessageKey
 
 let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    let suggestedFix = lazy(
+    let fix = lazy(
         let replacementText =
             match emptyLiteralType with
             | EmptyStringLiteral -> "String.Empty"
@@ -35,7 +35,7 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
     Array.singleton
         { Range = range
           Message = getStaticEmptyErrorMessage range emptyLiteralType
-          SuggestedFix = Some suggestedFix
+          Fix = Some fix
           TypeChecks = List.Empty }
 
 let private runner (args: AstNodeRuleParams) =

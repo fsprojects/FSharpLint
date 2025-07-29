@@ -121,7 +121,7 @@ type X = Generic<int>
         Assert.IsTrue(this.NoErrorsExist)
 
     [<Test>]
-    member this.``Quickfix for F# List type``() =
+    member this.``Fix for F# List type``() =
         let source = """
 module Program
 
@@ -135,10 +135,10 @@ type T = int list
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for F# Option type``() =
+    member this.``Fix for F# Option type``() =
         let source = """
 module Program
 
@@ -152,10 +152,10 @@ type T = int option
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for F# Ref type``() =
+    member this.``Fix for F# Ref type``() =
         let source = """
 module Program
 
@@ -169,10 +169,10 @@ type T = int ref
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for F# array type from prefix syntax``() =
+    member this.``Fix for F# array type from prefix syntax``() =
         let source = """
 module Program
 
@@ -186,10 +186,10 @@ type T = int []
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for F# array type from standard postfix syntax``() =
+    member this.``Fix for F# array type from standard postfix syntax``() =
         let source = """
 module Program
 
@@ -203,10 +203,10 @@ type T = int []
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for F# array tuple type from standard postfix syntax``() =
+    member this.``Fix for F# array tuple type from standard postfix syntax``() =
         let source = """
 module Program
 
@@ -220,10 +220,10 @@ type T = (int * int) []
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
-    member this.``Quickfix for generic type``() =
+    member this.``Fix for generic type``() =
         let source = """
 module Program
 
@@ -237,7 +237,7 @@ type T = Generic<int>
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
 [<TestFixture>]
 type TestFormattingAlwaysTypePrefixing() =
