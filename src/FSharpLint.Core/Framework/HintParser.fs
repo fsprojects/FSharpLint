@@ -135,14 +135,14 @@ module HintParser =
             { Lookup:Dictionary<int, Node>
               AnyMatch:(char option * Node) list }
 
-            override lhs.Equals(other) =
+            override this.Equals(other) =
                 match other with
                 | :? Edges as rhs ->
                     let getList dict = Seq.toList dict |> List.map (fun (x:KeyValuePair<_, _>) -> (x.Key, x.Value))
 
-                    lhs.AnyMatch = rhs.AnyMatch &&
-                    lhs.Lookup.Count = rhs.Lookup.Count &&
-                    getList lhs.Lookup = getList rhs.Lookup
+                    this.AnyMatch = rhs.AnyMatch &&
+                    this.Lookup.Count = rhs.Lookup.Count &&
+                    getList this.Lookup = getList rhs.Lookup
                 | _ -> false
 
             override this.GetHashCode() = hash (this.AnyMatch, hash this.Lookup)
