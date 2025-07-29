@@ -9,11 +9,11 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    let errors range suggestedFix =
+    let errors range fix =
         {
             Range = range
             Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-            SuggestedFix = suggestedFix
+            Fix = fix
             TypeChecks = List.Empty
         } |> Array.singleton
     
@@ -42,7 +42,7 @@ let runner (args: AstNodeRuleParams) =
                         if isParentPiped then
                             Array.empty
                         else
-                            let suggestedFix = lazy(
+                            let fix = lazy(
                                 let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
                                 let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
                                 match maybeFuncText, maybeArgText with
@@ -50,7 +50,7 @@ let runner (args: AstNodeRuleParams) =
                                     let replacementText = sprintf "%s %s" funcText argText
                                     Some { FromRange=range; ToText=replacementText }
                                 | _ -> None)
-                            errors ident.idRange (Some suggestedFix)
+                            errors ident.idRange (Some fix)
                 else
                     Array.empty
             | _ ->

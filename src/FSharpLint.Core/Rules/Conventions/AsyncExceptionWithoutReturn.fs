@@ -46,7 +46,7 @@ let rec checkExpression (expression: SynExpr) (range: range) =
         ->
         { Range = range
           Message = Resources.GetString "RulesAsyncExceptionWithoutReturn"
-          SuggestedFix = None
+          Fix = None
           TypeChecks = List.Empty }
         |> Array.singleton
     | SynExpr.App (_, _, funcExpr, _, range) ->

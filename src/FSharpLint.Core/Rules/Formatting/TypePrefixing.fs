@@ -21,12 +21,12 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
     match typeName with
     | SynType.LongIdent lid ->
         let prefixSuggestion typeName =
-            let suggestedFix = lazy(
+            let fix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                 ||> Option.map2 (fun fromText typeArgs -> { FromRange = range; ToText = $"{typeName}<{typeArgs}>" }))
             { Range = range
               Message = Resources.GetString("RulesFormattingGenericPrefixError")
-              SuggestedFix = Some suggestedFix
+              Fix = Some fix
               TypeChecks = [] } |> Some
 
         match lid |> longIdentWithDotsToString with
@@ -40,12 +40,12 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
             // Prefer postfix.
             if not isPostfix && config.Mode <> Mode.Always
             then
-                let suggestedFix = lazy(
+                let fix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromRange = range; ToText = $"{typeArgs} {typeName}" }))
                 { Range = range
                   Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
-                  SuggestedFix = Some suggestedFix
+                  Fix = Some fix
                   TypeChecks = [] } |> Some
             else
                 if isPostfix && config.Mode = Mode.Always then
@@ -55,12 +55,12 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
 
         | "array" when config.Mode <> Mode.Always ->
             // Prefer special postfix (e.g. int []).
-            let suggestedFix = lazy(
+            let fix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange range args.FileContent, typeArgs)
                 ||> Option.map2 (fun fromText typeArgs -> { FromRange = range; ToText = $"{typeArgs} []" }))
             { Range = range
               Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
-              SuggestedFix = Some suggestedFix
+              Fix = Some fix
               TypeChecks = [] } |> Some
 
         | typeName ->
@@ -73,7 +73,7 @@ let checkTypePrefixing (config:Config) (args:AstNodeRuleParams) range typeName t
                 { Range = range
                   Message =  String.Format(recommendPostfixErrMsg.Value, typeName)
                   // TODO
-                  SuggestedFix = None
+                  Fix = None
                   TypeChecks = List.Empty } |> Some
             | false, _ ->
                 None
@@ -89,7 +89,7 @@ let runner (config:Config) args =
     | AstNode.Type (SynType.Array (1, _elementType, range)) when config.Mode = Mode.Always ->
         { Range = range
           Message = Resources.GetString("RulesFormattingF#ArrayPrefixError")
-          SuggestedFix = None
+          Fix = None
           TypeChecks = List.Empty }
         |> Array.singleton
     | _ ->

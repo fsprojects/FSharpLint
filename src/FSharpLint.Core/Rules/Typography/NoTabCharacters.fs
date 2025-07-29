@@ -28,7 +28,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")
-              SuggestedFix =
+              Fix =
                 Some(
                     lazy
                         (Some(

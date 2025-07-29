@@ -17,7 +17,7 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
     |> Array.choose (fun (expr, nextExpr) ->
         if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
             let commaRange = Range.mkRange "" expr.Range.End nextExpr.Range.Start
-            let suggestedFix =
+            let fix =
                 ExpressionUtilities.tryFindTextOfRange commaRange args.FileContent
                 |> Option.map (fun commaText ->
                     lazy(
@@ -26,7 +26,7 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
                         ) )
             { Range = commaRange
               Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
-              SuggestedFix = suggestedFix
+              Fix = fix
               TypeChecks = [] } |> Some
         else
             None)

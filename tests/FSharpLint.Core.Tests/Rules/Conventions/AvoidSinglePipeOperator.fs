@@ -213,7 +213,7 @@ let someFunc someParam =
 """
         
         this.Parse source
-        let fixedSource = this.ApplyQuickFix source
+        let fixedSource = this.ApplyFix source
 
         Assert.AreEqual(expected, fixedSource)
 

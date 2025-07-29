@@ -44,7 +44,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
         |> List.choose getFunctionNameFromAsyncCompExprBinding
         |> List.filter ((=) callerIdent.idText)
         |> List.choose (fun _ ->
-            let suggestedFix = lazy(
+            let fix = lazy(
                 ExpressionUtilities.tryFindTextOfRange doTokenRange args.FileContent
                 |> Option.map (fun fromText ->
                     { FromRange = doTokenRange
@@ -52,7 +52,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
 
             { Range = range
               Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
-              SuggestedFix = Some suggestedFix
+              Fix = Some fix
               TypeChecks = [] } |> Some)
         |> List.toArray
     | _ -> Array.empty

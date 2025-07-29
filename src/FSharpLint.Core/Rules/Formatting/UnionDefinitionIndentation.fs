@@ -26,7 +26,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                 if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
                     { Range = firstCase.Range
                       Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
-                      SuggestedFix = None
+                      Fix = None
                       TypeChecks = [] } |> Some
                 else
                     None
@@ -39,7 +39,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                     if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
                         { Range = caseTwo.Range
                           Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
-                          SuggestedFix = None
+                          Fix = None
                           TypeChecks = [] } |> Some
                     else
                         None)

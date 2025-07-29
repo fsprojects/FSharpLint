@@ -579,15 +579,15 @@ let private hintError typeChecks hint (args:AstNodeRuleParams) range matchedVari
 
         let toText = FormatHint.toString true parentAstNode args matchedVariables None (HintExpr expr)
 
-        let suggestedFix = lazy(
+        let fix = lazy(
             ExpressionUtilities.tryFindTextOfRange range args.FileContent
             |> Option.map (fun fromText -> { FromRange = range; ToText = toText }))
 
-        { Range = range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = typeChecks }
+        { Range = range; Message = error; Fix = Some fix; TypeChecks = typeChecks }
     | Suggestion.Message(message) ->
         let errorFormatString = Resources.GetString("RulesHintSuggestion")
         let error = System.String.Format(errorFormatString, matched, message)
-        { Range = range; Message = error; SuggestedFix = None; TypeChecks = typeChecks }
+        { Range = range; Message = error; Fix = None; TypeChecks = typeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
     let symbol =

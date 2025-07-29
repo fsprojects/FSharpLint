@@ -25,7 +25,7 @@ type ExitCode =
     | Error = -1
     | Success = 0
     | NoSuchRuleName = 1
-    | NoSuggestedFix = 2
+    | NoFix = 2
 
 let fileTypeHelp = "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
 
@@ -42,7 +42,7 @@ with
             match this with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
-            | Fix _ -> "Apply quickfixes for specified rule name or names (comma separated)."
+            | Fix _ -> "Apply fixes for specified rule name or names (comma separated)."
             | Version -> "Prints current version."
 
 // TODO: investigate erroneous warning on this type definition
@@ -70,7 +70,7 @@ with
     interface IArgParserTemplate with
         member this.Usage =
             match this with
-            | Fix_Target _ -> "Rule name to be applied with suggestedFix and input to lint."
+            | Fix_Target _ -> "Rule name to be applied with fix and input to lint."
             | Fix_File_Type _ -> fileTypeHelp
 // fsharplint:enable UnionCasesNames
 
@@ -129,31 +129,31 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
     
     let handleFixResult (target: string) (ruleName: string) = function
         | LintResult.Success warnings ->
-            String.Format(Resources.GetString "ConsoleApplyingSuggestedFixFile", target) |> output.WriteInfo
+            String.Format(Resources.GetString "ConsoleApplyingFixFile", target) |> output.WriteInfo
             let increment = 1
             let noFixIncrement = 0
-            let countSuggestedFix = 
+            let countFix =
                 warnings
                 |> List.sumBy (fun (element: Suggestion.LintWarning) ->
                     let sourceCode = File.ReadAllText element.FilePath
                     if String.Equals(ruleName, element.RuleName, StringComparison.InvariantCultureIgnoreCase) then
-                        match element.Details.SuggestedFix with
-                        | Some lazySuggestedFix ->
-                            lazySuggestedFix.Force()
-                            |> Option.iter (fun suggestedFix ->
+                        match element.Details.Fix with
+                        | Some lazyFix ->
+                            lazyFix.Force()
+                            |> Option.iter (fun fix ->
                                 let updatedSourceCode = 
-                                    let builder = StringBuilder(sourceCode.Length + suggestedFix.ToText.Length)
+                                    let builder = StringBuilder(sourceCode.Length + fix.ToText.Length)
                                     let firstPart = 
                                         sourceCode.AsSpan(
                                             0,
-                                            (ExpressionUtilities.findPos suggestedFix.FromRange.Start sourceCode).Value
+                                            (ExpressionUtilities.findPos fix.FromRange.Start sourceCode).Value
                                         )
                                     let secondPart = 
                                         sourceCode.AsSpan
-                                            (ExpressionUtilities.findPos suggestedFix.FromRange.End sourceCode).Value
+                                            (ExpressionUtilities.findPos fix.FromRange.End sourceCode).Value
                                     builder
                                         .Append(firstPart)
-                                        .Append(suggestedFix.ToText)
+                                        .Append(fix.ToText)
                                         .Append(secondPart)
                                         .ToString()
                                 File.WriteAllText(
@@ -167,10 +167,10 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                         noFixIncrement)
             outputWarnings warnings
 
-            if countSuggestedFix > 0 then
+            if countFix > 0 then
                 exitCode <- ExitCode.Success
             else
-                exitCode <- ExitCode.NoSuggestedFix
+                exitCode <- ExitCode.NoFix
 
         | LintResult.Failure failure -> handleError ExitCode.Error failure.Description
 
@@ -215,7 +215,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
 
         linting fileType lintParams target toolsPath false None
 
-    let applySuggestedFix (fixArgs: ParseResults<FixArgs>) =
+    let applyFix (fixArgs: ParseResults<FixArgs>) =
         let fixParams = getParams None
         let ruleName, target = fixArgs.GetResult Fix_Target
         let fileType = fixArgs.TryGetResult Fix_File_Type |> Option.defaultValue (inferFileType target)
@@ -242,7 +242,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
 
     match arguments.GetSubCommand() with
     | Lint lintArgs -> applyLint lintArgs
-    | Fix fixArgs -> applySuggestedFix fixArgs
+    | Fix fixArgs -> applyFix fixArgs
     | _ -> ()
 
     int exitCode

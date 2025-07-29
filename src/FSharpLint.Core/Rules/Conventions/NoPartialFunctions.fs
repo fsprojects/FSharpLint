@@ -91,7 +91,7 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
         Some {
             Range = range
             Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
-            SuggestedFix = None
+            Fix = None
             TypeChecks = []
         }
     else
@@ -102,14 +102,14 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
                 {
                     Range = range
                     Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
-                    SuggestedFix = None
+                    Fix = None
                     TypeChecks = []
                 }
             | Function replacementFunction ->
                 {
                     Range = range
                     Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
-                    SuggestedFix = Some (lazy ( Some { FromRange = range; ToText = replacementFunction }))
+                    Fix = Some (lazy ( Some { FromRange = range; ToText = replacementFunction }))
                     TypeChecks = []
                 })
 
@@ -292,12 +292,12 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                              | PatternMatch ->
                                 Some { Range = range
                                        Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError", fullyQualifiedInstanceMember)
-                                       SuggestedFix = None
+                                       Fix = None
                                        TypeChecks = (fun () -> typeMatches) |> List.singleton }
                              | Function replacementFunctionName ->
                                 Some { Range = range
                                        Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunctionName, fullyQualifiedInstanceMember)
-                                       SuggestedFix = Some (lazy ( Some { FromRange = range; ToText = replacementFunctionName }))
+                                       Fix = Some (lazy ( Some { FromRange = range; ToText = replacementFunctionName }))
                                        TypeChecks = (fun () -> typeMatches) |> List.singleton }
                         else
                             None
@@ -331,12 +331,12 @@ let private checkMemberCallOnExpression
                 | PatternMatch ->
                     Some { Range = originalRange
                            Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError", fullyQualifiedInstanceMember)
-                           SuggestedFix = None
+                           Fix = None
                            TypeChecks = (fun () -> true) |> List.singleton }
                 | Function replacementFunctionName ->
                     Some { Range = originalRange
                            Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunctionName, fullyQualifiedInstanceMember)
-                           SuggestedFix = Some (lazy ( Some { FromRange = originalRange; ToText = replacementFunctionName }))
+                           Fix = Some (lazy ( Some { FromRange = originalRange; ToText = replacementFunctionName }))
                            TypeChecks = (fun () -> true) |> List.singleton }
             else
                 None)

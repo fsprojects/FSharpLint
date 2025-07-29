@@ -138,7 +138,7 @@
   <data name="ConsoleStartingFile" xml:space="preserve">
     <value>========== Linting {0} ==========</value>
   </data>
-  <data name="ConsoleApplyingSuggestedFixFile" xml:space="preserve">
+  <data name="ConsoleApplyingFixFile" xml:space="preserve">
     <value>========== Applying fixes to {0} ==========</value>
   </data>
   <data name="ConsoleMSBuildFailedToLoadProjectFile" xml:space="preserve">

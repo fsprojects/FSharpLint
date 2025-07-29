@@ -73,7 +73,7 @@ let private runner (args: AstNodeRuleParams) =
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
         | expression, _ when isImmutableValueExpression args expression ->
-            let suggestedFix =
+            let fix =
                 lazy
                     (match memberIdentifier.LongIdent with
                      | [ _; memberName ] ->
@@ -84,7 +84,7 @@ let private runner (args: AstNodeRuleParams) =
 
             { Range = memberRange
               Message = Resources.GetString "RulesSuggestUseAutoProperty"
-              SuggestedFix = Some suggestedFix
+              Fix = Some fix
               TypeChecks = List.Empty }
             |> Array.singleton
         | _ -> Array.empty

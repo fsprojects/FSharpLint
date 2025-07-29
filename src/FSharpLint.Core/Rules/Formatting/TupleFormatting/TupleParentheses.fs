@@ -15,12 +15,12 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     | _ ->
         ExpressionUtilities.tryFindTextOfRange range args.FileContent
         |> Option.map (fun text ->
-            let suggestedFix = lazy(
+            let fix = lazy(
                 { FromRange = range; ToText = $"({text})" }
                 |> Some)
             { Range = range
               Message = Resources.GetString("RulesFormattingTupleParenthesesError")
-              SuggestedFix = Some suggestedFix
+              Fix = Some fix
               TypeChecks = [] })
         |> Option.toArray
 

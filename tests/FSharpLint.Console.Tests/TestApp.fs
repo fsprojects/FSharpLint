@@ -156,7 +156,7 @@ module Fall =
         use input = new TemporaryFile(sourceCode, "fs")
         let (exitCode, errors) = main [| "fix"; ruleName; input.FileName |]
 
-        Assert.AreEqual(int ExitCode.NoSuggestedFix, exitCode)
+        Assert.AreEqual(int ExitCode.NoFix, exitCode)
         Assert.AreEqual(sourceCode, File.ReadAllText input.FileName)
 
     [<Test>]

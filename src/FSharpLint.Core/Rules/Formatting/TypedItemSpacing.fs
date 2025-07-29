@@ -55,14 +55,14 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                 let trimmedTypeText = typeText.TrimStart(' ')
                 let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
                 let spacesAfterString = " " |> String.replicate expectedSpacesAfter
-                let suggestedFix = lazy(
+                let fix = lazy(
                     { FromRange = range; ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
                     |> Some)
                 let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                 Some
                     { Range = range
                       Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                      SuggestedFix = Some suggestedFix
+                      Fix = Some fix
                       TypeChecks = [] }
                 else
                     None

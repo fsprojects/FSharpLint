@@ -49,7 +49,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
         let range = Range.mkRange "" (Position.mkPos lineNumber (line.Length - whitespaceLength)) (Position.mkPos lineNumber line.Length)
         { Range = range
           Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
-          SuggestedFix = None
+          Fix = None
           TypeChecks = [] } |> Array.singleton
     else
         Array.empty
