@@ -216,6 +216,8 @@ module private MatchExpression =
         | Match of (unit -> bool) list
         | NoMatch
 
+    let internal returnEmptyMatch () = Match List.Empty
+
     let private (&&~) lhs rhs =
         match (lhs, rhs) with
         | Match(asyncLhs), Match(asyncRhs) -> Match(asyncLhs @ asyncRhs)
@@ -252,10 +254,12 @@ module private MatchExpression =
                 | _ -> Match(List.Empty)
         | _ -> Match(List.Empty)
 
-    let rec matchHintExpr arguments =
+    [<TailCall>]
+    let rec matchHintExpr (continuation: unit -> HintMatch) arguments =
         let expr = removeParens arguments.Expression
         let arguments = { arguments with Expression = expr }
 
+        (continuation ()) &&~
         match arguments.Hint with
         | Expression.Variable(variable) when Map.containsKey variable arguments.LambdaArguments ->
             match expr with
@@ -276,7 +280,7 @@ module private MatchExpression =
             if matchExpr expr = Some(arguments.Hint) then Match(List.Empty)
             else NoMatch
         | Expression.Parentheses(hint) ->
-            arguments.SubHint(expr, hint) |> matchHintExpr
+            arguments.SubHint(expr, hint) |> matchHintExpr returnEmptyMatch
         | Expression.Tuple(_) ->
             matchTuple arguments
         | Expression.List(_) ->
@@ -298,99 +302,123 @@ module private MatchExpression =
         | Expression.LambdaBody(_) -> NoMatch
         | Expression.Else(_) -> NoMatch
 
-    and private matchFunctionApplication arguments =
+    and [<TailCall>] private matchFunctionApplication arguments =
         match (arguments.Expression, arguments.Hint) with
         | FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
             let expressions = List.map AstNode.Expression exprs
             doExpressionsMatch expressions hintExprs arguments
         | _ -> NoMatch
 
-    and private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
+    and [<TailCall>] private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
         if List.length expressions = List.length hintExpressions then
-            (expressions, hintExpressions)
-            ||> List.map2 (fun expr hint -> arguments.SubHint(expr, hint) |> matchHintExpr)
-            |> List.fold (&&~) (Match(List.Empty))
+            let subHints = 
+                (expressions, hintExpressions)
+                ||> List.map2 (fun expr hint -> arguments.SubHint(expr, hint))
+            
+            let rec innerDoExpressionsMatch args: HintMatch =
+                match args with
+                | head::tail -> 
+                    head |> matchHintExpr (fun () -> innerDoExpressionsMatch tail)
+                | [] -> Match(List.Empty)
+
+            innerDoExpressionsMatch subHints
         else
             NoMatch
 
-    and private matchIf arguments =
+    and [<TailCall>] private matchIf arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
            Expression.If(hintCond, hintExpr, None)) ->
-            arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
-            (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr)
+            matchHintExpr
+                (fun () -> (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr returnEmptyMatch))
+                (arguments.SubHint(Expression cond, hintCond))
         | (AstNode.Expression(SynExpr.IfThenElse(cond, expr, Some(elseExpr), _, _, _, _)),
            Expression.If(hintCond, hintExpr, Some(Expression.Else(hintElseExpr)))) ->
-            arguments.SubHint(Expression cond, hintCond) |> matchHintExpr &&~
-            (arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr) &&~
-            (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
+            matchHintExpr
+                (fun () -> 
+                    matchHintExpr
+                        (fun () -> arguments.SubHint(Expression expr, hintExpr) |> matchHintExpr returnEmptyMatch)
+                        (arguments.SubHint(Expression elseExpr, hintElseExpr)))
+                (arguments.SubHint(Expression cond, hintCond))
+            
         | _ -> NoMatch
 
-    and matchLambda arguments =
+    and [<TailCall>] matchLambda arguments =
         match (arguments.Expression, arguments.Hint) with
         | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
             match matchLambdaArguments lambdaArgs args with
             | LambdaMatch.Match(lambdaArguments) ->
-                matchHintExpr { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
+                matchHintExpr
+                    returnEmptyMatch
+                    { arguments.SubHint(AstNode.Expression(body), lambdaBody) with LambdaArguments = lambdaArguments }
             | LambdaMatch.NoMatch -> NoMatch
         | _ -> NoMatch
 
-    and private matchTuple arguments =
+    and [<TailCall>] private matchTuple arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.Tuple(_, expressions, _, _)), Expression.Tuple(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
             doExpressionsMatch expressions hintExpressions arguments
         | _ -> NoMatch
 
-    and private matchList arguments =
+    and [<TailCall>] private matchList arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.ArrayOrList(false, expressions, _)), Expression.List(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
             doExpressionsMatch expressions hintExpressions arguments
         | AstNode.Expression(SynExpr.ArrayOrListComputed(false, expression, _)), Expression.List([hintExpression]) ->
-            arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
+            arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr returnEmptyMatch
         | _ -> NoMatch
 
-    and private matchArray arguments =
+    and [<TailCall>] private matchArray arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.ArrayOrList(true, expressions, _)), Expression.Array(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
             doExpressionsMatch expressions hintExpressions arguments
         | AstNode.Expression(SynExpr.ArrayOrListComputed(true, expression, _)), Expression.Array([hintExpression]) ->
-            arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
+            arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr returnEmptyMatch
         | _ -> NoMatch
 
-    and private matchInfixOperation arguments =
+    and [<TailCall>] private matchInfixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.App(_, true, (ExpressionUtilities.Identifier(_) as opExpr), SynExpr.Tuple(_, [leftExpr; rightExpr], _, _), _)),
            Expression.InfixOperator(op, left, right)) ->
-            arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&~
-            (arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr) &&~
-            (arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr)
+            matchHintExpr
+                (fun () ->
+                    matchHintExpr
+                        (fun () -> arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr returnEmptyMatch)
+                        (arguments.SubHint(AstNode.Expression(leftExpr), left)))
+                (arguments.SubHint(AstNode.Expression(opExpr), op))
         | (AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)),
            Expression.InfixOperator(op, left, right)) ->
 
             match removeParens <| AstNode.Expression(infixExpr) with
             | AstNode.Expression(SynExpr.App(_, true, opExpr, leftExpr, _)) ->
-                arguments.SubHint(AstNode.Expression(opExpr), op) |> matchHintExpr &&~
-                (arguments.SubHint(AstNode.Expression(leftExpr), left) |> matchHintExpr) &&~
-                (arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr) &&~
-                notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr
+                matchHintExpr
+                    (fun () ->
+                        matchHintExpr
+                            (fun () ->
+                                matchHintExpr
+                                    (fun () -> notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr)
+                                    (arguments.SubHint(AstNode.Expression(rightExpr), right)))
+                            (arguments.SubHint(AstNode.Expression(leftExpr), left)))
+                    (arguments.SubHint(AstNode.Expression(opExpr), op))
             | _ -> NoMatch
         | _ -> NoMatch
 
-    and private matchPrefixOperation arguments =
+    and [<TailCall>] private matchPrefixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)),
            Expression.PrefixOperator(Expression.Identifier([op]), expr)) ->
-            arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])) |> matchHintExpr &&~
-            (arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr)
+            matchHintExpr
+                (fun () -> arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr returnEmptyMatch)
+                (arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])))
         | _ -> NoMatch
 
-    and private matchAddressOf arguments =
+    and [<TailCall>] private matchAddressOf arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.AddressOf(synSingleAmp, addrExpr, _, _)), Expression.AddressOf(singleAmp, expr) when synSingleAmp = singleAmp ->
-            arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr
+            arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr returnEmptyMatch
         | _ -> NoMatch
 
 module private MatchPattern =
@@ -410,9 +438,13 @@ module private MatchPattern =
         | SynPat.Paren(pattern, _) -> removeParens pattern
         | pat -> pat
 
-    let rec matchHintPattern (pattern, hint) =
+    let internal returnTrue () = true
+
+    [<TailCall>]
+    let rec matchHintPattern (continuation: unit -> bool) (pattern, hint) =
         let pattern = removeParens pattern
 
+        (continuation ()) &&
         match hint with
         | Pattern.Variable(_)
         | Pattern.Wildcard ->
@@ -426,7 +458,7 @@ module private MatchPattern =
         | Pattern.Or(_) ->
             matchOrPattern (pattern, hint)
         | Pattern.Parentheses(hint) ->
-            matchHintPattern (pattern, hint)
+            matchHintPattern returnTrue (pattern, hint)
         | Pattern.Tuple(_) ->
             matchTuple (pattern, hint)
         | Pattern.List(_) ->
@@ -434,38 +466,52 @@ module private MatchPattern =
         | Pattern.Array(_) ->
             matchArray (pattern, hint)
 
-    and private doPatternsMatch patterns hintExpressions =
-        (List.length patterns = List.length hintExpressions)
-        && (patterns, hintExpressions) ||> List.forall2 (fun pattern hint -> matchHintPattern (pattern, hint))
+    and [<TailCall>] private doPatternsMatch patterns hintExpressions =
+        if List.length patterns = List.length hintExpressions then
+            let rec innerDoPatternsMatch lst =
+                match lst with
+                | (pattern, hintExpression) :: tail ->
+                    matchHintPattern
+                        (fun () -> innerDoPatternsMatch tail)
+                        (pattern, hintExpression)
+                | [] -> true
 
-    and private matchList (pattern, hint) =
+            innerDoPatternsMatch (List.zip patterns hintExpressions)
+        else
+            false
+
+    and [<TailCall>] private matchList (pattern, hint) =
         match (pattern, hint) with
         | SynPat.ArrayOrList(false, patterns, _), Pattern.List(hintExpressions) ->
             doPatternsMatch patterns hintExpressions
         | _ -> false
 
-    and private matchArray (pattern, hint) =
+    and [<TailCall>] private matchArray (pattern, hint) =
         match (pattern, hint) with
         | SynPat.ArrayOrList(true, patterns, _), Pattern.Array(hintExpressions) ->
             doPatternsMatch patterns hintExpressions
         | _ -> false
 
-    and private matchTuple (pattern, hint) =
+    and [<TailCall>] private matchTuple (pattern, hint) =
         match (pattern, hint) with
         | SynPat.Tuple(_, patterns, _, _), Pattern.Tuple(hintExpressions) ->
             doPatternsMatch patterns hintExpressions
         | _ -> false
 
-    and private matchConsPattern (pattern, hint) =
+    and [<TailCall>] private matchConsPattern (pattern, hint) =
         match (pattern, hint) with
         | Cons(leftPattern, rightPattern), Pattern.Cons(left, right) ->
-            matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
+            matchHintPattern 
+                (fun () -> matchHintPattern returnTrue (rightPattern, right))
+                (leftPattern, left)
         | _ -> false
 
-    and private matchOrPattern (pattern, hint) =
+    and [<TailCall>] private matchOrPattern (pattern, hint) =
         match (pattern, hint) with
         | SynPat.Or(leftPattern, rightPattern, _, _), Pattern.Or(left, right) ->
-            matchHintPattern (leftPattern, left) && matchHintPattern (rightPattern, right)
+            matchHintPattern
+                (fun () -> matchHintPattern returnTrue (rightPattern, right))
+                (leftPattern, left)
         | _ -> false
 
 module private FormatHint =
@@ -504,6 +550,9 @@ module private FormatHint =
             Debug.Assert(false, $"Expected operator to be an expression identifier, but was {expression.ToString()}")
             String.Empty
 
+    // very hard to turn into tail-recursive form because of the way it operates
+    // (convert sub-expressions to strings and then combine them)
+    // fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
     let rec toString (config: ToStringConfig) =
         let toString hintNode =
             toString
@@ -597,6 +646,7 @@ module private FormatHint =
         arguments
         |> List.map (fun (LambdaArg expr) -> exprToString expr)
         |> String.concat " "
+    // fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 type HintErrorConfig =
     {
@@ -699,7 +749,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hin
     match (args.AstNode, hint.MatchedNode) with
     | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
     | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
-    | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern (pattern, hintPattern) ->
+    | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern MatchPattern.returnTrue (pattern, hintPattern) ->
         hintError
             {
                 TypeChecks = List.Empty
@@ -719,7 +769,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hin
               MatchExpression.FSharpCheckFileResults = args.CheckInfo
               MatchExpression.Breadcrumbs = breadcrumbs }
 
-        match MatchExpression.matchHintExpr arguments with
+        match MatchExpression.matchHintExpr MatchExpression.returnEmptyMatch arguments with
         | MatchExpression.Match(typeChecks) ->
             let suggest checks =
                 hintError
