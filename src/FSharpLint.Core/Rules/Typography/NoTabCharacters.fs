@@ -28,12 +28,11 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
         if isInLiteralString literalStrings range |> not then
             { Range = range
               Message = Resources.GetString("RulesTypographyTabCharacterError")
-              SuggestedFix =
+              Fix =
                 Some(
                     lazy
                         (Some(
                             { FromRange = range
-                              FromText = "\t"
                               ToText = String.replicate args.GlobalConfig.numIndentationSpaces " " }
                         ))
                 )

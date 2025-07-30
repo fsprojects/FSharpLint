@@ -40,7 +40,7 @@ let private emitWarning (func: RecursiveFunctionInfo) =
               Resources.GetString "RulesUnneededRecKeyword",
               func.Identifier.idText
           )
-      SuggestedFix = None
+      Fix = None
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =

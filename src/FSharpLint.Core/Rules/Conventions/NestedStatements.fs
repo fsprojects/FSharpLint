@@ -116,7 +116,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
                 getRange node
                 |> Option.map (fun range ->
-                    { Range = range; Message = error config.Depth; SuggestedFix = None; TypeChecks = [] })
+                    { Range = range; Message = error config.Depth; Fix = None; TypeChecks = [] })
                 |> Option.toArray
             else
                 depth <- depth + 1

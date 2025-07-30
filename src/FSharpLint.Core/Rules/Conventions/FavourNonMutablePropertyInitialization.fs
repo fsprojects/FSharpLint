@@ -17,7 +17,7 @@ let private getWarningDetails (ident: Ident) =
     |> Array.map (fun message ->
         { Range = ident.idRange
           Message = message
-          SuggestedFix = None
+          Fix = None
           TypeChecks = List.Empty })
 
 let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>) =

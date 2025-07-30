@@ -252,7 +252,7 @@ let foo x = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.ForLoopIdentifierIsCamelCase() =

@@ -31,7 +31,7 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
 
             { Range = intermediateRange
               Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
-              SuggestedFix = None
+              Fix = None
               TypeChecks = [] } |> Some
         else
             None)

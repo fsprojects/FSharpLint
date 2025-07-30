@@ -88,7 +88,7 @@ let __foobar = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Quick fix for camel case takes into account underscore prefixes.``() =
@@ -105,7 +105,7 @@ let foo _x = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``As pattern is processed correctly (GetPatternIdents regression)``() =

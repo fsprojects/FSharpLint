@@ -32,7 +32,7 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                         (Position.mkPos (declTwo.Range.StartLine + endOffset) 0)
                 { Range = intermediateRange
                   Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
-                  SuggestedFix = None
+                  Fix = None
                   TypeChecks = [] } |> Some
             else
                 None)

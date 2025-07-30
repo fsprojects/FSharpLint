@@ -105,4 +105,4 @@ type Foo(content: int) =
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)

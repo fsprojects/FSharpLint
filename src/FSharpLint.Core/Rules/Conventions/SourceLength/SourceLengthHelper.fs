@@ -75,7 +75,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
         if skipResult > config.MaxLines then
             { Range = range
               Message = error errorName config.MaxLines skipResult
-              SuggestedFix = None
+              Fix = None
               TypeChecks = [] } |> Array.singleton
         else
             Array.empty

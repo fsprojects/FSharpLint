@@ -17,7 +17,7 @@ let private runner (args:AstNodeRuleParams) =
                 {
                     Range = range
                     Message = Resources.GetString "FailwithfWithArgumentsMatchingFormatString"
-                    SuggestedFix = None
+                    Fix = None
                     TypeChecks = []
                 } |> Array.singleton
             | _ -> Array.empty

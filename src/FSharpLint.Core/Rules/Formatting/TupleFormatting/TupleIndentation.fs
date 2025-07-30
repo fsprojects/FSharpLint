@@ -21,7 +21,7 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
         if expr.Range.StartColumn <> nextExpr.Range.StartColumn then
             { Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
               Message = Resources.GetString("RulesFormattingTupleIndentationError")
-              SuggestedFix = None
+              Fix = None
               TypeChecks = [] } |> Some
         else
             None)
