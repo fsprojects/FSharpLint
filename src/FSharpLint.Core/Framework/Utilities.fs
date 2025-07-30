@@ -11,6 +11,8 @@ module Utilities =
 
     let (</>) path1 path2 = System.IO.Path.Combine(path1, path2)
 
+    let returnEmptyArray () = Array.empty
+
 module Dictionary =
 
     open System.Collections.Generic

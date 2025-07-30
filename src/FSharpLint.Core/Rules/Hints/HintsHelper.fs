@@ -39,6 +39,8 @@ let inline private isParen (node:AbstractSyntaxArray.Node) =
     | AstNode.Expression(SynExpr.Paren(_)) -> true
     | _ -> false
 
+// hard to turn into tail-recursive form
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 /// Compares the hint trie against a given location in the abstract syntax array.
 let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<_, _>) notify =
     List.iter notify trie.MatchedHint
@@ -67,4 +69,4 @@ let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVaria
             | None -> checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
 
         List.iter (fun (var, trie) -> collect var trie) trie.Edges.AnyMatch
-
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions

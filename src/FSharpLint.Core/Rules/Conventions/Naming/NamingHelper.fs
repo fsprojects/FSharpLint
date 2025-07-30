@@ -8,6 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Utilities
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Symbols
 
@@ -310,9 +311,14 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
 
 type GetIdents<'Item> = AccessControlLevel -> SynPat -> 'Item []
 
-/// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
-/// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
-let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:GetIdents<'Item>) argsAreParameters (pattern:SynPat) =
+[<TailCall>]
+let rec private innerGetPatternIdents<'Item> (accessibility:AccessControlLevel) 
+                                             (getIdents:GetIdents<'Item>) 
+                                             argsAreParameters 
+                                             (pattern:SynPat) 
+                                             (continuation: unit -> array<'Item>) =
+    (continuation())
+    |> Array.append <|
     match pattern with
     | SynPat.LongIdent(_, _, _, args, access, _) ->
         let identAccessibility = checkAccessibility accessibility access
@@ -322,36 +328,31 @@ let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:Ge
             | SynArgPats.NamePatPairs(pats, _, _) -> pats.IsEmpty
             | SynArgPats.Pats(pats) -> pats.IsEmpty
 
-        let argSuggestions =
-            match args with
-            | SynArgPats.NamePatPairs(pats, _, _) ->
-                pats
-                |> List.toArray
-                |> Array.collect (fun(_, _, synPat) -> getPatternIdents AccessControlLevel.Private getIdents false synPat)
-            | SynArgPats.Pats(pats) ->
-                pats
-                |> List.toArray
-                |> Array.collect (getPatternIdents AccessControlLevel.Private getIdents false)
+        let idents =
+            // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
+            if hasNoArgs || argsAreParameters then
+                getIdents identAccessibility pattern
+            else
+                Array.empty
 
-        // Only check if expecting args as parameters e.g. function - otherwise is a DU pattern.
-        if hasNoArgs || argsAreParameters then
-            getIdents identAccessibility pattern
-            |> Array.append argSuggestions
-        else
-            argSuggestions
+        Array.append
+            idents
+            (match args with
+            | SynArgPats.NamePatPairs(pats, _, _) ->
+                innerGetAllPatternIdents AccessControlLevel.Private getIdents (pats |> List.map (fun(_, _, synPat) -> synPat))
+            | SynArgPats.Pats(pats) ->
+                innerGetAllPatternIdents AccessControlLevel.Private getIdents pats)
     | SynPat.Named(_, _, access, _) ->
         let accessibility = checkAccessibility accessibility access
         getIdents accessibility pattern
     | SynPat.Or(p1, p2, _, _) ->
-        Array.collect (getPatternIdents accessibility getIdents false) [|p1; p2|]
+        innerGetAllPatternIdents accessibility getIdents [p1; p2]
     | SynPat.Paren(pat, _) ->
-        getPatternIdents accessibility getIdents false pat
+        innerGetPatternIdents accessibility getIdents false pat returnEmptyArray
     | SynPat.Ands(pats, _)
     | SynPat.Tuple(_, pats, _, _)
     | SynPat.ArrayOrList(_, pats, _) ->
-        pats
-        |> List.toArray
-        |> Array.collect (getPatternIdents accessibility getIdents false)
+        innerGetAllPatternIdents accessibility getIdents pats
     | SynPat.Record(_)
     | SynPat.IsInst(_)
     | SynPat.QuoteExpr(_)
@@ -364,13 +365,24 @@ let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:Ge
     | SynPat.InstanceMember(_)
     | SynPat.FromParseError(_) -> Array.empty
     | SynPat.As(lhsPat, rhsPat, _) ->
-        Array.append
-            (getPatternIdents accessibility getIdents false lhsPat)
-            (getPatternIdents accessibility getIdents false rhsPat)
+        innerGetPatternIdents accessibility getIdents false lhsPat 
+            (fun () -> innerGetPatternIdents accessibility getIdents false rhsPat returnEmptyArray)
     | SynPat.ListCons(lhs, rhs, _, _) ->
-        Array.append
-            (getPatternIdents accessibility getIdents false lhs)
-            (getPatternIdents accessibility getIdents false rhs)
+        innerGetPatternIdents accessibility getIdents false lhs
+            (fun () -> innerGetPatternIdents accessibility getIdents false rhs returnEmptyArray)
+
+and [<TailCall>] innerGetAllPatternIdents (accessibility: AccessControlLevel) 
+                                          (getIdents: GetIdents<'Item>) 
+                                          (patterns: list<SynPat>): array<'Item> =
+    match patterns with
+    | head::tail -> 
+        innerGetPatternIdents accessibility getIdents false head (fun () -> innerGetAllPatternIdents accessibility getIdents tail)
+    | [] -> Array.empty
+
+/// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
+/// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
+let getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:GetIdents<'Item>) argsAreParameters (pattern:SynPat)  =
+    innerGetPatternIdents accessibility getIdents argsAreParameters pattern returnEmptyArray
 
 let isNested args nodeIndex =
     let parent = args.SyntaxArray.[nodeIndex].ParentIndex

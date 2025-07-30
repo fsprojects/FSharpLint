@@ -6,10 +6,12 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.Utilities
 
-let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) =
+[<TailCall>]
+let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) (continuation: bool -> bool) =
     match expression with
-    | SynExpr.Const (_constant, _range) -> true
+    | SynExpr.Const (_constant, _range) -> continuation true
     | SynExpr.Ident ident ->
         let isMutableVariable =
             let exists memberDef =
@@ -27,21 +29,40 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
                 List.exists exists members
             | _ -> false
 
-        not isMutableVariable
+        not isMutableVariable |> continuation
     | SynExpr.ArrayOrList (_, elements, _) ->
-        List.forall (isImmutableValueExpression args) elements
+        areImmutableAllValueExpressions args elements id
     | SynExpr.ArrayOrListComputed (_, innerExpr, _) ->
-        isImmutableValueExpression args innerExpr
-        || isImmutableSequentialExpression args innerExpr
-    | _ -> false
+        isImmutableValueExpression
+            args
+            innerExpr
+            (fun prevResult -> prevResult || isImmutableSequentialExpression args innerExpr id)
+    | _ -> continuation false
 
-and isImmutableSequentialExpression args expression =
+and [<TailCall>] areImmutableAllValueExpressions (args: AstNodeRuleParams) (expressions: list<SynExpr>) (continuation: bool -> bool) =
+    match expressions with
+    | head::tail ->
+        areImmutableAllValueExpressions
+            args
+            tail
+            (fun prevResult ->
+                isImmutableValueExpression args head (fun prevResult2 -> prevResult2 && prevResult))
+    | [] -> continuation true
+
+and [<TailCall>] isImmutableSequentialExpression args expression (continuation: bool -> bool) =
     match expression with
     | SynExpr.Sequential (_, _, expr1, expr2, _, _) ->
-        isImmutableValueExpression args expr1
-        && (isImmutableSequentialExpression args expr2
-            || isImmutableValueExpression args expr2)
-    | _ -> false
+        isImmutableValueExpression
+            args
+            expr1
+            (fun prevResult -> 
+                isImmutableSequentialExpression args expr2 
+                        (fun prevResult2 ->
+                            isImmutableValueExpression args expr2
+                                (fun prevResult3 -> prevResult && prevResult2 || prevResult3)
+                        )
+            )
+    | _ -> continuation false
 
 let private hasStructAttribute node =
     match node with
@@ -83,7 +104,7 @@ let private runner (args: AstNodeRuleParams) =
         match expr, argPats with
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
-        | expression, _ when isImmutableValueExpression args expression ->
+        | expression, _ when isImmutableValueExpression args expression id ->
             match args.GetParents args.NodeIndex with
             | parentNode :: _ when hasStructAttribute parentNode ->
                 Array.empty
