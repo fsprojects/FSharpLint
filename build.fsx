@@ -290,6 +290,8 @@ Target.create "SelfCheck" (fun _ ->
             "nestedStatements"
             // Running NoPartialFunctions on this file causes a bug in FSharp.Compiler, so skip it for now
             "noPartialFunctions"
+            // Not all recursive functions are tail-call
+            "ensureTailCallDiagnosticsInRecursiveFunctions"
         ]
 
     let jsonObj = JObject.Parse fsharplintJsonText
