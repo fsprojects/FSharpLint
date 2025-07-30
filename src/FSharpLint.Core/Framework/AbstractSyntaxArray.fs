@@ -137,6 +137,8 @@ module AbstractSyntaxArray =
         | EnumCase(_) -> SyntaxNode.EnumCase
         | UnionCase(_) -> SyntaxNode.UnionCase
 
+    // see https://github.com/fsprojects/FSharpLint/issues/755
+    // fsharplint:disable SuggestUseAutoProperty
     [<Struct; NoEquality; NoComparison; DebuggerDisplay("{DebuggerDisplay,nq}")>]
     type TempNode(hashcode: int, actual: AstNode) =
         member _.Hashcode = hashcode
