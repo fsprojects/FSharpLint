@@ -252,6 +252,8 @@ module private MatchExpression =
                 | _ -> Match(List.Empty)
         | _ -> Match(List.Empty)
 
+    // not a tail-recursive function
+    // fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
     let rec matchHintExpr arguments =
         let expr = removeParens arguments.Expression
         let arguments = { arguments with Expression = expr }
@@ -297,15 +299,16 @@ module private MatchExpression =
         | Expression.LambdaArg(_)
         | Expression.LambdaBody(_) -> NoMatch
         | Expression.Else(_) -> NoMatch
+    // fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 
-    and private matchFunctionApplication arguments =
+    and [<TailCall>] private matchFunctionApplication arguments =
         match (arguments.Expression, arguments.Hint) with
         | FuncApp(exprs, _), Expression.FunctionApplication(hintExprs) ->
             let expressions = List.map AstNode.Expression exprs
             doExpressionsMatch expressions hintExprs arguments
         | _ -> NoMatch
 
-    and private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
+    and [<TailCall>] private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
         if List.length expressions = List.length hintExpressions then
             (expressions, hintExpressions)
             ||> List.map2 (fun expr hint -> arguments.SubHint(expr, hint) |> matchHintExpr)
@@ -313,7 +316,7 @@ module private MatchExpression =
         else
             NoMatch
 
-    and private matchIf arguments =
+    and [<TailCall>] private matchIf arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.IfThenElse(cond, expr, None, _, _, _, _)),
            Expression.If(hintCond, hintExpr, None)) ->
@@ -326,7 +329,7 @@ module private MatchExpression =
             (arguments.SubHint(Expression elseExpr, hintElseExpr) |> matchHintExpr)
         | _ -> NoMatch
 
-    and matchLambda arguments =
+    and [<TailCall>] matchLambda arguments =
         match (arguments.Expression, arguments.Hint) with
         | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
             match matchLambdaArguments lambdaArgs args with
@@ -335,14 +338,14 @@ module private MatchExpression =
             | LambdaMatch.NoMatch -> NoMatch
         | _ -> NoMatch
 
-    and private matchTuple arguments =
+    and [<TailCall>] private matchTuple arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.Tuple(_, expressions, _, _)), Expression.Tuple(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
             doExpressionsMatch expressions hintExpressions arguments
         | _ -> NoMatch
 
-    and private matchList arguments =
+    and [<TailCall>] private matchList arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.ArrayOrList(false, expressions, _)), Expression.List(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
@@ -351,7 +354,7 @@ module private MatchExpression =
             arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
         | _ -> NoMatch
 
-    and private matchArray arguments =
+    and [<TailCall>] private matchArray arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.ArrayOrList(true, expressions, _)), Expression.Array(hintExpressions) ->
             let expressions = List.map AstNode.Expression expressions
@@ -360,7 +363,7 @@ module private MatchExpression =
             arguments.SubHint(AstNode.Expression(expression), hintExpression) |> matchHintExpr
         | _ -> NoMatch
 
-    and private matchInfixOperation arguments =
+    and [<TailCall>] private matchInfixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.App(_, true, (ExpressionUtilities.Identifier(_) as opExpr), SynExpr.Tuple(_, [leftExpr; rightExpr], _, _), _)),
            Expression.InfixOperator(op, left, right)) ->
@@ -379,7 +382,7 @@ module private MatchExpression =
             | _ -> NoMatch
         | _ -> NoMatch
 
-    and private matchPrefixOperation arguments =
+    and [<TailCall>] private matchPrefixOperation arguments =
         match (arguments.Expression, arguments.Hint) with
         | (AstNode.Expression(SynExpr.App(_, _, opExpr, rightExpr, _)),
            Expression.PrefixOperator(Expression.Identifier([op]), expr)) ->
@@ -387,7 +390,7 @@ module private MatchExpression =
             (arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr)
         | _ -> NoMatch
 
-    and private matchAddressOf arguments =
+    and [<TailCall>] private matchAddressOf arguments =
         match (arguments.Expression, arguments.Hint) with
         | AstNode.Expression(SynExpr.AddressOf(synSingleAmp, addrExpr, _, _)), Expression.AddressOf(singleAmp, expr) when synSingleAmp = singleAmp ->
             arguments.SubHint(AstNode.Expression(addrExpr), expr) |> matchHintExpr

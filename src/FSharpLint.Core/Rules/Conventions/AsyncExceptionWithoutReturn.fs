@@ -7,6 +7,8 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+// not a tail-recursive function
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec checkExpression (expression: SynExpr) (range: range) =
     match expression with
     | SynExpr.Sequential (_, _, firstExpression, secondExpression, _, _) ->
@@ -55,7 +57,7 @@ let rec checkExpression (expression: SynExpr) (range: range) =
     | SynExpr.LetOrUse (_, _, _, body, range, _) ->
         checkExpression body range
     | _ -> Array.empty
-
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 let runner args =
     match args.AstNode with

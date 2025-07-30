@@ -114,6 +114,8 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
                     TypeChecks = List.Empty
                 })
 
+// not a tail-recursive function
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) = 
     let tryFindFirst exprs = 
         exprs |> Seq.choose (tryFindTypedExpression range) |> Seq.tryHead
@@ -208,6 +210,7 @@ let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) =
         | FSharpExprPatterns.WhileLoop(guardExpr, bodyExpr, _) -> 
             tryFindTypedExpression range guardExpr |> Option.orElse (tryFindTypedExpression range bodyExpr)
         | _ -> None
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
     let expressions =

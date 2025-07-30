@@ -7,6 +7,8 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+// not a tail-recursive function
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) =
     match expression with
     | SynExpr.Const (_constant, _range) -> true
@@ -34,6 +36,7 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
         isImmutableValueExpression args innerExpr
         || isImmutableSequentialExpression args innerExpr
     | _ -> false
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 and isImmutableSequentialExpression args expression =
     match expression with

@@ -32,12 +32,15 @@ let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>
         | _ -> instanceMethodCalls
     | _ -> instanceMethodCalls
 
+[<TailCall>]
 let rec private extraFromBindings (bindings: List<SynBinding>) (classInstances: List<string>) =
     match bindings with
     | SynBinding(_, _, _, _, _, _, _, SynPat.Named(SynIdent(ident, _), _, _, _), _, _expression, _, _, _)::rest ->
         extraFromBindings rest (ident.idText::classInstances)
     | _ -> classInstances
 
+// not a tail-recursive function
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) : array<WarningDetails> =
     match body with
     | SynExpr.LongIdentSet(SynLongIdent(identifiers, _, _), _, _) ->
@@ -65,6 +68,7 @@ and processExpression (expression: SynExpr) : array<WarningDetails> =
             (processExpression expr1)
             (processExpression expr2)
     | _ -> Array.empty
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 let runner args =
     match args.AstNode with

@@ -115,6 +115,7 @@ module AstInfo =
           "LBrack"
           "RBrack" ]
 
+    [<TailCall>]
     let rec isSequenceOfOperators (str:string) =
         if Seq.isEmpty str then
             true

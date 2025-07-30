@@ -213,6 +213,7 @@ module MergeSyntaxTrees =
             | None -> failwith "There's no last element in identifier."
         | _ -> 0
 
+    [<TailCall>]
     let rec private getHashCode node =
         match node with
         | HintExpr(Expression.Identifier(identifier))

@@ -310,6 +310,8 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
 
 type GetIdents<'Item> = AccessControlLevel -> SynPat -> 'Item []
 
+// not a tail-recursive function
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 /// Recursively get all identifiers from pattern using provided getIdents function and collect them into array.
 /// accessibility parameter is passed to getIdents, and can be narrowed down along the way (see checkAccessibility).
 let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:GetIdents<'Item>) argsAreParameters (pattern:SynPat) =
@@ -371,6 +373,7 @@ let rec getPatternIdents<'Item> (accessibility:AccessControlLevel) (getIdents:Ge
         Array.append
             (getPatternIdents accessibility getIdents false lhs)
             (getPatternIdents accessibility getIdents false rhs)
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
 let isNested args nodeIndex =
     let parent = args.SyntaxArray.[nodeIndex].ParentIndex
