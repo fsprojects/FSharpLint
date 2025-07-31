@@ -20,23 +20,28 @@ let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
 
 let runner (args: AstNodeRuleParams) =
     match args.AstNode, args.CheckInfo with
-    | UnneededRecKeyword.RecursiveFunction(func), Some checkInfo ->
-        if UnneededRecKeyword.functionCallsItself checkInfo func then
-            let hasTailCallAttribute =
-                func.Attributes 
-                |> List.collect (fun attrs -> attrs.Attributes) 
-                |> List.exists 
-                    (fun attr -> 
-                        match attr.TypeName with
-                        | SynLongIdent([ident], _, _) ->
-                            ident.idText = "TailCall" || ident.idText = "TailCallAttribute"
-                        | _ -> false)
-            if hasTailCallAttribute then
-                Array.empty
-            else
-                emitWarning func |> Array.singleton
-        else
-            Array.empty
+    | UnneededRecKeyword.RecursiveFunctions(funcs), Some checkInfo ->
+        funcs
+        |> List.choose
+            (fun functionInfo ->
+                if UnneededRecKeyword.functionIsCalledInOneOf checkInfo functionInfo funcs then
+                    let hasTailCallAttribute =
+                        functionInfo.Attributes 
+                        |> List.collect (fun attrs -> attrs.Attributes) 
+                        |> List.exists 
+                            (fun attr -> 
+                                match attr.TypeName with
+                                | SynLongIdent([ident], _, _) ->
+                                    ident.idText = "TailCall" || ident.idText = "TailCallAttribute"
+                                | _ -> false)
+                    if hasTailCallAttribute then
+                        None
+                    else
+                        emitWarning functionInfo |> Some
+                else
+                    None
+            )
+        |> List.toArray
     | _ -> Array.empty
 
 let rule =
