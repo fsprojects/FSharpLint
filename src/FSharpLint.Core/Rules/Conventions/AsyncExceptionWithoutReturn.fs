@@ -6,9 +6,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
-
-
-let returnEmptyArray () = Array.empty
+open FSharpLint.Framework.Utilities
 
 [<TailCall>]
 let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit -> array<WarningDetails>) =
@@ -61,7 +59,7 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
             checkExpression body range returnEmptyArray
         | _ -> Array.empty)
         (continuation ())
-and checkMultipleExpressions (expressions: list<SynExpr * range>) (continuation: unit -> array<WarningDetails>) =
+and [<TailCall>] checkMultipleExpressions (expressions: list<SynExpr * range>) (continuation: unit -> array<WarningDetails>) =
     match expressions with
     | (expression, range) :: tail -> 
         checkExpression
