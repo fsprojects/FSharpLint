@@ -17,21 +17,33 @@ type internal RecursiveFunctionInfo =
         Attributes: SynAttributes
     }
 
-let internal (|RecursiveFunction|_|) (astNode: AstNode)  =
+let internal (|RecursiveFunctions|_|) (astNode: AstNode)  =
     match astNode with
     | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _)) ->
-        match bindings with
-        | SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent (SynLongIdent([ident], _, _), _, _, _, _, range), _, body, _, _, _) :: _ ->
-            Some { Identifier = ident; Range = range; Body = body; Attributes = attributes } 
-        | _ -> None
+        let recursiveBindings =
+            bindings 
+            |> List.choose 
+                (fun binding -> 
+                    match binding with
+                    | SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent (SynLongIdent([ident], _, _), _, _, _, _, range), _, body, _, _, _) ->
+                        Some { Identifier = ident; Range = range; Body = body; Attributes = attributes } 
+                    | _ -> None)
+        match recursiveBindings with
+        | [] -> None
+        | _ -> Some recursiveBindings
     | _ -> None
 
-let internal functionCallsItself (checkInfo: FSharpCheckFileResults) (func: RecursiveFunctionInfo) =
-    let funcName = func.Identifier.idText
-    checkInfo.GetAllUsesOfAllSymbolsInFile()
-    |> Seq.exists (fun usage -> 
-        usage.Symbol.DisplayName = funcName 
-        && ExpressionUtilities.rangeContainsOtherRange func.Body.Range usage.Range)
+let internal functionIsCalledInOneOf (checkInfo: FSharpCheckFileResults)
+                                     (callee: RecursiveFunctionInfo)
+                                     (callers: list<RecursiveFunctionInfo>) =
+    let calleeName = callee.Identifier.idText
+    callers
+    |> List.exists
+        (fun caller ->
+            checkInfo.GetAllUsesOfAllSymbolsInFile()
+            |> Seq.exists (fun usage -> 
+                usage.Symbol.DisplayName = calleeName 
+                && ExpressionUtilities.rangeContainsOtherRange caller.Body.Range usage.Range))
 
 let private emitWarning (func: RecursiveFunctionInfo) =
     { Range = func.Range
@@ -45,8 +57,15 @@ let private emitWarning (func: RecursiveFunctionInfo) =
 
 let runner (args: AstNodeRuleParams) =
     match args.AstNode, args.CheckInfo with
-    | RecursiveFunction(func), Some checkInfo when not (functionCallsItself checkInfo func) ->
-        emitWarning func |> Array.singleton
+    | RecursiveFunctions(funcs), Some checkInfo ->
+        funcs 
+            |> List.choose 
+                (fun functionInfo -> 
+                    if not (functionIsCalledInOneOf checkInfo functionInfo funcs) then
+                        emitWarning functionInfo |> Some
+                    else
+                        None)
+            |> List.toArray
     | _ -> Array.empty
 
 let rule =
