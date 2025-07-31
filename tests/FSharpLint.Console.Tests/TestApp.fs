@@ -15,7 +15,7 @@ type TemporaryFile(fileContent : string, extension) =
     do
         File.WriteAllText(filename, fileContent)
 
-    member _.FileName = filename
+    member val FileName = filename
 
     interface System.IDisposable with
         member _.Dispose() =

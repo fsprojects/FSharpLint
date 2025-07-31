@@ -44,35 +44,35 @@ let private getRange node =
     | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
     | _ -> None
 
-let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) i j =
-    let mutable i = i
-    let mutable j = j
+let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) iIndex jIndex =
+    let mutable iIndex = iIndex
+    let mutable jIndex = jIndex
     let mutable distance = 0
 
-    while i <> j do
-        if i > j then
-            i <- syntaxArray.[i].ParentIndex
+    while iIndex <> jIndex do
+        if iIndex > jIndex then
+            iIndex <- syntaxArray.[iIndex].ParentIndex
 
-            if i <> j && areChildrenNested syntaxArray.[i].Actual then
+            if iIndex <> jIndex && areChildrenNested syntaxArray.[iIndex].Actual then
                 distance <- distance + 1
         else
-            j <- syntaxArray.[j].ParentIndex
+            jIndex <- syntaxArray.[jIndex].ParentIndex
 
     distance
 
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
 /// e.g. lambda arg being a duplicate of the lambda.
-let isMetaData args node i =
-    let parentIndex = args.SyntaxArray.[i].ParentIndex
-    if parentIndex = i then false
+let isMetaData args node index =
+    let parentIndex = args.SyntaxArray.[index].ParentIndex
+    if parentIndex = index then false
     else
         Object.ReferenceEquals(node, args.SyntaxArray.[parentIndex].Actual)
 
-let isElseIf args node i =
+let isElseIf args node index =
     match node with
     | AstNode.Expression(SynExpr.IfThenElse(_)) ->
-        let parentIndex = args.SyntaxArray.[i].ParentIndex
-        if parentIndex = i then false
+        let parentIndex = args.SyntaxArray.[index].ParentIndex
+        if parentIndex = index then false
         else
             match args.SyntaxArray.[parentIndex].Actual with
             | AstNode.Expression(SynExpr.IfThenElse(_, _, Some(_), _, _, _, _)) -> true
@@ -81,13 +81,13 @@ let isElseIf args node i =
 
 let mutable depth = 0
 
-let decrementDepthToCommonParent args i j =
-    if j < args.SyntaxArray.Length then
+let decrementDepthToCommonParent args iIndex jIndex =
+    if jIndex < args.SyntaxArray.Length then
         // If next node in array is not a sibling or child of the current node.
-        let parent = args.SyntaxArray.[j].ParentIndex
-        if parent <> i && parent <> args.SyntaxArray.[i].ParentIndex then
+        let parent = args.SyntaxArray.[jIndex].ParentIndex
+        if parent <> iIndex && parent <> args.SyntaxArray.[iIndex].ParentIndex then
             // Decrement depth until we reach a common parent.
-            depth <- depth - (distanceToCommonParent args.SyntaxArray i j)
+            depth <- depth - (distanceToCommonParent args.SyntaxArray iIndex jIndex)
 
 let mutable skipToIndex = None
 
@@ -103,20 +103,25 @@ let runner (config:Config) (args:AstNodeRuleParams) =
             true
 
     if not skip then
-        let i = args.NodeIndex
+        let index = args.NodeIndex
         let node = args.AstNode
-        decrementDepthToCommonParent args i (i + 1)
+        decrementDepthToCommonParent args index (index + 1)
 
-        if areChildrenNested node && not <| isMetaData args node i && not <| isElseIf args node i then
+        if areChildrenNested node && not <| isMetaData args node index && not <| isElseIf args node index then
             if depth >= config.Depth then
                 // Skip children as we've had an error containing them.
-                let skipChildren = i + args.SyntaxArray.[i].NumberOfChildren + 1
-                decrementDepthToCommonParent args i skipChildren
+                let skipChildren = index + args.SyntaxArray.[index].NumberOfChildren + 1
+                decrementDepthToCommonParent args index skipChildren
                 skipToIndex <- Some skipChildren
 
                 getRange node
                 |> Option.map (fun range ->
-                    { Range = range; Message = error config.Depth; SuggestedFix = None; TypeChecks = [] })
+                    {
+                        Range = range
+                        Message = error config.Depth
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    })
                 |> Option.toArray
             else
                 depth <- depth + 1
@@ -131,8 +136,13 @@ let cleanup () =
     skipToIndex <- None
 
 let rule config =
-    { Name = "NestedStatements"
-      Identifier = Identifiers.NestedStatements
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config
-                     Cleanup = cleanup } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "NestedStatements"
+            Identifier = Identifiers.NestedStatements
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = cleanup
+                }
+        }

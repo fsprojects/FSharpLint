@@ -10,10 +10,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
 let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
-    members
-    |> List.toArray
-    |> Array.pairwise
-    |> Array.choose (fun (memberOne, memberTwo) ->
+    let choose (memberOne: SynMemberDefn) (memberTwo: SynMemberDefn) =
         let numPrecedingCommentLines = countPrecedingCommentLines args.FileContent memberOne.Range.End memberTwo.Range.Start
         if memberTwo.Range.StartLine <> memberOne.Range.EndLine + 2 + numPrecedingCommentLines then
             let intermediateRange =
@@ -25,16 +22,24 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
                     else 0
 
                 Range.mkRange
-                    ""
+                    String.Empty
                     (Position.mkPos (memberOne.Range.EndLine + 1) 0)
                     (Position.mkPos (memberTwo.Range.StartLine + endOffset) 0)
 
-            { Range = intermediateRange
-              Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
-              SuggestedFix = None
-              TypeChecks = [] } |> Some
+            Some
+                {
+                    Range = intermediateRange
+                    Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
         else
-            None)
+            None
+
+    members
+    |> List.toArray
+    |> Array.pairwise
+    |> Array.choose (fun (memberOne, memberTwo) -> choose memberOne memberTwo)
 
 let runner args =
     match args.AstNode with
@@ -45,7 +50,13 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "ClassMemberSpacing"
-      Identifier = Identifiers.ClassMemberSpacing
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "ClassMemberSpacing"
+            Identifier = Identifiers.ClassMemberSpacing
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

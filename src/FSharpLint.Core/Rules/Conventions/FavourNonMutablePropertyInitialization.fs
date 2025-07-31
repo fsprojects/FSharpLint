@@ -5,6 +5,7 @@ open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.Utilities
 open System
 
 let private getWarningDetails (ident: Ident) =
@@ -32,61 +33,72 @@ let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>
         | _ -> instanceMethodCalls
     | _ -> instanceMethodCalls
 
+[<TailCall>]
 let rec private extraFromBindings (bindings: List<SynBinding>) (classInstances: List<string>) =
     match bindings with
     | SynBinding(_, _, _, _, _, _, _, SynPat.Named(SynIdent(ident, _), _, _, _), _, _expression, _, _, _)::rest ->
         extraFromBindings rest (ident.idText::classInstances)
     | _ -> classInstances
 
-let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) : array<WarningDetails> =
-    match body with
-    | SynExpr.LongIdentSet(SynLongIdent(identifiers, _, _), _, _) ->
-        match identifiers with
-        | [instanceIdent; propertyIdent] when Set.contains instanceIdent.idText instanceNames ->
-            getWarningDetails propertyIdent
-        | _ -> Array.empty
-    | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
-        let instanceNames =
-            Set.difference
+[<TailCall>]
+let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
+    Array.append
+        (match body with
+        | SynExpr.LongIdentSet(SynLongIdent(identifiers, _, _), _, _) ->
+            match identifiers with
+            | [instanceIdent; propertyIdent] when Set.contains instanceIdent.idText instanceNames ->
+                getWarningDetails propertyIdent
+            | _ -> Array.empty
+        | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
+            let instanceNames =
+                Set.difference
+                    instanceNames
+                    (extraInstanceMethod expr1 List.empty |> Set.ofList)
+            processLetBinding
                 instanceNames
-                (extraInstanceMethod expr1 List.empty |> Set.ofList)
-        Array.append
-            (processLetBinding instanceNames expr1)
-            (processLetBinding instanceNames expr2)
-    | _ -> [||]
+                expr1
+                (fun () -> processLetBinding instanceNames expr2 returnEmptyArray)
+        | _ -> Array.empty)
+        (continuation())
 
-and processExpression (expression: SynExpr) : array<WarningDetails> =
-    match expression with
-    | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
-        let instanceNames = extraFromBindings bindings [] |> Set.ofList
-        processLetBinding instanceNames body
-    | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
-        Array.append
-            (processExpression expr1)
-            (processExpression expr2)
-    | _ -> Array.empty
+and [<TailCall>] processExpression (expression: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
+    Array.append
+        (match expression with
+        | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
+            let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
+            processLetBinding instanceNames body returnEmptyArray
+        | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
+            processExpression expr1 (fun () -> processExpression expr2 returnEmptyArray)
+        | _ -> Array.empty)
+        (continuation())
 
 let runner args =
     match args.AstNode with
     | Binding(SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, body, _, _), _, _, _)) ->
-        let instanceNames = extraFromBindings bindings [] |> Set.ofList
-        processLetBinding instanceNames body
+        let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
+        processLetBinding instanceNames body returnEmptyArray
     | Match(SynMatchClause(_, _, expr, _, _, _)) ->
-        processExpression expr
+        processExpression expr returnEmptyArray
     | Lambda(lambda, _) ->
-        processExpression lambda.Body
+        processExpression lambda.Body returnEmptyArray
     | Expression(SynExpr.TryWith(tryExpr, _, _, _, _, _)) ->
-        processExpression tryExpr
+        processExpression tryExpr returnEmptyArray
     | Expression(SynExpr.TryFinally(tryExpr, finallyExpr, _, _, _, _)) ->
         Array.append
-            (processExpression tryExpr)
-            (processExpression finallyExpr)
+            (processExpression tryExpr returnEmptyArray)
+            (processExpression finallyExpr returnEmptyArray)
     | Expression(SynExpr.ComputationExpr(_, expr, _)) ->
-        processExpression expr
+        processExpression expr returnEmptyArray
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourNonMutablePropertyInitialization"
-      Identifier = Identifiers.FavourNonMutablePropertyInitialization
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourNonMutablePropertyInitialization"
+            Identifier = Identifiers.FavourNonMutablePropertyInitialization
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }
