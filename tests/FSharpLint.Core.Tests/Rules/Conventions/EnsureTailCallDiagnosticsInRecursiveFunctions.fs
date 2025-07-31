@@ -44,3 +44,33 @@ module Bar =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Should error when functions are mutually recursive, but one of them has no [<TailCall>] attribute``() =
+        this.Parse """
+[<TailCall>]
+let rec Foo someParam =
+    if someParam then
+        Foo false
+    else
+        Bar()
+and Bar () =
+    Foo true
+"""
+        
+        Assert.IsTrue <| this.ErrorExistsAt(8, 4)
+
+    [<Test>]
+    member this.``Should not error when functions are mutually recursive, and both of them have [<TailCall>] attribute``() =
+        this.Parse """
+[<TailCall>]
+let rec Foo someParam =
+    if someParam then
+        Foo false
+    else
+        Bar()
+and [<TailCall>] Bar () =
+    Foo true
+"""
+        
+        Assert.IsTrue this.NoErrorsExist
