@@ -78,13 +78,13 @@ let result = extractInt singleCaseDU
         let source = """
 module Program
 
-let __foo_bar = 0
+let baz __foo_bar = 0
 """
 
         let expected = """
 module Program
 
-let __foobar = 0
+let baz __foobar = 0
 """
 
         this.Parse source
