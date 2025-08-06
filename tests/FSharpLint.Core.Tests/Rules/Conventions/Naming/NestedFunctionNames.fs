@@ -55,6 +55,20 @@ module Program =
         Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
+    member this.NestedFunctionNameWithNoParametersIsPascalCase() =
+        this.Parse """
+module Program =
+    let CylinderVolume () =
+        let NestedFunction () =
+            1
+
+        let pi = 3.14159
+        pi * 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+
+    [<Test>]
     member this.NestedFunctionNameInTypeIsPascalCase() =
         this.Parse """
 type Record =
