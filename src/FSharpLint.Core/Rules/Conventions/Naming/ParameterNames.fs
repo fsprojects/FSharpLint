@@ -41,7 +41,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
-            | Value | Function ->
+            | Function ->
                 let accessControlLevel = getAccessControlLevel args.SyntaxArray args.NodeIndex
                 getPatternIdents accessControlLevel (getValueOrFunctionIdents args.CheckInfo) true pattern
             | Member | Property ->
