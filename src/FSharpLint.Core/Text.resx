@@ -372,4 +372,7 @@
   <data name="RulesFavourAsKeyword" xml:space="preserve">
     <value>Prefer using the 'as' pattern to match a constant and bind it to a variable.</value>
   </data>
+  <data name="RulesFavourNestedFunctions" xml:space="preserve">
+    <value>Prefer using local functions over private module-level functions</value>
+  </data>
 </root>
