@@ -108,3 +108,14 @@ module Program =
 """
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Bindings that are not functions should not cause errors``() =
+        this.Parse """
+module Program =
+    let OuterFunction () =
+        let BLUE_STATE = "blue"
+        ()
+"""
+
+        this.AssertNoWarnings()

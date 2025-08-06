@@ -199,3 +199,12 @@ module Program =
 """
 
         Assert.IsTrue(this.ErrorExistsAt(8, 8))
+
+    [<Test>]
+    member this.``Bindings that are not functions should not cause errors``() =
+        this.Parse """
+module Program =
+    let BLUE_STATE = "blue"
+"""
+
+        this.AssertNoWarnings()
