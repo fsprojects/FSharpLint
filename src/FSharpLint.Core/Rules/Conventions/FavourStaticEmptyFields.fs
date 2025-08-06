@@ -25,16 +25,16 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     errorMessageKey |> formatError
 
 let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    let suggestedFix = lazy(
+    let fix = lazy(
         let replacementText =
             match emptyLiteralType with
             | EmptyStringLiteral -> "String.Empty"
             | EmptyListLiteral -> "List.Empty"
             | EmptyArrayLiteral -> "Array.empty"
-        Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
+        Some({ FromRange = range; ToText = replacementText }))
     { Range = range
       Message = getStaticEmptyErrorMessage range emptyLiteralType
-      SuggestedFix = Some suggestedFix
+      Fix = Some fix
       TypeChecks = List.Empty }
     |> Array.singleton
 

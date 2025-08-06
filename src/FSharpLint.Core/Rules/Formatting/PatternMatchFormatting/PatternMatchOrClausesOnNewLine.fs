@@ -20,7 +20,7 @@ let check args _ (clauses:SynMatchClause list) _ =
         if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
             { Range = clauseTwo.Range
               Message = Resources.GetString("RulesFormattingPatternMatchOrClausesOnNewLineError")
-              SuggestedFix = None
+              Fix = None
               TypeChecks = [] } |> Some
         else
             None)

@@ -22,7 +22,7 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
         if expr.Range.StartLine <> matchPatternEndLine && exprIndentation <> clauseIndentation + args.GlobalConfig.numIndentationSpaces then
             { Range = expr.Range
               Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
-              SuggestedFix = None
+              Fix = None
               TypeChecks = [] } |> Some
         else
             None)

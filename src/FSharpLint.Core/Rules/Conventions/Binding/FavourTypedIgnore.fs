@@ -10,18 +10,17 @@ open FSharpLint.Framework.Rules
 let private runner (args: AstNodeRuleParams) =
     let generateError identifier range text =
 
-        let suggestedFix =
+        let fix =
             lazy
                 (ExpressionUtilities.tryFindTextOfRange range text
                  |> Option.map
                      (fun fromText ->
-                         { FromText = fromText
-                           FromRange = range
+                         { FromRange = range
                            ToText = identifier }))
 
         { Range = range
           Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
-          SuggestedFix = Some suggestedFix
+          Fix = Some fix
           TypeChecks = [] }
 
     let isTyped expression identifier range text =

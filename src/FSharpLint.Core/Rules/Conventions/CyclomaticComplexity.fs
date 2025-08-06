@@ -194,7 +194,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
                                  pos.Column, pos.Line)
                             |> Seq.map (fun scope -> // transform into WarningDetails
                                 let errMsg = String.Format(Resources.GetString("RulesCyclomaticComplexityError"), scope.Complexity, config.MaxComplexity)
-                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = [] })
+                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; Fix = None; TypeChecks = [] })
                             |> Seq.toList
             let ret = match warningDetails with
                       | Some x -> x::fromStack

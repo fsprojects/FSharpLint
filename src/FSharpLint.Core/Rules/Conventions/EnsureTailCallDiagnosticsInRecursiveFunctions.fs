@@ -15,7 +15,7 @@ let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
             Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
             func.Identifier.idText
         )
-      SuggestedFix = None
+      Fix = None
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =

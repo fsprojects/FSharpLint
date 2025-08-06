@@ -146,7 +146,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
                 let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
                 { Range = range
                   Message =  errorString
-                  SuggestedFix = None
+                  Fix = None
                   TypeChecks = [] } |> Some
             else
                 None
@@ -155,7 +155,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
                 let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
                 { Range = range
                   Message =  String.Format(errorFormatString, expectedSpaces)
-                  SuggestedFix = None
+                  Fix = None
                   TypeChecks = [] } |> Some
             else
                 None
@@ -163,7 +163,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
         { Range = range
           Message =  String.Format(errorFormatString, expectedSpaces)
-          SuggestedFix = None
+          Fix = None
           TypeChecks = [] } |> Some
     else
         None

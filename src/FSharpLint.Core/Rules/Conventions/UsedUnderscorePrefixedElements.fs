@@ -24,7 +24,7 @@ let runner (args: AstNodeRuleParams) =
                         Some {
                             Range = usage.Range
                             Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
-                            SuggestedFix = None
+                            Fix = None
                             TypeChecks = List.Empty
                         }
                     else
