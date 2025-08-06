@@ -55,6 +55,20 @@ module Program =
         Assert.IsTrue(this.ErrorExistsAt(4, 12))
 
     [<Test>]
+    member this.NestedFunctionNameWithNoParametersIsPascalCase() =
+        this.Parse """
+module Program =
+    let CylinderVolume () =
+        let NestedFunction () =
+            1
+
+        let pi = 3.14159
+        pi * 2
+"""
+
+        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+
+    [<Test>]
     member this.NestedFunctionNameInTypeIsPascalCase() =
         this.Parse """
 type Record =
@@ -105,6 +119,17 @@ module Program =
         let radius = 1
         let pi = 3.14159
         length * pi * radius * radius
+"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Bindings that are not functions should not cause errors``() =
+        this.Parse """
+module Program =
+    let OuterFunction () =
+        let BLUE_STATE = "blue"
+        ()
 """
 
         this.AssertNoWarnings()
