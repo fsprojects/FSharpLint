@@ -114,3 +114,14 @@ let foo ((x, y) as bar_coord) = bar_coord
 """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Module members should not cause errors as they are not parameters``() =
+        this.Parse """
+module BitLaunch =
+    module Regions =
+        let Bucharest = "Bucharest"
+        let Amsterdam someArg = "Amsterdam"
+"""
+        
+        Assert.IsFalse this.ErrorsExist
