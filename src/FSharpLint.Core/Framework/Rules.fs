@@ -58,6 +58,7 @@ type NamingUnderscores =
     | None = 0
     | AllowPrefix = 1
     | AllowAny = 2
+    | AllowInfix = 3
 
 type NamingConfig =
     { Naming:NamingCase option

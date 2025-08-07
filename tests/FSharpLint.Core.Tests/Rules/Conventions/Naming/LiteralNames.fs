@@ -10,6 +10,7 @@ let config =
       Underscores = Some NamingUnderscores.None
       Prefix = None
       Suffix = None }
+
 [<TestFixture>]
 type TestConventionsLiteralNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(LiteralNames.rule config)
@@ -68,4 +69,58 @@ let cat = 5
 """
 
         Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+let infixConfig =
+    { NamingConfig.Naming = Some NamingCase.PascalCase
+      Underscores = Some NamingUnderscores.AllowInfix
+      Prefix = None
+      Suffix = None }
+
+[<TestFixture>]
+type TestConventionsLiteralNamesInfix() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(LiteralNames.rule infixConfig)
+
+    [<Test>]
+    member this.LiteralIsInfixUnderscore() =
+        this.Parse """
+module Program
+
+[<Literal>]
+let Super_Cat = 5
+"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.LiteralIsUnderscorePrefix() =
+        this.Parse """
+module Program
+
+[<Literal>]
+let _Cat = 5
+"""
+
+        Assert.IsTrue(this.ErrorExistsOnLine 5)
+
+    [<Test>]
+    member this.LiteralIsUnderscoreSuffix() =
+        this.Parse """
+module Program
+
+[<Literal>]
+let Cat_ = 5
+"""
+
+        Assert.IsTrue(this.ErrorExistsOnLine 5)
+
+    [<Test>]
+    member this.LiteralIsNoUnderscore() =
+        this.Parse """
+module Program
+
+[<Literal>]
+let SuperCat = 5
+"""
+
+        this.AssertNoWarnings()
 

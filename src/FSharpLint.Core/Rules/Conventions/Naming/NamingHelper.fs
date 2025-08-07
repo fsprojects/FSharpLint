@@ -24,6 +24,10 @@ module QuickFixes =
         let toText = prefixingUnderscores + ident.idText.Replace("_", String.Empty)
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
+    let removePrefixingAndSuffixingUnderscores (ident:Ident) = lazy(
+        let toText = ident.idText.Trim '_'
+        Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
+
     let addPrefix prefix (ident:Ident) = lazy(
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText })
 
@@ -83,12 +87,17 @@ let private camelCaseRule (identifier:string) =
     if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
     else None
 
-let private underscoreRule allowPrefix (identifier:string) =
-    if allowPrefix && identifier.TrimStart('_').Contains("_") then
-        Some "RulesNamingConventionsUnderscoreError"
-    else if not allowPrefix && identifier.Contains("_") then
-        Some "RulesNamingConventionsUnderscoreError"
-    else
+let private underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
+    let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
+    let errorKeyToRemoveLeadingOrTrailingUnderscores = "RulesNamingConventionsNoInfixUnderscoreError"
+    match underscoreMode with
+    | NamingUnderscores.AllowPrefix when identifier.TrimStart('_').Contains '_' ->
+        Some errorKeyToRemoveUnderscores
+    | NamingUnderscores.None when identifier.Contains '_' ->
+        Some errorKeyToRemoveUnderscores
+    | NamingUnderscores.AllowInfix when (identifier.StartsWith '_' || identifier.EndsWith '_') ->
+        Some errorKeyToRemoveLeadingOrTrailingUnderscores
+    | _ ->
         None
 
 let private prefixRule (prefix:string) (identifier:string) =
@@ -120,12 +129,15 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
 
     let underscoresError =
         match config.Underscores with
-        | Some NamingUnderscores.None ->
-            underscoreRule false idText
+        | Some (NamingUnderscores.None as nuCfg) ->
+            underscoreRule nuCfg idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
-        | Some NamingUnderscores.AllowPrefix ->
-            underscoreRule true idText
+        | Some (NamingUnderscores.AllowPrefix as nuCfg) ->
+            underscoreRule nuCfg idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
+        | Some (NamingUnderscores.AllowInfix as nuCfg) ->
+            underscoreRule nuCfg idText
+            |> Option.map (formatError >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
         | _ -> None
 
     let prefixError =
