@@ -6,7 +6,8 @@ open NUnit.Framework
 open FSharpLint.Framework
 open FSharpLint.Framework.HintParser
 open FParsec
-open MergeSyntaxTrees
+open FSharpLint.Framework.MergeSyntaxTrees
+open FSharpLint.Framework.HintParserTypes
 open System.Collections.Generic
 
 [<TestFixture>]

@@ -9,15 +9,23 @@ open FSharp.Compiler.Text
 let checkTrailingNewLineInFile (args:LineRuleParams) =
     if args.IsLastLine && args.FileContent.EndsWith("\n") then
         let pos = Position.mkPos args.LineNumber 0
-        { Range = Range.mkRange "" pos pos
-          Message = Resources.GetString("RulesTypographyTrailingLineError")
-          SuggestedFix = None
-          TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            {
+                Range = Range.mkRange "" pos pos
+                Message = Resources.GetString("RulesTypographyTrailingLineError")
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
 let rule =
-    { Name = "TrailingNewLineInFile"
-      Identifier = Identifiers.TrailingNewLineInFile
-      RuleConfig = { LineRuleConfig.Runner = checkTrailingNewLineInFile } }
-    |> LineRule
+    LineRule
+        {
+            Name = "TrailingNewLineInFile"
+            Identifier = Identifiers.TrailingNewLineInFile
+            RuleConfig =
+                {
+                    LineRuleConfig.Runner = checkTrailingNewLineInFile
+                }
+        }

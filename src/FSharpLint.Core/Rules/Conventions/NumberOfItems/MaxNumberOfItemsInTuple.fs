@@ -7,24 +7,30 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) i =
-    let rec isApplicationNode i =
-        if i <= 0 then false
+let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) index =
+    let rec isApplicationNode nodeIndex =
+        if nodeIndex <= 0 then false
         else
-            let node = syntaxArray.[i]
+            let node = syntaxArray.[nodeIndex]
             match node.Actual with
             | AstNode.Expression(SynExpr.Paren(_)) -> isApplicationNode node.ParentIndex
             | AstNode.Expression(SynExpr.App(_) | SynExpr.New(_)) -> true
             | _ -> false
 
-    if i <= 0 then false
-    else isApplicationNode syntaxArray.[i].ParentIndex
+    if index <= 0 then false
+    else isApplicationNode syntaxArray.[index].ParentIndex
 
 let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
         let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
         let error = String.Format(errorFormatString, maxItems)
-        { Range = items.[maxItems].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            {
+                Range = items.[maxItems].Range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -39,7 +45,13 @@ let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
         Array.empty
 
 let rule config =
-    { Name = "MaxNumberOfItemsInTuple"
-      Identifier = Identifiers.MaxNumberOfItemsInTuple
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxNumberOfItemsInTuple"
+            Identifier = Identifiers.MaxNumberOfItemsInTuple
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

@@ -56,8 +56,8 @@ let private parserProgress (output:Output.IOutput) = function
         String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
     | Failed (file, parseException) ->
         String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-        $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
-        |> output.WriteError
+        output.WriteError
+            $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
 
 /// Infers the file type of the target based on its file extension.
 let internal inferFileType (target:string) =
@@ -84,7 +84,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         let version =
             Assembly.GetExecutingAssembly().GetCustomAttributes false
             |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
-        $"Current version: {version}" |> output.WriteInfo
+        output.WriteInfo $"Current version: {version}"
         Environment.Exit 0
 
     let handleError (str:string) =
@@ -129,10 +129,10 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | _ -> Lint.lintProject lintParams target toolsPath
             handleLintResult lintResult
         with
-        | e ->
+        | exn ->
             let target = if fileType = FileType.Source then "source" else target
-            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{e.Message}{Environment.NewLine}Stack trace: {e.StackTrace}"
-            |> handleError
+            handleError
+                $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
     | _ -> ()
 
     exitCode

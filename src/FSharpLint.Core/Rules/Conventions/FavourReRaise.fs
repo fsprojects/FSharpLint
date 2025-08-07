@@ -9,11 +9,11 @@ open FSharpLint.Framework.Rules
 
 let private runner (args: AstNodeRuleParams) =
     let generateError suggestedFix range =
-        { Range = range
-          Message = Resources.GetString "RulesFavourReRaise"
-          SuggestedFix = Some suggestedFix
-          TypeChecks = List.empty }
-        |> Array.singleton
+        Array.singleton
+            { Range = range
+              Message = Resources.GetString "RulesFavourReRaise"
+              SuggestedFix = Some suggestedFix
+              TypeChecks = List.empty }
 
     let rec checkExpr (expr) maybeIdent =
         match expr with
@@ -44,9 +44,13 @@ let private runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourReRaise"
-      Identifier = Identifiers.FavourReRaise
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourReRaise"
+            Identifier = Identifiers.FavourReRaise
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

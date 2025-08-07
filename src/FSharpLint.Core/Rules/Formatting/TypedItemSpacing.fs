@@ -16,21 +16,21 @@ type TypedItemStyle =
 [<RequireQualifiedAccess>]
 type Config = { TypedItemStyle:TypedItemStyle }
 
-let private getLeadingSpaces (s:string) =
-    let rec loop i =
-        if i < s.Length && s.[i] = ' '
-        then loop (i + 1)
-        else i
+let private getLeadingSpaces (text:string) =
+    let rec loop index =
+        if index < text.Length && text.[index] = ' '
+        then loop (index + 1)
+        else index
 
     loop 0
 
-let private getTrailingSpaces (s:string) =
-    let rec loop i count =
-        if i >= 0 && s.[i] = ' '
-        then loop (i - 1) (count + 1)
+let private getTrailingSpaces (text:string) =
+    let rec loop index count =
+        if index >= 0 && text.[index] = ' '
+        then loop (index - 1) (count + 1)
         else count
 
-    (loop (s.Length - 1) 0)
+    (loop (text.Length - 1) 0)
 
 let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     match typedItemStyle with
@@ -44,8 +44,7 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
     let (expectedSpacesBefore, expectedSpacesAfter) =
         expectedSpacesFromConfig config.TypedItemStyle
 
-    ExpressionUtilities.tryFindTextOfRange range args.FileContent
-    |> Option.bind (fun text ->
+    let bind (text: string) = 
         match text.Split(':') with
         | [|otherText; typeText|] ->
             let spacesBeforeColon = getTrailingSpaces otherText
@@ -56,17 +55,24 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                 let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
                 let spacesAfterString = " " |> String.replicate expectedSpacesAfter
                 let suggestedFix = lazy(
-                    { FromRange = range; FromText = text; ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
-                    |> Some)
+                    Some { FromRange = range;
+                           FromText = text;
+                           ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
+                    )
                 let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
                 Some
-                    { Range = range
-                      Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                      SuggestedFix = Some suggestedFix
-                      TypeChecks = [] }
+                    {
+                        Range = range
+                        Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                        SuggestedFix = Some suggestedFix
+                        TypeChecks = List.Empty
+                    }
                 else
                     None
-        | _ -> None)
+        | _ -> None
+
+    ExpressionUtilities.tryFindTextOfRange range args.FileContent
+    |> Option.bind bind
 
 /// Checks for correct spacing around colon of a typed item.
 let runner (config:Config) (args:AstNodeRuleParams) =
@@ -76,10 +82,16 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         // NOTE: This currently does not work for fields in union cases, since the range on union case fields is incorrect,
         // only including the type and not the field name. (https://github.com/dotnet/fsharp/issues/9279)
         checkRange config args range |> Option.toArray
-    | _ -> [||]
+    | _ -> Array.empty
 
 let rule config =
-    { Name = "TypedItemSpacing"
-      Identifier = Identifiers.TypedItemSpacing
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TypedItemSpacing"
+            Identifier = Identifiers.TypedItemSpacing
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

@@ -14,10 +14,11 @@ let private checkForWildcardNamedWithAsPattern fileContents pattern =
         let suggestedFix = 
             lazy(
                 Some { FromRange = range; FromText = fileContents; ToText = identifier.idText })
-        { Range = range
-          Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            { Range = range
+              Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
+              SuggestedFix = Some suggestedFix
+              TypeChecks = List.Empty }
     | _ -> Array.empty
 
 let private runner (args:AstNodeRuleParams) =
@@ -27,8 +28,13 @@ let private runner (args:AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "WildcardNamedWithAsPattern"
-      Identifier = Identifiers.WildcardNamedWithAsPattern
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
-
+    AstNodeRule
+        {
+            Name = "WildcardNamedWithAsPattern"
+            Identifier = Identifiers.WildcardNamedWithAsPattern
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

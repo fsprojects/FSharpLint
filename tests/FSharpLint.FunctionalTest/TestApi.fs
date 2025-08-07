@@ -8,8 +8,7 @@ module TestApi =
     open FSharpLint.Application.Lint
     open FSharp.Compiler.CodeAnalysis
     open FSharp.Compiler.Text
-
-    let (</>) x y = Path.Combine(x, y)
+    open FSharpLint.Framework.Utilities
 
     let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 
@@ -38,7 +37,7 @@ module TestApi =
         [<Test>]
         member _.``Performance of linting an existing file``() =
             let text = File.ReadAllText sourceFile
-            let tree = text |> generateAst
+            let tree = generateAst text
             let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None }
 
             let stopwatch = Stopwatch.StartNew()
@@ -49,7 +48,7 @@ module TestApi =
             for _ in 0..iterations do
                 stopwatch.Restart()
 
-                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
+                lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore<LintResult>
 
                 stopwatch.Stop()
 
