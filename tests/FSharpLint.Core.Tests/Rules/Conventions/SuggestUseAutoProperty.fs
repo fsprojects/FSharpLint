@@ -106,3 +106,13 @@ type Foo(content: int) =
 
         this.Parse source
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Should not suggest using auto-property for types with [<Struct>] attribute`` () =
+        this.Parse """
+[<Struct>]
+type Foo(content: int) =
+    member self.Content = content
+"""
+
+        Assert.IsTrue this.NoErrorsExist

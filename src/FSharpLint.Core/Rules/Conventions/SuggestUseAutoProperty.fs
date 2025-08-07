@@ -44,6 +44,18 @@ and isImmutableSequentialExpression args expression =
             || isImmutableValueExpression args expr2)
     | _ -> false
 
+let private hasStructAttribute node =
+    match node with
+    | AstNode.TypeDefinition(SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
+        attributes
+        |> extractAttributes
+        |> List.exists
+            (fun attribute ->
+                match List.tryLast attribute.TypeName.LongIdent with
+                | Some(ident) -> ident.idText = "Struct" || ident.idText = "StructAttribute"
+                | None -> false)
+    | _ -> false
+
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
     | MemberDefinition
@@ -73,21 +85,25 @@ let private runner (args: AstNodeRuleParams) =
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
         | expression, _ when isImmutableValueExpression args expression ->
-            let suggestedFix =
-                lazy
-                    (match memberIdentifier.LongIdent with
-                     | [ _; memberName ] ->
-                         Some
-                             { FromText = args.FileContent
-                               FromRange = memberIdentifier.Range
-                               ToText = $"val {memberName.idText}" }
-                     | _ -> None)
-
-            { Range = memberRange
-              Message = Resources.GetString "RulesSuggestUseAutoProperty"
-              SuggestedFix = Some suggestedFix
-              TypeChecks = List.Empty }
-            |> Array.singleton
+            match args.GetParents args.NodeIndex with
+            | parentNode :: _ when hasStructAttribute parentNode ->
+                Array.empty
+            | _ ->
+                let suggestedFix =
+                    lazy
+                        (match memberIdentifier.LongIdent with
+                            | [ _; memberName ] ->
+                                Some
+                                    { FromText = args.FileContent
+                                      FromRange = memberIdentifier.Range
+                                      ToText = $"val {memberName.idText}" }
+                            | _ -> None)
+            
+                { Range = memberRange
+                  Message = Resources.GetString "RulesSuggestUseAutoProperty"
+                  SuggestedFix = Some suggestedFix
+                  TypeChecks = List.Empty }
+                |> Array.singleton
         | _ -> Array.empty
     | _ -> Array.empty
 
