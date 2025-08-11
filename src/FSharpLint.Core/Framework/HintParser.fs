@@ -7,8 +7,8 @@ open HintParserTypes
 
 module HintParser =
 
-    let charListToString charList =
-        Seq.fold (fun concatenatedString charElement -> concatenatedString + charElement.ToString()) String.Empty charList
+    let charListToString (charList: char seq) =
+        String.Concat charList
 
     let pischar chars : Parser<char, 'CharParser> =
         satisfy (fun character -> List.exists ((=) character) chars)
