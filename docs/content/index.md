@@ -107,7 +107,7 @@ Rules can be disabled within the code using structured comments. See the [Suppre
 
 ## Running Lint From An Application
 
-Install the [`FSharp.Core` nuget package](https://www.nuget.org/packages/FSharpLint.Core/).
+Install the [`FSharpLint.Core` nuget package](https://www.nuget.org/packages/FSharpLint.Core/).
 
 The namespace `FSharpLint.Application` contains a module named `Lint` which provides several functions
 to lint a project/source file/source string.
