@@ -53,6 +53,8 @@ type AstNodeRuleConfig =
 type NamingCase =
     | PascalCase = 0
     | CamelCase = 1
+    | AllLowercase = 2
+    | AllUppercase = 3
 
 type NamingUnderscores =
     | None = 0

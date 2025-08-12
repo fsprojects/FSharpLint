@@ -52,6 +52,16 @@ module QuickFixes =
         let camelCaseIdent = mapFirstChar Char.ToLower ident.idText
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
 
+    let toAllLowercase (ident:Ident) = lazy(
+        let newIdent = ident.idText.ToLower()
+        //TODO: in case Underscores=AllowAny or AllowInfix, and ident is PascalCase or CamelCase, try to inject them when case changes
+        Some { FromText = ident.idText; FromRange = ident.idRange; ToText = newIdent })
+
+    let toAllUppercase (ident:Ident) = lazy(
+        let newIdent = ident.idText.ToUpper()
+        //TODO: in case Underscores=AllowAny or AllowInfix, and ident is PascalCase or CamelCase, try to inject them when case changes
+        Some { FromText = ident.idText; FromRange = ident.idRange; ToText = newIdent })
+
 [<Literal>]
 let private NumberOfExpectedBackticks = 4
 
@@ -79,6 +89,12 @@ let isCamelCase (identifier:string) =
     if withoutUnderscorePrefix.Length = 0 then true
     else Char.IsLower withoutUnderscorePrefix.[0]
 
+let isAllLowercase (identifier:string) =
+    Seq.forall (fun char -> Char.IsLower char || (not <| Char.IsLetter char)) identifier
+
+let isAllUppercase (identifier:string) =
+    Seq.forall (fun char -> Char.IsUpper char || (not <| Char.IsLetter char)) identifier
+
 let private pascalCaseRule (identifier:string) =
     if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
     else None
@@ -86,6 +102,15 @@ let private pascalCaseRule (identifier:string) =
 let private camelCaseRule (identifier:string) =
     if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
     else None
+
+let private uppercaseRule (identifier:string) =
+    if not (isAllUppercase identifier) then Some "RulesNamingConventionsUppercaseError"
+    else None
+
+let private lowercaseRule (identifier:string) =
+    if not (isAllLowercase identifier) then Some "RulesNamingConventionsLowercaseError"
+    else None
+
 
 let private underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
     let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
@@ -125,6 +150,12 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         | Some NamingCase.CamelCase ->
             camelCaseRule idText
             |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
+        | Some NamingCase.AllLowercase ->
+            lowercaseRule idText
+            |> Option.map (formatError >> tryAddFix QuickFixes.toAllLowercase)
+        | Some NamingCase.AllUppercase ->
+            uppercaseRule idText
+            |> Option.map (formatError >> tryAddFix QuickFixes.toAllUppercase)
         | _ -> None
 
     let underscoresError =
