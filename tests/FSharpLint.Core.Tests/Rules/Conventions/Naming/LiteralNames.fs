@@ -124,3 +124,24 @@ let SuperCat = 5
 
         Assert.IsTrue(this.ErrorExistsOnLine 5)
 
+    [<Test>]
+    member this.SuggestedFix() =
+        let source = """
+module Program
+
+[<Literal>]
+let superCat = 5
+"""
+        let expected = """
+module Program
+
+[<Literal>]
+let super_cat = 5
+"""
+        this.Parse source
+
+        Assert.IsTrue(this.ErrorExistsOnLine 5)
+
+        let result = this.ApplyQuickFix source
+
+        Assert.AreEqual(expected, result)
