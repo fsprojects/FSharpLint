@@ -282,9 +282,6 @@ Target.create "SelfCheck" (fun _ ->
             "trailingNewLineInFile"
             "trailingWhitespaceOnLine"
 
-            // TODO: investigate if useful
-            "tupleParentheses"
-
             // TODO: we should enable at some point
             "typePrefixing"
             "unnestedFunctionNames"
