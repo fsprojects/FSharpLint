@@ -266,30 +266,36 @@ Target.create "SelfCheck" (fun _ ->
 
     let excludedRules =
         [
+            // Formatting rules (maybe mark them as DEPRECATED soon, recommending the use of `fantomas` instead)
             "typedItemSpacing"
-            "typePrefixing"
             "unionDefinitionIndentation"
             "moduleDeclSpacing"
             "classMemberSpacing"
             "tupleCommaSpacing"
             "tupleIndentation"
-            "tupleParentheses"
             "patternMatchClausesOnNewLine"
             "patternMatchOrClausesOnNewLine"
             "patternMatchClauseIndentation"
             "patternMatchExpressionIndentation"
-            // rule is too complex and we can enable it later
-            "cyclomaticComplexity"
-            "unnestedFunctionNames"
-            "nestedFunctionNames"
             "indentation"
             "maxCharactersOnLine"
-            "trailingWhitespaceOnLine"
             "trailingNewLineInFile"
-            // not enable for now
+            "trailingWhitespaceOnLine"
+
+            // TODO: investigate if useful
+            "tupleParentheses"
+
+            // TODO: we should enable at some point
+            "typePrefixing"
+            "unnestedFunctionNames"
+            "nestedFunctionNames"
             "nestedStatements"
+
             // Running NoPartialFunctions on this file causes a bug in FSharp.Compiler, so skip it for now
             "noPartialFunctions"
+
+            // rule is too complex, we can enable it later
+            "cyclomaticComplexity"
         ]
 
     let jsonObj = JsonObject.Parse fsharplintJsonText
