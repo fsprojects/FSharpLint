@@ -16,7 +16,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
 
     let indentationLevelError =
 
-        let bind (firstClause: SynMatchClause) = 
+        let processClause (firstClause: SynMatchClause) =
             let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
             if isLambda then
                 if clauseIndentation <> matchStartIndentation + args.GlobalConfig.numIndentationSpaces then
@@ -45,7 +45,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
         else
             clauses
             |> List.tryHead
-            |> Option.bind bind
+            |> Option.bind processClause
 
     let consistentIndentationErrors =
         let choose (clauseOneSpaces: int) (clauseTwo: SynMatchClause) (clauseTwoSpaces: int) =

@@ -9,7 +9,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
-    let map text = 
+    let processText text =
         let suggestedFix =
             lazy
                 (Some 
@@ -31,7 +31,7 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
         Array.empty
     | _ ->
         ExpressionUtilities.tryFindTextOfRange range args.FileContent
-        |> Option.map map
+        |> Option.map processText
         |> Option.toArray
 
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses

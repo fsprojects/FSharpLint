@@ -4,11 +4,11 @@ namespace FSharpLint.Core
 module Prelude =
 
     module Async =
-        let combine operation firstAsync secondAsync = async {
-            let! firstOperation = firstAsync 
-            let! secondOperation = secondAsync 
+        let combine operation job1 job2 = async {
+            let! firstOperation = job1
+            let! secondOperation = job2
             return operation firstOperation secondOperation }
 
-        let map operation xAsync = async {
-            let! xAsyncArg = xAsync
-            return operation xAsyncArg }
+        let map operation job = async {
+            let! jobResult = job
+            return operation jobResult }

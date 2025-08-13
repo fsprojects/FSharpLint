@@ -13,7 +13,7 @@ open FSharpLint.Framework.Rules
 let runner (args: AstNodeRuleParams) =
     // hack to only run rule once
     if args.NodeIndex = 0 then
-        let choose (usage: FSharpSymbolUse) =
+        let processSymbolUse (usage: FSharpSymbolUse) =
             match usage.Symbol with
             | :? FSharp.Compiler.Symbols.FSharpMemberOrFunctionOrValue as symbol -> 
                 let conditions =
@@ -35,7 +35,7 @@ let runner (args: AstNodeRuleParams) =
         match args.CheckInfo with
         | Some checkResults -> 
             checkResults.GetAllUsesOfAllSymbolsInFile() 
-            |> Seq.choose choose
+            |> Seq.choose processSymbolUse
             |> Seq.toArray
         | None -> Array.empty
     else
