@@ -36,10 +36,10 @@ open Fake.IO.FileSystemOperators
 open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.Api
-open Newtonsoft.Json.Linq
 
 open System
 open System.IO
+open System.Text.Json.Nodes
 
 Target.initEnvironment()
 
@@ -292,15 +292,16 @@ Target.create "SelfCheck" (fun _ ->
             "noPartialFunctions"
         ]
 
-    let jsonObj = JObject.Parse fsharplintJsonText
+    let jsonObj = JsonObject.Parse fsharplintJsonText
 
-    for pair in jsonObj do
-        let isRule = (jsonObj.SelectToken pair.Key).SelectToken("enabled")
+    for pair in jsonObj.AsObject() do
+        if pair.Value.GetValueKind() = Text.Json.JsonValueKind.Object then
+            match pair.Value.AsObject().TryGetPropertyValue("enabled") with
+            | true, isRule when not (List.contains pair.Key excludedRules) ->
+                isRule.AsValue().ReplaceWith true
+            | _ -> ()
 
-        if not (isNull isRule) && not (List.contains pair.Key excludedRules) then
-            isRule.Replace(JValue true) |> ignore<unit>
-
-    File.WriteAllText(fsharplintJsonDir, jsonObj.ToString())
+    File.WriteAllText(fsharplintJsonDir, jsonObj.ToJsonString())
 
     printfn "Now re-running self-check with more rules enabled..."
     runLinter ())
