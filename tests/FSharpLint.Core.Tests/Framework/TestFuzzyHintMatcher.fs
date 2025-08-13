@@ -11,8 +11,6 @@ open NUnit.Framework
 open FParsec
 open TestUtils
 
-// fsharplint:disable MaxLinesInValue MaxLinesInMember
-
 let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify =
     for i = 0 to syntaxArray.Length - 1 do
         let node = syntaxArray.[i]
@@ -29,6 +27,8 @@ type TestAst() =
         | Success(hint, _, _) -> hint
         | Failure(message, _, _) -> failwith message
 
+    // List of hints is quite big and would trigger MaxLinesInValue and MaxLinesInMember rules.
+    // fsharplint:disable MaxLinesInValue MaxLinesInMember
     [<Category("Performance")>]
     [<Test>]
     member _.``Performance of matching fuzzy matching hints``() =
@@ -149,6 +149,7 @@ type TestAst() =
         stopwatch.Stop()
         Assert.Less(stopwatch.ElapsedMilliseconds, 50)
         fprintf TestContext.Out "Iterated array in %d milliseconds." stopwatch.ElapsedMilliseconds
+    // fsharplint:enable MaxLinesInValue MaxLinesInMember
 
     [<Category("Hint Matcher")>]
     [<Test>]
