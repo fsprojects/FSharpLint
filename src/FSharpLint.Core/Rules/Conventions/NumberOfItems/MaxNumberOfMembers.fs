@@ -19,20 +19,24 @@ let private getMembers (members:SynMemberDefn list) =
         | SynMemberDefn.AutoProperty(_, _, _, _, _, _, _, _, SynValSigAccess.GetSet (access, _, _), _, _, _) -> isPublic access
         | _ -> false
 
-    members
-    |> List.filter isPublicMember
+    List.filter isPublicMember members
 
 let private validateType (maxMembers:int) members typeRepresentation =
     let members =
         match typeRepresentation with
         | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> members
-        | SynTypeDefnRepr.ObjectModel(_, members, _) -> members
-        |> getMembers
+        | SynTypeDefnRepr.ObjectModel(_, members, _) -> getMembers members
 
     if List.length members > maxMembers then
         let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
         let error = String.Format(errorFormatString, maxMembers)
-        { Range = members.[maxMembers].Range; Message = error; SuggestedFix = None; TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            {
+                Range = members.[maxMembers].Range
+                Message = error
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         Array.empty
 
@@ -43,7 +47,13 @@ let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams)
     | _ -> Array.empty
 
 let rule config =
-    { Name = "MaxNumberOfMembers"
-      Identifier = Identifiers.MaxNumberOfMembers
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "MaxNumberOfMembers"
+            Identifier = Identifiers.MaxNumberOfMembers
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

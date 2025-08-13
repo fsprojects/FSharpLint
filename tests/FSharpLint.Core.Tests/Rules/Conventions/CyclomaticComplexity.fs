@@ -14,9 +14,9 @@ let private MaxComplexity = 5
 let private NewLine = "\n"
 
 /// Indent all lines of a string equally by the given number of spaces.
-let private indent numSpaces (s: string) =
+let private indent numSpaces (inputText: string) =
     let indentStr = String.replicate numSpaces " "
-    let result = indentStr + s.Replace(NewLine, $"{NewLine}{indentStr}")
+    let result = indentStr + inputText.Replace(NewLine, $"{NewLine}{indentStr}")
     result
 
 /// Generates a body of code containing a match expression.
@@ -28,7 +28,7 @@ let private makeMatchSnippet len =
 
 /// Generates a body of code containing a match expression with a when clause containing a logical operator in each pattern.
 let private makeMatchSnippetWithLogicalOperatorsInWhenClause len =
-    let patterns = Seq.map (fun i -> $"| x when x = \"%d{i*len}\" || x = \"%d{i*len+1}\" -> ()") [| 1..len-1 |] |> String.concat NewLine
+    let patterns = Seq.map (fun index -> $"| x when x = \"%d{index*len}\" || x = \"%d{index*len+1}\" -> ()") [| 1..len-1 |] |> String.concat NewLine
     $"""match "dummyString" with
 {patterns}
 | _ -> ()"""
@@ -86,18 +86,16 @@ let private matchExpression len =
 /// Generates a body of code containing a match expression with multiple combined patterns.
 let private matchExpressionWithCombinedPatterns len =
     let patterns = Seq.map (sprintf "| \"%d\"") [| 1..len-1 |] |> String.concat NewLine
-    $"""match "dummyString" with
+    makeProgram "f()" $"""match "dummyString" with
 {patterns}
 | _ -> ()"""
-    |> makeProgram "f()"
 
 /// Generates a body of code containing a match function with multiple patterns.
 let private matchFunction len =
-    $"""    function
-{(Seq.map (sprintf "    | \"%d\"") [| 1..len-1 |] |> String.concat NewLine)}
+    makeProgram "f" $"""    function 
+{(Seq.map (fun index -> (sprintf "    | \"%d\"" index)) [| 1..len-1 |] |> String.concat NewLine)} 
     | _ -> ()
 f "dummyString" """
-    |> makeProgram "f"
 
 /// Generates a computational expression with a match! expression containing multiple patterns.
 let private matchBang len =
@@ -137,18 +135,18 @@ type TestConventionsCyclomaticComplexity() =
     static member private FailureCasesSource =
         seq {
             let num = MaxComplexity + 1
-            let errorLocation = 2, 4
-            yield ifElseExpressions num, errorLocation
-            yield forExpressions num, errorLocation
-            yield foreachExpressions num, errorLocation
-            yield whileExpressions num, errorLocation
-            yield matchExpression num, errorLocation
-            yield matchExpressionWithCombinedPatterns num, errorLocation
-            yield matchFunction num, errorLocation
-            yield matchBang num, errorLocation
-            yield ifThenExpressionWithMultipleAndConditionals num, errorLocation
-            yield ifThenExpressionWithMultipleOrConditionals num, errorLocation
-            yield whileWithBooleanOperatorsInConditionExpressions num, errorLocation
+            let errorLocation = (2, 4)
+            yield (ifElseExpressions num, errorLocation)
+            yield (forExpressions num, errorLocation)
+            yield (foreachExpressions num, errorLocation)
+            yield (whileExpressions num, errorLocation)
+            yield (matchExpression num, errorLocation)
+            yield (matchExpressionWithCombinedPatterns num, errorLocation)
+            yield (matchFunction num, errorLocation)
+            yield (matchBang num, errorLocation)
+            yield (ifThenExpressionWithMultipleAndConditionals num, errorLocation)
+            yield (ifThenExpressionWithMultipleOrConditionals num, errorLocation)
+            yield (whileWithBooleanOperatorsInConditionExpressions num, errorLocation)
         } |> Seq.map (fun (x, y) -> [| box x; box y |])
 
     /// Verifies that no cyclomatic complexity over-maximum flags are raised on source that has cyclomatic complexity <= maxComplexity.
@@ -247,7 +245,7 @@ let f() =
     [<Test>]
     member this.EnsureRedundantWarningsNotReported() =
         // generates a vapid match clause
-        let genMatchClause i = $"""| "{i}" -> match str with
+        let genMatchClause index = $"""| "{index}" -> match str with
     | "A" -> ()
     | "B" -> ()"""
         // create a snippet of code with 10 match clauses

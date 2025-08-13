@@ -33,9 +33,9 @@ module ParseFile =
         | AbortedTypeCheck
 
     [<NoComparison>]
-    type ParseFileResult<'T> =
+    type ParseFileResult<'Content> =
         | Failed of ParseFileFailure
-        | Success of 'T
+        | Success of 'Content
 
     let private parse file source (checker:FSharpChecker, options) =
         let sourceText = SourceText.ofString source
@@ -45,10 +45,13 @@ module ParseFile =
 
         match checkFileAnswer with
         | FSharpCheckFileAnswer.Succeeded(typeCheckResults) ->
-            { Text = source
-              Ast = parseResults.ParseTree
-              TypeCheckResults = Some(typeCheckResults)
-              File = file } |> Success
+            Success
+                {
+                    Text = source
+                    Ast = parseResults.ParseTree
+                    TypeCheckResults = Some(typeCheckResults)
+                    File = file
+                }
         | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
 
     let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =

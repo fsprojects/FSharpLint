@@ -4,9 +4,9 @@ open FSharpLint.Framework
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 
-let isLetBinding i (syntaxArray:AbstractSyntaxArray.Node []) =
-    if i > 0 then
-        match syntaxArray.[syntaxArray.[i].ParentIndex].Actual with
+let isLetBinding index (syntaxArray:AbstractSyntaxArray.Node []) =
+    if index > 0 then
+        match syntaxArray.[syntaxArray.[index].ParentIndex].Actual with
         | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))
         | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _, _)) -> true
         | _ -> false

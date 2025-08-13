@@ -16,12 +16,13 @@ let private checkForBindingToAWildcard pattern range fileContent (expr: SynExpr)
     match ExpressionUtilities.tryFindTextOfRange expr.Range fileContent with
     | Some exprText -> 
         if findWildAndIgnoreParens pattern then
-            { Range = range
-              Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-              SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
-                                                FromText = fileContent
-                                                ToText = sprintf "(%s) |> ignore" exprText })))
-              TypeChecks = [] } |> Array.singleton
+            Array.singleton
+                { Range = range
+                  Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+                  SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
+                                                    FromText = fileContent
+                                                    ToText = sprintf "(%s) |> ignore" exprText })))
+                  TypeChecks = List.Empty }
         else
             Array.empty
     | None -> Array.empty
@@ -44,7 +45,13 @@ let private runner (args:AstNodeRuleParams) =
 
 /// Checks if any code uses 'let _ = ...' and suggests to use the ignore function.
 let rule =
-    { Name = "FavourIgnoreOverLetWild"
-      Identifier = Identifiers.FavourIgnoreOverLetWild
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourIgnoreOverLetWild"
+            Identifier = Identifiers.FavourIgnoreOverLetWild
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

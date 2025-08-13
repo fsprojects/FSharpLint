@@ -1,11 +1,12 @@
 ﻿module FSharpLint.Core.Tests.TestHintMatcherBase
 
+open System
 open FParsec
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application
 open FSharpLint.Framework
 open FSharpLint.Framework.HintParser
-open FSharpLint.Framework.HintParser.MergeSyntaxTrees
+open FSharpLint.Framework.MergeSyntaxTrees
 open FSharpLint.Framework.ParseFile
 open FSharpLint.Rules
 
@@ -48,7 +49,7 @@ type TestHintMatcherBase () =
             | Rules.AstNodeRule rule -> rule
             | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -57,7 +58,18 @@ type TestHintMatcherBase () =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split "\n") syntaxArray |> fst
-            suggestions |> Array.iter this.PostSuggestion
+            let suggestions =
+                runAstNodeRules
+                    {
+                        Rules = Array.singleton rule
+                        GlobalConfig = globalConfig
+                        TypeCheckResults = checkResult
+                        FilePath = (Option.defaultValue String.Empty fileName)
+                        FileContent = input
+                        Lines = (input.Split("\n"))
+                        SyntaxArray = syntaxArray
+                    }
+                |> fst
+            Array.iter this.PostSuggestion suggestions
         | _ ->
             failwithf "Failed to parse"

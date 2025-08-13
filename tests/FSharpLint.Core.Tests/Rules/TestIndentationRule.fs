@@ -15,7 +15,7 @@ type TestIndentationRuleBase (rule:Rule) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
-        let fileName = fileName |> Option.defaultValue "Test.fsx"
+        let fileName = Option.defaultValue "Test.fsx" fileName
 
         let projectOptions, _ = checker.GetProjectOptionsFromScript(fileName, sourceText) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
@@ -26,13 +26,31 @@ type TestIndentationRuleBase (rule:Rule) =
             | IndentationRule rule -> rule
             | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         let lines = input.Split "\n"
 
         let syntaxArray = AbstractSyntaxArray.astToArray parseResults.ParseTree
-        let (_, context) = runAstNodeRules Array.empty globalConfig None fileName input lines syntaxArray
-        let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = [||] }
+        let (_, context) =
+            runAstNodeRules
+                {
+                    Rules = Array.empty
+                    GlobalConfig = globalConfig
+                    TypeCheckResults = None
+                    FilePath = fileName
+                    FileContent = input
+                    Lines = lines
+                    SyntaxArray = syntaxArray
+                }
+        let lineRules = { LineRules.IndentationRule = Some rule; NoTabCharactersRule = None; GenericLineRules = Array.empty }
 
-        runLineRules lineRules globalConfig fileName input lines context
+        runLineRules
+            {
+                LineRules = lineRules
+                GlobalConfig = globalConfig
+                FilePath = fileName
+                FileContent = input
+                Lines = lines
+                Context = context
+            }
         |> Array.iter this.PostSuggestion

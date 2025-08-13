@@ -56,7 +56,7 @@ let private emitWarning (func: RecursiveFunctionInfo) =
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =
-    match args.AstNode, args.CheckInfo with
+    match (args.AstNode, args.CheckInfo) with
     | RecursiveFunctions(funcs), Some checkInfo ->
         funcs 
             |> List.choose 
@@ -69,9 +69,13 @@ let runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "UnneededRecKeyword"
-      Identifier = Identifiers.UnneededRecKeyword
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "UnneededRecKeyword"
+            Identifier = Identifiers.UnneededRecKeyword
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -1,5 +1,7 @@
 module FSharpLint.Rules.RedundantNewKeyword
 
+open System
+
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharp.Compiler.Symbols
@@ -16,17 +18,17 @@ let private implementsIDisposable (fsharpType:FSharpType) =
     else
         false
 
-let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) = fun () -> 
-    let names = ident.LongIdent |> List.map (fun x -> x.idText)
-    let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, "", names)
+let private doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) =
+    let names = List.map (fun (identifier: Ident) -> identifier.idText) ident.LongIdent
+    let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, String.Empty, names)
 
     match symbol with
     | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
         let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 
-        ctor.DeclaringEntity
-        |> Option.exists (fun ctorForType ->
-            Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
+        Option.exists
+            (fun (ctorForType: FSharpEntity) -> Seq.forall (implementsIDisposable >> not) ctorForType.AllInterfaces)
+            ctor.DeclaringEntity
     | Some symbol when (symbol.Symbol :? FSharpEntity) ->
         let ctor = symbol.Symbol :?> FSharpEntity
         Seq.forall (implementsIDisposable >> not) ctor.AllInterfaces
@@ -42,17 +44,29 @@ let private generateFix (text:string) range = lazy(
 
 
 let runner args =
-    match args.AstNode, args.CheckInfo with
+    match (args.AstNode, args.CheckInfo) with
     | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
     | AstNode.Expression(SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
-        { Range = range
-          Message = Resources.GetString("RulesRedundantNewKeyword")
-          SuggestedFix = Some (generateFix args.FileContent range)
-          TypeChecks = [ doesNotImplementIDisposable checkInfo identifier ] } |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = Resources.GetString("RulesRedundantNewKeyword")
+                SuggestedFix = Some(generateFix args.FileContent range)
+                TypeChecks =
+                    [
+                        fun () -> doesNotImplementIDisposable checkInfo identifier
+                    ]
+            }
     | _ -> Array.empty
 
 let rule =
-    { Name = "RedundantNewKeyword"
-      Identifier = Identifiers.RedundantNewKeyword
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "RedundantNewKeyword"
+            Identifier = Identifiers.RedundantNewKeyword
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

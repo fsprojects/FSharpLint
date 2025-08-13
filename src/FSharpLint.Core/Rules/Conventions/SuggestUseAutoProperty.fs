@@ -6,43 +6,63 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.Utilities
 
-let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) =
+[<TailCall>]
+let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression: SynExpr) (continuation: bool -> bool) =
     match expression with
-    | SynExpr.Const (_constant, _range) -> true
+    | SynExpr.Const (_constant, _range) -> continuation true
     | SynExpr.Ident ident ->
         let isMutableVariable =
+            let exists memberDef =
+                match memberDef with
+                | SynMemberDefn.LetBindings (bindings, _, _, _) ->
+                    List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
+                        match headPat with
+                        | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
+                            bindingIdent.idText = ident.idText
+                        | _ -> false) bindings
+                | _ -> false
+
             match args.GetParents args.NodeIndex with
             | TypeDefinition (SynTypeDefn (_, SynTypeDefnRepr.ObjectModel (_, members, _), _, _, _, _)) :: _ ->
-                members
-                |> List.exists (fun (memberDef: SynMemberDefn) ->
-                    match memberDef with
-                    | SynMemberDefn.LetBindings (bindings, _, _, _) ->
-                        bindings
-                        |> List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
-                            match headPat with
-                            | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->
-                                bindingIdent.idText = ident.idText
-                            | _ -> false)
-                    | _ -> false)
+                List.exists exists members
             | _ -> false
 
-        not isMutableVariable
+        not isMutableVariable |> continuation
     | SynExpr.ArrayOrList (_, elements, _) ->
-        elements
-        |> List.forall (isImmutableValueExpression args)
+        areImmutableAllValueExpressions args elements id
     | SynExpr.ArrayOrListComputed (_, innerExpr, _) ->
-        isImmutableValueExpression args innerExpr
-        || isImmutableSequentialExpression args innerExpr
-    | _ -> false
+        isImmutableValueExpression
+            args
+            innerExpr
+            (fun prevResult -> prevResult || isImmutableSequentialExpression args innerExpr id)
+    | _ -> continuation false
 
-and isImmutableSequentialExpression args expression =
+and [<TailCall>] areImmutableAllValueExpressions (args: AstNodeRuleParams) (expressions: list<SynExpr>) (continuation: bool -> bool) =
+    match expressions with
+    | head::tail ->
+        areImmutableAllValueExpressions
+            args
+            tail
+            (fun prevResult ->
+                isImmutableValueExpression args head (fun prevResult2 -> prevResult2 && prevResult))
+    | [] -> continuation true
+
+and [<TailCall>] isImmutableSequentialExpression args expression (continuation: bool -> bool) =
     match expression with
     | SynExpr.Sequential (_, _, expr1, expr2, _, _) ->
-        isImmutableValueExpression args expr1
-        && (isImmutableSequentialExpression args expr2
-            || isImmutableValueExpression args expr2)
-    | _ -> false
+        isImmutableValueExpression
+            args
+            expr1
+            (fun prevResult -> 
+                isImmutableSequentialExpression args expr2 
+                        (fun prevResult2 ->
+                            isImmutableValueExpression args expr2
+                                (fun prevResult3 -> prevResult && prevResult2 || prevResult3)
+                        )
+            )
+    | _ -> continuation false
 
 let private hasStructAttribute node =
     match node with
@@ -81,10 +101,10 @@ let private runner (args: AstNodeRuleParams) =
                     memberRange
                 )
         ) when memberFlags.IsInstance ->
-        match expr, argPats with
+        match (expr, argPats) with
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
-        | expression, _ when isImmutableValueExpression args expression ->
+        | expression, _ when isImmutableValueExpression args expression id ->
             match args.GetParents args.NodeIndex with
             | parentNode :: _ when hasStructAttribute parentNode ->
                 Array.empty
@@ -99,18 +119,22 @@ let private runner (args: AstNodeRuleParams) =
                                       ToText = $"val {memberName.idText}" }
                             | _ -> None)
             
-                { Range = memberRange
-                  Message = Resources.GetString "RulesSuggestUseAutoProperty"
-                  SuggestedFix = Some suggestedFix
-                  TypeChecks = List.Empty }
-                |> Array.singleton
+                Array.singleton
+                    { Range = memberRange
+                      Message = Resources.GetString "RulesSuggestUseAutoProperty"
+                      SuggestedFix = Some suggestedFix
+                      TypeChecks = List.Empty }
         | _ -> Array.empty
     | _ -> Array.empty
 
 let rule =
-    { Name = "SuggestUseAutoProperty"
-      Identifier = Identifiers.SuggestUseAutoProperty
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "SuggestUseAutoProperty"
+            Identifier = Identifiers.SuggestUseAutoProperty
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

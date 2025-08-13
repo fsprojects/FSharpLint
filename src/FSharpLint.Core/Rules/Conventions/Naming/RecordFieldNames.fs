@@ -10,8 +10,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.TypeSimpleRepresentation (SynTypeDefnSimpleRepr.Record (recordFields=recordFields)) ->
         recordFields
         |> List.choose (fun (SynField (idOpt=idOpt)) ->
-            idOpt
-            |> Option.map (fun identifier -> (identifier, identifier.idText, None)))
+            Option.map (fun (identifier: Ident) -> (identifier, identifier.idText, None)) idOpt)
         |> List.toArray
     | _ -> Array.empty
 

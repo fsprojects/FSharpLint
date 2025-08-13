@@ -39,21 +39,21 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
                         if lastArgument.idText = lambdaArgument.idText then
                             funcString :: calledFunctionIdents
                         else
-                            []
+                            List.Empty
                     | SynExpr.App(_, false, _, _, _) as nextFunction ->
                         lambdaArgumentIsLastApplicationInFunctionCalls 
                             nextFunction 
                             lambdaArgument 
                             (funcString :: calledFunctionIdents)
-                    | _ -> []
-                | _ -> []
-            | _ -> []
+                    | _ -> List.Empty
+                | _ -> List.Empty
+            | _ -> List.Empty
 
         match lambda.Arguments with
         | [singleParameter] ->
             match Helper.FunctionReimplementation.getLambdaParamIdent singleParameter with
             | Some paramIdent -> 
-                match lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent [] with
+                match lambdaArgumentIsLastApplicationInFunctionCalls expression paramIdent List.Empty with
                 | [] -> None
                 | funcStrings -> Some funcStrings
             | None -> None
@@ -65,16 +65,23 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
         let suggestedFix =
             lazy(
                 Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
-        { Range = range
-          Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] } |> Array.singleton
+        Array.singleton
+            { Range = range
+              Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+              SuggestedFix = Some suggestedFix
+              TypeChecks = List.Empty }
 
 let runner (args:AstNodeRuleParams) =
     Helper.FunctionReimplementation.checkLambda args (validateLambdaCannotBeReplacedWithComposition args.FileContent)
 
 let rule =
-    { Name = "CanBeReplacedWithComposition"
-      Identifier = Identifiers.CanBeReplacedWithComposition
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "CanBeReplacedWithComposition"
+            Identifier = Identifiers.CanBeReplacedWithComposition
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -19,10 +19,12 @@ let private runner (args: AstNodeRuleParams) =
                            FromRange = range
                            ToText = identifier }))
 
-        { Range = range
-          Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
-          SuggestedFix = Some suggestedFix
-          TypeChecks = [] }
+        {
+            Range = range
+            Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
 
     let isTyped expression identifier range text =
         match expression with
@@ -50,9 +52,13 @@ let private runner (args: AstNodeRuleParams) =
 
 /// Checks if any code uses untyped ignore
 let rule =
-    { Name = "FavourTypedIgnore"
-      Identifier = Identifiers.FavourTypedIgnore
-      RuleConfig =
-          { AstNodeRuleConfig.Runner = runner
-            Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourTypedIgnore"
+            Identifier = Identifiers.FavourTypedIgnore
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

@@ -3,4 +3,10 @@
 # that they are unlikely to be what you are interested in when blaming.
 # Like formatting with Fantomas
 # https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignore-commits-in-the-blame-view
-# Add formatting commits here
+
+# Console,Core,Tests: fix FSharpLint warning (Fixing the warning for AvoidTooShortNames rule.)
+e9410e83af1de4d76230b0e8d44ae6a99fac6d7b
+
+# Core: rename some funcs and params
+628b1786e7f913ecd87e42a45ab7f195c536a6cb
+

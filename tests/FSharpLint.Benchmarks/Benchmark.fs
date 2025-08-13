@@ -6,6 +6,7 @@ open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Text
 open FSharpLint.Application.Lint
 open FSharpLint.Framework
+open FSharpLint.Framework.Utilities
 
 type Benchmark () =
 
@@ -23,8 +24,6 @@ type Benchmark () =
 
         parseResults.ParseTree
 
-    let (</>) x y = Path.Combine(x, y)
-
     let basePath = ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".."
     let sourceFile = basePath </> "TypeChecker.fs"
 
@@ -35,4 +34,4 @@ type Benchmark () =
 
     [<Benchmark>]
     member this.LintParsedFile () =
-        lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore
+        lintParsedFile OptionalLintParameters.Default fileInfo sourceFile |> ignore<LintResult>

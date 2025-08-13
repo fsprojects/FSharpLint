@@ -23,7 +23,7 @@ type StandardOutput () =
             if String.length errorLine = 0 then "^"
             else
                 errorLine
-                |> Seq.mapi (fun i _ -> if i = range.StartColumn then "^" else " ")
+                |> Seq.mapi (fun index _ -> if index = range.StartColumn then "^" else " ")
                 |> Seq.reduce (+)
         $"{getErrorMessage range}{Environment.NewLine}{errorLine}{Environment.NewLine}{highlightColumnLine}"
 
@@ -59,5 +59,4 @@ type MSBuildOutput () =
                 <| warning.RuleIdentifier
                 <| warning.Details.Message
         member _.WriteError (error:string) =
-            $"FSharpLint error: {error}"
-            |> Console.Error.WriteLine
+            Console.Error.WriteLine $"FSharpLint error: {error}"

@@ -12,20 +12,20 @@ open FSharpLint.Framework.ExpressionUtilities
 
 [<TestFixture>]
 type TestAst() =
-    let unionCaseName (x:'T) =
-        match FSharpValue.GetUnionFields(x, typeof<'T>) with
+    let unionCaseName (unionCase: 'UnionType) =
+        match FSharpValue.GetUnionFields(unionCase, typeof<'UnionType>) with
         | case, _ -> case.Name
 
     let astToExpr ast =
-        let (|Module|_|) x =
-            match x with
+        let (|Module|_|) moduleOrNamespace =
+            match moduleOrNamespace with
             | SynModuleOrNamespace(_, _, _, SynModuleDecl.Expr(app, _)::_, _, _, _, _, _) ->
                 Some(app)
             | _ -> None
 
         match ast with
-        | ParsedInput.ImplFile(x) ->
-            match x with
+        | ParsedInput.ImplFile(implFile) ->
+            match implFile with
             | ParsedImplFileInput(_, _, _, _, _, Module(app)::_, _, _, _) ->
                 app
             | _ -> failwith "Expected at least one module or namespace."
@@ -37,49 +37,49 @@ type TestAst() =
     member _.``Flatten with right pipe adds lhs to end of function application.``() =
         match generateAst "x |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with left pipe adds rhs to end of function application.``() =
         match generateAst "List.map (fun x -> x) <| x" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Ident"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with right pipe adds lhs to end of function application no matter the number of arguments on rhs.``() =
         match generateAst "x |> List.map (fun x -> x) 1" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with binary operator on lhs of right pipe.``() =
         match generateAst "x::[] |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with function application on lhs of right pipe.``() =
         match generateAst "foo x |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with multiple right pipes.``() =
         match generateAst "x |> foo |> List.map (fun x -> x)" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "App"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Test>]
     member _.``Flatten with multiple left pipes.``() =
         match generateAst "List.map (fun x -> x) <| 1 <| x" |> astToExpr |> Expression with
         | FuncApp(expressions, _) ->
-            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], expressions |> List.map astNodeName)
+            Assert.AreEqual(["LongIdent"; "Lambda"; "Const"; "Ident"], List.map astNodeName expressions)
         | _ -> Assert.Fail()
 
     [<Category("Performance")>]
@@ -95,7 +95,7 @@ type TestAst() =
         for _ in 0..iterations do
             stopwatch.Restart()
 
-            astToArray tree |> ignore
+            astToArray tree |> ignore<Node array>
 
             stopwatch.Stop()
 
@@ -112,7 +112,7 @@ type TestAst() =
 
         let array = astToArray tree
 
-        let actual = array |> Array.map (fun x -> x.Hashcode) |> Array.toList
+        let actual = array |> Array.map (fun node -> node.Hashcode) |> Array.toList
 
         let expected =
             [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
@@ -132,8 +132,8 @@ type TestAst() =
               Utilities.hash2 SyntaxNode.Identifier "woofs" ]
 
         Assert.AreEqual(expected, actual)
-
-        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex)) |> Array.toList
+        
+        let expected = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> Array.toList
         Assert.AreEqual([ (14, 0)
                           (13, 0)
                           (12, 1)
@@ -158,7 +158,7 @@ type TestAst() =
 
         let array = astToArray tree
 
-        let actual = array |> Array.map (fun x -> x.Hashcode) |> List.ofArray
+        let actual = array |> Array.map (fun node -> node.Hashcode) |> List.ofArray
 
         let expected =
             [ Utilities.hash2 SyntaxNode.ModuleOrNamespace 0
@@ -171,7 +171,7 @@ type TestAst() =
 
         Assert.AreEqual(expected, actual)
 
-        let expected = array |> Array.map (fun x -> (x.NumberOfChildren, x.ParentIndex)) |> List.ofArray
+        let expected = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> List.ofArray
         Assert.AreEqual([ (6, 0)
                           (5, 0)
                           (4, 1)

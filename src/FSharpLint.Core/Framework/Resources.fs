@@ -7,7 +7,7 @@ open System.Resources
 /// Used to retrieve multi-lingual strings inside of the app.
 type Resources() =
     static let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                              |> Seq.find (fun n -> n.EndsWith("Text.resources", System.StringComparison.Ordinal))
+                              |> Seq.find (fun resource -> resource.EndsWith("Text.resources", System.StringComparison.Ordinal))
 
     static let resourceManager = ResourceManager(resourceName.Replace(".resources", System.String.Empty), typeof<Resources>.GetTypeInfo().Assembly)
 

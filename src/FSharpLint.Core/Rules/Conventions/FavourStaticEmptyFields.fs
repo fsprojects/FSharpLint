@@ -22,7 +22,7 @@ let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (empt
     let formatError errorName =
         Resources.GetString errorName
 
-    errorMessageKey |> formatError
+    formatError errorMessageKey
 
 let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
     let suggestedFix = lazy(
@@ -32,11 +32,11 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
             | EmptyListLiteral -> "List.Empty"
             | EmptyArrayLiteral -> "Array.empty"
         Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
-    { Range = range
-      Message = getStaticEmptyErrorMessage range emptyLiteralType
-      SuggestedFix = Some suggestedFix
-      TypeChecks = List.Empty }
-    |> Array.singleton
+    Array.singleton
+        { Range = range
+          Message = getStaticEmptyErrorMessage range emptyLiteralType
+          SuggestedFix = Some suggestedFix
+          TypeChecks = List.Empty }
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
@@ -47,9 +47,8 @@ let private runner (args: AstNodeRuleParams) =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
         generateError args.FileContent range emptyLiteralType
     | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
-        synExprRecordField
-        |> List.map (fun field ->
-            match field with
+        let mapping =
+            function
             | SynExprRecordField(_, _, expr, _) ->
                 match expr with
                 | Some(SynExpr.ArrayOrList(isArray, [], range)) ->
@@ -59,15 +58,21 @@ let private runner (args: AstNodeRuleParams) =
                     generateError args.FileContent range EmptyStringLiteral
                 | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
                     generateError args.FileContent range EmptyStringLiteral
-                | _ -> Array.empty)
+                | _ -> Array.empty
+        synExprRecordField
+        |> List.map mapping
         |> Array.concat
     | _ -> Array.empty
 
 
 let rule =
-    { Name = "FavourStaticEmptyFields"
-      Identifier = Identifiers.FavourStaticEmptyFields
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "FavourStaticEmptyFields"
+            Identifier = Identifiers.FavourStaticEmptyFields
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

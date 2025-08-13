@@ -331,7 +331,7 @@
             "additionalPartials": []
         }
     },
-    "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": false },
+    "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": true },
     "favourAsKeyword": { "enabled": true },
     "hints": {
         "add": [

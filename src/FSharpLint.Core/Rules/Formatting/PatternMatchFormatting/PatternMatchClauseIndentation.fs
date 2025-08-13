@@ -15,53 +15,73 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
     let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.FileContent
 
     let indentationLevelError =
+
+        let processClause (firstClause: SynMatchClause) =
+            let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
+            if isLambda then
+                if clauseIndentation <> matchStartIndentation + args.GlobalConfig.numIndentationSpaces then
+                    Some
+                        {
+                            Range = firstClause.Range
+                            Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
+                            SuggestedFix = None
+                            TypeChecks = List.Empty
+                        }
+                else
+                    None
+            elif clauseIndentation <> matchStartIndentation then
+                Some
+                    {
+                        Range = firstClause.Range
+                        Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
+            else
+                None
+
         if isLambda && config.AllowSingleLineLambda && clauses |> List.forall (fun clause -> clause.Range.StartLine = matchExprRange.StartLine) then
             None
         else
             clauses
             |> List.tryHead
-            |> Option.bind (fun firstClause ->
-                let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
-                if isLambda then
-                    if clauseIndentation <> matchStartIndentation + args.GlobalConfig.numIndentationSpaces then
-                        { Range = firstClause.Range
-                          Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
-                          SuggestedFix = None
-                          TypeChecks = [] } |> Some
-                    else
-                        None
-                elif clauseIndentation <> matchStartIndentation then
-                    { Range = firstClause.Range
-                      Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
-                      SuggestedFix = None
-                      TypeChecks = [] } |> Some
-                else
-                    None)
+            |> Option.bind processClause
 
     let consistentIndentationErrors =
+        let choose (clauseOneSpaces: int) (clauseTwo: SynMatchClause) (clauseTwoSpaces: int) =
+            if clauseOneSpaces <> clauseTwoSpaces then
+                Some
+                    {
+                        Range = clauseTwo.Range
+                        Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
+            else
+                None
+
         clauses
         |> List.toArray
         |> Array.map (fun clause -> (clause, ExpressionUtilities.getLeadingSpaces clause.Range args.FileContent))
         |> Array.pairwise
-        |> Array.choose (fun ((_, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) ->
-            if clauseOneSpaces <> clauseTwoSpaces then
-                { Range = clauseTwo.Range
-                  Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
-                  SuggestedFix = None
-                  TypeChecks = [] } |> Some
-            else
-                None)
+        |> Array.choose (fun ((_, clauseOneSpaces), (clauseTwo, clauseTwoSpaces)) -> choose clauseOneSpaces clauseTwo clauseTwoSpaces)
 
-    [|
-        indentationLevelError |> Option.toArray
-        consistentIndentationErrors
-    |]
-    |> Array.concat
+    Array.concat
+        [|
+            Option.toArray indentationLevelError
+            consistentIndentationErrors
+        |]
 
 let runner (config:Config) (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args (check config)
 
 let rule config =
-    { Name = "PatternMatchClauseIndentation"
-      Identifier = Identifiers.PatternMatchClauseIndentation
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "PatternMatchClauseIndentation"
+            Identifier = Identifiers.PatternMatchClauseIndentation
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner config
+                    Cleanup = ignore
+                }
+        }

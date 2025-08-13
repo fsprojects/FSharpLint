@@ -19,12 +19,13 @@ let checkRaiseWithTooManyArgs (raiseType:string) (count:int) (ruleName:string) (
         | FuncApp(expressions, range) ->
             match expressions with
             | RaiseWithTooManyArgs raiseType count ->
-                {
-                    Range = range
-                    Message = Resources.GetString ruleName
-                    SuggestedFix = None
-                    TypeChecks = []
-                } |> Array.singleton
+                Array.singleton
+                    {
+                        Range = range
+                        Message = Resources.GetString ruleName
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
             | _ -> Array.empty
         | _ -> Array.empty
     | _ -> Array.empty

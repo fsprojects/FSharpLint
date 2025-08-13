@@ -39,6 +39,7 @@ open Fake.Api
 
 open System
 open System.IO
+open System.Text.Json.Nodes
 
 Target.initEnvironment()
 
@@ -249,12 +250,64 @@ Target.create "Push" (fun _ ->
 
 
 Target.create "SelfCheck" (fun _ ->
-    let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
+    let runLinter () =
+        let srcDir = Path.Combine(rootDir.FullName, "src") |> DirectoryInfo
 
-    let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
-    let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
-    exec "dotnet" $"run --framework net9.0 lint %s{sol.FullName}" consoleProj.Directory.FullName
-)
+        let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
+        let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
+
+        exec "dotnet" $"run --framework net9.0 lint %s{sol.FullName}" consoleProj.Directory.FullName
+
+    printfn "Running self-check with default rules..."
+    runLinter ()
+
+    let fsharplintJsonDir = Path.Combine("src", "FSharpLint.Core", "fsharplint.json")
+    let fsharplintJsonText = File.ReadAllText fsharplintJsonDir
+
+    let excludedRules =
+        [
+            // Formatting rules (maybe mark them as DEPRECATED soon, recommending the use of `fantomas` instead)
+            "typedItemSpacing"
+            "unionDefinitionIndentation"
+            "moduleDeclSpacing"
+            "classMemberSpacing"
+            "tupleCommaSpacing"
+            "tupleIndentation"
+            "patternMatchClausesOnNewLine"
+            "patternMatchOrClausesOnNewLine"
+            "patternMatchClauseIndentation"
+            "patternMatchExpressionIndentation"
+            "indentation"
+            "maxCharactersOnLine"
+            "trailingNewLineInFile"
+            "trailingWhitespaceOnLine"
+
+            // TODO: we should enable at some point
+            "typePrefixing"
+            "unnestedFunctionNames"
+            "nestedFunctionNames"
+            "nestedStatements"
+
+            // Running NoPartialFunctions on this file causes a bug in FSharp.Compiler, so skip it for now
+            "noPartialFunctions"
+
+            // rule is too complex, we can enable it later
+            "cyclomaticComplexity"
+        ]
+
+    let jsonObj = JsonObject.Parse fsharplintJsonText
+
+    for pair in jsonObj.AsObject() do
+        if pair.Value.GetValueKind() = Text.Json.JsonValueKind.Object then
+            match pair.Value.AsObject().TryGetPropertyValue("enabled") with
+            | true, isRule when not (List.contains pair.Key excludedRules) ->
+                isRule.AsValue().ReplaceWith true
+            | _ -> ()
+
+    File.WriteAllText(fsharplintJsonDir, jsonObj.ToJsonString())
+
+    printfn "Now re-running self-check with more rules enabled..."
+    runLinter ())
 
 // --------------------------------------------------------------------------------------
 // Build order

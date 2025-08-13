@@ -9,25 +9,41 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
+    let processText text =
+        let suggestedFix =
+            lazy
+                (Some 
+                    {
+                        FromRange = range
+                        FromText = text
+                        ToText = $"({text})"
+                     })
+
+        {
+            Range = range
+            Message = Resources.GetString("RulesFormattingTupleParenthesesError")
+            SuggestedFix = Some suggestedFix
+            TypeChecks = List.Empty
+        }
+
     match parentNode with
     | Some (AstNode.Expression (SynExpr.Paren _)) ->
         Array.empty
     | _ ->
         ExpressionUtilities.tryFindTextOfRange range args.FileContent
-        |> Option.map (fun text ->
-            let suggestedFix = lazy(
-                { FromRange = range; FromText = text; ToText = $"({text})" }
-                |> Some)
-            { Range = range
-              Message = Resources.GetString("RulesFormattingTupleParenthesesError")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = [] })
+        |> Option.map processText
         |> Option.toArray
 
 let runner (args:AstNodeRuleParams) = TupleFormatting.isActualTuple args checkTupleHasParentheses
 
 let rule =
-    { Name = "TupleParentheses"
-      Identifier = Identifiers.TupleParentheses
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "TupleParentheses"
+            Identifier = Identifiers.TupleParentheses
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

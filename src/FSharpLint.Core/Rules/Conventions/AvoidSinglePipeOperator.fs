@@ -10,18 +10,19 @@ open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
     let errors range suggestedFix =
-        {
-            Range = range
-            Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
-            SuggestedFix = suggestedFix
-            TypeChecks = List.Empty
-        } |> Array.singleton
+        Array.singleton
+            {
+                Range = range
+                Message = String.Format(Resources.GetString ("RulesAvoidSinglePipeOperator"))
+                SuggestedFix = suggestedFix
+                TypeChecks = List.Empty
+            }
     
     let rec checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
         let checkParentPiped (expr: AstNode) =
             match expr with
             | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-                checkExpr funcExpr outerArgExpr range [] |> Seq.isEmpty
+                checkExpr funcExpr outerArgExpr range List.Empty |> Seq.isEmpty
             | _ -> false
 
         match expr with
@@ -45,7 +46,7 @@ let runner (args: AstNodeRuleParams) =
                             let suggestedFix = lazy(
                                 let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
                                 let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
-                                match maybeFuncText, maybeArgText with
+                                match (maybeFuncText, maybeArgText) with
                                 | Some(funcText), Some(argText) ->
                                     let replacementText = sprintf "%s %s" funcText argText
                                     Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }
@@ -74,7 +75,13 @@ let runner (args: AstNodeRuleParams) =
 
 
 let rule =
-    { Name = "AvoidSinglePipeOperator"
-      Identifier = Identifiers.AvoidSinglePipeOperator
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "AvoidSinglePipeOperator"
+            Identifier = Identifiers.AvoidSinglePipeOperator
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }

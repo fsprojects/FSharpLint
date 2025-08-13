@@ -28,36 +28,38 @@ module ContextBuilder =
             | other ->
                 (other::items)
 
-        helper [] seqExpr
+        helper List.Empty seqExpr
         |> List.rev
 
     let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:Range) =
         let absoluteOverride = (rangeToUpdate.StartLine, (true, expectedIndentation))
         let relativeOverrides =
-            [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
-            |> List.map (fun offsetLine ->
-                (offsetLine, (false, expectedIndentation)))
+            List.map (fun offsetLine ->
+                (offsetLine, (false, expectedIndentation))) [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
         (absoluteOverride::relativeOverrides)
 
     let rec private collectRecordFields = function
         | (SynExpr.Record ( _, _, fields, _)) ->
             let subRecords =
                 fields
-                |> List.choose (fun (SynExprRecordField(_, _, expr, _)) -> expr |> Option.map collectRecordFields)
+                |> List.choose (fun (SynExprRecordField(_, _, expr, _)) -> Option.map collectRecordFields expr)
                 |> List.concat
             fields::subRecords
         | _ ->
-            []
+            List.Empty
 
     let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:Range list) =
         match ranges with
         | (first::others) ->
             let expectedIndentation = first.StartColumn
-            others 
-            |> List.collect (fun other -> 
-                [ for lineNumber=other.StartLine to other.EndLine do 
-                    yield (lineNumber, (true, expectedIndentation)) ])
-        | _ -> []
+            List.collect
+                (fun (other: Range) ->
+                    [
+                        for lineNumber = other.StartLine to other.EndLine do
+                            yield (lineNumber, (true, expectedIndentation))
+                    ])
+                others
+        | _ -> List.Empty
 
     let private indentationOverridesForNode (node:AstNode) =
         match node with
@@ -98,7 +100,7 @@ module ContextBuilder =
             match funcExpr with
             | ExpressionUtilities.Identifier([ ident ], _) when ident.idText = "op_ColonEquals" ->
                 // := for reference cell assignment should be handled like normal equals, not like an infix operator.
-                []
+                List.Empty
             | _ ->
                 let expectedIndentation = innerArg.Range.StartColumn
                 createAbsoluteAndOffsetOverrides expectedIndentation outerArg.Range
@@ -125,7 +127,7 @@ module ContextBuilder =
             |> List.map (fun ((_, fieldIdent), _, _) -> fieldIdent.idRange)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
-        | _ -> []
+        | _ -> List.Empty
 
     let builder current node =
         indentationOverridesForNode node
@@ -135,7 +137,7 @@ module ContextBuilder =
 let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indentationOverrides:Map<int,bool*int>) =
     let lineTrimmedStart = line.TrimStart()
     let numLeadingSpaces = line.Length - lineTrimmedStart.Length
-    let range = Range.mkRange "" (Position.mkPos lineNumber 0) (Position.mkPos lineNumber numLeadingSpaces)
+    let range = Range.mkRange String.Empty (Position.mkPos lineNumber 0) (Position.mkPos lineNumber numLeadingSpaces)
 
     if lineTrimmedStart.StartsWith "//" || lineTrimmedStart.StartsWith "(*" then
         None
@@ -144,27 +146,37 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then
                 let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                { Range = range
-                  Message =  errorString
-                  SuggestedFix = None
-                  TypeChecks = [] } |> Some
+                Some
+                    {
+                        Range = range
+                        Message = errorString
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
             else
                 None
         | (false, indentationOffset) ->
             if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
                 let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
-                { Range = range
-                  Message =  String.Format(errorFormatString, expectedSpaces)
-                  SuggestedFix = None
-                  TypeChecks = [] } |> Some
+
+                Some
+                    {
+                        Range = range
+                        Message = String.Format(errorFormatString, expectedSpaces)
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
             else
                 None
     elif numLeadingSpaces % expectedSpaces <> 0 then
         let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
-        { Range = range
-          Message =  String.Format(errorFormatString, expectedSpaces)
-          SuggestedFix = None
-          TypeChecks = [] } |> Some
+        Some
+            {
+                Range = range
+                Message = String.Format(errorFormatString, expectedSpaces)
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
     else
         None
 
@@ -173,7 +185,9 @@ let runner context args =
     |> Option.toArray
 
 let rule =
-    { Name = "Indentation"
-      Identifier = Identifiers.Indentation
-      RuleConfig = { Runner = runner } }
-    |> IndentationRule
+    IndentationRule
+        {
+            Name = "Indentation"
+            Identifier = Identifiers.Indentation
+            RuleConfig = { Runner = runner }
+        }

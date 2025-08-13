@@ -1,5 +1,6 @@
 ﻿module FSharpLint.Core.Tests.TestAstNodeRuleBase
 
+open System
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Application
 open FSharpLint.Framework
@@ -25,7 +26,7 @@ type TestAstNodeRuleBase (rule:Rule) =
             | AstNodeRule rule -> rule
             | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
 
-        let globalConfig = globalConfig |> Option.defaultValue GlobalRuleConfig.Default
+        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -34,9 +35,22 @@ type TestAstNodeRuleBase (rule:Rule) =
                 match checkFile with
                 | Some false -> None
                 | _ -> parseInfo.TypeCheckResults
-            let suggestions = runAstNodeRules (Array.singleton rule) globalConfig checkResult (Option.defaultValue "" fileName) input (input.Split("\n")) syntaxArray |> fst
+
+            let suggestions =
+                runAstNodeRules
+                    {
+                        Rules = Array.singleton rule
+                        GlobalConfig = globalConfig
+                        TypeCheckResults = checkResult
+                        FilePath = (Option.defaultValue String.Empty fileName)
+                        FileContent = input
+                        Lines = (input.Split("\n"))
+                        SyntaxArray = syntaxArray
+                    }
+                |> fst
+
             rule.RuleConfig.Cleanup()
 
-            suggestions |> Array.iter this.PostSuggestion
+            Array.iter this.PostSuggestion suggestions
         | _ ->
             failwithf "Failed to parse"

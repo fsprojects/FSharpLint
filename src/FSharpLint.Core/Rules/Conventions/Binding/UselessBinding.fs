@@ -19,13 +19,13 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         
         let isNotMutable (symbol:FSharpSymbolUse) =
             match symbol.Symbol with
-            | :? FSharpMemberOrFunctionOrValue as v -> not v.IsMutable
+            | :? FSharpMemberOrFunctionOrValue as fsharpElement -> not fsharpElement.IsMutable
             | _ -> true
 
         let checkNotMutable (ident:Ident) = fun () ->
             let symbol =
                 checkInfo.GetSymbolUseAtLocation(
-                    ident.idRange.StartLine, ident.idRange.EndColumn, "", [ident.idText])
+                    ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
             match symbol with
             | Some(symbol) -> isNotMutable symbol
@@ -51,9 +51,9 @@ let private runner (args:AstNodeRuleParams) =
     let maybeSuggestedFix = 
         match args.GetParents(args.NodeIndex) with
         | AstNode.ModuleDeclaration(SynModuleDecl.Let(_, _, range)) :: _ ->
-            Some({ FromRange = range; FromText = "let"; ToText = "" })
+            Some({ FromRange = range; FromText = "let"; ToText = String.Empty })
         | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, range, _)) :: _ -> 
-            Some({ FromRange = range; FromText = "use"; ToText = "" })
+            Some({ FromRange = range; FromText = "use"; ToText = String.Empty })
         | _ -> None
     match args.AstNode with
     | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _, _))
@@ -63,8 +63,13 @@ let private runner (args:AstNodeRuleParams) =
         Array.empty
 
 let rule =
-    { Name = "UselessBinding"
-      Identifier = Identifiers.UselessBinding
-      RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
-    |> AstNodeRule
-
+    AstNodeRule
+        {
+            Name = "UselessBinding"
+            Identifier = Identifiers.UselessBinding
+            RuleConfig =
+                {
+                    AstNodeRuleConfig.Runner = runner
+                    Cleanup = ignore
+                }
+        }
