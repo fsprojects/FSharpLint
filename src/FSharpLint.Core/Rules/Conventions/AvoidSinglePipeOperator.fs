@@ -46,7 +46,7 @@ let runner (args: AstNodeRuleParams) =
                             let suggestedFix = lazy(
                                 let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
                                 let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
-                                match maybeFuncText, maybeArgText with
+                                match (maybeFuncText, maybeArgText) with
                                 | Some(funcText), Some(argText) ->
                                     let replacementText = sprintf "%s %s" funcText argText
                                     Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }

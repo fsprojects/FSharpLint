@@ -22,12 +22,12 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
         | SynExpr.For (_, _, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
         | SynExpr.ForEach (_, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
         | SynExpr.Match (_, _, clauses, range, _) ->
-            let subExpressions = clauses |> List.map (fun (SynMatchClause (_, _, clause, range, _, _)) -> clause, range)
+            let subExpressions = clauses |> List.map (fun (SynMatchClause (_, _, clause, range, _, _)) -> (clause, range))
             checkMultipleExpressions subExpressions returnEmptyArray
         | SynExpr.Do (innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
         | SynExpr.TryWith (tryExpression, withCases, tryRange, _, _, _) ->
             let subExpressions =
-                withCases |> List.map (fun (SynMatchClause (_, _, withCase, withRange, _, _)) -> withCase, withRange)
+                withCases |> List.map (fun (SynMatchClause (_, _, withCase, withRange, _, _)) -> (withCase, withRange))
             checkMultipleExpressions subExpressions (fun () -> checkExpression tryExpression tryRange returnEmptyArray)
         | SynExpr.TryFinally (tryExpression, finallyExpr, range, _, _, _) ->
             checkExpression tryExpression range (fun () -> checkExpression finallyExpr range returnEmptyArray)

@@ -135,18 +135,18 @@ type TestConventionsCyclomaticComplexity() =
     static member private FailureCasesSource =
         seq {
             let num = MaxComplexity + 1
-            let errorLocation = 2, 4
-            yield ifElseExpressions num, errorLocation
-            yield forExpressions num, errorLocation
-            yield foreachExpressions num, errorLocation
-            yield whileExpressions num, errorLocation
-            yield matchExpression num, errorLocation
-            yield matchExpressionWithCombinedPatterns num, errorLocation
-            yield matchFunction num, errorLocation
-            yield matchBang num, errorLocation
-            yield ifThenExpressionWithMultipleAndConditionals num, errorLocation
-            yield ifThenExpressionWithMultipleOrConditionals num, errorLocation
-            yield whileWithBooleanOperatorsInConditionExpressions num, errorLocation
+            let errorLocation = (2, 4)
+            yield (ifElseExpressions num, errorLocation)
+            yield (forExpressions num, errorLocation)
+            yield (foreachExpressions num, errorLocation)
+            yield (whileExpressions num, errorLocation)
+            yield (matchExpression num, errorLocation)
+            yield (matchExpressionWithCombinedPatterns num, errorLocation)
+            yield (matchFunction num, errorLocation)
+            yield (matchBang num, errorLocation)
+            yield (ifThenExpressionWithMultipleAndConditionals num, errorLocation)
+            yield (ifThenExpressionWithMultipleOrConditionals num, errorLocation)
+            yield (whileWithBooleanOperatorsInConditionExpressions num, errorLocation)
         } |> Seq.map (fun (x, y) -> [| box x; box y |])
 
     /// Verifies that no cyclomatic complexity over-maximum flags are raised on source that has cyclomatic complexity <= maxComplexity.

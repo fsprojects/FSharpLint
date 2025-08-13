@@ -32,8 +32,8 @@ type private BindingScopeComparer() =
         member this.Compare(left, right) =
             let leftStart = left.Binding.RangeOfBindingWithoutRhs.Start
             let rightStart = right.Binding.RangeOfBindingWithoutRhs.Start
-            let leftTuple : ValueTuple<int, int, int> = leftStart.Line, leftStart.Column, left.Complexity
-            let rightTuple : ValueTuple<int, int, int> = rightStart.Line, rightStart.Column, right.Complexity
+            let leftTuple : ValueTuple<int, int, int> = (leftStart.Line, leftStart.Column, left.Complexity)
+            let rightTuple : ValueTuple<int, int, int> = (rightStart.Line, rightStart.Column, right.Complexity)
             leftTuple.CompareTo rightTuple
     
 ///  A two-tiered stack-like structure for containing BindingScopes.
@@ -190,7 +190,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
             let fromStack = bindingStack
                             |> Seq.sortBy (fun scope -> // sort by order of start position, for reporting
                                  let pos = scope.Binding.RangeOfBindingWithRhs.Start
-                                 pos.Column, pos.Line)
+                                 (pos.Column, pos.Line))
                             |> Seq.map (fun scope -> // transform into WarningDetails
                                 let errMsg = String.Format(Resources.GetString("RulesCyclomaticComplexityError"), scope.Complexity, config.MaxComplexity)
                                 { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = List.Empty })

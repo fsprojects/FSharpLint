@@ -101,7 +101,7 @@ let private runner (args: AstNodeRuleParams) =
                     memberRange
                 )
         ) when memberFlags.IsInstance ->
-        match expr, argPats with
+        match (expr, argPats) with
         | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
             Array.empty
         | expression, _ when isImmutableValueExpression args expression id ->

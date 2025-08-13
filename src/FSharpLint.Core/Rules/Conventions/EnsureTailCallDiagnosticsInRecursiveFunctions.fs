@@ -19,7 +19,7 @@ let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =
-    match args.AstNode, args.CheckInfo with
+    match (args.AstNode, args.CheckInfo) with
     | UnneededRecKeyword.RecursiveFunctions(funcs), Some checkInfo ->
         let processFunction functionInfo =
             if UnneededRecKeyword.functionIsCalledInOneOf checkInfo functionInfo funcs then

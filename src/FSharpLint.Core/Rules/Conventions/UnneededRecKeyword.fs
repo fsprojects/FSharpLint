@@ -56,7 +56,7 @@ let private emitWarning (func: RecursiveFunctionInfo) =
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =
-    match args.AstNode, args.CheckInfo with
+    match (args.AstNode, args.CheckInfo) with
     | RecursiveFunctions(funcs), Some checkInfo ->
         funcs 
             |> List.choose 
