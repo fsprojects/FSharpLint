@@ -1,7 +1,6 @@
 module FSharpLint.Rules.Helper.Naming
 
 open System
-open System.Text
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
@@ -54,16 +53,17 @@ module QuickFixes =
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
 
     let splitByCaseChange (name: string) : seq<string> =
-        let builder = System.Text.StringBuilder()
+        let partitionPoints =
+            seq {
+                yield 0
+                for (index, (current, next)) in name |> Seq.pairwise |> Seq.indexed do
+                    if (Char.IsUpper next || not (Char.IsLetter next)) && not (Char.IsUpper current) then
+                        yield index + 1
+                yield name.Length
+            }
         seq {
-            let isUppercase = Char.IsUpper name.[0]
-            for char in name do
-                if isUppercase <> Char.IsUpper char then
-                    yield builder.ToString()
-                    builder.Clear() |> ignore<StringBuilder>
-                builder.Append char |> ignore<StringBuilder>
-            if builder.Length > 0 then
-                yield builder.ToString()
+            for (start, finish) in Seq.pairwise partitionPoints do
+                yield name.Substring(start, finish - start)
         }
 
     let private convertAllToCase (caseMapping: string -> string) (underscoresConfig:  Option<NamingUnderscores>) (ident:Ident) =
