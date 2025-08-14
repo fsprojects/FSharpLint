@@ -67,6 +67,8 @@ let private runner (args: AstNodeRuleParams) =
 
     let rec checkExpr node maybeIdentifier =
         match node with
+        | SynExpr.App (_, _, (SynExpr.App(_) as innerExpr), _, _) ->
+            checkExpr innerExpr maybeIdentifier
         | SynExpr.App (_, _, SynExpr.Ident failwithId, expression, range) when
             failwithId.idText = "failwith"
             || failwithId.idText = "failwithf"
