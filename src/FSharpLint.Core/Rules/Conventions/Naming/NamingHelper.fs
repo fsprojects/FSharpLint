@@ -24,6 +24,10 @@ module QuickFixes =
         let toText = prefixingUnderscores + ident.idText.Replace("_", String.Empty)
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
 
+    let removePrefixingAndSuffixingUnderscores (ident:Ident) = lazy(
+        let toText = ident.idText.Trim '_'
+        Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
+
     let addPrefix prefix (ident:Ident) = lazy(
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = prefix + ident.idText })
 
@@ -47,6 +51,35 @@ module QuickFixes =
     let toCamelCase (ident:Ident) = lazy(
         let camelCaseIdent = mapFirstChar Char.ToLower ident.idText
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = camelCaseIdent })
+
+    let splitByCaseChange (name: string) : seq<string> =
+        let partitionPoints =
+            seq {
+                yield 0
+                for (index, (current, next)) in name |> Seq.pairwise |> Seq.indexed do
+                    if (Char.IsUpper next || not (Char.IsLetter next)) && not (Char.IsUpper current) then
+                        yield index + 1
+                yield name.Length
+            }
+        seq {
+            for (start, finish) in Seq.pairwise partitionPoints do
+                yield name.Substring(start, finish - start)
+        }
+
+    let private convertAllToCase (caseMapping: string -> string) (underscoresConfig:  Option<NamingUnderscores>) (ident:Ident) =
+        lazy(
+            let newIdent = 
+                match underscoresConfig with
+                | Some NamingUnderscores.AllowAny | Some NamingUnderscores.AllowInfix ->
+                    let parts = splitByCaseChange ident.idText |> Seq.map caseMapping
+                    String.Join('_', parts)
+                | _ -> caseMapping ident.idText
+            Some { FromText = ident.idText; FromRange = ident.idRange; ToText = newIdent }
+        )
+
+    let toAllLowercase = convertAllToCase (fun part -> part.ToLower())
+    
+    let toAllUppercase = convertAllToCase (fun part -> part.ToUpper())
 
 [<Literal>]
 let private NumberOfExpectedBackticks = 4
@@ -75,6 +108,12 @@ let isCamelCase (identifier:string) =
     if withoutUnderscorePrefix.Length = 0 then true
     else Char.IsLower withoutUnderscorePrefix.[0]
 
+let isAllLowercase (identifier:string) =
+    Seq.forall (fun char -> Char.IsLower char || (not <| Char.IsLetter char)) identifier
+
+let isAllUppercase (identifier:string) =
+    Seq.forall (fun char -> Char.IsUpper char || (not <| Char.IsLetter char)) identifier
+
 let private pascalCaseRule (identifier:string) =
     if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
     else None
@@ -83,12 +122,26 @@ let private camelCaseRule (identifier:string) =
     if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
     else None
 
-let private underscoreRule allowPrefix (identifier:string) =
-    if allowPrefix && identifier.TrimStart('_').Contains("_") then
-        Some "RulesNamingConventionsUnderscoreError"
-    else if not allowPrefix && identifier.Contains("_") then
-        Some "RulesNamingConventionsUnderscoreError"
-    else
+let private uppercaseRule (identifier:string) =
+    if not (isAllUppercase identifier) then Some "RulesNamingConventionsUppercaseError"
+    else None
+
+let private lowercaseRule (identifier:string) =
+    if not (isAllLowercase identifier) then Some "RulesNamingConventionsLowercaseError"
+    else None
+
+
+let private underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
+    let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
+    let errorKeyToRemoveLeadingOrTrailingUnderscores = "RulesNamingConventionsNoInfixUnderscoreError"
+    match underscoreMode with
+    | NamingUnderscores.AllowPrefix when identifier.TrimStart('_').Contains '_' ->
+        Some errorKeyToRemoveUnderscores
+    | NamingUnderscores.None when identifier.Contains '_' ->
+        Some errorKeyToRemoveUnderscores
+    | NamingUnderscores.AllowInfix when (identifier.StartsWith '_' || identifier.EndsWith '_') ->
+        Some errorKeyToRemoveLeadingOrTrailingUnderscores
+    | _ ->
         None
 
 let private prefixRule (prefix:string) (identifier:string) =
@@ -116,16 +169,25 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         | Some NamingCase.CamelCase ->
             camelCaseRule idText
             |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
+        | Some NamingCase.AllLowercase ->
+            lowercaseRule idText
+            |> Option.map (formatError >> tryAddFix (QuickFixes.toAllLowercase config.Underscores))
+        | Some NamingCase.AllUppercase ->
+            uppercaseRule idText
+            |> Option.map (formatError >> tryAddFix (QuickFixes.toAllUppercase config.Underscores))
         | _ -> None
 
     let underscoresError =
         match config.Underscores with
-        | Some NamingUnderscores.None ->
-            underscoreRule false idText
+        | Some (NamingUnderscores.None as nuCfg) ->
+            underscoreRule nuCfg idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
-        | Some NamingUnderscores.AllowPrefix ->
-            underscoreRule true idText
+        | Some (NamingUnderscores.AllowPrefix as nuCfg) ->
+            underscoreRule nuCfg idText
             |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
+        | Some (NamingUnderscores.AllowInfix as nuCfg) ->
+            underscoreRule nuCfg idText
+            |> Option.map (formatError >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
         | _ -> None
 
     let prefixError =
