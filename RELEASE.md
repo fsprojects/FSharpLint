@@ -5,7 +5,7 @@ Revision (Z) part of the version by 2, e.g.: `0.23.2 -> 0.24.0` or `0.23.2 -> 1.
 2. Update the [changelog](CHANGELOG.md) since last release: add the entry (`## [X.Y.Z]`) summarizing all the changes since the previous release
 (ideally one line per PR or commit).
 3. Commit, but don't push yet!
-4. Tag the head of master with the version number in the format `vx.x.x` - e.g.: `git tag v0.20.4`.
+4. Tag the head of master with the version number in the format `vX.Y.Z` - e.g.: `git tag v0.20.4`.
 5. Push to remote: `git push origin vX.Y.Z master` - this will start CI processes that will:
 * Build the package
 * Create a github release
@@ -17,4 +17,4 @@ Revision (Z) part of the version by 2, e.g.: `0.23.2 -> 0.24.0` or `0.23.2 -> 1.
 * Github secret: `NUGET_KEY`.
   * This is the API key from nuget, used to push the package to nuget.
   * At the moment the key lives under `knocte`'s nuget account, but maybe the `fsprojects` account should also be able to create an applicable API key.
-  * "Expires in 12 months" from 2023/11/23
+  * "Expires in 12 months" from 2025/JUL/07 .
