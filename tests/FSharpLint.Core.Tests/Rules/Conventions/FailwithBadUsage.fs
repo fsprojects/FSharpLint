@@ -111,6 +111,19 @@ with
         Assert.IsTrue(this.ErrorExistsAt(6, 4))
 
     [<Test>]
+    member this.FailwithfShouldNotSwallowExceptions2() =
+        this.Parse """
+try
+    foo()
+with
+| e ->
+    failwithf "bar %i" 42
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsOnLine 6)
+
+    [<Test>]
     member this.FailwithWithfGoodArguments2() =
         this.Parse """
 let foo () =
