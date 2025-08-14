@@ -124,7 +124,16 @@ with
         Assert.IsTrue(this.ErrorExistsOnLine 6)
 
     [<Test>]
-    member this.FailwithWithfGoodArguments2() =
+    member this.FailwithfWithGoodArguments() =
+        this.Parse """
+let foo () =
+    failwithf "foo %i" 42
+"""
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.FailwithfWithGoodArguments2() =
         this.Parse """
 let foo () =
     failwithf "foo"
