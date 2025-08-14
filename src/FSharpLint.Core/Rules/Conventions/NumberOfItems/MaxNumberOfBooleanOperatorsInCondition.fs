@@ -40,12 +40,7 @@ let private validateCondition (maxBooleanOperators:int) condition =
         let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
         let error = String.Format(errorFormatString, maxBooleanOperators)
         Array.singleton
-            {
-                Range = condition.Range
-                Message = error
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
+            { Range = condition.Range; Message = error; Fix = None; TypeChecks = List.Empty }
     else
         Array.empty
 

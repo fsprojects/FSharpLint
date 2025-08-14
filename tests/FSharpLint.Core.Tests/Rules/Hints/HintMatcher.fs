@@ -771,7 +771,7 @@ let x = List.collect (fun x -> [x]) [1;2;3]
 
         this.SetConfig(["List.concat (List.map f x) ===> List.collect f x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application moved in suggestion which does not require parentheses must not be surrounded by them.``() =
@@ -789,7 +789,7 @@ let x y = y 0
 
         this.SetConfig(["if x then true else false ===> x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application moved in suggestion which requires parens must be surrounded by them.``() =
@@ -807,7 +807,7 @@ let x y = y (foo 0)
 
         this.SetConfig(["0 ===> foo 0"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application in suggestion with surrounding parens keeps them.``() =
@@ -825,7 +825,7 @@ let x y = y (foo 0 0)
 
         this.SetConfig(["foo 0 ===> foo 0 0"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application as variable in suggestion with surrounding parens keeps them.``() =
@@ -843,7 +843,7 @@ let x y = id (foo 0)
 
         this.SetConfig(["bar x ===> id x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application in suggestion with surrounding parens but no longer needs removes surrounding parens.``() =
@@ -861,7 +861,7 @@ let x y = if foo 0 then 0 else 1
 
         this.SetConfig(["bar x ===> if x then 0 else 1"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application in suggestion with addressof operator keeps parens surrounding application.``() =
@@ -879,7 +879,7 @@ let x y = &&(foo 0)
 
         this.SetConfig(["&x ===> &&x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Function application in suggestion with prefix operator removed, removes parens surrounding application.``() =
@@ -896,7 +896,7 @@ let x y = foo 0
 """
         this.SetConfig(["- -x ===> x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Infix operator in hint fix is formatted with space either side of it``() =
@@ -918,4 +918,4 @@ let x y =
 
         this.SetConfig(["List.map f (List.map g x) ===> List.map (g >> f) x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)

@@ -215,7 +215,7 @@ type Cat = | Foo
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() =
@@ -232,7 +232,7 @@ type Cat = | Foo
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.EnumNameIsPascalCase() =

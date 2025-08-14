@@ -686,15 +686,15 @@ let private hintError (config: HintErrorConfig) =
                         HintNode = (HintExpr expr)
                 }
 
-        let suggestedFix = lazy(
+        let fix = lazy(
             ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
+            |> Option.map (fun fromText -> { FromRange = config.Range; ToText = toText }))
 
-        { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
+        { Range = config.Range; Message = error; Fix = Some fix; TypeChecks = config.TypeChecks }
     | Suggestion.Message(message) ->
         let errorFormatString = Resources.GetString("RulesHintSuggestion")
         let error = System.String.Format(errorFormatString, matched, message)
-        { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
+        { Range = config.Range; Message = error; Fix = None; TypeChecks = config.TypeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
     let symbol =

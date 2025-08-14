@@ -33,7 +33,7 @@ match cat with
 
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
@@ -49,7 +49,7 @@ match maybeCat with
 
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 

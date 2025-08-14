@@ -74,13 +74,13 @@ type TestRuleBase () =
     member this.AssertNoWarnings() =
         Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
 
-    member this.ApplyQuickFix (source:string) =
-        let firstSuggestedFix =
+    member this.ApplyFix (source:string) =
+        let firstFix =
             suggestions
-            |> Seq.choose (fun linterSuggestion -> linterSuggestion.Details.SuggestedFix)
+            |> Seq.choose (fun linterSuggestion -> linterSuggestion.Details.Fix)
             |> Seq.tryHead
 
-        match Option.bind (fun (suggestedFix: Lazy<option<SuggestedFix>>) -> suggestedFix.Value) firstSuggestedFix with
+        match Option.bind (fun (fix: Lazy<option<Fix>>) -> fix.Value) firstFix with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
