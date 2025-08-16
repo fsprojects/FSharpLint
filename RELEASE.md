@@ -6,7 +6,7 @@ Revision (Z) part of the version by 2, e.g.: `0.23.2 -> 0.24.0` or `0.23.2 -> 1.
 (ideally one line per PR or commit).
 3. Commit (e.g. with a title such as "Bump version to `X.Y.Z` adding release notes"), but don't push yet!
 4. Tag the head of master with the version number in the format `vX.Y.Z` - e.g.: `git tag v0.20.4`.
-5. Push to remote: `git push origin vX.Y.Z master` - this will start CI processes that will:
+5. Push to remote: `git push origin vX.Y.Z && git push origin master` - this will start CI processes that will:
 * Build the package
 * Create a github release
 * Pushes the package to NuGet
