@@ -4,7 +4,7 @@
 Revision (Z) part of the version by 2, e.g.: `0.23.2 -> 0.24.0` or `0.23.2 -> 1.0` or `0.23.2 -> 0.23.4`
 2. Update the [changelog](CHANGELOG.md) since last release: add the entry (`## [X.Y.Z]`) summarizing all the changes since the previous release
 (ideally one line per PR or commit).
-3. Commit, but don't push yet!
+3. Commit (e.g. with a title such as "Bump version to `X.Y.Z` adding release notes"), but don't push yet!
 4. Tag the head of master with the version number in the format `vX.Y.Z` - e.g.: `git tag v0.20.4`.
 5. Push to remote: `git push origin vX.Y.Z master` - this will start CI processes that will:
 * Build the package

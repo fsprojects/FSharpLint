@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2] - 2025-08-16
+
+- Potentially fix flaky FailwithBadUsage rule's tests #763 #764 [@knocte]
+- FailwithBadUsage: fixed false negative (case with failwithf application) #764 [@webwarrior-ws, @knocte]
+- docs: fix FSharp.Core->FSharpLint.Core typo #761 [@Numpsy]
+- Enable EnsureTailCallDiagnosticsInRecursiveFunctions rule by default #756 [@knocte]
+- Enable more rules for SelfCheck #756 [@Mersho, @webwarrior-ws, @knocte]
+- Fix false positive in SuggestAutoProperty rule #755 [@webwarrior-ws]
+- Fix false positives in NestedFunctionNames & UnnestedFunctionNames rules #759 [@webwarrior-ws]
+- Fix false positive in ParameterNames rule #758 [@webwarrior-ws]
+- Fix false negative in EnsureTailCallDiagnosticsInRecursiveFunctions rule (mutually-recursive funcs) #757 [@webwarrior-ws]
+- Add quickfix suggestions for several rules #646 [@webwarrior-ws]
+- Add quickfix suggestions for several rules #649 [@Mersho]
+- Add nice make experience #660 [@knocte]
+- docs: improve/elaborate main project description #692 [@knocte, @xperiandri]
+- Fix false positive in AvoidSinglePipeOperator rule #753 [@webwarrior-ws]
+
 ## [0.26.0] - 2025-07-18
 
 - Fix MSBuild integration sample in docs #750 [@xperiandri]
