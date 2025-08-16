@@ -2,7 +2,7 @@ We prefer the latest F# 9 features over the old syntax
 
 Prefer `voption` over `option`
 
-Prefer `task` CE over `async` CE
+Prefer `async` CE over `task` CE
 
 This is how you define a non-default F# class constructor:
 ```fsharp
