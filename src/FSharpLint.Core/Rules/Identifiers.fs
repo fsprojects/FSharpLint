@@ -1,4 +1,3 @@
-// fsharplint:disable FL0046
 module FSharpLint.Rules.Identifiers
 
 let [<Literal>] private Prefix = "FL"
