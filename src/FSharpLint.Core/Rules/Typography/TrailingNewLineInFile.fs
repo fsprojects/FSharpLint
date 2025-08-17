@@ -13,7 +13,7 @@ let checkTrailingNewLineInFile (args:LineRuleParams) =
             {
                 Range = Range.mkRange "" pos pos
                 Message = Resources.GetString("RulesTypographyTrailingLineError")
-                SuggestedFix = None
+                Fix = None
                 TypeChecks = List.Empty
             }
     else

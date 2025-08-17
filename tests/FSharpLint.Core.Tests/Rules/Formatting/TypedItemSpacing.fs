@@ -27,11 +27,11 @@ type TestFormattingTypedItemSpaceAfter() =
         Assert.IsTrue(this.ErrorExistsAt(1, 11))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with no spaces around colon``() =
+    member this.``Fix for typed pattern with no spaces around colon``() =
         let source = "let (x:int) = 1"
         let expected = "let (x: int) = 1"
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Error for typed pattern with spaces around colon``() =
@@ -49,11 +49,11 @@ type TestFormattingTypedItemSpaceAfter() =
         Assert.IsTrue(this.ErrorExistsAt(1, 13))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Fix for typed pattern with spaces around colon``() =
         let source = "let (x : int) = 1"
         let expected = "let (x: int) = 1"
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
 [<TestFixture>]
 type TestFormattingTypedItemSpacesAround() =
@@ -78,7 +78,7 @@ let (x:int) = 1""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Fix for typed pattern with spaces around colon``() =
         let source = """
 module Program
 
@@ -91,7 +91,7 @@ module Program
 let (x : int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Error for typed pattern with space after colon``() =
@@ -103,7 +103,7 @@ let (x: int) = 1""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with space after colon``() =
+    member this.``Fix for typed pattern with space after colon``() =
         let source = """
 module Program
 
@@ -116,7 +116,7 @@ module Program
 let (x : int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
 [<TestFixture>]
 type TestFormattingTypedItemNoSpaces() =
@@ -141,7 +141,7 @@ let (x : int) = 1""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Fix for typed pattern with spaces around colon``() =
         let source = """
 module Program
 
@@ -154,7 +154,7 @@ module Program
 let (x:int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``Error for typed pattern with space after colon``() =
@@ -166,7 +166,7 @@ let (x: int) = 1""")
         Assert.IsTrue(this.ErrorExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with space after colon``() =
+    member this.``Fix for typed pattern with space after colon``() =
         let source = """
 module Program
 
@@ -179,4 +179,4 @@ module Program
 let (x:int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)

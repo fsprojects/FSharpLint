@@ -27,7 +27,7 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
                 {
                     Range = intermediateRange
                     Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
-                    SuggestedFix = None
+                    Fix = None
                     TypeChecks = List.Empty
                 }
         else

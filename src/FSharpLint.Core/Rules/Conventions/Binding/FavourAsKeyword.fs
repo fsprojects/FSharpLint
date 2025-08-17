@@ -23,21 +23,21 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
 
             let fromRange = Range.mkRange String.Empty range.Start constRange.End
 
-            let suggestedFix =
+            let fix =
                 ExpressionUtilities.tryFindTextOfRange fromRange args.FileContent
                 |> Option.bind (fun text ->
 
                     ExpressionUtilities.tryFindTextOfRange constRange args.FileContent
                     |> Option.bind (fun constText ->
-                        Some (lazy (Some { FromText = text; FromRange = fromRange; ToText = $"{constText} as {ident.idText}"}))
+                        Some (lazy (Some { FromRange = fromRange; ToText = $"{constText} as {ident.idText}"}))
                     )
                 )
 
             Array.singleton
                 { Range = fromRange
                   Message = Resources.GetString("RulesFavourAsKeyword")
-                  SuggestedFix = suggestedFix
-                  TypeChecks = List.Empty }
+                  Fix = fix
+                  TypeChecks = List.empty }
 
         | _ -> Array.empty
     | _ -> Array.empty

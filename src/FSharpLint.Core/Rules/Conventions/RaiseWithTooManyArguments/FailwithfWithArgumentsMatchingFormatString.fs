@@ -20,7 +20,7 @@ let private runner (args:AstNodeRuleParams) =
                     {
                         Range = range
                         Message = Resources.GetString "FailwithfWithArgumentsMatchingFormatString"
-                        SuggestedFix = None
+                        Fix = None
                         TypeChecks = List.Empty
                     }
             | _ -> Array.empty

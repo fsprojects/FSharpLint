@@ -43,7 +43,7 @@ let _ = System.Version()
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyFix source)
 
     [<Test>]
     member this.``new keyword is not required (1).``() =

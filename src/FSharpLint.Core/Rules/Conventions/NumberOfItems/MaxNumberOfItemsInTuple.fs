@@ -25,12 +25,7 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
         let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
         let error = String.Format(errorFormatString, maxItems)
         Array.singleton
-            {
-                Range = items.[maxItems].Range
-                Message = error
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
+            { Range = items.[maxItems].Range; Message = error; Fix = None; TypeChecks = List.Empty }
     else
         Array.empty
 
