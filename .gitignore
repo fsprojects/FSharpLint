@@ -405,7 +405,8 @@ FodyWeavers.xsd
 tmp/
 temp/
 .fsdocs
-docs/
+docs/*
+!docs/Makefile
 
 # ===================================================
 # OS files

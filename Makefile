@@ -8,6 +8,9 @@ check:
 selfcheck:
 	dotnet fsi build.fsx --target SelfCheck
 
+# added docs tatget to .PHONY target because, otherwise, as 'docs' dir already exists
+# then Make would consider it "up to date" and would skip execution of the target
+.PHONY: docs
 docs:
-	dotnet fsi build.fsx --target Docs
+	$(MAKE) --directory docs
 
