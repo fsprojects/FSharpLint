@@ -7,9 +7,3 @@ check:
 
 selfcheck:
 	dotnet fsi build.fsx --target SelfCheck
-
-# add docs to .PHONY target because docs directory already exists and Make considers it "up to date" and skips execution.
-.PHONY: docs
-docs:
-	dotnet fsi build.fsx --target Docs
-
