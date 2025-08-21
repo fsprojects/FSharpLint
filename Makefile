@@ -7,7 +7,3 @@ check:
 
 selfcheck:
 	dotnet fsi build.fsx --target SelfCheck
-
-docs:
-	dotnet fsi build.fsx --target Docs
-
