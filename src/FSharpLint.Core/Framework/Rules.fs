@@ -53,11 +53,14 @@ type AstNodeRuleConfig =
 type NamingCase =
     | PascalCase = 0
     | CamelCase = 1
+    | AllLowercase = 2
+    | AllUppercase = 3
 
 type NamingUnderscores =
     | None = 0
     | AllowPrefix = 1
     | AllowAny = 2
+    | AllowInfix = 3
 
 type NamingConfig =
     { Naming:NamingCase option
