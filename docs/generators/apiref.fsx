@@ -1,4 +1,4 @@
-#r "nuget: Fornax.Core, 0.16.0-beta002"
+#r "nuget: Fornax.Core, 0.16.0-beta005"
 #r "nuget: Markdig, 0.41.3"
 #r "nuget: FSharp.Formatting, 20.0.1"
 
