@@ -148,7 +148,7 @@
     <PackageReference Include="Ionide.ProjInfo.FCS" />
     <PackageReference Include="Ionide.ProjInfo" />
     <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
-    <PackageReference Update="Microsoft.Build" ExcludeAssets="runtime" Condition="$(TargetFramework) == 'net8.0'" VersionOverride="17.11.31" />
+    <PackageReference Update="Microsoft.Build" ExcludeAssets="runtime" Condition="$(TargetFramework) == 'net8.0'" VersionOverride="17.11.48" />
     <PackageReference Include="Microsoft.Build.Locator" />
     <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" ExcludeAssets="runtime" />
