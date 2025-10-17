@@ -404,7 +404,7 @@ let rec private innerGetPatternIdents<'Item> (accessibility:AccessControlLevel)
             idents
             (match args with
             | SynArgPats.NamePatPairs(pats, _, _) ->
-                innerGetAllPatternIdents AccessControlLevel.Private getIdents (pats |> List.map (fun(_, _, synPat) -> synPat))
+                innerGetAllPatternIdents AccessControlLevel.Private getIdents (pats |> List.map _.Pattern)
             | SynArgPats.Pats(pats) ->
                 innerGetAllPatternIdents AccessControlLevel.Private getIdents pats)
     | SynPat.Named(_, _, access, _) ->

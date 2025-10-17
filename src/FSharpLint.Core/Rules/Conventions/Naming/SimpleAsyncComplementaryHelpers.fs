@@ -32,7 +32,7 @@ type private Func =
 [<TailCall>]
 let rec private getBindings (acc: list<SynBinding>) (declarations: list<SynModuleDecl>) =
     match declarations with
-    | SynModuleDecl.Let(_, bindings, _) :: rest -> getBindings (bindings @ acc) rest
+    | SynModuleDecl.Let(_, bindings, _, _) :: rest -> getBindings (bindings @ acc) rest
     | SynModuleDecl.NestedModule(_, _, innerDecls, _, _, _) :: rest -> getBindings acc (innerDecls @ rest)
     | [] -> acc
     | _ :: rest -> getBindings acc rest
@@ -145,7 +145,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                     | SynArgPats.NamePatPairs(pairs, _, _) ->
                         let argsList =
                             pairs
-                            |> List.map (fun (ident, _, _) -> ident.idRange)
+                            |> List.map _.Range
                             |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
                         " " + String.Join(" ", argsList)
                     | SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, _), _) ]) ->

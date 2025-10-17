@@ -64,9 +64,9 @@ let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (
 and [<TailCall>] processExpression (expression: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
     Array.append
         (match expression with
-        | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
-            let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
-            processLetBinding instanceNames body returnEmptyArray
+        | SynExpr.LetOrUse letOrUse when not letOrUse.IsBang ->
+            let instanceNames = extraFromBindings letOrUse.Bindings List.Empty |> Set.ofList
+            processLetBinding instanceNames letOrUse.Body returnEmptyArray
         | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
             processExpression expr1 (fun () -> processExpression expr2 returnEmptyArray)
         | _ -> Array.empty)
@@ -74,7 +74,7 @@ and [<TailCall>] processExpression (expression: SynExpr) (continuation: unit -> 
 
 let runner args =
     match args.AstNode with
-    | Binding(SynBinding(_, _, _, _, _, _, _, _, _, SynExpr.LetOrUse(_, _, bindings, body, _, _), _, _, _)) ->
+    | Binding(SynBinding(_, _, _, _, _, _, _, _, _, ExpressionUtilities.LetOrUse({Bindings = bindings; Body = body}, false, _), _, _, _)) ->
         let instanceNames = extraFromBindings bindings List.Empty |> Set.ofList
         processLetBinding instanceNames body returnEmptyArray
     | Match(SynMatchClause(_, _, expr, _, _, _)) ->

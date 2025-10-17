@@ -75,7 +75,7 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
     | SynExpr.Record(_, _, synExprRecordFields, _) :: tail ->
         let mapping =
             function
-            | SynExprRecordField(_, _, expr, _) -> expr
+            | SynExprRecordField(_, _, expr, _, _) -> expr
         let fieldExpressions = 
             synExprRecordFields
             |> List.choose mapping

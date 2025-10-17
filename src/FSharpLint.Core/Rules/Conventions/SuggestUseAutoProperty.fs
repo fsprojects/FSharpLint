@@ -16,7 +16,7 @@ let rec private isImmutableValueExpression (args: AstNodeRuleParams) (expression
         let isMutableVariable =
             let exists memberDef =
                 match memberDef with
-                | SynMemberDefn.LetBindings (bindings, _, _, _) ->
+                | SynMemberDefn.LetBindings (bindings, _, _, _, _) ->
                     List.exists (fun (SynBinding (_, _, _, isMutable, _, _, _, headPat, _, _, _, _, _)) ->
                         match headPat with
                         | SynPat.Named (SynIdent(bindingIdent, _), _, _, _) when isMutable ->

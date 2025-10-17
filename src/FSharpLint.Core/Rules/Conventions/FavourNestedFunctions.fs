@@ -35,7 +35,7 @@ let rec private collectMemberBindings (acc: list<FunctionBinding>) (memberDefns:
         collectMemberBindings (collectBindings (List.singleton binding) @ acc) rest
     | SynMemberDefn.GetSetMember(getMember, setMember, _, _) :: rest ->
         collectMemberBindings (collectBindings ((Option.toList getMember) @ (Option.toList setMember)) @ acc) rest
-    | SynMemberDefn.LetBindings(bindings, _, _, _) :: rest ->
+    | SynMemberDefn.LetBindings(bindings, _, _, _, _) :: rest ->
         collectMemberBindings (collectBindings bindings @ acc) rest
     | SynMemberDefn.Interface(_, _, Some(members), _) :: rest ->
         collectMemberBindings acc (members @ rest)
@@ -45,7 +45,7 @@ let rec private collectMemberBindings (acc: list<FunctionBinding>) (memberDefns:
 let runner (args: AstNodeRuleParams) =
     let collectTopLevelFunctionBindings (declaration: SynModuleDecl): list<FunctionBinding> = 
         match declaration with
-        | SynModuleDecl.Let(_, bindings, _) -> collectBindings bindings
+        | SynModuleDecl.Let(_, bindings, _, _) -> collectBindings bindings
         | _ -> List.empty
     
     match args.AstNode with
@@ -75,7 +75,7 @@ let runner (args: AstNodeRuleParams) =
                     collectBindings (List.singleton binding)
                 | SynMemberDefn.GetSetMember(getMember, setMember, _, _)  ->
                     collectBindings ((Option.toList getMember) @ (Option.toList setMember))
-                | SynMemberDefn.LetBindings(bindings, _, _, _)  ->
+                | SynMemberDefn.LetBindings(bindings, _, _, _, _)  ->
                     collectBindings bindings
                 | SynMemberDefn.Interface(_, _, Some(members), _) ->
                     collectMemberBindings List.empty members

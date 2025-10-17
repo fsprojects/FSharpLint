@@ -212,14 +212,14 @@ module AbstractSyntaxArray =
                 recordFields
                 |> Seq.map 
                     (function 
-                     | SynExprRecordField.SynExprRecordField((ident, _), _, Some(_), _) -> 
+                     | SynExprRecordField.SynExprRecordField((ident, _), _, Some(_), _, _) -> 
                         getIdentHash (ident.LongIdent |> List.map (fun each -> each.idText))
                      | _ -> 0)
                 |> Seq.fold (^^^) 0
             let fields =
                 recordFields
                 |> List.choose 
-                    (function | SynExprRecordField.SynExprRecordField((_, _), _, maybeExpr, _) -> maybeExpr)
+                    (function | SynExprRecordField.SynExprRecordField((_, _), _, maybeExpr, _, _) -> maybeExpr)
                 |> List.map Expression
             getHashCode fieldNamesHash (rest @ fields)
         | [] -> 0

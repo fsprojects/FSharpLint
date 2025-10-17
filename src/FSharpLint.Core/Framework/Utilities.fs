@@ -153,6 +153,15 @@ module ExpressionUtilities =
         (range.StartLine, range.StartColumn) >= (containingRange.StartLine, containingRange.StartColumn) 
             && (range.EndLine, range.EndColumn) <= (containingRange.EndLine, containingRange.EndColumn)
 
+    /// Active pattern to match any SynExpr.LetOrUse
+    /// Returns a tuple of (record, isBang, isUse) allowing matching on both booleans and accessing the full record
+    /// Borrowed from https://github.com/nojaf/fsharp/blob/b3d90dc6ab9a9cedad4b8702fd8625f8f8175ae1/src/Compiler/SyntaxTree/SyntaxTreeOps.fs#L138
+    [<return: Struct>]
+    let (|LetOrUse|_|) (expr: SynExpr) =
+        match expr with
+        | SynExpr.LetOrUse(letOrUse) -> ValueSome(letOrUse, letOrUse.IsBang, letOrUse.IsUse)
+        | _ -> ValueNone
+
 module String =
 
     open System.IO
