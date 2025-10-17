@@ -45,7 +45,7 @@ module ContextBuilder =
         | (SynExpr.Record (_, _, fields, _)) ->
             let newAcc = fields :: acc
             fields
-            |> List.fold (fun currentAcc (SynExprRecordField(_, _, exprOpt, _)) ->
+            |> List.fold (fun currentAcc (SynExprRecordField(_, _, exprOpt, _, _)) ->
                 match exprOpt with
                 | Some expr -> collectRecordFieldsInner currentAcc expr
                 | None -> currentAcc
@@ -84,7 +84,7 @@ module ContextBuilder =
             collectRecordFields record
             |> List.collect (fun recordFields ->
                 recordFields
-                |> List.map (fun (SynExprRecordField((fieldName, _), _, _, _)) -> fieldName.Range)
+                |> List.map (fun (SynExprRecordField((fieldName, _), _, _, _, _)) -> fieldName.Range)
                 |> firstRangePerLine
                 |> createAbsoluteAndOffsetOverridesBasedOnFirst)
         | Expression (SynExpr.ArrayOrListComputed(expr=(SynExpr.ComputationExpr(expr=expr)))) ->
@@ -131,7 +131,14 @@ module ContextBuilder =
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | Pattern (SynPat.Record (fieldPats=fieldPats)) ->
             fieldPats
-            |> List.map (fun ((_, fieldIdent), _, _) -> fieldIdent.idRange)
+            |> List.map (fun patPairField -> patPairField.Range)
+                // @@TODO@@ Do we need to look at the ranges inside FieldName here?
+                //let fieldIdent = 
+                //    match patPairField.FieldName.LongIdent with
+                //    | [id] -> id
+                //    | lid -> List.last lid
+                //
+                //fieldIdent.idRange)
             |> firstRangePerLine
             |> createAbsoluteAndOffsetOverridesBasedOnFirst
         | _ -> List.Empty

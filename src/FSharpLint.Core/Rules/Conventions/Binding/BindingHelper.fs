@@ -8,6 +8,6 @@ let isLetBinding index (syntaxArray:AbstractSyntaxArray.Node []) =
     if index > 0 then
         match syntaxArray.[syntaxArray.[index].ParentIndex].Actual with
         | AstNode.ModuleDeclaration(SynModuleDecl.Let(_))
-        | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, _, _)) -> true
+        | AstNode.Expression(SynExpr.LetOrUse(_, false, _, false, _, _, _, _)) -> true
         | _ -> false
     else false

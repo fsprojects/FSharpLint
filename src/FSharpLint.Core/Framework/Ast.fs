@@ -240,7 +240,7 @@ module Ast =
         | SynPat.Attrib(pattern, _, _)
         | SynPat.Paren(pattern, _) -> add <| Pattern pattern
         | SynPat.Named(_) -> ()
-        | SynPat.Record(patternsAndIdentifier, _) -> List.revIter (fun (_, _, pattern) -> pattern |> Pattern |> add) patternsAndIdentifier
+        | SynPat.Record(patPairFieldList, _) -> patPairFieldList |> List.revIter(_.Pattern >> Pattern >> add)
         | SynPat.Const(_)
         | SynPat.Wild(_)
         | SynPat.FromParseError(_)
@@ -306,13 +306,6 @@ module Ast =
         | SynExpr.DotNamedIndexedPropertySet(expression, _, expression1, expression2, _)
         | SynExpr.For(_, _, _, _, expression, _, expression1, expression2, _) ->
             addMany [Expression expression2; Expression expression1; Expression expression]
-        | SynExpr.LetOrUseBang(_, _, _, pattern, rightHandSide, andBangs, leftHandSide, _, _) ->
-            addMany [Expression rightHandSide; Expression leftHandSide]
-            // TODO: is the the correct way to handle the new `and!` syntax?
-            List.iter (fun (SynExprAndBang(_, _, _, pattern, body, _, _)) ->
-                addMany [Expression body; Pattern pattern]
-            ) andBangs
-            add <| Pattern pattern
         | SynExpr.ForEach(_, _, _, _, pattern, expression, expression1, _) ->
             addMany [Expression expression1; Expression expression; Pattern pattern]
         | SynExpr.MatchLambda(_, _, matchClauses, _, _) ->
@@ -330,9 +323,22 @@ module Ast =
         | SynExpr.Upcast(expression, synType, _)
         | SynExpr.Downcast(expression, synType, _) ->
             addMany [Type synType; Expression expression]
-        | SynExpr.LetOrUse(_, _, bindings, expression, _, _) ->
+        // regular let or use
+        | SynExpr.LetOrUse(_, _, _, false, bindings, expression, _, _) ->
             add <| Expression expression
             List.revIter (Binding >> add) bindings
+        // let! or use!
+        | SynExpr.LetOrUse(_, _, _, true, bindings, leftHandSide, _, _) ->
+            match bindings with
+            | firstBinding :: andBangs ->
+                match firstBinding with
+                | SynBinding(headPat = pattern; expr = rightHandSide) ->
+                    addMany [Expression rightHandSide; Expression leftHandSide]
+                    List.iter (fun (SynBinding(headPat = pattern; expr = body)) ->
+                        addMany [Expression body; Pattern pattern]
+                    ) andBangs
+                    add <| Pattern pattern
+            | [] -> () // error case. @@TODO@@ any other handling needed here?
         | SynExpr.Ident(ident) -> add <| Identifier([ident.idText], ident.idRange)
         | SynExpr.LongIdent(_, SynLongIdent(ident, _, _), _, range) ->
             add <| Identifier(List.map (fun (identifier: Ident) -> identifier.idText) ident, range)
@@ -417,7 +423,7 @@ module Ast =
         | SynArgPats.Pats(patterns) ->
             patterns |> List.revIter (Pattern >> add)
         | SynArgPats.NamePatPairs(namePatterns, _, _) ->
-            namePatterns |> List.revIter (fun (_, _, pattern) -> pattern |> Pattern |> add)
+            namePatterns |> List.revIter (_.Pattern >> Pattern >> add)
 
     let inline private typeRepresentationChildren node add =
         match node with
@@ -474,7 +480,7 @@ module Ast =
         | Else(expression)
         | Expression(expression) -> expressionChildren expression add
 
-        | File(ParsedInput.ImplFile(ParsedImplFileInput(_, _, _, _, _, moduleOrNamespaces, _, _, _))) ->
+        | File(ParsedInput.ImplFile(ParsedImplFileInput(contents = moduleOrNamespaces))) ->
             moduleOrNamespaces |> List.revIter (ModuleOrNamespace >> add)
 
         | UnionCase(unionCase) -> unionCaseChildren unionCase add
