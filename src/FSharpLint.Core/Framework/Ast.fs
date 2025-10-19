@@ -259,6 +259,8 @@ module Ast =
             add <| Pattern lhs
             add <| Pattern rhs
 
+
+    // fsharplint:disable FL0025
     let inline private expressionChildren (node: SynExpr) (add: AstNode -> unit) =
         let addMany = List.iter add
 
@@ -383,6 +385,8 @@ module Ast =
             expr1 |> Option.iter (Expression >> add)
             expr2 |> Option.iter (Expression >> add)
         | _ -> ()
+
+    // fsharplint:enable
 
     let inline private typeSimpleRepresentationChildren node add =
         match node with
