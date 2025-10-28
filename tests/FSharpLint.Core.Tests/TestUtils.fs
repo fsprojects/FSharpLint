@@ -15,17 +15,22 @@
 
     let private performanceTestSourceFile = basePath </> "TypeChecker.fs"
 
+    let generateAstAsync source =
+        async {
+            let checker = FSharpChecker.Create(keepAssemblyContents=true)
+            let sourceText = SourceText.ofString source
+
+            let! options = 
+                ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source
+
+            let! parseResults =
+                checker.ParseFile(performanceTestSourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
+
+            return parseResults.ParseTree
+        }
+
     let generateAst source =
-        let checker = FSharpChecker.Create(keepAssemblyContents=true)
-        let sourceText = SourceText.ofString source
-
-        let options = ParseFile.getProjectOptionsFromScript checker performanceTestSourceFile source
-
-        let parseResults =
-            checker.ParseFile(performanceTestSourceFile, sourceText, options |> checker.GetParsingOptionsFromProjectOptions |> fst)
-            |> Async.RunSynchronously
-
-        parseResults.ParseTree
+        generateAstAsync source |> Async.RunSynchronously
 
     let getPerformanceTestInput =
         let memoizedResult = ref None

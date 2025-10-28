@@ -476,7 +476,7 @@ module Lint =
                     let parsedFiles =
                         files
                         |> List.filter (not << isIgnoredFile)
-                        |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
+                        |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions) |> Async.RunSynchronously)
 
                     let failedFiles = List.choose getFailedFiles parsedFiles
 
@@ -585,19 +585,25 @@ module Lint =
             LintResult.Failure (RunTimeConfigError err)
 
     /// Lints F# source code.
+    let lintSourceAsync optionalParams source =
+        async {
+            let checker = FSharpChecker.Create(keepAssemblyContents=true)
+
+            match! ParseFile.parseSource source checker with
+            | ParseFile.Success(parseFileInformation) ->
+                let parsedFileInfo =
+                    { Source = parseFileInformation.Text
+                      Ast = parseFileInformation.Ast
+                      TypeCheckResults = parseFileInformation.TypeCheckResults }
+
+                return lintParsedSource optionalParams parsedFileInfo
+            | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
+        }
+
+    /// Lints F# source code.
     let lintSource optionalParams source =
-        let checker = FSharpChecker.Create(keepAssemblyContents=true)
-
-        match ParseFile.parseSource source checker with
-        | ParseFile.Success(parseFileInformation) ->
-            let parsedFileInfo =
-                { Source = parseFileInformation.Text
-                  Ast = parseFileInformation.Ast
-                  TypeCheckResults = parseFileInformation.TypeCheckResults }
-
-            lintParsedSource optionalParams parsedFileInfo
-        | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
-
+        lintSourceAsync optionalParams source |> Async.RunSynchronously
+        
     /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
         match getConfig optionalParams.Configuration with
@@ -631,7 +637,7 @@ module Lint =
         if IO.File.Exists filePath then
             let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
-            match ParseFile.parseFile filePath checker None with
+            match ParseFile.parseFile filePath checker None |> Async.RunSynchronously with
             | ParseFile.Success astFileParseInfo ->
                 let parsedFileInfo =
                     { Source = astFileParseInfo.Text
