@@ -229,30 +229,35 @@ module private MatchExpression =
         match (leftExpr, opExpr) with
         | ExpressionUtilities.Identifier([ident], _), ExpressionUtilities.Identifier([opIdent], _) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
-            | Some(checkFile) ->
-                let checkSymbol () = 
-                    let symbolUse =
-                        checkFile.GetSymbolUseAtLocation(
-                            ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
+            | Some checkFile ->
+                let symbolUse =
+                    checkFile.GetSymbolUseAtLocation(
+                        ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
-                    match symbolUse with
-                    | Some(symbolUse) ->
+                match symbolUse with
+                | Some symbolUse ->
+                    let checkSymbol () = 
                         match symbolUse.Symbol with
                         | :? FSharpParameter
                         | :? FSharpField -> false
                         | :? FSharpMemberOrFunctionOrValue as element -> not element.IsProperty
                         | _ -> true
-                    | None -> true
-                checkSymbol
-                |> List.singleton
-                |> Match
+                    checkSymbol
+                    |> List.singleton
+                    |> Match
+                | None ->
+                    // Symbol resolution failed, fall back to breadcrumb checking
+                    match filterParens arguments.Breadcrumbs with
+                    | PossiblyInMethod
+                    | PossiblyInConstructor -> NoMatch
+                    | _ -> Match List.Empty
             | None ->
                 /// Check if in `new` expr or function application (either could be a constructor).
                 match filterParens arguments.Breadcrumbs with
                 | PossiblyInMethod
                 | PossiblyInConstructor -> NoMatch
-                | _ -> Match(List.Empty)
-        | _ -> Match(List.Empty)
+                | _ -> Match List.Empty
+        | _ -> Match List.Empty
 
     [<TailCall>]
     let rec matchHintExpr (continuation: unit -> HintMatch) arguments =
@@ -386,7 +391,10 @@ module private MatchExpression =
             matchHintExpr
                 (fun () ->
                     matchHintExpr
-                        (fun () -> arguments.SubHint(AstNode.Expression(rightExpr), right) |> matchHintExpr returnEmptyMatch)
+                        (fun () ->
+                            matchHintExpr
+                                (fun () -> notPropertyInitialisationOrNamedParameter arguments leftExpr opExpr)
+                                (arguments.SubHint(AstNode.Expression(rightExpr), right)))
                         (arguments.SubHint(AstNode.Expression(leftExpr), left)))
                 (arguments.SubHint(AstNode.Expression(opExpr), op))
         | (AstNode.Expression(SynExpr.App(_, _, infixExpr, rightExpr, _)),

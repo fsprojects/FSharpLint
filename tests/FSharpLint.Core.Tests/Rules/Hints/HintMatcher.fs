@@ -754,6 +754,41 @@ do
 
         this.AssertNoWarnings()
 
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/492
+    [<Test>]
+    member this.``Named parameter in atomic static method call should not be treated as infix operation``() =
+        this.SetConfig(["x = true ===> x"])
+
+        this.Parse """
+module Goat
+
+type Foo() =
+    static member Create(keepAssemblyContents: bool) = Foo()
+
+do
+    let foo = Foo.Create(keepAssemblyContents = true)
+    ()
+"""
+
+        this.AssertNoWarnings()
+
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/492
+    [<Test>]
+    member this.``Named parameter in FSharpChecker.Create should not be treated as infix operation``() =
+        this.SetConfig(["x = true ===> x"])
+
+        this.Parse """
+module Goat
+
+open FSharp.Compiler.CodeAnalysis
+
+do
+    let checker = FSharpChecker.Create(keepAssemblyContents = true)
+    ()
+"""
+
+        this.AssertNoWarnings()
+
     /// Regression test for: https://github.com/fsprojects/FSharpLint/pull/194#issuecomment-268560761
     [<Test>]
     member this.``Lambdas in hint suggestions must be surrounded with parentheses.``() =
