@@ -306,8 +306,12 @@ let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, mo
 
     // Check the identifiers in the module name have no length.
     // Not ideal but there's no attribute in the AST indicating the module is implicit from the file name.
-    // TODO: does SynModuleOrNamespaceKind.AnonModule replace this check?
-    isModule moduleKind && longIdent |> List.forall (fun ident -> zeroLengthRange ident.idRange)
+    match moduleKind with
+    | SynModuleOrNamespaceKind.AnonModule -> true
+    | _ when isModule moduleKind -> 
+        // Fallback check for older compiler versions
+        longIdent |> List.forall (fun ident -> zeroLengthRange ident.idRange)
+    | _ -> false
 
 type GetIdents<'Item> = AccessControlLevel -> SynPat -> 'Item []
 
