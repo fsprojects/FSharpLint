@@ -114,7 +114,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Run Fornax
-      run: make docs
+      run: make --directory=docs
     - name: Deploy (if tag)
       if: startsWith(github.ref, 'refs/tags/')
       uses: peaceiris/actions-gh-pages@v3
