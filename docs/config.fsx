@@ -1,4 +1,4 @@
-#r "nuget: Fornax.Core, 0.16.0-beta002"
+#r "nuget: Fornax.Core, 0.16.0-beta005"
 
 open Config
 
