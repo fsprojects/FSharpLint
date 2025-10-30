@@ -1,4 +1,4 @@
-﻿namespace FSharpLint.Framework
+namespace FSharpLint.Framework
 
 /// Provides functionality to parse F# files using `FSharp.Compiler.Service`.
 module ParseFile =
@@ -37,49 +37,51 @@ module ParseFile =
         | Failed of ParseFileFailure
         | Success of 'Content
 
-    let private parse file source (checker:FSharpChecker, options) =
+    let private parse file source (checker:FSharpChecker, options) = async {
         let sourceText = SourceText.ofString source
-        let (parseResults, checkFileAnswer) =
+        let! parseResults, checkFileAnswer =
             checker.ParseAndCheckFileInProject(file, 0, sourceText, options)
-            |> Async.RunSynchronously
 
         match checkFileAnswer with
         | FSharpCheckFileAnswer.Succeeded(typeCheckResults) ->
-            Success
+            return Success
                 {
                     Text = source
                     Ast = parseResults.ParseTree
                     TypeCheckResults = Some(typeCheckResults)
                     File = file
                 }
-        | FSharpCheckFileAnswer.Aborted -> Failed(AbortedTypeCheck)
+        | FSharpCheckFileAnswer.Aborted -> return Failed(AbortedTypeCheck)
+    }
 
-    let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) =
+    let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) = async {
         let sourceText = SourceText.ofString source
         let assumeDotNetFramework = false
         let otherOpts = [| "--targetprofile:netstandard" |]
 
-        let (options, _diagnostics) =
+        let! options, _diagnostics =
             checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework, useSdkRefs = not assumeDotNetFramework, otherFlags = otherOpts)
-            |> Async.RunSynchronously
-        options
+        return options
+    }
 
     /// Parses a file using `FSharp.Compiler.Service`.
-    let parseFile file (checker:FSharpChecker) projectOptions =
+    let parseFile file (checker:FSharpChecker) projectOptions = async {
         let source = File.ReadAllText(file)
 
-        let projectOptions =
+        let! projectOptions =
             match projectOptions with
-            | Some(existingOptions) -> existingOptions
+            | Some(existingOptions) -> async { return existingOptions }
             | None -> getProjectOptionsFromScript checker file source
 
-        parse file source (checker, projectOptions)
+        return! parse file source (checker, projectOptions)
+    }
 
     /// Parses source code using `FSharp.Compiler.Service`.
-    let parseSourceFile fileName source (checker:FSharpChecker) =
-        let options = getProjectOptionsFromScript checker fileName source
+    let parseSourceFile fileName source (checker:FSharpChecker) = async {
+        let! options = getProjectOptionsFromScript checker fileName source
 
-        parse fileName source (checker, options)
+        return! parse fileName source (checker, options)
+    }
 
     let parseSource source (checker:FSharpChecker) =
         let fileName = Path.ChangeExtension(Path.GetTempFileName(), "fsx")

@@ -51,7 +51,7 @@ type TestHintMatcherBase () =
 
         let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
-        match parseResults with
+        match Async.RunSynchronously parseResults with
         | ParseFileResult.Success parseInfo ->
             let syntaxArray = AbstractSyntaxArray.astToArray parseInfo.Ast
             let checkResult =
