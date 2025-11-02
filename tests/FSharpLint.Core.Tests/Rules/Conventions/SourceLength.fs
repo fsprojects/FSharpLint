@@ -230,7 +230,29 @@ let MemberLength = 70
 [<TestFixture>]
 type TestMaxLinesInMember() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMember.rule { Config.MaxLines = MemberLength })
-    // TODO: Add tests.
+        [<Test>]
+    member this.MemberTooManyLines() =
+        this.Parse $"""
+module Program
+
+type Class() =
+    member this.Member1 () =
+        %s{generateNewLines MemberLength 8}
+        ()
+\"\"\")
+
+        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+
+    [<Test>]
+    member this.MemberNotTooManyLines() =
+        this.Parse \"\"\"
+module Program
+
+type Class() =
+    member this.Member1 () = ()
+\"\"""
+
+        Assert.IsFalse(this.ErrorExistsAt(5, 4))
 
 [<Literal>]
 let PropertyLength = 70
