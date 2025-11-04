@@ -2,6 +2,7 @@
 
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
+open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
@@ -25,8 +26,16 @@ let hasEntryPointAttribute (syntaxArray: array<AbstractSyntaxArray.Node>) =
                 attributes |> List.exists hasEntryPoint
             | _ -> false)
 
-let checkIfInLibrary (syntaxArray: array<AbstractSyntaxArray.Node>) (range: range) : array<WarningDetails> =
-    if hasEntryPointAttribute syntaxArray then
+let checkIfInLibrary (syntaxArray: array<AbstractSyntaxArray.Node>) (checkInfo: option<FSharpCheckFileResults>) (range: range) : array<WarningDetails> =
+    let isInTestAssembly =
+        match checkInfo with
+        | Some checkFileResults -> 
+            match Seq.tryHead checkFileResults.PartialAssemblySignature.Entities with
+            | Some entity -> entity.Assembly.QualifiedName.ToLowerInvariant().Contains "test"
+            | None -> false
+        | None -> false
+    
+    if isInTestAssembly || hasEntryPointAttribute syntaxArray then
         Array.empty
     else
         Array.singleton 
@@ -40,7 +49,7 @@ let checkIfInLibrary (syntaxArray: array<AbstractSyntaxArray.Node>) (range: rang
 let runner args =
     match args.AstNode with
     | AstNode.Identifier(["Async"; "RunSynchronously"], range) ->
-        checkIfInLibrary args.SyntaxArray range
+        checkIfInLibrary args.SyntaxArray args.CheckInfo range
     | _ -> Array.empty
 
 let rule =
