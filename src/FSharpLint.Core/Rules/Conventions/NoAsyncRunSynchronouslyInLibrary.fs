@@ -9,33 +9,53 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 
-let hasEntryPointAttribute (syntaxArray: array<AbstractSyntaxArray.Node>) =
-    let hasEntryPoint (attrs: SynAttributeList) =
-        attrs.Attributes 
-        |> List.exists 
-            (fun attr -> 
-                match attr.TypeName with
-                | SynLongIdent([ident], _, _) -> ident.idText = "EntryPoint"
-                | _ -> false)
+let extractAttributeNames (attributes: SynAttributes) =
+    seq {
+        for attr in extractAttributes attributes do
+            match attr.TypeName with
+            | SynLongIdent([ident], _, _) -> yield ident.idText
+            | _ -> ()
+    }
 
+let hasEntryPointAttribute (syntaxArray: array<AbstractSyntaxArray.Node>) =
     syntaxArray
     |> Array.exists 
         (fun node -> 
             match node.Actual with
             | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _)) -> 
-                attributes |> List.exists hasEntryPoint
+                attributes 
+                |> extractAttributeNames
+                |> Seq.contains "EntryPoint"
             | _ -> false)
 
-let checkIfInLibrary (syntaxArray: array<AbstractSyntaxArray.Node>) (checkInfo: option<FSharpCheckFileResults>) (range: range) : array<WarningDetails> =
+let testMethodAttributes = [ "Test"; "TestMethod" ]
+let testClassAttributes = [ "TestFixture"; "TestClass" ]
+
+let isInsideTest (parents: list<AstNode>)  =
+    let isTestMethodOrClass node =
+        match node with
+        | AstNode.MemberDefinition(SynMemberDefn.Member(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _), _)) ->
+            attributes 
+            |> extractAttributeNames
+            |> Seq.exists (fun name -> testMethodAttributes |> List.contains name)
+        | AstNode.TypeDefinition(SynTypeDefn.SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
+            attributes 
+            |> extractAttributeNames
+            |> Seq.exists (fun name -> testClassAttributes |> List.contains name)
+        | _ -> false
+    
+    parents |> List.exists isTestMethodOrClass
+
+let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
     let isInTestAssembly =
-        match checkInfo with
+        match args.CheckInfo with
         | Some checkFileResults -> 
             match Seq.tryHead checkFileResults.PartialAssemblySignature.Entities with
             | Some entity -> entity.Assembly.QualifiedName.ToLowerInvariant().Contains "test"
             | None -> false
         | None -> false
     
-    if isInTestAssembly || hasEntryPointAttribute syntaxArray then
+    if isInTestAssembly || isInsideTest (args.GetParents args.NodeIndex) || hasEntryPointAttribute args.SyntaxArray then
         Array.empty
     else
         Array.singleton 
@@ -49,7 +69,7 @@ let checkIfInLibrary (syntaxArray: array<AbstractSyntaxArray.Node>) (checkInfo: 
 let runner args =
     match args.AstNode with
     | AstNode.Identifier(["Async"; "RunSynchronously"], range) ->
-        checkIfInLibrary args.SyntaxArray args.CheckInfo range
+        checkIfInLibrary args range
     | _ -> Array.empty
 
 let rule =
