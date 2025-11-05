@@ -4,22 +4,5 @@ Prefer `voption` over `option`
 
 Prefer `async` CE over `task` CE
 
-This is how you define a non-default F# class constructor:
-```fsharp
-type DerivedClass =
-    inherit BaseClass
-
-    new (``arguments here``) as ``created object``
-        =
-        // create any objects used in the base class constructor
-        let fieldValue = ""
-        {
-            inherit
-                BaseClass (``arguments here``)
-        }
-        then
-            ``created object``.otherField <- fieldValue
-
-    [<DefaultValue>]
-    val mutable otherField : FieldType
-```
+Prefer idiomatic F#, that is, code that favors composition over inheritance,
+and leans to immutability (pure functions, usage of thread-safe collections, etc.)
