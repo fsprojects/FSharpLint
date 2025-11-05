@@ -47,15 +47,18 @@ let isInsideTest (parents: list<AstNode>)  =
     parents |> List.exists isTestMethodOrClass
 
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
-    let isInTestAssembly =
+    let isInTestProject =
         match args.CheckInfo with
         | Some checkFileResults -> 
-            match Seq.tryHead checkFileResults.PartialAssemblySignature.Entities with
-            | Some entity -> entity.Assembly.QualifiedName.ToLowerInvariant().Contains "test"
-            | None -> false
+            let namespaceIncludesTest =
+                match checkFileResults.ImplementationFile with
+                | Some implFile -> implFile.QualifiedName.ToLowerInvariant().Contains "test"
+                | None -> false
+            let projectFileInfo = System.IO.FileInfo checkFileResults.ProjectContext.ProjectOptions.ProjectFileName
+            namespaceIncludesTest || projectFileInfo.Name.ToLowerInvariant().Contains "test"
         | None -> false
     
-    if isInTestAssembly || isInsideTest (args.GetParents args.NodeIndex) || hasEntryPointAttribute args.SyntaxArray then
+    if isInTestProject || isInsideTest (args.GetParents args.NodeIndex) || hasEntryPointAttribute args.SyntaxArray then
         Array.empty
     else
         Array.singleton 
