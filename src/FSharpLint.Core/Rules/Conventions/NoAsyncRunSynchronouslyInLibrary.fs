@@ -9,6 +9,19 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 
+let hasEntryPoint (checkFileResults: FSharpCheckFileResults) =
+    match checkFileResults.ImplementationFile with
+    | Some implFile -> implFile.HasExplicitEntryPoint
+    | None -> false
+
+let isInTestProject (checkFileResults: FSharpCheckFileResults) =
+    let namespaceIncludesTest =
+        match checkFileResults.ImplementationFile with
+        | Some implFile -> implFile.QualifiedName.ToLowerInvariant().Contains "test"
+        | None -> false
+    let projectFileInfo = System.IO.FileInfo checkFileResults.ProjectContext.ProjectOptions.ProjectFileName
+    namespaceIncludesTest || projectFileInfo.Name.ToLowerInvariant().Contains "test"
+
 let extractAttributeNames (attributes: SynAttributes) =
     seq {
         for attr in extractAttributes attributes do
@@ -16,17 +29,6 @@ let extractAttributeNames (attributes: SynAttributes) =
             | SynLongIdent([ident], _, _) -> yield ident.idText
             | _ -> ()
     }
-
-let hasEntryPointAttribute (syntaxArray: array<AbstractSyntaxArray.Node>) =
-    syntaxArray
-    |> Array.exists 
-        (fun node -> 
-            match node.Actual with
-            | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _)) -> 
-                attributes 
-                |> extractAttributeNames
-                |> Seq.contains "EntryPoint"
-            | _ -> false)
 
 let testMethodAttributes = [ "Test"; "TestMethod" ]
 let testClassAttributes = [ "TestFixture"; "TestClass" ]
@@ -47,18 +49,14 @@ let isInsideTest (parents: list<AstNode>)  =
     parents |> List.exists isTestMethodOrClass
 
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
-    let isInTestProject =
+    let ruleNotApplicable =
         match args.CheckInfo with
-        | Some checkFileResults -> 
-            let namespaceIncludesTest =
-                match checkFileResults.ImplementationFile with
-                | Some implFile -> implFile.QualifiedName.ToLowerInvariant().Contains "test"
-                | None -> false
-            let projectFileInfo = System.IO.FileInfo checkFileResults.ProjectContext.ProjectOptions.ProjectFileName
-            namespaceIncludesTest || projectFileInfo.Name.ToLowerInvariant().Contains "test"
-        | None -> false
+        | Some checkFileResults ->
+            hasEntryPoint checkFileResults || isInTestProject checkFileResults || isInsideTest (args.GetParents args.NodeIndex)
+        | None ->
+            isInsideTest (args.GetParents args.NodeIndex)
     
-    if isInTestProject || isInsideTest (args.GetParents args.NodeIndex) || hasEntryPointAttribute args.SyntaxArray then
+    if ruleNotApplicable then
         Array.empty
     else
         Array.singleton 
