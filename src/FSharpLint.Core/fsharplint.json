@@ -334,6 +334,7 @@
     "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": true },
     "favourAsKeyword": { "enabled": true },
     "interpolatedStringWithNoSubstitution": { "enabled": true },
+    "noAsyncRunSynchronouslyInLibrary": { "enabled": true },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
