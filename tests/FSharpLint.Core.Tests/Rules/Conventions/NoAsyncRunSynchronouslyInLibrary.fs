@@ -33,3 +33,35 @@ let main () =
     |> Async.RunSynchronously""")
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in NUnit test code``() =
+        this.Parse("""
+module Program
+
+[<TestFixture>]
+type FooTest () =
+    [<Test>]
+    member this.Foo() =
+        async {
+            return ()
+        }
+        |> Async.RunSynchronously""")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in MSTest test code``() =
+        this.Parse("""
+module Program
+
+[<TestClass>]
+type FooTest () =
+    [<TestMethod>]
+    member this.Foo() =
+        async {
+            return ()
+        }
+        |> Async.RunSynchronously""")
+
+        this.AssertNoWarnings()
