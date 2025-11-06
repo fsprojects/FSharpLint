@@ -285,12 +285,6 @@ module Lint =
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then
-                let runSynchronously work =
-                    let timeoutMs = 2000
-                    match lintInfo.CancellationToken with
-                    | Some(cancellationToken) -> Async.RunSynchronously(work, timeoutMs, cancellationToken)
-                    | None -> Async.RunSynchronously(work, timeoutMs)
-
                 try
                     let typeChecksSuccessful (typeChecks:(unit -> bool) list) =
                         (true, typeChecks)
