@@ -10,19 +10,18 @@ open FSharpLint.Rules.Helper
 
 let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     let processText text =
-        let suggestedFix =
+        let fix =
             lazy
                 (Some 
                     {
                         FromRange = range
-                        FromText = text
                         ToText = $"({text})"
                      })
 
         {
             Range = range
             Message = Resources.GetString("RulesFormattingTupleParenthesesError")
-            SuggestedFix = Some suggestedFix
+            Fix = Some fix
             TypeChecks = List.Empty
         }
 

@@ -24,7 +24,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
                         {
                             Range = firstClause.Range
                             Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
-                            SuggestedFix = None
+                            Fix = None
                             TypeChecks = List.Empty
                         }
                 else
@@ -34,7 +34,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
                     {
                         Range = firstClause.Range
                         Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
-                        SuggestedFix = None
+                        Fix = None
                         TypeChecks = List.Empty
                     }
             else
@@ -54,7 +54,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
                     {
                         Range = clauseTwo.Range
                         Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
-                        SuggestedFix = None
+                        Fix = None
                         TypeChecks = List.Empty
                     }
             else

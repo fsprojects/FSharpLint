@@ -28,7 +28,7 @@ match [] with
 
         Assert.IsTrue(this.ErrorExistsAt(5, 2))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 

@@ -112,7 +112,7 @@ type TorMessageDigest(isSha256: bool) =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceErrorSuggestedFix() =
+    member this.InConsistentSelfShouldProduceErrorFix() =
         let source = """
 type Foo =
     { Bar : Baz }
@@ -133,12 +133,12 @@ type Foo =
 
         Assert.IsTrue this.ErrorsExist
         
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceErrorSuggestedFix2() =
+    member this.InConsistentSelfShouldProduceErrorFix2() =
         let source = """
 type Foo =
     { Bar : Baz }
@@ -160,12 +160,12 @@ type Foo =
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(6, 11))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceErrorSuggestedFix3() =
+    member this.InConsistentSelfShouldProduceErrorFix3() =
         let source = """
 type CustomerName(firstName, middleInitial, lastName) =
     member this.FirstName = firstName
@@ -182,6 +182,6 @@ type CustomerName(firstName, middleInitial, lastName) =
         Assert.IsTrue this.ErrorsExist
         Assert.IsTrue(this.ErrorExistsAt(4, 11))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)

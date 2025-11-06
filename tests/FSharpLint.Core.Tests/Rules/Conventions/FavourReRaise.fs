@@ -120,6 +120,6 @@ with
         Assert.IsTrue(this.ErrorsExist)
         Assert.IsTrue(this.ErrorExistsAt(7, 8))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyFix source
 
         Assert.AreEqual(expected, result)

@@ -166,3 +166,5 @@ module Lint =
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedFile : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> filePath:string -> LintResult
+
+    val getConfig : ConfigurationParam -> Result<Configuration,string>

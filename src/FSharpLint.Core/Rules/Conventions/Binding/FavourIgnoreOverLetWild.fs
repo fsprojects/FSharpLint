@@ -19,9 +19,8 @@ let private checkForBindingToAWildcard pattern range fileContent (expr: SynExpr)
             Array.singleton
                 { Range = range
                   Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-                  SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
-                                                    FromText = fileContent
-                                                    ToText = sprintf "(%s) |> ignore" exprText })))
+                  Fix = Some (lazy (Some({ FromRange = letBindingRange
+                                           ToText = sprintf "(%s) |> ignore" exprText })))
                   TypeChecks = List.Empty }
         else
             Array.empty
