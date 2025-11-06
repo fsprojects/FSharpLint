@@ -238,7 +238,7 @@
     <value>A tuple of wildcards in a pattern can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
   </data>
   <data name="LintSourceError" xml:space="preserve">
-    <value>Error on line {0} starting at column {1}</value>
+    <value>Error on line {0} starting at column {1}: {2}</value>
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
