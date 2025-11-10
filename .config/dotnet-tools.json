@@ -10,7 +10,7 @@
       "rollForward": false
     },
     "fornax": {
-      "version": "0.16.0-beta002",
+      "version": "0.16.0",
       "commands": [
         "fornax"
       ],

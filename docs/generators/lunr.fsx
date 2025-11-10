@@ -1,4 +1,4 @@
-#r "nuget: Fornax.Core, 0.16.0-beta002"
+#r "nuget: Fornax.Core, 0.16.0"
 #r "nuget: FSharp.Formatting, 20.0.1"
 
 #if !FORNAX
