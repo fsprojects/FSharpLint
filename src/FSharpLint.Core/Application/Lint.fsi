@@ -1,4 +1,4 @@
-﻿namespace FSharpLint.Application
+namespace FSharpLint.Application
 
 /// Provides an API to manage/load FSharpLint configuration files.
 /// <see cref="FSharpLint.Framework.Configuration" /> for more information on
@@ -162,6 +162,9 @@ module Lint =
 
     /// Lints an F# file from a given path to the `.fs` file.
     val lintFile : optionalParams:OptionalLintParameters -> filePath:string -> LintResult
+
+    /// Lints multiple F# files from given file paths.
+    val lintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> LintResult
 
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.

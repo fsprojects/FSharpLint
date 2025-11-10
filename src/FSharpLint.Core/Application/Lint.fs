@@ -1,4 +1,4 @@
-﻿namespace FSharpLint.Application
+namespace FSharpLint.Application
 
 open System
 open System.Collections.Concurrent
@@ -643,3 +643,36 @@ module Lint =
         else
             FailedToLoadFile filePath
             |> LintResult.Failure
+
+    /// Lints multiple F# files from given file paths.
+    let lintFiles optionalParams filePaths =
+        let checker = FSharpChecker.Create(keepAssemblyContents=true)
+        
+        match getConfig optionalParams.Configuration with
+        | Ok config ->
+            let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration config }
+            
+            let lintSingleFile filePath =
+                if IO.File.Exists filePath then
+                    match ParseFile.parseFile filePath checker None with
+                    | ParseFile.Success astFileParseInfo ->
+                        let parsedFileInfo =
+                            { Source = astFileParseInfo.Text
+                              Ast = astFileParseInfo.Ast
+                              TypeCheckResults = astFileParseInfo.TypeCheckResults }
+                        lintParsedFile optionalParams parsedFileInfo filePath
+                    | ParseFile.Failed failure ->
+                        LintResult.Failure (FailedToParseFile failure)
+                else
+                    LintResult.Failure (FailedToLoadFile filePath)
+            
+            let results = filePaths |> Seq.map lintSingleFile |> Seq.toList
+            
+            let failures = results |> List.choose (function | LintResult.Failure f -> Some f | _ -> None)
+            let warnings = results |> List.collect (function | LintResult.Success w -> w | _ -> [])
+            
+            match failures with
+            | firstFailure :: _ -> LintResult.Failure firstFailure
+            | [] -> LintResult.Success warnings
+        | Error err ->
+            LintResult.Failure (RunTimeConfigError err)

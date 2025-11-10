@@ -135,7 +135,45 @@ type TestFileTypeInference() =
     [<TestCase(@"C:\Projects\MySolution.slnx", FileType.Solution, TestName = "inferFileType must handle .slnx files with full paths correctly")>]
     [<TestCase(@"C:\Projects\MySolution.slnf", FileType.Solution, TestName = "inferFileType must handle .slnf files with full paths correctly")>]
     [<TestCase("../MyProject.fsproj", FileType.Project, TestName = "inferFileType must handle .fsproj files with relative paths correctly")>]
+    [<TestCase("*.fs", FileType.Wildcard, TestName = "inferFileType must recognize wildcard patterns with * as Wildcard type")>]
+    [<TestCase("**/*.fs", FileType.Wildcard, TestName = "inferFileType must recognize recursive wildcard patterns as Wildcard type")>]
+    [<TestCase("src/**/*.fsx", FileType.Wildcard, TestName = "inferFileType must recognize subdirectory recursive wildcard patterns as Wildcard type")>]
+    [<TestCase("test?.fs", FileType.Wildcard, TestName = "inferFileType must recognize wildcard patterns with ? as Wildcard type")>]
     member _.``File type inference test cases``(filename: string, expectedType: int) =
         let result = FSharpLint.Console.Program.inferFileType filename
         let expectedType = enum<FileType>(expectedType)
         Assert.AreEqual(expectedType, result)
+
+[<TestFixture>]
+type TestWildcardExpansion() =
+    
+    [<Test>]
+    member _.``expandWildcard finds .fs files in current directory``() =
+        use file1 = new TemporaryFile("module Test1", "fs")
+        use file2 = new TemporaryFile("module Test2", "fs")
+        let dir = Path.GetDirectoryName(file1.FileName)
+        let pattern = Path.Combine(dir, "*.fs")
+        
+        let results = expandWildcard pattern
+        
+        Assert.That(results, Is.Not.Empty)
+        Assert.That(results, Does.Contain(file1.FileName))
+        Assert.That(results, Does.Contain(file2.FileName))
+    
+    [<Test>]
+    member _.``expandWildcard finds .fsx files``() =
+        use file1 = new TemporaryFile("printfn \"test\"", "fsx")
+        let dir = Path.GetDirectoryName(file1.FileName)
+        let pattern = Path.Combine(dir, "*.fsx")
+        
+        let results = expandWildcard pattern
+        
+        Assert.That(results, Does.Contain(file1.FileName))
+    
+    [<Test>]
+    member _.``expandWildcard returns empty list for non-existent directory``() =
+        let pattern = "nonexistent_directory/*.fs"
+        
+        let results = expandWildcard pattern
+        
+        Assert.That(results, Is.Empty)

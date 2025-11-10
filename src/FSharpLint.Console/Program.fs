@@ -1,4 +1,4 @@
-﻿module FSharpLint.Console.Program
+module FSharpLint.Console.Program
 
 open Argu
 open System
@@ -18,6 +18,7 @@ type internal FileType =
     | Solution = 2
     | File = 3
     | Source = 4
+    | Wildcard = 5
 
 // Allowing underscores in union case names for proper Argu command line option formatting.
 // fsharplint:disable UnionCasesNames
@@ -49,6 +50,42 @@ with
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
 
+/// Expands a wildcard pattern to a list of matching files.
+/// Supports recursive search using ** (e.g., "**/*.fs" or "src/**/*.fs")
+let internal expandWildcard (pattern:string) =
+    let isFSharpFile (filePath:string) =
+        filePath.EndsWith ".fs" || filePath.EndsWith ".fsx"
+    
+    let normalizedPattern = pattern.Replace('\\', '/')
+    
+    let directory, searchPattern, searchOption =
+        match normalizedPattern.IndexOf "**/" with
+        | -1 ->
+            // Non-recursive pattern
+            match normalizedPattern.LastIndexOf '/' with
+            | -1 -> ".", normalizedPattern, SearchOption.TopDirectoryOnly
+            | lastSeparator ->
+                let dir = normalizedPattern.Substring(0, lastSeparator)
+                let pat = normalizedPattern.Substring(lastSeparator + 1)
+                (if String.IsNullOrEmpty dir then "." else dir), pat, SearchOption.TopDirectoryOnly
+        | 0 ->
+            // Pattern starts with **/
+            let pat = normalizedPattern.Substring 3
+            ".", pat, SearchOption.AllDirectories
+        | doubleStarIndex ->
+            // Pattern has **/ in the middle
+            let dir = normalizedPattern.Substring(0, doubleStarIndex).TrimEnd '/'
+            let pat = normalizedPattern.Substring(doubleStarIndex + 3)
+            dir, pat, SearchOption.AllDirectories
+    
+    let fullDirectory = Path.GetFullPath directory
+    if Directory.Exists fullDirectory then
+        Directory.GetFiles(fullDirectory, searchPattern, searchOption)
+        |> Array.filter isFSharpFile
+        |> Array.toList
+    else
+        []
+
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->
         String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
@@ -59,9 +96,15 @@ let private parserProgress (output:Output.IOutput) = function
         output.WriteError
             $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
 
+/// Checks if a string contains wildcard characters.
+let internal containsWildcard (target:string) =
+    target.Contains("*") || target.Contains("?")
+
 /// Infers the file type of the target based on its file extension.
 let internal inferFileType (target:string) =
-    if target.EndsWith ".fs" || target.EndsWith ".fsx" then
+    if containsWildcard target then
+        FileType.Wildcard
+    else if target.EndsWith ".fs" || target.EndsWith ".fsx" then
         FileType.File
     else if target.EndsWith ".fsproj" then
         FileType.Project
@@ -125,6 +168,14 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | FileType.File -> Lint.lintFile lintParams target
                 | FileType.Source -> Lint.lintSource lintParams target
                 | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
+                | FileType.Wildcard ->
+                    let files = expandWildcard target
+                    if List.isEmpty files then
+                        output.WriteInfo $"No files matching pattern '%s{target}' were found."
+                        LintResult.Success []
+                    else
+                        output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
+                        Lint.lintFiles lintParams files
                 | FileType.Project
                 | _ -> Lint.lintProject lintParams target toolsPath
             handleLintResult lintResult
