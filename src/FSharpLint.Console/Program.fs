@@ -63,20 +63,20 @@ let internal expandWildcard (pattern:string) =
         | -1 ->
             // Non-recursive pattern
             match normalizedPattern.LastIndexOf '/' with
-            | -1 -> ".", normalizedPattern, SearchOption.TopDirectoryOnly
+            | -1 -> (".", normalizedPattern, SearchOption.TopDirectoryOnly)
             | lastSeparator ->
                 let dir = normalizedPattern.Substring(0, lastSeparator)
                 let pat = normalizedPattern.Substring(lastSeparator + 1)
-                (if String.IsNullOrEmpty dir then "." else dir), pat, SearchOption.TopDirectoryOnly
+                ((if String.IsNullOrEmpty dir then "." else dir), pat, SearchOption.TopDirectoryOnly)
         | 0 ->
             // Pattern starts with **/
             let pat = normalizedPattern.Substring 3
-            ".", pat, SearchOption.AllDirectories
+            (".", pat, SearchOption.AllDirectories)
         | doubleStarIndex ->
             // Pattern has **/ in the middle
             let dir = normalizedPattern.Substring(0, doubleStarIndex).TrimEnd '/'
             let pat = normalizedPattern.Substring(doubleStarIndex + 3)
-            dir, pat, SearchOption.AllDirectories
+            (dir, pat, SearchOption.AllDirectories)
     
     let fullDirectory = Path.GetFullPath directory
     if Directory.Exists fullDirectory then
@@ -84,7 +84,7 @@ let internal expandWildcard (pattern:string) =
         |> Array.filter isFSharpFile
         |> Array.toList
     else
-        []
+        List.empty
 
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->
@@ -169,10 +169,11 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | FileType.Source -> Lint.lintSource lintParams target
                 | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
                 | FileType.Wildcard ->
+                    output.WriteInfo $"Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                     let files = expandWildcard target
                     if List.isEmpty files then
                         output.WriteInfo $"No files matching pattern '%s{target}' were found."
-                        LintResult.Success []
+                        LintResult.Success List.empty
                     else
                         output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
                         Lint.lintFiles lintParams files

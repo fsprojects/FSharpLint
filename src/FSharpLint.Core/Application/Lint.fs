@@ -668,8 +668,8 @@ module Lint =
             
             let results = filePaths |> Seq.map lintSingleFile |> Seq.toList
             
-            let failures = results |> List.choose (function | LintResult.Failure f -> Some f | _ -> None)
-            let warnings = results |> List.collect (function | LintResult.Success w -> w | _ -> [])
+            let failures = results |> List.choose (function | LintResult.Failure failure -> Some failure | _ -> None)
+            let warnings = results |> List.collect (function | LintResult.Success warning -> warning | _ -> List.empty)
             
             match failures with
             | firstFailure :: _ -> LintResult.Failure firstFailure
