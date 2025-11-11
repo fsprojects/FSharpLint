@@ -174,6 +174,15 @@
   <data name="RulesNamingConventionsUnderscoreError" xml:space="preserve">
     <value>Consider changing `{0}` to remove any underscores.</value>
   </data>
+  <data name="RulesNamingConventionsNoInfixUnderscoreError" xml:space="preserve">
+    <value>Consider removing any leading or trailing underscore from `{0}`.</value>
+  </data>
+  <data name="RulesNamingConventionsUppercaseError" xml:space="preserve">
+    <value>Consider changing `{0}` to uppercase.</value>
+  </data>
+  <data name="RulesNamingConventionsLowercaseError" xml:space="preserve">
+    <value>Consider changing `{0}` to lowercase.</value>
+  </data>
   <data name="RulesAvoidTooShortNamesError" xml:space="preserve">
     <value>Consider using a longer name, as it is currently too short.</value>
   </data>
