@@ -157,7 +157,7 @@ module Lint =
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
 
     /// Lints F# source code async.
-    val lintSourceAsync : optionalParams:OptionalLintParameters -> source:string -> Async<LintResult>
+    val asyncLintSource : optionalParams:OptionalLintParameters -> source:string -> Async<LintResult>
 
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.

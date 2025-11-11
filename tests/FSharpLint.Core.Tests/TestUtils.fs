@@ -15,7 +15,7 @@
 
     let private performanceTestSourceFile = basePath </> "TypeChecker.fs"
 
-    let generateAstAsync source =
+    let asyncGenerateAst source =
         async {
             let checker = FSharpChecker.Create(keepAssemblyContents=true)
             let sourceText = SourceText.ofString source
@@ -30,7 +30,7 @@
         }
 
     let generateAst source =
-        generateAstAsync source |> Async.RunSynchronously
+        asyncGenerateAst source |> Async.RunSynchronously
 
     let getPerformanceTestInput =
         let memoizedResult = ref None

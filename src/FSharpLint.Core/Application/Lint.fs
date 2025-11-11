@@ -585,7 +585,7 @@ module Lint =
             LintResult.Failure (RunTimeConfigError err)
 
     /// Lints F# source code.
-    let lintSourceAsync optionalParams source =
+    let asyncLintSource optionalParams source =
         async {
             let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
@@ -602,7 +602,7 @@ module Lint =
 
     /// Lints F# source code.
     let lintSource optionalParams source =
-        lintSourceAsync optionalParams source |> Async.RunSynchronously
+        asyncLintSource optionalParams source |> Async.RunSynchronously
         
     /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
