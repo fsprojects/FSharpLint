@@ -660,7 +660,7 @@ module Lint =
             
             let lintSingleFile filePath =
                 if IO.File.Exists filePath then
-                    match ParseFile.parseFile filePath checker None with
+                    match ParseFile.parseFile filePath checker None |> Async.RunSynchronously with
                     | ParseFile.Success astFileParseInfo ->
                         let parsedFileInfo =
                             { Source = astFileParseInfo.Text
