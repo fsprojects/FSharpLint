@@ -139,8 +139,8 @@ jobs:
           </configuration>
           EOF
       - name: Install FSharpLint from downloaded binaries
-        run: dotnet tool install --global dotnet-fsharplint --prerelease --framework net8.0
+        run: dotnet tool install --global fsharplint --prerelease --framework net8.0
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project (net8.0 only)
-        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
+        run: fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
