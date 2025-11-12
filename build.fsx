@@ -299,7 +299,9 @@ Target.create "SelfCheck" (fun _ ->
 
     for pair in jsonObj.AsObject() do
         if pair.Value.GetValueKind() = Text.Json.JsonValueKind.Object then
-            match pair.Value.AsObject().TryGetPropertyValue("enabled") with
+            let result, isRule = pair.Value.AsObject().TryGetPropertyValue("enabled")
+
+            match result, isRule with
             | true, isRule when not (List.contains pair.Key excludedRules) ->
                 isRule.AsValue().ReplaceWith true
             | _ -> ()
