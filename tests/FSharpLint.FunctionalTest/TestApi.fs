@@ -64,7 +64,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
-            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
+            let result = asyncLintProject OptionalLintParameters.Default projectFile toolsPath |> Async.RunSynchronously
 
             match result with
             | LintResult.Success warnings ->
@@ -77,7 +77,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
             let projectFile = projectPath </> "FSharpLint.FunctionalTest.TestedProject.NetCore.fsproj"
 
-            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
+            let result = asyncLintProject OptionalLintParameters.Default projectFile toolsPath |> Async.RunSynchronously
 
             match result with
             | LintResult.Success warnings ->
@@ -92,7 +92,7 @@ module TestApi =
             let tempConfigFile = TestContext.CurrentContext.TestDirectory </> "fsharplint.json"
             File.WriteAllText (tempConfigFile, """{ "ignoreFiles": ["*"] }""")
 
-            let result = lintProject OptionalLintParameters.Default projectFile toolsPath
+            let result = asyncLintProject OptionalLintParameters.Default projectFile toolsPath |> Async.RunSynchronously
             File.Delete tempConfigFile
 
             match result with
@@ -108,7 +108,7 @@ module TestApi =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject"
             let solutionFile = projectPath </> solutionFileName
 
-            let result = lintSolution OptionalLintParameters.Default solutionFile toolsPath
+            let result = asyncLintSolution OptionalLintParameters.Default solutionFile toolsPath |> Async.RunSynchronously
 
             match result with
             | LintResult.Success warnings ->
@@ -126,7 +126,9 @@ module TestApi =
 
             let relativePathToSolutionFile = Path.GetRelativePath (Directory.GetCurrentDirectory(), solutionFile)
 
-            let result = lintSolution OptionalLintParameters.Default relativePathToSolutionFile toolsPath
+            let result =
+                asyncLintSolution OptionalLintParameters.Default relativePathToSolutionFile toolsPath
+                |> Async.RunSynchronously
 
             match result with
             | LintResult.Success warnings ->

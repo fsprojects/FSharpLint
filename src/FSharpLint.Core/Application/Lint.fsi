@@ -147,14 +147,11 @@ module Lint =
     val runLineRules : RunLineRulesConfig -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
-    val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
+    val asyncLintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
-
-    /// Lints F# source code.
-    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
+    val asyncLintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
 
     /// Lints F# source code async.
     val asyncLintSource : optionalParams:OptionalLintParameters -> source:string -> Async<LintResult>
@@ -164,10 +161,10 @@ module Lint =
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
-    val lintFile : optionalParams:OptionalLintParameters -> filePath:string -> LintResult
+    val asyncLintFile : optionalParams:OptionalLintParameters -> filePath:string -> Async<LintResult>
 
     /// Lints multiple F# files from given file paths.
-    val lintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> LintResult
+    val asyncLintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> Async<LintResult>
 
     /// Lints an F# file that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.

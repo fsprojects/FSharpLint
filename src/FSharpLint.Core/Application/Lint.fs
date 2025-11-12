@@ -437,7 +437,7 @@ module Lint =
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+    let asyncLintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) = async {
         if IO.File.Exists projectFilePath then
             let projectFilePath = Path.GetFullPath projectFilePath
             let lintWarnings = LinkedList<Suggestion.LintWarning>()
@@ -453,7 +453,7 @@ module Lint =
 
                 let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
-                let parseFilesInProject files projectOptions =
+                let parseFilesInProject files projectOptions = async {
                     let lintInformation =
                         { Configuration = config
                           CancellationToken = optionalParams.CancellationToken
@@ -467,39 +467,41 @@ module Lint =
                             Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
                         |> Option.defaultValue false
 
-                    let parsedFiles =
+                    let! parsedFiles =
                         files
                         |> List.filter (not << isIgnoredFile)
-                        |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions) |> Async.RunSynchronously)
+                        |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
+                        |> Async.Sequential
 
-                    let failedFiles = List.choose getFailedFiles parsedFiles
+                    let failedFiles = Array.choose getFailedFiles parsedFiles
 
-                    if List.isEmpty failedFiles then
+                    if Array.isEmpty failedFiles then
                         parsedFiles
-                        |> List.choose getParsedFiles
-                        |> List.iter (lint lintInformation)
+                        |> Array.choose getParsedFiles
+                        |> Array.iter (lint lintInformation)
 
-                        Success ()
+                        return Success ()
                     else
-                        Failure (FailedToParseFilesInProject failedFiles)
+                        return Failure (FailedToParseFilesInProject (Array.toList failedFiles))
+                }
 
                 match getProjectInfo projectFilePath toolsPath with
                 | Ok projectOptions ->
-                    match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
-                    | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
-                    | Failure lintFailure -> LintResult.Failure lintFailure
+                    match! parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
+                    | Success _ -> return lintWarnings |> Seq.toList |> LintResult.Success
+                    | Failure lintFailure -> return LintResult.Failure lintFailure
                 | Error error ->
-                    MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
-                    |> LintResult.Failure
+                    return 
+                        MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
+                        |> LintResult.Failure
             | Error err ->
-                RunTimeConfigError err
-                |> LintResult.Failure
+                return RunTimeConfigError err |> LintResult.Failure
         else
-            FailedToLoadFile projectFilePath
-            |> LintResult.Failure
+            return FailedToLoadFile projectFilePath |> LintResult.Failure
+    }
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
-    let lintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+    let asyncLintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) = async {
         if IO.File.Exists solutionFilePath then
             let solutionFilePath = Path.GetFullPath solutionFilePath
             let solutionFolder = Path.GetDirectoryName solutionFilePath
@@ -526,9 +528,13 @@ module Lint =
                                 projectPath.Replace("\\", "/"))
                         |> Seq.toArray
 
-                    let (successes, failures) =
+                    let! lintResults = 
                         projectsInSolution
-                        |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath toolsPath)
+                        |> Array.map (fun projectFilePath -> asyncLintProject optionalParams projectFilePath toolsPath)
+                        |> Async.Sequential
+
+                    let (successes, failures) =
+                        lintResults
                         |> Array.fold (fun (successes, failures) result ->
                             match result with
                             | LintResult.Success warnings ->
@@ -538,17 +544,17 @@ module Lint =
 
                     match failures with
                     | [] ->
-                        LintResult.Success successes
+                        return LintResult.Success successes
                     | firstErr :: _ ->
-                        LintResult.Failure firstErr
+                        return LintResult.Failure firstErr
                 with
                 | ex ->
-                    LintResult.Failure (MSBuildFailedToLoadProjectFile (solutionFilePath, BuildFailure.InvalidProjectFileMessage ex.Message))
+                    return LintResult.Failure (MSBuildFailedToLoadProjectFile (solutionFilePath, BuildFailure.InvalidProjectFileMessage ex.Message))
 
-            | Error err -> LintResult.Failure (RunTimeConfigError err)
+            | Error err -> return LintResult.Failure (RunTimeConfigError err)
         else
-            FailedToLoadFile solutionFilePath
-            |> LintResult.Failure
+            return FailedToLoadFile solutionFilePath |> LintResult.Failure
+    }
 
     /// Lints F# source code that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource optionalParams parsedFileInfo =
@@ -593,10 +599,6 @@ module Lint =
                 return lintParsedSource optionalParams parsedFileInfo
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
         }
-
-    /// Lints F# source code.
-    let lintSource optionalParams source =
-        asyncLintSource optionalParams source |> Async.RunSynchronously
         
     /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
@@ -627,52 +629,60 @@ module Lint =
         | Error err -> LintResult.Failure (RunTimeConfigError err)
 
     /// Lints an F# file from a given path to the `.fs` file.
-    let lintFile optionalParams filePath =
+    let asyncLintFile optionalParams filePath = async {
         if IO.File.Exists filePath then
             let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
-            match ParseFile.parseFile filePath checker None |> Async.RunSynchronously with
+            match! ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->
                 let parsedFileInfo =
                     { Source = astFileParseInfo.Text
                       Ast = astFileParseInfo.Ast
                       TypeCheckResults = astFileParseInfo.TypeCheckResults }
 
-                lintParsedFile optionalParams parsedFileInfo filePath
-            | ParseFile.Failed failure -> LintResult.Failure(FailedToParseFile failure)
+                return lintParsedFile optionalParams parsedFileInfo filePath
+            | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
         else
-            FailedToLoadFile filePath
-            |> LintResult.Failure
+            return FailedToLoadFile filePath |> LintResult.Failure
+    }
 
     /// Lints multiple F# files from given file paths.
-    let lintFiles optionalParams filePaths =
+    let asyncLintFiles optionalParams filePaths = async {
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
         
         match getConfig optionalParams.Configuration with
         | Ok config ->
             let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration config }
             
-            let lintSingleFile filePath =
+            let lintSingleFile filePath = async {
                 if IO.File.Exists filePath then
-                    match ParseFile.parseFile filePath checker None |> Async.RunSynchronously with
+                    match! ParseFile.parseFile filePath checker None with
                     | ParseFile.Success astFileParseInfo ->
                         let parsedFileInfo =
                             { Source = astFileParseInfo.Text
                               Ast = astFileParseInfo.Ast
                               TypeCheckResults = astFileParseInfo.TypeCheckResults }
-                        lintParsedFile optionalParams parsedFileInfo filePath
+                        return lintParsedFile optionalParams parsedFileInfo filePath
                     | ParseFile.Failed failure ->
-                        LintResult.Failure (FailedToParseFile failure)
+                        return LintResult.Failure (FailedToParseFile failure)
                 else
-                    LintResult.Failure (FailedToLoadFile filePath)
+                    return LintResult.Failure (FailedToLoadFile filePath)
+            }
             
-            let results = filePaths |> Seq.map lintSingleFile |> Seq.toList
+            let! results = filePaths |> Seq.map lintSingleFile |> Async.Sequential
             
-            let failures = results |> List.choose (function | LintResult.Failure failure -> Some failure | _ -> None)
-            let warnings = results |> List.collect (function | LintResult.Success warning -> warning | _ -> List.empty)
+            let failures = 
+                results 
+                |> Seq.choose (function | LintResult.Failure failure -> Some failure | _ -> None)
+                |> Seq.toList
+            let warnings = 
+                results 
+                |> Seq.collect (function | LintResult.Success warning -> warning | _ -> List.empty)
+                |> Seq.toList
             
             match failures with
-            | firstFailure :: _ -> LintResult.Failure firstFailure
-            | [] -> LintResult.Success warnings
+            | firstFailure :: _ -> return LintResult.Failure firstFailure
+            | [] -> return LintResult.Success warnings
         | Error err ->
-            LintResult.Failure (RunTimeConfigError err)
+            return LintResult.Failure (RunTimeConfigError err)
+    }
