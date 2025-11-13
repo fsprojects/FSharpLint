@@ -8,6 +8,7 @@ open FSharpLint.Application.Lint
 open FSharpLint.Framework
 open FSharpLint.Framework.Utilities
 
+// fsharplint:disable NoAsyncRunSynchronouslyInLibrary
 type Benchmark () =
 
     let generateAst source sourceFile =
