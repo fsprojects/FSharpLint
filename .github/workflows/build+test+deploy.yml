@@ -27,10 +27,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        global-json-file: global.json
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
@@ -49,10 +45,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        global-json-file: global.json
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
@@ -104,11 +96,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        global-json-file: global.json
-
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
