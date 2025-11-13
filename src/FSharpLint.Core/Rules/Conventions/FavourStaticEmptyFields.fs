@@ -49,7 +49,7 @@ let private runner (args: AstNodeRuleParams) =
     | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
         let mapping =
             function
-            | SynExprRecordField(_, _, expr, _) ->
+            | SynExprRecordField(_, _, expr, _, _) ->
                 match expr with
                 | Some(SynExpr.ArrayOrList(isArray, [], range)) ->
                     let emptyLiteralType = if isArray then EmptyArrayLiteral else EmptyListLiteral
