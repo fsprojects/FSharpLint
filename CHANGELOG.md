@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.6] - 2025-11-14
+
+- Fix CI via relaxing rollForward policy #783 [@knocte, @Numpsy]
+- Fix CI upgrading .NET version & dropping setup steps #780 [@Numpsy, @knocte]
+- Features "AllowInfix" & "AllUppercase" & "AllLowercase", to support MACRO_CASE and snake_case #762 [@knocte]
+- Upgrade Fornax dependency to non-beta #767 [@Numpsy]
+- Misc improvements #775 [@knocte]
+- Wildcard support for the console app (dotnet tool) #777 [@Thorium]
+- Addressed TODO in NamingHelper #772 [@Thorium]
+
 ## [0.26.4] - 2025-11-05
 
 - Fix docs generation #766 #768 [@webwarrior-ws, @knocte]
