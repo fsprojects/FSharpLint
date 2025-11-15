@@ -31,7 +31,7 @@ let private isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) =
         Seq.forall (fun child -> 
             iIndex + child < nodeArray.Length && 
             jIndex + child < nodeArray.Length && 
-            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode) { 0..numChildren }
+            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode) (seq { 0..numChildren })
     else false
 
 let inline private isParen (node:AbstractSyntaxArray.Node) =
