@@ -46,8 +46,8 @@ Package | Version
 
 1. Make sure you've installed the .NET version defined in [global.json](global.json)
 2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `dotnet fsi build.fsx` to build default target of [build script](build.fsx)
-4. Build documentation to make sure everything is fine with `dotnet fsi build.fsx -t Docs`
+3. Run `make` to build the default target of the [build script](build.fsx)
+4. Build documentation to make sure everything is fine with `make docs`
 5. Go to docs folder `cd docs` and start Fornax in watch mode `dotnet fornax watch`
 6. Your documentation should be now accessible on `localhost:8080` and will be regenerated on every file save
 
