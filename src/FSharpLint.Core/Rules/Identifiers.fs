@@ -91,3 +91,4 @@ let UnneededRecKeyword = identifier 83
 let FavourNonMutablePropertyInitialization = identifier 84
 let EnsureTailCallDiagnosticsInRecursiveFunctions = identifier 85
 let FavourAsKeyword = identifier 86
+let InterpolatedStringWithNoSubstitution = identifier 87
