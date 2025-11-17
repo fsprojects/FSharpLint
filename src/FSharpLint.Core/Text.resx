@@ -381,4 +381,7 @@
   <data name="RulesFavourAsKeyword" xml:space="preserve">
     <value>Prefer using the 'as' pattern to match a constant and bind it to a variable.</value>
   </data>
+  <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
+    <value>Use interpolated string (with $ prefix) only when embedding F# expression in that string using {}.</value>
+  </data>
 </root>
