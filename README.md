@@ -38,10 +38,9 @@ Package | Version
 ## How to build
 
 1. Make sure you've installed the .NET version defined in [global.json](global.json)
-2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `make` to build (which executes the `Build` target from the FAKE-based [build script](build.fsx))
-4. To run tests use `make check`
-5. To build documentation use `make docs`
+2. Run `make` to build (which executes the `Build` target from the FAKE-based [build script](build.fsx))
+3. To run tests use `make check`
+4. To build documentation use `make docs`
 
 ## How to work with documentation
 
