@@ -144,3 +144,36 @@ jobs:
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project (net8.0 only)
         run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
+        
+  testReleaseBinariesWithDotNet10:
+    needs: deployReleaseBinaries
+    runs-on: ubuntu-latest
+    steps:
+      - run: dotnet --list-sdks    
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: ./artifacts
+      - name: Remove global.json to allow .NET 10 SDK
+        run: rm -f global.json
+      - name: Create local NuGet.config
+        run: |
+          cat > NuGet.config <<EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <add key="local" value="./artifacts" />
+            </packageSources>
+            <disabledPackageSources>
+              <add key="nuget.org" value="true" />
+            </disabledPackageSources>
+          </configuration>
+          EOF
+      - name: Install FSharpLint from downloaded binaries
+        run: dotnet tool install --global dotnet-fsharplint --prerelease
+      - name: Add .NET tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Lint FSharpLint.Console project
+        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
