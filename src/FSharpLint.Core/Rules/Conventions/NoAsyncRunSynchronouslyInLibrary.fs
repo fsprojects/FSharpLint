@@ -9,9 +9,18 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 
-let hasEntryPoint (checkFileResults: FSharpCheckFileResults) =
-    match checkFileResults.ImplementationFile with
-    | Some implFile -> implFile.HasExplicitEntryPoint
+let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckResults: FSharpCheckProjectResults option) =
+    let hasEntryPointInTheSameFile =
+        match checkFileResults.ImplementationFile with
+        | Some implFile -> implFile.HasExplicitEntryPoint
+        | None -> false
+
+    hasEntryPointInTheSameFile
+    ||
+    match maybeProjectCheckResults with
+    | Some projectCheckResults ->
+        projectCheckResults.AssemblyContents.ImplementationFiles
+        |> Seq.exists (fun implFile -> implFile.HasExplicitEntryPoint)
     | None -> false
 
 let excludedProjectNames = [ "test"; "console" ]
@@ -56,7 +65,7 @@ let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDet
     let ruleNotApplicable =
         match args.CheckInfo with
         | Some checkFileResults ->
-            hasEntryPoint checkFileResults || isInTestProject checkFileResults || isInsideTest (args.GetParents args.NodeIndex)
+            hasEntryPoint checkFileResults args.ProjectCheckInfo || isInTestProject checkFileResults || isInsideTest (args.GetParents args.NodeIndex)
         | None ->
             isInsideTest (args.GetParents args.NodeIndex)
     
