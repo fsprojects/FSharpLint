@@ -382,6 +382,6 @@
     <value>Prefer using the 'as' pattern to match a constant and bind it to a variable.</value>
   </data>
   <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
-    <value>Use interpolated string (with $ prefix) only when embedding F# expression in that string using {}.</value>
+    <value>Do not use interpolated string syntax (with $ prefix) or formatting functions (sprintf, failwithf) when not really performing any interpolation.</value>
   </data>
 </root>
