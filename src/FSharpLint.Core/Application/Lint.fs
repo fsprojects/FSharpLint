@@ -510,6 +510,9 @@ module Lint =
             return FailedToLoadFile projectFilePath |> LintResult.Failure
     }
 
+    let lintProject optionalParams projectFilePath toolsPath =
+        asyncLintProject optionalParams projectFilePath toolsPath |> Async.RunSynchronously
+
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     let asyncLintSolution (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) = async {
         if IO.File.Exists solutionFilePath then
@@ -566,6 +569,9 @@ module Lint =
             return FailedToLoadFile solutionFilePath |> LintResult.Failure
     }
 
+    let lintSolution optionalParams solutionFilePath toolsPath =
+        asyncLintSolution optionalParams solutionFilePath toolsPath |> Async.RunSynchronously
+
     /// Lints F# source code that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedSource optionalParams parsedFileInfo =
         match getConfig optionalParams.Configuration with
@@ -611,6 +617,9 @@ module Lint =
                 return lintParsedSource optionalParams parsedFileInfo
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
         }
+
+    let lintSource optionalParams source =
+        asyncLintSource optionalParams source |> Async.RunSynchronously
         
     /// Lints an F# file that has already been parsed using `FSharp.Compiler.Services` in the calling application.
     let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
@@ -660,6 +669,9 @@ module Lint =
             return FailedToLoadFile filePath |> LintResult.Failure
     }
 
+    let lintFile optionalParams filePath =
+        asyncLintFile optionalParams filePath |> Async.RunSynchronously
+
     /// Lints multiple F# files from given file paths.
     let asyncLintFiles optionalParams filePaths = async {
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
@@ -701,3 +713,6 @@ module Lint =
         | Error err ->
             return LintResult.Failure (RunTimeConfigError err)
     }
+
+    let lintFiles optionalParams filePaths =
+        asyncLintFiles optionalParams filePaths |> Async.RunSynchronously
