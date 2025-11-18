@@ -35,6 +35,23 @@ let main () =
         this.AssertNoWarnings()
 
     [<Test>]
+    member this.``Async.RunSynchronously may be used in code module that has function with entry point``() =
+        this.Parse("""
+module Program
+
+let foo () =
+    async {
+        return ()
+    }
+    |> Async.RunSynchronously
+
+[<EntryPoint>]
+let main () =
+    0""")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
     member this.``Async.RunSynchronously may be used in NUnit test code``() =
         this.Parse("""
 module Program
@@ -63,5 +80,24 @@ type FooTest () =
             return ()
         }
         |> Async.RunSynchronously""")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in module with tests``() =
+        this.Parse("""
+module Program
+
+let foo () =
+    async {
+        return ()
+    }
+    |> Async.RunSynchronously
+
+[<TestClass>]
+type FooTest () =
+    [<TestMethod>]
+    member this.Foo() =
+        ()""")
 
         this.AssertNoWarnings()
