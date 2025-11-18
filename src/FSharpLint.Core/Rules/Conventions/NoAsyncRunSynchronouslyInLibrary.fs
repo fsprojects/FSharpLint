@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Rules.NoAsyncRunSynchronouslyInLibrary
 
 open FSharp.Compiler.Syntax
+open FSharp.Compiler.Symbols
 open FSharp.Compiler.Text
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework
@@ -46,7 +47,7 @@ let extractAttributeNames (attributes: SynAttributes) =
 let testMethodAttributes = [ "Test"; "TestMethod" ]
 let testClassAttributes = [ "TestFixture"; "TestClass" ]
 
-let isInsideTest (parents: list<AstNode>)  =
+let isInTheSameModuleAsTest (nodes: array<AbstractSyntaxArray.Node>) (maybeProjectCheckResults: FSharpCheckProjectResults option) =
     let isTestMethodOrClass node =
         match node with
         | AstNode.MemberDefinition(SynMemberDefn.Member(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _), _)) ->
@@ -59,15 +60,32 @@ let isInsideTest (parents: list<AstNode>)  =
             |> Seq.exists (fun name -> testClassAttributes |> List.contains name)
         | _ -> false
     
-    parents |> List.exists isTestMethodOrClass
+    let isDeclarationOfTestClass declaration =
+        match declaration with
+        | FSharpImplementationFileDeclaration.Entity(entity, _) ->
+            entity.Attributes
+            |> Seq.exists (fun attr -> testClassAttributes |> List.contains attr.AttributeType.DisplayName)
+        | _ -> false
+
+    match maybeProjectCheckResults with
+    | Some projectCheckResults ->
+        projectCheckResults.AssemblyContents.ImplementationFiles
+        |> Seq.exists (fun implFile -> 
+            implFile.Declarations
+            |> Seq.exists isDeclarationOfTestClass
+        )
+    | None ->
+        nodes |> Array.exists (fun node -> isTestMethodOrClass node.Actual)
 
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
     let ruleNotApplicable =
         match args.CheckInfo with
         | Some checkFileResults ->
-            hasEntryPoint checkFileResults args.ProjectCheckInfo || isInTestProject checkFileResults || isInsideTest (args.GetParents args.NodeIndex)
+            hasEntryPoint checkFileResults args.ProjectCheckInfo
+            || isInTestProject checkFileResults
+            || isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
         | None ->
-            isInsideTest (args.GetParents args.NodeIndex)
+            isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
     
     if ruleNotApplicable then
         Array.empty
