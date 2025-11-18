@@ -38,7 +38,7 @@ module TestApi =
         member _.``Performance of linting an existing file``() =
             let text = File.ReadAllText sourceFile
             let tree = generateAst text
-            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None }
+            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None; ProjectCheckResults = None }
 
             let stopwatch = Stopwatch.StartNew()
             let times = ResizeArray()
