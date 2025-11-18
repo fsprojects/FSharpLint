@@ -14,13 +14,17 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) =
     | Some implFile -> implFile.HasExplicitEntryPoint
     | None -> false
 
+let excludedProjectNames = [ "test"; "console" ]
+
 let isInTestProject (checkFileResults: FSharpCheckFileResults) =
     let namespaceIncludesTest =
         match checkFileResults.ImplementationFile with
-        | Some implFile -> implFile.QualifiedName.ToLowerInvariant().Contains "test"
+        | Some implFile -> 
+            excludedProjectNames |> List.exists (fun name -> implFile.QualifiedName.ToLowerInvariant().Contains name)
         | None -> false
     let projectFileInfo = System.IO.FileInfo checkFileResults.ProjectContext.ProjectOptions.ProjectFileName
-    namespaceIncludesTest || projectFileInfo.Name.ToLowerInvariant().Contains "test"
+    namespaceIncludesTest 
+    || excludedProjectNames |> List.exists (fun name -> projectFileInfo.Name.ToLowerInvariant().Contains name)
 
 let extractAttributeNames (attributes: SynAttributes) =
     seq {
