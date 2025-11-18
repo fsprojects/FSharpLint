@@ -51,10 +51,6 @@ Package | Version
 5. Go to docs folder `cd docs` and start Fornax in watch mode `dotnet fornax watch`
 6. Your documentation should be now accessible on `localhost:8080` and will be regenerated on every file save
 
-## How to release
-
-Please [read the Releasing Guidelines](./RELEASE.md) if you're a maintainer.
-
 ## How to contribute
 
 Bug reports, feature requests, and pull requests are very welcome! Please [read the Contribution Guidelines](./CONTRIBUTING.md)

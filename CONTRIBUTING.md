@@ -143,3 +143,8 @@ in order to craft an excellent pull request:
    git checkout <your-topic-branch>
    git rebase master
    ```
+
+## Maintaining the project
+
+If you have become a maintainer, please don't forget to follow [the Releasing Guidelines](./RELEASE.md).
+
