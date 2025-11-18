@@ -169,7 +169,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
                 | FileType.Source -> Lint.lintSource lintParams target
                 | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
                 | FileType.Wildcard ->
-                    output.WriteInfo $"Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
+                    output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                     let files = expandWildcard target
                     if List.isEmpty files then
                         output.WriteInfo $"No files matching pattern '%s{target}' were found."

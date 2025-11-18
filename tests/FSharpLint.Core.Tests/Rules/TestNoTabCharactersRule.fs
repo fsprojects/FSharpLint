@@ -24,7 +24,7 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
         let rule =
             match rule with
             | NoTabCharactersRule rule -> rule
-            | _ -> failwithf "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
+            | _ -> failwith "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
 
         let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 

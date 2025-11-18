@@ -26,7 +26,7 @@ type TestLineRuleBase (rule:Rule) =
         let rule =
             match rule with
             | LineRule rule -> rule
-            | _ -> failwithf "TestLineRuleBase only accepts LineRules"
+            | _ -> failwith "TestLineRuleBase only accepts LineRules"
 
         let lines = input.Split "\n"
 

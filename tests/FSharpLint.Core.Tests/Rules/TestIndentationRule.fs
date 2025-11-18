@@ -24,7 +24,7 @@ type TestIndentationRuleBase (rule:Rule) =
         let rule =
             match rule with
             | IndentationRule rule -> rule
-            | _ -> failwithf "TestIndentationRuleBase only accepts IndentationRules"
+            | _ -> failwith "TestIndentationRuleBase only accepts IndentationRules"
 
         let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
