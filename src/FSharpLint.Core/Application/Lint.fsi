@@ -74,6 +74,9 @@ module Lint =
 
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
         TypeCheckResults: FSharpCheckFileResults option
+
+        /// Optional results of project-wide type info (allows for a more accurate lint).
+        ProjectCheckResults:FSharpCheckProjectResults option
     }
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -124,6 +127,7 @@ module Lint =
             Rules: RuleMetadata<AstNodeRuleConfig>[]
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
+            ProjectCheckResults: FSharpCheckProjectResults option
             FilePath: string
             FileContent: string
             Lines: string[]
