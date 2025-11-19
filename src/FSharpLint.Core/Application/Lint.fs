@@ -510,6 +510,7 @@ module Lint =
             return FailedToLoadFile projectFilePath |> LintResult.Failure
     }
 
+    [<Obsolete "Use asyncLintProject instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintProject optionalParams projectFilePath toolsPath =
         asyncLintProject optionalParams projectFilePath toolsPath |> Async.RunSynchronously
 
@@ -569,6 +570,7 @@ module Lint =
             return FailedToLoadFile solutionFilePath |> LintResult.Failure
     }
 
+    [<Obsolete "Use asyncLintSolution instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintSolution optionalParams solutionFilePath toolsPath =
         asyncLintSolution optionalParams solutionFilePath toolsPath |> Async.RunSynchronously
 
@@ -618,6 +620,7 @@ module Lint =
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
         }
 
+    [<Obsolete "Use asyncLintSource instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintSource optionalParams source =
         asyncLintSource optionalParams source |> Async.RunSynchronously
         
@@ -669,6 +672,7 @@ module Lint =
             return FailedToLoadFile filePath |> LintResult.Failure
     }
 
+    [<Obsolete "Use asyncLintFile instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintFile optionalParams filePath =
         asyncLintFile optionalParams filePath |> Async.RunSynchronously
 
@@ -714,5 +718,6 @@ module Lint =
             return LintResult.Failure (RunTimeConfigError err)
     }
 
+    [<Obsolete "Use asyncLintFiles instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintFiles optionalParams filePaths =
         asyncLintFiles optionalParams filePaths |> Async.RunSynchronously
