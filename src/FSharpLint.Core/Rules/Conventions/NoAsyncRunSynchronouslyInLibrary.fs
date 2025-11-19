@@ -77,15 +77,32 @@ let isInTheSameModuleAsTest (nodes: array<AbstractSyntaxArray.Node>) (maybeProje
     | None ->
         nodes |> Array.exists (fun node -> isTestMethodOrClass node.Actual)
 
+let isInObsoleteMethodOrFunction parents =
+    let isObsolete node =
+        match node with
+        | AstNode.MemberDefinition(SynMemberDefn.Member(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _), _)) ->
+            attributes 
+            |> extractAttributeNames
+            |> Seq.contains "Obsolete"
+        | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _)) ->
+            attributes 
+            |> extractAttributeNames
+            |> Seq.contains "Obsolete"
+        | _ -> false
+
+    parents |> List.exists isObsolete
+
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
     let ruleNotApplicable =
         match args.CheckInfo with
         | Some checkFileResults ->
             hasEntryPoint checkFileResults args.ProjectCheckInfo
             || isInTestProject checkFileResults
+            || isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
             || isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
         | None ->
-            isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
+            isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
+            || isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
     
     if ruleNotApplicable then
         Array.empty

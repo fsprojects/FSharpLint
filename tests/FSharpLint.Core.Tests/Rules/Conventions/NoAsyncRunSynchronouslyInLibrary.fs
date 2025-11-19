@@ -101,3 +101,32 @@ type FooTest () =
         ()""")
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in methods with Obsolete attribute``() =
+        this.Parse("""
+module Program
+
+type FooTest () =
+    [<Obsolete>]
+    member this.Foo() =
+        async {
+            return ()
+        }
+        |> Async.RunSynchronously""")
+
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in functions with Obsolete attribute``() =
+        this.Parse("""
+module Program
+
+[<Obsolete>]
+let Foo() =
+    async {
+        return ()
+    }
+    |> Async.RunSynchronously""")
+
+        this.AssertNoWarnings()
