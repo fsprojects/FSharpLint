@@ -11,8 +11,6 @@ Use the issues tracker for:
 * [feature requests](#feature-requests)
 * [submitting pull requests](#pull-requests)
 
-Please **do not** use the issue tracker for personal or commercial support requests.
-
 ## Bug reports
 
 A bug is either a _demonstrable problem_ that is caused by the code in the repository,
