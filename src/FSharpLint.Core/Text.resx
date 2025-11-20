@@ -381,4 +381,7 @@
   <data name="RulesFavourAsKeyword" xml:space="preserve">
     <value>Prefer using the 'as' pattern to match a constant and bind it to a variable.</value>
   </data>
+  <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
+    <value>Do not use interpolated string syntax (with $ prefix) or formatting functions (sprintf, failwithf) when not really performing any interpolation.</value>
+  </data>
 </root>

@@ -24,7 +24,7 @@ type TestAstNodeRuleBase (rule:Rule) =
         let rule =
             match rule with
             | AstNodeRule rule -> rule
-            | _ -> failwithf "TestAstNodeRuleBase only accepts AstNodeRules"
+            | _ -> failwith "TestAstNodeRuleBase only accepts AstNodeRules"
 
         let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
@@ -53,4 +53,4 @@ type TestAstNodeRuleBase (rule:Rule) =
 
             Array.iter this.PostSuggestion suggestions
         | _ ->
-            failwithf "Failed to parse"
+            failwith "Failed to parse"

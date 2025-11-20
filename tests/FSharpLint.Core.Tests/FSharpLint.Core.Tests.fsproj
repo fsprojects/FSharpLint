@@ -14,6 +14,7 @@
     <Compile Include="Rules\TestIndentationRule.fs" />
     <Compile Include="Rules\TestNoTabCharactersRule.fs" />
     <Compile Include="Rules\TestLineRule.fs" />
+    <Compile Include="Rules\Smells\InterpolatedStringWithNoSubstitution.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleParentheses.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />

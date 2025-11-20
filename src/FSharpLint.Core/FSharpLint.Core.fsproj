@@ -31,6 +31,7 @@
     <Compile Include="Framework\Suppression.fs" />
     <!-- Rules -->
     <Compile Include="Rules\Identifiers.fs" />
+    <Compile Include="Rules\Smells\InterpolatedStringWithNoSubstitution.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />

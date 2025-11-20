@@ -47,7 +47,7 @@ type TestHintMatcherBase () =
         let rule =
             match HintMatcher.rule { HintTrie = hintTrie } with
             | Rules.AstNodeRule rule -> rule
-            | _ -> failwithf "TestHintMatcherBase only accepts AstNodeRules"
+            | _ -> failwith "TestHintMatcherBase only accepts AstNodeRules"
 
         let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
@@ -72,4 +72,4 @@ type TestHintMatcherBase () =
                 |> fst
             Array.iter this.PostSuggestion suggestions
         | _ ->
-            failwithf "Failed to parse"
+            failwith "Failed to parse"
