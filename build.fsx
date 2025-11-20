@@ -15,6 +15,8 @@
 #r "nuget: Fake.DotNet.MsBuild"
 #r "nuget: Fake.Api.GitHub"
 
+#r "nuget: Fsdk, Version=0.6.0--date20231213-0703.git-d7a5962"
+
 #if FAKE
 #load ".fake/build.fsx/intellisense.fsx"
 #else
@@ -113,19 +115,7 @@ let nugetVersion =
                             PreRelease = None }
         let bumpedBaseVersion = string bumped
 
-        let nugetPreRelease = Path.Combine(rootDir.FullName, "nugetPreRelease.fsx")
-        let procResult =
-            CreateProcess.fromRawCommand
-                "dotnet"
-                [
-                    "fsi"
-                    nugetPreRelease
-                    bumpedBaseVersion
-                ]
-            |> CreateProcess.redirectOutput
-            |> CreateProcess.ensureExitCode
-            |> Proc.run
-        procResult.Result.Output.Trim()
+        Fsdk.Network.GetNugetPrereleaseVersionFromBaseVersion bumpedBaseVersion
 
 let PackageReleaseNotes baseProps =
     if isTag then
