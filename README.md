@@ -2,9 +2,9 @@
 
 FSharpLint is a static analysis tool for F#. Like many other software linters, it analyzes your source code (using both typed and untyped syntax trees) and highlights any violations of defined F# coding rules. There are various kinds of rules:
 
-* **Conventions:** ensures that your API members follow project- or solution-wide naming conventions.
-* **Smells:** warns about logic that may pose maintainability problems or potential downsides.
-* **Formatting:** checks that code is indented and structured according to specified cosmetic standards.
+* **Conventions:** ensures that your API members follow project- or solution-wide naming standards, or that your source code is structured in parts that don't surpass excessive (and configurable) certain lengths.
+* **Smells:** warns about logic that may indicate defects, or pose maintainability problems or downsides.
+* **Formatting:** checks that code is indented and structured according to specified cosmetic standards (beware, this kind of rules are deprecated in favour of more mature tools such as `fantomas`).
 
 The tool is configurable via JSON and can be run as a console app or as an MSBuild task. It also provides an interface for easy integration into other software.
 
@@ -38,23 +38,18 @@ Package | Version
 ## How to build
 
 1. Make sure you've installed the .NET version defined in [global.json](global.json)
-2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `make` to build (which executes the `Build` target from the FAKE-based [build script](build.fsx))
-4. To run tests use `make check`
-5. To build documentation use `make docs`
+2. Run `make` to build (which executes the `Build` target from the FAKE-based [build script](build.fsx))
+3. To run tests use `make check`
+4. To build documentation use `make docs`
 
 ## How to work with documentation
 
 1. Make sure you've installed the .NET version defined in [global.json](global.json)
 2. Run `dotnet tool restore` to install all developer tools required to build the project
-3. Run `dotnet fsi build.fsx` to build default target of [build script](build.fsx)
-4. Build documentation to make sure everything is fine with `dotnet fsi build.fsx -t Docs`
+3. Run `make` to build the default target of the [build script](build.fsx)
+4. Build documentation to make sure everything is fine with `make docs`
 5. Go to docs folder `cd docs` and start Fornax in watch mode `dotnet fornax watch`
 6. Your documentation should be now accessible on `localhost:8080` and will be regenerated on every file save
-
-## How to release
-
-Please [read the Releasing Guidelines](./RELEASE.md) if you're a maintainer.
 
 ## How to contribute
 
