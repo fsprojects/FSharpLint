@@ -224,6 +224,7 @@ Target.create "Push" (fun _ ->
                 | None ->
                     failwith "GITHUB_SHA should have been populated"
                 | Some commitHash ->
+                    // NOTE: for this to work, github workflow needs to have `fetch-depth: 0` in its checkout action
                     let gitArgs = $"describe --exact-match --tags %s{commitHash}"
                     let proc =
                         CreateProcess.fromRawCommandLine "git" gitArgs
