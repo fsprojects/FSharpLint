@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.8] - 2025-11-21
+
+- Fix compilation with .NET10 #779 [@Numpsy]
+- Improve ReadMe.md & Contributing.md #786 [@knocte]
+- New rule InterpolatedStringWithNoSubstitution #787 [@webwarrior-ws]
+- Fix exception at runtime bug if using newer .NET versions #687 #704 #784 [@Numpsy, @webwarrior-ws]
+- Add Async APIs to FSharpLint.Core for async parsing #771 [@Thorium, @webwarrior-ws, @knocte]
+
 ## [0.26.6] - 2025-11-14
 
 - Fix CI via relaxing rollForward policy #783 [@knocte, @Numpsy]
