@@ -23,6 +23,9 @@ module ParseFile =
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
         TypeCheckResults:FSharpCheckFileResults option
 
+        /// Optional results of project-wide type info (allows for a more accurate lint).
+        ProjectCheckResults:FSharpCheckProjectResults option
+
         /// Path to the file.
         File:string
     }
@@ -49,6 +52,7 @@ module ParseFile =
                     Text = source
                     Ast = parseResults.ParseTree
                     TypeCheckResults = Some(typeCheckResults)
+                    ProjectCheckResults = None
                     File = file
                 }
         | FSharpCheckFileAnswer.Aborted -> return Failed(AbortedTypeCheck)

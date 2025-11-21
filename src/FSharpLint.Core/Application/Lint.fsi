@@ -74,6 +74,9 @@ module Lint =
 
         /// Optional results of inferring the types on the AST (allows for a more accurate lint).
         TypeCheckResults: FSharpCheckFileResults option
+
+        /// Optional results of project-wide type info (allows for a more accurate lint).
+        ProjectCheckResults:FSharpCheckProjectResults option
     }
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -124,6 +127,7 @@ module Lint =
             Rules: RuleMetadata<AstNodeRuleConfig>[]
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
+            ProjectCheckResults: FSharpCheckProjectResults option
             FilePath: string
             FileContent: string
             Lines: string[]
@@ -147,26 +151,38 @@ module Lint =
     val runLineRules : RunLineRulesConfig -> Suggestion.LintWarning []
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
+    val asyncLintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
+
+    /// [Obsolete] Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
-    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
+    val asyncLintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
 
-    /// Lints F# source code.
-    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
+    /// [Obsolete] Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
+    val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
     /// Lints F# source code async.
     val asyncLintSource : optionalParams:OptionalLintParameters -> source:string -> Async<LintResult>
+
+    /// [Obsolete] Lints F# source code.
+    val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
 
     /// Lints F# source code that has already been parsed using
     /// `FSharp.Compiler.Services` in the calling application.
     val lintParsedSource : optionalParams:OptionalLintParameters -> parsedFileInfo:ParsedFileInformation -> LintResult
 
     /// Lints an F# file from a given path to the `.fs` file.
+    val asyncLintFile : optionalParams:OptionalLintParameters -> filePath:string -> Async<LintResult>
+
+    /// [Obsolete] Lints an F# file from a given path to the `.fs` file.
     val lintFile : optionalParams:OptionalLintParameters -> filePath:string -> LintResult
 
     /// Lints multiple F# files from given file paths.
+    val asyncLintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> Async<LintResult>
+
+    /// [Obsolete] Lints multiple F# files from given file paths.
     val lintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> LintResult
 
     /// Lints an F# file that has already been parsed using

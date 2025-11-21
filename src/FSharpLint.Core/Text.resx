@@ -384,4 +384,7 @@
   <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
     <value>Do not use interpolated string syntax (with $ prefix) or formatting functions (sprintf, failwithf) when not really performing any interpolation.</value>
   </data>
+  <data name="NoAsyncRunSynchronouslyInLibrary" xml:space="preserve">
+    <value>Async.RunSynchronously should not be used in libraries.</value>
+  </data>
 </root>

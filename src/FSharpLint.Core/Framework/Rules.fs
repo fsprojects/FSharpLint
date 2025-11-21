@@ -30,6 +30,7 @@ type AstNodeRuleParams =
       FileContent:string
       Lines:string []
       CheckInfo:FSharpCheckFileResults option
+      ProjectCheckInfo:FSharpCheckProjectResults option
       GlobalConfig:GlobalRuleConfig }
 
 type LineRuleParams =
