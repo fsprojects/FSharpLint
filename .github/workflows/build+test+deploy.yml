@@ -43,6 +43,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+      with:
+        # we need fetch-depth: 0 because we use the `git describe` command in build.fsx
+        fetch-depth: 0
+
     - name: Restore tools
       run: dotnet tool restore
     - name: Build
