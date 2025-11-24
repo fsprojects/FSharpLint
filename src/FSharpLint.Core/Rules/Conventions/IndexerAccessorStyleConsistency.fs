@@ -14,10 +14,13 @@ type Config = {
 }
 
 let generateOutput (range: FSharp.Compiler.Text.Range) =
-    { Range = range
-      Message = Resources.GetString "RulesIndexerAccessorStyleConsistency"
-      SuggestedFix = None
-      TypeChecks = List.Empty } |> Array.singleton
+    Array.singleton
+        {
+            Range = range
+            Message = Resources.GetString "RulesIndexerAccessorStyleConsistency"
+            SuggestedFix = None
+            TypeChecks = List.Empty
+        }
 
 let runner (config: Config) (args: AstNodeRuleParams) =
     let styleType = config.Style
@@ -49,7 +52,9 @@ let runner (config: Config) (args: AstNodeRuleParams) =
         failwithf "Unknown style type %s" styleType
 
 let rule config =
-    { Name = "IndexerAccessorStyleConsistency"
-      Identifier = Identifiers.IndexerAccessorStyleConsistency
-      RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        {
+            Name = "IndexerAccessorStyleConsistency"
+            Identifier = Identifiers.IndexerAccessorStyleConsistency
+            RuleConfig = { AstNodeRuleConfig.Runner = runner config; Cleanup = ignore }
+        }
