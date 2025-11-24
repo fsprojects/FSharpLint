@@ -6,6 +6,7 @@ open System.IO
 open System.Reflection
 open System.Text.Json
 open System.Text.Json.Serialization
+open Microsoft.FSharp.Reflection
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.HintParser
@@ -17,6 +18,40 @@ let SettingsFileName = "fsharplint.json"
 exception ConfigurationException of string
 
 module internal FSharpJsonConverter =
+    
+    type private SimpleDUConverter<'TDiscriminatedUnion>() =
+        inherit JsonConverter<'TDiscriminatedUnion>()
+
+        let allCases = FSharpType.GetUnionCases typeof<'TDiscriminatedUnion> 
+
+        override this.Read (reader: byref<Text.Json.Utf8JsonReader>, typeToConvert: Type, options: Text.Json.JsonSerializerOptions): 'TDiscriminatedUnion = 
+            let value = reader.GetString()
+            match allCases |> Array.tryFind (fun case -> case.Name = value) with
+            | Some case -> FSharpValue.MakeUnion(case, Array.empty) :?> 'TDiscriminatedUnion
+            | _ -> failwithf "Unexpected value: %A. Expected one of: %A" value allCases
+
+        override this.Write (writer: Text.Json.Utf8JsonWriter, value: 'TDiscriminatedUnion, options: Text.Json.JsonSerializerOptions): unit = 
+            writer.WriteStringValue(value.ToString())
+
+    /// JSON converter  for discriminated unions that only have cases with no fields.
+    /// Maps DUs to strings, like JsonStringEnumConverter.
+    type SimpleDiscriminatedUnionJsonConverter() =
+        inherit JsonConverterFactory()
+
+        override this.CanConvert (typeToConvert: Type): bool = 
+            FSharpType.IsUnion typeToConvert 
+            && (FSharpType.GetUnionCases typeToConvert |> Array.forall (fun typ -> typ.GetFields().Length = 0))
+
+        override this.CreateConverter (typeToConvert: Type, options: JsonSerializerOptions): JsonConverter =
+            let converterType = typedefof<SimpleDUConverter<_>>
+            Activator.CreateInstance(
+                converterType.MakeGenericType(Array.singleton typeToConvert),
+                BindingFlags.Instance ||| BindingFlags.Public,
+                binder=null,
+                args=Array.empty,
+                culture=null
+            )
+            :?> JsonConverter
 
     let jsonOptions =
         let options =
@@ -25,6 +60,7 @@ module internal FSharpJsonConverter =
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             )
         options.Converters.Add(JsonStringEnumConverter())
+        options.Converters.Add(SimpleDiscriminatedUnionJsonConverter())
         options
 
 module IgnoreFiles =
