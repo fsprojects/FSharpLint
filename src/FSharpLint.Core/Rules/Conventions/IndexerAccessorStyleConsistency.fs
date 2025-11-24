@@ -13,11 +13,11 @@ type Config = {
     Style: string
 }
 
-let generateOutput (range: FSharp.Compiler.Text.Range) =
+let generateOutput (range: FSharp.Compiler.Text.Range) msg =
     Array.singleton
         {
             Range = range
-            Message = Resources.GetString "RulesIndexerAccessorStyleConsistency"
+            Message = Resources.GetString msg
             SuggestedFix = None
             TypeChecks = List.Empty
         }
@@ -32,7 +32,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                  SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, expr, range), _), 
                  _, _, _)
                 ->
-                generateOutput range
+                generateOutput range "RulesIndexerAccessorStyleConsistencyToOCaml"
             | _ ->
                 Array.empty
         | _ -> 
@@ -43,7 +43,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
             match binding with
             | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _
                 , SynExpr.DotIndexedGet (_, _, _, range), _, _, _) ->
-                generateOutput range
+                generateOutput range "RulesIndexerAccessorStyleConsistencyToCSharp"
             | _ ->
                 Array.empty
         | _ -> 
