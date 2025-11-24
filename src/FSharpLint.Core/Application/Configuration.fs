@@ -120,6 +120,18 @@ let constructTypePrefixingRuleWithConfig rule (ruleConfig: RuleConfig<TypePrefix
     else
         None
 
+
+// Deprecated grouped configs. TODO: remove in next major release
+
+[<Literal>]
+let private ObsoleteMsg = "Please provide formatting rules at root level. This type will be removed in the near future."
+[<Literal>]
+let private ObsoleteWarnTreatAsError = false
+
+// to be able to use our own types that we mark as Obsolete
+#nowarn "44"
+
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type TupleFormattingConfig =
     { tupleCommaSpacing:EnabledConfig option
       tupleIndentation:EnabledConfig option
@@ -133,6 +145,7 @@ with
                 Option.bind (constructRuleIfEnabled TupleParentheses.rule) this.tupleParentheses
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type PatternMatchFormattingConfig =
     { patternMatchClausesOnNewLine:EnabledConfig option
       patternMatchOrClausesOnNewLine:EnabledConfig option
@@ -148,6 +161,7 @@ with
                 Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule) this.patternMatchExpressionIndentation
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type FormattingConfig =
     { typedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
       typePrefixing:RuleConfig<TypePrefixing.Config> option
@@ -169,6 +183,7 @@ with
                 this.patternMatchFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type RaiseWithTooManyArgsConfig =
     { failwithBadUsage:EnabledConfig option
       raiseWithSingleArgument:EnabledConfig option
@@ -188,6 +203,7 @@ with
                 this.failwithfWithArgumentsMatchingFormatString |> Option.bind (constructRuleIfEnabled FailwithfWithArgumentsMatchingFormatString.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type SourceLengthConfig =
     { maxLinesInLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
       maxLinesInMatchLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
@@ -219,6 +235,7 @@ with
                 this.maxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type NamesConfig =
     { interfaceNames:RuleConfig<NamingConfig> option
       genericTypesNames:RuleConfig<NamingConfig> option
@@ -263,6 +280,7 @@ with
                 this.internalValuesNames|> Option.bind (constructRuleWithConfig InternalValuesNames.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type NumberOfItemsConfig =
     { maxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
       maxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
@@ -278,6 +296,7 @@ with
                 this.maxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type BindingConfig =
     { favourIgnoreOverLetWild:EnabledConfig option
       wildcardNamedWithAsPattern:EnabledConfig option
@@ -297,6 +316,7 @@ with
                 this.favourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
       avoidTooShortNames:EnabledConfig option
@@ -348,6 +368,7 @@ with
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
             |]
 
+[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
 type TypographyConfig =
     { indentation:EnabledConfig option
       maxCharactersOnLine:RuleConfig<MaxCharactersOnLine.Config> option
@@ -367,6 +388,8 @@ with
                 this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
             |]
 
+// </Deprecated>
+
 let private getOrEmptyList hints = Option.defaultValue Array.empty hints
 
 type HintConfig = {
@@ -380,13 +403,21 @@ type GlobalConfig = {
 
 type Configuration =
     { Global:GlobalConfig option
+
       // Deprecated grouped configs. TODO: remove in next major release
+
+      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
       /// DEPRECATED, provide formatting rules at root level.
       formatting:FormattingConfig option
+      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
       /// DEPRECATED, provide conventions rules at root level.
       conventions:ConventionsConfig option
       /// DEPRECATED, provide typography rules at root level.
+      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
       typography:TypographyConfig option
+
+      // </Deprecated>
+
       ignoreFiles:string [] option
       Hints:HintConfig option
       TypedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
@@ -480,9 +511,13 @@ with
         Global = None
         ignoreFiles = None
         Hints = None
+
+        // Deprecated grouped configs. TODO: remove in next major release
         formatting = None
         conventions = None
         typography = None
+        // </Deprecated>
+
         // Configs for rules.
         TypedItemSpacing = None
         TypePrefixing = None
@@ -669,9 +704,12 @@ let flattenConfig (config:Configuration) =
     let deprecatedAllRules =
         Array.concat
             [|
+                // Deprecated grouped configs. TODO: remove in next major release
                 config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
                 config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
                 config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+                // </Deprecated>
+
                 config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
             |]
 
