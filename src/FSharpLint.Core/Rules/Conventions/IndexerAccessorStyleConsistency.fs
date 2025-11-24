@@ -8,23 +8,27 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework
 open System
 
+type IndexerAccessorStyle =
+    | OCaml
+    | CSharp
+
 [<RequireQualifiedAccess>]
 type Config = {
-    Style: string
+    Style: IndexerAccessorStyle
 }
 
-let generateOutput (range: FSharp.Compiler.Text.Range) msg =
+let generateOutput (range: FSharp.Compiler.Text.Range) (style: IndexerAccessorStyle) =
     Array.singleton
         {
             Range = range
-            Message = Resources.GetString msg
+            Message = String.Format(Resources.GetString "RulesIndexerAccessorStyleConsistency", style.ToString())
             SuggestedFix = None
             TypeChecks = List.Empty
         }
 
 let runner (config: Config) (args: AstNodeRuleParams) =
-    let styleType = config.Style
-    if String.Equals (styleType, "ocaml", StringComparison.InvariantCultureIgnoreCase) then
+    match config.Style with
+    | IndexerAccessorStyle.OCaml ->
         match args.AstNode with
         | AstNode.Binding binding ->
             match binding with
@@ -32,24 +36,22 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                  SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, expr, range), _), 
                  _, _, _)
                 ->
-                generateOutput range "RulesIndexerAccessorStyleConsistencyToOCaml"
+                generateOutput range IndexerAccessorStyle.OCaml
             | _ ->
                 Array.empty
         | _ -> 
             Array.empty
-    elif String.Equals (styleType, "csharp", StringComparison.InvariantCultureIgnoreCase) then
+    | IndexerAccessorStyle.CSharp ->
         match args.AstNode with
         | AstNode.Binding binding ->
             match binding with
             | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _
                 , SynExpr.DotIndexedGet (_, _, _, range), _, _, _) ->
-                generateOutput range "RulesIndexerAccessorStyleConsistencyToCSharp"
+                generateOutput range IndexerAccessorStyle.CSharp
             | _ ->
                 Array.empty
         | _ -> 
             Array.empty
-    else
-        failwithf "Unknown style type %s" styleType
 
 let rule config =
     AstNodeRule

@@ -384,10 +384,7 @@
   <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
     <value>Do not use interpolated string syntax (with $ prefix) or formatting functions (sprintf, failwithf) when not really performing any interpolation.</value>
   </data>
-  <data name="RulesIndexerAccessorStyleConsistencyToCSharp" xml:space="preserve">
-    <value>Consider switching the indexer accessor to CSharp style.</value>
-  </data>
-  <data name="RulesIndexerAccessorStyleConsistencyToOCaml" xml:space="preserve">
-    <value>Consider switching the indexer accessor to OCaml style.</value>
+  <data name="RulesIndexerAccessorStyleConsistency" xml:space="preserve">
+    <value>Consider switching the indexer accessor to {0} style.</value>
   </data>
 </root>

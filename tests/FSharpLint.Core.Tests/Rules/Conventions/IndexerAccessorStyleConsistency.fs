@@ -3,10 +3,11 @@ module FSharpLint.Core.Tests.Rules.Conventions.IndexerAccessorStyleConsistency
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
+open FSharpLint.Rules.IndexerAccessorStyleConsistency
 
 [<TestFixture>]
 type TestConventionsIndexerAccessorStyleConsistencyCSharp() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(IndexerAccessorStyleConsistency.rule { Style = "CSharp" })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(IndexerAccessorStyleConsistency.rule { Style = IndexerAccessorStyle.CSharp })
     
     [<Test>]
     member this.IndexerAccessorStyleConsistencyOCamlStyleWhenUsingCSharp() =
@@ -32,7 +33,7 @@ System.Console.WriteLine bar"""
 
 [<TestFixture>]
 type TestConventionsIndexerAccessorStyleConsistencyOCaml() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(IndexerAccessorStyleConsistency.rule { Style = "OCaml" })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(IndexerAccessorStyleConsistency.rule { Style = IndexerAccessorStyle.OCaml })
 
     [<Test>]
     member this.IndexerAccessorStyleConsistencyCSharpStyleWhenUsingOCaml() =
