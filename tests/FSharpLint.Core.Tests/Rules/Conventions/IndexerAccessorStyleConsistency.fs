@@ -1,9 +1,8 @@
 module FSharpLint.Core.Tests.Rules.Conventions.IndexerAccessorStyleConsistency
 
 open NUnit.Framework
-open FSharpLint.Framework.Rules
-open FSharpLint.Rules.IndexerAccessorStyleConsistency
 open FSharpLint.Rules
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsIndexerAccessorStyleConsistencyCSharp() =

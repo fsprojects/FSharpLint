@@ -25,8 +25,10 @@ let runner (config: Config) (args: AstNodeRuleParams) =
         match args.AstNode with
         | AstNode.Binding binding ->
             match binding with
-            | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _
-                , SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListOfSeqExpr (_, expr, range), _), _, _) ->
+            | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _,
+                 SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, expr, range), _), 
+                 _, _, _)
+                ->
                 generateOutput range
             | _ ->
                 Array.empty
@@ -37,7 +39,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
         | AstNode.Binding binding ->
             match binding with
             | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _
-                , SynExpr.DotIndexedGet (_, _, _, range), _, _) ->
+                , SynExpr.DotIndexedGet (_, _, _, range), _, _, _) ->
                 generateOutput range
             | _ ->
                 Array.empty
