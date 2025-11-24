@@ -300,6 +300,7 @@ with
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
       avoidTooShortNames:EnabledConfig option
+      indexerAccessorStyleConsistency: RuleConfig<IndexerAccessorStyleConsistency.Config> option
       redundantNewKeyword:EnabledConfig option
       favourStaticEmptyFields:EnabledConfig option
       asyncExceptionWithoutReturn:EnabledConfig option
@@ -346,6 +347,7 @@ with
                 this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
                 this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
+                this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
             |]
 
 type TypographyConfig =
@@ -403,6 +405,7 @@ type Configuration =
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
       AvoidTooShortNames:EnabledConfig option
+      IndexerAccessorStyleConsistency:RuleConfig<IndexerAccessorStyleConsistency.Config> option
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
       FavourReRaise:EnabledConfig option
@@ -498,6 +501,7 @@ with
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
+        IndexerAccessorStyleConsistency = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
@@ -693,6 +697,7 @@ let flattenConfig (config:Configuration) =
                 config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
                 config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
                 config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+                config.IndexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule)
                 config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
                 config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)
                 config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)
