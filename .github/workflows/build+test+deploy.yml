@@ -37,7 +37,7 @@ jobs:
       run: make selfcheck
 
 
-  deployReleaseBinaries:
+  packReleaseBinaries:
     needs: buildAndTest
     runs-on: ubuntu-latest
 
@@ -54,6 +54,23 @@ jobs:
       with:
         name: binaries
         path: ./out/*.nupkg
+        
+  publishReleaseBinaries:
+    needs:
+    - packReleaseBinaries
+    - testReleaseBinariesInDotNet8Container
+    - testReleaseBinariesWithDotNet10
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Restore tools
+      run: dotnet tool restore
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: binaries
+        path: ./out/
     - name: Get Changelog Entry
       id: changelog_reader
       uses: mindsers/changelog-reader-action@v1
@@ -89,7 +106,7 @@ jobs:
 
 
   deployReleaseDocs:
-    needs: deployReleaseBinaries
+    needs: publishReleaseBinaries
     runs-on: ubuntu-latest
 
     steps:
@@ -110,7 +127,7 @@ jobs:
         force_orphan: true
 
   testReleaseBinariesInDotNet8Container:
-    needs: deployReleaseBinaries
+    needs: packReleaseBinaries
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/dotnet/sdk:8.0
@@ -144,7 +161,7 @@ jobs:
         run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
         
   testReleaseBinariesWithDotNet10:
-    needs: deployReleaseBinaries
+    needs: packReleaseBinaries
     runs-on: ubuntu-latest
     steps:
       - run: dotnet --list-sdks    
