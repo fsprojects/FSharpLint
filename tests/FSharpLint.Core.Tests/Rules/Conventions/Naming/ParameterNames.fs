@@ -22,7 +22,7 @@ module Program
 let main dog = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ConstructorParameterIsPascalCase() =
@@ -33,7 +33,7 @@ type MyClass2(Cats) as this =
     member this.PrintMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 14))
+        Assert.IsTrue(this.ViolationExistsAt(4, 14))
 
     [<Test>]
     member this.ConstructorParameterIsCamelCase() =
@@ -44,7 +44,7 @@ type MyClass2(cats) as this =
     member this.PrintMessage() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.CompilerGeneratedArgumentName() =
@@ -54,10 +54,10 @@ module Program
 (fun _ -> ())
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.ParameterUnionCaseContainingValueDoesNotGenerateWarning() =
+    member this.ParameterUnionCaseContainingValueDoesNotGenerateViolation() =
         this.Parse """
 module Program
 
@@ -71,7 +71,7 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() =
@@ -113,10 +113,10 @@ let foo _x = 0
 let foo ((x, y) as bar_coord) = bar_coord
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``Module members should not cause errors as they are not parameters``() =
+    member this.``Module members should not cause violations as they are not parameters``() =
         this.Parse """
 module BitLaunch =
     module Regions =
@@ -124,4 +124,4 @@ module BitLaunch =
         let Amsterdam someArg = "Amsterdam"
 """
         
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist

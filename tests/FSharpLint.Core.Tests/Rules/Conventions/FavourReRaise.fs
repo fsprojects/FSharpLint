@@ -20,10 +20,10 @@ with
         reraise()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``using raise ex must generate error``() =
+    member this.``using raise ex must generate violation``() =
         this.Parse
             """
  try
@@ -34,11 +34,11 @@ with
          raise ex
 """
 
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(7, 9))
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsAt(7, 9))
 
     [<Test>]
-    member this.``using raise outside with block must not generate error``() =
+    member this.``using raise outside with block must not generate violation``() =
         this.Parse
             """
 let function1 x y =
@@ -52,10 +52,10 @@ let function1 x y =
       printfn "Always print this."
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``using raise with an exception that's not in the with block must not generate error``() =
+    member this.``using raise with an exception that's not in the with block must not generate violation``() =
         this.Parse
             """
 try
@@ -67,10 +67,10 @@ with
         raise e
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``using raise with an exception that's not in the with block must not generate error (2)``() =
+    member this.``using raise with an exception that's not in the with block must not generate violation (2)``() =
         this.Parse
             """
 try
@@ -81,10 +81,10 @@ with
     raise e
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``using raise with an exception that's not in the with block must not generate error (3)``() =
+    member this.``using raise with an exception that's not in the with block must not generate violation (3)``() =
         this.Parse
             """
 try
@@ -95,10 +95,10 @@ with
     raise ex
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``using raise ex must generate error suggested fix``() =
+    member this.``using raise ex must generate violation and suggested fix``() =
         let source = """
 try
     foo ()
@@ -117,8 +117,8 @@ with
         
         this.Parse source
 
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(7, 8))
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsAt(7, 8))
 
         let result = this.ApplyQuickFix source
 

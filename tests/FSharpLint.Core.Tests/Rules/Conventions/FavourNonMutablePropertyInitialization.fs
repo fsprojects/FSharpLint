@@ -9,7 +9,7 @@ type TestConventionsFavourNonMutablePropertyInitialization() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourNonMutablePropertyInitialization.rule)
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError1() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation1() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -21,10 +21,10 @@ module Program =
         let someInstance = SomeClass()
         someInstance.MyWriteOnlyProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError2() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation2() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -38,10 +38,10 @@ module Program =
         let someInstance = SomeClass()
         someInstance.MyReadWriteProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError3() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation3() =
         this.Parse """
 open System.Net
 
@@ -52,10 +52,10 @@ module Program =
         someInstance.Domain <- "example.com"
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError4() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation4() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -72,10 +72,10 @@ module Program =
         SomeClass.SomeStaticMethod()
         someInstance.MyReadWriteProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError5() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation5() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -88,10 +88,10 @@ module Program =
         someInstance.MyWriteOnlyProperty <- 2
         ()"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldProduceError6() =
+    member this.FavourNonMutablePropertyInitializationShouldProduceViolation6() =
         this.Parse """
 type SomeClass() =
     member val SomeProperty1 = 0 with get, set
@@ -103,11 +103,11 @@ module Program =
         someInstance.SomeProperty1 <- 2
         someInstance.SomeProperty2 <- 3"""
 
-        Assert.IsTrue <| this.ErrorExistsAt(9, 21)
-        Assert.IsTrue <| this.ErrorExistsAt(10, 21)
+        Assert.IsTrue <| this.ViolationExistsAt(9, 21)
+        Assert.IsTrue <| this.ViolationExistsAt(10, 21)
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should produce error in match expression``() =
+    member this.``FavourNonMutablePropertyInitialization should produce violation in match expression``() =
         this.Parse """
 type SomeClass() =
     member val MyWriteOnlyProperty = 0 with set
@@ -118,10 +118,10 @@ let someValue =
         let someInstance = SomeClass()
         someInstance.MyWriteOnlyProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should produce error in lambda function``() =
+    member this.``FavourNonMutablePropertyInitialization should produce violation in lambda function``() =
         this.Parse """
 type SomeClass() =
     member val MyWriteOnlyProperty = 0 with set
@@ -131,10 +131,10 @@ let someLambda =
         let someInstance = SomeClass()
         someInstance.MyWriteOnlyProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should produce error in try-with block``() =
+    member this.``FavourNonMutablePropertyInitialization should produce violation in try-with block``() =
         this.Parse """
 type SomeClass() =
     member val MyWriteOnlyProperty = 0 with set
@@ -146,10 +146,10 @@ let someValue =
     with
     | _ -> ()"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should produce error in finally block``() =
+    member this.``FavourNonMutablePropertyInitialization should produce violation in finally block``() =
         this.Parse """
 type SomeClass() =
     member val MyWriteOnlyProperty = 0 with set
@@ -161,10 +161,10 @@ let someValue =
         let someInstance = SomeClass()
         someInstance.MyWriteOnlyProperty <- 2"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should produce error in computation expression``() =
+    member this.``FavourNonMutablePropertyInitialization should produce violation in computation expression``() =
         this.Parse """
 type SomeClass() =
     member val MyWriteOnlyProperty = 0 with set
@@ -175,10 +175,10 @@ let someValue =
         someInstance.MyWriteOnlyProperty <- 2
     }"""
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldNotProduceError1() =
+    member this.FavourNonMutablePropertyInitializationShouldNotProduceViolation1() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -190,10 +190,10 @@ module Program =
         let someInstance = SomeClass(MyWriteOnlyProperty = 2)
         ()"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldNotProduceError2() =
+    member this.FavourNonMutablePropertyInitializationShouldNotProduceViolation2() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -207,10 +207,10 @@ module Program =
         let someInstance = SomeClass(MyReadWriteProperty = 2)
         ()"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldNotProduceError3() =
+    member this.FavourNonMutablePropertyInitializationShouldNotProduceViolation3() =
         this.Parse """
 type SomeClass() =
     let mutable myInternalValue = 1
@@ -227,10 +227,10 @@ module Program =
         someInstance.SomeMethod()
         someInstance.MyReadWriteProperty <- 2"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldNotProduceError4() =
+    member this.FavourNonMutablePropertyInitializationShouldNotProduceViolation4() =
         this.Parse """
 module SomeModule =
     let mutable myInternalValue = 1
@@ -239,10 +239,10 @@ module Program =
     let someFunction() =
         SomeModule.myInternalValue <- 2"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourNonMutablePropertyInitializationShouldNotProduceError5() =
+    member this.FavourNonMutablePropertyInitializationShouldNotProduceViolation5() =
         this.Parse """
 open System.Net
 
@@ -252,14 +252,14 @@ module Program =
         let someInstance = Cookie(Domain = "example.com")
         ()"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``FavourNonMutablePropertyInitialization should not produce error on local variables``() =
+    member this.``FavourNonMutablePropertyInitialization should not produce violation on local variables``() =
         this.Parse """
 let someFunc () =
     let mutable current = 23
     current <- 2
     ()"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist

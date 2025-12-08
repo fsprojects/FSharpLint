@@ -2,13 +2,13 @@ module FSharpLint.Rules.FavourTypedIgnore
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private runner (args: AstNodeRuleParams) =
-    let generateError identifier range text =
+    let generateViolation identifier range text =
 
         let suggestedFix =
             lazy
@@ -30,7 +30,7 @@ let private runner (args: AstNodeRuleParams) =
         match expression with
         | SynExpr.Typed (_id, _synType, _range) -> Array.empty
         | _ ->
-            generateError identifier range text
+            generateViolation identifier range text
             |> Array.singleton
 
     let ignoreFunc = "ignore"
@@ -46,7 +46,7 @@ let private runner (args: AstNodeRuleParams) =
         match expression with
         | SynExpr.Paren (expr, _, _, _) -> isTyped expr identifier.idText range identifier.idText
         | _ ->
-            generateError identifier.idText range identifier.idText
+            generateViolation identifier.idText range identifier.idText
             |> Array.singleton
     | _ -> Array.empty
 

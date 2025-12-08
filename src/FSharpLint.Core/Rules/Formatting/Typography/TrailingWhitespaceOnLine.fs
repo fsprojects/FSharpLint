@@ -2,7 +2,7 @@ module FSharpLint.Rules.TrailingWhitespaceOnLine
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Text
 
@@ -50,7 +50,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
         Array.singleton
             {
                 Range = range
-                Message = Resources.GetString("RulesTypographyTrailingWhitespaceError")
+                Message = Resources.GetString "RulesTypographyTrailingWhitespaceViolation"
                 SuggestedFix = None
                 TypeChecks = List.Empty
             }

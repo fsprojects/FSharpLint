@@ -3,13 +3,13 @@
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 
 [<TailCall>]
-let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit -> array<WarningDetails>) =
+let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit -> array<ViolationDetails>) =
     Array.append
         (match expression with
         | SynExpr.Sequential (_, _, firstExpression, secondExpression, _, _) ->
@@ -59,7 +59,7 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
             checkExpression body range returnEmptyArray
         | _ -> Array.empty)
         (continuation ())
-and [<TailCall>] checkMultipleExpressions (expressions: list<SynExpr * range>) (continuation: unit -> array<WarningDetails>) =
+and [<TailCall>] checkMultipleExpressions (expressions: list<SynExpr * range>) (continuation: unit -> array<ViolationDetails>) =
     match expressions with
     | (expression, range) :: tail -> 
         checkExpression

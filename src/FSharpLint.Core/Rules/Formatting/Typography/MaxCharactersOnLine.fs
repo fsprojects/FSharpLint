@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxCharactersOnLine
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Text
 
@@ -14,11 +14,11 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
     let lineLength = String.length args.Line
     if lineLength > maxCharacters then
         let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber (maxCharacters + 1)) (Position.mkPos args.LineNumber lineLength)
-        let errorFormatString = Resources.GetString("RulesTypographyLineLengthError")
+        let violationTextFormatString = Resources.GetString "RulesTypographyLineLengthViolation"
         Array.singleton
             {
                 Range = range
-                Message = String.Format(errorFormatString, (maxCharacters + 1))
+                Message = String.Format(violationTextFormatString, (maxCharacters + 1))
                 SuggestedFix = None
                 TypeChecks = List.Empty
             }

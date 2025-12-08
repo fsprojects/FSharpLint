@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxLinesInFile
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Text
 
@@ -11,12 +11,12 @@ type Config = { MaxLinesInFile:int }
 
 let private checkNumberOfLinesInFile numberOfLines line maxLines =
     if numberOfLines > maxLines then
-        let errorFormatString = Resources.GetString("RulesTypographyFileLengthError")
+        let violationTextFormatString = Resources.GetString "RulesTypographyFileLengthViolation"
         Array.singleton
             {
                 Range =
                     Range.mkRange "" (Position.mkPos (maxLines + 1) 0) (Position.mkPos numberOfLines (String.length line))
-                Message = String.Format(errorFormatString, (maxLines + 1))
+                Message = String.Format(violationTextFormatString, (maxLines + 1))
                 SuggestedFix = None
                 TypeChecks = List.Empty
             }

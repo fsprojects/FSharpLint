@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Text
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -59,11 +59,11 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                            FromText = text;
                            ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
                     )
-                let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
+                let violationTextFormatString = Resources.GetString "RulesFormattingTypedItemSpacingViolation"
                 Some
                     {
                         Range = range
-                        Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                        Message = String.Format(violationTextFormatString, expectedSpacesBefore, expectedSpacesAfter)
                         SuggestedFix = Some suggestedFix
                         TypeChecks = List.Empty
                     }

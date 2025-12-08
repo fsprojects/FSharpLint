@@ -9,19 +9,19 @@ type TestFormattingTupleParentheses() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleParentheses.rule)
 
     [<Test>]
-    member this.``Error for tuple instantiation without parentheses``() =
+    member this.``Violation for tuple instantiation without parentheses``() =
         this.Parse("""
 module Program
 
 let x = 1, 2""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.``No tuple instantiation error for cons operator``() =
+    member this.``No tuple instantiation violation for cons operator``() =
         this.Parse("""let x = "" :: aStringList""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
     member this.``Quickfix for tuple instantiation without parentheses``() =
@@ -39,10 +39,10 @@ let x = (1, 2)"""
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``No error for tuple instantiation with parentheses``() =
+    member this.``No violation for tuple instantiation with parentheses``() =
         this.Parse("""
 module Program
 
 let x = (1, 2)""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

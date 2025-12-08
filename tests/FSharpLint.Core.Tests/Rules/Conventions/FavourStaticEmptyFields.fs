@@ -10,42 +10,42 @@ type TestConventionsFavourStaticEmptyFields() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourStaticEmptyFields.rule)
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError1() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation1() =
         this.Parse "let foo = \"\""
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError2() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation2() =
         this.Parse "System.Console.WriteLine \"\""
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError3() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation3() =
         this.Parse "let aList = []"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError4() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation4() =
         this.Parse "let aList = [ ]"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError5() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation5() =
         this.Parse "System.Console.WriteLine([].Length)"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError6() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation6() =
         this.Parse """
 let foo a =
     if a = 0 then
@@ -54,32 +54,32 @@ let foo a =
         ""
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError7() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation7() =
         this.Parse "let anArray = [||]"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError8() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation8() =
         this.Parse "let anArray = [| |]"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError9() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation9() =
         this.Parse "System.Console.WriteLine([||].Length)"
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "Array.empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "Array.empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError10() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation10() =
         this.Parse """
 type Person =
     {
@@ -89,11 +89,11 @@ type Person =
 
 { FirstName = "Foo"; Nicknames = [] } |> ignore"""
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "List.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "List.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError11() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation11() =
         this.Parse """
 type Person =
     {
@@ -102,11 +102,11 @@ type Person =
 
 { FirstName = "" } |> ignore"""
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldProduceError12() =
+    member this.FavourStaticEmptyFieldsShouldProduceViolation12() =
         this.Parse """
 type Person =
     {
@@ -115,59 +115,59 @@ type Person =
 
 { FirstName = fooGetFirstName "" } |> ignore"""
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationMsg.Contains "String.Empty")
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError1() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation1() =
         this.Parse "let bar = String.Empty"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError2() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation2() =
         this.Parse "let foo = \"My Name\""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError3() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation3() =
         this.Parse "System.Console.WriteLine System.String.Empty"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError4() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation4() =
         this.Parse "let aList = List.Empty"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError5() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation5() =
         this.Parse "System.Console.WriteLine(List.Empty.Length.ToString())"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError6() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation6() =
         this.Parse "let anArray = Array.empty"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError7() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation7() =
         this.Parse "System.Console.WriteLine(Array.empty.Length.ToString())"
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsShouldNotProduceError8() =
+    member this.FavourStaticEmptyFieldsShouldNotProduceViolation8() =
         this.Parse """
 match foo with
 | [] -> true
 | head::_ -> false"""
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.FavourStaticEmptyFieldsSuggestedFixForString() =
@@ -177,7 +177,7 @@ match foo with
         
         this.Parse source
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
         let result = this.ApplyQuickFix source
 
@@ -191,7 +191,7 @@ match foo with
         
         this.Parse source
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
         let result = this.ApplyQuickFix source
 
@@ -205,7 +205,7 @@ match foo with
         
         this.Parse source
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
         let result = this.ApplyQuickFix source
 

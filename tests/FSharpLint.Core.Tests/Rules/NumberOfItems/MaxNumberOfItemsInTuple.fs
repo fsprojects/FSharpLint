@@ -19,19 +19,19 @@ type Test(a,b,c,d,e,f) =
 let dog = Test(1,2,3,4,5,6)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/141
-    /// Note: we are just disabling all warnings for tuples in function applications
+    /// Note: we are just disabling all violations for tuples in function applications
     /// because in a lot of places the user won't have control over the definition
-    /// of the function - the definition of a function should be where the lint is warning.
+    /// of the function - the definition of a function should be where the linter is reporting.
     [<Test>]
-    member this.``Tuple with too many items in a functiona application must never issue a warning.``() =
+    member this.``Tuple with too many items in a functiona application must never issue a violation.``() =
         this.Parse """
 foo (1,2,3,4,5,6)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.SixTupleItemsExpressionConstructorWithNew() =
@@ -44,7 +44,7 @@ type Test(a,b,c,d,e,f) =
 let dog = new Test(1,2,3,4,5,6)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.SixTupleItemsExpressionCallingMethod() =
@@ -60,7 +60,7 @@ let dog =
     test.One(1,2,3,4,5,6)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.SixTupleItemsExpression() =
@@ -70,7 +70,7 @@ module Program
 let foo = (1, 2, 3, 4, 5, 6)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 26))
+        Assert.IsTrue(this.ViolationExistsAt(4, 26))
 
     [<Test>]
     member this.FiveTupleItemsExpression() =
@@ -80,4 +80,4 @@ module Program
 let foo = (1, 2, 3, 4, 5)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

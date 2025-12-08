@@ -5,17 +5,17 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Rules.Helper
 
 let private isIdentifierTooShort (identifier: string) =
     identifier.Length < 2 && not (identifier.StartsWith '_')
 
 let private checkIdentifierPart (identifier:Ident) (idText:string) =
-    let formatError errorName =
-        String.Format(Resources.GetString errorName, idText)
+    let formatViolationMsg msgKey =
+        String.Format(Resources.GetString msgKey, idText)
 
-    "RulesAvoidTooShortNamesError" |> formatError |> Array.singleton
+    "RulesAvoidTooShortNamesViolation" |> formatViolationMsg |> Array.singleton
 
 let private checkIdentifier (identifier:Ident) (idText:string) =
     if isIdentifierTooShort idText then

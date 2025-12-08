@@ -3,7 +3,7 @@ module FSharpLint.Rules.UsedUnderscorePrefixedElements
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharp.Compiler.CodeAnalysis

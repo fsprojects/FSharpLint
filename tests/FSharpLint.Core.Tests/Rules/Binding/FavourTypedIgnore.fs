@@ -9,36 +9,36 @@ type TestBindingFavourTypedIgnore() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourTypedIgnore.rule)
 
     [<Test>]
-    member this.``typed ignore has no error``() =
+    member this.``typed ignore causes no violation``() =
         this.Parse
             """
 Console.ReadLine() |> ignore<string>
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``typed ignore has no error (without pipe)``() =
+    member this.``typed ignore causes no violation (without pipe)``() =
         this.Parse
             """
  ignore<string>(Console.ReadLine())
  """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``untyped ignore has errors``() =
+    member this.``untyped ignore causes violation``() =
         this.Parse
             """
 Console.ReadLine()
 |> ignore
 """
 
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(2, 0))
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsAt(2, 0))
 
     [<Test>]
-    member this.``untyped ignore has errors (without pipe)``() =
+    member this.``untyped ignore causes violation (without pipe)``() =
         this.Parse
             """
 ignore(
@@ -46,5 +46,5 @@ ignore(
 )
 """
 
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsAt(2, 0))
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsAt(2, 0))

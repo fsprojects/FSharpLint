@@ -7,7 +7,7 @@ open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 
 type internal RecursiveFunctionInfo =
     {
@@ -45,7 +45,7 @@ let internal functionIsCalledInOneOf (checkInfo: FSharpCheckFileResults)
                 usage.Symbol.DisplayName = calleeName 
                 && ExpressionUtilities.rangeContainsOtherRange caller.Body.Range usage.Range))
 
-let private emitWarning (func: RecursiveFunctionInfo) =
+let private generateViolation (func: RecursiveFunctionInfo) =
     { Range = func.Range
       Message =
           String.Format(
@@ -62,7 +62,7 @@ let runner (args: AstNodeRuleParams) =
             |> List.choose 
                 (fun functionInfo -> 
                     if not (functionIsCalledInOneOf checkInfo functionInfo funcs) then
-                        emitWarning functionInfo |> Some
+                        generateViolation functionInfo |> Some
                     else
                         None)
             |> List.toArray

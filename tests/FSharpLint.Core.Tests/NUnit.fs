@@ -7,9 +7,9 @@ module Extensions =
 
     type Assert with
 
-        static member ErrorExistsAt(matcher:TestRuleBase.TestRuleBase, (startLine, startCol)) =
-            if not (matcher.ErrorExistsAt(startLine, startCol))
+        static member ViolationExistsAt(matcher:TestRuleBase.TestRuleBase, (startLine, startCol)) =
+            if not (matcher.ViolationExistsAt(startLine, startCol))
             then
-                match matcher.ErrorRanges with
-                | [] -> failwithf "Expected an error to exist at (%d, %d), but no error could be found at that location. There were no errors reported" startLine startCol
-                | knownErrors -> failwithf "Expected an error to exist at (%d, %d), but no error could be found at that location.  Current errors are:\n%A" startLine startCol knownErrors
+                match matcher.ViolationRanges with
+                | [] -> failwithf "Expected a violation to exist at (%d, %d), but none could be found at that location. There were no violation reported" startLine startCol
+                | knownViolations -> failwithf "Expected a violation to exist at (%d, %d), but no violation could be found at that location.  Current violations were:\n%A" startLine startCol knownViolations

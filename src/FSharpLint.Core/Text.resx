@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -130,10 +130,10 @@
     <value>Failed to resolve references.</value>
   </data>
   <data name="ConsoleFinished" xml:space="preserve">
-    <value>========== Summary: {0} warnings ==========</value>
+    <value>========== Summary: {0} rule violations ==========</value>
   </data>
   <data name="ConsoleFinishedFile" xml:space="preserve">
-    <value>========== Finished: {0} warnings ==========</value>
+    <value>========== Finished: {0} rule violations ==========</value>
   </data>
   <data name="ConsoleStartingFile" xml:space="preserve">
     <value>========== Linting {0} ==========</value>
@@ -144,7 +144,7 @@
   <data name="ConsoleProjectFileCouldNotBeFound" xml:space="preserve">
     <value>{0} could not be found on disk.</value>
   </data>
-  <data name="ConsoleRunTimeConfigError" xml:space="preserve">
+  <data name="ConsoleRunTimeConfigViolation" xml:space="preserve">
     <value>Failed while reading from config at run time, error: {0}.</value>
   </data>
   <data name="RulesFailwithfWithArgumentsMatchingFormatString" xml:space="preserve">
@@ -153,7 +153,7 @@
   <data name="RulesFailwithWithSingleArgument" xml:space="preserve">
     <value>`failwith` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesFavourIgnoreOverLetWildError" xml:space="preserve">
+  <data name="RulesFavourIgnoreOverLetWildViolation" xml:space="preserve">
     <value>The `ignore` function is usually favoured over `let _ = ...` when ignoring the result of an expression.</value>
   </data>
   <data name="RulesReimplementsFunction" xml:space="preserve">
@@ -165,70 +165,70 @@
   <data name="RulesHintSuggestion" xml:space="preserve">
     <value>`{0}`; suggestion: {1}.</value>
   </data>
-  <data name="RulesNamingConventionsCamelCaseError" xml:space="preserve">
+  <data name="RulesNamingConventionsCamelCaseViolation" xml:space="preserve">
     <value>Consider changing `{0}` to camelCase.</value>
   </data>
-  <data name="RulesNamingConventionsPascalCaseError" xml:space="preserve">
+  <data name="RulesNamingConventionsPascalCaseViolation" xml:space="preserve">
     <value>Consider changing `{0}` to PascalCase.</value>
   </data>
-  <data name="RulesNamingConventionsUnderscoreError" xml:space="preserve">
+  <data name="RulesNamingConventionsUnderscoreViolation" xml:space="preserve">
     <value>Consider changing `{0}` to remove any underscores.</value>
   </data>
-  <data name="RulesNamingConventionsNoInfixUnderscoreError" xml:space="preserve">
+  <data name="RulesNamingConventionsNoInfixUnderscoreViolation" xml:space="preserve">
     <value>Consider removing any leading or trailing underscore from `{0}`.</value>
   </data>
-  <data name="RulesNamingConventionsUppercaseError" xml:space="preserve">
+  <data name="RulesNamingConventionsUppercaseViolation" xml:space="preserve">
     <value>Consider changing `{0}` to uppercase.</value>
   </data>
-  <data name="RulesNamingConventionsLowercaseError" xml:space="preserve">
+  <data name="RulesNamingConventionsLowercaseViolation" xml:space="preserve">
     <value>Consider changing `{0}` to lowercase.</value>
   </data>
-  <data name="RulesAvoidTooShortNamesError" xml:space="preserve">
+  <data name="RulesAvoidTooShortNamesViolation" xml:space="preserve">
     <value>Consider using a longer name, as it is currently too short.</value>
   </data>
-  <data name="RulesNamingConventionsPrefixError" xml:space="preserve">
+  <data name="RulesNamingConventionsPrefixViolation" xml:space="preserve">
     <value>Consider changing `{0}` to be prefixed with `{1}`.</value>
   </data>
-  <data name="RulesNamingConventionsSuffixError" xml:space="preserve">
+  <data name="RulesNamingConventionsSuffixViolation" xml:space="preserve">
     <value>Consider changing `{0}` to be suffixed with `{1}`.</value>
   </data>
-  <data name="RulesNestedStatementsError" xml:space="preserve">
+  <data name="RulesNestedStatementsViolation" xml:space="preserve">
     <value>Code suggested not to be nested more deeply than a depth of {0}.</value>
   </data>
-  <data name="RulesNumberOfItemsBooleanConditionsError" xml:space="preserve">
+  <data name="RulesNumberOfItemsBooleanConditionsViolation" xml:space="preserve">
     <value>Conditions suggested to contain at most {0} boolean operators.</value>
   </data>
-  <data name="RulesNumberOfItemsClassMembersError" xml:space="preserve">
+  <data name="RulesNumberOfItemsClassMembersViolation" xml:space="preserve">
     <value>Class suggested to have a maximum of {0} members.</value>
   </data>
-  <data name="RulesNumberOfItemsFunctionError" xml:space="preserve">
+  <data name="RulesNumberOfItemsFunctionViolation" xml:space="preserve">
     <value>Functions suggested to have a maximum of {0} parameters.</value>
   </data>
-  <data name="RulesNumberOfItemsTupleError" xml:space="preserve">
+  <data name="RulesNumberOfItemsTupleViolation" xml:space="preserve">
     <value>Tuple suggested to have a maximum of {0} items.</value>
   </data>
   <data name="RulesRaiseWithSingleArgument" xml:space="preserve">
     <value>`raise` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesSourceLengthError" xml:space="preserve">
+  <data name="RulesSourceLengthViolation" xml:space="preserve">
     <value>{0} was {2} lines long, suggested to be less than {1} lines long.</value>
   </data>
-  <data name="RulesTypographyFileLengthError" xml:space="preserve">
+  <data name="RulesTypographyFileLengthViolation" xml:space="preserve">
     <value>File suggested to be less than {0} lines long.</value>
   </data>
-  <data name="RulesTypographyLineLengthError" xml:space="preserve">
+  <data name="RulesTypographyLineLengthViolation" xml:space="preserve">
     <value>Line suggested to be less than {0} characters long.</value>
   </data>
-  <data name="RulesTypographyTabCharacterError" xml:space="preserve">
+  <data name="RulesTypographyTabCharacterViolation" xml:space="preserve">
     <value>Consider replacing tab (`\t`) with spaces.</value>
   </data>
-  <data name="RulesTypographyTrailingLineError" xml:space="preserve">
+  <data name="RulesTypographyTrailingLineViolation" xml:space="preserve">
     <value>Found trailing whitespace line at end of file.</value>
   </data>
-  <data name="RulesTypographyTrailingWhitespaceError" xml:space="preserve">
+  <data name="RulesTypographyTrailingWhitespaceViolation" xml:space="preserve">
     <value>Found trailing whitespace at end of line.</value>
   </data>
-  <data name="RulesUselessBindingError" xml:space="preserve">
+  <data name="RulesUselessBindingViolation" xml:space="preserve">
     <value>Binding appears to have no purpose.</value>
   </data>
   <data name="RulesWildcardNamedWithAsPattern" xml:space="preserve">
@@ -243,11 +243,11 @@
   <data name="RulesNullArgWithSingleArgument" xml:space="preserve">
     <value>`nullArg` should have a single argument, further arguments will be ignored by the compiler.</value>
   </data>
-  <data name="RulesTupleOfWildcardsError" xml:space="preserve">
+  <data name="RulesTupleOfWildcardsViolation" xml:space="preserve">
     <value>A tuple of wildcards in a pattern can be replaced with a single wildcard. `{0}` can be replaced with `{1}`.</value>
   </data>
-  <data name="LintSourceError" xml:space="preserve">
-    <value>Error on line {0} starting at column {1}</value>
+  <data name="LintSourceViolation" xml:space="preserve">
+    <value>Violation on line {0} starting at column {1}</value>
   </data>
   <data name="RulesCanBeReplacedWithComposition" xml:space="preserve">
     <value>Lambda may be able to be replaced with composition. e.g. `fun x -&gt; x |&gt; isValid |&gt; not` could be replaced with `isValid &gt;&gt; not`.</value>
@@ -258,85 +258,85 @@
   <data name="RulesRedundantNewKeyword" xml:space="preserve">
     <value>Usage of `new` keyword here is redundant.</value>
   </data>
-  <data name="RulesFormattingPatternMatchClausesOnNewLineError" xml:space="preserve">
+  <data name="RulesFormattingPatternMatchClausesOnNewLineViolation" xml:space="preserve">
     <value>Each match clause should be placed on its own line.</value>
   </data>
-  <data name="RulesFormattingPatternMatchOrClausesOnNewLineError" xml:space="preserve">
+  <data name="RulesFormattingPatternMatchOrClausesOnNewLineViolation" xml:space="preserve">
     <value>Each 'or' match clause should be placed on its own line</value>
   </data>
-  <data name="RulesFormattingTupleCommaSpacingError" xml:space="preserve">
+  <data name="RulesFormattingTupleCommaSpacingViolation" xml:space="preserve">
     <value>Comma in tuple instantiation should be followed by single space.</value>
   </data>
-   <data name="RulesFormattingTupleIndentationError" xml:space="preserve">
+   <data name="RulesFormattingTupleIndentationViolation" xml:space="preserve">
     <value>Sub-expressions of tuple on different lines should have consistent indentation.</value>
   </data>
-  <data name="RulesFormattingTupleParenthesesError" xml:space="preserve">
+  <data name="RulesFormattingTupleParenthesesViolation" xml:space="preserve">
     <value>Use parentheses for tuple instantiation.</value>
   </data>
-  <data name="RulesFormattingTypedItemSpacingError" xml:space="preserve">
+  <data name="RulesFormattingTypedItemSpacingViolation" xml:space="preserve">
     <value>Expected {0} space(s) before and {1} space(s) after ':' in typed item.</value>
   </data>
-  <data name="RulesFormattingF#ArrayPostfixError" xml:space="preserve">
+  <data name="RulesFormattingF#ArrayPostfixViolation" xml:space="preserve">
     <value>Use special postfix syntax for F# type array.</value>
   </data>
-  <data name="RulesFormattingF#PostfixGenericError" xml:space="preserve">
+  <data name="RulesFormattingF#PostfixGenericViolation" xml:space="preserve">
     <value>Use postfix syntax for F# type {0}.</value>
   </data>
-  <data name="RulesFormattingF#ArrayPrefixError" xml:space="preserve">
+  <data name="RulesFormattingF#ArrayPrefixViolation" xml:space="preserve">
     <value>Use prefix syntax for generic type (array&lt;'Foo&gt;).</value>
   </data>
-  <data name="RulesFormattingGenericPrefixError" xml:space="preserve">
+  <data name="RulesFormattingGenericPrefixViolation" xml:space="preserve">
     <value>Use prefix syntax for generic type.</value>
   </data>
-  <data name="RulesFormattingPatternMatchClauseIndentationError" xml:space="preserve">
+  <data name="RulesFormattingPatternMatchClauseIndentationViolation" xml:space="preserve">
     <value>Match clauses should be in line with 'match' keyword.</value>
   </data>
-  <data name="RulesFormattingLambdaPatternMatchClauseIndentationError" xml:space="preserve">
+  <data name="RulesFormattingLambdaPatternMatchClauseIndentationViolation" xml:space="preserve">
     <value>Match clauses should be indented one level from 'function' keyword.</value>
   </data>
-  <data name="RulesFormattingPatternMatchClauseSameIndentationError" xml:space="preserve">
+  <data name="RulesFormattingPatternMatchClauseSameIndentationViolation" xml:space="preserve">
     <value>Match clauses should be at the same indentation level.</value>
   </data>
-  <data name="RulesFormattingMatchExpressionIndentationError" xml:space="preserve">
+  <data name="RulesFormattingMatchExpressionIndentationViolation" xml:space="preserve">
     <value>If RHS of pattern match case is on newline, it should be indented by one level.</value>
   </data>
-  <data name="RulesFormattingModuleDeclSpacingError" xml:space="preserve">
+  <data name="RulesFormattingModuleDeclSpacingViolation" xml:space="preserve">
     <value>Separate module declarations with 2 blank lines.</value>
   </data>
-  <data name="RulesFormattingClassMemberSpacingError" xml:space="preserve">
+  <data name="RulesFormattingClassMemberSpacingViolation" xml:space="preserve">
     <value>Class members should be separated by 1 blank line.</value>
   </data>
-  <data name="RulesFormattingUnionDefinitionIndentationError" xml:space="preserve">
+  <data name="RulesFormattingUnionDefinitionIndentationViolation" xml:space="preserve">
     <value>Union definition cases should be indented one level on a new line.</value>
   </data>
-  <data name="RulesFormattingUnionDefinitionSameIndentationError" xml:space="preserve">
+  <data name="RulesFormattingUnionDefinitionSameIndentationViolation" xml:space="preserve">
     <value>Union definition cases should be at the same indentation level.</value>
   </data>
-  <data name="RulesConventionsTopLevelNamespaceError" xml:space="preserve">
+  <data name="RulesConventionsTopLevelNamespaceViolation" xml:space="preserve">
     <value>Prefer namespaces at top level.</value>
   </data>
-  <data name="RulesTypographyIndentationError" xml:space="preserve">
+  <data name="RulesTypographyIndentationViolation" xml:space="preserve">
     <value>Indentation must use a multiple of {0} spaces.</value>
   </data>
-  <data name="RulesTypographyRecordFieldIndentationError" xml:space="preserve">
+  <data name="RulesTypographyRecordFieldIndentationViolation" xml:space="preserve">
     <value>Record fields should be aligned.</value>
   </data>
-  <data name="RulesTypographyOverridenIndentationError" xml:space="preserve">
+  <data name="RulesTypographyOverridenIndentationViolation" xml:space="preserve">
     <value>Invalid indentation.</value>
   </data>
-  <data name="RulesConventionsRecursiveAsyncFunctionError" xml:space="preserve">
+  <data name="RulesConventionsRecursiveAsyncFunctionViolation" xml:space="preserve">
     <value>Recursive async functions ending with a `do!` recursive call will leak memory; prefer `return!`.</value>
   </data>
-  <data name="RulesConventionsNoPartialFunctionsReplacementError" xml:space="preserve">
+  <data name="RulesConventionsNoPartialFunctionsReplacementViolation" xml:space="preserve">
     <value>Consider using '{0}' instead of partial function/method '{1}'.</value>
   </data>
-  <data name="RulesConventionsNoPartialFunctionsPatternMatchError" xml:space="preserve">
+  <data name="RulesConventionsNoPartialFunctionsPatternMatchViolation" xml:space="preserve">
     <value>Consider using pattern matching instead of partial function/method '{0}'.</value>
   </data>
-  <data name="RulesConventionsNoPartialFunctionsAdditionalError" xml:space="preserve">
+  <data name="RulesConventionsNoPartialFunctionsAdditionalViolation" xml:space="preserve">
     <value>Consider not using partial function '{0}'.</value>
   </data>
-  <data name="RulesCyclomaticComplexityError" xml:space="preserve">
+  <data name="RulesCyclomaticComplexityViolation" xml:space="preserve">
     <value>The cyclomatic complexity of this section is {0}, which exceeds the maximum suggested complexity of {1}.</value>
   </data>
   <data name="RulesFavourTypedIgnore" xml:space="preserve">
@@ -372,7 +372,7 @@
   <data name="RulesUnneededRecKeyword" xml:space="preserve">
     <value>The '{0}' function has a "rec" keyword, but it is not really recursive, consider removing it.</value>
   </data>
-  <data name="RulesFavourNonMutablePropertyInitializationError" xml:space="preserve">
+  <data name="RulesFavourNonMutablePropertyInitializationViolation" xml:space="preserve">
     <value>Consider using non-mutable property initialization.</value>
   </data>
   <data name="RulesEnsureTailCallDiagnosticsInRecursiveFunctions" xml:space="preserve">

@@ -21,7 +21,7 @@
     <Compile Include="Framework\HintParserTypes.fs" />
     <Compile Include="Framework\HintParserUtilities.fs" />
     <Compile Include="Framework/HintParser.fs" />
-    <Compile Include="Framework\Suggestion.fs" />
+    <Compile Include="Framework\Violation.fs" />
     <Compile Include="Framework\Ast.fs" />
     <Compile Include="Framework\AstInfo.fs" />
     <Compile Include="Framework\AbstractSyntaxArray.fs" />

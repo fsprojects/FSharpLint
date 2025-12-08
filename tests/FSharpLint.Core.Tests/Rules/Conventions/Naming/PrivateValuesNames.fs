@@ -25,7 +25,7 @@ let main =
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 9))
+        Assert.IsTrue(this.ViolationExistsAt(5, 9))
 
     [<Test>]
     member this.PrivateTupleIsPascalCase() =
@@ -35,7 +35,7 @@ module Program
 let private Cat, private dog = 1, 0
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+        Assert.IsTrue(this.ViolationExistsAt(4, 12))
 
     [<Test>]
     member this.PrivateFunctionNameIsPascalCase() =
@@ -45,7 +45,7 @@ module Program
 let private Main () = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+        Assert.IsTrue(this.ViolationExistsAt(4, 12))
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/103
     [<Test>]
@@ -59,7 +59,7 @@ let main =
     | _ -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.UnderscoreInMatchPatternIdent() =
@@ -72,7 +72,7 @@ let main =
     | _ -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine 6)
+        Assert.IsTrue(this.ViolationExistsOnLine 6)
 
     [<Test>]
     member this.VariablePatternMatchIsCamelCase() =
@@ -84,7 +84,7 @@ let main =
     | dog -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PatternMatchAsIsPascalCase() =
@@ -96,7 +96,7 @@ let main =
     | _ as Dog -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 11))
+        Assert.IsTrue(this.ViolationExistsAt(6, 11))
 
     [<Test>]
     member this.PatternMatchAsIsCamelCase() =
@@ -108,7 +108,7 @@ let main =
     | _ as dog -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FunctionNameNestedInBindingIsPascalCase() =
@@ -120,7 +120,7 @@ let main () =
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+        Assert.IsTrue(this.ViolationExistsAt(5, 8))
 
     [<Test>]
     member this.FunctionNameNestedInBindingIsCamelCase() =
@@ -132,7 +132,7 @@ let main () =
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.CamelCaseLetBindingInType() =
@@ -145,7 +145,7 @@ type Dog() =
     member this.Goat() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PascalCaseLetBindingInType() =
@@ -158,7 +158,7 @@ type Dog() =
     member this.Goat() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+        Assert.IsTrue(this.ViolationExistsAt(5, 8))
 
     [<Test>]
     member this.PascalCaseLetBindingInMethod() =
@@ -171,7 +171,7 @@ type Cat() =
         ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 12))
+        Assert.IsTrue(this.ViolationExistsAt(6, 12))
 
     [<Test>]
     member this.CamelCaseLetBindingInMethod() =
@@ -184,10 +184,10 @@ type Cat() =
         ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LiteralPatternMatchExpectNoErrors() =
+    member this.LiteralPatternMatchExpectNoViolations() =
         this.Parse """
 module Program
 
@@ -200,7 +200,7 @@ let main =
     | _ -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/191
     [<Test>]
@@ -213,7 +213,7 @@ let foo () =
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``Lower case international characters recognised by camelCase rule``() =
@@ -225,7 +225,7 @@ let foo () =
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FunctionParameterIsPascalCase() =
@@ -235,7 +235,7 @@ module Program
 let main Dog = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
     member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() =
@@ -263,7 +263,7 @@ let someFunc() =
     for i = 10 downto 1 do System.Console.Write(i)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ForLoopIdentifierIsPascalCase() =
@@ -274,7 +274,7 @@ let someFunc() =
     for I = 10 downto 1 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+        Assert.IsTrue(this.ViolationExistsAt(5, 8))
 
     [<Test>]
     member this.ForEachLoopIdentifierIsCamelCase() =
@@ -285,7 +285,7 @@ let someFunc() =
     for i in 1..10 do System.Console.Write(i)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ForEachLoopIdentifierIsPascalCase() =
@@ -296,10 +296,10 @@ let someFunc() =
     for I in 1..10 do System.Console.Write(I)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 8))
+        Assert.IsTrue(this.ViolationExistsAt(5, 8))
 
     [<Test>]
-    member this.UnionCaseInBindingContainingPascalCaseValueGeneratesWarning() =
+    member this.UnionCaseInBindingContainingPascalCaseValueGeneratesViolation() =
         this.Parse """
 module Program
 
@@ -308,10 +308,10 @@ type SingleCaseDU = SingleCaseDU of int
 let (SingleCaseDU MyInt) = (SingleCaseDU 5)
 """
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     [<Test>]
-    member this.ParameterUnionCaseContainingPascalCaseValueGeneratesWarning() =
+    member this.ParameterUnionCaseContainingPascalCaseValueGeneratesViolation() =
         this.Parse """
 module Program
 
@@ -324,7 +324,7 @@ let singleCaseDU = SingleCaseDU 5
 let result = extractInt singleCaseDU
 """
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     [<Test>]
     member this.PrivateVariableIsCamelCase() =
@@ -334,7 +334,7 @@ module Program
 let private cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PrivateVariableIsPascalCase() =
@@ -344,7 +344,7 @@ module Program
 let private Cat = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4,12))
+        Assert.IsTrue(this.ViolationExistsAt(4,12))
 
     [<Test>]
     member this.PublicVariableIsNotReported() =
@@ -354,7 +354,7 @@ module Program
 let Cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
 
     [<Test>]
@@ -365,7 +365,7 @@ module Program
 let public Cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.InternalVariableIsNotReported() =
@@ -375,4 +375,4 @@ module Program
 let internal Cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

@@ -22,7 +22,7 @@ module Program
 type Cat = int
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.TypeAbbreviationIsCamelCase() =
@@ -32,7 +32,7 @@ module Program
 type cat = int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.ClassNameIsPascalCase() =
@@ -43,7 +43,7 @@ type MyClass2() as this =
     member this.PrintMessage() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ClassNameIsCamelCase() =
@@ -54,7 +54,7 @@ type myClass2() as this =
     member this.PrintMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.UnionNameIsPascalCase() =
@@ -65,7 +65,7 @@ type Union =
 | Some
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.UnionNameIsCamelCase() =
@@ -76,7 +76,7 @@ type union =
 | Some
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.RecordNameIsPascalCase() =
@@ -86,7 +86,7 @@ module Program
 type Record = { Dog: int }
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.RecordNameIsCamelCase() =
@@ -96,7 +96,7 @@ module Program
 type record = { Dog: int }
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.DelegateNameIsPascalCase() =
@@ -106,7 +106,7 @@ module Program
 type Delegate2 = delegate of int * int -> int
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.DelegateNameIsCamelCase() =
@@ -116,7 +116,7 @@ module program
 type delegate2 = delegate of int * int -> int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.StructNameIsPascalCase() =
@@ -131,7 +131,7 @@ type Point2D =
     end
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.StructNameIsCamelCase() =
@@ -146,7 +146,7 @@ type point2D =
     end
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.TypeExtensionTypeIsCamelCase() =
@@ -160,7 +160,7 @@ type myClass with
     member this.Goat() = 200
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(7, 5))
+        Assert.IsFalse(this.ViolationExistsAt(7, 5))
 
     [<Test>]
     member this.TypeExtensionTypeIsPascalCase() =
@@ -174,7 +174,7 @@ type MyClass with
     member this.Goat() = 200
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PascalCaseTypeAbbreviationOfLiteral() =
@@ -187,7 +187,7 @@ type Abbreviation = LiteralAttribute
 let Dog = 6
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``Upper case international characters recognised by PascalCase rule``() =
@@ -197,7 +197,7 @@ module Program
 type Ścieżka = Ścieżka of string
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
 
     [<Test>]
@@ -243,7 +243,7 @@ type MyEnum =
 | EnumCase = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.EnumNameIsCamelCase() =
@@ -254,5 +254,5 @@ type myEnum =
 | EnumCase = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 

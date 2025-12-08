@@ -22,7 +22,7 @@ type TestConventionsNamespaceNames() =
 namespace Matt.Dog.Cat
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.NamespaceIsCamelCase() =
@@ -30,7 +30,7 @@ namespace Matt.Dog.Cat
 namespace matt.dog.cat
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(2, 10))
+        Assert.IsTrue(this.ViolationExistsAt(2, 10))
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/240
     [<Test>]
@@ -39,7 +39,7 @@ namespace matt.dog.cat
 type MyClass2() as this =
     member this.PrintMessage() = ()""", fileName = "3i-3.fsx")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/240
     [<Test>]
@@ -48,5 +48,5 @@ type MyClass2() as this =
 type MyClass2() as this =
     member this.PrintMessage() = ()""", fileName = "foo.3i-3.fsx")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 

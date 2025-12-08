@@ -29,7 +29,7 @@ match 4 with
 | Odd -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PatternFunctionValidPartialActivePattern() =
@@ -41,7 +41,7 @@ let (|Even|_|) = function
 | _ -> None
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ActivePatternContainsUnderscore() =
@@ -55,7 +55,7 @@ match 4 with
 | Odd -> ()
 """
 
-        Assert.That(this.ErrorExistsAt(4, 5), Is.True)
+        Assert.That(this.ViolationExistsAt(4, 5), Is.True)
 
     [<Test>]
     member this.ActivePatternDoesNotContainUnderscore() =
@@ -69,7 +69,7 @@ match 4 with
 | Odd -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PartialActivePatternContainsUnderscore() =
@@ -83,7 +83,7 @@ match 3 with
 | dog -> ()
 """
 
-        Assert.That(this.ErrorExistsAt(4, 5), Is.True)
+        Assert.That(this.ViolationExistsAt(4, 5), Is.True)
 
     [<Test>]
     member this.PartialActivePatternDoesNotContainUnderscore() =
@@ -97,15 +97,15 @@ match 3 with
 | dog -> ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/425
     [<Test>]
-    member this.NoWarningForMeasureType() =
+    member this.NoViolationForMeasureType() =
         this.Parse """
 type [<Measure>] kg
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
 

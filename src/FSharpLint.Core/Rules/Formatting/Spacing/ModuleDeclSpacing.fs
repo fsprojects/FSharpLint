@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
@@ -26,7 +26,7 @@ let checkModuleDeclSpacing (args:AstNodeRuleParams) synModuleOrNamespace =
             Some
                 {
                     Range = intermediateRange
-                    Message = Resources.GetString("RulesFormattingModuleDeclSpacingError")
+                    Message = Resources.GetString "RulesFormattingModuleDeclSpacingViolation"
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }

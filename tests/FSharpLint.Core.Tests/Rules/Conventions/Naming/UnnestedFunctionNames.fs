@@ -24,7 +24,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FunctionNameHasUnderscore() =
@@ -35,7 +35,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 8))
+        Assert.IsTrue(this.ViolationExistsAt(3, 8))
 
     [<Test>]
     member this.FunctionNameIsCamelCase() =
@@ -46,7 +46,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 8))
+        Assert.IsTrue(this.ViolationExistsAt(3, 8))
 
     [<Test>]
     member this.FunctionNameWithNoArgsIsCamelCase() =
@@ -57,7 +57,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 8))
+        Assert.IsTrue(this.ViolationExistsAt(3, 8))
 
     [<Test>]
     member this.FunctionNameWithNoArgsIsPascalCase() =
@@ -68,7 +68,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ValueNameWithNoArgsAndNoParenthesisIsCamelCase() =
@@ -80,7 +80,7 @@ module Program
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PrivateFunctionNameIsCamelCase() =
@@ -91,7 +91,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 16))
+        Assert.IsTrue(this.ViolationExistsAt(3, 16))
 
     [<Test>]
     member this.PublicFunctionNameIsCamelCase() =
@@ -102,7 +102,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(3, 15))
+        Assert.IsTrue(this.ViolationExistsAt(3, 15))
 
 
     [<Test>]
@@ -114,7 +114,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FunctionNameInTypeIsCamelCase() =
@@ -124,7 +124,7 @@ type MyClass(initX:int) =
     member this.method() = printf "x=%i" x
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 16))
+        Assert.IsTrue(this.ViolationExistsAt(4, 16))
 
     [<Test>]
     member this.FunctionNameInRecordIsCamelCase() =
@@ -136,7 +136,7 @@ type Record =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 16))
+        Assert.IsTrue(this.ViolationExistsAt(4, 16))
 
     [<Test>]
     member this.NestedFunctionNameIsCamelCase() =
@@ -150,7 +150,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.NestedFunctionNameInTypeIsCamelCase() =
@@ -164,7 +164,7 @@ type Record =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.UnnestedFunctionNameIsPascalCase() =
@@ -181,7 +181,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.UnnestedFunctionNameIsCamelCase() =
@@ -198,13 +198,13 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(8, 8))
+        Assert.IsTrue(this.ViolationExistsAt(8, 8))
 
     [<Test>]
-    member this.``Bindings that are not functions should not cause errors``() =
+    member this.``Bindings that are not functions should not cause violations``() =
         this.Parse """
 module Program =
     let BLUE_STATE = "blue"
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

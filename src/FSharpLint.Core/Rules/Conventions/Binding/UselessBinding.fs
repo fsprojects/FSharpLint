@@ -2,7 +2,7 @@ module FSharpLint.Rules.UselessBinding
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.CodeAnalysis
@@ -41,7 +41,7 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
         |> Option.bind (fun bindingIdent -> matchingIdentifier bindingIdent expr)
         |> Option.map (fun ident ->
             { Range = range
-              Message = Resources.GetString("RulesUselessBindingError")
+              Message = Resources.GetString "RulesUselessBindingViolation"
               SuggestedFix = Some (lazy(maybeSuggestedFix))
               TypeChecks = [ checkNotMutable ident ] })
         |> Option.toArray

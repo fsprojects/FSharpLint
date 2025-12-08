@@ -10,115 +10,115 @@ type TestFormattingHybridTypePrefixing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Hybrid })
 
     [<Test>]
-    member this.``Error for F# List type prefix syntax``() =
+    member this.``Violation for F# List type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = list<int>
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``No error for F# List type postfix syntax``() =
+    member this.``No violation for F# List type postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int list
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for F# Option type prefix syntax``() =
+    member this.``Violation for F# Option type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = Option<int>
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``No error for F# Option type postfix syntax``() =
+    member this.``No violation for F# Option type postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int option
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for F# ref type prefix syntax``() =
+    member this.``Violation for F# ref type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = ref<int>
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``No error for F# ref type postfix syntax``() =
+    member this.``No violation for F# ref type postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int ref
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for F# array type prefix syntax``() =
+    member this.``Violation for F# array type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = array<int>
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``Error for F# array type standard postfix syntax``() =
+    member this.``Violation for F# array type standard postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int array
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
-        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use special postfix syntax for F# type array.", 4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
+        Assert.IsTrue (this.ViolationWithMessageExistsAt("Use special postfix syntax for F# type array.", 4, 9))
 
     [<Test>]
-    member this.``No error for F# array type special postfix syntax``() =
+    member this.``No violation for F# array type special postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int []
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for generic type postfix syntax``() =
+    member this.``Violation for generic type postfix syntax``() =
         this.Parse """
 module Program
 
 type X = int Generic
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``No error for generic type prefix syntax``() =
+    member this.``No violation for generic type prefix syntax``() =
         this.Parse """
 module Program
 
 type X = Generic<int>
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
     member this.``Quickfix for F# List type``() =
@@ -244,118 +244,118 @@ type TestFormattingAlwaysTypePrefixing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Always })
 
     [<Test>]
-    member this.``Error for generic type postfix syntax (like hybrid)``() =
+    member this.``Violation for generic type postfix syntax (like hybrid)``() =
         this.Parse """
 module Program
 
 type X = int Generic
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``No error for generic type prefix syntax (like hybrid)``() =
+    member this.``No violation for generic type prefix syntax (like hybrid)``() =
         this.Parse """
 module Program
 
 type X = Generic<int>
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``No error for F# Option type prefix syntax``() =
+    member this.``No violation for F# Option type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = Option<int>
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``Error for F# Option type postfix syntax``() =
+    member this.``Violation for F# Option type postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int option
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``No error for F# array type prefix syntax``() =
+    member this.``No violation for F# array type prefix syntax``() =
         this.Parse """
 module Program
 
 type T = array<int>
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``Error for F# array type standard postfix syntax``() =
+    member this.``Violation for F# array type standard postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int array
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use prefix syntax for generic type.", 4, 9))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationWithMessageExistsAt("Use prefix syntax for generic type.", 4, 9))
 
     [<Test>]
-    member this.``Error for F# array type special postfix syntax``() =
+    member this.``Violation for F# array type special postfix syntax``() =
         this.Parse """
 module Program
 
 type T = int []
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue (this.ErrorWithMessageExistsAt("Use prefix syntax for generic type (array<'Foo>).", 4, 9))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue (this.ViolationWithMessageExistsAt("Use prefix syntax for generic type (array<'Foo>).", 4, 9))
 
 [<TestFixture>]
 type TestFormattingNeverTypePrefixing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypePrefixing.rule { Config.Mode = Mode.Never })
 
     [<Test>]
-    member this.``Error for F# Option type prefix syntax (like hybrid)``() =
+    member this.``Violation for F# Option type prefix syntax (like hybrid)``() =
         this.Parse """
 module Program
 
 type T = Option<int>
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.``No error for F# Option type postfix syntax (like hybrid)``() =
+    member this.``No violation for F# Option type postfix syntax (like hybrid)``() =
         this.Parse """
 module Program
 
 type T = int option
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``No error for generic type postfix syntax (unlike any other mode)``() =
+    member this.``No violation for generic type postfix syntax (unlike any other mode)``() =
         this.Parse """
 module Program
 
 type X = int Generic
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``Error for generic type prefix syntax (unlike any other mode)``() =
+    member this.``Violation for generic type prefix syntax (unlike any other mode)``() =
         this.Parse """
 module Program
 
 type X = Generic<int>
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 

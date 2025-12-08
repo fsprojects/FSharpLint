@@ -153,13 +153,13 @@ type TestConventionsCyclomaticComplexity() =
     [<TestCaseSource(nameof(TestConventionsCyclomaticComplexity.AtMaxComplexityTestCasesSource))>]
     member this.EnsureNoErrorWhenComplexityBelowThreshold(code) =
         this.Parse code
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     /// Verifies that flags are raised on source code that has cyclomatic complexity > maxComplexity.
     [<TestCaseSource(nameof(TestConventionsCyclomaticComplexity.FailureCasesSource))>]
     member this.EnsureErrorWhenComplexityExceedsThreshold(code, errorLocation) =
         this.Parse code
-        Assert.IsTrue(this.ErrorExistsAt(errorLocation))
+        Assert.IsTrue(this.ViolationExistsAt(errorLocation))
 
     /// Verifies that an error is raised on a match expression which has multiple boolean operator conditions in multiple when clauses.
     [<Test>]
@@ -168,7 +168,7 @@ type TestConventionsCyclomaticComplexity() =
 let f() =
 {makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity + 1)}"""
         this.Parse code
-        Assert.AreEqual(1, this.ErrorRanges.Length)
+        Assert.AreEqual(1, this.ViolationRanges.Length)
 
     /// Verifies that an error is raised on a single match clause with multiple logical operators.
     [<Test>]
@@ -179,7 +179,7 @@ let f() =
     | x when x = "1" {[2..MaxComplexity+1] |> List.map (sprintf "|| x = \"%d\"") |> String.concat " "} -> ()
     | _ -> ()"""
         this.Parse code
-        Assert.AreEqual(1, this.ErrorRanges.Length)
+        Assert.AreEqual(1, this.ViolationRanges.Length)
 
     /// Verifies that no cyclomatic complexity error is flagged when boolean operators are raised outside of conditional branching contexts (sanity check).
     [<Test>]
@@ -189,7 +189,7 @@ let f() =
         let t = true {String.replicate (MaxComplexity+1) "|| false "}
         ()"""
         this.Parse code
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     /// Verifies that the cyclomatic complexity of functions is independent, by checking that a snippet of code with two functions, each with a complexity lower than the threshold but with a sum complexity greater than the threshold, does not flag an error.
     [<Test>]
@@ -200,7 +200,7 @@ let f() =
     let g() =
 {makeMatchSnippetWithLogicalOperatorsInWhenClause (MaxComplexity / 2) |> indent 8}"""
         this.Parse code
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     /// Verifies that the cyclomatic complexity is calculated on functions independently by checking that a function that comes after a function with a cyclomatic complexity that is flagged as too high need not be flagged.
     [<Test>]
@@ -211,8 +211,8 @@ let f() =
 let g() =
 {makeMatchSnippet MaxComplexity |> indent 4}"""
         this.Parse code
-        Assert.AreEqual(1, this.ErrorRanges.Length)
-        Assert.IsTrue(this.ErrorExistsAt(2, 4))
+        Assert.AreEqual(1, this.ViolationRanges.Length)
+        Assert.IsTrue(this.ViolationExistsAt(2, 4))
 
     /// Verifies that the cyclomatic complexity of nested functions are calculated independently by checking that evaluation of multiple nested functions each with a cyclomatic complexity equal to maxComplexity (so that the sum of their complexities is greater than maxComplexity) does not result in a flag.
     [<Test>]
@@ -225,7 +225,7 @@ let f() =
 {makeMatchSnippet MaxComplexity |> indent 8}
     ()"""
         this.Parse code
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
 
     /// Verifies that the cyclomatic complexity is calculated on nested functions independently by checking that a nested function that comes after another nested function with a cyclomatic complexity that is flagged as too high need not be flagged.
@@ -239,7 +239,7 @@ let f() =
 {makeMatchSnippet MaxComplexity |> indent 8}
 {makeMatchSnippet (MaxComplexity+1) |> indent 4}"""
         this.Parse code
-        Assert.AreEqual(2, this.ErrorRanges.Length)
+        Assert.AreEqual(2, this.ViolationRanges.Length)
 
     /// Verifies that the multiple messages are not provided for a single function.
     [<Test>]
@@ -254,4 +254,4 @@ let f() =
 let f (str: string) =
     match str with""" + NewLine + matchClauses
         this.Parse code
-        Assert.AreEqual(1, this.ErrorRanges.Length)
+        Assert.AreEqual(1, this.ViolationRanges.Length)

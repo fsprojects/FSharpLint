@@ -23,7 +23,7 @@ type IPrintable =
     abstract member Print : unit -> unit
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/100
     /// (static classes were thought to be interfaces)
@@ -36,7 +36,7 @@ type Printable =
     static member Print() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for https://github.com/ionide/ionide-vscode-fsharp/issues/153
     /// (type aliases were thought to be interfaces)
@@ -48,7 +48,7 @@ module Program
 type Matrix = int[,]
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.InterfaceNameDoesNotBeginWithI() =
@@ -59,7 +59,7 @@ type Printable =
     abstract member Print : unit -> unit
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.AbstractClassNameDoesNotBeginWithI() =
@@ -71,7 +71,7 @@ type Printable() =
     abstract member Print : unit -> unit
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``Quick fix for prefixes adds missing prefix to identifier.``() =

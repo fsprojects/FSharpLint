@@ -2,7 +2,7 @@ module FSharpLint.Rules.TrailingNewLineInFile
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Text
 
@@ -12,7 +12,7 @@ let checkTrailingNewLineInFile (args:LineRuleParams) =
         Array.singleton
             {
                 Range = Range.mkRange "" pos pos
-                Message = Resources.GetString("RulesTypographyTrailingLineError")
+                Message = Resources.GetString "RulesTypographyTrailingLineViolation"
                 SuggestedFix = None
                 TypeChecks = List.Empty
             }

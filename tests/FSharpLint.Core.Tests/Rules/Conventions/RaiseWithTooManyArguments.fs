@@ -16,7 +16,7 @@ module Program
 failwith ""
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.FailwithWithExtraArgument() =
@@ -26,7 +26,7 @@ module Program
 failwith "" ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.FailwithWithMultipleExtraArguments() =
@@ -36,7 +36,7 @@ module Program
 failwith "" "" "" ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.FailwithWithExtraArgumentWithRightPipe() =
@@ -46,7 +46,7 @@ module Program
 "" |> failwith ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
 [<TestFixture>]
 type TestConventionsRaiseWithSingleArg() =
@@ -60,7 +60,7 @@ module Program
 raise (System.ArgumentException("Divisor cannot be zero!"))
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.RaiseWithExtraArgument() =
@@ -70,7 +70,7 @@ module Program
 raise (System.ArgumentException("Divisor cannot be zero!")) ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
 [<TestFixture>]
 type TestConventionsFailwithfWithArugmentMatchingFormatString() =
@@ -84,7 +84,7 @@ module Program
 failwithf "%d %s" 4 "dog"
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.FailwithfWithExtraArgument() =
@@ -94,7 +94,7 @@ module Program
 failwithf "%d %s" 4 "dog" 5
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.FailwithfWithEscapedFormatAndWithExtraArgument() =
@@ -104,7 +104,7 @@ module Program
 failwithf "%d %% %s" 4 "dog" 5
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
 [<TestFixture>]
 type TestConventionsNullArgWithSingleArg() =
@@ -118,7 +118,7 @@ module Program
 nullArg ""
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.NullArgWithExtraArgument() =
@@ -128,7 +128,7 @@ module Program
 nullArg "" ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
 [<TestFixture>]
 type TestConventionsInvalidOpWithSingleArg() =
@@ -142,7 +142,7 @@ module Program
 invalidOp ""
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.InvalidOpWithExtraArgument() =
@@ -152,7 +152,7 @@ module Program
 invalidOp "" ""
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))
 
 [<TestFixture>]
 type TestConventionsInvalidArgWithTwoArguments() =
@@ -166,7 +166,7 @@ module Program
 invalidArg "month" "Expected value to be between 1 and 12"
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 0))
+        Assert.IsFalse(this.ViolationExistsAt(4, 0))
 
     [<Test>]
     member this.InvalidArgWithExtraArgument() =
@@ -176,4 +176,4 @@ module Program
 invalidArg "month" "Expected value to be between 1 and 12" "some other arg"
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 0))
+        Assert.IsTrue(this.ViolationExistsAt(4, 0))

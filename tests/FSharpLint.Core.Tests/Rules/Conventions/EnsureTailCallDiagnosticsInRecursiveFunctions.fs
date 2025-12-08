@@ -9,7 +9,7 @@ type TestEnsureTailCallDiagnosticsInRecursiveFunctions() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(EnsureTailCallDiagnosticsInRecursiveFunctions.rule)
 
     [<Test>]
-    member this.``Should error when function is recursive, but has no [<TailCall>] attribute``() =
+    member this.``Should give violation when function is recursive, but has no [<TailCall>] attribute``() =
         this.Parse """
 let rec Foo someParam =
     if someParam then
@@ -18,10 +18,10 @@ let rec Foo someParam =
         ()
 """
 
-        Assert.IsTrue <| this.ErrorExistsAt(2, 8)
+        Assert.IsTrue <| this.ViolationExistsAt(2, 8)
 
     [<Test>]
-    member this.``Should not error when function is recursive and has [<TailCall>] attribute``() =
+    member this.``Should not give violation when function is recursive and has [<TailCall>] attribute``() =
         this.Parse """
 [<TailCall>]
 let rec Foo someParam =
@@ -31,10 +31,10 @@ let rec Foo someParam =
         ()
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``Should not error when function is defined with rec keyword but is not recursive``() =
+    member this.``Should not give violation when function is defined with rec keyword but is not recursive``() =
         this.Parse """
 let rec Foo someParam =
     ()
@@ -43,10 +43,10 @@ module Bar =
     let Foo = 0
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.``Should error when functions are mutually recursive, but one of them has no [<TailCall>] attribute``() =
+    member this.``Should give violation when functions are mutually recursive, but one of them has no [<TailCall>] attribute``() =
         this.Parse """
 [<TailCall>]
 let rec Foo someParam =
@@ -58,10 +58,10 @@ and Bar () =
     Foo true
 """
         
-        Assert.IsTrue <| this.ErrorExistsAt(8, 4)
+        Assert.IsTrue <| this.ViolationExistsAt(8, 4)
 
     [<Test>]
-    member this.``Should not error when functions are mutually recursive, and both of them have [<TailCall>] attribute``() =
+    member this.``Should not give violation when functions are mutually recursive, and both of them have [<TailCall>] attribute``() =
         this.Parse """
 [<TailCall>]
 let rec Foo someParam =
@@ -73,4 +73,4 @@ and [<TailCall>] Bar () =
     Foo true
 """
         
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist

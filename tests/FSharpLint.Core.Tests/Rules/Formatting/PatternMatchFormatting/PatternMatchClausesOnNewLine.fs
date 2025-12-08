@@ -9,17 +9,17 @@ type TestFormattingPatternMatchClausesOnNewLine() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClausesOnNewLine.rule)
 
         [<Test>]
-    member this.``Error for pattern match clauses on same line``() =
+    member this.``Violation for pattern match clauses on same line``() =
         this.Parse("""
 module Program
 
 match 1 with
 | 1 -> 1 | 2 -> 2""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 11))
+        Assert.IsTrue(this.ViolationExistsAt(5, 11))
 
     [<Test>]
-    member this.``No error for pattern match clauses on different lines``() =
+    member this.``No violation for pattern match clauses on different lines``() =
         this.Parse("""
 module Program
 
@@ -27,10 +27,10 @@ match 1 with
 | 1 -> 1
 | 2 -> 2""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for exception match clauses on same line``() =
+    member this.``Violation for exception match clauses on same line``() =
         this.Parse("""
 module Program
 
@@ -39,10 +39,10 @@ try
 with
 | :? System.DivideByZeroException -> 1 | :? System.Exception -> 2 """)
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 41))
+        Assert.IsTrue(this.ViolationExistsAt(7, 41))
 
     [<Test>]
-    member this.``No error for exception match clauses on same line``() =
+    member this.``No violation for exception match clauses on same line``() =
         this.Parse("""
 module Program
 
@@ -52,5 +52,5 @@ with
 | :? System.DivideByZeroException -> 1
 | :? System.Exception -> 2 """)
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 

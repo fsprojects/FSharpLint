@@ -4,7 +4,7 @@ open System
 open System.Linq
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.CodeAnalysis
@@ -91,7 +91,7 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
     elif List.contains identifier config.AdditionalPartials then
         Some {
             Range = range
-            Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
+            Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsAdditionalViolation", identifier)
             SuggestedFix = None
             TypeChecks = List.Empty
         }
@@ -102,14 +102,14 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
             | PatternMatch ->
                 {
                     Range = range
-                    Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
+                    Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchViolation", identifier)
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }
             | Function replacementFunction ->
                 {
                     Range = range
-                    Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
+                    Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementViolation", replacementFunction, identifier)
                     SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
                     TypeChecks = List.Empty
                 })
@@ -247,7 +247,7 @@ let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType)
         )
     | None -> None
 
-let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
+let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<ViolationDetails>) =
     let typeChecks =
         let map (replacement: string * option<string> * string * Replacement) =
             match replacement with
@@ -299,7 +299,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                                         Message =
                                             String.Format(
                                                 Resources.GetString
-                                                    "RulesConventionsNoPartialFunctionsPatternMatchError",
+                                                    "RulesConventionsNoPartialFunctionsPatternMatchViolation",
                                                 fullyQualifiedInstanceMember
                                             )
                                         SuggestedFix = None
@@ -311,7 +311,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                                         Range = range
                                         Message =
                                             String.Format(
-                                                Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
+                                                Resources.GetString "RulesConventionsNoPartialFunctionsReplacementViolation",
                                                 replacementFunctionName,
                                                 fullyQualifiedInstanceMember
                                             )
@@ -333,7 +333,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                 | _ -> None
 
         List.map map partialInstanceMemberIdentifiers
-    match List.tryFind(fun (typeCheck:Option<WarningDetails>) -> typeCheck.IsSome) typeChecks with
+    match List.tryFind(fun (typeCheck:Option<ViolationDetails>) -> typeCheck.IsSome) typeChecks with
     | None -> None
     | Some instanceMember -> instanceMember
 
@@ -341,7 +341,7 @@ let private checkMemberCallOnExpression
     (checkFile: FSharpCheckFileResults) 
     (flieContent: string) 
     (range: Range) 
-    (originalRange: Range): array<WarningDetails> =
+    (originalRange: Range): array<ViolationDetails> =
     match getTypedExpressionForRange checkFile range with
     | Some expression ->
         let choose (fullyQualifiedInstanceMember: string) (replacementStrategy: Replacement) =
@@ -363,7 +363,7 @@ let private checkMemberCallOnExpression
                             Range = originalRange
                             Message =
                                 String.Format(
-                                    Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchError",
+                                    Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchViolation",
                                     fullyQualifiedInstanceMember
                                 )
                             SuggestedFix = None
@@ -375,7 +375,7 @@ let private checkMemberCallOnExpression
                             Range = originalRange
                             Message =
                                 String.Format(
-                                    Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
+                                    Resources.GetString "RulesConventionsNoPartialFunctionsReplacementViolation",
                                     replacementFunctionName,
                                     fullyQualifiedInstanceMember
                                 )
@@ -415,8 +415,8 @@ let private runner (config:Config) (args:AstNodeRuleParams) =
             let lineText = args.Lines.[range.EndLine - 1]
             let nonStaticInstanceMemberTypeCheckResult = isNonStaticInstanceMemberCall checkInfo identifier lineText range
             match nonStaticInstanceMemberTypeCheckResult with
-            | Some warningDetails ->
-                Array.singleton warningDetails
+            | Some violationDetails ->
+                Array.singleton violationDetails
             | _ -> Array.Empty()
     | (Ast.Expression(SynExpr.DotGet(expr, _, SynLongIdent(_identifiers, _, _), _range)), Some checkInfo) ->
         let originalRange = expr.Range

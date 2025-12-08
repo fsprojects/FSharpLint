@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
@@ -29,7 +29,7 @@ let checkClassMemberSpacing (args:AstNodeRuleParams) (members:SynMemberDefns) =
             Some
                 {
                     Range = intermediateRange
-                    Message = Resources.GetString("RulesFormattingClassMemberSpacingError")
+                    Message = Resources.GetString "RulesFormattingClassMemberSpacingViolation"
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }

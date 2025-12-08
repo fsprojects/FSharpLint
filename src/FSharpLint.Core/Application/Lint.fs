@@ -16,6 +16,7 @@ open FSharpLint.Core
 open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
 open FSharpLint.Framework.Rules
+open FSharpLint.Framework.Violation
 open FSharpLint.Rules
 
 /// Provides an API to manage/load FSharpLint configuration files.
@@ -77,7 +78,7 @@ module Lint =
                 | FailedToLoadConfig message ->
                     String.Format(Resources.GetString("ConsoleFailedToLoadConfig"), message)
                 | RunTimeConfigError error ->
-                    String.Format(Resources.GetString("ConsoleRunTimeConfigError"), error)
+                    String.Format(Resources.GetString "ConsoleRunTimeConfigViolation", error)
                 | FailedToParseFile failure ->
                     $"Lint failed to parse a file. Failed with: {getParseFailureReason failure}"
                 | FailedToParseFilesInProject failures ->
@@ -96,7 +97,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string * Suggestion.LintWarning list
+        | ReachedEnd of string * list<LintViolation>
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -111,7 +112,7 @@ module Lint =
     [<NoEquality; NoComparison>]
     type LintInfo =
         { CancellationToken:CancellationToken option
-          ErrorReceived:Suggestion.LintWarning -> unit
+          ErrorReceived:LintViolation -> unit
           ReportLinterProgress:ProjectProgress -> unit
           Configuration:Configuration.Configuration }
 
@@ -220,15 +221,15 @@ module Lint =
     let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
-        let fileWarnings = ResizeArray()
+        let fileViolations = ResizeArray()
 
-        let suggest (warning:Suggestion.LintWarning) =
-            lintInfo.ErrorReceived warning
-            fileWarnings.Add warning
+        let suggest (violation: LintViolation) =
+            lintInfo.ErrorReceived violation
+            fileViolations.Add violation
 
-        let trySuggest (suggestion:Suggestion.LintWarning) =
-            if suggestion.Details.TypeChecks.IsEmpty then suggest suggestion
-            else suggestionsRequiringTypeChecks.Push suggestion
+        let trySuggest (violation: LintViolation) =
+            if violation.Details.TypeChecks.IsEmpty then suggest violation
+            else suggestionsRequiringTypeChecks.Push violation
 
         Starting(fileInfo.File) |> lintInfo.ReportLinterProgress
 
@@ -279,9 +280,9 @@ module Lint =
 
             [| lineSuggestions; astNodeSuggestions |]
             |> Array.concat
-            |> Array.filter (fun warning ->
-                let line = warning.Details.Range.StartLine
-                Suppression.isSuppressed warning.RuleName line suppressionInfo |> not)
+            |> Array.filter (fun violation ->
+                let line = violation.Details.Range.StartLine
+                Suppression.isSuppressed violation.RuleName line suppressionInfo |> not)
             |> Array.iter trySuggest
 
             if cancelHasNotBeenRequested () then
@@ -296,9 +297,9 @@ module Lint =
                         (true, typeChecks)
                         ||> List.fold (fun acc cur -> acc && cur())
 
-                    let typeCheckSuggestion (suggestion:Suggestion.LintWarning) =
-                        if typeChecksSuccessful suggestion.Details.TypeChecks
-                        then Some suggestion
+                    let typeCheckSuggestion (violation: LintViolation) =
+                        if typeChecksSuccessful violation.Details.TypeChecks
+                        then Some violation
                         else None
 
                     suggestionsRequiringTypeChecks
@@ -309,7 +310,7 @@ module Lint =
         with
         | exn -> Failed(fileInfo.File, exn) |> lintInfo.ReportLinterProgress
 
-        ReachedEnd(fileInfo.File, Seq.toList fileWarnings) |> lintInfo.ReportLinterProgress
+        ReachedEnd(fileInfo.File, Seq.toList fileViolations) |> lintInfo.ReportLinterProgress
 
     let private runProcess (workingDir:string) (exePath:string) (args:string) =
         let psi = 
@@ -369,10 +370,10 @@ module Lint =
     /// Result of running the linter.
     [<RequireQualifiedAccess; NoEquality; NoComparison>]
     type LintResult =
-        | Success of Suggestion.LintWarning list
+        | Success of list<LintViolation>
         | Failure of LintFailure
 
-        member this.TryGetSuccess([<Out>] success:byref<Suggestion.LintWarning list>) =
+        member this.TryGetSuccess([<Out>] success:byref<list<LintViolation>>) =
             match this with
             | Success value -> success <- value; true
             | _ -> false
@@ -398,14 +399,14 @@ module Lint =
         /// You can also explicitly specify the default configuration.
         Configuration:ConfigurationParam
         /// This function will be called every time the linter finds a broken rule.
-        ReceivedWarning:(Suggestion.LintWarning -> unit) option
+        ReceivedViolation: (LintViolation -> unit) option
         /// This function will be called any time the linter progress changes for a project.
         ReportLinterProgress:(ProjectProgress -> unit) option
     } with
         static member Default = {
             OptionalLintParameters.CancellationToken = None
             Configuration = Default
-            ReceivedWarning = None
+            ReceivedViolation = None
             ReportLinterProgress = None
         }
 
@@ -446,16 +447,16 @@ module Lint =
     let lintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         if IO.File.Exists projectFilePath then
             let projectFilePath = Path.GetFullPath projectFilePath
-            let lintWarnings = LinkedList<Suggestion.LintWarning>()
+            let lintViolations = LinkedList<LintViolation>()
 
             match getConfig optionalParams.Configuration with
             | Ok config ->
                 let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
 
-                let warningReceived (warning:Suggestion.LintWarning) =
-                    lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
+                let violationReceived (violation: LintViolation) =
+                    lintViolations.AddLast violation |> ignore<LinkedListNode<LintViolation>>
 
-                    Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
+                    Option.iter (fun func -> func violation) optionalParams.ReceivedViolation
 
                 let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
@@ -463,7 +464,7 @@ module Lint =
                     let lintInformation =
                         { Configuration = config
                           CancellationToken = optionalParams.CancellationToken
-                          ErrorReceived = warningReceived
+                          ErrorReceived = violationReceived
                           ReportLinterProgress = projectProgress }
 
                     let isIgnoredFile filePath =
@@ -492,7 +493,7 @@ module Lint =
                 match getProjectInfo projectFilePath toolsPath with
                 | Ok projectOptions ->
                     match parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
-                    | Success _ -> lintWarnings |> Seq.toList |> LintResult.Success
+                    | Success _ -> lintViolations |> Seq.toList |> LintResult.Success
                     | Failure lintFailure -> LintResult.Failure lintFailure
                 | Error error ->
                     MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
@@ -537,8 +538,8 @@ module Lint =
                         |> Array.map (fun projectFilePath -> lintProject optionalParams projectFilePath toolsPath)
                         |> Array.fold (fun (successes, failures) result ->
                             match result with
-                            | LintResult.Success warnings ->
-                                (List.append warnings successes, failures)
+                            | LintResult.Success violations ->
+                                (List.append violations successes, failures)
                             | LintResult.Failure err ->
                                 (successes, err :: failures)) (List.Empty, List.Empty)
 
@@ -560,16 +561,16 @@ module Lint =
     let lintParsedSource optionalParams parsedFileInfo =
         match getConfig optionalParams.Configuration with
         | Ok config ->
-            let lintWarnings = LinkedList<Suggestion.LintWarning>()
+            let lintViolations = LinkedList<LintViolation>()
 
-            let warningReceived (warning:Suggestion.LintWarning) =
-                lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
+            let violationReceived (violation: LintViolation) =
+                lintViolations.AddLast violation |> ignore<LinkedListNode<LintViolation>>
 
-                Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
+                Option.iter (fun func -> func violation) optionalParams.ReceivedViolation
             let lintInformation =
                 { Configuration = config
                   CancellationToken = optionalParams.CancellationToken
-                  ErrorReceived = warningReceived
+                  ErrorReceived = violationReceived
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
@@ -580,7 +581,7 @@ module Lint =
 
             lint lintInformation parsedFileInfo
 
-            lintWarnings |> Seq.toList |> LintResult.Success
+            lintViolations |> Seq.toList |> LintResult.Success
         | Error err ->
             LintResult.Failure (RunTimeConfigError err)
 
@@ -608,17 +609,17 @@ module Lint =
     let lintParsedFile (optionalParams:OptionalLintParameters) (parsedFileInfo:ParsedFileInformation) (filePath:string) =
         match getConfig optionalParams.Configuration with
         | Ok config ->
-            let lintWarnings = LinkedList<Suggestion.LintWarning>()
+            let lintViolations = LinkedList<LintViolation>()
 
-            let warningReceived (warning:Suggestion.LintWarning) =
-                lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
+            let violationReceived (violation: LintViolation) =
+                lintViolations.AddLast violation |> ignore<LinkedListNode<LintViolation>>
 
-                Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
+                Option.iter (fun func -> func violation) optionalParams.ReceivedViolation
 
             let lintInformation =
                 { Configuration = config
                   CancellationToken = optionalParams.CancellationToken
-                  ErrorReceived = warningReceived
+                  ErrorReceived = violationReceived
                   ReportLinterProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress }
 
             let parsedFileInfo =
@@ -629,7 +630,7 @@ module Lint =
 
             lint lintInformation parsedFileInfo
 
-            lintWarnings |> Seq.toList |> LintResult.Success
+            lintViolations |> Seq.toList |> LintResult.Success
         | Error err -> LintResult.Failure (RunTimeConfigError err)
 
     /// Lints an F# file from a given path to the `.fs` file.
@@ -675,10 +676,10 @@ module Lint =
             let results = filePaths |> Seq.map lintSingleFile |> Seq.toList
             
             let failures = results |> List.choose (function | LintResult.Failure failure -> Some failure | _ -> None)
-            let warnings = results |> List.collect (function | LintResult.Success warning -> warning | _ -> List.empty)
+            let violations = results |> List.collect (function | LintResult.Success violation -> violation | _ -> List.empty)
             
             match failures with
             | firstFailure :: _ -> LintResult.Failure firstFailure
-            | [] -> LintResult.Success warnings
+            | [] -> LintResult.Success violations
         | Error err ->
             LintResult.Failure (RunTimeConfigError err)

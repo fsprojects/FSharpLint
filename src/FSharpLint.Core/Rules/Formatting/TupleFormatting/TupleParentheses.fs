@@ -3,7 +3,7 @@ module FSharpLint.Rules.TupleParentheses
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -21,7 +21,7 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
 
         {
             Range = range
-            Message = Resources.GetString("RulesFormattingTupleParenthesesError")
+            Message = Resources.GetString "RulesFormattingTupleParenthesesViolation"
             SuggestedFix = Some suggestedFix
             TypeChecks = List.Empty
         }

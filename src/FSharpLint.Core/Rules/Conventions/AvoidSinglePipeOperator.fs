@@ -3,13 +3,13 @@ module FSharpLint.Rules.AvoidSinglePipeOperator
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
-    let errors range suggestedFix =
+    let generateViolation range suggestedFix =
         Array.singleton
             {
                 Range = range
@@ -18,7 +18,7 @@ let runner (args: AstNodeRuleParams) =
                 TypeChecks = List.Empty
             }
     
-    let rec checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
+    let rec checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): array<ViolationDetails> =
         let checkParentPiped (expr: AstNode) =
             match expr with
             | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
@@ -51,7 +51,7 @@ let runner (args: AstNodeRuleParams) =
                                     let replacementText = sprintf "%s %s" funcText argText
                                     Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }
                                 | _ -> None)
-                            errors ident.idRange (Some suggestedFix)
+                            generateViolation ident.idRange (Some suggestedFix)
                 else
                     Array.empty
             | _ ->
@@ -59,7 +59,7 @@ let runner (args: AstNodeRuleParams) =
         | _ ->
             Array.empty
 
-    let error =
+    let ruleViolation =
         match args.AstNode with
         | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range)) ->
             match argExpr with
@@ -71,8 +71,7 @@ let runner (args: AstNodeRuleParams) =
         | _ ->
             Array.empty
 
-    error
-
+    ruleViolation
 
 let rule =
     AstNodeRule

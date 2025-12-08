@@ -22,7 +22,7 @@ module Program
 type Record = { Dog: int }
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.RecordFieldIsCamelCase() =
@@ -32,7 +32,7 @@ module Program
 type Record = { dog: int }
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 16))
+        Assert.IsTrue(this.ViolationExistsAt(4, 16))
 
     [<Test>]
     member this.RecordFieldRuleDoesntApplyToUnionCaseFields() =
@@ -41,4 +41,4 @@ type Test =
 | InfixOperator of operatorIdentifier:Expression * Expression * Expression
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

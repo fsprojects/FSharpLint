@@ -22,7 +22,7 @@ module Program
     | UnionCase
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.UnionCaseIsCamelCase() =
@@ -32,10 +32,10 @@ module Program
     | unionCase
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 6))
+        Assert.IsTrue(this.ViolationExistsAt(4, 6))
 
     [<Test>]
-    member this.``Let DU deconstruction must not warn about DU name``() =
+    member this.``Let DU deconstruction must not cause violation about DU name``() =
         this.Parse """
 module Program
 
@@ -44,10 +44,10 @@ type Foo = Foo of bool
 let Foo(foo) = Foo(true)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``Let parameter DU deconstruction must not warn about DU name``() =
+    member this.``Let parameter DU deconstruction must not cause violation about DU name``() =
         this.Parse """
 module Program
 
@@ -56,10 +56,10 @@ type Foo = Foo of bool
 let foo (Foo(v)) = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``For pattern DU deconstruction must not warn about DU name``() =
+    member this.``For pattern DU deconstruction must not cause violation about DU name``() =
         this.Parse """
 module Program
 
@@ -68,7 +68,7 @@ type Foo = Foo of bool
 for Foo(foo) in [Foo(true)] do ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
      /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/97
     [<Test>]
@@ -84,10 +84,10 @@ module String10 =
 
         this.Parse source
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.UnionCaseWithoutValueDoesNotGenerateWarningWhenTypeCheckingInput() =
+    member this.UnionCaseWithoutValueDoesNotGenerateViolationWhenTypeCheckingInput() =
         this.Parse """
 module Program
 
@@ -96,7 +96,7 @@ type SingleCaseDUNoValues = | SingleCaseDUNoValues
 let foo SingleCaseDUNoValues = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/188
     [<Test>]
@@ -111,4 +111,4 @@ let SomeCamel WithCamel.YesCamel = 12
 
         this.Parse source
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

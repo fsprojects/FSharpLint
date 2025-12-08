@@ -10,7 +10,7 @@ type TestConventionsAvoidTooShortNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AvoidTooShortNames.rule)
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldNotProduceError1() =
+    member this.AvoidTooShortNamesShouldNotProduceViolation1() =
         this.Parse """
 module Program
 
@@ -20,10 +20,10 @@ let bar baz =
     foobar
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError2() =
+    member this.AvoidTooShortNamesShouldProduceViolation2() =
         this.Parse """
 module Program
 
@@ -33,10 +33,10 @@ let bar baz =
     foobar
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError3() =
+    member this.AvoidTooShortNamesShouldProduceViolation3() =
         this.Parse """
 module Program
 
@@ -46,10 +46,10 @@ let b baz n =
     foobar
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError4() =
+    member this.AvoidTooShortNamesShouldProduceViolation4() =
         this.Parse """
 module Program
 
@@ -59,10 +59,10 @@ let bar b =
     foobar
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError5() =
+    member this.AvoidTooShortNamesShouldProduceViolation5() =
         this.Parse """
 module Program
 
@@ -72,10 +72,10 @@ let bar baz =
     x
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError6() =
+    member this.AvoidTooShortNamesShouldProduceViolation6() =
         this.Parse """
 type CellCreatedFast =
     private
@@ -85,10 +85,10 @@ type CellCreatedFast =
         }
  """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError7() =
+    member this.AvoidTooShortNamesShouldProduceViolation7() =
         this.Parse """
 type TorStreamCipher(keyBytes: array<byte>, ivOpt: Option<array<byte>>) =
     member self.Encrypt(data: array<byte>) : array<byte> =
@@ -100,57 +100,57 @@ type TorStreamCipher(keyBytes: array<byte>, ivOpt: Option<array<byte>>) =
         innerEncrypt 3 keyBytes
  """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError8() =
+    member this.AvoidTooShortNamesShouldProduceViolation8() =
         this.Parse """
 type Foo<'T> = Option<'T>
 """
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError9() =
+    member this.AvoidTooShortNamesShouldProduceViolation9() =
         this.Parse """
 type Foo<'SomeType> = Option<'SomeType>
 """
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError10() =
+    member this.AvoidTooShortNamesShouldProduceViolation10() =
         this.Parse """
 let Foo (x: int) =
     x.ToString()
 """
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError11() =
+    member this.AvoidTooShortNamesShouldProduceViolation11() =
         this.Parse """
 match foo with
 | x -> ()
 """
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError12() =
+    member this.AvoidTooShortNamesShouldProduceViolation12() =
         this.Parse """
 match foo with
 | Some(x) -> ()
 """
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError13() =
+    member this.AvoidTooShortNamesShouldProduceViolation13() =
         this.Parse """
 match foo with
 | Some(x) -> (x)
 """
-        Assert.IsTrue(this.ErrorExistsAt(3, 7))
-        Assert.IsFalse(this.ErrorExistsAt(3, 14))
+        Assert.IsTrue(this.ViolationExistsAt(3, 7))
+        Assert.IsFalse(this.ViolationExistsAt(3, 14))
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError14() =
+    member this.AvoidTooShortNamesShouldProduceViolation14() =
         this.Parse """
 async {
     let! z = async { return 1 + 2 }
@@ -158,10 +158,10 @@ async {
 } |> Async.RunSynchronously |> ignore<int>
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError15() =
+    member this.AvoidTooShortNamesShouldProduceViolation15() =
         this.Parse """
 async {
     let! result = async { return 1 + 2 }
@@ -169,10 +169,10 @@ async {
 } |> Async.RunSynchronously |> ignore<int>
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError16() =
+    member this.AvoidTooShortNamesShouldProduceViolation16() =
         this.Parse """
 type SomeDU =
     | SomeMember of int * string * bool
@@ -184,12 +184,12 @@ let fooFunction (arg: SomeDU) =
     | SomeDU.SomeOtherMember theInt -> theInt
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.AvoidTooShortNamesShouldProduceError17() =
+    member this.AvoidTooShortNamesShouldProduceViolation17() =
         this.Parse """
 fun x -> x + 1 |> ignore
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist

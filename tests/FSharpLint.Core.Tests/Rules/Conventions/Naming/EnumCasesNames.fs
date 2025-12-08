@@ -23,7 +23,7 @@ type MyEnum =
 | EnumCase = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.EnumCaseIsCamelCase() =
@@ -34,4 +34,4 @@ type MyEnum =
 | enumCase = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.IsTrue(this.ViolationExistsAt(5, 2))

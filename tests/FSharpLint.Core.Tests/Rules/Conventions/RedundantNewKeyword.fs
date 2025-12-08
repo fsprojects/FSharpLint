@@ -9,14 +9,14 @@ type TestConventionsRedundantNewKeyword() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RedundantNewKeyword.rule)
 
     [<Test>]
-    member this.``Lint gives suggestion when new keyword is not required.``() =
+    member this.``Violation when new keyword is not required.``() =
         this.Parse """
 module Program
 
 let _ = new System.Version()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
     member this.``New keyword not considered unnecassery if used with a constructor of a type which implements IDisposable.``() =
@@ -26,7 +26,7 @@ module Program
 let _ = new System.IO.MemoryStream()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``Quick fix for unnecassery new keyword.``() =
@@ -53,7 +53,7 @@ module Program
         new System.Collections.Generic.Dictionary<string, string>() |> ignore
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``new keyword is not required (2).``() =
@@ -63,7 +63,7 @@ module Program
         new Guid() |> ignore
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``new keyword is not required (3).``() =
@@ -73,4 +73,4 @@ module Program
         new Int32() |> ignore
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist

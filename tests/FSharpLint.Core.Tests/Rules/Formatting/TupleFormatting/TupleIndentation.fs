@@ -9,7 +9,7 @@ type TestFormattingTupleIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleIndentation.rule)
 
         [<Test>]
-    member this.``Error for tuple with newlines and inconsistent indentation``() =
+    member this.``Violation for tuple with newlines and inconsistent indentation``() =
         this.Parse("""
 module Program
 
@@ -18,10 +18,10 @@ let x = (
         2,
         3)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
-    member this.``No error for tuple with newlines and consistent indentation``() =
+    member this.``No violation for tuple with newlines and consistent indentation``() =
         this.Parse("""
 module Program
 
@@ -30,4 +30,4 @@ let x = (
     2,
     3)""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

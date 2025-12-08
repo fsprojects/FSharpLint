@@ -3,7 +3,7 @@ module FSharpLint.Rules.TupleOfWildcards
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -23,16 +23,16 @@ let private checkTupleOfWildcards fileContents pattern identifier identifierRang
 
     match pattern with
     | SynPat.Tuple(_isStruct, patterns, _, range) when List.length patterns > 1 && patterns |> List.forall isWildcard ->
-        let errorFormat = Resources.GetString("RulesTupleOfWildcardsError")
+        let violationTextFormatString = Resources.GetString "RulesTupleOfWildcardsViolation"
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = constructorString 1
-        let error = String.Format(errorFormat, refactorFrom, refactorTo)
+        let violationMsg = String.Format(violationTextFormatString, refactorFrom, refactorTo)
         let suggestedFix = lazy(
             Some { SuggestedFix.FromRange = identifierRange; FromText = fileContents; ToText = refactorTo })
         Array.singleton
             {
                 Range = range
-                Message = error
+                Message = violationMsg
                 SuggestedFix = Some suggestedFix
                 TypeChecks = List.Empty
             }

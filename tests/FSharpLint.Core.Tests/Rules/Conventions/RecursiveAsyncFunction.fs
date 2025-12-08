@@ -9,7 +9,7 @@ type TestConventionsRecursiveAsyncFunction() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RecursiveAsyncFunction.rule)
 
     [<Test>]
-    member this.``Error for recursive async function ending in recursive do!``() = 
+    member this.``Violation for recursive async function ending in recursive do!``() = 
         this.Parse """
 namespace Program
 
@@ -20,10 +20,10 @@ module X =
     }
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 8))
+        Assert.IsTrue(this.ViolationExistsAt(7, 8))
 
     [<Test>]
-    member this.``No error for recursive async function ending in recursive return!``() = 
+    member this.``No violation for recursive async function ending in recursive return!``() = 
         this.Parse """
 namespace Program
 
@@ -34,10 +34,10 @@ module X =
     }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for recursive async function ending in non-recursive do!``() = 
+    member this.``No violation for recursive async function ending in non-recursive do!``() = 
         this.Parse """
 namespace Program
 
@@ -49,7 +49,7 @@ module X =
     }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
     member this.``Quickfix for recursive async function ending in recursive do!``() = 

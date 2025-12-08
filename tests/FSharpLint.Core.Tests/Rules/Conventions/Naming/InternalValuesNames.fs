@@ -22,7 +22,7 @@ module Program
 let internal cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.InternalVariableIsPascalCase() =
@@ -32,7 +32,7 @@ module Program
 let internal Cat = 1
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4,13))
+        Assert.IsTrue(this.ViolationExistsAt(4,13))
 
     [<Test>]
     member this.PublicVariableIsNotReported() =
@@ -42,7 +42,7 @@ module Program
 let Cat = 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PascalCaseLetBindingInTypeIsNotReported() =
@@ -52,4 +52,4 @@ module program
 let Cat() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

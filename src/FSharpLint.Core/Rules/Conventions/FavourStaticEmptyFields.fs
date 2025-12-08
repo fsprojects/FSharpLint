@@ -1,7 +1,7 @@
 module FSharpLint.Rules.FavourStaticEmptyFields
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
@@ -12,19 +12,16 @@ type private EmptyLiteralType =
     | EmptyListLiteral
     | EmptyArrayLiteral
 
-let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    let errorMessageKey =
+let private getStaticEmptyRuleViolationMessage  (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+    let messageKey =
         match emptyLiteralType with
         | EmptyStringLiteral -> "RulesFavourStaticEmptyFieldsForString"
         | EmptyListLiteral -> "RulesFavourStaticEmptyFieldsForList"
         | EmptyArrayLiteral -> "RulesFavourStaticEmptyFieldsForArray"
 
-    let formatError errorName =
-        Resources.GetString errorName
+    Resources.GetString messageKey
 
-    formatError errorMessageKey
-
-let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+let private generateViolation (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
     let suggestedFix = lazy(
         let replacementText =
             match emptyLiteralType with
@@ -34,18 +31,18 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
         Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
     Array.singleton
         { Range = range
-          Message = getStaticEmptyErrorMessage range emptyLiteralType
+          Message = getStaticEmptyRuleViolationMessage range emptyLiteralType
           SuggestedFix = Some suggestedFix
           TypeChecks = List.Empty }
 
 let private runner (args: AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Expression(SynExpr.Const (SynConst.String ("", _, range), _)) -> 
-        generateError args.FileContent range EmptyStringLiteral
+        generateViolation args.FileContent range EmptyStringLiteral
     | AstNode.Expression(SynExpr.ArrayOrList (isArray, [], range)) ->
         let emptyLiteralType =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
-        generateError args.FileContent range emptyLiteralType
+        generateViolation args.FileContent range emptyLiteralType
     | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
         let mapping =
             function
@@ -53,11 +50,11 @@ let private runner (args: AstNodeRuleParams) =
                 match expr with
                 | Some(SynExpr.ArrayOrList(isArray, [], range)) ->
                     let emptyLiteralType = if isArray then EmptyArrayLiteral else EmptyListLiteral
-                    generateError args.FileContent range emptyLiteralType
+                    generateViolation args.FileContent range emptyLiteralType
                 | Some(SynExpr.Const (SynConst.String ("", _, range), _)) ->
-                    generateError args.FileContent range EmptyStringLiteral
+                    generateViolation args.FileContent range EmptyStringLiteral
                 | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
-                    generateError args.FileContent range EmptyStringLiteral
+                    generateViolation args.FileContent range EmptyStringLiteral
                 | _ -> Array.empty
         synExprRecordField
         |> List.map mapping

@@ -15,19 +15,19 @@ type TestConventionsMeasureTypesNames() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MeasureTypeNames.rule config)
 
     [<Test>]
-    member this.``Unit of measure issues no casing naming warning.``() =
+    member this.``Unit of measure issues no casing naming violation.``() =
         this.Parse """
 [<Measure>] type L
 
 [<Measure>] type usGal
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``Unit of measure issues underscore naming warning.``() =
+    member this.``Unit of measure issues underscore naming violation.``() =
         this.Parse """
 [<Measure>] type us_Gal
 """
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)

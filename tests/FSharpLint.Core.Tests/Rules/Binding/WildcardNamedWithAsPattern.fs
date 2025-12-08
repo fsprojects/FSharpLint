@@ -26,7 +26,7 @@ match [] with
         
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.IsTrue(this.ViolationExistsAt(5, 2))
 
         let result = this.ApplyQuickFix source
 
@@ -41,7 +41,7 @@ match [] with
 | x -> ()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.WildcardWithoutAsPattern() =
@@ -52,7 +52,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
 
 

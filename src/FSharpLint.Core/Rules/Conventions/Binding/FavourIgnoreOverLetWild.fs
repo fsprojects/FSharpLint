@@ -2,7 +2,7 @@ module FSharpLint.Rules.FavourIgnoreOverLetWild
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -18,7 +18,7 @@ let private checkForBindingToAWildcard pattern range fileContent (expr: SynExpr)
         if findWildAndIgnoreParens pattern then
             Array.singleton
                 { Range = range
-                  Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+                  Message = Resources.GetString "RulesFavourIgnoreOverLetWildViolation"
                   SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
                                                     FromText = fileContent
                                                     ToText = sprintf "(%s) |> ignore" exprText })))

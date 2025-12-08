@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -29,7 +29,7 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
         Some
             {
                 Range = commaRange
-                Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
+                Message = Resources.GetString "RulesFormattingTupleCommaSpacingViolation"
                 SuggestedFix = suggestedFix
                 TypeChecks = List.Empty
             }

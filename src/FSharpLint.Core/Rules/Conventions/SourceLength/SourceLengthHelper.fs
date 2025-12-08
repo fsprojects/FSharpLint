@@ -3,7 +3,7 @@ module FSharpLint.Rules.Helper.SourceLength
 open System
 open System.Text.RegularExpressions
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Text
 open FSharpLint.Framework.ExpressionUtilities
 
@@ -17,9 +17,9 @@ type private MultilineCommentMarker =
     | Begin of int
     | End of int
 
-let private error name lineCount actual =
-    let errorFormatString = Resources.GetString("RulesSourceLengthError")
-    String.Format(errorFormatString, name, lineCount, actual)
+let private msg name lineCount actual =
+    let violationTextFormatString = Resources.GetString "RulesSourceLengthViolation"
+    String.Format(violationTextFormatString, name, lineCount, actual)
 
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 
@@ -56,7 +56,7 @@ let private stripMultilineComments (source: string) =
             + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
         source
 
-let checkSourceLengthRule (config:Config) range fileContents errorName =
+let checkSourceLengthRule (config:Config) range fileContents elementKind =
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
         let sourceCode =
@@ -76,7 +76,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
             Array.singleton
                 {
                     Range = range
-                    Message = error errorName config.MaxLines skipResult
+                    Message = msg elementKind config.MaxLines skipResult
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }

@@ -3,7 +3,7 @@ module FSharpLint.Rules.UnionDefinitionIndentation
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -22,25 +22,25 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
         | []
         | [_] -> Array.empty
         | firstCase :: _ ->
-            let indentationLevelError =
+            let indentationLevelViolation =
                 if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
                     Some
                         {
                             Range = firstCase.Range
-                            Message = Resources.GetString("RulesFormattingUnionDefinitionIndentationError")
+                            Message = Resources.GetString "RulesFormattingUnionDefinitionIndentationViolation"
                             SuggestedFix = None
                             TypeChecks = List.Empty
                         }
                 else
                     None
 
-            let consistentIndentationErrors =
+            let consistentIndentationViolations =
                 let choose caseOne caseTwo = 
                     if getUnionCaseStartColumn caseOne <> getUnionCaseStartColumn caseTwo then
                         Some
                             {
                                 Range = caseTwo.Range
-                                Message = Resources.GetString("RulesFormattingUnionDefinitionSameIndentationError")
+                                Message = Resources.GetString "RulesFormattingUnionDefinitionSameIndentationViolation"
                                 SuggestedFix = None
                                 TypeChecks = List.Empty
                             }
@@ -54,8 +54,8 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
 
             Array.concat
                 [|
-                    Option.toArray indentationLevelError
-                    consistentIndentationErrors
+                    Option.toArray indentationLevelViolation
+                    consistentIndentationViolations
                 |]
     | _ -> Array.empty
 

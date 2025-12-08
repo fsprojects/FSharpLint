@@ -17,7 +17,7 @@ if not true && (false && false) || true then
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FiveBooleanOperators() =
@@ -28,4 +28,4 @@ if not true && (false && false) || true (&&) (false) then
     ()
 """
 
-        Assert.ErrorExistsAt(this, (4, 3))
+        Assert.ViolationExistsAt(this, (4, 3))

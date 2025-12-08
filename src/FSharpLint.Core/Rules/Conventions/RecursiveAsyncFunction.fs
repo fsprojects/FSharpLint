@@ -3,7 +3,7 @@ module FSharpLint.Rules.RecursiveAsyncFunction
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -46,7 +46,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
         Some
             {
                 Range = range
-                Message = Resources.GetString("RulesConventionsRecursiveAsyncFunctionError")
+                Message = Resources.GetString "RulesConventionsRecursiveAsyncFunctionViolation"
                 SuggestedFix = Some suggestedFix
                 TypeChecks = List.Empty
             }

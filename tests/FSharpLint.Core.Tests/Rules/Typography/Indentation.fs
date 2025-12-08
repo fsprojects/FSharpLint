@@ -9,7 +9,7 @@ type TestTypographyIndentation() =
     inherit TestIndentationRuleBase.TestIndentationRuleBase(Indentation.rule)
 
     [<Test>]
-    member this.``Error for incorrect indentation``() =
+    member this.``Violation for incorrect indentation``() =
         this.Parse """
 module P
 
@@ -17,10 +17,10 @@ let x =
   x
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+        Assert.IsTrue(this.ViolationExistsAt(5, 0))
 
     [<Test>]
-    member this.``No error for correct indentation``() =
+    member this.``No violation for correct indentation``() =
         this.Parse """
 module P
 
@@ -28,10 +28,10 @@ let x =
     x
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for incorrect record field indentation``() =
+    member this.``Violation for incorrect record field indentation``() =
         this.Parse """
 module P
 
@@ -40,10 +40,10 @@ let rainbow =
           Y = "Y"}
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+        Assert.IsTrue(this.ViolationExistsAt(6, 0))
 
     [<Test>]
-    member this.``No error for correct record field indentation``() =
+    member this.``No violation for correct record field indentation``() =
         this.Parse """
 module P
 
@@ -52,20 +52,20 @@ let rainbow =
       Y = "Y"}
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct record field indentation in type definition``() =
+    member this.``No violation for correct record field indentation in type definition``() =
         this.Parse """
 type T =
     { X : int
       Y : string }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct record field indentation with multiple fields per line``() =
+    member this.``No violation for correct record field indentation with multiple fields per line``() =
         this.Parse """
 module P
 
@@ -74,10 +74,10 @@ let rainbow =
       Y = "Y"; W = "W"}
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct multiline record field indentation``() =
+    member this.``No violation for correct multiline record field indentation``() =
         this.Parse """
 module P
 
@@ -88,10 +88,10 @@ let rainbow =
       Y = "Y"}
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct array member indentation``() =
+    member this.``No violation for correct array member indentation``() =
         this.Parse """
 module P
 
@@ -102,10 +102,10 @@ let pascalsTriangle =
     |]
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for multi-line tuple``() =
+    member this.``No violation for multi-line tuple``() =
         this.Parse """
 module P
 
@@ -115,11 +115,11 @@ let pascalsTriangle =
      3)
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
 
     [<Test>]
-    member this.``No error for correct list member indentation``() =
+    member this.``No violation for correct list member indentation``() =
         this.Parse """
 module P
 
@@ -130,10 +130,10 @@ let pascalsTriangle =
     ]
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional pipeline indentation``() =
+    member this.``No violation for exceptional pipeline indentation``() =
         this.Parse """
 module P
 
@@ -142,10 +142,10 @@ let res = 1
           |> sub 3
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional composition indentation``() =
+    member this.``No violation for exceptional composition indentation``() =
         this.Parse """
 module P
 
@@ -153,10 +153,10 @@ let res = add 2
           >> sub 3
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional infix indentation``() =
+    member this.``No violation for exceptional infix indentation``() =
         this.Parse """
 module P
 
@@ -165,20 +165,20 @@ let res = 1
           + 3
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for pipeline on same line``() =
+    member this.``No violation for pipeline on same line``() =
         this.Parse """
 module P
 
 let res = 1 |> add 2
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for standard pipeline indentation``() =
+    member this.``No violation for standard pipeline indentation``() =
         this.Parse """
 module P
 
@@ -188,10 +188,10 @@ let res =
     |> sub 3
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional multiline pipeline indentation``() =
+    member this.``No violation for exceptional multiline pipeline indentation``() =
         this.Parse """
 module P
 
@@ -202,10 +202,10 @@ let res = 1
               x - 3)
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional object expression indentation``() =
+    member this.``No violation for exceptional object expression indentation``() =
         this.Parse """
 module P
 
@@ -218,10 +218,10 @@ let comparer =
               reversed.CompareTo (rev s2) }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for record with comment``() =
+    member this.``No violation for record with comment``() =
         this.Parse """
     type CurrentNode =
         { Node: AstNode
@@ -231,10 +231,10 @@ let comparer =
           Breadcrumbs: AstNode list }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional nested records indentation``() =
+    member this.``No violation for exceptional nested records indentation``() =
         this.Parse """
     { LoadedRules.GlobalConfig = getGlobalConfig config.Global
       DeprecatedRules = deprecatedAllRules
@@ -245,20 +245,20 @@ let comparer =
           NoTabCharactersRule = noTabCharactersRule } }
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional list indentation with multiple items per line``() =
+    member this.``No violation for exceptional list indentation with multiple items per line``() =
         this.Parse """
 let opchars =
     [ '>';'<';'+';'-';'*';'=';'~';'%';'&';'|';'@'
       '#';'^';'!';'?';'/';'.';':';',' ]
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional match guard indentation``() =
+    member this.``No violation for exceptional match guard indentation``() =
         this.Parse """
 match args.AstNode with
 | AstNode.Binding(SynBinding(_, _, _, isMutable, _, _, _, pattern, _, expr, range, _))
@@ -269,10 +269,10 @@ match args.AstNode with
     Array.empty
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional tuple pattern indentation``() =
+    member this.``No violation for exceptional tuple pattern indentation``() =
         this.Parse """
     let (|Cons|_|) pattern =
         match pattern with
@@ -284,20 +284,20 @@ match args.AstNode with
         | _ -> None
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for exceptional record pattern indentation``() =
+    member this.``No violation for exceptional record pattern indentation``() =
         this.Parse """
         match x with
         | X { y = y
               z = z } -> ()
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for multi-line reference cell assignment``() =
+    member this.``No violation for multi-line reference cell assignment``() =
         this.Parse """
         do pstringelemImpl :=
             choice
@@ -305,4 +305,4 @@ match args.AstNode with
                   skipChar '\\' >>. pnewline >>. many spaces >>. pstringelem ]
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

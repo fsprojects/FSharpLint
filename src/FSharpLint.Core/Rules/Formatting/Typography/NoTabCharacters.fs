@@ -2,7 +2,7 @@ module FSharpLint.Rules.NoTabCharacters
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
@@ -28,7 +28,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
         if isInLiteralString literalStrings range |> not then
             Array.singleton
                 { Range = range
-                  Message = Resources.GetString("RulesTypographyTabCharacterError")
+                  Message = Resources.GetString "RulesTypographyTabCharacterViolation"
                   SuggestedFix =
                     Some(
                         lazy

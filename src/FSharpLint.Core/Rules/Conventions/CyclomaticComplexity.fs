@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.Linq
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -143,10 +143,10 @@ let private countBooleanOperators expression =
     countOperators 0 expression
 
 /// Runner for the rule. 
-let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
+let runner (config:Config) (args:AstNodeRuleParams) : array<ViolationDetails> =
     let bindingStack = getBindingStack config.MaxComplexity
     
-    let mutable warningDetails = None
+    let mutable violationDetails = None
     let node = args.AstNode
     let parentIndex = args.SyntaxArray.[args.NodeIndex].ParentIndex
     // determine if the node is a duplicate of a node in the AST containing ExtraSyntaxInfo (e.g. lambda arg being a duplicate of the lambda itself)
@@ -191,12 +191,12 @@ let runner (config:Config) (args:AstNodeRuleParams) : WarningDetails[] =
                             |> Seq.sortBy (fun scope -> // sort by order of start position, for reporting
                                  let pos = scope.Binding.RangeOfBindingWithRhs.Start
                                  (pos.Column, pos.Line))
-                            |> Seq.map (fun scope -> // transform into WarningDetails
-                                let errMsg = String.Format(Resources.GetString("RulesCyclomaticComplexityError"), scope.Complexity, config.MaxComplexity)
-                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = errMsg; SuggestedFix = None; TypeChecks = List.Empty })
+                            |> Seq.map (fun scope -> // transform into ViolationDetails
+                                let violationMsg = String.Format(Resources.GetString "RulesCyclomaticComplexityViolation", scope.Complexity, config.MaxComplexity)
+                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = violationMsg; SuggestedFix = None; TypeChecks = List.Empty })
                             |> Seq.toList
-            let ret = match warningDetails with
-                      | Some warning -> warning::fromStack
+            let ret = match violationDetails with
+                      | Some violation -> violation::fromStack
                       | None -> fromStack
             List.toArray ret
     else

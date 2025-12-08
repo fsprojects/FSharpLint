@@ -2,7 +2,7 @@ module FSharpLint.Rules.NestedStatements
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -10,9 +10,9 @@ open FSharpLint.Framework.Rules
 [<RequireQualifiedAccess>]
 type Config = { Depth:int }
 
-let private error (depth:int) =
-    let errorFormatString = Resources.GetString("RulesNestedStatementsError")
-    String.Format(errorFormatString, depth)
+let private violationText (depth:int) =
+    let violationTextFormatString = Resources.GetString "RulesNestedStatementsViolation"
+    String.Format(violationTextFormatString, depth)
 
 /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
@@ -109,7 +109,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
         if areChildrenNested node && not <| isMetaData args node index && not <| isElseIf args node index then
             if depth >= config.Depth then
-                // Skip children as we've had an error containing them.
+                // Skip children as we've had a violation containing them.
                 let skipChildren = index + args.SyntaxArray.[index].NumberOfChildren + 1
                 decrementDepthToCommonParent args index skipChildren
                 skipToIndex <- Some skipChildren
@@ -118,7 +118,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                 |> Option.map (fun range ->
                     {
                         Range = range
-                        Message = error config.Depth
+                        Message = violationText config.Depth
                         SuggestedFix = None
                         TypeChecks = List.Empty
                     })

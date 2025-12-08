@@ -9,13 +9,13 @@ type TestFormattingTupleCommaSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TupleCommaSpacing.rule)
 
         [<Test>]
-    member this.``Error for tuple instantiation without space after comma``() =
+    member this.``Violation for tuple instantiation without space after comma``() =
         this.Parse("""
 module Program
 
 let x = (1,2)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 10))
+        Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
     member this.``Quickfix for tuple instantiation without space after comma``() =
@@ -34,13 +34,13 @@ let x = (1, 2)"""
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``Error for tuple instantiation with two spaces after comma``() =
+    member this.``Violation for tuple instantiation with two spaces after comma``() =
         this.Parse("""
 module Program
 
 let x = (1,  2)""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 10))
+        Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
     member this.``Quickfix for tuple instantiation with two spaces after comma``() =
@@ -59,16 +59,16 @@ let x = (1, 2)"""
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
     [<Test>]
-    member this.``No error for tuple instantiation with single space after comma``() =
+    member this.``No violation for tuple instantiation with single space after comma``() =
         this.Parse("""
 module Program
 
 let x = (1, 2)""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for tuple instantiation with newline after comma``() =
+    member this.``No violation for tuple instantiation with newline after comma``() =
         this.Parse("""
 module Program
 
@@ -76,4 +76,4 @@ let x = (
     1, 2,
     3)""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

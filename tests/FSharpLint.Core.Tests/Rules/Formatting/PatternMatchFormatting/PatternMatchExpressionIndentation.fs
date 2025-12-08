@@ -9,7 +9,7 @@ type TestFormattingPatternMatchExpressionIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchExpressionIndentation.rule)
 
     [<Test>]
-    member this.``Error for pattern match clauses indentation for expression on newline``() =
+    member this.``Violation for pattern match clauses indentation for expression on newline``() =
         this.Parse"""
 module Program
 
@@ -20,10 +20,10 @@ true
     false
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+        Assert.IsTrue(this.ViolationExistsAt(6, 0))
 
     [<Test>]
-    member this.``No error for pattern match clauses with indentation for expression on newline``() =
+    member this.``No violation for pattern match clauses with indentation for expression on newline``() =
         this.Parse"""
 module Program
 
@@ -34,10 +34,10 @@ match 1 with
     false
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for exception pattern match clauses indentation for expression on newline``() =
+    member this.``Violation for exception pattern match clauses indentation for expression on newline``() =
         this.Parse """
 module Program
 
@@ -49,10 +49,10 @@ with
 | :? System.Exception ->
     2 """
 
-        Assert.IsTrue(this.ErrorExistsAt(8, 0))
+        Assert.IsTrue(this.ViolationExistsAt(8, 0))
 
     [<Test>]
-    member this.``No error for exception pattern match clauses with indentation for expression on newline``() =
+    member this.``No violation for exception pattern match clauses with indentation for expression on newline``() =
         this.Parse """
 module Program
 
@@ -64,4 +64,4 @@ with
 | :? System.Exception ->
     2 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

@@ -18,7 +18,7 @@ module MyModule =
         ()
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use variable with underscore prefix but not immediately after declaration``() =
@@ -31,7 +31,7 @@ module MyModule =
         _random
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use variable with underscore prefix inside some expression``() =
@@ -42,7 +42,7 @@ module MyModule =
         "someString" + _random.ToString()
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use variable with underscore prefix defined in tuple``() =
@@ -54,7 +54,7 @@ module MyModule =
         ()
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Not using variable with underscore prefix``() =
@@ -66,7 +66,7 @@ module MyModule =
         ()
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Using variable without underscore prefix``() =
@@ -78,10 +78,10 @@ module MyModule =
         ()
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
-    member this.``Use of underscore variable in function should not cause error``() =
+    member this.``Use of underscore variable in function should not cause violation``() =
         this.Parse """
 module MyModule =
     let MyFunc () =
@@ -89,7 +89,7 @@ module MyModule =
         ()
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Using field with underscore prefix``() =
@@ -100,7 +100,7 @@ type CustomerName(firstName) =
         printfn "%A" this._FirstName
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Using private member with underscore prefix``() =
@@ -111,7 +111,7 @@ type CustomerName(firstName) =
         printfn "%A" this._FirstName
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Using private property with underscore prefix``() =
@@ -123,4 +123,4 @@ type CustomerName(firstName) =
         printfn "%A" this._FirstName
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist

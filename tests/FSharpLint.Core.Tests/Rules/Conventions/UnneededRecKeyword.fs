@@ -10,7 +10,7 @@ type TestConventionsUnneededRecKeyword() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UnneededRecKeyword.rule)
 
     [<Test>]
-    member this.UnneededRecKeywordShouldNotProduceError() =
+    member this.UnneededRecKeywordShouldNotProduceViolation() =
         this.Parse """
 let rec Foo () =
     if someParam then
@@ -19,19 +19,19 @@ let rec Foo () =
         ()
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError1() =
+    member this.UnneededRecKeywordShouldProduceViolation1() =
         this.Parse """
 let rec Foo someParam =
     ()
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
-    member this.UnneededRecKeywordShouldProduceError2() =
+    member this.UnneededRecKeywordShouldProduceViolation2() =
         this.Parse """
 let rec Foo someParam =
     ()
@@ -44,4 +44,4 @@ let Bar () =
     ()
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
