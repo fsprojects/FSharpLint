@@ -24,7 +24,7 @@ let x = 1, 2""")
         Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Quickfix for tuple instantiation without parentheses``() =
+    member this.``Autofix for tuple instantiation without parentheses``() =
         let source = """
 module Program
 
@@ -36,7 +36,7 @@ module Program
 let x = (1, 2)"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``No violation for tuple instantiation with parentheses``() =

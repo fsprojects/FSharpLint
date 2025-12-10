@@ -150,7 +150,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
                     {
                         Range = range
                         Message = violationMsg
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
@@ -163,7 +163,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
                     {
                         Range = range
                         Message = String.Format(violationTextFormatString, expectedSpaces)
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
@@ -174,7 +174,7 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
             {
                 Range = range
                 Message = String.Format(violationTextFormatString, expectedSpaces)
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

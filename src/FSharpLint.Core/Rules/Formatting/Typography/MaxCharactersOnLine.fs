@@ -19,7 +19,7 @@ let checkMaxCharactersOnLine (config:Config) (args:LineRuleParams) =
             {
                 Range = range
                 Message = String.Format(violationTextFormatString, (maxCharacters + 1))
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

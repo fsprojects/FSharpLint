@@ -54,7 +54,7 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                 let trimmedTypeText = typeText.TrimStart(' ')
                 let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
                 let spacesAfterString = " " |> String.replicate expectedSpacesAfter
-                let suggestedFix = lazy(
+                let autoFix = lazy(
                     Some { FromRange = range;
                            FromText = text;
                            ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
@@ -64,7 +64,7 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                     {
                         Range = range
                         Message = String.Format(violationTextFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                        SuggestedFix = Some suggestedFix
+                        AutoFix = Some autoFix
                         TypeChecks = List.Empty
                     }
                 else

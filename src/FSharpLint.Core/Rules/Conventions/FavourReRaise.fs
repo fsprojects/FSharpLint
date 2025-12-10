@@ -8,24 +8,24 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private runner (args: AstNodeRuleParams) =
-    let generateViolation suggestedFix range =
+    let generateViolation autoFix range =
         Array.singleton
             { Range = range
               Message = Resources.GetString "RulesFavourReRaise"
-              SuggestedFix = Some suggestedFix
+              AutoFix = Some autoFix
               TypeChecks = List.empty }
 
     let rec checkExpr (expr) maybeIdent =
         match expr with
         | SynExpr.App (_, _, SynExpr.Ident raiseId, expression, range) when raiseId.idText = "raise" ->
-            let suggestedFix = lazy(Some({ FromRange = range; FromText = raiseId.idText; ToText = "reraise()" }))
+            let autoFix = lazy(Some({ FromRange = range; FromText = raiseId.idText; ToText = "reraise()" }))
             match expression with
             | SynExpr.Ident ident ->
                 match maybeIdent with
                 | Some id when id = ident.idText ->
-                    generateViolation suggestedFix range
+                    generateViolation autoFix range
                 | _ -> Array.empty
-            | SynExpr.LongIdent (_, SynLongIdent (id, _, _), _, range) -> generateViolation suggestedFix range
+            | SynExpr.LongIdent (_, SynLongIdent (id, _, _), _, range) -> generateViolation autoFix range
             | _ -> Array.empty
         | SynExpr.TryWith (expressions, clauseList, _range, _, _, _) as expr ->
             clauseList

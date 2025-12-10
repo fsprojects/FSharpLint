@@ -18,7 +18,7 @@ let x = (1,2)""")
         Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
-    member this.``Quickfix for tuple instantiation without space after comma``() =
+    member this.``Autofix for tuple instantiation without space after comma``() =
         let source = """
 module Program
 
@@ -31,7 +31,7 @@ module Program
 let x = (1, 2)"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Violation for tuple instantiation with two spaces after comma``() =
@@ -43,7 +43,7 @@ let x = (1,  2)""")
         Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
-    member this.``Quickfix for tuple instantiation with two spaces after comma``() =
+    member this.``Autofix for tuple instantiation with two spaces after comma``() =
         let source = """
 module Program
 
@@ -56,7 +56,7 @@ module Program
 let x = (1, 2)"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``No violation for tuple instantiation with single space after comma``() =

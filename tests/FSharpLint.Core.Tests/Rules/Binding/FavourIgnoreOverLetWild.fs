@@ -51,7 +51,7 @@ let a = List.iter (fun x -> ()) []
         Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
-    member this.LetWildcardUnitValueSuggestedFix() =
+    member this.LetWildcardUnitValueAutoFix() =
         let source = """
 module Program
 
@@ -64,12 +64,12 @@ module Program
 
         Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.LetWildCardInParanUnitValueSuggestedFix() =
+    member this.LetWildCardInParanUnitValueAutoFix() =
         let source = """
 module Program
 
@@ -84,6 +84,6 @@ module Program
 
         Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

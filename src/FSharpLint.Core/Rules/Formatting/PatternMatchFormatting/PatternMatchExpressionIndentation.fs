@@ -22,7 +22,7 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
                 {
                     Range = expr.Range
                     Message = Resources.GetString "RulesFormattingMatchExpressionIndentationViolation"
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

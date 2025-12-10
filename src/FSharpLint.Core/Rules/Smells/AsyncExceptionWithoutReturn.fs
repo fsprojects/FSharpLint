@@ -50,7 +50,7 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
                 {
                     Range = range
                     Message = Resources.GetString "RulesAsyncExceptionWithoutReturn"
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         | SynExpr.App (_, _, funcExpr, _, range) ->

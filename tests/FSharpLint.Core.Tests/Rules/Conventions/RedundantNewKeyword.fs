@@ -29,7 +29,7 @@ let _ = new System.IO.MemoryStream()
         this.AssertNoViolations()
 
     [<Test>]
-    member this.``Quick fix for unnecassery new keyword.``() =
+    member this.``Auto fix for unnecassery new keyword.``() =
         let source = """
 module Program
 
@@ -43,7 +43,7 @@ let _ = System.Version()
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``new keyword is not required (1).``() =

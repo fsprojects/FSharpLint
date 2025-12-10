@@ -77,7 +77,7 @@ let checkSourceLengthRule (config:Config) range fileContents elementKind =
                 {
                     Range = range
                     Message = msg elementKind config.MaxLines skipResult
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

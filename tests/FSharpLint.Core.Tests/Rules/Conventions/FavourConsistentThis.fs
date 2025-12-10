@@ -112,7 +112,7 @@ type TorMessageDigest(isSha256: bool) =
         Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceViolationAndSuggestedFix() =
+    member this.InConsistentSelfShouldProduceViolationAndAutoFix() =
         let source = """
 type Foo =
     { Bar : Baz }
@@ -133,12 +133,12 @@ type Foo =
 
         Assert.IsTrue this.ViolationsExist
         
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceViolationAndSuggestedFix2() =
+    member this.InConsistentSelfShouldProduceViolationAndAutoFix2() =
         let source = """
 type Foo =
     { Bar : Baz }
@@ -160,12 +160,12 @@ type Foo =
         Assert.IsTrue this.ViolationsExist
         Assert.IsTrue(this.ViolationExistsAt(6, 11))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.InConsistentSelfShouldProduceViolationAndSuggestedFix3() =
+    member this.InConsistentSelfShouldProduceViolationAndAutoFix3() =
         let source = """
 type CustomerName(firstName, middleInitial, lastName) =
     member this.FirstName = firstName
@@ -182,6 +182,6 @@ type CustomerName(firstName, middleInitial, lastName) =
         Assert.IsTrue this.ViolationsExist
         Assert.IsTrue(this.ViolationExistsAt(4, 11))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

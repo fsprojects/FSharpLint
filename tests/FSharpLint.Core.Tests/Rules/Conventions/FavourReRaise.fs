@@ -120,6 +120,6 @@ with
         Assert.IsTrue(this.ViolationsExist)
         Assert.IsTrue(this.ViolationExistsAt(7, 8))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

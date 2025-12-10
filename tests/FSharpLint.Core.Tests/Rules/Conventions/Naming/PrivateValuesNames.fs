@@ -238,7 +238,7 @@ let main Dog = ()
         Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``Quick fix for camel case converts the first character of the identifier to lower case.``() =
+    member this.``Auto fix for camel case converts the first character of the identifier to lower case.``() =
         let source = """
 module Program
 
@@ -252,7 +252,7 @@ let foo x = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.ForLoopIdentifierIsCamelCase() =

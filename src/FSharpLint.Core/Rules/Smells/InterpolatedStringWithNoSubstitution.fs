@@ -11,7 +11,7 @@ let private generateViolation range =
     {
         Range = range
         Message = Resources.GetString "InterpolatedStringWithNoSubstitution"
-        SuggestedFix = None
+        AutoFix = None
         TypeChecks = List.Empty
     }
 

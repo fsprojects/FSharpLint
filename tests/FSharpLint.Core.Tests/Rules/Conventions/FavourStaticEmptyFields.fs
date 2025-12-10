@@ -170,7 +170,7 @@ match foo with
         Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsSuggestedFixForString() =
+    member this.FavourStaticEmptyFieldsAutoFixForString() =
         let source = "let foo = \"\""
 
         let expected = "let foo = String.Empty"
@@ -179,12 +179,12 @@ match foo with
 
         Assert.IsTrue this.ViolationsExist
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsSuggestedFixForList() =
+    member this.FavourStaticEmptyFieldsAutoFixForList() =
         let source = "let foo = []"
 
         let expected = "let foo = List.Empty"
@@ -193,12 +193,12 @@ match foo with
 
         Assert.IsTrue this.ViolationsExist
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.FavourStaticEmptyFieldsSuggestedFixForArray() =
+    member this.FavourStaticEmptyFieldsAutoFixForArray() =
         let source = "let foo = [||]"
 
         let expected = "let foo = Array.empty"
@@ -207,6 +207,6 @@ match foo with
 
         Assert.IsTrue this.ViolationsExist
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

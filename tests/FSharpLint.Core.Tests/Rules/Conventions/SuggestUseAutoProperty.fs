@@ -93,7 +93,7 @@ type Foo() =
         Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Quick fix for property that only returns immutable value`` () =
+    member this.``Auto fix for property that only returns immutable value`` () =
         let source = """
 type Foo(content: int) =
     member self.Content = content
@@ -105,7 +105,7 @@ type Foo(content: int) =
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``No violation for types with [<Struct>] attribute`` () =
