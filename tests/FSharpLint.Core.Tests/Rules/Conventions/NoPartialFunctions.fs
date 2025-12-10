@@ -183,35 +183,35 @@ module Program =
 
         this.AssertNoViolations()
 (*
-    // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers
+    // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers in .Core/.../NoPartialFunctions.fs
 
     [<Test>]
     member this.``Violation for method invocations to Foo.Bar.Instance.Baz``() =
-        this.Parse("
+        this.Parse("""
 namespace Foo
 type Bar() =
-    member this.Baz = 'x'
+    member this.Baz = "x"
     static member Instance = Bar()
 namespace FooBar
 module Program =
-    let bar = '212'
+    let bar = "212"
     Console.WriteLine bar
     let foo = None
     printf foo.ToString()
-    System.Console.WriteLine Foo.Bar.Instance.Baz")
+    System.Console.WriteLine Foo.Bar.Instance.Baz""")
 
         Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Violation text for method invocations to Foo.Bar.Instance.Baz``() =
-        this.Parse("
+        this.Parse("""
 namespace Foo
 type Bar() =
-    member this.Baz = 'x'
+    member this.Baz = "x"
     static member Instance = Bar()
 namespace FooBar
 module Program =
-    System.Console.WriteLine Foo.Bar.Instance.Baz")
+    System.Console.WriteLine Foo.Bar.Instance.Baz""")
 
         Assert.IsTrue this.ViolationsExist
         this.AssertViolationWithMessageExists("Consider using pattern matching instead of partial function/method 'Foo.Bar.Baz'.")
