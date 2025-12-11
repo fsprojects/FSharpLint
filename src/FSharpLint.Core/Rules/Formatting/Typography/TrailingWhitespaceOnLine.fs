@@ -51,7 +51,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
             {
                 Range = range
                 Message = Resources.GetString "RulesTypographyTrailingWhitespaceViolation"
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

@@ -62,13 +62,13 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
     match tryReplaceWithFunctionComposition lambda.Body with
     | None -> Array.empty
     | Some funcStrings ->
-        let suggestedFix =
+        let autoFix =
             lazy(
                 Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
         Array.singleton
             { Range = range
               Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-              SuggestedFix = Some suggestedFix
+              AutoFix = Some autoFix
               TypeChecks = List.Empty }
 
 let runner (args:AstNodeRuleParams) =

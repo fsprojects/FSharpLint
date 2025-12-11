@@ -59,7 +59,7 @@ exception MyError of string
         Assert.IsTrue(this.ViolationWithMessageExistsAt(violationMsg, 3, 10))
 
     [<Test>]
-    member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
+    member this.``Auto fix for suffixes adds missing suffix to identifier.``() =
         let source = """
 module Program
 exception Foo of string
@@ -71,4 +71,4 @@ exception FooException of string
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)

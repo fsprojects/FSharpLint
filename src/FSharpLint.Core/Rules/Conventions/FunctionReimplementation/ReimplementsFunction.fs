@@ -31,14 +31,14 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
                     ident.idText)
             |> String.concat "."
 
-        let suggestedFix = lazy(
+        let autoFix = lazy(
             ExpressionUtilities.tryFindTextOfRange range text
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
 
         {
             Range = range
             Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-            SuggestedFix = Some suggestedFix
+            AutoFix = Some autoFix
             TypeChecks = List.Empty
         }
 

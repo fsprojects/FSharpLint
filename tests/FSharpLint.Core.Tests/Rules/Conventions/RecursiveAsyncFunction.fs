@@ -52,7 +52,7 @@ module X =
         Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Quickfix for recursive async function ending in recursive do!``() = 
+    member this.``Autofix for recursive async function ending in recursive do!``() =
         let source = """
 namespace Program
 
@@ -74,5 +74,5 @@ module X =
 """
 
         this.Parse(source)
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
         Assert.AreEqual(expected, result)

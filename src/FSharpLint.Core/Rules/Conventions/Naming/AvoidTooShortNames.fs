@@ -23,7 +23,7 @@ let private checkIdentifier (identifier:Ident) (idText:string) =
         |> Array.map (fun message ->
             { Range = identifier.idRange
               Message = message
-              SuggestedFix = None
+              AutoFix = None
               TypeChecks = List.Empty })
     else
         Array.empty

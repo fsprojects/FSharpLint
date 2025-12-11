@@ -18,7 +18,7 @@ let private getViolationDetails (ident: Ident) =
     |> Array.map (fun message ->
         { Range = ident.idRange
           Message = message
-          SuggestedFix = None
+          AutoFix = None
           TypeChecks = List.Empty })
 
 let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>) =

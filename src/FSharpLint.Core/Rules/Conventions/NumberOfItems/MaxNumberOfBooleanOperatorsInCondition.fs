@@ -43,7 +43,7 @@ let private validateCondition (maxBooleanOperators:int) condition =
             {
                 Range = condition.Range
                 Message = violationMsg
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

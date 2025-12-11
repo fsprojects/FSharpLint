@@ -29,7 +29,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
             Array.singleton
                 { Range = range
                   Message = Resources.GetString "RulesTypographyTabCharacterViolation"
-                  SuggestedFix =
+                  AutoFix =
                     Some(
                         lazy
                             (Some(

@@ -29,14 +29,14 @@ type TestTypographyTabCharacterInFile() =
         Assert.IsFalse(this.ViolationExistsAt(4, 13))
 
     [<Test>]
-    member this.TabCharacterInFileSuggestedFix() =
+    member this.TabCharacterInFileAutoFix() =
         let source = "\t"
         let expected = String.replicate 4 " "
         this.Parse source
 
         Assert.IsTrue(this.ViolationExistsAt(1, 0))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 

@@ -92,7 +92,7 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
         Some {
             Range = range
             Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsAdditionalViolation", identifier)
-            SuggestedFix = None
+            AutoFix = None
             TypeChecks = List.Empty
         }
     else
@@ -103,14 +103,14 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
                 {
                     Range = range
                     Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchViolation", identifier)
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
             | Function replacementFunction ->
                 {
                     Range = range
                     Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementViolation", replacementFunction, identifier)
-                    SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
+                    AutoFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
                     TypeChecks = List.Empty
                 })
 
@@ -302,7 +302,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                                                     "RulesConventionsNoPartialFunctionsPatternMatchViolation",
                                                 fullyQualifiedInstanceMember
                                             )
-                                        SuggestedFix = None
+                                        AutoFix = None
                                         TypeChecks = (fun () -> typeMatches) |> List.singleton
                                     }
                             | Function replacementFunctionName ->
@@ -315,7 +315,7 @@ let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) nam
                                                 replacementFunctionName,
                                                 fullyQualifiedInstanceMember
                                             )
-                                        SuggestedFix =
+                                        AutoFix =
                                             Some(
                                                 lazy
                                                     (Some
@@ -366,7 +366,7 @@ let private checkMemberCallOnExpression
                                     Resources.GetString "RulesConventionsNoPartialFunctionsPatternMatchViolation",
                                     fullyQualifiedInstanceMember
                                 )
-                            SuggestedFix = None
+                            AutoFix = None
                             TypeChecks = (fun () -> true) |> List.singleton
                         }
                 | Function replacementFunctionName ->
@@ -379,7 +379,7 @@ let private checkMemberCallOnExpression
                                     replacementFunctionName,
                                     fullyQualifiedInstanceMember
                                 )
-                            SuggestedFix =
+                            AutoFix =
                                 Some(
                                     lazy
                                         (Some

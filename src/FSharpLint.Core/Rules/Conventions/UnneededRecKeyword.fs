@@ -52,7 +52,7 @@ let private generateViolation (func: RecursiveFunctionInfo) =
               Resources.GetString "RulesUnneededRecKeyword",
               func.Identifier.idText
           )
-      SuggestedFix = None
+      AutoFix = None
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =

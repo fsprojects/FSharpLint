@@ -17,7 +17,7 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
             {
                 Range = parameters.[maxParameters].Range
                 Message = violationMsg
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     | _ -> Array.empty

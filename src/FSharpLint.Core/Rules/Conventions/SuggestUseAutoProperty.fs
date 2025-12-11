@@ -109,7 +109,7 @@ let private runner (args: AstNodeRuleParams) =
             | parentNode :: _ when hasStructAttribute parentNode ->
                 Array.empty
             | _ ->
-                let suggestedFix =
+                let autoFix =
                     lazy
                         (match memberIdentifier.LongIdent with
                             | [ _; memberName ] ->
@@ -122,7 +122,7 @@ let private runner (args: AstNodeRuleParams) =
                 Array.singleton
                     { Range = memberRange
                       Message = Resources.GetString "RulesSuggestUseAutoProperty"
-                      SuggestedFix = Some suggestedFix
+                      AutoFix = Some autoFix
                       TypeChecks = List.Empty }
         | _ -> Array.empty
     | _ -> Array.empty

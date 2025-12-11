@@ -119,7 +119,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                     {
                         Range = range
                         Message = violationText config.Depth
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     })
                 |> Option.toArray

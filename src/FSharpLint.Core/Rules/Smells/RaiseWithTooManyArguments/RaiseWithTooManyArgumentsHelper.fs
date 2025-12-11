@@ -23,7 +23,7 @@ let checkRaiseWithTooManyArgs (raiseType:string) (count:int) (ruleName:string) (
                     {
                         Range = range
                         Message = Resources.GetString ruleName
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             | _ -> Array.empty

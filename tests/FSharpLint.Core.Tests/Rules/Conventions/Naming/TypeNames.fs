@@ -201,7 +201,7 @@ type Ścieżka = Ścieżka of string
 
 
     [<Test>]
-    member this.``Quick fix for underscores with config of `None` when will remove prefixing underscores.``() =
+    member this.``Auto fix for underscores with config of `None` when will remove prefixing underscores.``() =
         let source = """
 module Program
 
@@ -215,10 +215,10 @@ type Cat = | Foo
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Quick fix for pascal case converts the first character of the identifier to upper case.``() =
+    member this.``Auto fix for pascal case converts the first character of the identifier to upper case.``() =
         let source = """
 module Program
 
@@ -232,7 +232,7 @@ type Cat = | Foo
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.EnumNameIsPascalCase() =

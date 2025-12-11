@@ -108,7 +108,7 @@ module XmlDocumentation =
             configExceptionHeader analyserInfo.Config ruleName && isNotSuppressed ruleName i
 
         let suggest range message = 
-            args.Info.Suggest { Range = range; Message = message; SuggestedFix = None; TypeChecks = [] }
+            args.Info.Suggest { Range = range; Message = message; AutoFix = None; TypeChecks = [] }
         
         for i = 0 to syntaxArray.Length - 1 do
             match syntaxArray.[i].Actual with

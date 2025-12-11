@@ -125,7 +125,7 @@ let SuperCat = 5
         Assert.IsTrue(this.ViolationExistsOnLine 5)
 
     [<Test>]
-    member this.SuggestedFix() =
+    member this.AutoFix() =
         let source = """
 module Program
 
@@ -142,12 +142,12 @@ let super_cat = 5
 
         Assert.IsTrue(this.ViolationExistsOnLine 5)
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.SuggestedFixForComplexName() =
+    member this.AutoFixForComplexName() =
         let source = """
 module Program
 
@@ -164,6 +164,6 @@ let super_cat_with_1_number = 5
 
         Assert.IsTrue(this.ViolationExistsOnLine 5)
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

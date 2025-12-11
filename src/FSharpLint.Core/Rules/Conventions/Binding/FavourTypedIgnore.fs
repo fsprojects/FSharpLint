@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 let private runner (args: AstNodeRuleParams) =
     let generateViolation identifier range text =
 
-        let suggestedFix =
+        let autoFix =
             lazy
                 (ExpressionUtilities.tryFindTextOfRange range text
                  |> Option.map
@@ -22,7 +22,7 @@ let private runner (args: AstNodeRuleParams) =
         {
             Range = range
             Message = String.Format(Resources.GetString "RulesFavourTypedIgnore", identifier)
-            SuggestedFix = Some suggestedFix
+            AutoFix = Some autoFix
             TypeChecks = List.Empty
         }
 

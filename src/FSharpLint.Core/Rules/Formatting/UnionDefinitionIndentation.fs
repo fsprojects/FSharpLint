@@ -28,7 +28,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                         {
                             Range = firstCase.Range
                             Message = Resources.GetString "RulesFormattingUnionDefinitionIndentationViolation"
-                            SuggestedFix = None
+                            AutoFix = None
                             TypeChecks = List.Empty
                         }
                 else
@@ -41,7 +41,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
                             {
                                 Range = caseTwo.Range
                                 Message = Resources.GetString "RulesFormattingUnionDefinitionSameIndentationViolation"
-                                SuggestedFix = None
+                                AutoFix = None
                                 TypeChecks = List.Empty
                             }
                     else

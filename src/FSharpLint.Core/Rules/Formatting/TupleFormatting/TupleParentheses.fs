@@ -10,7 +10,7 @@ open FSharpLint.Rules.Helper
 
 let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
     let processText text =
-        let suggestedFix =
+        let autoFix =
             lazy
                 (Some 
                     {
@@ -22,7 +22,7 @@ let checkTupleHasParentheses (args:AstNodeRuleParams) _ range parentNode =
         {
             Range = range
             Message = Resources.GetString "RulesFormattingTupleParenthesesViolation"
-            SuggestedFix = Some suggestedFix
+            AutoFix = Some autoFix
             TypeChecks = List.Empty
         }
 

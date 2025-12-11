@@ -51,7 +51,7 @@ let runner args =
             {
                 Range = range
                 Message = Resources.GetString("RulesRedundantNewKeyword")
-                SuggestedFix = Some(generateFix args.FileContent range)
+                AutoFix = Some(generateFix args.FileContent range)
                 TypeChecks =
                     [
                         fun () -> doesNotImplementIDisposable checkInfo identifier

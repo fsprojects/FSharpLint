@@ -28,7 +28,7 @@ match [] with
 
         Assert.IsTrue(this.ViolationExistsAt(5, 2))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 

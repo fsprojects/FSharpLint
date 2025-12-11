@@ -74,7 +74,7 @@ let result = extractInt singleCaseDU
         this.AssertNoViolations()
 
     [<Test>]
-    member this.``Quick fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() =
+    member this.``Auto fix for underscores with config of `AllowPrefix` will only remove underscores not prefixing the identifier.``() =
         let source = """
 module Program
 
@@ -88,10 +88,10 @@ let baz __foobar = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Quick fix for camel case takes into account underscore prefixes.``() =
+    member this.``Auto fix for camel case takes into account underscore prefixes.``() =
         let source = """
 module Program
 
@@ -105,7 +105,7 @@ let foo _x = 0
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``As pattern is processed correctly (GetPatternIdents regression)``() =

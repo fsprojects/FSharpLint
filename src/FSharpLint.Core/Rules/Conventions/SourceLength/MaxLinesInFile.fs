@@ -17,7 +17,7 @@ let private checkNumberOfLinesInFile numberOfLines line maxLines =
                 Range =
                     Range.mkRange "" (Position.mkPos (maxLines + 1) 0) (Position.mkPos numberOfLines (String.length line))
                 Message = String.Format(violationTextFormatString, (maxLines + 1))
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

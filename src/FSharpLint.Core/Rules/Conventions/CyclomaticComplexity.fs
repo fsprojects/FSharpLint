@@ -193,7 +193,7 @@ let runner (config:Config) (args:AstNodeRuleParams) : array<ViolationDetails> =
                                  (pos.Column, pos.Line))
                             |> Seq.map (fun scope -> // transform into ViolationDetails
                                 let violationMsg = String.Format(Resources.GetString "RulesCyclomaticComplexityViolation", scope.Complexity, config.MaxComplexity)
-                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = violationMsg; SuggestedFix = None; TypeChecks = List.Empty })
+                                { Range = scope.Binding.RangeOfBindingWithRhs; Message = violationMsg; AutoFix = None; TypeChecks = List.Empty })
                             |> Seq.toList
             let ret = match violationDetails with
                       | Some violation -> violation::fromStack

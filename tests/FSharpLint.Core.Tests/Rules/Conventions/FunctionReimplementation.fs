@@ -40,7 +40,7 @@ let f = List.map (fun (x,_) -> id x) []
         this.AssertNoViolations()
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() =
+    member this.``Autofix for lambda reimplementing operator is to replace the lambda with the operator.``() =
         let source = """
 module Program
 
@@ -54,7 +54,7 @@ let f = ( * )
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Lambda reimplementing long identifier function issues violation``() =
@@ -67,7 +67,7 @@ let f = fun a b -> List.map a b
         Assert.IsTrue(this.ViolationsExist)
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() =
+    member this.``Autofix for lambda reimplementing function is to replace the lambda with the func ident.``() =
         let source = """
 module Program
 
@@ -81,7 +81,7 @@ let f = List.map
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -202,7 +202,7 @@ let f = fun x -> x |> tan 0 |> cos |> tan
         Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.``Test quick fix for nested function calls that can be replaced with composition``() =
+    member this.``Test auto fix for nested function calls that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -217,12 +217,12 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.``Test quick fix for piped function calls that can be replaced with composition``() =
+    member this.``Test auto fix for piped function calls that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -237,12 +237,12 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.``Test quick fix for piped function calls with partially applied functions that can be replaced with composition``() =
+    member this.``Test auto fix for piped function calls with partially applied functions that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -257,7 +257,7 @@ let f = min 0.0 >> cos >> tan
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 

@@ -9,7 +9,7 @@ type TestBindingFavourAsKeyword() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourAsKeyword.rule)
 
     [<Test>]
-    member this.FavourAsKeywordShouldQuickFix() =
+    member this.FavourAsKeywordShouldAutoFix() =
         let source = """
 module Program
 
@@ -26,7 +26,7 @@ match "" with
 | "baz" as bar -> ()
 """
 
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
 
     [<Test>]

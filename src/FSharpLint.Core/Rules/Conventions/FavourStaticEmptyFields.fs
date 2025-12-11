@@ -22,7 +22,7 @@ let private getStaticEmptyRuleViolationMessage  (range:FSharp.Compiler.Text.Rang
     Resources.GetString messageKey
 
 let private generateViolation (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    let suggestedFix = lazy(
+    let autoFix = lazy(
         let replacementText =
             match emptyLiteralType with
             | EmptyStringLiteral -> "String.Empty"
@@ -32,7 +32,7 @@ let private generateViolation (fileContents: string) (range:FSharp.Compiler.Text
     Array.singleton
         { Range = range
           Message = getStaticEmptyRuleViolationMessage range emptyLiteralType
-          SuggestedFix = Some suggestedFix
+          AutoFix = Some autoFix
           TypeChecks = List.Empty }
 
 let private runner (args: AstNodeRuleParams) =

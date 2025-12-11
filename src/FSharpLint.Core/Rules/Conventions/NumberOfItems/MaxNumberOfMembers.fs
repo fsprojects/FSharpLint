@@ -34,7 +34,7 @@ let private validateType (maxMembers:int) members typeRepresentation =
             {
                 Range = members.[maxMembers].Range
                 Message = violationMsg
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else
