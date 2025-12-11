@@ -13,22 +13,22 @@ type FSharpLintResponseCode =
     | ErrDaemonCreationFailed = -1
     | OkCurrentDaemonVersion = 0
 
-type File = private File of string 
-with 
+type File = private File of string
+with
     static member From (filePath: string) =
         if File.Exists(filePath) then
             filePath |> File |> Some
         else
             None
 
-    static member Unwrap(File f) = f
+    static member Unwrap(File file) = file
 
 type FSharpLintVersion = FSharpLintVersion of string
 type FSharpLintExecutableFile = FSharpLintExecutableFile of File
-type Folder = private Folder of string 
-with 
+type Folder = private Folder of string
+with
     static member FromFile (filePath: string) =
-        if File.Exists(filePath) then 
+        if File.Exists(filePath) then
             let folder = (FileInfo filePath).Directory
             if folder.Exists then
                 folder.FullName |> Folder |> Some
@@ -37,12 +37,12 @@ with
         else
             None
     static member FromFolder (folderPath: string) =
-        if Directory.Exists(folderPath) then 
+        if Directory.Exists(folderPath) then
             let folder = DirectoryInfo folderPath
             folder.FullName |> Folder |> Some
         else
             None
-    static member Unwrap(Folder f) = f
+    static member Unwrap(Folder folder) = folder
 
 [<RequireQualifiedAccess>]
 type FSharpLintToolStartInfo =
