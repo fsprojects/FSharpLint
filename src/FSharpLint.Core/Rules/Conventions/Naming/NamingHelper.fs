@@ -12,7 +12,7 @@ open FSharpLint.Framework.Utilities
 open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Symbols
 
-module QuickFixes =
+module AutoFixes =
     let removeAllUnderscores (ident:Ident) = lazy(
         let toText = ident.idText.Replace("_", String.Empty)
         Some { FromText = ident.idText; FromRange = ident.idRange; ToText = toText })
@@ -165,40 +165,40 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
         match config.Naming with
         | Some NamingCase.PascalCase ->
             pascalCaseRule idText
-            |> Option.map (formatViolationMsg >> tryAddFix QuickFixes.toPascalCase)
+            |> Option.map (formatViolationMsg >> tryAddFix AutoFixes.toPascalCase)
         | Some NamingCase.CamelCase ->
             camelCaseRule idText
-            |> Option.map (formatViolationMsg >> tryAddFix QuickFixes.toCamelCase)
+            |> Option.map (formatViolationMsg >> tryAddFix AutoFixes.toCamelCase)
         | Some NamingCase.AllLowercase ->
             lowercaseRule idText
-            |> Option.map (formatViolationMsg >> tryAddFix (QuickFixes.toAllLowercase config.Underscores))
+            |> Option.map (formatViolationMsg >> tryAddFix (AutoFixes.toAllLowercase config.Underscores))
         | Some NamingCase.AllUppercase ->
             uppercaseRule idText
-            |> Option.map (formatViolationMsg >> tryAddFix (QuickFixes.toAllUppercase config.Underscores))
+            |> Option.map (formatViolationMsg >> tryAddFix (AutoFixes.toAllUppercase config.Underscores))
         | _ -> None
 
     let underscoresViolation =
         match config.Underscores with
         | Some (NamingUnderscores.None as nuCfg) ->
             underscoreRule nuCfg idText
-            |> Option.map (formatViolationMsg >> tryAddFix QuickFixes.removeAllUnderscores)
+            |> Option.map (formatViolationMsg >> tryAddFix AutoFixes.removeAllUnderscores)
         | Some (NamingUnderscores.AllowPrefix as nuCfg) ->
             underscoreRule nuCfg idText
-            |> Option.map (formatViolationMsg >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
+            |> Option.map (formatViolationMsg >> tryAddFix AutoFixes.removeNonPrefixingUnderscores)
         | Some (NamingUnderscores.AllowInfix as nuCfg) ->
             underscoreRule nuCfg idText
-            |> Option.map (formatViolationMsg >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
+            |> Option.map (formatViolationMsg >> tryAddFix AutoFixes.removePrefixingAndSuffixingUnderscores)
         | _ -> None
 
     let prefixViolation =
         Option.bind (fun prefix ->
             prefixRule prefix idText
-            |> Option.map (formatViolationMsg2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))) config.Prefix
+            |> Option.map (formatViolationMsg2 prefix >> tryAddFix (AutoFixes.addPrefix prefix))) config.Prefix
 
     let suffixViolation =
         Option.bind (fun suffix ->
             suffixRule suffix idText
-            |> Option.map (formatViolationMsg2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))) config.Suffix
+            |> Option.map (formatViolationMsg2 suffix >> tryAddFix (AutoFixes.addSuffix suffix))) config.Suffix
 
     Array.choose id
         [|
@@ -211,11 +211,11 @@ let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText
 let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
     if notOperator idText && isNotDoubleBackTickedIdent identifier then
         checkIdentifierPart namingConfig identifier idText
-        |> Array.map (fun (message, suggestedFix) ->
+        |> Array.map (fun (message, autoFix) ->
             {
                 Range = identifier.idRange
                 Message = message
-                SuggestedFix = Some suggestedFix
+                AutoFix = Some autoFix
                 TypeChecks = List.Empty
             })
     else

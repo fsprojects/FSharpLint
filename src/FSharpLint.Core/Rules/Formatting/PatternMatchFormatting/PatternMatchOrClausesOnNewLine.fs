@@ -15,7 +15,7 @@ let check args _ (clauses:SynMatchClause list) _ =
                 {
                     Range = clauseTwo.Range
                     Message = Resources.GetString "RulesFormattingPatternMatchOrClausesOnNewLineViolation"
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

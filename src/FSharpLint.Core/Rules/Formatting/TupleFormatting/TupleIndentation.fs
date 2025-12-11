@@ -18,7 +18,7 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
                 {
                     Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
                     Message = Resources.GetString "RulesFormattingTupleIndentationViolation"
-                    SuggestedFix = None
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

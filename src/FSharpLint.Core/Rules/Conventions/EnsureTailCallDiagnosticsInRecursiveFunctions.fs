@@ -15,7 +15,7 @@ let private generateViolation (func: UnneededRecKeyword.RecursiveFunctionInfo) =
             Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
             func.Identifier.idText
         )
-      SuggestedFix = None
+      AutoFix = None
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =

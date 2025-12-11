@@ -74,7 +74,7 @@ type Printable() =
         this.AssertNoViolations()
 
     [<Test>]
-    member this.``Quick fix for prefixes adds missing prefix to identifier.``() =
+    member this.``Auto fix for prefixes adds missing prefix to identifier.``() =
         let source = """
 module Program
 
@@ -90,4 +90,4 @@ type IPrintable =
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)

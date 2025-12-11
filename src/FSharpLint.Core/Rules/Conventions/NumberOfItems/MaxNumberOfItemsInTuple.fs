@@ -28,7 +28,7 @@ let private validateTuple (maxItems:int) (items:SynExpr list) =
             {
                 Range = items.[maxItems].Range
                 Message = violationMsg
-                SuggestedFix = None
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

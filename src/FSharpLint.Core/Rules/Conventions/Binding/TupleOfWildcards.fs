@@ -27,13 +27,13 @@ let private checkTupleOfWildcards fileContents pattern identifier identifierRang
         let refactorFrom = constructorString (List.length patterns)
         let refactorTo = constructorString 1
         let violationMsg = String.Format(violationTextFormatString, refactorFrom, refactorTo)
-        let suggestedFix = lazy(
-            Some { SuggestedFix.FromRange = identifierRange; FromText = fileContents; ToText = refactorTo })
+        let autoFix = lazy(
+            Some { AutoFix.FromRange = identifierRange; FromText = fileContents; ToText = refactorTo })
         Array.singleton
             {
                 Range = range
                 Message = violationMsg
-                SuggestedFix = Some suggestedFix
+                AutoFix = Some autoFix
                 TypeChecks = List.Empty
             }
     | _ -> Array.empty

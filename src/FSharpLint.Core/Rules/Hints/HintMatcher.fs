@@ -694,15 +694,15 @@ let private hintError (config: HintErrorConfig) =
                         HintNode = (HintExpr expr)
                 }
 
-        let suggestedFix = lazy(
+        let autoFix = lazy(
             ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
 
-        { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
+        { Range = config.Range; Message = error; AutoFix = Some autoFix; TypeChecks = config.TypeChecks }
     | Suggestion.Message(message) ->
         let violationTextFormatString = Resources.GetString "RulesHintSuggestion"
         let error = System.String.Format(violationTextFormatString, matched, message)
-        { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
+        { Range = config.Range; Message = error; AutoFix = None; TypeChecks = config.TypeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
     let symbol =
