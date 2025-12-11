@@ -296,7 +296,7 @@
         }
     },
     "suggestUseAutoProperty": { "enabled": false },
-    "avoidTooShortNames": { "enabled": false },
+    "avoidTooShortNaming": { "enabled": false },
     "asyncExceptionWithoutReturn": { "enabled": false },
     "unneededRecKeyword": { "enabled": true },
     "indentation": {

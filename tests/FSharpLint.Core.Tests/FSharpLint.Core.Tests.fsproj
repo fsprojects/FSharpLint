@@ -41,7 +41,7 @@
     <Compile Include="Rules\Conventions\NoPartialFunctions.fs" />
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
-    <Compile Include="Rules\Conventions\AvoidTooShortNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\AvoidTooShortNaming.fs" />
     <Compile Include="Rules\Conventions\AvoidSinglePipeOperator.fs" />
     <Compile Include="Rules\Conventions\SuggestUseAutoProperty.fs" />
     <Compile Include="Rules\Conventions\UsedUnderscorePrefixedElements.fs" />

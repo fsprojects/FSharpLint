@@ -183,7 +183,7 @@
   <data name="RulesNamingConventionsLowercaseViolation" xml:space="preserve">
     <value>Consider changing `{0}` to lowercase.</value>
   </data>
-  <data name="RulesAvoidTooShortNamesViolation" xml:space="preserve">
+  <data name="RulesAvoidTooShortNamingViolation" xml:space="preserve">
     <value>Consider using a longer name, as it is currently too short.</value>
   </data>
   <data name="RulesNamingConventionsPrefixViolation" xml:space="preserve">
