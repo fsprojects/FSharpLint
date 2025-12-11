@@ -153,7 +153,7 @@ let private getFolderFor filePath (): Result<Folder, FSharpLintServiceError> =
         else match Folder.FromFile filePath with
              | None -> Error FSharpLintServiceError.FileDoesNotExist
              | Some folder -> Ok folder
-    
+
     handleFile filePath
 
 let private getDaemon (agent: MailboxProcessor<Msg>) (folder: Folder) : Result<JsonRpc, FSharpLintServiceError> =
@@ -190,26 +190,26 @@ let private daemonNotFoundResponse filePath (error: GetDaemonError) : Task<FShar
                                                                                        workingDirectory,
                                                                                        pathEnvironmentVariable,
                                                                                        error)) ->
-            $"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` inside working directory \"{workingDirectory}\" but could not find \"%s{executableFile}\" on the PATH (%s{pathEnvironmentVariable}). Error: %s{error}",
-            FSharpLintResponseCode.ErrDaemonCreationFailed
+            ($"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` inside working directory \"{workingDirectory}\" but could not find \"%s{executableFile}\" on the PATH (%s{pathEnvironmentVariable}). Error: %s{error}",
+            FSharpLintResponseCode.ErrDaemonCreationFailed)
         | GetDaemonError.DotNetToolListError(DotNetToolListError.ProcessStartError(ProcessStartError.UnexpectedException(executableFile,
                                                                                                                          arguments,
                                                                                                                          error)))
         | GetDaemonError.FSharpLintProcessStart(ProcessStartError.UnexpectedException(executableFile, arguments, error)) ->
-            $"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` but failed with \"%s{error}\"",
-            FSharpLintResponseCode.ErrDaemonCreationFailed
+            ($"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` but failed with \"%s{error}\"",
+            FSharpLintResponseCode.ErrDaemonCreationFailed)
         | GetDaemonError.DotNetToolListError(DotNetToolListError.ExitCodeNonZero(executableFile,
                                                                                  arguments,
                                                                                  exitCode,
                                                                                  error)) ->
-            $"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` but exited with code {exitCode} {error}",
-            FSharpLintResponseCode.ErrDaemonCreationFailed
+            ($"FSharpLint.Client tried to run `%s{executableFile} %s{arguments}` but exited with code {exitCode} {error}",
+            FSharpLintResponseCode.ErrDaemonCreationFailed)
         | GetDaemonError.InCompatibleVersionFound ->
-            "FSharpLint.Client did not found a compatible dotnet tool version to launch as daemon process",
-            FSharpLintResponseCode.ErrToolNotFound
+            ("FSharpLint.Client did not found a compatible dotnet tool version to launch as daemon process",
+            FSharpLintResponseCode.ErrToolNotFound)
         | GetDaemonError.CompatibleVersionIsKnownButNoDaemonIsRunning(FSharpLintVersion version) ->
-            $"FSharpLint.Client found a compatible version `%s{version}` but no daemon could be launched.",
-            FSharpLintResponseCode.ErrDaemonCreationFailed
+            ($"FSharpLint.Client found a compatible version `%s{version}` but no daemon could be launched.",
+            FSharpLintResponseCode.ErrDaemonCreationFailed)
 
     { Code = int code
       FilePath = filePath
@@ -226,10 +226,10 @@ let private cancellationWasRequestedResponse filePath : Task<FSharpLintResponse>
 
 let mapResultToResponse (filePath: string) (result: Result<Task<FSharpLintResponse>, FSharpLintServiceError>) =
     match result with
-    | Ok t -> t
+    | Ok version -> version
     | Error FSharpLintServiceError.FileDoesNotExist -> fileNotFoundResponse filePath
     | Error FSharpLintServiceError.FilePathIsNotAbsolute -> fileNotAbsoluteResponse filePath
-    | Error(FSharpLintServiceError.DaemonNotFound e) -> daemonNotFoundResponse filePath e
+    | Error(FSharpLintServiceError.DaemonNotFound err) -> daemonNotFoundResponse filePath err
     | Error FSharpLintServiceError.CancellationWasRequested -> cancellationWasRequestedResponse filePath
 
 type LSPFSharpLintService() =
@@ -239,7 +239,7 @@ type LSPFSharpLintService() =
     interface IFSharpLintService with
         member this.Dispose() =
             if not cts.IsCancellationRequested then
-                agent.PostAndReply Reset |> ignore
+                agent.PostAndReply Reset |> ignore<_>
                 cts.Cancel()
 
         member _.VersionAsync(versionRequest: VersionRequest, ?cancellationToken: CancellationToken) : Task<FSharpLintResponse> =
@@ -252,8 +252,8 @@ type LSPFSharpLintService() =
                         Methods.Version,
                         cancellationToken = Option.defaultValue cts.Token cancellationToken
                     )
-                    .ContinueWith(fun (t: Task<string>) ->
+                    .ContinueWith(fun (task: Task<string>) ->
                         { Code = int FSharpLintResponseCode.OkCurrentDaemonVersion
-                          Result = Content t.Result
+                          Result = Content task.Result
                           FilePath = versionRequest.FilePath }))
             |> mapResultToResponse versionRequest.FilePath

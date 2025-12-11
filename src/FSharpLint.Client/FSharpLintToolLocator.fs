@@ -32,7 +32,7 @@ let private readOutputStreamAsLines (outputStream: StreamReader) : string list =
         let nextLine = outputStream.ReadLine()
 
         if isNull nextLine then
-            continuation []
+            continuation List.Empty
         else
             readLines outputStream (fun lines -> nextLine :: lines |> continuation)
 
@@ -73,15 +73,15 @@ let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<stri
     ps.UseShellExecute <- false
 
     match startProcess ps with
-    | Ok p ->
-        p.WaitForExit()
-        let exitCode = p.ExitCode
+    | Ok proc ->
+        proc.WaitForExit()
+        let exitCode = proc.ExitCode
 
         if exitCode = 0 then
-            let output = readOutputStreamAsLines p.StandardOutput
+            let output = readOutputStreamAsLines proc.StandardOutput
             Ok output
         else
-            let error = p.StandardError.ReadToEnd()
+            let error = proc.StandardError.ReadToEnd()
             Error(DotNetToolListError.ExitCodeNonZero(ps.FileName, ps.Arguments, exitCode, error))
     | Error err -> Error(DotNetToolListError.ProcessStartError err)
 
@@ -113,7 +113,7 @@ let private (|CompatibleTool|_|) lines =
         let tool =
             List.tryFind
                 (fun (packageId, version) ->
-                    match packageId, version with
+                    match (packageId, version) with
                     | CompatibleToolName _, CompatibleVersion _ -> true
                     | _ -> false)
                 tools
@@ -129,7 +129,7 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
         Option.ofObj (Environment.GetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE"))
         |> Option.orElse (Option.ofObj (Environment.GetEnvironmentVariable("PATH")))
         |> function
-        | Some s -> s.Split([| if isWindows then ';' else ':' |], StringSplitOptions.RemoveEmptyEntries)
+        | Some path -> path.Split([| if isWindows then ';' else ':' |], StringSplitOptions.RemoveEmptyEntries)
         | None -> Array.empty
         |> Seq.choose (fun folder ->
             if isWindows then
@@ -154,15 +154,15 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
             UseShellExecute = false)
 
         match startProcess processStart with
-        | Ok p ->
-            p.WaitForExit()
-            let stdOut = p.StandardOutput.ReadToEnd()
+        | Ok proc ->
+            proc.WaitForExit()
+            let stdOut = proc.StandardOutput.ReadToEnd()
 
             stdOut
             |> Option.ofObj
-            |> Option.bind (fun s ->
-                if s.Contains("Current version: ", StringComparison.CurrentCultureIgnoreCase) then
-                    let version = s.ToLowerInvariant().Replace("current version: ", String.Empty).Trim()
+            |> Option.bind (fun stdOut ->
+                if stdOut.Contains("Current version: ", StringComparison.CurrentCultureIgnoreCase) then
+                    let version = stdOut.ToLowerInvariant().Replace("current version: ", String.Empty).Trim()
                     Some (FSharpLintExecutableFile(fsharpLintExecutablePath), FSharpLintVersion(version))
                 else
                     None)

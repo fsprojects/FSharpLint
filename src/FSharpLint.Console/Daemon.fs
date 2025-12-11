@@ -19,7 +19,7 @@ type FSharpLintDaemon(sender: Stream, reader: Stream) as this =
 
     let disconnectEvent = new ManualResetEvent(false)
 
-    let exit () = disconnectEvent.Set() |> ignore
+    let exit () = disconnectEvent.Set() |> ignore<bool>
 
     do rpc.Disconnected.Add(fun _ -> exit ())
 
