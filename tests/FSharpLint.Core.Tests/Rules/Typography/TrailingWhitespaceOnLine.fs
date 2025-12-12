@@ -14,7 +14,7 @@ type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOn() =
         this.Parse("fun x -> " + System.Environment.NewLine + "    ()")
 
-        Assert.IsFalse(this.ErrorExistsAt(1, 8))
+        Assert.IsFalse(this.ViolationExistsAt(1, 8))
 
 [<TestFixture>]
 type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
@@ -24,25 +24,25 @@ type SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
     member this.SingleSpaceOnEndOfLineAfterOperatorWithConfigPropertyOff() =
         this.Parse("fun x -> " + System.Environment.NewLine + "    ()")
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 8))
+        Assert.IsTrue(this.ViolationExistsAt(1, 8))
 
     [<Test>]
     member this.NoSpacesOnEndOfLineWithNoSpacesAllowed() =
         this.Parse("let line = 55")
 
-        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+        Assert.IsFalse(this.ViolationExistsAt(1, 13))
 
     [<Test>]
     member this.OneSpaceOnEndOfLineWithNoSpacesAllowed() =
         this.Parse("let line = 55 ")
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 13))
+        Assert.IsTrue(this.ViolationExistsAt(1, 13))
 
     [<Test>]
     member this.WhitespaceOnEndOfLineAfterNewLine() =
         this.Parse (System.Environment.NewLine + "let d = 0 ")
 
-        Assert.IsTrue(this.ErrorExistsAt(2, 9))
+        Assert.IsTrue(this.ViolationExistsAt(2, 9))
 
 
 [<TestFixture>]
@@ -53,7 +53,7 @@ type MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() =
     member this.MultipleSpacesOnEndOfLineAfterOperatorWithConfigPropertyOn() =
         this.Parse("fun x ->  " + System.Environment.NewLine + "    ()")
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 8))
+        Assert.IsTrue(this.ViolationExistsAt(1, 8))
 
 [<TestFixture>]
 type TestOneSpace() =
@@ -63,14 +63,14 @@ type TestOneSpace() =
     member this.OneSpaceOnEndOfLineWithOneSpaceAllowed() =
         this.Parse("let line = 55 ")
 
-        Assert.IsFalse(this.ErrorExistsAt(1, 14))
-        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+        Assert.IsFalse(this.ViolationExistsAt(1, 14))
+        Assert.IsFalse(this.ViolationExistsAt(1, 13))
 
     [<Test>]
     member this.TwoSpacesOnEndOfLineWithOneSpaceAllowed() =
         this.Parse("let line = 55  ")
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 13))
+        Assert.IsTrue(this.ViolationExistsAt(1, 13))
 
 [<TestFixture>]
 type TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
@@ -80,9 +80,9 @@ type TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
     member this.TwoSpacesOnEndOfLineWithTwoSpacesAllowed() =
         this.Parse("let line = 55  ")
 
-        Assert.IsFalse(this.ErrorExistsAt(1, 15))
-        Assert.IsFalse(this.ErrorExistsAt(1, 14))
-        Assert.IsFalse(this.ErrorExistsAt(1, 13))
+        Assert.IsFalse(this.ViolationExistsAt(1, 15))
+        Assert.IsFalse(this.ViolationExistsAt(1, 14))
+        Assert.IsFalse(this.ViolationExistsAt(1, 13))
 
 [<TestFixture>]
 type WhitespaceEntireLine() =
@@ -92,7 +92,7 @@ type WhitespaceEntireLine() =
     member this.WhitespaceEntireLine() =
         this.Parse " "
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 0))
+        Assert.IsTrue(this.ViolationExistsAt(1, 0))
 
 [<TestFixture>]
 type WhitespaceEntireLineIgnoreBlankLines() =
@@ -102,4 +102,4 @@ type WhitespaceEntireLineIgnoreBlankLines() =
     member this.WhitespaceEntireLineIgnoreBlankLines() =
         this.Parse(" ")
 
-        Assert.IsFalse(this.ErrorExistsAt(1, 0))
+        Assert.IsFalse(this.ViolationExistsAt(1, 0))

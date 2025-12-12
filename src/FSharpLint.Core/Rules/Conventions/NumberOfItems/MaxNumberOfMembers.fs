@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxNumberOfMembers
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -28,13 +28,13 @@ let private validateType (maxMembers:int) members typeRepresentation =
         | SynTypeDefnRepr.ObjectModel(_, members, _) -> getMembers members
 
     if List.length members > maxMembers then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
-        let error = String.Format(errorFormatString, maxMembers)
+        let violationTextFormatString = Resources.GetString("RulesNumberOfItemsClassMembersViolation")
+        let violationMsg = String.Format(violationTextFormatString, maxMembers)
         Array.singleton
             {
                 Range = members.[maxMembers].Range
-                Message = error
-                SuggestedFix = None
+                Message = violationMsg
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

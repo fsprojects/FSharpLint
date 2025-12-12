@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -22,15 +22,15 @@ let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tu
                         FromText = commaText
                         ToText = ", "
                     })
-        let suggestedFix =
+        let autoFix =
             ExpressionUtilities.tryFindTextOfRange commaRange args.FileContent
             |> Option.map map
 
         Some
             {
                 Range = commaRange
-                Message = Resources.GetString("RulesFormattingTupleCommaSpacingError")
-                SuggestedFix = suggestedFix
+                Message = Resources.GetString "RulesFormattingTupleCommaSpacingViolation"
+                AutoFix = autoFix
                 TypeChecks = List.Empty
             }
       else

@@ -299,7 +299,7 @@ with
 
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
-      avoidTooShortNames:EnabledConfig option
+      avoidTooShortNaming:EnabledConfig option
       redundantNewKeyword:EnabledConfig option
       favourStaticEmptyFields:EnabledConfig option
       asyncExceptionWithoutReturn:EnabledConfig option
@@ -325,7 +325,7 @@ with
         Array.concat
             [|
                 this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
-                this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray
+                this.avoidTooShortNaming |> Option.bind (constructRuleIfEnabled AvoidTooShortNaming.rule) |> Option.toArray
                 this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
                 this.favourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule) |> Option.toArray
                 this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
@@ -402,7 +402,7 @@ type Configuration =
       PatternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
-      AvoidTooShortNames:EnabledConfig option
+      AvoidTooShortNaming:EnabledConfig option
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
       FavourReRaise:EnabledConfig option
@@ -497,7 +497,7 @@ with
         PatternMatchClauseIndentation = None
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
-        AvoidTooShortNames = None
+        AvoidTooShortNaming = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
@@ -692,7 +692,7 @@ let flattenConfig (config:Configuration) =
                 config.PatternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
                 config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
                 config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
-                config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+                config.AvoidTooShortNaming |> Option.bind (constructRuleIfEnabled AvoidTooShortNaming.rule)
                 config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
                 config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)
                 config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)

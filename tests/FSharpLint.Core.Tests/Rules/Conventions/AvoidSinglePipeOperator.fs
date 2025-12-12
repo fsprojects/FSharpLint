@@ -16,7 +16,7 @@ let someFunc someParam =
     |> someOtherFunc
 """
 
-        Assert.IsTrue <| this.ErrorExistsAt(4, 4)
+        Assert.IsTrue <| this.ViolationExistsAt(4, 4)
 
     [<Test>]
     member this.``Use pipe operator twice``() =
@@ -27,7 +27,7 @@ let someFunc someParam =
     |> yetAnotherFunc
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once in module``() =
@@ -38,7 +38,7 @@ module MyModule =
         |> someOtherFunc
 """
 
-        Assert.IsTrue <| this.ErrorExistsAt(5, 8)
+        Assert.IsTrue <| this.ViolationExistsAt(5, 8)
 
     [<Test>]
     member this.``Use pipe operator twice in module``() =
@@ -50,7 +50,7 @@ module MyModule =
         |> yetAnotherFunc
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once in type``() =
@@ -61,7 +61,7 @@ type CustomerName(firstName) =
         |> someOtherFunc
 """
 
-        Assert.IsTrue <| this.ErrorExistsAt(5, 8)
+        Assert.IsTrue <| this.ViolationExistsAt(5, 8)
 
     [<Test>]
     member this.``Use pipe operator twice in type``() =
@@ -73,7 +73,7 @@ type CustomerName(firstName) =
         |> yetAnotherFunc
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once to avoid parenthesis``() =
@@ -83,7 +83,7 @@ let someFunc someParam =
     |> someOtherFunc2
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
 
     [<Test>]
@@ -93,7 +93,7 @@ let someFunc someParam =
     someOtherFunc1 someParam someParam2 |> someOtherFunc3
 """
 
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator after an if expression``() =
@@ -103,7 +103,7 @@ let foo param =
     |> bar
 """
 
-        Assert.True this.NoErrorsExist
+        Assert.True this.NoViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once on record within a if statement``() =
@@ -120,7 +120,7 @@ let someFunc someParam =
         Array.empty
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator twice on record within a if statement``() =
@@ -139,7 +139,7 @@ let someFunc someParam =
         Array.empty
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once inside of an array``() =
@@ -148,7 +148,7 @@ let someFunc () =
     [| "Foo" |> String.length |]
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once on record within a nested if statement``() =
@@ -168,7 +168,7 @@ let someFunc someParam barParam =
         Array.empty
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator once without binding``() =
@@ -178,7 +178,7 @@ module Foo
 -1.0 |> abs
 """
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.``Use pipe operator twice without binding``() =
@@ -188,7 +188,7 @@ module Foo
 -1.0 |> abs |> ignore
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.``Use pipe operator thrice without binding``() =
@@ -198,7 +198,7 @@ module Foo
 -1.0 |> printf "%d" |> ignore |> someOtherFunc
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.``Suggest not using pipe operator if it's used once``() =
@@ -213,7 +213,7 @@ let someFunc someParam =
 """
         
         this.Parse source
-        let fixedSource = this.ApplyQuickFix source
+        let fixedSource = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, fixedSource)
 
@@ -225,7 +225,7 @@ let someFunc someParam =
     |> someOtherFunc someOtherParam
 """
         
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.``Use pipe operator for higher-order function with more than 1 argument``() =
@@ -236,4 +236,4 @@ parsedSolution.ProjectsInOrder
 )
 """
         
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist

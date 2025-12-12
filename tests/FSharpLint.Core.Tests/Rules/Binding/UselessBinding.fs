@@ -17,7 +17,7 @@ let a = 10
 let a = a
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.NotUselessBindingAsShadowingMutableWithImmutable() =
@@ -28,7 +28,7 @@ let mutable a = 10
 let a = a
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.NotUselessBindingAsShadowingImmutableWithMutable() =
@@ -39,7 +39,7 @@ let a = 10
 let mutable a = a
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.UselessBindingWithParens() =
@@ -50,12 +50,12 @@ let a = 10
 let ((a)) = ((a))
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/101
     /// (a use binding will dispose the value so is not useless)
     [<Test>]
-    member this.UseBindingWithSameNameDoesNotCauseUselessBindingError() =
+    member this.UseBindingWithSameNameDoesNotCauseUselessBindingViolation() =
         this.Parse """
 module Program
 
@@ -65,10 +65,10 @@ type Cat() =
         reader.ReadToEnd()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
-    member this.UselessBindingSuggestedFix() =
+    member this.UselessBindingAutoFix() =
         let source = """
 module Program
 
@@ -82,14 +82,14 @@ let a = 10
 
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.UselessBindingWithParensSuggestedFix() =
+    member this.UselessBindingWithParensAutoFix() =
         let source = """
 module Program
 
@@ -104,8 +104,8 @@ let a = 10
 
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

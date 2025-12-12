@@ -53,4 +53,4 @@ type TestIndentationRuleBase (rule:Rule) =
                 Lines = lines
                 Context = context
             }
-        |> Array.iter this.PostSuggestion
+        |> Array.iter this.PostViolation

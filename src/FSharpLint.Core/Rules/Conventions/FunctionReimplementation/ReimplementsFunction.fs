@@ -3,7 +3,7 @@ module FSharpLint.Rules.ReimplementsFunction
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -21,7 +21,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
             | ExpressionUtilities.Identifier(ident, _) -> Some(ident)
             | _ -> None
 
-    let generateError (identifier:LongIdent) =
+    let generateViolation (identifier:LongIdent) =
         let identifier =
             identifier
             |> List.map (fun ident ->
@@ -31,14 +31,14 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
                     ident.idText)
             |> String.concat "."
 
-        let suggestedFix = lazy(
+        let autoFix = lazy(
             ExpressionUtilities.tryFindTextOfRange range text
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
 
         {
             Range = range
             Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-            SuggestedFix = Some suggestedFix
+            AutoFix = Some autoFix
             TypeChecks = List.Empty
         }
 
@@ -48,7 +48,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
         |> List.rev
 
     isFunctionPointless lambda.Body argumentsAsIdentifiers
-    |> Option.map generateError
+    |> Option.map generateViolation
     |> Option.toArray
 
 let runner (args:AstNodeRuleParams) =

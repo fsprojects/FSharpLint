@@ -6,10 +6,10 @@ open NUnit.Framework
 open FSharpLint.Core.Tests
 
 type Assert with
-  static member NoErrors(this:TestHintMatcher) =
-    if this.NoErrorsExist then ()
+  static member NoViolations(this:TestHintMatcher) =
+    if this.NoViolationsExist then ()
     else
-        raise (NUnit.Framework.AssertionException($"No errors were expected, but there were some errors. Errors were:\n{this.ErrorMsg}"))
+        raise (NUnit.Framework.AssertionException($"No violations were expected, but there were some. Violations were:\n{this.ViolationMsg}"))
 
 [<TestFixture; SingleThreaded>]
 type TestHintMatcher() =
@@ -26,7 +26,7 @@ let (a, b) = (1, 2)
 let valid = not (a = b)
 """
 
-        Assert.ErrorExistsAt(this, (5, 12))
+        Assert.ViolationExistsAt(this, (5, 12))
 
     [<Test>]
     member this.MatchFunctionApplication() =
@@ -38,7 +38,7 @@ module Goat
 List.fold (+) 0 x
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchInfixExpression() =
@@ -50,7 +50,7 @@ module Goat
 4 + 4
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchPrefixExpression() =
@@ -62,7 +62,7 @@ module Goat
 4 + %4
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.``Match address of operator with a single ampersand in expression``() =
@@ -74,7 +74,7 @@ module Goat
 4 + &4
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.``Match address of operator with two ampersands in expression``() =
@@ -86,7 +86,7 @@ module Goat
 4 + &&4
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchParenthesesInHintExpression() =
@@ -98,7 +98,7 @@ module Goat
 6 + 4 / 5
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchParenthesesExpression() =
@@ -110,7 +110,7 @@ module Goat
 6 + (4 + (5))
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchLambda() =
@@ -122,7 +122,7 @@ module Goat
 let f = fun x y z -> x + z
 """
 
-        Assert.ErrorExistsAt(this, (4, 8))
+        Assert.ViolationExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchWildcardLambda() =
@@ -134,7 +134,7 @@ module Goat
 let f = fun _ -> 1
 """
 
-        Assert.ErrorExistsAt(this, (4, 8))
+        Assert.ViolationExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchMultipleWildcardLambda() =
@@ -146,7 +146,7 @@ module Goat
 let f = fun _ _ -> 1
 """
 
-        Assert.ErrorExistsAt(this, (4, 8))
+        Assert.ViolationExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchMultipleWildcardAndVariableLambda() =
@@ -158,7 +158,7 @@ module Goat
 let f = fun _ a _ x -> 1
 """
 
-        Assert.ErrorExistsAt(this, (4, 8))
+        Assert.ViolationExistsAt(this, (4, 8))
 
     [<Test>]
     member this.MatchIdLambda() =
@@ -170,7 +170,7 @@ module Goat
 let f = fun x -> x
 """
 
-        Assert.ErrorExistsAt(this, (4, 8))
+        Assert.ViolationExistsAt(this, (4, 8))
 
     [<Test>]
     member this.DontMatchIdLambda() =
@@ -182,7 +182,7 @@ module Goat
 let f = fun x -> 1
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 8))
+        Assert.IsFalse(this.ViolationExistsAt(4, 8))
 
     [<Test>]
     member this.MatchFunctionApplicationWithBackwardPipe() =
@@ -194,7 +194,7 @@ module Goat
 (+) 1 <| 2 + 3
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchFunctionApplicationWithForwardPipe() =
@@ -206,7 +206,7 @@ module Goat
 [1;2;3] |> List.fold (+) 0
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchMultipleFunctionApplications() =
@@ -218,7 +218,7 @@ module Goat
 [1;2;3] |> List.sort |> List.head
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchTupleApplication() =
@@ -230,7 +230,7 @@ module Goat
 fst (1, 0) |> ignore
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchListAppendItem() =
@@ -242,7 +242,7 @@ module Goat
 1::[] |> ignore
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchAppendListToList() =
@@ -254,7 +254,7 @@ module Goat
 [1]@[2] |> ignore
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchListAppendItemInPattern() =
@@ -268,7 +268,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 2))
+        Assert.ViolationExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchTupleInPattern() =
@@ -282,7 +282,7 @@ match ([], []) with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 3))
+        Assert.ViolationExistsAt(this, (5, 3))
 
     [<Test>]
     member this.MatchIntegerConstantInPattern() =
@@ -296,7 +296,7 @@ match 0 with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 2))
+        Assert.ViolationExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchListInPattern() =
@@ -310,7 +310,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 2))
+        Assert.ViolationExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchArrayInPattern() =
@@ -324,7 +324,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 2))
+        Assert.ViolationExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchEmptyArray() =
@@ -336,7 +336,7 @@ module Goat
 Array.isEmpty [||]
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchOrPattern() =
@@ -350,7 +350,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.ErrorExistsAt(this, (5, 2))
+        Assert.ViolationExistsAt(this, (5, 2))
 
     [<Test>]
     member this.MatchIfStatement() =
@@ -362,7 +362,7 @@ module Goat
 if true then true else false
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchElseIfStatement() =
@@ -374,7 +374,7 @@ module Goat
 if true then true else if true then true else false
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchSingleParamStaticMethod() =
@@ -386,7 +386,7 @@ module Goat
 System.String.Copy("dog")
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.MatchMultiParamStaticMethod() =
@@ -398,7 +398,7 @@ module Goat
 System.String.Compare("dog", "cat")
 """
 
-        Assert.ErrorExistsAt(this, (4, 0))
+        Assert.ViolationExistsAt(this, (4, 0))
 
     [<Test>]
     member this.NamedParameterShouldNotBeTreatedAsInfixOperation() =
@@ -413,7 +413,7 @@ type Bar() =
 Bar.SomeMethod(foo = true)
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.``Named parameter in object method call should not be treated as infix operation``() =
@@ -428,7 +428,7 @@ type Bar() =
 Bar().SomeMethod(foo = true)
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.NamedParameterWithMoreThanOneParameterShouldNotBeTreatedAsInfixOperation() =
@@ -443,7 +443,7 @@ type Bar() =
 Bar.SomeMethod(woof = 5, foo = true)
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/128
     [<Test>]
@@ -460,7 +460,7 @@ do
             (inputs = args, raiseOnUsage = false, ignoreMissing = true,
              errorHandler = ProcessExiter())""", checkFile=false) // This test only passes with typechecking disabled.
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.``Named parameter in object method call with more than one arg should not be treated as infix operation``() =
@@ -475,7 +475,7 @@ type Bar() =
 Bar().SomeMethod(woof = 5, foo = true)
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.PropertyInitShouldNotBeTreatedAsInfixOperation() =
@@ -490,7 +490,7 @@ type Bar() =
 Bar(Foo = true) |> ignore
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.PropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
@@ -505,7 +505,7 @@ type Bar() =
 new Bar(Foo = true) |> ignore
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.MultiplePropertyInitWithNewKeywwordShouldNotBeTreatedAsInfixOperation() =
@@ -521,7 +521,7 @@ type Bar() =
 new Bar(Foo = true, Bar = true) |> ignore
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/108
     /// Type arguments on a constructor were causing hint to be displayed for property initialisation.
@@ -538,7 +538,7 @@ type Bar<'a>() =
 Bar<_>(Foo = true) |> ignore
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
     member this.PropertyEqualityOperationShouldBeTreatedAsInfixOperation() =
@@ -553,9 +553,9 @@ type Bar() =
     member this.X() = this.Foo = true
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine(7))
+        Assert.IsTrue(this.ViolationExistsOnLine(7))
 
-    /// Parentheses around expressions matched by hints were causing duplicate warnings
+    /// Parentheses around expressions matched by hints were causing duplicate violations
     [<Test>]
     member this.ParenthesesAroundAMatchedExpressionShouldNotCauseAnExtraMatch() =
         this.SetConfig(["x = true ===> x"])
@@ -566,9 +566,9 @@ module Goat
 let foo x = if (x = true) then 0 else 1
 """
 
-        Assert.IsTrue((this.ErrorExistsAt >> not)(4, 15) && this.ErrorExistsAt(4, 16))
+        Assert.IsTrue((this.ViolationExistsAt >> not)(4, 15) && this.ViolationExistsAt(4, 16))
 
-    /// Parentheses around patterns matched by hints were causing duplicate warnings
+    /// Parentheses around patterns matched by hints were causing duplicate violations
     [<Test>]
     member this.ParenthesesAroundAMatchedPatternShouldNotCauseAnExtraMatch() =
         this.SetConfig(["pattern: [0] | [1] ===> []"])
@@ -581,7 +581,7 @@ match [] with
 | _ -> ()
 """
 
-        Assert.IsTrue((this.ErrorExistsAt >> not)(5, 2) && this.ErrorExistsAt(5, 3))
+        Assert.IsTrue((this.ViolationExistsAt >> not)(5, 2) && this.ViolationExistsAt(5, 3))
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -597,7 +597,7 @@ type TakesDelegate() =
 TakesDelegate().Foo(fun _ -> ())
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -613,7 +613,7 @@ type TakesDelegate() =
 TakesDelegate().Foo("", fun _ -> ())
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -629,7 +629,7 @@ type TakesDelegate() =
 TakesDelegate().Foo("", fun _ -> ())
 """
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -646,7 +646,7 @@ let object = TakesDelegate()
 object.Foo("", fun _ -> ())
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/109
     [<Test>]
@@ -663,10 +663,10 @@ let object = TakesDelegate()
 object.Foo(fun _ -> ())
 """
 
-        Assert.NoErrors(this)
+        Assert.NoViolations(this)
 
     [<Test>]
-    member this.``Operator identifier is correctly written out as an operator symbol in the error message.``() =
+    member this.``Operator identifier is correctly written out as an operator symbol in the violation message.``() =
         this.SetConfig(["0 ===> FSharpLint.(+)"])
 
         this.Parse"""
@@ -676,10 +676,10 @@ do
     ignore 0
 """
 
-        this.AssertErrorWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.")
+        this.AssertViolationWithMessageExists("`0` might be able to be refactored into `FSharpLint.( + )`.")
 
     [<Test>]
-    member this.``Suggestion as a message presents correct error message.``() =
+    member this.``Suggestion as a message presents correct violation message.``() =
         this.SetConfig(["() ===> m\"Message\""])
 
         this.Parse"""
@@ -689,7 +689,7 @@ do
     ()
 """
 
-        this.AssertErrorWithMessageExists("`()`; suggestion: Message.")
+        this.AssertViolationWithMessageExists("`()`; suggestion: Message.")
 
     [<Test>]
     member this.``Hints matches null in an expression correctly.``() =
@@ -703,7 +703,7 @@ do
     x = null |> ignore
 """
 
-        this.AssertErrorWithMessageExists("`x = null`; suggestion: Use pattern matching to null check.")
+        this.AssertViolationWithMessageExists("`x = null`; suggestion: Use pattern matching to null check.")
 
     /// Regression test for: http://codereview.stackexchange.com/questions/134296/f-function-to-concatenate-some-dsl-scripts-with-indentation#comment251110_134297
     [<Test>]
@@ -717,7 +717,7 @@ do
     [(1,2,3)] |> Seq.groupBy(fun (store, app, script) -> store)  |> ignore
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: http://stackoverflow.com/questions/38412166/how-to-refactor-a-function-using-ignore
     [<Test>]
@@ -732,7 +732,7 @@ do
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/304
     [<Test>]
@@ -752,7 +752,7 @@ do
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/492
     [<Test>]
@@ -770,7 +770,7 @@ do
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/492
     [<Test>]
@@ -787,7 +787,7 @@ do
     ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/pull/194#issuecomment-268560761
     [<Test>]
@@ -806,7 +806,7 @@ let x = List.collect (fun x -> [x]) [1;2;3]
 
         this.SetConfig(["List.concat (List.map f x) ===> List.collect f x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application moved in suggestion which does not require parentheses must not be surrounded by them.``() =
@@ -824,7 +824,7 @@ let x y = y 0
 
         this.SetConfig(["if x then true else false ===> x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application moved in suggestion which requires parens must be surrounded by them.``() =
@@ -842,7 +842,7 @@ let x y = y (foo 0)
 
         this.SetConfig(["0 ===> foo 0"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application in suggestion with surrounding parens keeps them.``() =
@@ -860,7 +860,7 @@ let x y = y (foo 0 0)
 
         this.SetConfig(["foo 0 ===> foo 0 0"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application as variable in suggestion with surrounding parens keeps them.``() =
@@ -878,7 +878,7 @@ let x y = id (foo 0)
 
         this.SetConfig(["bar x ===> id x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application in suggestion with surrounding parens but no longer needs removes surrounding parens.``() =
@@ -896,7 +896,7 @@ let x y = if foo 0 then 0 else 1
 
         this.SetConfig(["bar x ===> if x then 0 else 1"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application in suggestion with addressof operator keeps parens surrounding application.``() =
@@ -914,7 +914,7 @@ let x y = &&(foo 0)
 
         this.SetConfig(["&x ===> &&x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Function application in suggestion with prefix operator removed, removes parens surrounding application.``() =
@@ -931,7 +931,7 @@ let x y = foo 0
 """
         this.SetConfig(["- -x ===> x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
     member this.``Infix operator in hint fix is formatted with space either side of it``() =
@@ -953,4 +953,4 @@ let x y =
 
         this.SetConfig(["List.map f (List.map g x) ===> List.map (g >> f) x"])
         this.Parse(source)
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)

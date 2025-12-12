@@ -3,19 +3,19 @@
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
+let private generateViolation (func: UnneededRecKeyword.RecursiveFunctionInfo) =
     { Range = func.Range
       Message =
         String.Format(
             Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
             func.Identifier.idText
         )
-      SuggestedFix = None
+      AutoFix = None
       TypeChecks = list.Empty }
 
 let runner (args: AstNodeRuleParams) =
@@ -35,7 +35,7 @@ let runner (args: AstNodeRuleParams) =
                 if hasTailCallAttribute then
                     None
                 else
-                    emitWarning functionInfo |> Some
+                    generateViolation functionInfo |> Some
             else
                 None
         funcs

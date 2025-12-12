@@ -9,7 +9,7 @@ type TestFormattingClassMemberSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ClassMemberSpacing.rule)
 
     [<Test>]
-    member this.``Error for no space between class members``() =
+    member this.``Violation for no space between class members``() =
         this.Parse """
 module Program
 
@@ -18,10 +18,10 @@ type T = T of int with
     static member x = 2
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+        Assert.IsTrue(this.ViolationExistsAt(6, 0))
 
     [<Test>]
-    member this.``No error for correct spacing between class members``() =
+    member this.``No violation for correct spacing between class members``() =
         this.Parse """
 module Program
 
@@ -31,10 +31,10 @@ type T = T of int with
     static member x = 2
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct spacing between class members with comment``() =
+    member this.``No violation for correct spacing between class members with comment``() =
         this.Parse """
 module Program
 
@@ -54,10 +54,10 @@ type GenericOptions =
         ()
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for too much spacing between class members``() =
+    member this.``Violation for too much spacing between class members``() =
         this.Parse """
 module Program
 
@@ -69,5 +69,5 @@ type T = T of int with
     static member x = 2
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 0))
+        Assert.IsTrue(this.ViolationExistsAt(6, 0))
 

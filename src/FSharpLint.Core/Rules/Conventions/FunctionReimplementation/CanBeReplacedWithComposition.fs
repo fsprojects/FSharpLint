@@ -2,7 +2,7 @@ module FSharpLint.Rules.CanBeReplacedWithComposition
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -62,13 +62,13 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
     match tryReplaceWithFunctionComposition lambda.Body with
     | None -> Array.empty
     | Some funcStrings ->
-        let suggestedFix =
+        let autoFix =
             lazy(
                 Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
         Array.singleton
             { Range = range
               Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-              SuggestedFix = Some suggestedFix
+              AutoFix = Some autoFix
               TypeChecks = List.Empty }
 
 let runner (args:AstNodeRuleParams) =

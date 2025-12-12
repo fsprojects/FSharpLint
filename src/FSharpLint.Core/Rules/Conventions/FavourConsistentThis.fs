@@ -1,7 +1,7 @@
 module FSharpLint.Rules.FavourConsistentThis
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
@@ -24,14 +24,14 @@ let runner (config: Config) args =
             if identifiers.Length = 2 then
                 match identifiers  with
                 | head::_ when isNotConsistent head.idText symbol ->
-                    let suggestedFix = lazy(Some({ FromRange = head.idRange; FromText = head.idText; ToText = symbol }))
-                    let error =
+                    let autoFix = lazy(Some({ FromRange = head.idRange; FromText = head.idText; ToText = symbol }))
+                    let violation =
                         Array.singleton
                             { Range = range
                               Message = String.Format(Resources.GetString "RulesFavourConsistentThis", config.Symbol)
-                              SuggestedFix = Some suggestedFix
+                              AutoFix = Some autoFix
                               TypeChecks = List.Empty }
-                    error
+                    violation
                 | _ -> Array.empty
             else
                 Array.empty

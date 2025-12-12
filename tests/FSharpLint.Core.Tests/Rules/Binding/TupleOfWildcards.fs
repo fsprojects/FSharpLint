@@ -19,7 +19,7 @@ match Persian(1, 3) with
 | Persian(_, _) -> ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 10))
+        Assert.IsTrue(this.ViolationExistsAt(7, 10))
 
     [<Test>]
     member this.``Suggested fix for tuple of wildcards should be single wildcard``() = 
@@ -33,7 +33,7 @@ match cat with
 
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
@@ -49,7 +49,7 @@ match maybeCat with
 
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
@@ -62,7 +62,7 @@ type Cat() =
     member _.Persian(_, _) = ()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.``Constructor's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
@@ -75,7 +75,7 @@ type Cat() =
     member _.Persian(_) = ()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.``Method with type argument's parameter list of wildcards should not be treated as tuple of wildcards.``() = 
@@ -86,7 +86,7 @@ type Cat() =
     member _.Persian<'t>(_, _) = ()
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.``Method's parameter list of wildcards in object expressions should not be treated as tuple of wildcards.``() =
@@ -101,4 +101,4 @@ let x =
         member _.Two(_, _) = false }
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)

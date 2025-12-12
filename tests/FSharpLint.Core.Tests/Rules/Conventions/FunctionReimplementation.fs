@@ -9,24 +9,24 @@ type TestConventionsFunctionReimplementation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ReimplementsFunction.rule)
 
     [<Test>]
-    member this.LambdaReimplementingMultiplicationIssuesError() =
+    member this.LambdaReimplementingMultiplicationIssuesViolation() =
         this.Parse """
 module Program
 
 let f = fun a b -> a * b
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.``Operator ident is displayed in error as an operator symbol.``() =
+    member this.``Operator ident is displayed in violation as an operator symbol.``() =
         this.Parse """
 module Program
 
 let f = fun a b -> a * b
 """
 
-        this.ErrorMsg.Contains "`( * )`" |> Assert.IsTrue
+        this.ViolationMsg.Contains "`( * )`" |> Assert.IsTrue
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/237
     [<Test>]
@@ -37,10 +37,10 @@ module Program
 let f = List.map (fun (x,_) -> id x) []
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing operator is to replace the lambda with the operator.``() =
+    member this.``Autofix for lambda reimplementing operator is to replace the lambda with the operator.``() =
         let source = """
 module Program
 
@@ -54,20 +54,20 @@ let f = ( * )
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Lambda reimplementing long identifier function issues error``() =
+    member this.``Lambda reimplementing long identifier function issues violation``() =
         this.Parse """
 module Program
 
 let f = fun a b -> List.map a b
 """
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     [<Test>]
-    member this.``Quickfix for lambda reimplementing function is to replace the lambda with the func ident.``() =
+    member this.``Autofix for lambda reimplementing function is to replace the lambda with the func ident.``() =
         let source = """
 module Program
 
@@ -81,7 +81,7 @@ let f = List.map
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -93,7 +93,7 @@ type Cat = | Meower of string
 
 let f = List.map (fun x -> Meower x) ["1";"2"]""")
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/113
     [<Test>]
@@ -109,30 +109,30 @@ let f = List.map (fun x -> Duck x) ["1";"2"]
 open System
 let f = List.map (fun x -> String x) ["1";"2"]""")
 
-        Assert.IsTrue(this.ErrorsExist)
+        Assert.IsTrue(this.ViolationsExist)
 
     [<Test>]
-    member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueError() =
+    member this.LambdaNotReimplmentingMultiplicationAsUsingConstantDoesNotIssueViolation() =
         this.Parse """
 module Program
 
 let f = fun a b -> a * 1
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LambdaReimplementingCeilingFunctionIssuesError() =
+    member this.LambdaReimplementingCeilingFunctionIssuesViolation() =
         this.Parse """
 module Program
 
 let f = fun x -> ceil x
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueError() =
+    member this.MultiplicationLambdaWithWildcardParameterDoesNotIssueViolation() =
         this.Parse """
 module Program
 
@@ -141,10 +141,10 @@ let x = 6
 let f = fun a b _ -> a * b
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LambdaWithUnitParameterDoesNotIssueError() =
+    member this.LambdaWithUnitParameterDoesNotIssueViolation() =
         this.Parse """
 module Program
 
@@ -153,10 +153,10 @@ let x = 6
 let f = fun () -> ceil x
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LambdaWithWildcardParameterDoesNotIssueError() =
+    member this.LambdaWithWildcardParameterDoesNotIssueViolation() =
         this.Parse """
 module Program
 
@@ -165,31 +165,31 @@ let x = 6
 let f = fun _ -> ceil x
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
 [<TestFixture>]
 type TestConventionsCanBeReplacedWithComposition() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(CanBeReplacedWithComposition.rule)
 
     [<Test>]
-    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() =
+    member this.LambdaNestedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesViolation() =
         this.Parse """
 module Program
 
 let f = fun x -> tan(cos(tan x))
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesError() =
+    member this.LambdaPipedFunctionCallsThatCouldBeReplacedWithFunctionCompositionIssuesViolation() =
         this.Parse """
 module Program
 
 let f = fun x -> x |> tan |> cos |> tan
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
     member this.``Applying constants in chain issues composition suggestion``() =
@@ -199,10 +199,10 @@ module Program
 let f = fun x -> x |> tan 0 |> cos |> tan
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 8))
+        Assert.IsTrue(this.ViolationExistsAt(4, 8))
 
     [<Test>]
-    member this.``Test quick fix for nested function calls that can be replaced with composition``() =
+    member this.``Test auto fix for nested function calls that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -217,12 +217,12 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.``Test quick fix for piped function calls that can be replaced with composition``() =
+    member this.``Test auto fix for piped function calls that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -237,12 +237,12 @@ let f = tan >> cos >> sin
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.``Test quick fix for piped function calls with partially applied functions that can be replaced with composition``() =
+    member this.``Test auto fix for piped function calls with partially applied functions that can be replaced with composition``() =
         let source = """
 module Program
 
@@ -257,7 +257,7 @@ let f = min 0.0 >> cos >> tan
         
         this.Parse source
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
@@ -269,10 +269,10 @@ module Program
 let f = fun x -> x |> tan y |> cos |> tan
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LambdaWithUnitParameterDoesNotIssueError() =
+    member this.LambdaWithUnitParameterDoesNotIssueViolation() =
         this.Parse """
 module Program
 
@@ -281,10 +281,10 @@ let x = 6
 let f = fun () -> ceil x
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.LambdaWithWildcardParameterDoesNotIssueError() =
+    member this.LambdaWithWildcardParameterDoesNotIssueViolation() =
         this.Parse """
 module Program
 
@@ -293,7 +293,7 @@ let x = 6
 let f = fun _ -> ceil x
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/130
     [<Test>]
@@ -306,7 +306,7 @@ let x = 6
 let f = fun p -> p.Name <= packageName || not (isPackageLastInSource p)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
@@ -319,7 +319,7 @@ let x = 6
 let f = (fun value -> state + (findCoefficient conversion.Coefficients key) * value)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/140
     [<Test>]
@@ -332,4 +332,4 @@ let x = 6
 let f = fun s1 s2 -> concat s1 s2 |> parse
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

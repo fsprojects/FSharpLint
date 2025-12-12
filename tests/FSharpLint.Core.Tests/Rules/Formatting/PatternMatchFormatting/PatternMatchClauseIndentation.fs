@@ -9,7 +9,7 @@ type TestFormattingPatternMatchClauseIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule { PatternMatchClauseIndentation.Config.AllowSingleLineLambda = false })
 
     [<Test>]
-    member this.``Error for pattern match clauses at different indentation``() =
+    member this.``Violation for pattern match clauses at different indentation``() =
         this.Parse"""
 module Program
 
@@ -18,10 +18,10 @@ match 1 with
     | 2 -> false
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 6))
+        Assert.IsTrue(this.ViolationExistsAt(6, 6))
 
     [<Test>]
-    member this.``No error for pattern match clauses with same indentation``() =
+    member this.``No violation for pattern match clauses with same indentation``() =
         this.Parse"""
 module Program
 
@@ -30,10 +30,10 @@ match 1 with
 | 2 -> false
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for exception pattern match clauses at different indentation``() =
+    member this.``Violation for exception pattern match clauses at different indentation``() =
         this.Parse """
 module Program
 
@@ -43,10 +43,10 @@ with
     | :? System.DivideByZeroException -> 1
     | :? System.Exception -> 2 """
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 6))
+        Assert.IsTrue(this.ViolationExistsAt(7, 6))
 
     [<Test>]
-    member this.``No error for exception pattern match clauses with same indentation``() =
+    member this.``No violation for exception pattern match clauses with same indentation``() =
         this.Parse """
 module Program
 
@@ -56,10 +56,10 @@ with
 | :? System.DivideByZeroException -> 1
 | :? System.Exception -> 2 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for lambda pattern match clauses at different indentation``() =
+    member this.``Violation for lambda pattern match clauses at different indentation``() =
         this.Parse"""
 module Program
 
@@ -68,10 +68,10 @@ module Program
         | 2 -> false)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 10))
+        Assert.IsTrue(this.ViolationExistsAt(6, 10))
 
     [<Test>]
-    member this.``No error for lambda pattern match clauses with same indentation``() =
+    member this.``No violation for lambda pattern match clauses with same indentation``() =
         this.Parse"""
 module Program
 
@@ -80,10 +80,10 @@ module Program
     | 2 -> false)
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for lambda pattern match clauses with no surrounding parentheses, same indentation``() =
+    member this.``No violation for lambda pattern match clauses with no surrounding parentheses, same indentation``() =
         this.Parse"""
 module Program
 
@@ -92,10 +92,10 @@ module Program
     | 2 -> false
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for lambda pattern match clauses without level of indentation for clauses``() =
+    member this.``Violation for lambda pattern match clauses without level of indentation for clauses``() =
         this.Parse"""
 module Program
 
@@ -104,10 +104,10 @@ module Program
 | 2 -> false)
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.IsTrue(this.ViolationExistsAt(5, 2))
 
     [<Test>]
-    member this.``No error for multi-line pattern match clauses with same indentation``() =
+    member this.``No violation for multi-line pattern match clauses with same indentation``() =
         this.Parse"""
 module Program
 
@@ -118,29 +118,29 @@ match "x" with
 | _ -> "otherresult"
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
 
     [<Test>]
-    member this.``No match clause indentation error for struct tuple deconstruction``() =
+    member this.``No match clause indentation violation for struct tuple deconstruction``() =
           this.Parse """fun struct(x, y) -> ()"""
 
-          Assert.IsTrue(this.NoErrorsExist)
+          Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for single-line lambda pattern match when not allowed``() =
+    member this.``Violation for single-line lambda pattern match when not allowed``() =
         this.Parse """let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true | _ -> false"""
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 26))
+        Assert.IsTrue(this.ViolationExistsAt(1, 26))
 
 [<TestFixture>]
 type TestFormattingPatternMatchClauseIndentationAllowSingleLineLambda() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PatternMatchClauseIndentation.rule { PatternMatchClauseIndentation.Config.AllowSingleLineLambda = true })
 
     [<Test>]
-    member this.``No error for single-line lambda pattern match when allowed``() =
+    member this.``No violation for single-line lambda pattern match when allowed``() =
         this.Parse """let isAnyMatch = function ((SyntaxHintNode.Wildcard | SyntaxHintNode.Variable), _, _, _) -> true | _ -> false"""
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
 

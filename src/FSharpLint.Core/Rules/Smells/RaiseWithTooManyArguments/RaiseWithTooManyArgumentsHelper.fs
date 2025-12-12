@@ -1,7 +1,7 @@
 module FSharpLint.Rules.Helper.RaiseWithTooManyArguments
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -23,7 +23,7 @@ let checkRaiseWithTooManyArgs (raiseType:string) (count:int) (ruleName:string) (
                     {
                         Range = range
                         Message = Resources.GetString ruleName
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             | _ -> Array.empty

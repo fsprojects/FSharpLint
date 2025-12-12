@@ -9,17 +9,17 @@ type TestFormattingUnionDefinitionIndentation() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(UnionDefinitionIndentation.rule)
 
     [<Test>]
-    member this.``Error for union definition with multiple cases on same line``() =
+    member this.``Violation for union definition with multiple cases on same line``() =
         this.Parse"""
 module Program
 
 type T = T1 of int | T2 of int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 9))
+        Assert.IsTrue(this.ViolationExistsAt(4, 9))
 
     [<Test>]
-    member this.``Error for union defintion cases at same level as 'type' keyword``() =
+    member this.``Violation for union defintion cases at same level as 'type' keyword``() =
         this.Parse"""
 module Program
 
@@ -28,10 +28,10 @@ type T =
 | T2 of int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 2))
+        Assert.IsTrue(this.ViolationExistsAt(5, 2))
 
     [<Test>]
-    member this.``Error for union defintion cases with inconsistent spacing``() =
+    member this.``Violation for union defintion cases with inconsistent spacing``() =
         this.Parse"""
 module Program
 
@@ -40,10 +40,10 @@ type T =
         | T2 of int
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 10))
+        Assert.IsTrue(this.ViolationExistsAt(6, 10))
 
     [<Test>]
-    member this.``No error for correctly indented union definition cases``() =
+    member this.``No violation for correctly indented union definition cases``() =
         this.Parse"""
 module Program
 
@@ -52,10 +52,10 @@ type T =
     | T2 of int
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correctly indented union definition cases in multi-type declaration``() =
+    member this.``No violation for correctly indented union definition cases in multi-type declaration``() =
         this.Parse"""
 module Program
 
@@ -67,10 +67,10 @@ and V =
     | V2 of int
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correctly indented union definition cases with attribute``() =
+    member this.``No violation for correctly indented union definition cases with attribute``() =
         this.Parse"""
 module Program
 
@@ -79,10 +79,10 @@ type Option =
     | CustomClass of string
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correctly indented union defintion cases with attribute and strange spacing``() =
+    member this.``No violation for correctly indented union defintion cases with attribute and strange spacing``() =
         this.Parse"""
 module Program
 
@@ -91,4 +91,4 @@ type Option =
     | CustomClass of string
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

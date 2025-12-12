@@ -24,7 +24,7 @@ module Program
 let Cat = 5
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.LiteralIsCamelCase() =
@@ -35,7 +35,7 @@ module program
 let cat = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.LiteralIsCamelCaseWithParen() =
@@ -46,7 +46,7 @@ module program
 let (cat) = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 5))
+        Assert.IsTrue(this.ViolationExistsAt(5, 5))
 
     [<Test>]
     member this.FullyQualifiedLiteralIsPascalCase() =
@@ -57,7 +57,7 @@ module Program
 let Cat = 5
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FullyQualifiedLiteralIsCamelCase() =
@@ -68,7 +68,7 @@ module program
 let cat = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
 let infixConfig =
     { NamingConfig.Naming = Some NamingCase.AllLowercase
@@ -89,7 +89,7 @@ module Program
 let super_cat = 5
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.LiteralIsUnderscorePrefix() =
@@ -100,7 +100,7 @@ module Program
 let _cat = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine 5)
+        Assert.IsTrue(this.ViolationExistsOnLine 5)
 
     [<Test>]
     member this.LiteralIsUnderscoreSuffix() =
@@ -111,7 +111,7 @@ module Program
 let cat_ = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine 5)
+        Assert.IsTrue(this.ViolationExistsOnLine 5)
 
     [<Test>]
     member this.LiteralIsNoUnderscore() =
@@ -122,10 +122,10 @@ module Program
 let SuperCat = 5
 """
 
-        Assert.IsTrue(this.ErrorExistsOnLine 5)
+        Assert.IsTrue(this.ViolationExistsOnLine 5)
 
     [<Test>]
-    member this.SuggestedFix() =
+    member this.AutoFix() =
         let source = """
 module Program
 
@@ -140,14 +140,14 @@ let super_cat = 5
 """
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsOnLine 5)
+        Assert.IsTrue(this.ViolationExistsOnLine 5)
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.SuggestedFixForComplexName() =
+    member this.AutoFixForComplexName() =
         let source = """
 module Program
 
@@ -162,8 +162,8 @@ let super_cat_with_1_number = 5
 """
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsOnLine 5)
+        Assert.IsTrue(this.ViolationExistsOnLine 5)
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

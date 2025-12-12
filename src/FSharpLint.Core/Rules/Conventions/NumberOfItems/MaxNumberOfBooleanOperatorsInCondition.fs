@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxNumberOfBooleanOperatorsInCondition
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -37,13 +37,13 @@ let private validateCondition (maxBooleanOperators:int) condition =
     let numberOfBooleanOperators = countBooleanOperators 0 condition
 
     if numberOfBooleanOperators > maxBooleanOperators then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
-        let error = String.Format(errorFormatString, maxBooleanOperators)
+        let violationTextFormatString = Resources.GetString "RulesNumberOfItemsBooleanConditionsViolation"
+        let violationMsg = String.Format(violationTextFormatString, maxBooleanOperators)
         Array.singleton
             {
                 Range = condition.Range
-                Message = error
-                SuggestedFix = None
+                Message = violationMsg
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

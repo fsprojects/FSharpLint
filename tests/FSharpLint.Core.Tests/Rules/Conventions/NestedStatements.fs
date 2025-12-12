@@ -25,7 +25,7 @@ let dog =
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(9, 20))
+        Assert.IsTrue(this.ViolationExistsAt(9, 20))
 
     [<Test>]
     member this.``Repeated nested too deep complains for correct ranges``() =
@@ -50,8 +50,8 @@ let dog =
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(9, 20))
-        Assert.IsTrue(this.ErrorExistsAt(16, 20))
+        Assert.IsTrue(this.ViolationExistsAt(9, 20))
+        Assert.IsTrue(this.ViolationExistsAt(16, 20))
 
     [<Test>]
     member this.ElseIfsShouldNotCountAsNested() =
@@ -81,7 +81,7 @@ let dog =
         ()
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(13, 4))
+        Assert.IsFalse(this.ViolationExistsAt(13, 4))
 
     [<Test>]
     member this.LambdaWildcardArgumentsMustNotCountAsANestedStatement() =
@@ -91,7 +91,7 @@ module Program
 let dog = (fun _ _ _ _ _ _ _ _ -> ())
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+        Assert.IsFalse(this.ViolationExistsOnLine(4))
 
     [<Test>]
     member this.LambdaArgumentsMustNotCountAsANestedStatement() =
@@ -101,7 +101,7 @@ module Program
 let dog = (fun a b c d e f g h i j -> ())
 """
 
-        Assert.IsFalse(this.ErrorExistsOnLine(4))
+        Assert.IsFalse(this.ViolationExistsOnLine(4))
 
     [<Test>]
     member this.NestedLambdasCountedCorrectly() =
@@ -111,7 +111,7 @@ module Program
 let dog = (fun x -> fun x -> fun x -> fun x -> fun x -> ())
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 47))
+        Assert.IsTrue(this.ViolationExistsAt(4, 47))
 
 
     [<Test>]
@@ -132,7 +132,7 @@ module Program
     member this.Create9 (i: char) = { Value=Convert.ToInt32(i)}
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
     member this.NestedStatementsWithinRecordMemberCountedCorrectly() =
@@ -151,4 +151,4 @@ type DummyRecord =
                                         ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(11, 32))
+        Assert.IsTrue(this.ViolationExistsAt(11, 32))

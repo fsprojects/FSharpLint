@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxNumberOfItemsInTuple
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -22,13 +22,13 @@ let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) index =
 
 let private validateTuple (maxItems:int) (items:SynExpr list) =
     if List.length items > maxItems then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
-        let error = String.Format(errorFormatString, maxItems)
+        let violationTextFormatString = Resources.GetString "RulesNumberOfItemsTupleViolation"
+        let violationMsg = String.Format(violationTextFormatString, maxItems)
         Array.singleton
             {
                 Range = items.[maxItems].Range
-                Message = error
-                SuggestedFix = None
+                Message = violationMsg
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

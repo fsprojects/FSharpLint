@@ -34,7 +34,7 @@ with
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
             | Version -> "Prints current version."
 
-// TODO: investigate erroneous warning on this type definition
+// TODO: investigate erroneous violation on this type definition
 // fsharplint:disable UnionDefinitionIndentation
 and private LintArgs =
     | [<MainCommand; Mandatory>] Target of target:string
@@ -89,11 +89,11 @@ let internal expandWildcard (pattern:string) =
 let private parserProgress (output:Output.IOutput) = function
     | Starting file ->
         String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
-    | ReachedEnd (_, warnings) ->
-        String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
+    | ReachedEnd (_, violations) ->
+        String.Format(Resources.GetString("ConsoleFinishedFile"), List.length violations) |> output.WriteInfo
     | Failed (file, parseException) ->
-        String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-        output.WriteError
+        String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteFailure
+        output.WriteFailure
             $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
 
 /// Checks if a string contains wildcard characters.
@@ -130,20 +130,21 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         output.WriteInfo $"Current version: {version}"
         Environment.Exit 0
 
-    let handleError (str:string) =
-        output.WriteError str
+    let handleFailure (str: string) =
+        output.WriteFailure str
         exitCode <- -1
 
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
 
         let handleLintResult = function
-            | LintResult.Success(warnings) ->
-                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
+            | LintResult.Success violations ->
+                String.Format(Resources.GetString "ConsoleFinished", List.length violations)
                 |> output.WriteInfo
-                if not (List.isEmpty warnings) then exitCode <- -1
+                if not (List.isEmpty violations) then
+                    exitCode <- -1
             | LintResult.Failure(failure) ->
-                handleError failure.Description
+                handleFailure failure.Description
 
         let lintConfig = lintArgs.TryGetResult Lint_Config
 
@@ -152,10 +153,9 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             | Some configPath -> FromFile configPath
             | None -> Default
 
-
         let lintParams =
             { CancellationToken = None
-              ReceivedWarning = Some output.WriteWarning
+              ReceivedViolation = Some output.WriteViolationInfo
               Configuration = configParam
               ReportLinterProgress = Some (parserProgress output) }
 
@@ -183,7 +183,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         with
         | exn ->
             let target = if fileType = FileType.Source then "source" else target
-            handleError
+            handleFailure
                 $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
     | _ -> ()
 
@@ -195,9 +195,9 @@ let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrent
 
 [<EntryPoint>]
 let main argv =
-    let errorHandler = ProcessExiter(colorizer = function
+    let failureHandler = ProcessExiter(colorizer = function
         | ErrorCode.HelpText -> None
         | _ -> Some ConsoleColor.Red)
-    let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
+    let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = failureHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults toolsPath

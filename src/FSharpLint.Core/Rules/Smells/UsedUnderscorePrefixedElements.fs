@@ -3,7 +3,7 @@ module FSharpLint.Rules.UsedUnderscorePrefixedElements
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharp.Compiler.CodeAnalysis
@@ -25,7 +25,7 @@ let runner (args: AstNodeRuleParams) =
                     Some {
                         Range = usage.Range
                         Message = String.Format(Resources.GetString ("RulesUsedUnderscorePrefixedElements"))
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
                 else

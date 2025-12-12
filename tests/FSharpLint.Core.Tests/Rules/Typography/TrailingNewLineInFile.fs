@@ -12,4 +12,4 @@ type TestTypographyTrailingNewLineInFile() =
     member this.NewLineOnEndOfFile() =
         this.Parse ("let dog = 9" + System.Environment.NewLine)
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 0))
+        Assert.IsTrue(this.ViolationExistsAt(1, 0))

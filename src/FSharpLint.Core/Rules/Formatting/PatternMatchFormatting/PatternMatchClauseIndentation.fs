@@ -3,7 +3,7 @@ module FSharpLint.Rules.PatternMatchClauseIndentation
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -14,7 +14,7 @@ type Config = { AllowSingleLineLambda:bool }
 let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMatchClause list) isLambda =
     let matchStartIndentation = ExpressionUtilities.getLeadingSpaces matchExprRange args.FileContent
 
-    let indentationLevelError =
+    let indentationLevelViolation =
 
         let processClause (firstClause: SynMatchClause) =
             let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
@@ -23,8 +23,8 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
                     Some
                         {
                             Range = firstClause.Range
-                            Message = Resources.GetString("RulesFormattingLambdaPatternMatchClauseIndentationError")
-                            SuggestedFix = None
+                            Message = Resources.GetString "RulesFormattingLambdaPatternMatchClauseIndentationViolation"
+                            AutoFix = None
                             TypeChecks = List.Empty
                         }
                 else
@@ -33,8 +33,8 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
                 Some
                     {
                         Range = firstClause.Range
-                        Message = Resources.GetString("RulesFormattingPatternMatchClauseIndentationError")
-                        SuggestedFix = None
+                        Message = Resources.GetString "RulesFormattingPatternMatchClauseIndentationViolation"
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
@@ -47,14 +47,14 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
             |> List.tryHead
             |> Option.bind processClause
 
-    let consistentIndentationErrors =
+    let consistentIndentationViolations =
         let choose (clauseOneSpaces: int) (clauseTwo: SynMatchClause) (clauseTwoSpaces: int) =
             if clauseOneSpaces <> clauseTwoSpaces then
                 Some
                     {
                         Range = clauseTwo.Range
-                        Message = Resources.GetString("RulesFormattingPatternMatchClauseSameIndentationError")
-                        SuggestedFix = None
+                        Message = Resources.GetString "RulesFormattingPatternMatchClauseSameIndentationViolation"
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
@@ -68,8 +68,8 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
 
     Array.concat
         [|
-            Option.toArray indentationLevelError
-            consistentIndentationErrors
+            Option.toArray indentationLevelViolation
+            consistentIndentationViolations
         |]
 
 let runner (config:Config) (args:AstNodeRuleParams) = PatternMatchFormatting.isActualPatternMatch args (check config)

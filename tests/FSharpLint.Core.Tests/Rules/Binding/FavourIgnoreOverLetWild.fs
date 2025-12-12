@@ -16,7 +16,7 @@ module Program
 let _ = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.LetWildcardMultilaneStatementOfUnit() =
@@ -28,7 +28,7 @@ let (_) =
     ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.LetWildCardInParanUnitValue() =
@@ -38,7 +38,7 @@ module Program
 let ((((_)))) = List.iter (fun x -> ()) []
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.LetNonWildcardUnitValue() =
@@ -48,10 +48,10 @@ module Program
 let a = List.iter (fun x -> ()) []
 """
 
-        Assert.IsFalse(this.ErrorsExist)
+        Assert.IsFalse(this.ViolationsExist)
 
     [<Test>]
-    member this.LetWildcardUnitValueSuggestedFix() =
+    member this.LetWildcardUnitValueAutoFix() =
         let source = """
 module Program
 
@@ -62,14 +62,14 @@ module Program
 (()) |> ignore"""
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 
     [<Test>]
-    member this.LetWildCardInParanUnitValueSuggestedFix() =
+    member this.LetWildCardInParanUnitValueAutoFix() =
         let source = """
 module Program
 
@@ -82,8 +82,8 @@ module Program
 
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)

@@ -1,11 +1,11 @@
-﻿module FSharpLint.Framework.Suggestion
+﻿module FSharpLint.Framework.Violation
 
 open System
 open FSharp.Compiler.Text
 
 /// Information for consuming applications to provide an automated fix for a lint suggestion.
 [<NoEquality; NoComparison>]
-type SuggestedFix = {
+type AutoFix = {
     /// Text to be replaced.
     FromText:string
 
@@ -17,15 +17,15 @@ type SuggestedFix = {
 }
 
 [<NoEquality; NoComparison>]
-type WarningDetails = {
-    /// Location of the code that prompted the suggestion.
+type ViolationDetails = {
+    /// Location of the code that prompted the violation.
     Range:Range
 
     /// Suggestion message to describe the possible problem to the user.
     Message:string
 
     /// Information to provide an automated fix.
-    SuggestedFix:Lazy<SuggestedFix option> option
+    AutoFix:Option<Lazy<Option<AutoFix>>>
 
     /// Type checks to be performed to confirm this suggestion is valid.
     /// Suggestion is only considered valid when all type checks resolve to true.
@@ -36,21 +36,21 @@ type WarningDetails = {
         | Some(check) -> { this with TypeChecks = check::this.TypeChecks }
         | None -> this
 
-/// A lint "warning", sources the location of the warning with a suggestion on how it may be fixed.
+/// A lint "violation", sources the location of the vilation with a suggestion on how it may be fixed.
 [<NoEquality; NoComparison>]
-type LintWarning = {
-    /// Unique identifier for the rule that caused the warning.
+type LintViolation = {
+    /// Unique identifier for the rule that found the violation.
     RuleIdentifier:string
 
-    /// Unique name for the rule that caused the warning.
+    /// Unique name for the rule that found the violation.
     RuleName:string
 
-    /// Path to the file where the error occurs.
+    /// Path to the file where the violation occurs.
     FilePath:string
 
-    /// Text that caused the error (the `Range` of the content of `FileName`).
-    ErrorText:string
+    /// Source code fragment that caused the violation (the `Range` of the content of `FileName`).
+    SourceCodeFragment:string
 
-    /// Details for the warning.
-    Details:WarningDetails
+    /// Details for the rule violation.
+    Details:ViolationDetails
 }

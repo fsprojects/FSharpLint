@@ -19,46 +19,46 @@ type TestConventionsGenericTypesNames() =
         this.Parse """
 type Foo<'T> = Option<'T>
 """
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``generic type name shouldn't be camelCase``() =
         this.Parse """
 type Foo<'a> = Option<'a>
 """
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsOnLine 2)
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase (2 generic types)``() =
         this.Parse """
 type Foo<'a, 'T> = Option<'a * 'T>
 """
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsOnLine 2)
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase (2 generic types with different order)``() =
         this.Parse """
 type Foo<'T, 'a> = Option<'T * 'a>
 """
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsOnLine 2)
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names are PascalCase``() =
         this.Parse """
 type Foo<'K, 'V> = Option<'K * 'V>
 """
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase (multiple generic types)``() =
         this.Parse """
 type Foo<'T1, 'T2, 'T3, 'T4, 'T5, 'a, 'T6> = Option<'T1 * 'T2 * 'T3 * 'T4 * 'T5 * 'a * 'T6>
 """
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsOnLine 2)
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsOnLine 2)
 
     [<Test>]
     member this.``generic type names shouldn't be camelCase even for types in methods``() =
@@ -66,7 +66,7 @@ type Foo<'T1, 'T2, 'T3, 'T4, 'T5, 'a, 'T6> = Option<'T1 * 'T2 * 'T3 * 'T4 * 'T5 
 module PeerChannelEncryptorMonad =
     type PeerChannelEncryptorComputation<'T> =
         | PeerChannelEncryptorComputation of
-            (PeerChannelEncryptor -> Result<'T * PeerChannelEncryptor, PeerError>)
+            (PeerChannelEncryptor -> Result<'T * PeerChannelEncryptor, PeerFault>)
 
     let runP pcec initialState =
         let (PeerChannelEncryptorComputation innerFn) = pcec
@@ -90,5 +90,5 @@ module PeerChannelEncryptorMonad =
 
         PeerChannelEncryptorComputation innerFn
 """
-        Assert.IsTrue(this.ErrorsExist)
-        Assert.IsTrue(this.ErrorExistsOnLine 18)
+        Assert.IsTrue(this.ViolationsExist)
+        Assert.IsTrue(this.ViolationExistsOnLine 18)

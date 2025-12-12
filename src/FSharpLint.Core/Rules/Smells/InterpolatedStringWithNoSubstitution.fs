@@ -2,16 +2,16 @@
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private makeWarning range =
+let private generateViolation range =
     {
         Range = range
         Message = Resources.GetString "InterpolatedStringWithNoSubstitution"
-        SuggestedFix = None
+        AutoFix = None
         TypeChecks = List.Empty
     }
 
@@ -19,7 +19,7 @@ let checkInterpolatedString (contents: List<SynInterpolatedStringPart>) range =
     if contents |> List.exists (fun part -> part.IsFillExpr) then
         Array.empty
     else
-        Array.singleton (makeWarning range)
+        Array.singleton (generateViolation range)
 
 let stringFormattingFunctionNames = [ "sprintf"; "failwithf" ]
 
@@ -30,7 +30,7 @@ let checkFormattingFunctionApplication (formatString: string) range =
     if formatSpecifierRegex.IsMatch formatString then
         Array.empty
     else
-        Array.singleton (makeWarning range)
+        Array.singleton (generateViolation range)
             
 let runner (args: AstNodeRuleParams) =
     match args.AstNode with

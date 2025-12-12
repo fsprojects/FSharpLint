@@ -16,7 +16,7 @@ module Program
 let foo one two three four five six = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 32))
+        Assert.IsTrue(this.ViolationExistsAt(4, 32))
 
     [<Test>]
     member this.FiveParameters() =
@@ -26,4 +26,4 @@ module Program
 let foo one two three four five = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

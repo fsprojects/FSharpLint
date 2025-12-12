@@ -24,7 +24,7 @@ type MyClass2() as this =
     member this.PrintMessage() = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ClassMemberIsCamelCase() =
@@ -35,11 +35,11 @@ type MyClass2() as this =
     member this.printMessage() = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 16))
+        Assert.IsTrue(this.ViolationExistsAt(5, 16))
 
-    /// The new member (constructor) is not pascal case so check it does not post an error.
+    /// The new member (constructor) is not pascal case so check it does not cause any violation.
     [<Test>]
-    member this.ConstructorDoesNotPostError() =
+    member this.ConstructorDoesNotCauseViolation() =
         this.Parse """
 module Program
 
@@ -47,7 +47,7 @@ type MyClass(x) =
     new() = MyClass(0)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
 
 
@@ -61,7 +61,7 @@ type Shape2D(x0 : float, y0 : float) =
     member this.CenterX with get() = x and set xval = x <- xval
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PropertyIsCamelCase() =
@@ -73,7 +73,7 @@ type Shape2D(x0 : float, y0 : float) =
     member this.centerX with get() = x and set xval = x <- xval
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 16))
+        Assert.IsTrue(this.ViolationExistsAt(6, 16))
 
     [<Test>]
     member this.AbstractMemberNameIsPascalCase() =
@@ -85,7 +85,7 @@ type Shape2D(x0 : float, y0 : float) =
     abstract member Rotate: float -> unit
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AbstractMemberNameIsCamelCase() =
@@ -97,7 +97,7 @@ type Shape2D(x0 : float, y0 : float) =
     abstract member rotate: float -> unit
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 20))
+        Assert.IsTrue(this.ViolationExistsAt(6, 20))
 
     [<Test>]
     member this.AbstractPropertyNameIsPascalCase() =
@@ -109,7 +109,7 @@ type Shape2D(x0 : float, y0 : float) =
     abstract Area : float with get
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AbstractPropertyNameIsCamelCase() =
@@ -121,7 +121,7 @@ type Shape2D(x0 : float, y0 : float) =
     abstract area : float with get
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(6, 13))
+        Assert.IsTrue(this.ViolationExistsAt(6, 13))
 
     [<Test>]
     member this.DefaultMemberIsPascalCase() =
@@ -134,7 +134,7 @@ type Shape2D(x0 : float, y0 : float) =
     default this.Rotate(angle) = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.DefaultMemberIsCamelCase() =
@@ -147,7 +147,7 @@ type Shape2D(x0 : float, y0 : float) =
     default this.rotate(angle) = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(7, 17))
+        Assert.IsTrue(this.ViolationExistsAt(7, 17))
 
     [<Test>]
     member this.TypeExtensionMethodIsPascalCase() =
@@ -161,7 +161,7 @@ type MyClass with
     member this.Goat() = 200
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.TypeExtensionMethodIsCamelCase() =
@@ -175,12 +175,12 @@ type MyClass with
     member this.goat() = 200
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(8, 16))
+        Assert.IsTrue(this.ViolationExistsAt(8, 16))
 
     /// Regression test for https://github.com/fsprojects/FSharpLint/issues/99
-    /// (duplicated warning for underscore in identifier).
+    /// (duplicated violation for underscore in identifier).
     [<Test>]
-    member this.MemberWithUnderscoreDoesNotHaveDuplicateWarnings() =
+    member this.MemberWithUnderscoreDoesNotHaveDuplicateViolattions() =
         this.Parse """
 module Program
 
@@ -188,9 +188,9 @@ type Cat() =
     member x.Pri_nt() = ()
 """
 
-        let numberOfErrors = this.ErrorsAt(5, 13) |> Seq.length
+        let numberOfViolations = this.ViolationsAt(5, 13) |> Seq.length
 
-        Assert.AreEqual(1, numberOfErrors)
+        Assert.AreEqual(1, numberOfViolations)
 
     [<Test>]
     member this.``When prefix of underscores is allowed expect no suggestions when the remaining member ident is PascalCase``() =
@@ -201,11 +201,11 @@ type Cat() =
     member x.__Print() = (
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/323
     [<Test>]
-    member this.``Special op_ prefixed members do not cause errors`` () =
+    member this.``Special op_ prefixed members do not cause violations`` () =
         let source = """
 type X = X of int
 with
@@ -214,7 +214,7 @@ with
 """
 
         this.Parse source
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/327
     [<Test>]
@@ -227,4 +227,4 @@ type Foo() =
 """
 
         this.Parse source
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

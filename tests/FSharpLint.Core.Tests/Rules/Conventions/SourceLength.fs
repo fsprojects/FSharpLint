@@ -36,7 +36,7 @@ module Program
 let dog x =
     %s{generateNewLines FunctionLength 4}
     ()""")
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.FunctionNotTooManyLines() =
@@ -46,7 +46,7 @@ module Program
 let dog x =
     %s{generateNewLines (FunctionLength - 4) 4}
     ()""")
-        Assert.IsFalse(this.ErrorExistsAt(4, 4))
+        Assert.IsFalse(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.FunctionTooManyLinesWithComment() =
@@ -59,7 +59,7 @@ let dog x =
     // Buzz
     %s{generateNewLines (FunctionLength - 3) 4}
     ()""")
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.FunctionTooManyLinesWithMultiLineComment() =
@@ -73,7 +73,7 @@ let dog x =
     *)
     %s{generateNewLines (FunctionLength - 4) 4}
     ()""")
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
     [<Test>]
     member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
@@ -89,7 +89,7 @@ let dog x =
     let (*) a b = a + b
     %s{generateNewLines (FunctionLength - 5) 4}
     ()""")
-        Assert.IsFalse this.ErrorsExist
+        Assert.IsFalse this.ViolationsExist
 
 [<Literal>]
 let LambdaFunctionLength = 5
@@ -109,7 +109,7 @@ let dog = fun x ->
         ()
     | None -> ()
         """)
-        Assert.IsTrue(this.ErrorExistsAt(4, 10))
+        Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
     member this.``Multiple arguments in a lamba should not be treated as separate lambdas.``() =
@@ -124,7 +124,7 @@ let dog = fun x y ->
     | None -> ()
         """)
 
-        Assert.AreEqual(1, Seq.length <| this.ErrorsAt(4, 10))
+        Assert.AreEqual(1, Seq.length <| this.ViolationsAt(4, 10))
 
     [<Test>]
     member this.LambdaFunctionNotTooManyLines() =
@@ -138,7 +138,7 @@ let dog = fun x ->
     | None -> ()
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 10))
+        Assert.IsFalse(this.ViolationExistsAt(4, 10))
 
 [<Literal>]
 let MatchLambdaFunctionLength = 70
@@ -156,7 +156,7 @@ let dog = function
     %s{generateNewLines MatchLambdaFunctionLength 4}
     ()
 | None -> ()""")
-        Assert.IsTrue(this.ErrorExistsAt(4, 10))
+        Assert.IsTrue(this.ViolationExistsAt(4, 10))
 
     [<Test>]
     member this.MatchFunctionNotTooManyLines() =
@@ -168,7 +168,7 @@ let dog = function
     %s{generateNewLines (MatchLambdaFunctionLength - 5) 4}
     ()
 | None -> ()""")
-        Assert.IsFalse(this.ErrorExistsAt(4, 4))
+        Assert.IsFalse(this.ViolationExistsAt(4, 4))
 
 [<Literal>]
 let ValueLength = 70
@@ -184,7 +184,7 @@ module Program
 let dog =
     %s{generateNewLines ValueLength 4}
     ()""")
-        Assert.IsTrue(this.ErrorExistsAt(4, 4))
+        Assert.IsTrue(this.ViolationExistsAt(4, 4))
 
     [<Test>]
     member this.ValueNotTooManyLines() =
@@ -194,7 +194,7 @@ module Program
 let dog =
     %s{generateNewLines (ValueLength - 4) 4}
     ()""")
-        Assert.IsFalse(this.ErrorExistsAt(4, 4))
+        Assert.IsFalse(this.ViolationExistsAt(4, 4))
 
 [<Literal>]
 let ConstructorLength = 70
@@ -212,7 +212,7 @@ type MyClass(x) =
         %s{generateNewLines ConstructorLength 8}
         MyClass(0)
       """)
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.ConstructorNotTooManyLines() =
@@ -223,7 +223,7 @@ type MyClass(x) =
     new() = MyClass(0)
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 4))
+        Assert.IsFalse(this.ViolationExistsAt(5, 4))
 
 [<Literal>]
 let MemberLength = 70
@@ -241,7 +241,7 @@ type Class() =
         ()
 \"\"\")
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.MemberNotTooManyLines() =
@@ -252,7 +252,7 @@ type Class() =
     member this.Member1 () = ()
 \"\"""
 
-        Assert.IsFalse(this.ErrorExistsAt(5, 4))
+        Assert.IsFalse(this.ViolationExistsAt(5, 4))
 
 [<Literal>]
 let PropertyLength = 70
@@ -270,7 +270,7 @@ type Class() =
     member this.Property1 with get() =
         value
 """
-        Assert.IsFalse(this.ErrorExistsAt(6, 31))
+        Assert.IsFalse(this.ViolationExistsAt(6, 31))
 
 [<Literal>]
 let ClassLength = 500
@@ -287,7 +287,7 @@ type MyClass2() as this =
     do
         %s{generateNewLines ClassLength 8}
     member this.PrintMessage() = ()""")
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.ClassNotTooManyLines() =
@@ -298,7 +298,7 @@ type MyClass2() as this =
     member this.PrintMessage() = ()
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 5))
+        Assert.IsFalse(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.InterfaceTooManyLines() =
@@ -309,7 +309,7 @@ type IPrintable =
     %s{generateAbstractMembers ClassLength 4}
     abstract member Print : unit -> unit""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.InterfaceNotTooManyLines() =
@@ -320,7 +320,7 @@ type IPrintable =
     abstract member Print : unit -> unit
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 5))
+        Assert.IsFalse(this.ViolationExistsAt(4, 5))
 
 [<Literal>]
 let UnionLength = 500
@@ -345,7 +345,7 @@ type Record =
         %s{generateNewLines RecordLength 8}
         dog: int
     }}""")
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
     member this.RecordNotTooManyLines() =
@@ -355,7 +355,7 @@ module Program
 type Record = { dog: int }
 """
 
-        Assert.IsFalse(this.ErrorExistsAt(4, 5))
+        Assert.IsFalse(this.ViolationExistsAt(4, 5))
 
 [<Literal>]
 let EnumLength = 1000
@@ -377,7 +377,7 @@ module Program
 {generateNewLines ModuleLength 0}
 let foo = ""
 exception SomeException of string""")
-        Assert.IsTrue(this.ErrorExistsAt(2, 0))
+        Assert.IsTrue(this.ViolationExistsAt(2, 0))
 
     [<Test>]
     member this.ModuleNotTooManyLines() =
@@ -386,4 +386,4 @@ module Program
 {generateNewLines (ModuleLength - 4) 0}
 let foo = ""
 exception SomeException of string""")
-        Assert.IsFalse(this.ErrorExistsAt(2, 0))
+        Assert.IsFalse(this.ViolationExistsAt(2, 0))

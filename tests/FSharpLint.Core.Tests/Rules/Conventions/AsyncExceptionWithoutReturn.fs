@@ -19,7 +19,7 @@ let someAsyncFunction () =
         return true
     }""")
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.AsyncRaiseWithReturn() =
@@ -31,7 +31,7 @@ let someAsyncFunction () =
         return raise (new System.Exception("An error occurred."))
     }""")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AsyncFailWithWithoutReturn() =
@@ -44,7 +44,7 @@ let someAsyncFunction () =
         return true
     }""")
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.AsyncFailwithfWithoutReturn1() =
@@ -58,7 +58,7 @@ let someAsyncFunction () =
         return true
     }""")
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.AsyncFailwithfWithoutReturn2() =
@@ -71,7 +71,7 @@ let someAsyncFunction () =
         failwithf "Dummy Error Message: %i" errCode
     }""")
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist
 
     [<Test>]
     member this.AsyncFailwithWithReturn() =
@@ -83,7 +83,7 @@ let someAsyncFunction () =
         return failwith "An error occurred."
     }""")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AsyncFailwithfWithReturn() =
@@ -96,7 +96,7 @@ let someAsyncFunction () =
         return failwithf "Dummy Error Message: %i" errCode
     }""")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AsyncRaiseWithReturnInnerExpression() =
@@ -111,7 +111,7 @@ let someAsyncFunction () =
         return true
     }""")
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.AsyncRaiseWithoutReturnInnerExpression() =
@@ -126,4 +126,4 @@ let someAsyncFunction () =
         return true
     }""")
 
-        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue this.ViolationsExist

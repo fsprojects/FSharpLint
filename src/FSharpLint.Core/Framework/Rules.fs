@@ -5,7 +5,7 @@ open FSharp.Compiler.Text
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 
 // Non-standard record field names for serialization
 // fsharplint:disable RecordFieldNames
@@ -47,7 +47,7 @@ type RuleMetadata<'Config> =
       RuleConfig:'Config }
 
 type AstNodeRuleConfig =
-    { Runner:AstNodeRuleParams -> WarningDetails []
+    { Runner:AstNodeRuleParams -> array<ViolationDetails>
       Cleanup:unit -> unit }
 
 type NamingCase =
@@ -72,9 +72,9 @@ type NamingRuleConfig =
     { Config:NamingConfig
       GetIdentifiersToCheck:AstNodeRuleParams -> (Ident * string * (unit -> bool) option) [] }
 
-type LineRuleConfig = { Runner:LineRuleParams -> WarningDetails [] }
+type LineRuleConfig = { Runner:LineRuleParams -> array<ViolationDetails> }
 
-type LineRuleConfigWithContext<'Context> = { Runner:'Context -> LineRuleParams -> WarningDetails [] }
+type LineRuleConfigWithContext<'Context> = { Runner:'Context -> LineRuleParams -> array<ViolationDetails> }
 
 type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
 type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
@@ -85,23 +85,23 @@ type Rule =
     | IndentationRule of RuleMetadata<IndentationRuleConfig>
     | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
 
-let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details:WarningDetails) =
+let toLintViolation (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details: ViolationDetails) =
     {
-        LintWarning.RuleIdentifier = identifier
+        LintViolation.RuleIdentifier = identifier
         FilePath = filePath
         RuleName = ruleName
-        ErrorText = lines.[details.Range.StartLine - 1].TrimEnd('\r')
+        SourceCodeFragment = lines.[details.Range.StartLine - 1].TrimEnd('\r')
         Details = details
     }
 
 let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.map (toLintViolation rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
     rule.RuleConfig.Runner context config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.map (toLintViolation rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.map (toLintViolation rule.Identifier rule.Name config.FilePath config.Lines)

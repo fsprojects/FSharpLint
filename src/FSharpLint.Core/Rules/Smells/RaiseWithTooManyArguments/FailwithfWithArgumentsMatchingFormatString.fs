@@ -3,7 +3,7 @@ module FSharpLint.Rules.FailwithfWithArgumentsMatchingFormatString
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -20,7 +20,7 @@ let private runner (args:AstNodeRuleParams) =
                     {
                         Range = range
                         Message = Resources.GetString "FailwithfWithArgumentsMatchingFormatString"
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             | _ -> Array.empty

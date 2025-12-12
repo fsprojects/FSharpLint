@@ -2,7 +2,7 @@ module FSharpLint.Rules.FavourAsKeyword
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
@@ -23,7 +23,7 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
 
             let fromRange = Range.mkRange String.Empty range.Start constRange.End
 
-            let suggestedFix =
+            let autoFix =
                 ExpressionUtilities.tryFindTextOfRange fromRange args.FileContent
                 |> Option.bind (fun text ->
 
@@ -36,7 +36,7 @@ let private checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern 
             Array.singleton
                 { Range = fromRange
                   Message = Resources.GetString("RulesFavourAsKeyword")
-                  SuggestedFix = suggestedFix
+                  AutoFix = autoFix
                   TypeChecks = List.Empty }
 
         | _ -> Array.empty

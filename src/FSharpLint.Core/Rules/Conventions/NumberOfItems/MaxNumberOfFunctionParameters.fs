@@ -2,7 +2,7 @@ module FSharpLint.Rules.MaxNumberOfFunctionParameters
 
 open System
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
@@ -11,13 +11,13 @@ let private validateFunction (maxParameters:int) (constructorArguments:SynArgPat
     match constructorArguments with
     | SynArgPats.Pats(parameters)
             when List.length parameters > maxParameters ->
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsFunctionError")
-        let error = String.Format(errorFormatString, maxParameters)
+        let violationTextFormatString = Resources.GetString "RulesNumberOfItemsFunctionViolation"
+        let violationMsg = String.Format(violationTextFormatString, maxParameters)
         Array.singleton
             {
                 Range = parameters.[maxParameters].Range
-                Message = error
-                SuggestedFix = None
+                Message = violationMsg
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     | _ -> Array.empty

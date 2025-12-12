@@ -8,7 +8,7 @@ open FSharp.Compiler.SyntaxTrivia
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.ExpressionUtilities
 open FSharpLint.Framework.HintParser
@@ -682,8 +682,8 @@ let private hintError (config: HintErrorConfig) =
     match config.Hint.Suggestion with
     | Suggestion.Expr(expr) ->
         let suggestion = FormatHint.toString { toStringConfig with HintNode = (HintExpr expr) }
-        let errorFormatString = Resources.GetString("RulesHintRefactor")
-        let error = System.String.Format(errorFormatString, matched, suggestion)
+        let violationTextFormatString = Resources.GetString "RulesHintRefactor"
+        let error = System.String.Format(violationTextFormatString, matched, suggestion)
 
         let toText =
             FormatHint.toString
@@ -694,15 +694,15 @@ let private hintError (config: HintErrorConfig) =
                         HintNode = (HintExpr expr)
                 }
 
-        let suggestedFix = lazy(
+        let autoFix = lazy(
             ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
             |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
 
-        { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
+        { Range = config.Range; Message = error; AutoFix = Some autoFix; TypeChecks = config.TypeChecks }
     | Suggestion.Message(message) ->
-        let errorFormatString = Resources.GetString("RulesHintSuggestion")
-        let error = System.String.Format(errorFormatString, matched, message)
-        { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
+        let violationTextFormatString = Resources.GetString "RulesHintSuggestion"
+        let error = System.String.Format(violationTextFormatString, matched, message)
+        { Range = config.Range; Message = error; AutoFix = None; TypeChecks = config.TypeChecks }
 
 let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
     let symbol =

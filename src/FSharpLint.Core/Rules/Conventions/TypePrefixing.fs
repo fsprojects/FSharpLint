@@ -3,7 +3,7 @@ module FSharpLint.Rules.TypePrefixing
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
@@ -27,18 +27,18 @@ type CheckTypePrefixingConfig =
     }
 
 let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
-    let recommendPostfixErrMsg = lazy(Resources.GetString("RulesFormattingF#PostfixGenericError"))
+    let recommendPostfixViolationMsg = lazy(Resources.GetString "RulesFormattingF#PostfixGenericViolation")
     match typePrefixingConfig.TypeName with
     | SynType.LongIdent lid ->
         let prefixSuggestion typeName =
-            let suggestedFix = lazy(
+            let autoFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeName}<{typeArgs}>" }))
             Some
                 {
                     Range = typePrefixingConfig.Range
-                    Message = Resources.GetString("RulesFormattingGenericPrefixError")
-                    SuggestedFix = Some suggestedFix
+                    Message = Resources.GetString "RulesFormattingGenericPrefixViolation"
+                    AutoFix = Some autoFix
                     TypeChecks = List.Empty
                 }
 
@@ -53,14 +53,14 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
             // Prefer postfix.
             if not typePrefixingConfig.IsPostfix && typePrefixingConfig.Config.Mode <> Mode.Always
             then
-                let suggestedFix = lazy(
+                let autoFix = lazy(
                     (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
                     ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} {typeName}" }))
                 Some
                     {
                         Range = typePrefixingConfig.Range
-                        Message = String.Format(recommendPostfixErrMsg.Value, typeName)
-                        SuggestedFix = Some suggestedFix
+                        Message = String.Format(recommendPostfixViolationMsg.Value, typeName)
+                        AutoFix = Some autoFix
                         TypeChecks = List.Empty
                     }
             else
@@ -71,14 +71,14 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
 
         | "array" when typePrefixingConfig.Config.Mode <> Mode.Always ->
             // Prefer special postfix (e.g. int []).
-            let suggestedFix = lazy(
+            let autoFix = lazy(
                 (ExpressionUtilities.tryFindTextOfRange typePrefixingConfig.Range typePrefixingConfig.Args.FileContent, typePrefixingConfig.TypeArgs)
                 ||> Option.map2 (fun fromText typeArgs -> { FromText = fromText; FromRange = typePrefixingConfig.Range; ToText = $"{typeArgs} []" }))
             Some
                 {
                     Range = typePrefixingConfig.Range
-                    Message = Resources.GetString("RulesFormattingF#ArrayPostfixError")
-                    SuggestedFix = Some suggestedFix
+                    Message = Resources.GetString "RulesFormattingF#ArrayPostfixViolation"
+                    AutoFix = Some autoFix
                     TypeChecks = List.Empty
                 }
 
@@ -92,9 +92,9 @@ let checkTypePrefixing (typePrefixingConfig: CheckTypePrefixingConfig) =
                 Some
                     {
                         Range = typePrefixingConfig.Range
-                        Message = String.Format(recommendPostfixErrMsg.Value, typeName)
+                        Message = String.Format(recommendPostfixViolationMsg.Value, typeName)
                         // TODO
-                        SuggestedFix = None
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             | false, _ ->
@@ -119,8 +119,8 @@ let runner (config:Config) args =
     | AstNode.Type (SynType.Array (1, _elementType, range)) when config.Mode = Mode.Always ->
         Array.singleton
             { Range = range
-              Message = Resources.GetString("RulesFormattingF#ArrayPrefixError")
-              SuggestedFix = None
+              Message = Resources.GetString "RulesFormattingF#ArrayPrefixViolation"
+              AutoFix = None
               TypeChecks = List.Empty }
     | _ ->
         Array.empty

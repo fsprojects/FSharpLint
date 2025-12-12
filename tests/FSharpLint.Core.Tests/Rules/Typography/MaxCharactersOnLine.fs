@@ -12,4 +12,4 @@ type TestTypographyMaxCharactersOnLine() =
     member this.TooManyCharactersOnLine() =
         this.Parse "let line = 55 + 77 + 77 + 55 + 55 + 55 + 77 + 55 + 55 + 77 + 55 + 55 + 77 + 77"
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 61))
+        Assert.IsTrue(this.ViolationExistsAt(1, 61))

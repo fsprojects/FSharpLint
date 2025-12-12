@@ -3,7 +3,7 @@ module FSharpLint.Rules.RedundantNewKeyword
 open System
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.CodeAnalysis
@@ -51,7 +51,7 @@ let runner args =
             {
                 Range = range
                 Message = Resources.GetString("RulesRedundantNewKeyword")
-                SuggestedFix = Some(generateFix args.FileContent range)
+                AutoFix = Some(generateFix args.FileContent range)
                 TypeChecks =
                     [
                         fun () -> doesNotImplementIDisposable checkInfo identifier

@@ -9,7 +9,7 @@ type TestFormattingModuleDeclSpacing() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(ModuleDeclSpacing.rule)
 
     [<Test>]
-    member this.``Error for missing space between module declarations``() =
+    member this.``Violation for missing space between module declarations``() =
         this.Parse """
 module Program
 
@@ -18,10 +18,10 @@ let x = 1
 let y = 2
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+        Assert.IsTrue(this.ViolationExistsAt(5, 0))
 
     [<Test>]
-    member this.``Error for no space between module declarations``() =
+    member this.``Violation for no space between module declarations``() =
         this.Parse """
 module Program
 
@@ -29,10 +29,10 @@ let x = 1
 let y = 2
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 0))
+        Assert.IsTrue(this.ViolationExistsAt(5, 0))
 
     [<Test>]
-    member this.``No error for correct spacing between module declarations``() =
+    member this.``No violation for correct spacing between module declarations``() =
         this.Parse """
 module Program
 
@@ -42,10 +42,10 @@ let x = 1
 let y = 2
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``No error for correct spacing between module declarations with comments``() =
+    member this.``No violation for correct spacing between module declarations with comments``() =
         this.Parse """
 module Program
 
@@ -57,4 +57,4 @@ let x = 1
 let y = 2
 """
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)

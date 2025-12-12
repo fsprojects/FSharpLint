@@ -4,7 +4,7 @@ open System
 open FSharpLint.Framework
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -145,36 +145,36 @@ let checkIndentation (expectedSpaces:int) (line:string) (lineNumber:int) (indent
         match indentationOverrides.[lineNumber] with
         | (true, expectedIndentation) ->
             if numLeadingSpaces <> expectedIndentation then
-                let errorString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                let violationMsg = Resources.GetString "RulesTypographyOverridenIndentationViolation"
                 Some
                     {
                         Range = range
-                        Message = errorString
-                        SuggestedFix = None
+                        Message = violationMsg
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
                 None
         | (false, indentationOffset) ->
             if (numLeadingSpaces - indentationOffset) % expectedSpaces <> 0 then
-                let errorFormatString = Resources.GetString("RulesTypographyOverridenIndentationError")
+                let violationTextFormatString = Resources.GetString "RulesTypographyOverridenIndentationViolation"
 
                 Some
                     {
                         Range = range
-                        Message = String.Format(errorFormatString, expectedSpaces)
-                        SuggestedFix = None
+                        Message = String.Format(violationTextFormatString, expectedSpaces)
+                        AutoFix = None
                         TypeChecks = List.Empty
                     }
             else
                 None
     elif numLeadingSpaces % expectedSpaces <> 0 then
-        let errorFormatString = Resources.GetString("RulesTypographyIndentationError")
+        let violationTextFormatString = Resources.GetString "RulesTypographyIndentationViolation"
         Some
             {
                 Range = range
-                Message = String.Format(errorFormatString, expectedSpaces)
-                SuggestedFix = None
+                Message = String.Format(violationTextFormatString, expectedSpaces)
+                AutoFix = None
                 TypeChecks = List.Empty
             }
     else

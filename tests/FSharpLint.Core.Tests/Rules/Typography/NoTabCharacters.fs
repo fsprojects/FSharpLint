@@ -13,7 +13,7 @@ type TestTypographyTabCharacterInFile() =
     member this.TabCharacterInFile() =
         this.Parse "\t"
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 0))
+        Assert.IsTrue(this.ViolationExistsAt(1, 0))
 
     [<Test>]
     member this.``Tab character in literal strings are not reported``() =
@@ -25,18 +25,18 @@ type TestTypographyTabCharacterInFile() =
             """, "\t", "\"\"\"")
         this.Parse (source)
 
-        Assert.IsFalse(this.ErrorExistsAt(2, 23))
-        Assert.IsFalse(this.ErrorExistsAt(4, 13))
+        Assert.IsFalse(this.ViolationExistsAt(2, 23))
+        Assert.IsFalse(this.ViolationExistsAt(4, 13))
 
     [<Test>]
-    member this.TabCharacterInFileSuggestedFix() =
+    member this.TabCharacterInFileAutoFix() =
         let source = "\t"
         let expected = String.replicate 4 " "
         this.Parse source
 
-        Assert.IsTrue(this.ErrorExistsAt(1, 0))
+        Assert.IsTrue(this.ViolationExistsAt(1, 0))
 
-        let result = this.ApplyQuickFix source
+        let result = this.ApplyAutoFix source
 
         Assert.AreEqual(expected, result)
 

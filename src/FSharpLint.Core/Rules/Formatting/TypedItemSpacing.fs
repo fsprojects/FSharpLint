@@ -4,7 +4,7 @@ open System
 open FSharp.Compiler.Text
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
@@ -54,17 +54,17 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                 let trimmedTypeText = typeText.TrimStart(' ')
                 let spacesBeforeString = " " |> String.replicate expectedSpacesBefore
                 let spacesAfterString = " " |> String.replicate expectedSpacesAfter
-                let suggestedFix = lazy(
+                let autoFix = lazy(
                     Some { FromRange = range;
                            FromText = text;
                            ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
                     )
-                let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")
+                let violationTextFormatString = Resources.GetString "RulesFormattingTypedItemSpacingViolation"
                 Some
                     {
                         Range = range
-                        Message = String.Format(errorFormatString, expectedSpacesBefore, expectedSpacesAfter)
-                        SuggestedFix = Some suggestedFix
+                        Message = String.Format(violationTextFormatString, expectedSpacesBefore, expectedSpacesAfter)
+                        AutoFix = Some autoFix
                         TypeChecks = List.Empty
                     }
                 else

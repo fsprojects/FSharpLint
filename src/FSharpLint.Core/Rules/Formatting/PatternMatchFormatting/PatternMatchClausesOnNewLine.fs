@@ -3,7 +3,7 @@ module FSharpLint.Rules.PatternMatchClausesOnNewLine
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -14,8 +14,8 @@ let check args _ (clauses:SynMatchClause list) _ =
             Some
                 {
                     Range = clauseTwo.Range
-                    Message = Resources.GetString("RulesFormattingPatternMatchClausesOnNewLineError")
-                    SuggestedFix = None
+                    Message = Resources.GetString "RulesFormattingPatternMatchClausesOnNewLineViolation"
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

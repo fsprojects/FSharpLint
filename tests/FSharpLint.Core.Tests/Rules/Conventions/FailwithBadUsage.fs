@@ -15,8 +15,8 @@ type TestConventionsFailwithBadUsage() =
 let foo () =
     failwith ""
 """
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(3, 4))
 
     [<Test>]
     member this.FailwithWithBadArgumentsEmptyMessage2() =
@@ -25,8 +25,8 @@ let bar () =
     failwith String.Empty
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(3, 4))
 
     [<Test>]
     member this.FailwithWithBadArgumentsEmptyMessage3() =
@@ -37,8 +37,8 @@ let bar () =
     failwith String.Empty
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.FailwithWithGoodArguments() =
@@ -49,7 +49,7 @@ let bar () =
     failwith "bar2"
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FailwithWithGoodArguments2() =
@@ -58,7 +58,7 @@ let foo () =
     failwith "foo3"
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FailwithWithBadArgumentsDuplicateExceptionMessage() =
@@ -69,8 +69,8 @@ let bar () =
     failwith "foobar"
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(5, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(5, 4))
 
     [<Test>]
     member this.FailwithShouldNotSwallowExceptions() =
@@ -82,8 +82,8 @@ with
     failwith "bar4"
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(6, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(6, 4))
 
     [<Test>]
     member this.FailwithWithProperExceptions() =
@@ -95,7 +95,7 @@ with
     raise new Exception("bar5", e)
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.FailwithfShouldNotSwallowExceptions() =
@@ -107,8 +107,8 @@ with
     failwithf "bar6"
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(6, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(6, 4))
 
     [<Test>]
     member this.FailwithfShouldNotSwallowExceptions2() =
@@ -120,8 +120,8 @@ with
     failwithf "bar7 %i" 42
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsOnLine 6)
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsOnLine 6)
 
     [<Test>]
     member this.FailwithfWithGoodArguments() =
@@ -130,7 +130,7 @@ let foo () =
     failwithf "foo8 %i" 42
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FailwithfWithGoodArguments2() =
@@ -139,7 +139,7 @@ let foo () =
     failwithf "foo9"
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.FailwithfWithBadArgumentsEmptyMessage3() =
@@ -148,8 +148,8 @@ let foo () =
     failwithf String.Empty
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(3, 4))
 
     [<Test>]
     member this.FailwithfWithNullArgument() =
@@ -158,8 +158,8 @@ let foo () =
     failwithf null
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(3, 14))
 
     [<Test>]
     member this.FailwithfWithFullNameModuleEmptyMessage() =
@@ -168,8 +168,8 @@ let bar () =
     failwithf System.String.Empty
 """
 
-        Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 4))
+        Assert.IsTrue this.ViolationsExist
+        Assert.IsTrue(this.ViolationExistsAt(3, 4))
 
     [<Test>]
     member this.FailwithfWithShouldnotFail() =
@@ -179,7 +179,7 @@ let failIfNone (opt: 'a option) : 'a =
     |> Option.defaultWith (fun _ -> failwith "A unique error message")
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.ExternDeclarationsShouldnotFail() =
@@ -191,7 +191,7 @@ extern bool Foo()
 extern bool Bar()
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist
 
     [<Test>]
     member this.ExternDeclarationsWithoutDllImportShouldnotFail() =
@@ -201,4 +201,4 @@ extern bool Foo()
 extern bool Bar()
 """
 
-        Assert.IsTrue this.NoErrorsExist
+        Assert.IsTrue this.NoViolationsExist

@@ -22,7 +22,7 @@ module Program
 let main = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.ModuleNameIsCamelCase() =
@@ -32,4 +32,4 @@ module program
 let main = ()
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(2, 7))
+        Assert.IsTrue(this.ViolationExistsAt(2, 7))

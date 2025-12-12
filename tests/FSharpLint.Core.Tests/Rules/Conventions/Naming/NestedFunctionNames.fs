@@ -24,7 +24,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.NestedFunctionNameIsCamelCase() =
@@ -38,7 +38,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.NestedFunctionNameIsPascalCase() =
@@ -52,7 +52,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+        Assert.IsTrue(this.ViolationExistsAt(4, 12))
 
     [<Test>]
     member this.NestedFunctionNameWithNoParametersIsPascalCase() =
@@ -66,7 +66,7 @@ module Program =
         pi * 2
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 12))
+        Assert.IsTrue(this.ViolationExistsAt(4, 12))
 
     [<Test>]
     member this.NestedFunctionNameInTypeIsPascalCase() =
@@ -80,7 +80,7 @@ type Record =
         length * pi * radius * radius
 """
 
-        Assert.IsTrue(this.ErrorExistsAt(5, 12))
+        Assert.IsTrue(this.ViolationExistsAt(5, 12))
 
     [<Test>]
     member this.UnnestedFunctionNameIsPascalCase() =
@@ -97,7 +97,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PrivateUnnestedFunctionNameIsPascalCase() =
@@ -109,7 +109,7 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PrivateUnnestedFunctionNameIsCamelCase() =
@@ -121,10 +121,10 @@ module Program =
         length * pi * radius * radius
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``Bindings that are not functions should not cause errors``() =
+    member this.``Bindings that are not functions should not cause violations``() =
         this.Parse """
 module Program =
     let OuterFunction () =
@@ -132,4 +132,4 @@ module Program =
         ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()

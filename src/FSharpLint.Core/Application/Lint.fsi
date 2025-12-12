@@ -18,6 +18,7 @@ module Lint =
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
+    open FSharpLint.Framework.Violation
     open FSharp.Compiler.Text
     open FSharp.Compiler.CodeAnalysis
 
@@ -28,7 +29,7 @@ module Lint =
         | Starting of string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string * Suggestion.LintWarning list
+        | ReachedEnd of string * LintViolation list
 
         /// Failed to parse a file (file path, exception that caused failure).
         | Failed of string * System.Exception
@@ -55,7 +56,7 @@ module Lint =
         Configuration: ConfigurationParam
 
         /// This function will be called every time the linter finds a broken rule.
-        ReceivedWarning: (Suggestion.LintWarning -> unit) option
+        ReceivedViolation: (LintViolation -> unit) option
 
         ReportLinterProgress: (ProjectProgress -> unit) option
     } with
@@ -113,10 +114,10 @@ module Lint =
     /// Result of running the linter.
     [<NoEquality; NoComparison; RequireQualifiedAccess>]
     type LintResult =
-        | Success of Suggestion.LintWarning list
+        | Success of list<LintViolation>
         | Failure of LintFailure
 
-        member TryGetSuccess : byref<Suggestion.LintWarning list> -> bool
+        member TryGetSuccess : byref<list<LintViolation>> -> bool
         member TryGetFailure : byref<LintFailure> -> bool
 
     type RunAstNodeRulesConfig =
@@ -131,7 +132,7 @@ module Lint =
         }
 
     /// Runs all rules which take a node of the AST as input.
-    val runAstNodeRules : RunAstNodeRulesConfig -> Suggestion.LintWarning [] * Context
+    val runAstNodeRules : RunAstNodeRulesConfig -> array<LintViolation> * Context
 
     type RunLineRulesConfig =
         {
@@ -144,7 +145,7 @@ module Lint =
         }
 
     /// Runs all rules which take a line of text as input.
-    val runLineRules : RunLineRulesConfig -> Suggestion.LintWarning []
+    val runLineRules : RunLineRulesConfig -> array<LintViolation>
 
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult

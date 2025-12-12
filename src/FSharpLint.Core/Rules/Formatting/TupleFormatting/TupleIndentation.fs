@@ -5,7 +5,7 @@ open System.Diagnostics.CodeAnalysis
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -17,8 +17,8 @@ let checkTupleIndentation _ (tupleExprs:SynExpr list) _ _ =
             Some
                 {
                     Range = Range.mkRange "" expr.Range.Start nextExpr.Range.End
-                    Message = Resources.GetString("RulesFormattingTupleIndentationError")
-                    SuggestedFix = None
+                    Message = Resources.GetString "RulesFormattingTupleIndentationViolation"
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

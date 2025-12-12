@@ -21,9 +21,9 @@ module program
 exception MyError of string
 """
 
-        let error = "Consider changing `MyError` to PascalCase."
+        let violationMsg = "Consider changing `MyError` to PascalCase."
 
-        Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
+        Assert.IsFalse(this.ViolationWithMessageExistsAt(violationMsg, 3, 10))
 
     [<Test>]
     member this.ExceptionIsCamelCase() =
@@ -32,9 +32,9 @@ module program
 exception myError of string
 """
 
-        let error = "Consider changing `myError` to PascalCase."
+        let violationMsg = "Consider changing `myError` to PascalCase."
 
-        Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
+        Assert.IsTrue(this.ViolationWithMessageExistsAt(violationMsg, 3, 10))
 
     [<Test>]
     member this.ExceptionEndsWithException() =
@@ -43,9 +43,9 @@ module program
 exception MyErrorException of string
 """
 
-        let error = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
+        let violationMsg = "Consider changing `MyErrorException` to be suffixed with 'Exception'."
 
-        Assert.IsFalse(this.ErrorWithMessageExistsAt(error, 3, 10))
+        Assert.IsFalse(this.ViolationWithMessageExistsAt(violationMsg, 3, 10))
 
     [<Test>]
     member this.ExceptionDoesNotEndWithException() =
@@ -54,12 +54,12 @@ module Program
 exception MyError of string
 """
 
-        let error = "Consider changing `MyError` to be suffixed with `Exception`."
+        let violationMsg = "Consider changing `MyError` to be suffixed with `Exception`."
 
-        Assert.IsTrue(this.ErrorWithMessageExistsAt(error, 3, 10))
+        Assert.IsTrue(this.ViolationWithMessageExistsAt(violationMsg, 3, 10))
 
     [<Test>]
-    member this.``Quick fix for suffixes adds missing suffix to identifier.``() =
+    member this.``Auto fix for suffixes adds missing suffix to identifier.``() =
         let source = """
 module Program
 exception Foo of string
@@ -71,4 +71,4 @@ exception FooException of string
 """
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)

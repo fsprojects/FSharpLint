@@ -53,4 +53,4 @@ type TestLineRuleBase (rule:Rule) =
                 Lines = lines
                 Context = context
             }
-        |> Array.iter this.PostSuggestion
+        |> Array.iter this.PostViolation

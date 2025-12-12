@@ -10,75 +10,75 @@ type TestFormattingTypedItemSpaceAfter() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.SpaceAfter })
 
     [<Test>]
-    member this.``No error for typed pattern with space after colon``() =
+    member this.``No violation for typed pattern with space after colon``() =
         let source = "let (x: int) = 1"
         this.Parse source
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for typed pattern with no spaces around colon``() =
+    member this.``Violation for typed pattern with no spaces around colon``() =
         let source = "let (x:int) = 1"
         this.Parse source
-        Assert.IsTrue(this.ErrorExistsAt(1, 5))
+        Assert.IsTrue(this.ViolationExistsAt(1, 5))
 
     [<Test>]
-    member this.``No error for record field with spaces around colon``() =
+    member this.``No violation for record field with spaces around colon``() =
         this.Parse "type X = { x : int }"
-        Assert.IsTrue(this.ErrorExistsAt(1, 11))
+        Assert.IsTrue(this.ViolationExistsAt(1, 11))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with no spaces around colon``() =
+    member this.``Autofix for typed pattern with no spaces around colon``() =
         let source = "let (x:int) = 1"
         let expected = "let (x: int) = 1"
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Error for typed pattern with spaces around colon``() =
+    member this.``Violation for typed pattern with spaces around colon``() =
         this.Parse "let (x : int) = 1"
-        Assert.IsTrue(this.ErrorExistsAt(1, 5))
+        Assert.IsTrue(this.ViolationExistsAt(1, 5))
 
     [<Test>]
-    member this.``Error for record field with spaces around colon``() =
+    member this.``Violation for record field with spaces around colon``() =
         this.Parse "type X = { x : int }"
-        Assert.IsTrue(this.ErrorExistsAt(1, 11))
+        Assert.IsTrue(this.ViolationExistsAt(1, 11))
 
     [<Test; Ignore("Test is not passing because UnionCase's field range is incorrect")>]
-    member this.``Error for named tuple with spaces around colon``() =
+    member this.``Violation for named tuple with spaces around colon``() =
         this.Parse "type X = X of x : int"
-        Assert.IsTrue(this.ErrorExistsAt(1, 13))
+        Assert.IsTrue(this.ViolationExistsAt(1, 13))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Autofix for typed pattern with spaces around colon``() =
         let source = "let (x : int) = 1"
         let expected = "let (x: int) = 1"
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
 [<TestFixture>]
 type TestFormattingTypedItemSpacesAround() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.SpacesAround })
 
     [<Test>]
-    member this.``No error for typed pattern with spaces around colon``() =
+    member this.``No violation for typed pattern with spaces around colon``() =
         this.Parse("""
 module Program
 
 let (x : int) = 1""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for typed pattern with no spaces around colon``() =
+    member this.``Violation for typed pattern with no spaces around colon``() =
         this.Parse("""
 module Program
 
 let (x:int) = 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Autofix for typed pattern with spaces around colon``() =
         let source = """
 module Program
 
@@ -91,19 +91,19 @@ module Program
 let (x : int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Error for typed pattern with space after colon``() =
+    member this.``Violation for typed pattern with space after colon``() =
         this.Parse("""
 module Program
 
 let (x: int) = 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with space after colon``() =
+    member this.``Autofix for typed pattern with space after colon``() =
         let source = """
 module Program
 
@@ -116,32 +116,32 @@ module Program
 let (x : int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
 [<TestFixture>]
 type TestFormattingTypedItemNoSpaces() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(TypedItemSpacing.rule { Config.TypedItemStyle = TypedItemStyle.NoSpaces })
 
     [<Test>]
-    member this.``No error for typed pattern with no spaces around colon``() =
+    member this.``No violation for typed pattern with no spaces around colon``() =
         this.Parse("""
 module Program
 
 let (x:int) = 1""")
 
-        Assert.IsTrue(this.NoErrorsExist)
+        Assert.IsTrue(this.NoViolationsExist)
 
     [<Test>]
-    member this.``Error for typed pattern with spaces around colon``() =
+    member this.``Violation for typed pattern with spaces around colon``() =
         this.Parse("""
 module Program
 
 let (x : int) = 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with spaces around colon``() =
+    member this.``Autofix for typed pattern with spaces around colon``() =
         let source = """
 module Program
 
@@ -154,19 +154,19 @@ module Program
 let (x:int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)
 
     [<Test>]
-    member this.``Error for typed pattern with space after colon``() =
+    member this.``Violation for typed pattern with space after colon``() =
         this.Parse("""
 module Program
 
 let (x: int) = 1""")
 
-        Assert.IsTrue(this.ErrorExistsAt(4, 5))
+        Assert.IsTrue(this.ViolationExistsAt(4, 5))
 
     [<Test>]
-    member this.``Quickfix for typed pattern with space after colon``() =
+    member this.``Autofix for typed pattern with space after colon``() =
         let source = """
 module Program
 
@@ -179,4 +179,4 @@ module Program
 let (x:int) = 1"""
 
         this.Parse source
-        Assert.AreEqual(expected, this.ApplyQuickFix source)
+        Assert.AreEqual(expected, this.ApplyAutoFix source)

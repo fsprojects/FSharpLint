@@ -5,82 +5,82 @@ open System.Text
 open NUnit.Framework
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 
 [<AbstractClass>]
 type TestRuleBase () =
-    let suggestions = ResizeArray<_>()
+    let violations = ResizeArray<_>()
 
     abstract Parse : string * ?fileName:string * ?checkFile:bool * ?globalConfig:GlobalRuleConfig -> unit
 
-    member _.PostSuggestion (suggestion:Suggestion.LintWarning) =
-        if not suggestion.Details.TypeChecks.IsEmpty then
+    member _.PostViolation (violation: LintViolation) =
+        if not violation.Details.TypeChecks.IsEmpty then
             let successfulTypeCheck =
-                (true, suggestion.Details.TypeChecks)
+                (true, violation.Details.TypeChecks)
                 ||> List.fold (fun acc check -> acc && check ())
 
             if successfulTypeCheck then
-                suggestions.Add(suggestion)
+                violations.Add violation
         else
-            suggestions.Add(suggestion)
+            violations.Add violation
 
-    member _.ErrorRanges =
-        suggestions
-        |> Seq.map (fun linterSuggestion -> (linterSuggestion.Details.Range.StartLine, linterSuggestion.Details.Range.StartColumn))
+    member _.ViolationRanges =
+        violations
+        |> Seq.map (fun lintViolation -> (lintViolation.Details.Range.StartLine, lintViolation.Details.Range.StartColumn))
         |> List.ofSeq
 
-    member _.ErrorExistsAt(startLine, startColumn) =
-        suggestions
-        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine && linterSuggestion.Details.Range.StartColumn = startColumn)
+    member _.ViolationExistsAt(startLine, startColumn) =
+        violations
+        |> Seq.exists (fun lintViolation -> lintViolation.Details.Range.StartLine = startLine && lintViolation.Details.Range.StartColumn = startColumn)
 
-    member _.ErrorsAt(startLine, startColumn) =
-        suggestions
-        |> Seq.filter (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine && linterSuggestion.Details.Range.StartColumn = startColumn)
+    member _.ViolationsAt(startLine, startColumn) =
+        violations
+        |> Seq.filter (fun lintViolation -> lintViolation.Details.Range.StartLine = startLine && lintViolation.Details.Range.StartColumn = startColumn)
 
-    member _.ErrorExistsOnLine(startLine) =
-        suggestions
-        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine)
+    member _.ViolationExistsOnLine(startLine) =
+        violations
+        |> Seq.exists (fun lintViolation -> lintViolation.Details.Range.StartLine = startLine)
 
-    member _.NoErrorExistsOnLine(startLine) =
-        suggestions
-        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Range.StartLine = startLine)
+    member _.NoViolationExistsOnLine(startLine) =
+        violations
+        |> Seq.exists (fun lintViolation -> lintViolation.Details.Range.StartLine = startLine)
         |> not
 
     // prevent tests from passing if errors exist, just not on the line being checked
-    member _.NoErrorsExist =
-        Seq.isEmpty suggestions
+    member _.NoViolationsExist =
+        Seq.isEmpty violations
 
-    member _.ErrorsExist =
-        suggestions |> Seq.isEmpty |> not
+    member _.ViolationsExist =
+        violations |> Seq.isEmpty |> not
 
-    member _.ErrorMsg =
-        match suggestions with
-        | xs when xs.Count = 0 -> "No errors"
+    member _.ViolationMsg =
+        match violations with
+        | xs when xs.Count = 0 -> "No violations"
         | _ ->
-            suggestions
-            |> Seq.map (fun linterSuggestion -> 
-                $"(({linterSuggestion.Details.Range.StartRange.StartLine}, {linterSuggestion.Details.Range.StartColumn}) - ({linterSuggestion.Details.Range.EndRange.EndLine}, {linterSuggestion.Details.Range.EndRange.EndColumn}) -> {linterSuggestion.Details.Message})")
-            |> (fun suggestionMsg -> String.Join("; ", suggestionMsg))
+            violations
+            |> Seq.map (fun lintViolation ->
+                $"(({lintViolation.Details.Range.StartRange.StartLine}, {lintViolation.Details.Range.StartColumn}) - ({lintViolation.Details.Range.EndRange.EndLine}, {lintViolation.Details.Range.EndRange.EndColumn}) -> {lintViolation.Details.Message})")
+            |> (fun violationMsg -> String.Join("; ", violationMsg))
 
-    member this.ErrorWithMessageExistsAt(message, startLine, startColumn) =
-        this.ErrorsAt(startLine, startColumn)
-        |> Seq.exists (fun linterSuggestion -> linterSuggestion.Details.Message = message)
+    member this.ViolationWithMessageExistsAt(message, startLine, startColumn) =
+        this.ViolationsAt(startLine, startColumn)
+        |> Seq.exists (fun lintViolation -> lintViolation.Details.Message = message)
 
-    member _.AssertErrorWithMessageExists(message) =
-        let foundSuggestions = suggestions |> Seq.map (fun linterSuggestion -> linterSuggestion.Details.Message)
-        let foundSuggestionsStr = String.concat "," foundSuggestions
-        Assert.IsTrue(foundSuggestions |> Seq.contains message, $"Couldn't find message '{message}', found: [{foundSuggestionsStr}]")
+    member _.AssertViolationWithMessageExists(message) =
+        let foundViolations = violations |> Seq.map (fun linterViolation -> linterViolation.Details.Message)
+        let foundViolationsStr = String.concat "," foundViolations
+        Assert.IsTrue(foundViolations |> Seq.contains message, $"Couldn't find message '{message}', found: [{foundViolationsStr}]")
 
-    member this.AssertNoWarnings() =
-        Assert.IsFalse(this.ErrorsExist, "Expected no errors, but was: " + this.ErrorMsg)
+    member this.AssertNoViolations() =
+        Assert.IsFalse(this.ViolationsExist, "Expected no violations, but was: " + this.ViolationMsg)
 
-    member this.ApplyQuickFix (source:string) =
-        let firstSuggestedFix =
-            suggestions
-            |> Seq.choose (fun linterSuggestion -> linterSuggestion.Details.SuggestedFix)
+    member this.ApplyAutoFix (source:string) =
+        let firstAutoFix =
+            violations
+            |> Seq.choose (fun linterViolation -> linterViolation.Details.AutoFix)
             |> Seq.tryHead
 
-        match Option.bind (fun (suggestedFix: Lazy<option<SuggestedFix>>) -> suggestedFix.Value) firstSuggestedFix with
+        match Option.bind (fun (autoFix: Lazy<option<AutoFix>>) -> autoFix.Value) firstAutoFix with
         | Some(fix) ->
             let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
             let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
@@ -95,4 +95,5 @@ type TestRuleBase () =
         | None -> source
 
     [<SetUp>]
-    member _.SetUp() = suggestions.Clear()
+    member _.SetUp() =
+        violations.Clear()

@@ -51,6 +51,6 @@ type TestAstNodeRuleBase (rule:Rule) =
 
             rule.RuleConfig.Cleanup()
 
-            Array.iter this.PostSuggestion suggestions
+            Array.iter this.PostViolation suggestions
         | _ ->
             failwith "Failed to parse"

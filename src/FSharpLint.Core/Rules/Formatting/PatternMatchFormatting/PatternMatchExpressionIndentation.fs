@@ -3,7 +3,7 @@ module FSharpLint.Rules.PatternMatchExpressionIndentation
 open System
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
@@ -21,8 +21,8 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
             Some
                 {
                     Range = expr.Range
-                    Message = Resources.GetString("RulesFormattingMatchExpressionIndentationError")
-                    SuggestedFix = None
+                    Message = Resources.GetString "RulesFormattingMatchExpressionIndentationViolation"
+                    AutoFix = None
                     TypeChecks = List.Empty
                 }
         else

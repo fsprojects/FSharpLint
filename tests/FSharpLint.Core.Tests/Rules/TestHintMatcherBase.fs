@@ -70,6 +70,6 @@ type TestHintMatcherBase () =
                         SyntaxArray = syntaxArray
                     }
                 |> fst
-            Array.iter this.PostSuggestion suggestions
+            Array.iter this.PostViolation suggestions
         | _ ->
             failwith "Failed to parse"

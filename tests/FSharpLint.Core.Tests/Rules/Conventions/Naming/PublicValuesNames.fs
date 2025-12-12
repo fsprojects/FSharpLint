@@ -23,12 +23,12 @@ module Program
 let (Cat, _) = 1, 0
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// Extern functions typically match the counterpart from the external library
     /// and as such often won't follow F#'s conventions.
     [<Test>]
-    member this.``extern function definition should not trigger naming warnings``() =
+    member this.``extern function definition should not trigger naming violations``() =
         this.Parse """
 module Program
 
@@ -39,7 +39,7 @@ open System.Runtime.InteropServices
 extern int PyThreadState_SetAsyncExcLLP64(uint id, IntPtr exc)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PublicTupleIsCamelCase() =
@@ -49,7 +49,7 @@ module Program
 let (cat, _) = 1, 0
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     /// A public binding let binding identifier may be pascal case or upper case.
     [<Test>]
@@ -60,7 +60,7 @@ module Program
 let Main () = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
     member this.PublicFunctionNameIsCamelCase() =
@@ -70,10 +70,10 @@ module Program
 let main () = ()
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.UnionCaseInBindingContainingValueDoesNotGenerateWarning() =
+    member this.UnionCaseInBindingContainingValueDoesNotGenerateViolation() =
         this.Parse """
 module Program
 
@@ -82,10 +82,10 @@ type SingleCaseDU = SingleCaseDU of int
 let (SingleCaseDU myInt) = (SingleCaseDU 5)
 """
 
-        this.AssertNoWarnings()
+        this.AssertNoViolations()
 
     [<Test>]
-    member this.``ActivePatternDoesNotGenerateWarning`` () =
+    member this.``ActivePatternDoesNotGenerateViolations`` () =
          this.Parse """
 let (|Empty|_|) str =
     match str with
@@ -93,4 +93,4 @@ let (|Empty|_|) str =
     | _ -> None
 """
 
-         this.AssertNoWarnings()
+         this.AssertNoViolations()

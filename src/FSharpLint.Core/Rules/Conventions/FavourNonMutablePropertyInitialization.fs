@@ -1,24 +1,24 @@
 module FSharpLint.Rules.FavourNonMutablePropertyInitialization
 
 open FSharpLint.Framework
-open FSharpLint.Framework.Suggestion
+open FSharpLint.Framework.Violation
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 open System
 
-let private getWarningDetails (ident: Ident) =
-    let formatError errorName =
-        String.Format(Resources.GetString errorName, ident.idText)
+let private getViolationDetails (ident: Ident) =
+    let formatViolationMsg msgKey =
+        String.Format(Resources.GetString msgKey, ident.idText)
 
-    "RulesFavourNonMutablePropertyInitializationError"
-    |> formatError
+    "RulesFavourNonMutablePropertyInitializationViolation"
+    |> formatViolationMsg
     |> Array.singleton
     |> Array.map (fun message ->
         { Range = ident.idRange
           Message = message
-          SuggestedFix = None
+          AutoFix = None
           TypeChecks = List.Empty })
 
 let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>) =
@@ -41,13 +41,13 @@ let rec private extraFromBindings (bindings: List<SynBinding>) (classInstances: 
     | _ -> classInstances
 
 [<TailCall>]
-let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
+let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (continuation: unit -> array<ViolationDetails>) : array<ViolationDetails> =
     Array.append
         (match body with
         | SynExpr.LongIdentSet(SynLongIdent(identifiers, _, _), _, _) ->
             match identifiers with
             | [instanceIdent; propertyIdent] when Set.contains instanceIdent.idText instanceNames ->
-                getWarningDetails propertyIdent
+                getViolationDetails propertyIdent
             | _ -> Array.empty
         | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
             let instanceNames =
@@ -61,7 +61,7 @@ let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (
         | _ -> Array.empty)
         (continuation())
 
-and [<TailCall>] processExpression (expression: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
+and [<TailCall>] processExpression (expression: SynExpr) (continuation: unit -> array<ViolationDetails>) : array<ViolationDetails> =
     Array.append
         (match expression with
         | SynExpr.LetOrUse(_, _, bindings, body, _, _) ->
