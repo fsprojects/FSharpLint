@@ -30,26 +30,14 @@ let runner (config: Config) (args: AstNodeRuleParams) =
     match config.Style with
     | IndexerAccessorStyle.OCaml ->
         match args.AstNode with
-        | AstNode.Binding binding ->
-            match binding with
-            | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _,
-                 SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, expr, range), _), 
-                 _, _, _)
-                ->
-                generateOutput range IndexerAccessorStyle.OCaml
-            | _ ->
-                Array.empty
+        | AstNode.Expression (SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, _expr, range), _)) ->
+            generateOutput range IndexerAccessorStyle.OCaml
         | _ -> 
             Array.empty
     | IndexerAccessorStyle.CSharp ->
         match args.AstNode with
-        | AstNode.Binding binding ->
-            match binding with
-            | SynBinding (_, _, _, _, _, _, _, SynPat.Named _, _
-                , SynExpr.DotIndexedGet (_, _, _, range), _, _, _) ->
-                generateOutput range IndexerAccessorStyle.CSharp
-            | _ ->
-                Array.empty
+        | AstNode.Expression (SynExpr.DotIndexedGet (_, _, _, range)) ->
+            generateOutput range IndexerAccessorStyle.CSharp
         | _ -> 
             Array.empty
 

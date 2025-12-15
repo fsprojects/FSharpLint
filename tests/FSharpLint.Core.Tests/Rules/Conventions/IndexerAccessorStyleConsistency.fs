@@ -47,6 +47,18 @@ System.Console.WriteLine bar"""
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.IndexerAccessorStyleConsistencyCSharpStyleWhenUsingOCaml2() =
+        this.Parse """
+module Program
+
+let withoutPrefix = [ "foo" ]
+let firstChar = withoutPrefix[0] |> string
+let rest = withoutPrefix.Substring 1
+prefix + firstChar + rest"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.IndexerAccessorStyleConsistencyOCamlStyleWhenUsingOCaml() =
         this.Parse """
 module Program
