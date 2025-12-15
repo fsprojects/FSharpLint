@@ -334,6 +334,12 @@
     "ensureTailCallDiagnosticsInRecursiveFunctions": { "enabled": true },
     "favourAsKeyword": { "enabled": true },
     "interpolatedStringWithNoSubstitution": { "enabled": true },
+    "indexerAccessorStyleConsistency": {
+        "enabled": false,
+        "config": {
+            "style": "OCaml"
+        }
+    },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

@@ -124,6 +124,7 @@
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInFile.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Formatting\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\Conventions\IndexerAccessorStyleConsistency.fs" />
     <Compile Include="Rules\Hints\HintsHelper.fs" />
     <Compile Include="Rules\Hints\HintMatcher.fs" />
     <!-- Application  -->

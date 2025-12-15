@@ -6,6 +6,7 @@ open System.IO
 open System.Reflection
 open System.Text.Json
 open System.Text.Json.Serialization
+open Microsoft.FSharp.Reflection
 open FSharpLint.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.HintParser
@@ -17,6 +18,40 @@ let SettingsFileName = "fsharplint.json"
 exception ConfigurationException of string
 
 module internal FSharpJsonConverter =
+    
+    type private SimpleDUConverter<'TDiscriminatedUnion>() =
+        inherit JsonConverter<'TDiscriminatedUnion>()
+
+        let allCases = FSharpType.GetUnionCases typeof<'TDiscriminatedUnion> 
+
+        override this.Read (reader: byref<Text.Json.Utf8JsonReader>, typeToConvert: Type, options: Text.Json.JsonSerializerOptions): 'TDiscriminatedUnion = 
+            let value = reader.GetString()
+            match allCases |> Array.tryFind (fun case -> case.Name = value) with
+            | Some case -> FSharpValue.MakeUnion(case, Array.empty) :?> 'TDiscriminatedUnion
+            | _ -> failwithf "Unexpected value: %A. Expected one of: %A" value allCases
+
+        override this.Write (writer: Text.Json.Utf8JsonWriter, value: 'TDiscriminatedUnion, options: Text.Json.JsonSerializerOptions): unit = 
+            writer.WriteStringValue(value.ToString())
+
+    /// JSON converter  for discriminated unions that only have cases with no fields.
+    /// Maps DUs to strings, like JsonStringEnumConverter.
+    type SimpleDiscriminatedUnionJsonConverter() =
+        inherit JsonConverterFactory()
+
+        override this.CanConvert (typeToConvert: Type): bool = 
+            FSharpType.IsUnion typeToConvert 
+            && (FSharpType.GetUnionCases typeToConvert |> Array.forall (fun typ -> typ.GetFields().Length = 0))
+
+        override this.CreateConverter (typeToConvert: Type, options: JsonSerializerOptions): JsonConverter =
+            let converterType = typedefof<SimpleDUConverter<_>>
+            Activator.CreateInstance(
+                converterType.MakeGenericType(Array.singleton typeToConvert),
+                BindingFlags.Instance ||| BindingFlags.Public,
+                binder=null,
+                args=Array.empty,
+                culture=null
+            )
+            :?> JsonConverter
 
     let jsonOptions =
         let options =
@@ -25,6 +60,7 @@ module internal FSharpJsonConverter =
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             )
         options.Converters.Add(JsonStringEnumConverter())
+        options.Converters.Add(SimpleDiscriminatedUnionJsonConverter())
         options
 
 module IgnoreFiles =
@@ -300,6 +336,7 @@ with
 type ConventionsConfig =
     { recursiveAsyncFunction:EnabledConfig option
       avoidTooShortNames:EnabledConfig option
+      indexerAccessorStyleConsistency: RuleConfig<IndexerAccessorStyleConsistency.Config> option
       redundantNewKeyword:EnabledConfig option
       favourStaticEmptyFields:EnabledConfig option
       asyncExceptionWithoutReturn:EnabledConfig option
@@ -346,6 +383,7 @@ with
                 this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
                 this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
+                this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
             |]
 
 type TypographyConfig =
@@ -403,6 +441,7 @@ type Configuration =
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
       AvoidTooShortNames:EnabledConfig option
+      IndexerAccessorStyleConsistency:RuleConfig<IndexerAccessorStyleConsistency.Config> option
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
       FavourReRaise:EnabledConfig option
@@ -498,6 +537,7 @@ with
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
+        IndexerAccessorStyleConsistency = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
@@ -693,6 +733,7 @@ let flattenConfig (config:Configuration) =
                 config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
                 config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
                 config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+                config.IndexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule)
                 config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
                 config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)
                 config.FavourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule)

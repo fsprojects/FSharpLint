@@ -384,4 +384,7 @@
   <data name="InterpolatedStringWithNoSubstitution" xml:space="preserve">
     <value>Do not use interpolated string syntax (with $ prefix) or formatting functions (sprintf, failwithf) when not really performing any interpolation.</value>
   </data>
+  <data name="RulesIndexerAccessorStyleConsistency" xml:space="preserve">
+    <value>Consider switching the indexer accessor to {0} style.</value>
+  </data>
 </root>

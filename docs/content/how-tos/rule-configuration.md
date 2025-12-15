@@ -128,3 +128,4 @@ The following rules can be specified for linting.
 - [EnsureTailCallDiagnosticsInRecursiveFunctions (FL0085)](rules/FL0085.html)
 - [FavourAsKeyword (FL0086)](rules/FL0086.html)
 - [InterpolatedStringWithNoSubstitution (FL0087)](rules/FL0087.html)
+- [IndexerAccessorStyleConsistency (FL0088)](rules/FL0088.html)
