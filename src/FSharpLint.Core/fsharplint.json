@@ -411,6 +411,7 @@
             "false <> a ===> a",
             "if a then true else false ===> a",
             "if a then false else true ===> not a",
+            "if x then y else y ===> y",
             "not (not x) ===> x",
 
             "(fst x, snd x) ===> x",
