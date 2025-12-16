@@ -964,3 +964,21 @@ let x y =
         this.SetConfig(["(List.singleton x) @ y ===> x :: y"])
         this.Parse(source)
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``Result same regardless of condition can remove conditional block``() =
+        let source = """
+if (someCondition a b) then
+    res
+else
+    res
+"""
+
+        let expected = """
+res
+"""
+
+        this.SetConfig(["if x then y else y ===> y"])
+        this.Parse(source)
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
+
