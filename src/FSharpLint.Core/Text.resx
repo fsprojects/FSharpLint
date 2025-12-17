@@ -387,4 +387,7 @@
   <data name="RulesIndexerAccessorStyleConsistency" xml:space="preserve">
     <value>Consider switching the indexer accessor to {0} style.</value>
   </data>
+  <data name="RulesFavourSingleton" xml:space="preserve">
+    <value>Consider using List.singleton/Array.singleton instead of single member list/array.</value>
+  </data>
 </root>

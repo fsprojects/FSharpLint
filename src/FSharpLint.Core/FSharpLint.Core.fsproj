@@ -69,6 +69,7 @@
     <Compile Include="Rules\Smells\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
     <Compile Include="Rules\Smells\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
     <Compile Include="Rules\Conventions\FailwithBadUsage.fs" />
+    <Compile Include="Rules\Conventions\FavourSingleton.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />
