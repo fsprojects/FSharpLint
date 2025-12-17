@@ -9,24 +9,23 @@ open FSharpLint.Framework.Rules
 open System
 
 let runner args =
+    let generateViolation range =
+        let msg = Resources.GetString "RulesFavourSingleton"
+        { Range = range
+          Message = msg
+          SuggestedFix = None
+          TypeChecks = List.Empty }
+        |> Array.singleton
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, _, _, expression, _, _)) ->
+    | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, _, _, expression, _, _, _)) ->
         match expression with
-        | SynExpr.ArrayOrListOfSeqExpr(_, SynExpr.CompExpr(_, _, expr,range), _) ->
-            match expr with
+        | SynExpr.ArrayOrListComputed(_isArray, innerExpr, range) ->
+            match innerExpr with
             | SynExpr.Const(_, range) ->
-                { Range = range
-                  Message = String.Format(Resources.GetString "RulesFavourSingleton")
-                  SuggestedFix = None
-                  TypeChecks = List.Empty }
-                  |> Array.singleton
+              generateViolation range
             | SynExpr.Ident _ ->
-              { Range = range
-                Message = String.Format(Resources.GetString "RulesFavourSingleton")
-                SuggestedFix = None
-                TypeChecks = List.Empty }
-                |> Array.singleton
-              | _ -> Array.empty
+              generateViolation range
+            | _ -> Array.empty
         | _ -> Array.empty
     | _ -> Array.empty
 let rule =

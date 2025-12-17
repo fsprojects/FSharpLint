@@ -1,8 +1,9 @@
 module FSharpLint.Core.Tests.Rules.Conventions.FavourSingleton
 
+open System
 open NUnit.Framework
 open FSharpLint.Rules
-open System
+open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsFavourSingleton() =
@@ -30,7 +31,7 @@ let bar = true
 let foo = [ bar ]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 12))
+        Assert.IsTrue(this.ErrorExistsAt(3, 10))
 
     [<Test>]
     member this.ListWithMultipleIdentsShouldNotProduceError() =
@@ -62,7 +63,7 @@ let bar = true
 let foo = [| bar |]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 13))
+        Assert.IsTrue(this.ErrorExistsAt(3, 10))
 
     [<Test>]
     member this.ListWithMultipleIdentsShouldNotProduceError_Arrays() =
