@@ -11,11 +11,11 @@ open System
 let runner args =
     let generateViolation range =
         let msg = Resources.GetString "RulesFavourSingleton"
-        { Range = range
-          Message = msg
-          SuggestedFix = None
-          TypeChecks = List.Empty }
-        |> Array.singleton
+        Array.singleton
+            { Range = range
+              Message = msg
+              SuggestedFix = None
+              TypeChecks = List.Empty }
     match args.AstNode with
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, _, _, expression, _, _, _)) ->
         match expression with
@@ -29,9 +29,9 @@ let runner args =
         | _ -> Array.empty
     | _ -> Array.empty
 let rule =
-    { Name = "FavourSingleton"
-      Identifier = Identifiers.FavourSingleton
-      RuleConfig =
-        { AstNodeRuleConfig.Runner = runner
-          Cleanup = ignore } }
-    |> AstNodeRule
+    AstNodeRule
+        { Name = "FavourSingleton"
+          Identifier = Identifiers.FavourSingleton
+          RuleConfig =
+              { AstNodeRuleConfig.Runner = runner
+                Cleanup = ignore } }

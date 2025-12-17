@@ -57,7 +57,7 @@ module ParseFile =
     let getProjectOptionsFromScript (checker:FSharpChecker) file (source:string) = async {
         let sourceText = SourceText.ofString source
         let assumeDotNetFramework = false
-        let otherOpts = [| "--targetprofile:netstandard" |]
+        let otherOpts = Array.singleton "--targetprofile:netstandard"
 
         let! options, _diagnostics =
             checker.GetProjectOptionsFromScript(file, sourceText, assumeDotNetFramework = assumeDotNetFramework, useSdkRefs = not assumeDotNetFramework, otherFlags = otherOpts)

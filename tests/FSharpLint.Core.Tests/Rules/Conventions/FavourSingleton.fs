@@ -42,14 +42,14 @@ let foo = [ bar; false; true ]"""
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.ListWithManyItemsShouldNotProduceError_Arrays() =
+    member this.ArrayWithManyItemsShouldNotProduceError() =
         this.Parse """
 let foo = [| 10; 20 |]"""
 
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
-    member this.ListWithASingleConstantShouldProduceError_Arrays() =
+    member this.ArrayWithASingleConstantShouldProduceError() =
         this.Parse """
 let foo = [| 10 |]"""
 
@@ -57,7 +57,7 @@ let foo = [| 10 |]"""
         Assert.IsTrue(this.ErrorExistsAt(2, 13))
 
     [<Test>]
-    member this.ListWithASingleIdentShouldProduceError_Arrays() =
+    member this.ArrayWithASingleIdentShouldProduceError() =
         this.Parse """
 let bar = true
 let foo = [| bar |]"""
@@ -66,7 +66,7 @@ let foo = [| bar |]"""
         Assert.IsTrue(this.ErrorExistsAt(3, 10))
 
     [<Test>]
-    member this.ListWithMultipleIdentsShouldNotProduceError_Arrays() =
+    member this.ArrayWithMultipleIdentsShouldNotProduceError() =
         this.Parse """
 let bar = true
 let foo = [| bar; false; true |]"""
