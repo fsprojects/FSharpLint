@@ -36,7 +36,7 @@ let private getIdentifiers (args:AstNodeRuleParams) =
     | AstNode.Expression(SynExpr.ForEach(_, _, _, true, pattern, _, _, _)) ->
         getPatternIdents AccessControlLevel.Private (getValueOrFunctionIdents args.CheckInfo) false pattern
     | AstNode.Binding(SynBinding(_, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
-        if not (isLiteral attributes || isExtern attributes) then
+        if not (isLiteral attributes || isExtern attributes || isNested args args.NodeIndex) then
             match identifierTypeFromValData valData with
             | Value | Function ->
                 let accessibility = getAccessControlLevel args.SyntaxArray args.NodeIndex
