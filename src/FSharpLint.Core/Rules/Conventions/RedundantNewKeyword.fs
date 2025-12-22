@@ -47,16 +47,27 @@ let runner args =
     match (args.AstNode, args.CheckInfo) with
     | AstNode.Expression(SynExpr.New(_, SynType.LongIdent(identifier), _, range)), Some checkInfo
     | AstNode.Expression(SynExpr.New(_, SynType.App(SynType.LongIdent(identifier), _, _, _, _, _, _), _, range)), Some checkInfo ->
-        Array.singleton
-            {
-                Range = range
-                Message = Resources.GetString("RulesRedundantNewKeyword")
-                SuggestedFix = Some(generateFix args.FileContent range)
-                TypeChecks =
-                    [
-                        fun () -> doesNotImplementIDisposable checkInfo identifier
-                    ]
-            }
+        let maybeUseBinding =
+            args.GetParents args.NodeIndex
+            |> List.tryFind 
+                (function
+                 | AstNode.Expression(SynExpr.LetOrUse(_, true, _, _, _, _)) -> true
+                 | AstNode.Expression(SynExpr.LetOrUseBang(_, true, _, _, _, _, _, _, _)) -> true
+                 | _ -> false)
+        match maybeUseBinding with
+        | Some _binding ->
+            Array.empty
+        | None ->
+            Array.singleton
+                {
+                    Range = range
+                    Message = Resources.GetString("RulesRedundantNewKeyword")
+                    SuggestedFix = Some(generateFix args.FileContent range)
+                    TypeChecks =
+                        [
+                            fun () -> doesNotImplementIDisposable checkInfo identifier
+                        ]
+                }
     | _ -> Array.empty
 
 let rule =
