@@ -122,6 +122,7 @@
     <Compile Include="Rules\Formatting\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingWhitespaceOnLine.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInFile.fs" />
+    <Compile Include="Rules\Conventions\NoAsyncRunSynchronouslyInLibrary.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Formatting\Typography\NoTabCharacters.fs" />
     <Compile Include="Rules\Conventions\IndexerAccessorStyleConsistency.fs" />
