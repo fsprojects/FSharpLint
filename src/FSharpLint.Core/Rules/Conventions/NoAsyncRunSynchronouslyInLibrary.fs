@@ -10,7 +10,12 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 
-let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckResults: FSharpCheckProjectResults option) =
+type LibraryHeuristicResultByProjectName =
+    | Likely
+    | Unlikely
+    | Uncertain
+
+let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckResults: Option<FSharpCheckProjectResults>) =
     let hasEntryPointInTheSameFile =
         match checkFileResults.ImplementationFile with
         | Some implFile -> implFile.HasExplicitEntryPoint
@@ -22,19 +27,21 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckR
     | Some projectCheckResults ->
         projectCheckResults.AssemblyContents.ImplementationFiles
         |> Seq.exists (fun implFile -> implFile.HasExplicitEntryPoint)
-    | None -> false
+    | None ->
+        false
 
 let excludedProjectNames = [ "test"; "console" ]
 
-let isInTestProject (checkFileResults: FSharpCheckFileResults) =
-    let namespaceIncludesTest =
-        match checkFileResults.ImplementationFile with
-        | Some implFile -> 
-            excludedProjectNames |> List.exists (fun name -> implFile.QualifiedName.ToLowerInvariant().Contains name)
-        | None -> false
-    let projectFileInfo = System.IO.FileInfo checkFileResults.ProjectContext.ProjectOptions.ProjectFileName
-    namespaceIncludesTest 
-    || excludedProjectNames |> List.exists (fun name -> projectFileInfo.Name.ToLowerInvariant().Contains name)
+let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultByProjectName =
+    let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
+    if nameSegments |> Seq.contains "Lib" then
+        Likely
+    elif excludedProjectNames |> List.exists (fun name -> projectFileName.ToLowerInvariant().Contains name) then
+        Unlikely
+    elif projectFileName.ToLowerInvariant().EndsWith "lib" then
+        Likely
+    else
+        Uncertain
 
 let extractAttributeNames (attributes: SynAttributes) =
     seq {
@@ -47,7 +54,7 @@ let extractAttributeNames (attributes: SynAttributes) =
 let testMethodAttributes = [ "Test"; "TestMethod" ]
 let testClassAttributes = [ "TestFixture"; "TestClass" ]
 
-let isInTheSameModuleAsTest (nodes: array<AbstractSyntaxArray.Node>) (maybeProjectCheckResults: FSharpCheckProjectResults option) =
+let areThereTestsInSameFileOrProject (nodes: array<AbstractSyntaxArray.Node>) (maybeProjectCheckResults: FSharpCheckProjectResults option) =
     let isTestMethodOrClass node =
         match node with
         | AstNode.MemberDefinition(SynMemberDefn.Member(SynBinding(_, _, _, _, attributes, _, _, _, _, _, _, _, _), _)) ->
@@ -94,15 +101,22 @@ let isInObsoleteMethodOrFunction parents =
 
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
     let ruleNotApplicable =
-        match args.CheckInfo with
-        | Some checkFileResults ->
-            hasEntryPoint checkFileResults args.ProjectCheckInfo
-            || isInTestProject checkFileResults
-            || isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
-            || isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
-        | None ->
-            isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
-            || isInTheSameModuleAsTest args.SyntaxArray args.ProjectCheckInfo
+        isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
+        ||
+        match (args.CheckInfo, args.ProjectCheckInfo) with
+        | Some checkFileResults, Some checkProjectResults ->
+            let projectFile = System.IO.FileInfo checkProjectResults.ProjectContext.ProjectOptions.ProjectFileName
+            match howLikelyProjectIsLibrary projectFile.Name with
+            | Likely -> false
+            | Unlikely -> true
+            | Uncertain ->
+                hasEntryPoint checkFileResults args.ProjectCheckInfo
+                || areThereTestsInSameFileOrProject args.SyntaxArray args.ProjectCheckInfo
+        | Some checkFileResults, None ->
+            hasEntryPoint checkFileResults None
+            || areThereTestsInSameFileOrProject args.SyntaxArray args.ProjectCheckInfo
+        | _ ->
+            areThereTestsInSameFileOrProject args.SyntaxArray args.ProjectCheckInfo
     
     if ruleNotApplicable then
         Array.empty
