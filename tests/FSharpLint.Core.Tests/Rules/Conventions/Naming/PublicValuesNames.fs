@@ -94,3 +94,23 @@ let (|Empty|_|) str =
 """
 
          this.AssertNoWarnings()
+
+let pascalCaseConfig = { config with Naming = Some NamingCase.PascalCase }
+
+[<TestFixture>]
+type TestConventionsPublicValuesNamesPascalCase() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PublicValuesNames.rule pascalCaseConfig)
+        
+    [<Test>]
+    member this.``Nested function should not generate warning``() =
+        this.Parse """
+module Program
+
+[ "one" ]
+|> Seq.iter (fun str ->
+    let someFunc bar = bar
+    someFunc str
+)
+"""
+
+        this.AssertNoWarnings()
