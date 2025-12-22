@@ -3,6 +3,7 @@
 open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
+open FSharpLint.Rules.NoAsyncRunSynchronouslyInLibrary
 
 [<TestFixture>]
 type TestNoAsyncRunSynchronouslyInLibrary() =
@@ -130,3 +131,40 @@ let Foo() =
     |> Async.RunSynchronously""")
 
         this.AssertNoWarnings()
+
+[<TestFixture>]
+type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
+    [<Test>]
+    member this.``Unlikely to be library if contains "test" in name``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "TestProject",
+            LibraryHeuristicResultByProjectName.Unlikely
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "console" in name``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "FooConsole",
+            LibraryHeuristicResultByProjectName.Unlikely
+        )
+
+    [<Test>]
+    member this.``Likely to be library if contains Contains "Lib" as a PascalCase segment``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "LibFoo",
+            LibraryHeuristicResultByProjectName.Likely
+        )
+
+    [<Test>]
+    member this.``Uncertain if contains contains "Lib" but not as a PascalCase segment``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "LibreOfficeProg",
+            LibraryHeuristicResultByProjectName.Uncertain
+        )
+
+    [<Test>]
+    member this.``Likely to be library if contains ends with "lib" (case-insensitive)``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "FooLib",
+            LibraryHeuristicResultByProjectName.Likely
+        )
