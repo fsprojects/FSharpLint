@@ -130,6 +130,25 @@ let foo =
         Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
 
     [<Test>]
+    member this.FavourStaticEmptyFieldsShouldProduceError14() =
+        this.Parse """
+let foo =
+    {
+        Bar = ("a", "")
+    }"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+
+    [<Test>]
+    member this.FavourStaticEmptyFieldsShouldProduceError15() =
+        this.Parse """
+foo.[""] <- 0"""
+
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue (this.ErrorMsg.Contains "String.Empty")
+
+    [<Test>]
     member this.FavourStaticEmptyFieldsShouldNotProduceError1() =
         this.Parse "let bar = String.Empty"
 
