@@ -55,8 +55,8 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
                 errorsSoFar
                 (generateError args.FileContent range emptyLiteralType)
         processExpressions errors args tail
-    | SynExpr.App(_, _, _, argExpr, _) :: tail ->
-        processExpressions errorsSoFar args (argExpr :: tail)
+    | SynExpr.App(_, _, funcExpr, argExpr, _) :: tail ->
+        processExpressions errorsSoFar args (List.append [ funcExpr; argExpr ] tail)
     | SynExpr.Record(_, _, synExprRecordFields, _) :: tail ->
         let mapping =
             function
