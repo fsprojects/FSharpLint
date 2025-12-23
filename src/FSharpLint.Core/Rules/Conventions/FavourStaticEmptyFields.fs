@@ -47,7 +47,15 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
                 errorsSoFar
                 (generateError args.FileContent range EmptyStringLiteral)
         processExpressions errors args tail
-    | SynExpr.ArrayOrList (isArray, [], range) :: tail ->
+    | SynExpr.DotIndexedGet(_, indexArgs, _ , _) :: tail ->
+        processExpressions errorsSoFar args (indexArgs :: tail)
+    | SynExpr.DotIndexedSet(_, indexArgs, _ , _, _, _) :: tail ->
+        processExpressions errorsSoFar args (indexArgs :: tail)
+    | SynExpr.Paren(expr, _, _, _) :: tail ->
+        processExpressions errorsSoFar args (expr :: tail)
+    | SynExpr.Tuple(_, expressions, _, _) :: tail ->
+        processExpressions errorsSoFar args (List.append expressions tail)
+    | SynExpr.ArrayOrList(isArray, [], range) :: tail ->
         let emptyLiteralType =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
         let errors =
@@ -55,8 +63,15 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
                 errorsSoFar
                 (generateError args.FileContent range emptyLiteralType)
         processExpressions errors args tail
+    | SynExpr.ArrayOrListComputed(_, expr, _) :: tail ->
+        processExpressions errorsSoFar args (expr :: tail)
     | SynExpr.App(_, _, funcExpr, argExpr, _) :: tail ->
         processExpressions errorsSoFar args (List.append [ funcExpr; argExpr ] tail)
+    | SynExpr.AnonRecd(_, _, recordFields, _, _) :: tail ->
+        let fieldExpressions = 
+            recordFields
+            |> List.map (fun (_, _, expr) ->  expr)
+        processExpressions errorsSoFar args (List.append fieldExpressions tail)
     | SynExpr.Record(_, _, synExprRecordFields, _) :: tail ->
         let mapping =
             function
