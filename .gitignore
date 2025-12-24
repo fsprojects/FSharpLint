@@ -434,3 +434,7 @@ Desktop.ini
 
 # BenchmarkDotNet Results
 tests/FSharpLint.Benchmarks/BenchmarkDotNet.Artifacts
+
+api_layer*
+lint_layer*
+lint_net6.0_20240201*
