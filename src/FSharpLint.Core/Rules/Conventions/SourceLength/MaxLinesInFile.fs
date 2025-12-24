@@ -15,7 +15,7 @@ let private checkNumberOfLinesInFile numberOfLines line maxLines =
         Array.singleton
             {
                 Range =
-                    Range.mkRange "" (Position.mkPos (maxLines + 1) 0) (Position.mkPos numberOfLines (String.length line))
+                    Range.mkRange String.Empty (Position.mkPos (maxLines + 1) 0) (Position.mkPos numberOfLines (String.length line))
                 Message = String.Format(errorFormatString, (maxLines + 1))
                 SuggestedFix = None
                 TypeChecks = List.Empty

@@ -11,7 +11,7 @@ let checkTrailingNewLineInFile (args:LineRuleParams) =
         let pos = Position.mkPos args.LineNumber 0
         Array.singleton
             {
-                Range = Range.mkRange "" pos pos
+                Range = Range.mkRange String.Empty pos pos
                 Message = Resources.GetString("RulesTypographyTrailingLineError")
                 SuggestedFix = None
                 TypeChecks = List.Empty
