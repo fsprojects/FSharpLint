@@ -965,3 +965,13 @@ let x y =
         this.Parse(source)
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
+    [<Test>]
+    member this.``Demonstrate issue with recently added hint``() =
+        let source = """[a;b] @ tail"""
+
+        this.SetConfig(["[x] @ y ===> x::y"])
+        this.Parse(source)
+
+        // invalid!
+        Assert.AreNotEqual("a;b :: tail", this.ApplyQuickFix source)
+
