@@ -50,7 +50,7 @@ type MSBuildOutput () =
 
         member _.WriteInfo (info:string) = Console.Out.WriteLine info
         member _.WriteWarning (warning:Suggestion.LintWarning) =
-            fprintf Console.Out "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
+            fprintfn Console.Out "%s(%d,%d,%d,%d):FSharpLint warning %s: %s"
                 <| warning.FilePath
                 <| warning.Details.Range.StartLine
                 <| warning.Details.Range.StartColumn
