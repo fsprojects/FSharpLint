@@ -770,7 +770,7 @@ let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hin
         |> suggestions.Add
     | AstNode.Expression(expr), HintExpr(hintExpr) ->
         let arguments =
-            { MatchExpression.LambdaArguments = Map.ofList []
+            { MatchExpression.LambdaArguments = Map.empty
               MatchExpression.MatchedVariables = Dictionary<_, _>()
               MatchExpression.Expression = args.AstNode
               MatchExpression.Hint = hintExpr

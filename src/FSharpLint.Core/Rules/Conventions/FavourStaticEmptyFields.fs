@@ -38,30 +38,56 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
           SuggestedFix = Some suggestedFix
           TypeChecks = List.Empty }
 
-let private runner (args: AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Expression(SynExpr.Const (SynConst.String ("", _, range), _)) -> 
-        generateError args.FileContent range EmptyStringLiteral
-    | AstNode.Expression(SynExpr.ArrayOrList (isArray, [], range)) ->
+[<TailCall>]
+let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: AstNodeRuleParams) (expressions: list<SynExpr>) =
+    match expressions with
+    | SynExpr.Const(SynConst.String ("", _, range), _) :: tail -> 
+        let errors =
+            Array.append
+                errorsSoFar
+                (generateError args.FileContent range EmptyStringLiteral)
+        processExpressions errors args tail
+    | SynExpr.DotIndexedGet(_, indexArgs, _ , _) :: tail ->
+        processExpressions errorsSoFar args (indexArgs :: tail)
+    | SynExpr.DotIndexedSet(_, indexArgs, _ , _, _, _) :: tail ->
+        processExpressions errorsSoFar args (indexArgs :: tail)
+    | SynExpr.Paren(expr, _, _, _) :: tail ->
+        processExpressions errorsSoFar args (expr :: tail)
+    | SynExpr.Tuple(_, expressions, _, _) :: tail ->
+        processExpressions errorsSoFar args (List.append expressions tail)
+    | SynExpr.ArrayOrList(isArray, [], range) :: tail ->
         let emptyLiteralType =
             if isArray then EmptyArrayLiteral else EmptyListLiteral
-        generateError args.FileContent range emptyLiteralType
-    | AstNode.Expression(SynExpr.Record(_, _, synExprRecordField, _)) ->
+        let errors =
+            Array.append
+                errorsSoFar
+                (generateError args.FileContent range emptyLiteralType)
+        processExpressions errors args tail
+    | SynExpr.ArrayOrListComputed(_, expr, _) :: tail ->
+        processExpressions errorsSoFar args (expr :: tail)
+    | SynExpr.App(_, _, funcExpr, argExpr, _) :: tail ->
+        processExpressions errorsSoFar args (List.append [ funcExpr; argExpr ] tail)
+    | SynExpr.AnonRecd(_, _, recordFields, _, _) :: tail ->
+        let fieldExpressions = 
+            recordFields
+            |> List.map (fun (_, _, expr) ->  expr)
+        processExpressions errorsSoFar args (List.append fieldExpressions tail)
+    | SynExpr.Record(_, _, synExprRecordFields, _) :: tail ->
         let mapping =
             function
-            | SynExprRecordField(_, _, expr, _) ->
-                match expr with
-                | Some(SynExpr.ArrayOrList(isArray, [], range)) ->
-                    let emptyLiteralType = if isArray then EmptyArrayLiteral else EmptyListLiteral
-                    generateError args.FileContent range emptyLiteralType
-                | Some(SynExpr.Const (SynConst.String ("", _, range), _)) ->
-                    generateError args.FileContent range EmptyStringLiteral
-                | Some(SynExpr.App(_, _, _, SynExpr.Const (SynConst.String ("", _, range), _), _)) ->
-                    generateError args.FileContent range EmptyStringLiteral
-                | _ -> Array.empty
-        synExprRecordField
-        |> List.map mapping
-        |> Array.concat
+            | SynExprRecordField(_, _, expr, _) -> expr
+        let fieldExpressions = 
+            synExprRecordFields
+            |> List.choose mapping
+        processExpressions errorsSoFar args (List.append fieldExpressions tail)
+    | _ :: tail ->
+        processExpressions errorsSoFar args tail
+    | [] -> errorsSoFar
+
+let private runner (args: AstNodeRuleParams) =
+    match args.AstNode with
+    | AstNode.Expression(expr) -> 
+        processExpressions Array.empty args (List.singleton expr)
     | _ -> Array.empty
 
 
