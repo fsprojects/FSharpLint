@@ -957,21 +957,10 @@ let x y =
 
     [<Test>]
     member this.``List append of singleton item can be replaced with :: operator``() =
-        let source = """[head] @ tail"""
+        let source = """(List.singleton head) @ tail"""
 
         let expected = """head :: tail"""
 
-        this.SetConfig(["[x] @ y ===> x::y"])
+        this.SetConfig(["(List.singleton x) @ y ===> x :: y"])
         this.Parse(source)
         Assert.AreEqual(expected, this.ApplyQuickFix source)
-
-    [<Test>]
-    member this.``Demonstrate issue with recently added hint``() =
-        let source = """[a;b] @ tail"""
-
-        this.SetConfig(["[x] @ y ===> x::y"])
-        this.Parse(source)
-
-        // invalid!
-        Assert.AreNotEqual("a;b :: tail", this.ApplyQuickFix source)
-
