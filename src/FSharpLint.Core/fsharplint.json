@@ -282,7 +282,6 @@
         }
     },
     "favourIgnoreOverLetWild": { "enabled": true },
-    "favourSingleton": { "enabled": false },
     "wildcardNamedWithAsPattern": { "enabled": true },
     "uselessBinding": { "enabled": true },
     "tupleOfWildcards": { "enabled": true },
@@ -341,6 +340,7 @@
             "style": "OCaml"
         }
     },
+    "favourSingleton": { "enabled": false },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
