@@ -165,7 +165,7 @@ jobs:
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint a file (net8.0)
-        run: dotnet fsharplint lint --framework net8.0 ./src/FSharpLint.Console/Program.fs
+        run: dotnet fsharplint lint ./src/FSharpLint.Console/Program.fs
         
   testReleaseBinariesWithDotNet10:
     needs: packReleaseBinaries
