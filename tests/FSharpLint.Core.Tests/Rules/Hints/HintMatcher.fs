@@ -954,3 +954,13 @@ let x y =
         this.SetConfig(["List.map f (List.map g x) ===> List.map (g >> f) x"])
         this.Parse(source)
         Assert.AreEqual(expected, this.ApplyQuickFix source)
+
+    [<Test>]
+    member this.``List append of singleton item can be replaced with :: operator``() =
+        let source = """(List.singleton head) @ tail"""
+
+        let expected = """head :: tail"""
+
+        this.SetConfig(["(List.singleton x) @ y ===> x :: y"])
+        this.Parse(source)
+        Assert.AreEqual(expected, this.ApplyQuickFix source)
