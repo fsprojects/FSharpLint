@@ -116,3 +116,12 @@ module Program =
     let foo = new SomeDisposableType() :> ISomeInterfaceWithDisposable"""
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``New keyword is required for known type that implements IDisposable``() =
+        this.Parse
+            """module Program
+
+let foo = new System.Net.Http.HttpClient()"""
+        
+        this.AssertNoWarnings()
