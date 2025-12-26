@@ -7,18 +7,15 @@ open FSharpLint.Framework.AbstractSyntaxArray
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Suggestion
 
-// Non-standard record field names for serialization
-// fsharplint:disable RecordFieldNames
 type GlobalRuleConfig =
     {
-        numIndentationSpaces:int
+        NumIndentationSpaces:int
     }
 with
     static member Default =
         {
-            GlobalRuleConfig.numIndentationSpaces = 4
+            GlobalRuleConfig.NumIndentationSpaces = 4
         }
-// fsharplint:enable RecordFieldNames
 
 type AstNodeRuleParams =
     { AstNode:AstNode

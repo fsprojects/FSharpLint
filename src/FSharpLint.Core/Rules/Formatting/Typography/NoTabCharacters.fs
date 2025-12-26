@@ -35,7 +35,7 @@ let checkNoTabCharacters literalStrings (args:LineRuleParams) =
                             (Some(
                                 { FromRange = range
                                   FromText = "\t"
-                                  ToText = String.replicate args.GlobalConfig.numIndentationSpaces " " }
+                                  ToText = String.replicate args.GlobalConfig.NumIndentationSpaces " " }
                             ))
                     )
                   TypeChecks = List.Empty }

@@ -17,7 +17,7 @@ let check (args:AstNodeRuleParams) _ (clauses:SynMatchClause list) _ =
             guard
             |> Option.map (fun expr -> expr.Range.EndLine)
             |> Option.defaultValue pat.Range.EndLine
-        if expr.Range.StartLine <> matchPatternEndLine && exprIndentation <> clauseIndentation + args.GlobalConfig.numIndentationSpaces then
+        if expr.Range.StartLine <> matchPatternEndLine && exprIndentation <> clauseIndentation + args.GlobalConfig.NumIndentationSpaces then
             Some
                 {
                     Range = expr.Range

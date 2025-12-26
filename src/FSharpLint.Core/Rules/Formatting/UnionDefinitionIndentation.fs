@@ -23,7 +23,7 @@ let checkUnionDefinitionIndentation (args:AstNodeRuleParams) typeDefnRepr typeDe
         | [_] -> Array.empty
         | firstCase :: _ ->
             let indentationLevelError =
-                if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.numIndentationSpaces then
+                if getUnionCaseStartColumn firstCase - 2 <> typeDefnStartColumn + args.GlobalConfig.NumIndentationSpaces then
                     Some
                         {
                             Range = firstCase.Range
