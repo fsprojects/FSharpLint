@@ -232,7 +232,6 @@ type Configuration =
       MeasureTypeNames:RuleConfig<NamingConfig> option
       ActivePatternNames:RuleConfig<NamingConfig> option
       PublicValuesNames:RuleConfig<NamingConfig> option
-      NonPublicValuesNames:RuleConfig<NamingConfig> option
       PrivateValuesNames:RuleConfig<NamingConfig> option
       InternalValuesNames:RuleConfig<NamingConfig> option
       UnnestedFunctionNames:RuleConfig<NamingConfig> option
@@ -327,7 +326,6 @@ with
         MeasureTypeNames = None
         ActivePatternNames = None
         PublicValuesNames = None
-        NonPublicValuesNames = None
         PrivateValuesNames = None
         InternalValuesNames = None
         UnnestedFunctionNames = None
@@ -413,10 +411,6 @@ let private parseHints (hints:string []) =
     |> MergeSyntaxTrees.mergeHints
 
 let findDeprecation config deprecatedAllRules allRules =
-    if config.NonPublicValuesNames.IsSome &&
-        (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
-        failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
-
     let astNodeRules = ResizeArray()
     let lineRules = ResizeArray()
     let mutable indentationRule = None
@@ -519,8 +513,6 @@ let flattenConfig (config:Configuration) =
                 config.MeasureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule)
                 config.ActivePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule)
                 config.PublicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule)
-                config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
-                config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
                 config.PrivateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
                 config.InternalValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
                 config.UnnestedFunctionNames |> Option.bind (constructRuleWithConfig UnnestedFunctionNames.rule)
