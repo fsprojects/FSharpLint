@@ -389,7 +389,7 @@ type LoadedRules =
     { GlobalConfig:Rules.GlobalRuleConfig
       AstNodeRules:RuleMetadata<AstNodeRuleConfig> []
       LineRules:LineRules
-      DeprecatedRules:Rule [] }
+    }
 
 let getGlobalConfig (globalConfig:GlobalConfig option) =
     globalConfig
@@ -410,47 +410,14 @@ let private parseHints (hints:string []) =
     |> Array.toList
     |> MergeSyntaxTrees.mergeHints
 
-let findDeprecation config deprecatedAllRules allRules =
-    let astNodeRules = ResizeArray()
-    let lineRules = ResizeArray()
-    let mutable indentationRule = None
-    let mutable noTabCharactersRule = None
-    Array.append allRules deprecatedAllRules
-    |> Array.distinctBy (function // Discard any deprecated rules which were define in a non-deprecated form.
-        | Rule.AstNodeRule rule -> rule.Identifier
-        | Rule.LineRule rule -> rule.Identifier
-        | Rule.IndentationRule rule -> rule.Identifier
-        | Rule.NoTabCharactersRule rule -> rule.Identifier)
-    |> Array.iter (function
-        | AstNodeRule rule -> astNodeRules.Add rule
-        | LineRule rule -> lineRules.Add(rule)
-        | IndentationRule rule -> indentationRule <- Some rule
-        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
-
-    {
-        LoadedRules.GlobalConfig = getGlobalConfig config.Global
-        DeprecatedRules = deprecatedAllRules
-        AstNodeRules = astNodeRules.ToArray()
-        LineRules =
-            {
-                GenericLineRules = lineRules.ToArray()
-                IndentationRule = indentationRule
-                NoTabCharactersRule = noTabCharactersRule
-            }
-    }
-
 // fsharplint:disable MaxLinesInFunction
 let flattenConfig (config:Configuration) =
-    let deprecatedAllRules =
-        Array.concat
-            [|
-                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.Add) }) |> Option.toArray
-            |]
-
     let allRules =
         Array.choose
             id
             [|
+                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.Add) })
+
                 config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
                 config.TypePrefixing |> Option.bind (constructTypePrefixingRuleWithConfig TypePrefixing.rule)
                 config.UnionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule)
@@ -540,4 +507,26 @@ let flattenConfig (config:Configuration) =
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
             |]
 
-    findDeprecation config deprecatedAllRules allRules
+    let astNodeRules = ResizeArray()
+    let lineRules = ResizeArray()
+    let mutable indentationRule = None
+    let mutable noTabCharactersRule = None
+
+    allRules
+    |> Array.iter (function
+        | AstNodeRule rule -> astNodeRules.Add rule
+        | LineRule rule -> lineRules.Add(rule)
+        | IndentationRule rule -> indentationRule <- Some rule
+        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
+
+    {
+        LoadedRules.GlobalConfig = getGlobalConfig config.Global
+        AstNodeRules = astNodeRules.ToArray()
+        LineRules =
+            {
+                GenericLineRules = lineRules.ToArray()
+                IndentationRule = indentationRule
+                NoTabCharactersRule = noTabCharactersRule
+            }
+    }
+// fsharplint:enable MaxLinesInFunction
