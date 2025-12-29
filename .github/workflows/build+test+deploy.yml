@@ -164,8 +164,8 @@ jobs:
         run: dotnet tool install --global dotnet-fsharplint --prerelease --framework net8.0
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Lint FSharpLint.Console project (net8.0 only)
-        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
+      - name: Lint a file (net8.0)
+        run: dotnet fsharplint lint ./src/FSharpLint.Console/Program.fs
         
   testReleaseBinariesWithDotNet10:
     needs: packReleaseBinaries
@@ -198,5 +198,5 @@ jobs:
         run: dotnet tool install --global dotnet-fsharplint --prerelease
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Lint FSharpLint.Console project
-        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
+      - name: Lint a file (net10.0)
+        run: dotnet fsharplint lint ./src/FSharpLint.Console/Program.fs

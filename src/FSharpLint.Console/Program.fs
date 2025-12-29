@@ -159,30 +159,44 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
               Configuration = configParam
               ReportLinterProgress = Some (parserProgress output) }
 
-        let target = lintArgs.GetResult Target
-        let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+        let targets = lintArgs.GetResults Target
+        
+        let fileType = 
+            match lintArgs.TryGetResult File_Type with
+            | Some fileType -> 
+                fileType 
+            | None ->
+                match targets |> List.map inferFileType |> List.distinct with
+                | [ inferredType ] -> 
+                    inferredType
+                | inferredTypes ->
+                    handleError $"""Given targets were inferred to have multiple types: {inferredTypes}.
+Specify file type by passing --file-type argument."""
+                    exit exitCode
+                    failwith "Unreachable"
 
         try
-            let lintResult =
-                match fileType with
-                | FileType.File -> Lint.lintFile lintParams target
-                | FileType.Source -> Lint.lintSource lintParams target
-                | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
-                | FileType.Wildcard ->
-                    output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
-                    let files = expandWildcard target
-                    if List.isEmpty files then
-                        output.WriteInfo $"No files matching pattern '%s{target}' were found."
-                        LintResult.Success List.empty
-                    else
-                        output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
-                        Lint.lintFiles lintParams files
-                | FileType.Project
-                | _ -> Lint.lintProject lintParams target toolsPath
-            handleLintResult lintResult
+            for target in targets do
+                let lintResult =
+                    match fileType with
+                    | FileType.File -> Lint.lintFile lintParams target
+                    | FileType.Source -> Lint.lintSource lintParams target
+                    | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
+                    | FileType.Wildcard ->
+                        output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
+                        let files = expandWildcard target
+                        if List.isEmpty files then
+                            output.WriteInfo $"No files matching pattern '%s{target}' were found."
+                            LintResult.Success List.empty
+                        else
+                            output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
+                            Lint.lintFiles lintParams files
+                    | FileType.Project
+                    | _ -> Lint.lintProject lintParams target toolsPath
+                handleLintResult lintResult
         with
         | exn ->
-            let target = if fileType = FileType.Source then "source" else target
+            let target = if fileType = FileType.Source then "source" else String.Join(", ", targets)
             handleError
                 $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
     | _ -> ()
