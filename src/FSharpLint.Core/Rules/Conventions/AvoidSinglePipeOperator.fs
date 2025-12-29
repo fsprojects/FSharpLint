@@ -8,6 +8,9 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+let isSingleLine (range: FSharp.Compiler.Text.range) =
+    range.EndLine = range.StartLine
+
 let runner (args: AstNodeRuleParams) =
     let errors range suggestedFix =
         Array.singleton
@@ -26,7 +29,7 @@ let runner (args: AstNodeRuleParams) =
             | _ -> false
 
         match expr with
-        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, appRange) ->
+        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, appRange) when isSingleLine argExpr.Range ->
             match funcExpr with
             | ExpressionUtilities.Identifier([ ident ], _) ->
                 if ident.idText = "op_PipeRight" then
