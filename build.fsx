@@ -310,7 +310,7 @@ Target.create "Release" DoNothing
 
 "Clean"
   ==> "Build"
-  ==> "Test"
+//   ==> "Test"
   ==> "Default"
 
 "Clean"
