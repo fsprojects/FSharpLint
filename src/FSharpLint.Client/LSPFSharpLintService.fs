@@ -58,69 +58,70 @@ let private createAgent (ct: CancellationToken) =
                 Some { state with FolderToVersion = Map.add folder version state.FolderToVersion }
         | None -> None
 
-    MailboxProcessor.Start(
-        (fun inbox ->
-            let rec messageLoop (state: ServiceState) =
-                async {
-                    let! msg = inbox.Receive()
+    let processor (inbox: MailboxProcessor<Msg>) =
+        let rec messageLoop (state: ServiceState) =
+            async {
+                let! msg = inbox.Receive()
 
-                    let nextState =
-                        match msg with
-                        | GetDaemon(folder, replyChannel) ->
-                            // get the version for that folder
-                            // look in the cache first
-                            let versionFromCache = Map.tryFind folder state.FolderToVersion
-                            match versionFromCache with
-                            | Some version ->
+                let nextState =
+                    match msg with
+                    | GetDaemon(folder, replyChannel) ->
+                        // get the version for that folder
+                        // look in the cache first
+                        let versionFromCache = Map.tryFind folder state.FolderToVersion
+                        match versionFromCache with
+                        | Some version ->
+                            tryGetVersionFromCache state version folder replyChannel
+                            |> Option.defaultWith(fun () ->
+                                // This is a strange situation, we know what version is linked to that folder but there is no daemon
+                                // The moment a version is added, is also the moment a daemon is re-used or created
+                                replyChannel.Reply(
+                                    Error(GetDaemonError.CompatibleVersionIsKnownButNoDaemonIsRunning version)
+                                )
+
+                                state)
+                        | None ->
+                            // Try and find a version of fsharplint daemon for our current folder
+                            let fsharpLintToolResult: Result<FSharpLintToolFound, FSharpLintToolError> =
+                                findFSharpLintTool folder
+
+                            match fsharpLintToolResult with
+                            | Ok(FSharpLintToolFound(version, startInfo)) ->
+                                let createDaemon() =
+                                    let createDaemonResult = createFor startInfo
+
+                                    match createDaemonResult with
+                                    | Ok daemon ->
+                                        replyChannel.Reply(Ok daemon.RpcClient)
+
+                                        { Daemons = Map.add version daemon state.Daemons
+                                          FolderToVersion = Map.add folder version state.FolderToVersion }
+                                    | Error pse ->
+                                        replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
+                                        state
+
+
                                 tryGetVersionFromCache state version folder replyChannel
-                                |> Option.defaultWith(fun () -> 
-                                    // This is a strange situation, we know what version is linked to that folder but there is no daemon
-                                    // The moment a version is added, is also the moment a daemon is re-used or created
-                                    replyChannel.Reply(
-                                        Error(GetDaemonError.CompatibleVersionIsKnownButNoDaemonIsRunning version)
-                                    )
+                                |> Option.defaultWith(fun () -> createDaemon())
+                            | Error FSharpLintToolError.NoCompatibleVersionFound ->
+                                replyChannel.Reply(Error GetDaemonError.InCompatibleVersionFound)
+                                state
+                            | Error(FSharpLintToolError.DotNetListError dotNetToolListError) ->
+                                replyChannel.Reply(Error(GetDaemonError.DotNetToolListError dotNetToolListError))
+                                state
+                    | Reset replyChannel ->
+                        Map.toList state.Daemons
+                        |> List.iter (fun (_, daemon) -> (daemon :> IDisposable).Dispose())
 
-                                    state)
-                            | None ->
-                                // Try and find a version of fsharplint daemon for our current folder
-                                let fsharpLintToolResult: Result<FSharpLintToolFound, FSharpLintToolError> =
-                                    findFSharpLintTool folder
+                        replyChannel.Reply()
+                        ServiceState.Empty
 
-                                match fsharpLintToolResult with
-                                | Ok(FSharpLintToolFound(version, startInfo)) ->
-                                    tryGetVersionFromCache state version folder replyChannel
-                                    |> Option.defaultWith(fun () -> 
-                                        let createDaemonResult = createFor startInfo
+                return! messageLoop nextState
+            }
 
-                                        match createDaemonResult with
-                                        | Ok daemon ->
-                                            replyChannel.Reply(Ok daemon.RpcClient)
+        messageLoop ServiceState.Empty
 
-                                            { Daemons = Map.add version daemon state.Daemons
-                                              FolderToVersion = Map.add folder version state.FolderToVersion }
-                                        | Error pse ->
-                                            replyChannel.Reply(Error(GetDaemonError.FSharpLintProcessStart pse))
-                                            state
-                                    )
-                                | Error FSharpLintToolError.NoCompatibleVersionFound ->
-                                    replyChannel.Reply(Error GetDaemonError.InCompatibleVersionFound)
-                                    state
-                                | Error(FSharpLintToolError.DotNetListError dotNetToolListError) ->
-                                    replyChannel.Reply(Error(GetDaemonError.DotNetToolListError dotNetToolListError))
-                                    state
-                        | Reset replyChannel ->
-                            Map.toList state.Daemons
-                            |> List.iter (fun (_, daemon) -> (daemon :> IDisposable).Dispose())
-
-                            replyChannel.Reply()
-                            ServiceState.Empty
-
-                    return! messageLoop nextState
-                }
-
-            messageLoop ServiceState.Empty),
-        cancellationToken = ct
-    )
+    MailboxProcessor.Start(processor, cancellationToken = ct)
 
 type FSharpLintServiceError =
     | DaemonNotFound of GetDaemonError
@@ -253,10 +254,7 @@ type LSPFSharpLintService() =
             |> Result.bind (getDaemon agent)
             |> Result.map (fun client ->
                 client
-                    .InvokeWithCancellationAsync<string>(
-                        Methods.Version,
-                        cancellationToken = Option.defaultValue cts.Token cancellationToken
-                    )
+                    .InvokeWithCancellationAsync<string>(Methods.Version, cancellationToken = Option.defaultValue cts.Token cancellationToken)
                     .ContinueWith(fun (task: Task<string>) ->
                         { Code = int FSharpLintResponseCode.OkCurrentDaemonVersion
                           Result = Content task.Result

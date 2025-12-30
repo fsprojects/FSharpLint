@@ -132,19 +132,15 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
         | Some path -> path.Split([| if isWindows then ';' else ':' |], StringSplitOptions.RemoveEmptyEntries)
         | None -> Array.empty
         |> Seq.choose (fun folder ->
-            if isWindows then
-                let fsharpLintExe = Path.Combine(folder, $"{FSharpLintToolName}.exe")
-                if File.Exists fsharpLintExe then Some fsharpLintExe
-                else None
-            else
-                let fsharpLint = Path.Combine(folder, FSharpLintToolName)
-                if File.Exists fsharpLint then Some fsharpLint
-                else None)
+            let fsharpLint =
+                if isWindows then Path.Combine(folder, $"{FSharpLintToolName}.exe")
+                else Path.Combine(folder, FSharpLintToolName)
+            if File.Exists fsharpLint then Some fsharpLint
+            else None)
         |> Seq.tryHead
         |> Option.bind File.From
 
-    fsharpLintExecutableOnPathOpt
-    |> Option.bind (fun fsharpLintExecutablePath ->
+    let extractFsharpLintVersion fsharpLintExecutablePath =
         let processStart = ProcessStartInfo(
             FileName = File.Unwrap fsharpLintExecutablePath,
             Arguments = "--version",
@@ -167,7 +163,10 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
                 else
                     None)
         | Error(ProcessStartError.ExecutableFileNotFound _)
-        | Error(ProcessStartError.UnexpectedException _) -> None)
+        | Error(ProcessStartError.UnexpectedException _) -> None
+
+    fsharpLintExecutableOnPathOpt
+    |> Option.bind extractFsharpLintVersion
 
 let findFSharpLintTool (workingDir: Folder) : Result<FSharpLintToolFound, FSharpLintToolError> =
     // First try and find a local tool for the folder.
