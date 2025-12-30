@@ -160,7 +160,7 @@ let constructTypePrefixingRuleWithConfig rule (ruleConfig: RuleConfig<TypePrefix
 // Deprecated grouped configs. TODO: remove in next major release
 
 [<Literal>]
-let private ObsoleteMsg = "Please provide formatting rules at root level. This type will be removed in the near future."
+let private ObsoleteMsg = "Please rather provide these settings at root level instead of grouped. This type/member will be removed in the near future."
 [<Literal>]
 let private ObsoleteWarnTreatAsError = false
 
