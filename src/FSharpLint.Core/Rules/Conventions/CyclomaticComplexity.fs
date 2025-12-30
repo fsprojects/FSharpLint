@@ -43,23 +43,30 @@ type private BindingStack(maxComplexity: int) =
     
     member this.Push (args:AstNodeRuleParams) (bs: BindingScope) =
         // if the node is a child of the current binding scope
-        let isChildOfCurrent = if List.isEmpty tier1 then
-                                    false
-                                else
-                                    args.GetParents args.NodeIndex |> List.tryFind (fun astNode -> Object.ReferenceEquals(tier1.Head.Node, astNode)) |> Option.isSome
+        let isChildOfCurrent = 
+            match tier1 with
+            | [] ->
+                false
+            | head :: _ ->
+                args.GetParents args.NodeIndex |> List.tryFind (fun astNode -> Object.ReferenceEquals(head.Node, astNode)) |> Option.isSome
         // if the node is not a child and the stack isn't empty, we're finished with the current head of tier1, so move it from tier1 to tier2
-        if not isChildOfCurrent && not (List.isEmpty tier1) then
-            let popped = tier1.Head
+        match tier1 with
+        | popped :: _ when not isChildOfCurrent ->
             tier1 <- tier1.Tail
             if popped.Complexity > maxComplexity then
                 tier2.Add popped |> ignore<bool>
+        | _ -> 
+            ()
         // finally, push the item on to the stack
         tier1 <- bs::tier1
         
     member this.IncrComplexityOfCurrentScope incr =
-        let head = tier1.Head
-        let complexity = head.Complexity + incr
-        tier1 <- {head with Complexity = complexity}::tier1.Tail
+        match tier1 with
+        | head :: _ ->
+            let complexity = head.Complexity + incr
+            tier1 <- {head with Complexity = complexity}::tier1.Tail
+        | [] -> 
+            failwith $"{nameof(tier1)} is empty"
         
     interface IEnumerable<BindingScope> with
         member this.GetEnumerator() =

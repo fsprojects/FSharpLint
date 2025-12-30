@@ -676,8 +676,10 @@ let loadConfig (configPath:string) =
 /// This function loads and returns this default configuration.
 let defaultConfiguration =
     let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
-    let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                       |> Seq.find (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+    let resourceName = 
+        Assembly.GetExecutingAssembly().GetManifestResourceNames()
+        |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+        |> Option.defaultWith (fun () -> failwith "Could not get resource name")
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
     | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
