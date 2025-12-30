@@ -237,3 +237,21 @@ parsedSolution.ProjectsInOrder
 """
         
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Can use pipe operator for multi-line first argument``() =
+        this.Parse """
+type Person =
+    {
+        FirstName: string
+        SecondName: string
+    }
+
+{
+    FirstName = "John"
+    SecondName = "Doe"
+}
+|> Task.FromResult
+"""
+        
+        Assert.IsTrue this.NoErrorsExist
