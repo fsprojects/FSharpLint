@@ -10,7 +10,7 @@ open FSharpLint.Framework.ExpressionUtilities
 
 let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda range =
     let tryReplaceWithFunctionComposition expression =
-        let getLastElement = List.rev >> List.head
+        let getLastElement = List.rev >> List.tryHead
 
         let rec lambdaArgumentIsLastApplicationInFunctionCalls expression (lambdaArgument:Ident) (calledFunctionIdents: List<string>) =
             let rec appliedValuesAreConstants appliedValues =
@@ -35,12 +35,12 @@ let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda 
                     let funcString = String.Join(' ', funcStringParts)
                     
                     match getLastElement appliedValues with
-                    | SynExpr.Ident(lastArgument) when calledFunctionIdents.Length > 1 ->
+                    | Some(SynExpr.Ident(lastArgument)) when calledFunctionIdents.Length > 1 ->
                         if lastArgument.idText = lambdaArgument.idText then
                             funcString :: calledFunctionIdents
                         else
                             List.Empty
-                    | SynExpr.App(_, false, _, _, _) as nextFunction ->
+                    | Some(SynExpr.App(_, false, _, _, _) as nextFunction) ->
                         lambdaArgumentIsLastApplicationInFunctionCalls 
                             nextFunction 
                             lambdaArgument 

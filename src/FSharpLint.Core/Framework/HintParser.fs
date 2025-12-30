@@ -117,7 +117,10 @@ module HintParser =
         let private pescapechar: Parser<char, unit> =
             skipChar '\\'
             >>. pischar ['"';'\\';'\'';'n';'t';'b';'r';'a';'f';'v']
-            |>> fun escapeChar -> Map.find escapeChar escapeMap
+            |>> fun escapeChar -> 
+                match Map.tryFind escapeChar escapeMap with
+                | Some char -> char
+                | None -> failwithf "Could not find escape char %c in escape char map %A" escapeChar escapeMap
 
         let private pnonescapechars: Parser<char, unit> =
             skipChar '\\'

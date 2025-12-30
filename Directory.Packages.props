@@ -11,6 +11,7 @@
     <PackageVersion Include="FSharp.Compiler.Service" Version="43.9.201" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="6.1.2" />
     <PackageVersion Include="FSharp.Core" Version="9.0.201" />
+    <PackageVersion Include="FSharpx.Collections" Version="3.1.0" />
     <PackageVersion Include="Ionide.ProjInfo.ProjectSystem" Version="0.70.2" />
     <PackageVersion Include="Ionide.ProjInfo.FCS" Version="0.70.2" />
     <PackageVersion Include="Ionide.ProjInfo" Version="0.70.2" />
