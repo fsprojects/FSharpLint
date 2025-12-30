@@ -1,0 +1,1408 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | AstNode
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/custom.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li class="dd-item">
+            <a href="https://fsprojects.github.io/FSharpLint" class="">
+              Overview
+            </a>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              How-To Guides
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="">
+                  Install Dotnet Tool
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="">
+                  Setup MSBuild Task
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="">
+                  Rule Config
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="">
+                  Rule Suppression
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="dd-item parent">
+            <a class="active">
+              API References
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="">
+                  FSharpLint.Core
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortcuts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <div class="api-page">
+            <h2>
+              AstNode
+            </h2>
+            <b>
+              Namespace: 
+            </b>
+            <a href="../FSharpLint.Framework.html">
+              FSharpLint.Framework
+            </a>
+            <br/>
+            <b>
+              Parent Module: 
+            </b>
+            <a href="../fsharplint-framework-ast.html">
+              Ast
+            </a>
+            <br/>
+            <b>
+              Assembly: 
+            </b>
+            FSharpLint.Core
+            <br/>
+            <b>
+              Attributes: 
+            </b>
+            <code>
+              NoEqualityAttribute
+            </code>
+            <br/>
+            <code>
+              NoComparisonAttribute
+            </code>
+            <br/>
+            <br/>
+            <table>
+              <tr>
+                <th width="35%">
+                  Name
+                </th>
+                <th width="65%">
+                  Description
+                </th>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Instance Members
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsEnumCase
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsEnumCase</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsLambdaBody
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsLambdaBody</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsBinding
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsBinding</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsExpression
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsExpression</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsPattern
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsPattern</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsTypeDefinition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsTypeDefinition</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsTypeSimpleRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsTypeSimpleRepresentation</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsIdentifier
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsIdentifier</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUnionCase
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUnionCase</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsField
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsField</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsSimplePatterns
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsSimplePatterns</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsInterfaceImplementation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsInterfaceImplementation</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsType
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsType</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsComponentInfo
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsComponentInfo</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsConstructorArguments
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsConstructorArguments</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsTypeRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsTypeRepresentation</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsLambdaArg
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsLambdaArg</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsExceptionRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsExceptionRepresentation</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsFile
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsFile</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsModuleOrNamespace
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsModuleOrNamespace</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsMatch
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsMatch</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsTypeParameter
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsTypeParameter</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsSimplePattern
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsSimplePattern</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsMemberDefinition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsMemberDefinition</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsModuleDeclaration
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsModuleDeclaration</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsElse
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsElse</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Union Cases
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Expression
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Expression&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synexpr">SynExpr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Pattern
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Pattern&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synpat">SynPat</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    SimplePattern
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>SimplePattern&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synsimplepat">SynSimplePat</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    SimplePatterns
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>SimplePatterns&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synsimplepats">SynSimplePats</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ModuleOrNamespace
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>ModuleOrNamespace&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synmoduleornamespace">SynModuleOrNamespace</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ModuleDeclaration
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>ModuleDeclaration&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synmoduledecl">SynModuleDecl</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Binding
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Binding&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synbinding">SynBinding</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypeDefinition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>TypeDefinition&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syntypedefn">SynTypeDefn</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MemberDefinition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>MemberDefinition&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synmemberdefn">SynMemberDefn</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ComponentInfo
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>ComponentInfo&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syncomponentinfo">SynComponentInfo</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ExceptionRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>ExceptionRepresentation&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synexceptiondefnrepr">SynExceptionDefnRepr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UnionCase
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UnionCase&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synunioncase">SynUnionCase</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    EnumCase
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>EnumCase&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synenumcase">SynEnumCase</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypeRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>TypeRepresentation&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syntypedefnrepr">SynTypeDefnRepr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypeSimpleRepresentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>TypeSimpleRepresentation&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syntypedefnsimplerepr">SynTypeDefnSimpleRepr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Type
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Type&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syntype">SynType</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Field
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Field&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synfield">SynField</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Match
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Match&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synmatchclause">SynMatchClause</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ConstructorArguments
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>ConstructorArguments&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synargpats">SynArgPats</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypeParameter
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>TypeParameter&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syntypar">SynTypar</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InterfaceImplementation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>InterfaceImplementation&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-syninterfaceimpl">SynInterfaceImpl</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Identifier
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Identifier(<span><span>string&#32;list</span>,&#32;range</span>)</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    File
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>File&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-parsedinput">ParsedInput</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    LambdaBody
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>LambdaBody&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synexpr">SynExpr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    LambdaArg
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>LambdaArg&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synsimplepats">SynSimplePats</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Else
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Else&#32;<a href="https://fsharp.github.io/fsharp-core-docs/reference/fsharp-compiler-syntax-synexpr">SynExpr</a></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>

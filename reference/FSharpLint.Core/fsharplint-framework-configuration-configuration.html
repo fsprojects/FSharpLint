@@ -1,0 +1,1835 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | Configuration
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/custom.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li class="dd-item">
+            <a href="https://fsprojects.github.io/FSharpLint" class="">
+              Overview
+            </a>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              How-To Guides
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="">
+                  Install Dotnet Tool
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="">
+                  Setup MSBuild Task
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="">
+                  Rule Config
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="">
+                  Rule Suppression
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="dd-item parent">
+            <a class="active">
+              API References
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="">
+                  FSharpLint.Core
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortcuts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <div class="api-page">
+            <h2>
+              Configuration
+            </h2>
+            <b>
+              Namespace: 
+            </b>
+            <a href="../FSharpLint.Framework.html">
+              FSharpLint.Framework
+            </a>
+            <br/>
+            <b>
+              Parent Module: 
+            </b>
+            <a href="../fsharplint-framework-configuration.html">
+              Configuration
+            </a>
+            <br/>
+            <b>
+              Assembly: 
+            </b>
+            FSharpLint.Core
+            <br/>
+            <br/>
+            <table>
+              <tr>
+                <th width="35%">
+                  Name
+                </th>
+                <th width="65%">
+                  Description
+                </th>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Record Fields
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Global
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>Global</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    formatting
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>formatting</code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    ObsoleteAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    conventions
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>conventions</code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    ObsoleteAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    typography
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>typography</code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    ObsoleteAttribute
+                  </code>
+                </td>
+                <td>
+                  <p>DEPRECATED, provide typography rules at root level.</p>
+
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ignoreFiles
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ignoreFiles</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Hints
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>Hints</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypedItemSpacing
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TypedItemSpacing</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypePrefixing
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TypePrefixing</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UnionDefinitionIndentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UnionDefinitionIndentation</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ModuleDeclSpacing
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ModuleDeclSpacing</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ClassMemberSpacing
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ClassMemberSpacing</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TupleCommaSpacing
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TupleCommaSpacing</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TupleIndentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TupleIndentation</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TupleParentheses
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TupleParentheses</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PatternMatchClausesOnNewLine
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PatternMatchClausesOnNewLine</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PatternMatchOrClausesOnNewLine
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PatternMatchOrClausesOnNewLine</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PatternMatchClauseIndentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PatternMatchClauseIndentation</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PatternMatchExpressionIndentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PatternMatchExpressionIndentation</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    RecursiveAsyncFunction
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>RecursiveAsyncFunction</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    AvoidTooShortNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>AvoidTooShortNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IndexerAccessorStyleConsistency
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>IndexerAccessorStyleConsistency</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    RedundantNewKeyword
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>RedundantNewKeyword</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourNonMutablePropertyInitialization
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourNonMutablePropertyInitialization</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourReRaise
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourReRaise</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourStaticEmptyFields
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourStaticEmptyFields</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    AsyncExceptionWithoutReturn
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>AsyncExceptionWithoutReturn</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UnneededRecKeyword
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UnneededRecKeyword</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NestedStatements
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NestedStatements</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourConsistentThis
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourConsistentThis</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    CyclomaticComplexity
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>CyclomaticComplexity</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ReimplementsFunction
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ReimplementsFunction</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    CanBeReplacedWithComposition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>CanBeReplacedWithComposition</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    AvoidSinglePipeOperator
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>AvoidSinglePipeOperator</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UsedUnderscorePrefixedElements
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UsedUnderscorePrefixedElements</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FailwithBadUsage
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FailwithBadUsage</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    RaiseWithSingleArgument
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>RaiseWithSingleArgument</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FailwithWithSingleArgument
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FailwithWithSingleArgument</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NullArgWithSingleArgument
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NullArgWithSingleArgument</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InvalidOpWithSingleArgument
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>InvalidOpWithSingleArgument</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InvalidArgWithTwoArguments
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>InvalidArgWithTwoArguments</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FailwithfWithArgumentsMatchingFormatString
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FailwithfWithArgumentsMatchingFormatString</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInLambdaFunction
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInLambdaFunction</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInMatchLambdaFunction
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInMatchLambdaFunction</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInValue
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInValue</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInFunction
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInFunction</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInMember
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInMember</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInConstructor
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInConstructor</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInProperty
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInProperty</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInModule
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInModule</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInRecord
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInRecord</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInEnum
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInEnum</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInUnion
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInUnion</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInClass
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInClass</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InterfaceNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>InterfaceNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    GenericTypesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>GenericTypesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ExceptionNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ExceptionNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TypeNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TypeNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    RecordFieldNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>RecordFieldNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    EnumCasesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>EnumCasesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UnionCasesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UnionCasesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ModuleNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ModuleNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    LiteralNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>LiteralNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NamespaceNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NamespaceNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MemberNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MemberNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ParameterNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ParameterNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MeasureTypeNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MeasureTypeNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    ActivePatternNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>ActivePatternNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PublicValuesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PublicValuesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NonPublicValuesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NonPublicValuesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    PrivateValuesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>PrivateValuesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InternalValuesNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>InternalValuesNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UnnestedFunctionNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UnnestedFunctionNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NestedFunctionNames
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NestedFunctionNames</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxNumberOfItemsInTuple
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxNumberOfItemsInTuple</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxNumberOfFunctionParameters
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxNumberOfFunctionParameters</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxNumberOfMembers
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxNumberOfMembers</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxNumberOfBooleanOperatorsInCondition
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxNumberOfBooleanOperatorsInCondition</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourIgnoreOverLetWild
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourIgnoreOverLetWild</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourTypedIgnore
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourTypedIgnore</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    WildcardNamedWithAsPattern
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>WildcardNamedWithAsPattern</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UselessBinding
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>UselessBinding</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TupleOfWildcards
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TupleOfWildcards</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Indentation
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>Indentation</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxCharactersOnLine
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxCharactersOnLine</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TrailingWhitespaceOnLine
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TrailingWhitespaceOnLine</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    MaxLinesInFile
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>MaxLinesInFile</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    TrailingNewLineInFile
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>TrailingNewLineInFile</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NoTabCharacters
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NoTabCharacters</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    NoPartialFunctions
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>NoPartialFunctions</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    SuggestUseAutoProperty
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>SuggestUseAutoProperty</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    EnsureTailCallDiagnosticsInRecursiveFunctions
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>EnsureTailCallDiagnosticsInRecursiveFunctions</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourAsKeyword
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourAsKeyword</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    InterpolatedStringWithNoSubstitution
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>InterpolatedStringWithNoSubstitution</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    FavourSingleton
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code>FavourSingleton</code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Static Members
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Zero
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Configuration.Zero</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>

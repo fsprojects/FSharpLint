@@ -1,0 +1,1075 @@
+<html class="js csstransforms3d">
+  <head>
+    <meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>
+      FSharpLint | Constant
+    </title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://fsprojects.github.io/FSharpLint/static/images/favicon.png"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/nucleus.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/fontawesome-all.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/hybrid.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/featherlight.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/perfect-scrollbar.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/auto-complete.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/atom-one-dark-reasonable.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/custom.css"/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/atom-one-dark.min.css"/>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/css/theme-blue.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery-3.3.1.min.js"></script>
+  </head>
+  <body>
+    <nav id="sidebar">
+      <div id="header-wrapper">
+        <div id="header">
+          <h2 id="logo">
+            FSharpLint
+          </h2>
+        </div>
+        <div class="searchbox">
+          <label for="search-by">
+            <i class="fas fa-search"></i>
+          </label>
+          <input data-search-input="" id="search-by" type="search" placeholder="Search..."/>
+          <span data-search-clear="">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/lunr.min.js"></script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/auto-complete.js"></script>
+        <script type="text/javascript">
+          var baseurl ='https://fsprojects.github.io/FSharpLint'
+        </script>
+        <script type="text/javascript" src="https://fsprojects.github.io/FSharpLint/static/js/search.js"></script>
+      </div>
+      <div class="highlightable">
+        <ul class="topics">
+          <li class="dd-item">
+            <a href="https://fsprojects.github.io/FSharpLint" class="">
+              Overview
+            </a>
+          </li>
+          <li class="dd-item parent">
+            <a class="">
+              How-To Guides
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/install-dotnet-tool.html" class="">
+                  Install Dotnet Tool
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/msbuild-task.html" class="">
+                  Setup MSBuild Task
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-configuration.html" class="">
+                  Rule Config
+                </a>
+              </li>
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/how-tos/rule-suppression.html" class="">
+                  Rule Suppression
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="dd-item parent">
+            <a class="active">
+              API References
+            </a>
+            <ul class="child">
+              <li class="dd-item">
+                <a href="https://fsprojects.github.io/FSharpLint/reference/FSharpLint.Core/index.html" class="">
+                  FSharpLint.Core
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <section id="shortcuts">
+          <h3>
+            Shortcuts
+          </h3>
+          <ul>
+            <li>
+              <a class="padding" href="/">
+                <i class="fas fa-home"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a class="padding" href="http://github.com/fsprojects/FSharpLint">
+                <i class="fab fa-github"></i>
+                GitHub repo
+              </a>
+            </li>
+          </ul>
+        </section>
+        <section id="footer">
+          <p>Built with <a href="https://github.com/ionide/Fornax">Fornax</a>
+        </section>
+      </div>
+    </nav>
+    <section id="body">
+      <div id="overlay"></div>
+      <div class="padding highlightable">
+        <div id="body-inner">
+          <span id="sidebar-toggle-span">
+            <a href="#" id="sidebar-toggle" data-sidebar-toggle="">
+              <i class="fas fa-bars"></i>
+               navigation
+            </a>
+          </span>
+          <div class="api-page">
+            <h2>
+              Constant
+            </h2>
+            <b>
+              Namespace: 
+            </b>
+            <a href="../FSharpLint.Framework.html">
+              FSharpLint.Framework
+            </a>
+            <br/>
+            <b>
+              Parent Module: 
+            </b>
+            <a href="../fsharplint-framework-hintparsertypes.html">
+              HintParserTypes
+            </a>
+            <br/>
+            <b>
+              Assembly: 
+            </b>
+            FSharpLint.Core
+            <br/>
+            <br/>
+            <table>
+              <tr>
+                <th width="35%">
+                  Name
+                </th>
+                <th width="65%">
+                  Description
+                </th>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Instance Members
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsIntPtr
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsIntPtr</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsSingle
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsSingle</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsChar
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsChar</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsSByte
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsSByte</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsString
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsString</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUnit
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUnit</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUserNum
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUserNum</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUInt64
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUInt64</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsByte
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsByte</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsInt64
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsInt64</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsInt32
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsInt32</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUInt16
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUInt16</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsBool
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsBool</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsBytes
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsBytes</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsDouble
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsDouble</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsDecimal
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsDecimal</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUIntPtr
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUIntPtr</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsInt16
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsInt16</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IsUInt32
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>this.IsUInt32</span></code>
+                  <br/>
+                  <b>
+                    Attributes:
+                  </b>
+                  <code>
+                    CompilerGeneratedAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                  <code>
+                    DebuggerNonUserCodeAttribute
+                  </code>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="2">
+                  <b>
+                    Union Cases
+                  </b>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Byte
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Byte&#32;byte</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Bytes
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Bytes&#32;<span>byte[]</span></span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Char
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Char&#32;char</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Decimal
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Decimal&#32;decimal</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Double
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Double&#32;double</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Int16
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Int16&#32;int16</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Int32
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Int32&#32;int32</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Int64
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Int64&#32;int64</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    IntPtr
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>IntPtr&#32;nativeint</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    SByte
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>SByte&#32;sbyte</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Single
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Single&#32;single</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UInt16
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UInt16&#32;uint16</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UInt32
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UInt32&#32;uint32</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UInt64
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UInt64&#32;uint64</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UIntPtr
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UIntPtr&#32;unativeint</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    UserNum
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>UserNum(<span>bigint,&#32;char</span>)</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    String
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>String&#32;string</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Unit
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Unit</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <code>
+                    Bool
+                  </code>
+                  <br/>
+                  <br/>
+                  <b>
+                    Signature: 
+                  </b>
+                  <code><span>Bool&#32;bool</span></code>
+                  <br/>
+                </td>
+                <td>
+                  
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div style="left: -1000px; overflow: scroll; position: absolute; top: -1000px; border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;">
+      <div style="border: none; box-sizing: content-box; height: 200px; margin: 0px; padding: 0px; width: 200px;"></div>
+    </div>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/clipboard.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/jquery.sticky.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/featherlight.min.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/modernizr.custom-3.6.0.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/learn.js"></script>
+    <script src="https://fsprojects.github.io/FSharpLint/static/js/hugo-learn.js"></script>
+    <link rel="stylesheet" href="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.css"/>
+    <script src="https://fsprojects.github.io/FSharpLint/static/mermaid/mermaid.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/languages/fsharp.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad()
+    </script>
+  </body>
+</html>
