@@ -114,110 +114,113 @@ let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:
                     TypeChecks = List.Empty
                 })
 
-// not a tail-recursive function
-// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
-let rec private tryFindTypedExpression (range: Range) (expression: FSharpExpr) = 
-    let tryFindFirst exprs = 
-        exprs |> Seq.choose (tryFindTypedExpression range) |> Seq.tryHead
-    if expression.Range = range then
+[<TailCall>]
+let rec private tryFindTypedExpression (range: Range) (expressions: List<FSharpExpr>): Option<FSharpExpr> = 
+    match expressions with
+    | expression :: _ when expression.Range = range ->
         Some expression
-    else
-        match expression with 
-        | FSharpExprPatterns.AddressOf(lvalueExpr) -> 
-            tryFindTypedExpression range lvalueExpr
-        | FSharpExprPatterns.AddressSet(lvalueExpr, rvalueExpr) -> 
-            tryFindTypedExpression range lvalueExpr |> Option.orElse (tryFindTypedExpression range rvalueExpr)
-        | FSharpExprPatterns.Application(funcExpr, _typeArgs, argExprs) -> 
-            tryFindFirst (funcExpr :: argExprs)
-        | FSharpExprPatterns.Call(objExprOpt, _memberOrFunc, _typeArgs1, _typeArgs2, argExprs) ->
-            tryFindFirst (List.append (Option.toList objExprOpt) argExprs)
-        | FSharpExprPatterns.Coerce(_targetType, inpExpr) -> 
-            tryFindTypedExpression range inpExpr
-        | FSharpExprPatterns.FastIntegerForLoop(startExpr, limitExpr, consumeExpr, _isUp, _, _) -> 
-            tryFindFirst [ startExpr; limitExpr; consumeExpr ]
-        | FSharpExprPatterns.ILAsm(_asmCode, _typeArgs, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.ILFieldGet (objExprOpt, _fieldType, _fieldName) -> 
-            objExprOpt |> Option.bind (tryFindTypedExpression range)
-        | FSharpExprPatterns.ILFieldSet (objExprOpt, _fieldType, _fieldName, valueExpr) -> 
-            objExprOpt |> Option.bind (tryFindTypedExpression range) |> Option.orElse (tryFindTypedExpression range valueExpr)
-        | FSharpExprPatterns.IfThenElse (guardExpr, thenExpr, elseExpr) -> 
-            tryFindFirst [ guardExpr; thenExpr; elseExpr ]
-        | FSharpExprPatterns.Lambda(_lambdaVar, bodyExpr) -> 
-            tryFindTypedExpression range bodyExpr
-        | FSharpExprPatterns.Let((_bindingVar, bindingExpr, _), bodyExpr) -> 
-            tryFindTypedExpression range bindingExpr |> Option.orElse (tryFindTypedExpression range bodyExpr)
-        | FSharpExprPatterns.LetRec(recursiveBindings, bodyExpr) ->
+    | FSharpExprPatterns.AddressOf(lvalueExpr) :: rest -> 
+        tryFindTypedExpression range (lvalueExpr :: rest)
+    | FSharpExprPatterns.AddressSet(lvalueExpr, rvalueExpr) :: rest -> 
+        tryFindTypedExpression range (lvalueExpr :: rvalueExpr :: rest)
+    | FSharpExprPatterns.Application(funcExpr, _typeArgs, argExprs) :: rest -> 
+        tryFindTypedExpression range (funcExpr :: argExprs @ rest)
+    | FSharpExprPatterns.Call(objExprOpt, _memberOrFunc, _typeArgs1, _typeArgs2, argExprs) :: rest ->
+        tryFindTypedExpression range ((Option.toList objExprOpt) @ argExprs @ rest)
+    | FSharpExprPatterns.Coerce(_targetType, inpExpr) :: rest -> 
+        tryFindTypedExpression range (inpExpr :: rest)
+    | FSharpExprPatterns.FastIntegerForLoop(startExpr, limitExpr, consumeExpr, _isUp, _, _) :: rest -> 
+        tryFindTypedExpression range ([ startExpr; limitExpr; consumeExpr ] @ rest)
+    | FSharpExprPatterns.ILAsm(_asmCode, _typeArgs, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.ILFieldGet (objExprOpt, _fieldType, _fieldName) :: rest -> 
+        tryFindTypedExpression range (Option.toList objExprOpt @ rest)
+    | FSharpExprPatterns.ILFieldSet (objExprOpt, _fieldType, _fieldName, valueExpr) :: rest -> 
+        tryFindTypedExpression range (Option.toList objExprOpt @ valueExpr :: rest)
+    | FSharpExprPatterns.IfThenElse (guardExpr, thenExpr, elseExpr) :: rest -> 
+        tryFindTypedExpression range ([ guardExpr; thenExpr; elseExpr ] @ rest)
+    | FSharpExprPatterns.Lambda(_lambdaVar, bodyExpr) :: rest -> 
+        tryFindTypedExpression range (bodyExpr :: rest)
+    | FSharpExprPatterns.Let((_bindingVar, bindingExpr, _), bodyExpr) :: rest -> 
+        tryFindTypedExpression range (bindingExpr :: bodyExpr :: rest)
+    | FSharpExprPatterns.LetRec(recursiveBindings, bodyExpr) :: rest ->
+        let bindingExprs =
             recursiveBindings 
-            |> Seq.choose (fun (_, expr, _) -> tryFindTypedExpression range expr)
-            |> Seq.tryHead
-            |> Option.orElse (tryFindTypedExpression range bodyExpr)
-        | FSharpExprPatterns.NewArray(_arrayType, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.NewDelegate(_delegateType, delegateBodyExpr) -> 
-            tryFindTypedExpression range delegateBodyExpr
-        | FSharpExprPatterns.NewObject(_objType, _typeArgs, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.NewRecord(_recordType, argExprs) ->  
-            tryFindFirst argExprs
-        | FSharpExprPatterns.NewAnonRecord(_recordType, argExprs) ->  
-            tryFindFirst argExprs
-        | FSharpExprPatterns.NewTuple(_tupleType, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.NewUnionCase(_unionType, _unionCase, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.Quote(quotedExpr) -> 
-            tryFindTypedExpression range quotedExpr
-        | FSharpExprPatterns.FSharpFieldGet(objExprOpt, _recordOrClassType, _fieldInfo) -> 
-            objExprOpt |> Option.bind (tryFindTypedExpression range)
-        | FSharpExprPatterns.AnonRecordGet(objExpr, _recordOrClassType, _fieldInfo) -> 
-            tryFindTypedExpression range objExpr
-        | FSharpExprPatterns.FSharpFieldSet(objExprOpt, _recordOrClassType, _fieldInfo, argExpr) -> 
-            objExprOpt |> Option.bind (tryFindTypedExpression range) |> Option.orElse (tryFindTypedExpression range argExpr)
-        | FSharpExprPatterns.Sequential(firstExpr, secondExpr) -> 
-            tryFindTypedExpression range firstExpr |> Option.orElse (tryFindTypedExpression range secondExpr)
-        | FSharpExprPatterns.TryFinally(bodyExpr, finalizeExpr, _, _) -> 
-            tryFindTypedExpression range bodyExpr |> Option.orElse (tryFindTypedExpression range finalizeExpr)
-        | FSharpExprPatterns.TryWith(bodyExpr, _, _, _catchVar, catchExpr, _, _) -> 
-            tryFindTypedExpression range bodyExpr |> Option.orElse (tryFindTypedExpression range catchExpr)
-        | FSharpExprPatterns.TupleGet(_tupleType, _tupleElemIndex, tupleExpr) -> 
-            tryFindTypedExpression range tupleExpr
-        | FSharpExprPatterns.DecisionTree(decisionExpr, decisionTargets) -> 
-            tryFindTypedExpression range decisionExpr
-            |> Option.orElse (decisionTargets |> Seq.choose (fun (_, expr) -> tryFindTypedExpression range expr) |> Seq.tryHead)
-        | FSharpExprPatterns.DecisionTreeSuccess (_decisionTargetIdx, decisionTargetExprs) -> 
-            tryFindFirst decisionTargetExprs
-        | FSharpExprPatterns.TypeLambda(_genericParam, bodyExpr) -> 
-            tryFindTypedExpression range bodyExpr
-        | FSharpExprPatterns.TypeTest(_ty, inpExpr) -> 
-            tryFindTypedExpression range inpExpr
-        | FSharpExprPatterns.UnionCaseSet(unionExpr, unionType, unionCase, unionCaseField, valueExpr) -> 
-            tryFindTypedExpression range unionExpr |> Option.orElse (tryFindTypedExpression range valueExpr)
-        | FSharpExprPatterns.UnionCaseGet(unionExpr, _unionType, _unionCase, _unionCaseField) -> 
-            tryFindTypedExpression range unionExpr
-        | FSharpExprPatterns.UnionCaseTest(unionExpr, _unionType, _unionCase) -> 
-            tryFindTypedExpression range unionExpr
-        | FSharpExprPatterns.UnionCaseTag(unionExpr, _unionType) -> 
-            tryFindTypedExpression range unionExpr
-        | FSharpExprPatterns.ObjectExpr(_objType, baseCallExpr, overrides, interfaceImplementations) -> 
-            let interfaceImlps = interfaceImplementations |> List.collect snd
-            baseCallExpr :: (List.append overrides interfaceImlps |> Seq.cast<FSharpExpr> |> Seq.toList)
-            |> tryFindFirst
-        | FSharpExprPatterns.TraitCall(_sourceTypes, _traitName, _typeArgs, _typeInstantiation, _argTypes, argExprs) -> 
-            tryFindFirst argExprs
-        | FSharpExprPatterns.ValueSet(_valToSet, valueExpr) -> 
-            tryFindTypedExpression range valueExpr
-        | FSharpExprPatterns.WhileLoop(guardExpr, bodyExpr, _) -> 
-            tryFindTypedExpression range guardExpr |> Option.orElse (tryFindTypedExpression range bodyExpr)
-        | _ -> None
-// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
+            |> List.map (fun (_, expr, _) -> expr)
+        tryFindTypedExpression range (bindingExprs @ bodyExpr :: rest)
+    | FSharpExprPatterns.NewArray(_arrayType, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.NewDelegate(_delegateType, delegateBodyExpr) :: rest -> 
+        tryFindTypedExpression range (delegateBodyExpr :: rest)
+    | FSharpExprPatterns.NewObject(_objType, _typeArgs, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.NewRecord(_recordType, argExprs) :: rest ->  
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.NewAnonRecord(_recordType, argExprs) :: rest ->  
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.NewTuple(_tupleType, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.NewUnionCase(_unionType, _unionCase, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.Quote(quotedExpr) :: rest -> 
+        tryFindTypedExpression range (quotedExpr :: rest)
+    | FSharpExprPatterns.FSharpFieldGet(objExprOpt, _recordOrClassType, _fieldInfo) :: rest -> 
+         tryFindTypedExpression range (Option.toList objExprOpt @ rest)
+    | FSharpExprPatterns.AnonRecordGet(objExpr, _recordOrClassType, _fieldInfo) :: rest -> 
+        tryFindTypedExpression range (objExpr :: rest)
+    | FSharpExprPatterns.FSharpFieldSet(objExprOpt, _recordOrClassType, _fieldInfo, argExpr) :: rest -> 
+        tryFindTypedExpression range (Option.toList objExprOpt @ argExpr :: rest)
+    | FSharpExprPatterns.Sequential(firstExpr, secondExpr) :: rest -> 
+        tryFindTypedExpression range (firstExpr :: secondExpr :: rest)
+    | FSharpExprPatterns.TryFinally(bodyExpr, finalizeExpr, _, _) :: rest -> 
+        tryFindTypedExpression range (bodyExpr :: finalizeExpr :: rest)
+    | FSharpExprPatterns.TryWith(bodyExpr, _, _, _catchVar, catchExpr, _, _) :: rest -> 
+        tryFindTypedExpression range (bodyExpr :: catchExpr :: rest)
+    | FSharpExprPatterns.TupleGet(_tupleType, _tupleElemIndex, tupleExpr) :: rest -> 
+        tryFindTypedExpression range (tupleExpr :: rest)
+    | FSharpExprPatterns.DecisionTree(decisionExpr, decisionTargets) :: rest -> 
+        let decisionTargetExprs =
+            decisionTargets |> List.map (fun (_, expr) -> expr)
+        tryFindTypedExpression range (decisionExpr :: decisionTargetExprs @ rest)
+    | FSharpExprPatterns.DecisionTreeSuccess (_decisionTargetIdx, decisionTargetExprs) :: rest -> 
+        tryFindTypedExpression range (decisionTargetExprs @ rest)
+    | FSharpExprPatterns.TypeLambda(_genericParam, bodyExpr) :: rest -> 
+        tryFindTypedExpression range (bodyExpr :: rest)
+    | FSharpExprPatterns.TypeTest(_ty, inpExpr) :: rest -> 
+        tryFindTypedExpression range (inpExpr :: rest)
+    | FSharpExprPatterns.UnionCaseSet(unionExpr, _unionType, _unionCase, _unionCaseField, valueExpr) :: rest -> 
+        tryFindTypedExpression range (unionExpr :: valueExpr :: rest)
+    | FSharpExprPatterns.UnionCaseGet(unionExpr, _unionType, _unionCase, _unionCaseField) :: rest -> 
+        tryFindTypedExpression range (unionExpr :: rest)
+    | FSharpExprPatterns.UnionCaseTest(unionExpr, _unionType, _unionCase) :: rest -> 
+        tryFindTypedExpression range (unionExpr :: rest)
+    | FSharpExprPatterns.UnionCaseTag(unionExpr, _unionType) :: rest -> 
+        tryFindTypedExpression range (unionExpr :: rest)
+    | FSharpExprPatterns.ObjectExpr(_objType, baseCallExpr, overrides, interfaceImplementations) :: rest -> 
+        let interfaceImlps = 
+            interfaceImplementations
+            |> List.collect (fun (_, imlps) -> imlps)
+        let expressions =
+            List.append overrides interfaceImlps
+            |> Seq.cast<FSharpExpr>
+            |> Seq.toList
+        tryFindTypedExpression range (baseCallExpr :: expressions @ rest)
+    | FSharpExprPatterns.TraitCall(_sourceTypes, _traitName, _typeArgs, _typeInstantiation, _argTypes, argExprs) :: rest -> 
+        tryFindTypedExpression range (argExprs @ rest)
+    | FSharpExprPatterns.ValueSet(_valToSet, valueExpr) :: rest -> 
+        tryFindTypedExpression range (valueExpr :: rest)
+    | FSharpExprPatterns.WhileLoop(guardExpr, bodyExpr, _) :: rest -> 
+        tryFindTypedExpression range (guardExpr :: bodyExpr :: rest)
+    | _ :: rest ->
+        tryFindTypedExpression range rest
+    | [] -> None
 
 let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
     let expressions =
         match checkFile.ImplementationFile with
         | Some implementationFile ->
             let rec getExpressions declarations =
-                seq {
+                [
                     for declaration in declarations do
                         match declaration with
                         | FSharpImplementationFileDeclaration.Entity(entity, subDecls) ->
@@ -225,14 +228,12 @@ let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range
                         | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(_,_,body) -> 
                             yield body
                         | _ -> () 
-                }
+                ]
                     
             getExpressions implementationFile.Declarations
-        | None -> Seq.empty
+        | None -> List.empty
 
-    expressions
-    |> Seq.choose (tryFindTypedExpression range)
-    |> Seq.tryHead
+    tryFindTypedExpression range expressions
 
 let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType) : Option<bool> =
     let matchingPartialInstanceMember =
