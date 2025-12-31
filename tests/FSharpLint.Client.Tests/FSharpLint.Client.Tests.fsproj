@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="ReferenceTests.fs" />
+    <Compile Include="TestClient.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FSharpLint.Client\FSharpLint.Client.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+  </ItemGroup>
+
+</Project>

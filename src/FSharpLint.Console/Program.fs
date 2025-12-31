@@ -6,6 +6,7 @@ open System.IO
 open System.Reflection
 open FSharpLint.Framework
 open FSharpLint.Application
+open Daemon
 
 /// Output format the linter will use.
 type private OutputFormat =
@@ -26,6 +27,7 @@ type private ToolArgs =
     | [<AltCommandLine("-f")>] Format of OutputFormat
     | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
     | Version
+    | Daemon
 with
     interface IArgParserTemplate with
         member this.Usage =
@@ -33,6 +35,7 @@ with
             | Format _ -> "Output format of the linter."
             | Lint _ -> "Runs FSharpLint against a file or a collection of files."
             | Version -> "Prints current version."
+            | Daemon -> "Daemon mode, launches an LSP-like server to can be used by editor tooling."
 
 // TODO: investigate erroneous warning on this type definition
 // fsharplint:disable UnionDefinitionIndentation
@@ -55,9 +58,9 @@ with
 let internal expandWildcard (pattern:string) =
     let isFSharpFile (filePath:string) =
         filePath.EndsWith ".fs" || filePath.EndsWith ".fsx"
-    
+
     let normalizedPattern = pattern.Replace('\\', '/')
-    
+
     let directory, searchPattern, searchOption =
         match normalizedPattern.IndexOf "**/" with
         | -1 ->
@@ -77,7 +80,7 @@ let internal expandWildcard (pattern:string) =
             let dir = normalizedPattern.Substring(0, doubleStarIndex).TrimEnd '/'
             let pat = normalizedPattern.Substring(doubleStarIndex + 3)
             (dir, pat, SearchOption.AllDirectories)
-    
+
     let fullDirectory = Path.GetFullPath directory
     if Directory.Exists fullDirectory then
         Directory.GetFiles(fullDirectory, searchPattern, searchOption)
@@ -124,11 +127,15 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | None -> Output.StandardOutput() :> Output.IOutput
 
     if arguments.Contains ToolArgs.Version then
-        let version =
-            Assembly.GetExecutingAssembly().GetCustomAttributes false
-            |> Seq.pick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
+        let version = FSharpLint.Console.Version.get ()
         output.WriteInfo $"Current version: {version}"
         Environment.Exit 0
+
+    if arguments.Contains ToolArgs.Daemon then
+        let daemon = new FSharpLintDaemon(Console.OpenStandardOutput(), Console.OpenStandardInput())
+        AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> (daemon :> IDisposable).Dispose())
+
+        daemon.WaitForClose.GetAwaiter().GetResult()
 
     let handleError (str:string) =
         output.WriteError str
