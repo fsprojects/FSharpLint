@@ -57,20 +57,21 @@ let private startProcess (ps: ProcessStartInfo) : Result<Process, ProcessStartEr
     | ex -> Error(ProcessStartError.UnexpectedException(ps.FileName, ps.Arguments, ex.Message))
 
 let private runToolListCmd (workingDir: Folder) (globalFlag: bool) : Result<string list, DotNetToolListError> =
-    let ps = ProcessStartInfo("dotnet")
-    ps.WorkingDirectory <- Folder.Unwrap workingDir
-    ps.EnvironmentVariables.["DOTNET_CLI_UI_LANGUAGE"] <- "en-us" //ensure we have predictible output for parsing
-
     let toolArguments =
         Option.ofObj (Environment.GetEnvironmentVariable "FSHARPLINT_SEARCH_PATH_OVERRIDE")
         |> Option.map(fun env -> $" --tool-path %s{env}")
         |> Option.defaultValue (if globalFlag then "--global" else String.Empty)
 
-    ps.CreateNoWindow <- true
-    ps.Arguments <- $"tool list %s{toolArguments}"
-    ps.RedirectStandardOutput <- true
-    ps.RedirectStandardError <- true
-    ps.UseShellExecute <- false
+    let ps = ProcessStartInfo(
+        "dotnet",
+        Arguments = $"tool list %s{toolArguments}",
+        WorkingDirectory = Folder.Unwrap workingDir,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false,
+        CreateNoWindow = true
+    )
+    ps.EnvironmentVariables.["DOTNET_CLI_UI_LANGUAGE"] <- "en-us" //ensure we have predictible output for parsing
 
     match startProcess ps with
     | Ok proc ->
@@ -129,7 +130,7 @@ let private fsharpLintVersionOnPath () : (FSharpLintExecutableFile * FSharpLintV
         Option.ofObj (Environment.GetEnvironmentVariable("FSHARPLINT_SEARCH_PATH_OVERRIDE"))
         |> Option.orElse (Option.ofObj (Environment.GetEnvironmentVariable("PATH")))
         |> function
-        | Some path -> path.Split([| if isWindows then ';' else ':' |], StringSplitOptions.RemoveEmptyEntries)
+        | Some path -> path.Split([| Path.PathSeparator |], StringSplitOptions.RemoveEmptyEntries)
         | None -> Array.empty
         |> Seq.choose (fun folder ->
             let fsharpLint =
@@ -242,6 +243,8 @@ let createFor (startInfo: FSharpLintToolStartInfo) : Result<RunningFSharpLintToo
                   Process = daemonProcess
                   StartInfo = startInfo }
         with ex ->
+            Console.Error.WriteLine(ex.ToString())
+
             let error =
                 if daemonProcess.HasExited then
                     let stdErr = daemonProcess.StandardError.ReadToEnd()

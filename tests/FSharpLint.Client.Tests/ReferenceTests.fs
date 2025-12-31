@@ -11,5 +11,5 @@ let ``FSharpLint.Client should not reference FSharpLint.Core``() =
         System.Activator.CreateInstanceFrom("FSharp.Compiler.Service.dll", "FSharp.Compiler.CodeAnalysis.FSharpCheckFileResults")
         |> ignore<ObjectHandle>
     with
-    | :? FileNotFoundException as e -> () // dll is missing, what we want
-    | :? MissingMethodException as e -> Assert.Fail() // ctor is missing, dll was found
+    | :? FileNotFoundException -> () // dll is missing, what we want
+    | :? MissingMethodException -> Assert.Fail("ctor is missing, dll was found")

@@ -6,8 +6,7 @@ open System
 open Contracts
 open LSPFSharpLintService
 open LSPFSharpLintServiceTypes
-
-let (</>) path1 path2 = Path.Combine(path1, path2)
+open FSharpLint.Framework.Utilities
 
 let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".." </> ".."
 let fsharpLintConsoleDll = basePath </> "src" </> "FSharpLint.Console" </> "bin" </> "Release" </> "net9.0" </> "dotnet-fsharplint.dll"
