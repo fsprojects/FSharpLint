@@ -124,13 +124,17 @@ module ExpressionUtilities =
         let range = Range.mkRange String.Empty startPos endPos
 
         let map (precedingText: string) =
-            let lines =
+            let maybeHeadTail =
                 precedingText.Split '\n'
                 |> Array.rev
-                |> Array.tail
-            lines
-            |> Array.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
-            |> Array.length
+                |> FSharpx.Collections.Seq.tryHeadTail
+            match maybeHeadTail with
+            | Some(_, lines) ->
+                lines
+                |> Seq.takeWhile (fun line -> line.TrimStart().StartsWith("//"))
+                |> Seq.length
+            | None ->
+                0
 
         tryFindTextOfRange range text
         |> Option.map map

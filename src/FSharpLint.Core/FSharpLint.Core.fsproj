@@ -147,6 +147,7 @@
     <PackageReference Update="FSharp.Core" PrivateAssets="all" />
     <PackageReference Include="FParsec" />
     <PackageReference Include="FSharp.Compiler.Service" />
+    <PackageReference Include="FSharpx.Collections" />
     <PackageReference Include="Ionide.ProjInfo.ProjectSystem" />
     <PackageReference Include="Ionide.ProjInfo.FCS" />
     <PackageReference Include="Ionide.ProjInfo" />
