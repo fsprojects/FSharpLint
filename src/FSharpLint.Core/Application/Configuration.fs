@@ -183,7 +183,7 @@ type Configuration =
       PatternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
-      AvoidTooShortNames:EnabledConfig option
+      AvoidTooShortNaming:EnabledConfig option
       IndexerAccessorStyleConsistency:RuleConfig<IndexerAccessorStyleConsistency.Config> option
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
@@ -277,7 +277,7 @@ with
         PatternMatchClauseIndentation = None
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
-        AvoidTooShortNames = None
+        AvoidTooShortNaming = None
         IndexerAccessorStyleConsistency = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
@@ -431,7 +431,7 @@ let flattenConfig (config:Configuration) =
                 config.PatternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
                 config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
                 config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
-                config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+                config.AvoidTooShortNaming |> Option.bind (constructRuleIfEnabled AvoidTooShortNaming.rule)
                 config.IndexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule)
                 config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
                 config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)

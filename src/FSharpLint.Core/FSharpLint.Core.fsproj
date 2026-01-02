@@ -118,7 +118,7 @@
     <Compile Include="Rules\Conventions\Binding\UselessBinding.fs" />
     <Compile Include="Rules\Conventions\Binding\TupleOfWildcards.fs" />
     <Compile Include="Rules\Conventions\Binding\FavourAsKeyword.fs" />
-    <Compile Include="Rules\Conventions\Naming\AvoidTooShortNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\AvoidTooShortNaming.fs" />
     <Compile Include="Rules\Formatting\Typography\Indentation.fs" />
     <Compile Include="Rules\Formatting\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingWhitespaceOnLine.fs" />
