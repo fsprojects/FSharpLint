@@ -132,8 +132,6 @@ module IgnoreFiles =
                 when isCurrentlyIgnored && pathMatchesGlob glob segments isDirectory -> false
             | _ -> isCurrentlyIgnored) false ignorePaths
 
-// Non-standard record field naming for config serialization.
-// fsharplint:disable RecordFieldNames
 type RuleConfig<'Config> = {
     Enabled:bool
     Config:'Config option
@@ -156,307 +154,21 @@ let constructTypePrefixingRuleWithConfig rule (ruleConfig: RuleConfig<TypePrefix
     else
         None
 
-
-// Deprecated grouped configs. TODO: remove in next major release
-
-[<Literal>]
-let private ObsoleteMsg = "Please rather provide these settings at root level instead of grouped. This type/member will be removed in the near future."
-[<Literal>]
-let private ObsoleteWarnTreatAsError = false
-
-// to be able to use our own types that we mark as Obsolete
-#nowarn "44"
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type TupleFormattingConfig =
-    { tupleCommaSpacing:EnabledConfig option
-      tupleIndentation:EnabledConfig option
-      tupleParentheses:EnabledConfig option }
-with
-    member this.Flatten() =
-        Array.choose id
-            [|
-                Option.bind (constructRuleIfEnabled TupleCommaSpacing.rule) this.tupleCommaSpacing
-                Option.bind (constructRuleIfEnabled TupleIndentation.rule) this.tupleIndentation
-                Option.bind (constructRuleIfEnabled TupleParentheses.rule) this.tupleParentheses
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type PatternMatchFormattingConfig =
-    { patternMatchClausesOnNewLine:EnabledConfig option
-      patternMatchOrClausesOnNewLine:EnabledConfig option
-      patternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
-      patternMatchExpressionIndentation:EnabledConfig option }
-with
-    member this.Flatten() =
-        Array.choose id
-            [|
-                Option.bind (constructRuleIfEnabled PatternMatchClausesOnNewLine.rule) this.patternMatchClausesOnNewLine
-                Option.bind (constructRuleIfEnabled PatternMatchOrClausesOnNewLine.rule) this.patternMatchOrClausesOnNewLine
-                Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule) this.patternMatchClauseIndentation
-                Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule) this.patternMatchExpressionIndentation
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type FormattingConfig =
-    { typedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
-      typePrefixing:RuleConfig<TypePrefixing.Config> option
-      unionDefinitionIndentation:EnabledConfig option
-      moduleDeclSpacing:EnabledConfig option
-      classMemberSpacing:EnabledConfig option
-      tupleFormatting:TupleFormattingConfig option
-      patternMatchFormatting:PatternMatchFormattingConfig option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.typedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule) |> Option.toArray
-                this.typePrefixing |> Option.bind (constructTypePrefixingRuleWithConfig TypePrefixing.rule) |> Option.toArray
-                this.unionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule) |> Option.toArray
-                this.moduleDeclSpacing |> Option.bind (constructRuleIfEnabled ModuleDeclSpacing.rule) |> Option.toArray
-                this.classMemberSpacing |> Option.bind (constructRuleIfEnabled ClassMemberSpacing.rule) |> Option.toArray
-                this.tupleFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.patternMatchFormatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type RaiseWithTooManyArgsConfig =
-    { failwithBadUsage:EnabledConfig option
-      raiseWithSingleArgument:EnabledConfig option
-      nullArgWithSingleArgument:EnabledConfig option
-      invalidOpWithSingleArgument:EnabledConfig option
-      invalidArgWithTwoArguments:EnabledConfig option
-      failwithfWithArgumentsMatchingFormatString:EnabledConfig option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.failwithBadUsage |> Option.bind (constructRuleIfEnabled FailwithBadUsage.rule) |> Option.toArray
-                this.raiseWithSingleArgument |> Option.bind (constructRuleIfEnabled RaiseWithSingleArgument.rule) |> Option.toArray
-                this.nullArgWithSingleArgument |> Option.bind (constructRuleIfEnabled NullArgWithSingleArgument.rule) |> Option.toArray
-                this.invalidOpWithSingleArgument |> Option.bind (constructRuleIfEnabled InvalidOpWithSingleArgument.rule) |> Option.toArray
-                this.invalidArgWithTwoArguments |> Option.bind (constructRuleIfEnabled InvalidArgWithTwoArguments.rule) |> Option.toArray
-                this.failwithfWithArgumentsMatchingFormatString |> Option.bind (constructRuleIfEnabled FailwithfWithArgumentsMatchingFormatString.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type SourceLengthConfig =
-    { maxLinesInLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInMatchLambdaFunction:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInValue:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInFunction:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInMember:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInConstructor:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInProperty:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInModule:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInRecord:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInEnum:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInUnion:RuleConfig<Helper.SourceLength.Config> option
-      maxLinesInClass:RuleConfig<Helper.SourceLength.Config> option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.maxLinesInLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInLambdaFunction.rule) |> Option.toArray
-                this.maxLinesInMatchLambdaFunction |> Option.bind (constructRuleWithConfig MaxLinesInMatchLambdaFunction.rule) |> Option.toArray
-                this.maxLinesInValue |> Option.bind (constructRuleWithConfig MaxLinesInValue.rule) |> Option.toArray
-                this.maxLinesInFunction |> Option.bind (constructRuleWithConfig MaxLinesInFunction.rule) |> Option.toArray
-                this.maxLinesInMember |> Option.bind (constructRuleWithConfig MaxLinesInMember.rule) |> Option.toArray
-                this.maxLinesInConstructor |> Option.bind (constructRuleWithConfig MaxLinesInConstructor.rule) |> Option.toArray
-                this.maxLinesInProperty |> Option.bind (constructRuleWithConfig MaxLinesInProperty.rule) |> Option.toArray
-                this.maxLinesInModule |> Option.bind (constructRuleWithConfig MaxLinesInModule.rule) |> Option.toArray
-                this.maxLinesInRecord |> Option.bind (constructRuleWithConfig MaxLinesInRecord.rule) |> Option.toArray
-                this.maxLinesInEnum |> Option.bind (constructRuleWithConfig MaxLinesInEnum.rule) |> Option.toArray
-                this.maxLinesInUnion |> Option.bind (constructRuleWithConfig MaxLinesInUnion.rule) |> Option.toArray
-                this.maxLinesInClass |> Option.bind (constructRuleWithConfig MaxLinesInClass.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type NamesConfig =
-    { interfaceNames:RuleConfig<NamingConfig> option
-      genericTypesNames:RuleConfig<NamingConfig> option
-      exceptionNames:RuleConfig<NamingConfig> option
-      typeNames:RuleConfig<NamingConfig> option
-      recordFieldNames:RuleConfig<NamingConfig> option
-      enumCasesNames:RuleConfig<NamingConfig> option
-      unionCasesNames:RuleConfig<NamingConfig> option
-      moduleNames:RuleConfig<NamingConfig> option
-      literalNames:RuleConfig<NamingConfig> option
-      namespaceNames:RuleConfig<NamingConfig> option
-      memberNames:RuleConfig<NamingConfig> option
-      parameterNames:RuleConfig<NamingConfig> option
-      measureTypeNames:RuleConfig<NamingConfig> option
-      activePatternNames:RuleConfig<NamingConfig> option
-      publicValuesNames:RuleConfig<NamingConfig> option
-      nonPublicValuesNames:RuleConfig<NamingConfig> option
-      privateValuesNames:RuleConfig<NamingConfig> option
-      internalValuesNames:RuleConfig<NamingConfig> option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.interfaceNames |> Option.bind (constructRuleWithConfig InterfaceNames.rule) |> Option.toArray
-                this.genericTypesNames |> Option.bind (constructRuleWithConfig GenericTypesNames.rule) |> Option.toArray
-                this.exceptionNames |> Option.bind (constructRuleWithConfig ExceptionNames.rule) |> Option.toArray
-                this.typeNames |> Option.bind (constructRuleWithConfig TypeNames.rule) |> Option.toArray
-                this.recordFieldNames |> Option.bind (constructRuleWithConfig RecordFieldNames.rule) |> Option.toArray
-                this.enumCasesNames |> Option.bind (constructRuleWithConfig EnumCasesNames.rule) |> Option.toArray
-                this.unionCasesNames |> Option.bind (constructRuleWithConfig UnionCasesNames.rule) |> Option.toArray
-                this.moduleNames |> Option.bind (constructRuleWithConfig ModuleNames.rule) |> Option.toArray
-                this.literalNames |> Option.bind (constructRuleWithConfig LiteralNames.rule) |> Option.toArray
-                this.namespaceNames |> Option.bind (constructRuleWithConfig NamespaceNames.rule) |> Option.toArray
-                this.memberNames |> Option.bind (constructRuleWithConfig MemberNames.rule) |> Option.toArray
-                this.parameterNames |> Option.bind (constructRuleWithConfig ParameterNames.rule) |> Option.toArray
-                this.measureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule) |> Option.toArray
-                this.activePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule) |> Option.toArray
-                this.publicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule) |> Option.toArray
-                this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule) |> Option.toArray
-                this.nonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule) |> Option.toArray
-                this.privateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule) |> Option.toArray
-                this.internalValuesNames|> Option.bind (constructRuleWithConfig InternalValuesNames.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type NumberOfItemsConfig =
-    { maxNumberOfItemsInTuple:RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfFunctionParameters:RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfMembers:RuleConfig<Helper.NumberOfItems.Config> option
-      maxNumberOfBooleanOperatorsInCondition:RuleConfig<Helper.NumberOfItems.Config> option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.maxNumberOfItemsInTuple |> Option.bind (constructRuleWithConfig MaxNumberOfItemsInTuple.rule) |> Option.toArray
-                this.maxNumberOfFunctionParameters |> Option.bind (constructRuleWithConfig MaxNumberOfFunctionParameters.rule) |> Option.toArray
-                this.maxNumberOfMembers |> Option.bind (constructRuleWithConfig MaxNumberOfMembers.rule) |> Option.toArray
-                this.maxNumberOfBooleanOperatorsInCondition |> Option.bind (constructRuleWithConfig MaxNumberOfBooleanOperatorsInCondition.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type BindingConfig =
-    { favourIgnoreOverLetWild:EnabledConfig option
-      wildcardNamedWithAsPattern:EnabledConfig option
-      uselessBinding:EnabledConfig option
-      tupleOfWildcards:EnabledConfig option
-      favourAsKeyword:EnabledConfig option
-      favourTypedIgnore:EnabledConfig option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.favourIgnoreOverLetWild |> Option.bind (constructRuleIfEnabled FavourIgnoreOverLetWild.rule) |> Option.toArray
-                this.favourTypedIgnore |> Option.bind (constructRuleIfEnabled FavourTypedIgnore.rule) |> Option.toArray
-                this.wildcardNamedWithAsPattern |> Option.bind (constructRuleIfEnabled WildcardNamedWithAsPattern.rule) |> Option.toArray
-                this.uselessBinding |> Option.bind (constructRuleIfEnabled UselessBinding.rule) |> Option.toArray
-                this.tupleOfWildcards |> Option.bind (constructRuleIfEnabled TupleOfWildcards.rule) |> Option.toArray
-                this.favourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type ConventionsConfig =
-    { recursiveAsyncFunction:EnabledConfig option
-      avoidTooShortNames:EnabledConfig option
-      indexerAccessorStyleConsistency: RuleConfig<IndexerAccessorStyleConsistency.Config> option
-      redundantNewKeyword:EnabledConfig option
-      favourStaticEmptyFields:EnabledConfig option
-      asyncExceptionWithoutReturn:EnabledConfig option
-      unneededRecKeyword:EnabledConfig option
-      favourNonMutablePropertyInitialization:EnabledConfig option
-      nestedStatements:RuleConfig<NestedStatements.Config> option
-      cyclomaticComplexity:RuleConfig<CyclomaticComplexity.Config> option
-      reimplementsFunction:EnabledConfig option
-      canBeReplacedWithComposition:EnabledConfig option
-      avoidSinglePipeOperator:EnabledConfig option
-      raiseWithTooManyArgs:RaiseWithTooManyArgsConfig option
-      sourceLength:SourceLengthConfig option
-      naming:NamesConfig option
-      numberOfItems:NumberOfItemsConfig option
-      binding:BindingConfig option
-      favourReRaise:EnabledConfig option
-      favourConsistentThis:RuleConfig<FavourConsistentThis.Config> option
-      suggestUseAutoProperty:EnabledConfig option
-      usedUnderscorePrefixedElements:EnabledConfig option
-      ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option}
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.recursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule) |> Option.toArray
-                this.avoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule) |> Option.toArray
-                this.redundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule) |> Option.toArray
-                this.favourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule) |> Option.toArray
-                this.favourReRaise |> Option.bind (constructRuleIfEnabled FavourReRaise.rule) |> Option.toArray
-                this.favourStaticEmptyFields |> Option.bind (constructRuleIfEnabled FavourStaticEmptyFields.rule) |> Option.toArray
-                this.asyncExceptionWithoutReturn |> Option.bind (constructRuleIfEnabled AsyncExceptionWithoutReturn.rule) |> Option.toArray
-                this.unneededRecKeyword |> Option.bind (constructRuleIfEnabled UnneededRecKeyword.rule) |> Option.toArray
-                this.nestedStatements |> Option.bind (constructRuleWithConfig NestedStatements.rule) |> Option.toArray
-                this.favourConsistentThis |> Option.bind (constructRuleWithConfig FavourConsistentThis.rule) |> Option.toArray
-                this.cyclomaticComplexity |> Option.bind (constructRuleWithConfig CyclomaticComplexity.rule) |> Option.toArray
-                this.reimplementsFunction |> Option.bind (constructRuleIfEnabled ReimplementsFunction.rule) |> Option.toArray
-                this.canBeReplacedWithComposition |> Option.bind (constructRuleIfEnabled CanBeReplacedWithComposition.rule) |> Option.toArray
-                this.avoidSinglePipeOperator|> Option.bind (constructRuleIfEnabled AvoidSinglePipeOperator.rule) |> Option.toArray
-                this.usedUnderscorePrefixedElements |> Option.bind (constructRuleIfEnabled UsedUnderscorePrefixedElements.rule) |> Option.toArray
-                this.raiseWithTooManyArgs |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.sourceLength |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.naming |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.numberOfItems |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.binding |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
-                this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
-                this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
-            |]
-
-[<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-type TypographyConfig =
-    { indentation:EnabledConfig option
-      maxCharactersOnLine:RuleConfig<MaxCharactersOnLine.Config> option
-      trailingWhitespaceOnLine:RuleConfig<TrailingWhitespaceOnLine.Config> option
-      maxLinesInFile:RuleConfig<MaxLinesInFile.Config> option
-      trailingNewLineInFile:EnabledConfig option
-      noTabCharacters:EnabledConfig option }
-with
-    member this.Flatten() =
-        Array.concat
-            [|
-                this.indentation |> Option.bind (constructRuleIfEnabled Indentation.rule) |> Option.toArray
-                this.maxCharactersOnLine |> Option.bind (constructRuleWithConfig MaxCharactersOnLine.rule) |> Option.toArray
-                this.trailingWhitespaceOnLine |> Option.bind (constructRuleWithConfig TrailingWhitespaceOnLine.rule) |> Option.toArray
-                this.maxLinesInFile |> Option.bind (constructRuleWithConfig MaxLinesInFile.rule) |> Option.toArray
-                this.trailingNewLineInFile |> Option.bind (constructRuleIfEnabled TrailingNewLineInFile.rule) |> Option.toArray
-                this.noTabCharacters |> Option.bind (constructRuleIfEnabled NoTabCharacters.rule) |> Option.toArray
-            |]
-
-// </Deprecated>
-
 let private getOrEmptyList hints = Option.defaultValue Array.empty hints
 
 type HintConfig = {
-    add:string [] option
-    ignore:string [] option
+    Add:string [] option
+    Ignore:string [] option
 }
 
 type GlobalConfig = {
-    numIndentationSpaces:int option
+    NumIndentationSpaces:int option
 }
 
 type Configuration =
     { Global:GlobalConfig option
 
-      // Deprecated grouped configs. TODO: remove in next major release
-
-      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-      /// DEPRECATED, provide formatting rules at root level.
-      formatting:FormattingConfig option
-      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-      /// DEPRECATED, provide conventions rules at root level.
-      conventions:ConventionsConfig option
-      /// DEPRECATED, provide typography rules at root level.
-      [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
-      typography:TypographyConfig option
-
-      // </Deprecated>
-
-      ignoreFiles:string [] option
+      IgnoreFiles:string [] option
       Hints:HintConfig option
       TypedItemSpacing:RuleConfig<TypedItemSpacing.Config> option
       TypePrefixing:RuleConfig<TypePrefixing.Config> option
@@ -471,7 +183,7 @@ type Configuration =
       PatternMatchClauseIndentation:RuleConfig<PatternMatchClauseIndentation.Config> option
       PatternMatchExpressionIndentation:EnabledConfig option
       RecursiveAsyncFunction:EnabledConfig option
-      AvoidTooShortNames:EnabledConfig option
+      AvoidTooShortNaming:EnabledConfig option
       IndexerAccessorStyleConsistency:RuleConfig<IndexerAccessorStyleConsistency.Config> option
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
@@ -520,7 +232,6 @@ type Configuration =
       MeasureTypeNames:RuleConfig<NamingConfig> option
       ActivePatternNames:RuleConfig<NamingConfig> option
       PublicValuesNames:RuleConfig<NamingConfig> option
-      NonPublicValuesNames:RuleConfig<NamingConfig> option
       PrivateValuesNames:RuleConfig<NamingConfig> option
       InternalValuesNames:RuleConfig<NamingConfig> option
       UnnestedFunctionNames:RuleConfig<NamingConfig> option
@@ -549,14 +260,8 @@ type Configuration =
 with
     static member Zero = {
         Global = None
-        ignoreFiles = None
+        IgnoreFiles = None
         Hints = None
-
-        // Deprecated grouped configs. TODO: remove in next major release
-        formatting = None
-        conventions = None
-        typography = None
-        // </Deprecated>
 
         // Configs for rules.
         TypedItemSpacing = None
@@ -572,7 +277,7 @@ with
         PatternMatchClauseIndentation = None
         PatternMatchExpressionIndentation = None
         RecursiveAsyncFunction = None
-        AvoidTooShortNames = None
+        AvoidTooShortNaming = None
         IndexerAccessorStyleConsistency = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
@@ -621,7 +326,6 @@ with
         MeasureTypeNames = None
         ActivePatternNames = None
         PublicValuesNames = None
-        NonPublicValuesNames = None
         PrivateValuesNames = None
         InternalValuesNames = None
         UnnestedFunctionNames = None
@@ -648,8 +352,6 @@ with
         InterpolatedStringWithNoSubstitution = None
         FavourSingleton = None
     }
-
-// fsharplint:enable RecordFieldNames
 
 /// Tries to parse the provided config text.
 let parseConfig (configText:string) =
@@ -687,12 +389,12 @@ type LoadedRules =
     { GlobalConfig:Rules.GlobalRuleConfig
       AstNodeRules:RuleMetadata<AstNodeRuleConfig> []
       LineRules:LineRules
-      DeprecatedRules:Rule [] }
+    }
 
 let getGlobalConfig (globalConfig:GlobalConfig option) =
     globalConfig
     |> Option.map (fun globalConfig -> {
-        Rules.GlobalRuleConfig.numIndentationSpaces = globalConfig.numIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.numIndentationSpaces
+        Rules.GlobalRuleConfig.NumIndentationSpaces = globalConfig.NumIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.NumIndentationSpaces
     }) |> Option.defaultValue Rules.GlobalRuleConfig.Default
 
 let private parseHints (hints:string []) =
@@ -708,57 +410,14 @@ let private parseHints (hints:string []) =
     |> Array.toList
     |> MergeSyntaxTrees.mergeHints
 
-let findDeprecation config deprecatedAllRules allRules =
-    if config.NonPublicValuesNames.IsSome &&
-        (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
-        failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
-
-    let astNodeRules = ResizeArray()
-    let lineRules = ResizeArray()
-    let mutable indentationRule = None
-    let mutable noTabCharactersRule = None
-    Array.append allRules deprecatedAllRules
-    |> Array.distinctBy (function // Discard any deprecated rules which were define in a non-deprecated form.
-        | Rule.AstNodeRule rule -> rule.Identifier
-        | Rule.LineRule rule -> rule.Identifier
-        | Rule.IndentationRule rule -> rule.Identifier
-        | Rule.NoTabCharactersRule rule -> rule.Identifier)
-    |> Array.iter (function
-        | AstNodeRule rule -> astNodeRules.Add rule
-        | LineRule rule -> lineRules.Add(rule)
-        | IndentationRule rule -> indentationRule <- Some rule
-        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
-
-    {
-        LoadedRules.GlobalConfig = getGlobalConfig config.Global
-        DeprecatedRules = deprecatedAllRules
-        AstNodeRules = astNodeRules.ToArray()
-        LineRules =
-            {
-                GenericLineRules = lineRules.ToArray()
-                IndentationRule = indentationRule
-                NoTabCharactersRule = noTabCharactersRule
-            }
-    }
-
 // fsharplint:disable MaxLinesInFunction
 let flattenConfig (config:Configuration) =
-    let deprecatedAllRules =
-        Array.concat
-            [|
-                // Deprecated grouped configs. TODO: remove in next major release
-                config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                // </Deprecated>
-
-                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
-            |]
-
     let allRules =
         Array.choose
             id
             [|
+                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.Add) })
+
                 config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
                 config.TypePrefixing |> Option.bind (constructTypePrefixingRuleWithConfig TypePrefixing.rule)
                 config.UnionDefinitionIndentation |> Option.bind (constructRuleIfEnabled UnionDefinitionIndentation.rule)
@@ -772,7 +431,7 @@ let flattenConfig (config:Configuration) =
                 config.PatternMatchClauseIndentation |> Option.bind (constructRuleWithConfig PatternMatchClauseIndentation.rule)
                 config.PatternMatchExpressionIndentation |> Option.bind (constructRuleIfEnabled PatternMatchExpressionIndentation.rule)
                 config.RecursiveAsyncFunction |> Option.bind (constructRuleIfEnabled RecursiveAsyncFunction.rule)
-                config.AvoidTooShortNames |> Option.bind (constructRuleIfEnabled AvoidTooShortNames.rule)
+                config.AvoidTooShortNaming |> Option.bind (constructRuleIfEnabled AvoidTooShortNaming.rule)
                 config.IndexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule)
                 config.RedundantNewKeyword |> Option.bind (constructRuleIfEnabled RedundantNewKeyword.rule)
                 config.FavourNonMutablePropertyInitialization |> Option.bind (constructRuleIfEnabled FavourNonMutablePropertyInitialization.rule)
@@ -821,8 +480,6 @@ let flattenConfig (config:Configuration) =
                 config.MeasureTypeNames |> Option.bind (constructRuleWithConfig MeasureTypeNames.rule)
                 config.ActivePatternNames |> Option.bind (constructRuleWithConfig ActivePatternNames.rule)
                 config.PublicValuesNames |> Option.bind (constructRuleWithConfig PublicValuesNames.rule)
-                config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
-                config.NonPublicValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
                 config.PrivateValuesNames |> Option.bind (constructRuleWithConfig PrivateValuesNames.rule)
                 config.InternalValuesNames |> Option.bind (constructRuleWithConfig InternalValuesNames.rule)
                 config.UnnestedFunctionNames |> Option.bind (constructRuleWithConfig UnnestedFunctionNames.rule)
@@ -850,4 +507,26 @@ let flattenConfig (config:Configuration) =
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
             |]
 
-    findDeprecation config deprecatedAllRules allRules
+    let astNodeRules = ResizeArray()
+    let lineRules = ResizeArray()
+    let mutable indentationRule = None
+    let mutable noTabCharactersRule = None
+
+    allRules
+    |> Array.iter (function
+        | AstNodeRule rule -> astNodeRules.Add rule
+        | LineRule rule -> lineRules.Add(rule)
+        | IndentationRule rule -> indentationRule <- Some rule
+        | NoTabCharactersRule rule -> noTabCharactersRule <- Some rule)
+
+    {
+        LoadedRules.GlobalConfig = getGlobalConfig config.Global
+        AstNodeRules = astNodeRules.ToArray()
+        LineRules =
+            {
+                GenericLineRules = lineRules.ToArray()
+                IndentationRule = indentationRule
+                NoTabCharactersRule = noTabCharactersRule
+            }
+    }
+// fsharplint:enable MaxLinesInFunction

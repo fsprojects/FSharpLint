@@ -1,4 +1,4 @@
-module FSharpLint.Rules.AvoidTooShortNames
+module FSharpLint.Rules.AvoidTooShortNaming
 
 open System
 open FSharp.Compiler.Syntax
@@ -15,7 +15,7 @@ let private checkIdentifierPart (identifier:Ident) (idText:string) =
     let formatError errorName =
         String.Format(Resources.GetString errorName, idText)
 
-    "RulesAvoidTooShortNamesError" |> formatError |> Array.singleton
+    "RulesAvoidTooShortNamingError" |> formatError |> Array.singleton
 
 let private checkIdentifier (identifier:Ident) (idText:string) =
     if isIdentifierTooShort idText then
@@ -105,8 +105,8 @@ let runner (args:AstNodeRuleParams) =
 let rule =
     AstNodeRule
         {
-            Name = "AvoidTooShortNames"
-            Identifier = Identifiers.AvoidTooShortNames
+            Name = "AvoidTooShortNaming"
+            Identifier = Identifiers.AvoidTooShortNaming
             RuleConfig =
                 {
                     AstNodeRuleConfig.Runner = runner

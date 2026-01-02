@@ -19,7 +19,7 @@ let check (config:Config) (args:AstNodeRuleParams) matchExprRange (clauses:SynMa
         let processClause (firstClause: SynMatchClause) =
             let clauseIndentation = ExpressionUtilities.getLeadingSpaces firstClause.Range args.FileContent
             if isLambda then
-                if clauseIndentation <> matchStartIndentation + args.GlobalConfig.numIndentationSpaces then
+                if clauseIndentation <> matchStartIndentation + args.GlobalConfig.NumIndentationSpaces then
                     Some
                         {
                             Range = firstClause.Range
