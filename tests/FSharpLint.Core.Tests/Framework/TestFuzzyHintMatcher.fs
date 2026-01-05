@@ -12,11 +12,11 @@ open FParsec
 open TestUtils
 
 let possibleMatches (syntaxArray:AbstractSyntaxArray.Node []) (hintTrie:Edges) notify =
-    for i = 0 to syntaxArray.Length - 1 do
-        let node = syntaxArray.[i]
+    for nodeIndex = 0 to syntaxArray.Length - 1 do
+        let node = syntaxArray.[nodeIndex]
 
         match hintTrie.Lookup.TryGetValue node.Hashcode with
-        | true, trie -> checkTrie (i + 1) trie syntaxArray (Dictionary<_, _>()) (notify i)
+        | true, trie -> checkTrie (nodeIndex + 1) trie syntaxArray (Dictionary<_, _>()) (notify nodeIndex)
         | false, _ -> ()
 
 [<TestFixture>]

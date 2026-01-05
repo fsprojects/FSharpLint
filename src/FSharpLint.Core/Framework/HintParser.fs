@@ -579,9 +579,9 @@ module HintParser =
             addInfixOperator "<"  7 Associativity.Left
             addInfixOperator ">"  7 Associativity.Left
             addInfixOperator "="  7 Associativity.Left
-            for i in Operators.opchars do
-                if i <> '&' then
-                    addInfixOperator ("&" + i.ToString())  7 Associativity.Left
+            for opChar in Operators.opchars do
+                if opChar <> '&' then
+                    addInfixOperator ("&" + opChar.ToString())  7 Associativity.Left
 
             addInfixOperator "&&&"  8 Associativity.Left
             addInfixOperator "|||"  8 Associativity.Left
