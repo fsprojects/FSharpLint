@@ -183,35 +183,35 @@ module Program =
 
         this.AssertNoWarnings()
 (*
-    // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers
+    // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers in .Core/.../NoPartialFunctions.fs
 
     [<Test>]
     member this.``Error for methods Foo.Bar.Instance.Baz``() =
-        this.Parse("
+        this.Parse("""
 namespace Foo
 type Bar() =
-    member this.Baz = 'x'
+    member this.Baz = "x"
     static member Instance = Bar()
 namespace FooBar
 module Program =
-    let bar = '212'
+    let bar = "212"
     Console.WriteLine bar
     let foo = None
     printf foo.ToString()
-    System.Console.WriteLine Foo.Bar.Instance.Baz")
+    System.Console.WriteLine Foo.Bar.Instance.Baz""")
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
     member this.``Error for methods Foo.Bar.Instance.Baz 2``() =
-        this.Parse("
+        this.Parse("""
 namespace Foo
 type Bar() =
-    member this.Baz = 'x'
+    member this.Baz = "x"
     static member Instance = Bar()
 namespace FooBar
 module Program =
-    System.Console.WriteLine Foo.Bar.Instance.Baz")
+    System.Console.WriteLine Foo.Bar.Instance.Baz""")
 
         Assert.IsTrue this.ErrorsExist
         this.AssertErrorWithMessageExists("Consider using pattern matching instead of partial function/method 'Foo.Bar.Baz'.")
