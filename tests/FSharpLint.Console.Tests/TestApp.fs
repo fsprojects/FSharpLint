@@ -7,8 +7,8 @@ open NUnit.Framework
 let getErrorsFromOutput (output:string) =
     let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
 
-    set [ for i in 1..splitOutput.Length - 1 do
-            if splitOutput.[i].StartsWith "Error" then yield splitOutput.[i - 1] ]
+    set [ for index in 1..splitOutput.Length - 1 do
+            if splitOutput.[index].StartsWith "Error" then yield splitOutput.[index - 1] ]
 
 type TemporaryFile(fileContent : string, extension) =
     let filename = Path.ChangeExtension(Path.GetTempFileName(), extension)

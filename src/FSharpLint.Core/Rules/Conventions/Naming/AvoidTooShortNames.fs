@@ -61,6 +61,10 @@ let private getIdentifiers (args:AstNodeRuleParams) =
         match lambdaIdent with
         | Some ident -> Array.singleton (ident, ident.idText, None)
         | None -> Array.empty
+    | AstNode.Expression(SynExpr.ForEach(_, _, _, _, pat, _, _, _)) ->
+        getParameterWithBelowMinimumLength (List.singleton pat)
+    | AstNode.Expression(SynExpr.For(_, _, identifier, _, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
+        Array.singleton (identifier, identifier.idText, None)
     | AstNode.Match(SynMatchClause(namePattern, _, _, _, _, _)) ->
         getParameterWithBelowMinimumLength [namePattern]
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _, _)) ->
