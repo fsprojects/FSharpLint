@@ -384,8 +384,6 @@ module Lint =
     type ConfigurationParam =
         | Configuration of Configuration
         | FromFile of configPath:string
-        /// Partial config. Contains only differences from default config.
-        | FromFilePartial of configPath:string
         /// Tries to load the config from file `fsharplint.json`.
         /// If this file doesn't exist or is invalid, falls back to the default configuration.
         | Default
@@ -438,12 +436,6 @@ module Lint =
         match configParam with
         | Configuration config -> Ok config
         | FromFile filePath ->
-            try
-                Configuration.loadConfig filePath
-                |> Ok
-            with
-            | ex -> Error (string ex)
-        | FromFilePartial filePath ->
             try
                 match getDefault () with
                 | Ok defaultConfig ->
