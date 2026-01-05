@@ -259,8 +259,6 @@ module Ast =
             add <| Pattern lhs
             add <| Pattern rhs
 
-
-    // fsharplint:disable FL0025
     let inline private expressionChildren (node: SynExpr) (add: AstNode -> unit) =
         let addMany = List.iter add
 
@@ -280,6 +278,8 @@ module Ast =
         | SynExpr.Lazy(expression, _)
         | SynExpr.TraitCall(_, _, expression, _)
         | SynExpr.YieldOrReturn(_, expression, _, _)
+        | SynExpr.AnonRecd(_, Some (expression, _), _, _, _) ->
+        | SynExpr.IndexFromEnd(expression, _) ->
         | SynExpr.YieldOrReturnFrom(_, expression, _, _) -> add <| Expression expression
         | SynExpr.SequentialOrImplicitYield(_, expression1, expression2, ifNotExpression, _) ->
             addMany [Expression expression1; Expression expression2; Expression ifNotExpression]
@@ -291,17 +291,13 @@ module Ast =
         | SynExpr.While(_, expression, expression1, _)
         | SynExpr.TryFinally(expression, expression1, _, _, _, _)
         | SynExpr.Set(expression, expression1, _)
-        | SynExpr.DotSet(expression, _, expression1, _) ->
-            addMany [Expression expression1; Expression expression]
+        | SynExpr.DotSet(expression1, _, expression2, _) ->
+            addMany [Expression expression1; Expression expression2]
         | SynExpr.Typed(expression, synType, _) ->
             addMany [Type synType; Expression expression]
         | SynExpr.Tuple(_, expressions, _, _)
         | SynExpr.ArrayOrList(_, expressions, _) -> List.revIter (Expression >> add) expressions
         | SynExpr.Record(_, Some(expr, _), _, _) -> add <| Expression expr
-        | SynExpr.Record(_, None, _, _) -> ()
-        | SynExpr.AnonRecd(_, Some (expr,_), _, _, _) ->
-            add <| Expression expr
-        | SynExpr.AnonRecd(_, None, _, _, _) -> ()
         | SynExpr.ObjExpr(synType, _, _, bindings, _, _, _, _) ->
             List.revIter (Binding >> add) bindings
             add <| Type synType
@@ -370,23 +366,21 @@ module Ast =
         | SynExpr.DotLambda(_)
         | SynExpr.App(_)
         | SynExpr.Fixed(_) -> ()
-        *)
+        | SynExpr.Record(_, None, _, _) -> ()
+        | SynExpr.AnonRecd(_, None, _, _, _) -> ()
         | SynExpr.Typar(_) -> ()
-        | SynExpr.WhileBang(_, expression, expression1, _) ->
+        *)
+        | SynExpr.WhileBang(_, expression1, expression2, _) ->
             add <| Expression expression1
-            add <| Expression expression
+            add <| Expression expression2
         | SynExpr.DebugPoint(_debugPoint, _, innerExpr) -> 
             add <| Expression innerExpr
         | SynExpr.Dynamic(funcExpr, _, argExpr, _) ->
             addMany [Expression funcExpr; Expression argExpr]
-        | SynExpr.IndexFromEnd(expr, _) -> 
-            add <| Expression expr
         | SynExpr.IndexRange(expr1, _, expr2, _, _, _) ->
             expr1 |> Option.iter (Expression >> add)
             expr2 |> Option.iter (Expression >> add)
         | _ -> ()
-
-    // fsharplint:enable
 
     let inline private typeSimpleRepresentationChildren node add =
         match node with
