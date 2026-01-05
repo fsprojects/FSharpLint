@@ -64,7 +64,7 @@ type TestConsoleApplication() =
     member _.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
         let fileContent = """
         {
-            "InterfaceNames": {
+            "interfaceNames": {
                 "enabled": false
             }
         }
