@@ -1,0 +1,8 @@
+{
+    "typePrefixing": {
+        "enabled": true,
+        "config": {
+            "mode": "Always"
+        }
+    }
+}
