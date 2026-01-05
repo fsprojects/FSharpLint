@@ -24,7 +24,7 @@ type StandardOutput () =
             else
                 errorLine
                 |> Seq.mapi (fun index _ -> if index = range.StartColumn then "^" else " ")
-                |> Seq.reduce (+)
+                |> Seq.fold (+) String.Empty
         $"{getErrorMessage range}{Environment.NewLine}{errorLine}{Environment.NewLine}{highlightColumnLine}"
 
     let writeLine (str:string) (color:ConsoleColor) (writer:IO.TextWriter) =

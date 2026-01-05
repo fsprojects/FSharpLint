@@ -134,7 +134,16 @@ module IgnoreFiles =
 
 // Non-standard record field naming for config serialization.
 // fsharplint:disable RecordFieldNames
-type RuleConfig<'Config> = {
+type RuleConfig<'Config
+
+    // Workaround to FSharp Compiler Service bug (see https://github.com/dotnet/fsharp/issues/19118).
+    // The bug is fixed already (see PR https://github.com/dotnet/fsharp/pull/19123 and commit
+    // https://github.com/dotnet/fsharp/commit/89d788641914c5d0b87fddfa11f4df0b5cfaa73d) and might be available in
+    // the next version of FCS.
+    // The current latest version of FCS (43.10.101) as of writing this comment does not contain that fix.
+    when 'Config: comparison
+
+> = {
     Enabled:bool
     Config:'Config option
 }
@@ -667,8 +676,10 @@ let loadConfig (configPath:string) =
 /// This function loads and returns this default configuration.
 let defaultConfiguration =
     let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
-    let resourceName = Assembly.GetExecutingAssembly().GetManifestResourceNames()
-                       |> Seq.find (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+    let resourceName = 
+        Assembly.GetExecutingAssembly().GetManifestResourceNames()
+        |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+        |> Option.defaultWith (fun () -> failwith "Could not get resource name")
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
     | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
