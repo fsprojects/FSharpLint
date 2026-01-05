@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.26.10] - 2025-12-30
 
 - AvoidSinglePipeOperator: fix false positive, allowing single pipe operator with multiline argument #808 [@webwarrior-ws]
-- Core: Added [<Obsolete>] attribs and more comments around the fragments of some deprecated APIs #807 [@knocte]
+- Core: Added `[<Obsolete>]` attribs and more comments around the fragments of some deprecated APIs #807 [@knocte]
 - Tests: added 2 extra unit tests for RedundantNewKeyword rule #806 [@jp-fournier-dev, @webwarrior-ws]
 - FavourStaticEmptyFields: fix rule's false negatives #792 #798 [@webwarrior-ws]
 - Fix missing EOL in msbuild output #799 #804 [@knocte]
 - Add one more hint (conditionless reduction) #795 [@knocte]
 - FavourSingleton: new rule to recommend .Singleton API instead of single-item lists/arrays #526 #803 [@su8898, @parhamsaremi, @knocte]
+- CI: use fetch-depth:0 for release job #788 [@knocte]
+- CI: cosmetic, sync list-sdks step & add name #791 [@knocte]
 - RedundantNewKeyword: fix false positive when using 'use' keyword #797 [@webwarrior-ws]
 - PublicValuesNames: fix false positive for nested functions, that are essentially non-publicly accessible #796 [@webwarrior-ws]
 - IndexerAccessorStyle: new rule to allow consistency across the indexer style used (OCaml or CSharp) #532 #794 [@parhamsaremi, @knocte, @webwarrior-ws]
