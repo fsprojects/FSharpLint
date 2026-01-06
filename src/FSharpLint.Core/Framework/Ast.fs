@@ -278,8 +278,8 @@ module Ast =
         | SynExpr.Lazy(expression, _)
         | SynExpr.TraitCall(_, _, expression, _)
         | SynExpr.YieldOrReturn(_, expression, _, _)
-        | SynExpr.AnonRecd(_, Some (expression, _), _, _, _) ->
-        | SynExpr.IndexFromEnd(expression, _) ->
+        | SynExpr.AnonRecd(_, Some (expression, _), _, _, _)
+        | SynExpr.IndexFromEnd(expression, _)
         | SynExpr.YieldOrReturnFrom(_, expression, _, _) -> add <| Expression expression
         | SynExpr.SequentialOrImplicitYield(_, expression1, expression2, ifNotExpression, _) ->
             addMany [Expression expression1; Expression expression2; Expression ifNotExpression]
@@ -291,8 +291,8 @@ module Ast =
         | SynExpr.While(_, expression, expression1, _)
         | SynExpr.TryFinally(expression, expression1, _, _, _, _)
         | SynExpr.Set(expression, expression1, _)
-        | SynExpr.DotSet(expression1, _, expression2, _) ->
-            addMany [Expression expression1; Expression expression2]
+        | SynExpr.DotSet(expression, _, expression1, _) ->
+            addMany [Expression expression1; Expression expression]
         | SynExpr.Typed(expression, synType, _) ->
             addMany [Type synType; Expression expression]
         | SynExpr.Tuple(_, expressions, _, _)
