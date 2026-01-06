@@ -67,11 +67,20 @@ let areThereTestsInSameFileOrProject (nodes: array<AbstractSyntaxArray.Node>) (m
             |> Seq.exists (fun name -> testClassAttributes |> List.contains name)
         | _ -> false
     
-    let isDeclarationOfTestClass declaration =
+    let containsTests declaration =
         match declaration with
-        | FSharpImplementationFileDeclaration.Entity(entity, _) ->
+        | FSharpImplementationFileDeclaration.Entity(entity, declarations) when entity.IsClass ->
             entity.Attributes
             |> Seq.exists (fun attr -> testClassAttributes |> List.contains attr.AttributeType.DisplayName)
+            ||
+            declarations
+            |> Seq.exists
+                (fun memberDecl ->
+                    match memberDecl with
+                    | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(method, _, _) when method.IsMethod ->
+                        method.Attributes
+                        |> Seq.exists (fun attr -> testMethodAttributes |> List.contains attr.AttributeType.DisplayName)
+                    | _ -> false)
         | _ -> false
 
     match maybeProjectCheckResults with
@@ -79,7 +88,7 @@ let areThereTestsInSameFileOrProject (nodes: array<AbstractSyntaxArray.Node>) (m
         projectCheckResults.AssemblyContents.ImplementationFiles
         |> Seq.exists (fun implFile -> 
             implFile.Declarations
-            |> Seq.exists isDeclarationOfTestClass
+            |> Seq.exists containsTests
         )
     | None ->
         nodes |> Array.exists (fun node -> isTestMethodOrClass node.Actual)
