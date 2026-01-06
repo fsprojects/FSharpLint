@@ -3,6 +3,7 @@ module FSharpLint.Console.Tests.TestApp
 open System
 open System.IO
 open NUnit.Framework
+open FSharpLint.Console.Program
 
 let getErrorsFromOutput (output:string) =
     let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
@@ -44,7 +45,7 @@ type TestConsoleApplication() =
 
         let (returnCode, errors) = main [| "lint"; input.FileName |]
 
-        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
     [<Test>]
@@ -57,7 +58,7 @@ type TestConsoleApplication() =
 
         let (returnCode, errors) = main [| "lint"; input |]
 
-        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
     [<Test>]
@@ -79,7 +80,7 @@ type TestConsoleApplication() =
 
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
-        Assert.AreEqual(0, returnCode)
+        Assert.AreEqual(int ExitCode.Success, returnCode)
         Assert.AreEqual(Set.empty<string>, errors)
 
     [<Test>]
@@ -93,7 +94,7 @@ type TestConsoleApplication() =
 
         let (returnCode, errors) = main [| "lint"; input |]
 
-        Assert.AreEqual(0, returnCode)
+        Assert.AreEqual(int ExitCode.Success, returnCode)
         Assert.AreEqual(Set.empty<string>, errors)
 
     [<Test>]
@@ -115,10 +116,8 @@ type TestConsoleApplication() =
 
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
-        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
-
-open FSharpLint.Console.Program
 
 [<TestFixture>]
 type TestFileTypeInference() =

@@ -20,6 +20,10 @@ type internal FileType =
     | Source = 4
     | Wildcard = 5
 
+type ExitCode =
+    | Failure = -1
+    | Success = 0
+
 // Allowing underscores in union case names for proper Argu command line option formatting.
 // fsharplint:disable UnionCasesNames
 type private ToolArgs =
@@ -113,9 +117,71 @@ let internal inferFileType (target:string) =
     else
         FileType.Source
 
-let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
-    let mutable exitCode = 0
+let private lint
+    (lintArgs: ParseResults<LintArgs>)
+    (output: Output.IOutput)
+    (toolsPath:Ionide.ProjInfo.Types.ToolsPath)
+    : ExitCode =
+    let mutable exitCode = ExitCode.Success
 
+    let handleError (str:string) =
+        output.WriteError str
+        exitCode <- ExitCode.Failure
+
+    let handleLintResult = function
+        | LintResult.Success(warnings) ->
+            String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
+            |> output.WriteInfo
+            if not (List.isEmpty warnings) then
+                exitCode <- ExitCode.Failure
+        | LintResult.Failure(failure) ->
+            handleError failure.Description
+
+    let lintConfig = lintArgs.TryGetResult Lint_Config
+
+    let configParam =
+        match lintConfig with
+        | Some configPath -> FromFile configPath
+        | None -> Default
+
+    let lintParams =
+        {
+            CancellationToken = None
+            ReceivedWarning = Some output.WriteWarning
+            Configuration = configParam
+            ReportLinterProgress = Some (parserProgress output)
+        }
+
+    let target = lintArgs.GetResult Target
+    let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+
+    try
+        let lintResult =
+            match fileType with
+            | FileType.File -> Lint.lintFile lintParams target
+            | FileType.Source -> Lint.lintSource lintParams target
+            | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
+            | FileType.Wildcard ->
+                output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
+                let files = expandWildcard target
+                if List.isEmpty files then
+                    output.WriteInfo $"No files matching pattern '%s{target}' were found."
+                    LintResult.Success List.empty
+                else
+                    output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
+                    Lint.lintFiles lintParams files
+            | FileType.Project
+            | _ -> Lint.lintProject lintParams target toolsPath
+        handleLintResult lintResult
+    with
+    | exn ->
+        let target = if fileType = FileType.Source then "source" else target
+        handleError
+            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
+
+    exitCode
+
+let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
     let output =
         match arguments.TryGetResult Format with
         | Some OutputFormat.MSBuild -> Output.MSBuildOutput() :> Output.IOutput
@@ -134,64 +200,11 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
         | None ->
             failwith "Error: unable to get version"
 
-    let handleError (str:string) =
-        output.WriteError str
-        exitCode <- -1
-
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
-
-        let handleLintResult = function
-            | LintResult.Success(warnings) ->
-                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
-                |> output.WriteInfo
-                if not (List.isEmpty warnings) then exitCode <- -1
-            | LintResult.Failure(failure) ->
-                handleError failure.Description
-
-        let lintConfig = lintArgs.TryGetResult Lint_Config
-
-        let configParam =
-            match lintConfig with
-            | Some configPath -> FromFile configPath
-            | None -> Default
-
-
-        let lintParams =
-            { CancellationToken = None
-              ReceivedWarning = Some output.WriteWarning
-              Configuration = configParam
-              ReportLinterProgress = Some (parserProgress output) }
-
-        let target = lintArgs.GetResult Target
-        let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
-
-        try
-            let lintResult =
-                match fileType with
-                | FileType.File -> Lint.lintFile lintParams target
-                | FileType.Source -> Lint.lintSource lintParams target
-                | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
-                | FileType.Wildcard ->
-                    output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
-                    let files = expandWildcard target
-                    if List.isEmpty files then
-                        output.WriteInfo $"No files matching pattern '%s{target}' were found."
-                        LintResult.Success List.empty
-                    else
-                        output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
-                        Lint.lintFiles lintParams files
-                | FileType.Project
-                | _ -> Lint.lintProject lintParams target toolsPath
-            handleLintResult lintResult
-        with
-        | exn ->
-            let target = if fileType = FileType.Source then "source" else target
-            handleError
-                $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
-    | _ -> ()
-
-    exitCode
+        lint lintArgs output toolsPath
+    | _ ->
+        ExitCode.Failure
 
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
@@ -205,3 +218,4 @@ let main argv =
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults toolsPath
+    |> int
