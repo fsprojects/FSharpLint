@@ -31,7 +31,6 @@
     <Compile Include="Framework\Suppression.fs" />
     <!-- Rules -->
     <Compile Include="Rules\Identifiers.fs" />
-    <Compile Include="Rules\Smells\InterpolatedStringWithNoSubstitution.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
@@ -47,7 +46,6 @@
     <Compile Include="Rules\Conventions\TypePrefixing.fs" />
     <Compile Include="Rules\Formatting\UnionDefinitionIndentation.fs" />
     <Compile Include="Rules\Conventions\UnneededRecKeyword.fs" />
-    <Compile Include="Rules\Smells\AsyncExceptionWithoutReturn.fs" />
     <Compile Include="Rules\Conventions\FavourStaticEmptyFields.fs" />
     <Compile Include="Rules\Conventions\RecursiveAsyncFunction.fs" />
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
@@ -58,16 +56,8 @@
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
     <Compile Include="Rules\Conventions\AvoidSinglePipeOperator.fs" />
     <Compile Include="Rules\Conventions\SuggestUseAutoProperty.fs" />
-    <Compile Include="Rules\Smells\UsedUnderscorePrefixedElements.fs" />
     <Compile Include="Rules\Conventions\FavourNonMutablePropertyInitialization.fs" />
     <Compile Include="Rules\Conventions\EnsureTailCallDiagnosticsInRecursiveFunctions.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\NullArgWithSingleArgument.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\InvalidOpWithSingleArgument.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
-    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
     <Compile Include="Rules\Conventions\FailwithBadUsage.fs" />
     <Compile Include="Rules\Conventions\FavourSingleton.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
@@ -123,9 +113,19 @@
     <Compile Include="Rules\Formatting\Typography\MaxCharactersOnLine.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingWhitespaceOnLine.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInFile.fs" />
-    <Compile Include="Rules\Conventions\NoAsyncRunSynchronouslyInLibrary.fs" />
     <Compile Include="Rules\Formatting\Typography\TrailingNewLineInFile.fs" />
     <Compile Include="Rules\Formatting\Typography\NoTabCharacters.fs" />
+    <Compile Include="Rules\Smells\NoAsyncRunSynchronouslyInLibrary.fs" />
+    <Compile Include="Rules\Smells\InterpolatedStringWithNoSubstitution.fs" />
+    <Compile Include="Rules\Smells\AsyncExceptionWithoutReturn.fs" />
+    <Compile Include="Rules\Smells\UsedUnderscorePrefixedElements.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\RaiseWithTooManyArgumentsHelper.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\FailwithWithSingleArgument.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\RaiseWithSingleArgument.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\NullArgWithSingleArgument.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\InvalidOpWithSingleArgument.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\InvalidArgWithTwoArguments.fs" />
+    <Compile Include="Rules\Smells\RaiseWithTooManyArguments\FailwithfWithArgumentsMatchingFormatString.fs" />
     <Compile Include="Rules\Conventions\IndexerAccessorStyleConsistency.fs" />
     <Compile Include="Rules\Hints\HintsHelper.fs" />
     <Compile Include="Rules\Hints\HintMatcher.fs" />

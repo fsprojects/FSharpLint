@@ -1,4 +1,4 @@
-﻿module FSharpLint.Core.Tests.Rules.Conventions.NoAsyncRunSynchronouslyInLibrary
+﻿module FSharpLint.Core.Tests.Rules.Smells.NoAsyncRunSynchronouslyInLibrary
 
 open NUnit.Framework
 open FSharpLint.Framework.Rules
