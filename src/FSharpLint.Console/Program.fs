@@ -156,7 +156,6 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             | Some configPath -> FromFile configPath
             | None -> Default
 
-
         let lintParams =
             { CancellationToken = None
               ReceivedWarning = Some output.WriteWarning

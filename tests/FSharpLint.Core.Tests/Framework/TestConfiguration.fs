@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Core.Tests.TestConfiguration
 
 open NUnit.Framework
+open FSharpLint.Framework
 open FSharpLint.Framework.Configuration
 
 type System.String with
@@ -111,3 +112,31 @@ type TestConfiguration() =
         let actualConfig = parseConfig config
 
         Assert.AreEqual(expectedConfig.NoTabCharacters, actualConfig.NoTabCharacters)
+
+    [<Test>]
+    member __.``Combining config with empty one results in unchanged original config`` () =
+        let defaultConfig = Configuration.defaultConfiguration
+
+        let combinedConfig = Configuration.combineConfigs defaultConfig Configuration.Zero
+
+        Assert.AreEqual(defaultConfig, combinedConfig)
+
+    [<Test>]
+    member __.``When combining one config with another non-empty values are overriden`` () =
+        let baseConfig = Configuration.Zero
+
+        let partialConfig = { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
+
+        let combinedConfig = Configuration.combineConfigs baseConfig partialConfig
+
+        Assert.AreEqual(combinedConfig.NoTabCharacters, partialConfig.NoTabCharacters)
+
+    [<Test>]
+    member __.``When combining one config with another empty values are not overriden`` () =
+        let baseConfig = { Configuration.Zero with NoTabCharacters = Some { Enabled = true; Config = None } }
+
+        let partialConfig = Configuration.Zero
+
+        let combinedConfig = Configuration.combineConfigs baseConfig partialConfig
+
+        Assert.AreEqual(combinedConfig.NoTabCharacters, baseConfig.NoTabCharacters)
