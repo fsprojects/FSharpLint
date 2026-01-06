@@ -20,6 +20,10 @@ type internal FileType =
     | Source = 4
     | Wildcard = 5
 
+type ExitCode =
+    | Failure = -1
+    | Success = 0
+
 // Allowing underscores in union case names for proper Argu command line option formatting.
 // fsharplint:disable UnionCasesNames
 type private ToolArgs =
@@ -114,7 +118,7 @@ let internal inferFileType (target:string) =
         FileType.Source
 
 let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
-    let mutable exitCode = 0
+    let mutable exitCode = ExitCode.Success
 
     let output =
         match arguments.TryGetResult Format with
@@ -136,7 +140,7 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
 
     let handleError (str:string) =
         output.WriteError str
-        exitCode <- -1
+        exitCode <- ExitCode.Failure
 
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
@@ -145,7 +149,8 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
             | LintResult.Success(warnings) ->
                 String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
                 |> output.WriteInfo
-                if not (List.isEmpty warnings) then exitCode <- -1
+                if not (List.isEmpty warnings) then
+                    exitCode <- ExitCode.Failure
             | LintResult.Failure(failure) ->
                 handleError failure.Description
 
@@ -205,3 +210,4 @@ let main argv =
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults toolsPath
+    |> int
