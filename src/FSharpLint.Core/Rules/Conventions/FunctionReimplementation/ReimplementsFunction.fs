@@ -33,7 +33,7 @@ let private validateLambdaIsNotPointless (text:string) lambda range =
 
         let suggestedFix = lazy(
             ExpressionUtilities.tryFindTextOfRange range text
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
+            |> Option.map (fun fromText -> { FromRange = range; ToText = identifier }))
 
         {
             Range = range

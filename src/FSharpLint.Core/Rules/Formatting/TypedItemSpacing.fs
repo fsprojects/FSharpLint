@@ -56,7 +56,6 @@ let private checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
                 let spacesAfterString = " " |> String.replicate expectedSpacesAfter
                 let suggestedFix = lazy(
                     Some { FromRange = range;
-                           FromText = text;
                            ToText = $"{trimmedOtherText}{spacesBeforeString}:{spacesAfterString}{trimmedTypeText}" }
                     )
                 let errorFormatString = Resources.GetString("RulesFormattingTypedItemSpacingError")

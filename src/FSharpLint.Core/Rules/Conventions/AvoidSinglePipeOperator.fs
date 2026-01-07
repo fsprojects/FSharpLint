@@ -52,7 +52,7 @@ let runner (args: AstNodeRuleParams) =
                                 match (maybeFuncText, maybeArgText) with
                                 | Some(funcText), Some(argText) ->
                                     let replacementText = sprintf "%s %s" funcText argText
-                                    Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }
+                                    Some { FromRange=range; ToText=replacementText }
                                 | _ -> None)
                             errors ident.idRange (Some suggestedFix)
                 else

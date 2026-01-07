@@ -31,7 +31,7 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
             | EmptyStringLiteral -> "String.Empty"
             | EmptyListLiteral -> "List.Empty"
             | EmptyArrayLiteral -> "Array.empty"
-        Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
+        Some({ FromRange = range; ToText = replacementText }))
     Array.singleton
         { Range = range
           Message = getStaticEmptyErrorMessage range emptyLiteralType

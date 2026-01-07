@@ -114,8 +114,7 @@ let private runner (args: AstNodeRuleParams) =
                         (match memberIdentifier.LongIdent with
                             | [ _; memberName ] ->
                                 Some
-                                    { FromText = args.FileContent
-                                      FromRange = memberIdentifier.Range
+                                    { FromRange = memberIdentifier.Range
                                       ToText = $"val {memberName.idText}" }
                             | _ -> None)
             

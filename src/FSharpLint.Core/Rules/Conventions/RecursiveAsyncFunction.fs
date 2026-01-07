@@ -38,7 +38,6 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
                 (ExpressionUtilities.tryFindTextOfRange doTokenRange args.FileContent
                  |> Option.map (fun fromText ->
                      {
-                         FromText = fromText
                          FromRange = doTokenRange
                          ToText = "return!"
                      }))
