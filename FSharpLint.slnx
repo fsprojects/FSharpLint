@@ -94,6 +94,14 @@
     <File Path="docs/content/how-tos/rules/FL0080.md" />
     <File Path="docs/content/how-tos/rules/FL0081.md" />
     <File Path="docs/content/how-tos/rules/FL0082.md" />
+    <File Path="docs/content/how-tos/rules/FL0083.md" />
+    <File Path="docs/content/how-tos/rules/FL0084.md" />
+    <File Path="docs/content/how-tos/rules/FL0085.md" />
+    <File Path="docs/content/how-tos/rules/FL0086.md" />
+    <File Path="docs/content/how-tos/rules/FL0087.md" />
+    <File Path="docs/content/how-tos/rules/FL0088.md" />
+    <File Path="docs/content/how-tos/rules/FL0089.md" />
+    <File Path="docs/content/how-tos/rules/FL0090.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/FSharpLint.Console/FSharpLint.Console.fsproj" />
