@@ -46,6 +46,41 @@ let Bar () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.``Top level recursive private function that is used in single other function should give an error`` () =
+        this.Parse """
+let rec private Foo x =
+    if x = 0 then
+        Foo (x - 1)
+    else
+        0
+
+let Bar () =
+    Foo 3 |> ignore
+"""
+        
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Top level recursive private function that is used in multiple other functions should not give an error`` () =
+        this.Parse """
+let rec private Foo x =
+    if x = 0 then
+        Foo (x - 1)
+    else
+        0
+
+let rec Bar x =
+    Foo x |> Baz
+and Baz x =
+    Bar (x - 1)
+
+let FooBar () =
+    Foo 4
+"""
+        
+        this.AssertNoWarnings()
+
+    [<Test>]
     member this.``Nested functions should not give an error`` () =
         this.Parse """
 let Bar () =
