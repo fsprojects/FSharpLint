@@ -7,24 +7,29 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 
-let private (|FunctionDeclaration|_|) (declaration: SynModuleDecl) = 
-    match declaration with
-    | SynModuleDecl.Let(_, [ SynBinding(_, _, _, _, _, _, _, headPat, _, expr, _, _, _) ], _) ->
-        match headPat with
-        | SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, _, accessibility, _) ->
-            Some(ident, expr, accessibility)
-        | _ -> None
-    | _ -> None
-
 let runner (args: AstNodeRuleParams) =
+    let getFunctionBindings (declaration: SynModuleDecl) = 
+        match declaration with
+        | SynModuleDecl.Let(_, bindings, _) ->
+            bindings
+            |> List.choose
+                (fun binding ->
+                    match binding with
+                    | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, _, accessibility, _), _, expr, _, _, _) ->
+                        Some(ident, expr, accessibility)
+                    | _ -> None
+                )
+        | _ -> List.Empty
+
     match args.AstNode with
     | AstNode.ModuleOrNamespace(SynModuleOrNamespace(_, _, _kind, declarations, _, _, _, _, _)) ->
         let privateFunctionIdentifiers = 
             declarations
+            |> Seq.collect getFunctionBindings
             |> Seq.choose 
-                (fun declaration ->
-                    match declaration with
-                    | FunctionDeclaration(ident, _body, Some(SynAccess.Private _)) -> 
+                (fun (ident, _expr, accessibility) ->
+                    match accessibility with
+                    | Some(SynAccess.Private _) -> 
                         Some ident
                     | _ -> None)
             |> Seq.toArray
@@ -33,13 +38,13 @@ let runner (args: AstNodeRuleParams) =
         | Some checkInfo when privateFunctionIdentifiers.Length > 0 ->
             let otherFunctionBodies =
                 declarations
-                |> List.choose 
-                    (fun declaration ->
-                        match declaration with
-                        | FunctionDeclaration(ident, body, _) 
-                            when not(Array.exists (fun (each: Ident) -> each.idText = ident.idText) privateFunctionIdentifiers) -> 
+                |> Seq.collect getFunctionBindings
+                |> Seq.choose 
+                    (fun (ident, body, _accessibility) ->
+                        if not(Array.exists (fun (each: Ident) -> each.idText = ident.idText) privateFunctionIdentifiers) then 
                             Some body
-                        | _ -> None)
+                        else
+                            None)
             
             let emitWarningIfNeeded currFunctionIdentifier =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
