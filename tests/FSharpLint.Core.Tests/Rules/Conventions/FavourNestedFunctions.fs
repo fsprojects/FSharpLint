@@ -109,3 +109,14 @@ let Baz () =
 """
         
         this.AssertNoWarnings()
+    
+    [<Test>]
+    member this.``Private literal should not give an error because literals can only be module-level`` () =
+        this.Parse """
+let [<Literal>] private Foo = 6
+
+let Bar () =
+    Foo
+"""
+        
+        this.AssertNoWarnings()
