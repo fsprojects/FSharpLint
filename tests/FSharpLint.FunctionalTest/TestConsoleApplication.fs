@@ -140,3 +140,20 @@ module Tests =
                 $"Did not find the following expected errors: [{expectedMissingStr}]\n" +
                 $"Found the following unexpected warnings: [{notExpectedStr}]\n" +
                 $"Complete output: {output}")
+
+        [<Test>]
+        member _.InvalidArgument() =
+            let invalidArgument = $"lint --invalidArg someValue"
+            let output = dotnetFslint invalidArgument
+
+            Assert.IsTrue(output.Contains "unrecognized argument")
+
+            let invalidArgument2 = $"lint -hlp"
+            let output2 = dotnetFslint invalidArgument2
+
+            Assert.IsTrue(output2.Contains "unrecognized argument")
+
+            let multipleTargets = $"lint foo bar"
+            let output3 = dotnetFslint multipleTargets
+
+            Assert.IsTrue(output3.Contains "unrecognized argument")
