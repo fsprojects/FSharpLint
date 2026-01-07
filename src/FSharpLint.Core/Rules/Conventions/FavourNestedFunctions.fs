@@ -55,27 +55,28 @@ let runner (args: AstNodeRuleParams) =
                         else
                             None)
         
+            let emitWarningIfNeeded currFunctionIdentifier =
+                match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
+                | Some symbolUse ->
+                    let numberOfOtherFunctionsCurrFunctionIsUsedIn =
+                        otherFunctionBodies
+                        |> Seq.filter (fun funcBody -> 
+                            checkInfo.GetUsesOfSymbolInFile symbolUse.Symbol
+                            |> Array.exists (fun usage -> ExpressionUtilities.rangeContainsOtherRange funcBody.Range usage.Range))
+                        |> Seq.length
+                    if numberOfOtherFunctionsCurrFunctionIsUsedIn = 1 then
+                        Some {
+                            Range = currFunctionIdentifier.idRange
+                            WarningDetails.Message = Resources.GetString "RulesFavourNestedFunctions"
+                            SuggestedFix = None
+                            TypeChecks = List.Empty
+                        }
+                    else
+                        None
+                | None -> None
+            
             privateFunctionIdentifiers
-            |> Array.choose
-                (fun currFunctionIdentifier ->
-                    match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
-                    | Some symbolUse ->
-                        let numberOfOtherFunctionsCurrFunctionIsUsedIn =
-                            otherFunctionBodies
-                            |> Seq.filter (fun funcBody -> 
-                                checkInfo.GetUsesOfSymbolInFile symbolUse.Symbol
-                                |> Array.exists (fun usage -> ExpressionUtilities.rangeContainsOtherRange funcBody.Range usage.Range))
-                            |> Seq.length
-                        if numberOfOtherFunctionsCurrFunctionIsUsedIn = 1 then
-                            Some {
-                                Range = currFunctionIdentifier.idRange
-                                WarningDetails.Message = Resources.GetString "RulesFavourNestedFunctions"
-                                SuggestedFix = None
-                                TypeChecks = List.Empty
-                            }
-                        else
-                            None
-                    | None -> None)
+            |> Array.choose emitWarningIfNeeded
         | _ -> Array.empty
     | _ -> Array.empty
 

@@ -17,46 +17,46 @@ type private MultilineCommentMarker =
     | Begin of int
     | End of int
 
-let private error name lineCount actual =
-    let errorFormatString = Resources.GetString("RulesSourceLengthError")
-    String.Format(errorFormatString, name, lineCount, actual)
-
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 
 let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
 let private multilineCommentMarkerRegexCaptureGroupLength = 3
 
-let private stripMultilineComments (source: string) =
-    let markers = 
-        multilineCommentMarkerRegex.Matches source
-        |> Seq.map (fun markerMatch -> 
-            let index = markerMatch.Index
-            if source.[index] = '(' then
-                Begin index
-            else
-                End index)
-        |> Seq.sortBy (function | Begin index -> index | End index -> index)
-        |> Seq.toList
-
-    let rec getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
-        match toProcess with
-        | [] -> List.Empty
-        | Begin(index)::tail ->
-            getTopLevelBalancedPairs tail (index::stack)
-        | End(index)::tail ->
-            match stack with
-            | [] -> List.Empty
-            | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
-            | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
-
-    getTopLevelBalancedPairs markers List.Empty
-    |> List.fold
-        (fun (currSource: string) (startIndex, endIndex) ->
-            currSource.Substring(0, startIndex) 
-            + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
-        source
-
 let checkSourceLengthRule (config:Config) range fileContents errorName =
+    let error name lineCount actual =
+        let errorFormatString = Resources.GetString("RulesSourceLengthError")
+        String.Format(errorFormatString, name, lineCount, actual)
+
+    let stripMultilineComments (source: string) =
+        let markers = 
+            multilineCommentMarkerRegex.Matches source
+            |> Seq.map (fun markerMatch -> 
+                let index = markerMatch.Index
+                if source.[index] = '(' then
+                    Begin index
+                else
+                    End index)
+            |> Seq.sortBy (function | Begin index -> index | End index -> index)
+            |> Seq.toList
+
+        let rec getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
+            match toProcess with
+            | [] -> List.Empty
+            | Begin(index)::tail ->
+                getTopLevelBalancedPairs tail (index::stack)
+            | End(index)::tail ->
+                match stack with
+                | [] -> List.Empty
+                | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
+                | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
+
+        getTopLevelBalancedPairs markers List.Empty
+        |> List.fold
+            (fun (currSource: string) (startIndex, endIndex) ->
+                currSource.Substring(0, startIndex) 
+                + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
+            source
+
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
         let sourceCode =

@@ -10,10 +10,6 @@ open FSharpLint.Framework.Rules
 [<RequireQualifiedAccess>]
 type Config = { Depth:int }
 
-let private error (depth:int) =
-    let errorFormatString = Resources.GetString("RulesNestedStatementsError")
-    String.Format(errorFormatString, depth)
-
 /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
 /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
 /// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
@@ -38,28 +34,6 @@ let private areChildrenNested = function
     | AstNode.Expression(SynExpr.Match(_) as matchExpr) when not (isCompilerGeneratedMatch matchExpr) -> true
     | _ -> false
 
-let private getRange node =
-    match node with 
-    | AstNode.Expression(node) -> Some node.Range
-    | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
-    | _ -> None
-
-let private distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) iIndex jIndex =
-    let mutable iIndex = iIndex
-    let mutable jIndex = jIndex
-    let mutable distance = 0
-
-    while iIndex <> jIndex do
-        if iIndex > jIndex then
-            iIndex <- syntaxArray.[iIndex].ParentIndex
-
-            if iIndex <> jIndex && areChildrenNested syntaxArray.[iIndex].Actual then
-                distance <- distance + 1
-        else
-            jIndex <- syntaxArray.[jIndex].ParentIndex
-
-    distance
-
 /// Is node a duplicate of a node in the AST containing ExtraSyntaxInfo
 /// e.g. lambda arg being a duplicate of the lambda.
 let isMetaData args node index =
@@ -82,6 +56,22 @@ let isElseIf args node index =
 let mutable depth = 0
 
 let decrementDepthToCommonParent args iIndex jIndex =
+    let distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) iIndex jIndex =
+        let mutable iIndex = iIndex
+        let mutable jIndex = jIndex
+        let mutable distance = 0
+
+        while iIndex <> jIndex do
+            if iIndex > jIndex then
+                iIndex <- syntaxArray.[iIndex].ParentIndex
+
+                if iIndex <> jIndex && areChildrenNested syntaxArray.[iIndex].Actual then
+                    distance <- distance + 1
+            else
+                jIndex <- syntaxArray.[jIndex].ParentIndex
+
+        distance
+
     if jIndex < args.SyntaxArray.Length then
         // If next node in array is not a sibling or child of the current node.
         let parent = args.SyntaxArray.[jIndex].ParentIndex
@@ -92,6 +82,16 @@ let decrementDepthToCommonParent args iIndex jIndex =
 let mutable skipToIndex = None
 
 let runner (config:Config) (args:AstNodeRuleParams) =
+    let error (depth:int) =
+        let errorFormatString = Resources.GetString("RulesNestedStatementsError")
+        String.Format(errorFormatString, depth)
+
+    let getRange node =
+        match node with 
+        | AstNode.Expression(node) -> Some node.Range
+        | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
+        | _ -> None
+
     let skip =
         match skipToIndex with
         | Some skipTo when skipTo = args.NodeIndex ->

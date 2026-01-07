@@ -18,31 +18,31 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.HintParser
 open MergeSyntaxTrees
 
-/// Confirms if two parts of the ast look alike.
-/// This is required as hints can bind variables: the bound location needs to be compared to
-/// parts of the ast that the hint covers with the same variable.
-let private isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) = 
-    let numChildrenI = nodeArray.[iIndex].NumberOfChildren
-    let numChildrenJ = nodeArray.[jIndex].NumberOfChildren
-
-    if numChildrenI = numChildrenJ then
-        let numChildren = numChildrenI
-
-        Seq.forall (fun child -> 
-            iIndex + child < nodeArray.Length && 
-            jIndex + child < nodeArray.Length && 
-            nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode) (seq { 0..numChildren })
-    else false
-
-let inline private isParen (node:AbstractSyntaxArray.Node) =
-    match node.Actual with
-    | AstNode.Expression(SynExpr.Paren(_)) -> true
-    | _ -> false
-
 // hard to turn into tail-recursive form
 // fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
 /// Compares the hint trie against a given location in the abstract syntax array.
 let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVariables:Dictionary<_, _>) notify =
+    /// Confirms if two parts of the ast look alike.
+    /// This is required as hints can bind variables: the bound location needs to be compared to
+    /// parts of the ast that the hint covers with the same variable.
+    let isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) = 
+        let numChildrenI = nodeArray.[iIndex].NumberOfChildren
+        let numChildrenJ = nodeArray.[jIndex].NumberOfChildren
+
+        if numChildrenI = numChildrenJ then
+            let numChildren = numChildrenI
+
+            Seq.forall (fun child -> 
+                iIndex + child < nodeArray.Length && 
+                jIndex + child < nodeArray.Length && 
+                nodeArray.[iIndex + child].Hashcode = nodeArray.[jIndex + child].Hashcode) (seq { 0..numChildren })
+        else false
+
+    let inline isParen (node:AbstractSyntaxArray.Node) =
+        match node.Actual with
+        | AstNode.Expression(SynExpr.Paren(_)) -> true
+        | _ -> false
+
     List.iter notify trie.MatchedHint
 
     if index < nodeArray.Length then

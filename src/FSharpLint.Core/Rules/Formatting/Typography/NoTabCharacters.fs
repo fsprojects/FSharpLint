@@ -17,10 +17,10 @@ module ContextBuilder =
         | _ ->
             current
 
-let private isInLiteralString literalStrings range =
-    Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range) literalStrings
-
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
+    let isInLiteralString literalStrings range =
+        Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range) literalStrings
+
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
