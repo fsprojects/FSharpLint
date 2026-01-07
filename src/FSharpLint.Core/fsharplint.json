@@ -341,6 +341,7 @@
         }
     },
     "favourSingleton": { "enabled": false },
+    "noAsyncRunSynchronouslyInLibrary": { "enabled": true },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

@@ -554,7 +554,8 @@ type Configuration =
       EnsureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
       FavourAsKeyword:EnabledConfig option 
       InterpolatedStringWithNoSubstitution:EnabledConfig option
-      FavourSingleton:EnabledConfig option }
+      FavourSingleton:EnabledConfig option
+      NoAsyncRunSynchronouslyInLibrary:EnabledConfig option}
 with
     static member Zero = {
         Global = None
@@ -656,6 +657,7 @@ with
         FavourAsKeyword = None
         InterpolatedStringWithNoSubstitution = None
         FavourSingleton = None
+        NoAsyncRunSynchronouslyInLibrary = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -859,6 +861,7 @@ let flattenConfig (config:Configuration) =
                 config.FavourAsKeyword |> Option.bind (constructRuleIfEnabled FavourAsKeyword.rule)
                 config.InterpolatedStringWithNoSubstitution |> Option.bind (constructRuleIfEnabled InterpolatedStringWithNoSubstitution.rule)
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
+                config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules

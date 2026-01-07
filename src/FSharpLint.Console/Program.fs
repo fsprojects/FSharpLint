@@ -158,9 +158,9 @@ let private lint
     try
         let lintResult =
             match fileType with
-            | FileType.File -> Lint.lintFile lintParams target
-            | FileType.Source -> Lint.lintSource lintParams target
-            | FileType.Solution -> Lint.lintSolution lintParams target toolsPath
+            | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+            | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
+            | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
             | FileType.Wildcard ->
                 output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                 let files = expandWildcard target
@@ -169,9 +169,9 @@ let private lint
                     LintResult.Success List.empty
                 else
                     output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
-                    Lint.lintFiles lintParams files
+                    Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
             | FileType.Project
-            | _ -> Lint.lintProject lintParams target toolsPath
+            | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
         handleLintResult lintResult
     with
     | exn ->

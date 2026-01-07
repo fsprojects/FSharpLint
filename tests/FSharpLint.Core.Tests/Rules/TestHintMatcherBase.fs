@@ -64,6 +64,7 @@ type TestHintMatcherBase () =
                         Rules = Array.singleton rule
                         GlobalConfig = globalConfig
                         TypeCheckResults = checkResult
+                        ProjectCheckResults = None
                         FilePath = (Option.defaultValue String.Empty fileName)
                         FileContent = input
                         Lines = (input.Split("\n"))

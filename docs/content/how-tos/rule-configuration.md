@@ -130,3 +130,4 @@ The following rules can be specified for linting.
 - [InterpolatedStringWithNoSubstitution (FL0087)](rules/FL0087.html)
 - [IndexerAccessorStyleConsistency (FL0088)](rules/FL0088.html)
 - [FavourSingleton (FL0089)](rules/FL0089.html)
+- [NoAsyncRunSynchronouslyInLibrary (FL0090)](rules/FL0090.html)

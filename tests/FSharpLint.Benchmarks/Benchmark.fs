@@ -30,7 +30,7 @@ type Benchmark () =
     let (fileInfo, lines) =
         let text = File.ReadAllText sourceFile
         let tree = generateAst text sourceFile
-        ({ Ast = tree; Source = text; TypeCheckResults = None }, String.toLines text |> Array.toList)
+        ({ Ast = tree; Source = text; TypeCheckResults = None; ProjectCheckResults = None }, String.toLines text |> Array.toList)
 
     [<Benchmark>]
     member this.LintParsedFile () =

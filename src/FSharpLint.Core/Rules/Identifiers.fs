@@ -94,3 +94,4 @@ let FavourAsKeyword = identifier 86
 let InterpolatedStringWithNoSubstitution = identifier 87
 let IndexerAccessorStyleConsistency = identifier 88
 let FavourSingleton = identifier 89
+let NoAsyncRunSynchronouslyInLibrary = identifier 90

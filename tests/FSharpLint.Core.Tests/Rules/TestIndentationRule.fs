@@ -37,6 +37,7 @@ type TestIndentationRuleBase (rule:Rule) =
                     Rules = Array.empty
                     GlobalConfig = globalConfig
                     TypeCheckResults = None
+                    ProjectCheckResults = None
                     FilePath = fileName
                     FileContent = input
                     Lines = lines
