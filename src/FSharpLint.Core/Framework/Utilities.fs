@@ -142,7 +142,8 @@ module ExpressionUtilities =
         |> Option.defaultValue 0
 
     let rangeContainsOtherRange (containingRange:Range) (range:Range) =
-        range.StartLine >= containingRange.StartLine && range.EndLine <= containingRange.EndLine
+        (range.StartLine, range.StartColumn) >= (containingRange.StartLine, containingRange.StartColumn) 
+            && (range.EndLine, range.EndColumn) <= (containingRange.EndLine, containingRange.EndColumn)
 
 module String =
 
