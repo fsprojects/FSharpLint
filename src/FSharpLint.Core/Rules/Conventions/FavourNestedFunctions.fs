@@ -8,14 +8,6 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 
 let runner (args: AstNodeRuleParams) =
-    let hasLiteralAttribute (attributes: SynAttributes) =
-        extractAttributes attributes 
-        |> List.exists 
-            (fun attr -> 
-                match attr.TypeName with
-                | SynLongIdent([ident], _, _) -> ident.idText = "Literal"
-                | _ -> false )
-
     let getFunctionBindings (declaration: SynModuleDecl) = 
         match declaration with
         | SynModuleDecl.Let(_, bindings, _) ->
@@ -24,7 +16,7 @@ let runner (args: AstNodeRuleParams) =
                 (fun binding ->
                     match binding with
                     | SynBinding(_, _, _, _, attributes, _, _, SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, _, accessibility, _), _, expr, _, _, _)
-                        when not(hasLiteralAttribute attributes) ->
+                        when extractAttributes attributes |> List.isEmpty ->
                         Some(ident, expr, accessibility)
                     | _ -> None
                 )
