@@ -171,3 +171,20 @@ match node with
 | EndOfHint(_) -> None"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Should not produce error for vars used as args to active patterns``() =
+        this.Parse """
+let private (|RaiseWithTooManyArgs|_|) identifier maxArgs = function
+    | ExpressionUtilities.Identifier([ ident ], _)::arguments 
+        when List.length arguments > maxArgs && ident.idText = identifier ->
+        Some()
+    | _ -> None
+
+let checkRaiseWithTooManyArgs (raiseType:string) (count:int) =
+    match expressions with
+    | RaiseWithTooManyArgs raiseType count -> Array.empty
+    | _ -> Array.empty
+"""
+
+        Assert.IsTrue this.NoErrorsExist
