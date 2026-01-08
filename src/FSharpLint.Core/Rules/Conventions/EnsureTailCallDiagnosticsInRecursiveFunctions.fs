@@ -8,17 +8,17 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
-    { Range = func.Range
-      Message =
-        String.Format(
-            Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
-            func.Identifier.idText
-        )
-      SuggestedFix = None
-      TypeChecks = list.Empty }
-
 let runner (args: AstNodeRuleParams) =
+    let emitWarning (func: UnneededRecKeyword.RecursiveFunctionInfo) =
+        { Range = func.Range
+          Message =
+            String.Format(
+                Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
+                func.Identifier.idText
+            )
+          SuggestedFix = None
+          TypeChecks = list.Empty }
+
     match (args.AstNode, args.CheckInfo) with
     | UnneededRecKeyword.RecursiveFunctions(funcs), Some checkInfo ->
         let processFunction functionInfo =

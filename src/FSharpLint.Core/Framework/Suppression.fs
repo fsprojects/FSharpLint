@@ -15,20 +15,20 @@ type SuppressionInfo =
 /// Specifies the suppressions for an individual line.
 type LineSuppression = { Line:int; Suppressions:SuppressionInfo list }
 
-/// Extracts rule names from a whitespace separated string of rule names.
-let private extractRules (rules:Set<String>) (str:string) =
-    let (splitOnWhitespace:char[]) = null
-    let entries =
-        str.Split(splitOnWhitespace, StringSplitOptions.RemoveEmptyEntries)
-        |> Seq.map (fun entry -> entry.ToLowerInvariant())
-        |> Seq.filter (fun entry -> rules.Contains(entry))
-        |> Set.ofSeq
-
-    // If no rules set, then all rules are applied.
-    if Seq.isEmpty entries then rules else entries
-
 /// Parses a given file to find lines containing rule suppressions.
 let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
+    /// Extracts rule names from a whitespace separated string of rule names.
+    let extractRules (rules:Set<String>) (str:string) =
+        let (splitOnWhitespace:char[]) = null
+        let entries =
+            str.Split(splitOnWhitespace, StringSplitOptions.RemoveEmptyEntries)
+            |> Seq.map (fun entry -> entry.ToLowerInvariant())
+            |> Seq.filter (fun entry -> rules.Contains(entry))
+            |> Set.ofSeq
+
+        // If no rules set, then all rules are applied.
+        if Seq.isEmpty entries then rules else entries
+
     let rules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) rules
 
     let choose lineNum line = 
