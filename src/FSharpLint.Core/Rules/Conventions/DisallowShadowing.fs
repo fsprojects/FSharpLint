@@ -7,7 +7,7 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let rec private extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : List<Ident> =
+let private extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : List<Ident> =
     let rec extractIdentifier (pattern: SynSimplePat) =
         match pattern with
         | SynSimplePat.Id(ident, _, _, _, _, _) ->
@@ -17,10 +17,8 @@ let rec private extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : L
             extractIdentifier pat
 
     match simplePats with
-    | SynSimplePats.SimplePats(patterns, _) ->
+    | SynSimplePats.SimplePats(patterns, _, _) ->
         patterns |> List.map extractIdentifier
-    | SynSimplePats.Typed(pats, _, _) -> 
-        extractIdentifiersFromSimplePats pats
 
 
 let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : array<WarningDetails> =
@@ -58,7 +56,7 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
             match expression with
             | SynExpr.LetOrUse(_, _, bindings, _, _, _) ->
                 bindings |> List.exists processBinding
-            | SynExpr.Sequential(_, _, expr1, expr2, _) ->
+            | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
                 processExpression expr1 || processExpression expr2
             | SynExpr.Lambda(_, _, args, body, _, _, _) ->
                 processExpression body || processArgs args
@@ -74,7 +72,7 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
             | SynPat.OptionalVal(ident, _) -> rangeIncludedsDefinitions ident.idRange
             | SynPat.Paren(pat, _) -> processPattern pat
             | SynPat.Record(fieldPats, _) -> fieldPats |> List.exists (fun (_, _, pat) -> processPattern pat)
-            | SynPat.Tuple(_, pats, _) -> pats |> List.exists processPattern
+            | SynPat.Tuple(_, pats, _, _) -> pats |> List.exists processPattern
             | SynPat.Typed(pat, _, _) -> processPattern pat
             | _ -> false
 
@@ -98,8 +96,8 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
                 processPattern pattern
             | MemberDefinition(SynMemberDefn.Member(memberDefn, _)) ->
                 processBinding memberDefn
-            | TypeDefinition(SynTypeDefn(_, _, _, Some(SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _)), _, _)) ->
-                processArgs ctorArgs
+            | TypeDefinition(SynTypeDefn(_, _, _, Some(SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _, _)), _, _)) ->
+                processPattern ctorArgs
             | _ -> false
 
         let parents = args.GetParents args.NodeIndex
