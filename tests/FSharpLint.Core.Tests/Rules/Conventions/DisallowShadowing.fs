@@ -139,6 +139,17 @@ let foo = 1"""
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
+    member this.``Should not produce error when parameter with same name exists in another function``() =
+        this.Parse """
+let foo target =
+    target
+
+let bar target =
+    target + 1"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
     member this.``Should not produce error when variable name starts with underscore``() =
         this.Parse """
 let _foo = 0
