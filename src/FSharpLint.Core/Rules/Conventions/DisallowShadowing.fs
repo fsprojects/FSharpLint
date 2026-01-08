@@ -123,8 +123,14 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
             | _ -> false
 
         let parents = args.GetParents args.NodeIndex
-        let isShadowing =
-            parents |> List.exists processAstNode
+        let isShadowing = 
+            let currentDefinition = 
+                definitionsWithSameName |> Seq.tryFind (fun definition -> definition.Range = identifier.idRange)
+            match currentDefinition with
+            | Some _ ->
+                parents |> List.exists processAstNode
+            | None ->
+                false
 
         if isShadowing then
             Array.singleton { 
