@@ -1,6 +1,7 @@
 ﻿module FSharpLint.Rules.DisallowShadowing
 
 open System
+open FSharp.Compiler.CodeAnalysis
 open FSharp.Compiler.Syntax
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -38,19 +39,22 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
                         < (identifier.idRange.StartLine, identifier.idRange.StartColumn) )
             |> Seq.toArray
 
-        let rangeIncludedsDefinitions range =
-            definitionsBeforeCurrent
+        let rangeIncludedsDefinitions (definitions: array<FSharpSymbolUse>) range =
+            definitions
             |> Array.exists (fun usage -> ExpressionUtilities.rangeContainsOtherRange range usage.Range)
+
+        let rangeIncludedsDefinitionsBeforeCurrent =
+            rangeIncludedsDefinitions definitionsBeforeCurrent
         
         let processBinding binding =
             match binding with
             | SynBinding(_, _, _, _, _, _, _, _, _, _, range, _, _) ->
-                rangeIncludedsDefinitions range
+                rangeIncludedsDefinitionsBeforeCurrent range
 
         let processArgs (args: SynSimplePats) =
             args
             |> extractIdentifiersFromSimplePats
-            |> List.exists (fun ident -> rangeIncludedsDefinitions ident.idRange)
+            |> List.exists (fun ident -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange)
 
         let rec processExpression (expression: SynExpr) =
             match expression with
@@ -62,32 +66,36 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
                 processExpression body || processArgs args
             | _ -> false
 
-        let rec processPattern (pattern: SynPat) =
+        let rec processPattern (definitions: array<FSharpSymbolUse>) (pattern: SynPat) =
             match pattern with
-            | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitions ident.idRange
-            | SynPat.Ands(pats, _) -> pats |> List.exists processPattern
-            | SynPat.Or(lhs, rhs, _, _) -> processPattern lhs || processPattern rhs
-            | SynPat.ArrayOrList(_, pats, _) -> pats |> List.exists processPattern
-            | SynPat.As(_lhs, rhs, _) -> processPattern rhs
-            | SynPat.OptionalVal(ident, _) -> rangeIncludedsDefinitions ident.idRange
-            | SynPat.Paren(pat, _) -> processPattern pat
-            | SynPat.Record(fieldPats, _) -> fieldPats |> List.exists (fun (_, _, pat) -> processPattern pat)
-            | SynPat.Tuple(_, pats, _, _) -> pats |> List.exists processPattern
-            | SynPat.Typed(pat, _, _) -> processPattern pat
+            | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitions definitions ident.idRange
+            | SynPat.Ands(pats, _) -> pats |> List.exists (processPattern definitions)
+            | SynPat.Or(lhs, rhs, _, _) ->
+                let definitionsExcludingLhs =
+                    definitions
+                    |> Array.filter (fun usage -> not <| ExpressionUtilities.rangeContainsOtherRange lhs.Range usage.Range)
+                processPattern definitionsExcludingLhs lhs || processPattern definitionsExcludingLhs rhs
+            | SynPat.ArrayOrList(_, pats, _) -> pats |> List.exists (processPattern definitions)
+            | SynPat.As(_lhs, rhs, _) -> processPattern definitions rhs
+            | SynPat.OptionalVal(ident, _) -> rangeIncludedsDefinitions definitions ident.idRange
+            | SynPat.Paren(pat, _) -> processPattern definitions pat
+            | SynPat.Record(fieldPats, _) -> fieldPats |> List.exists (fun (_, _, pat) -> processPattern definitions pat)
+            | SynPat.Tuple(_, pats, _, _) -> pats |> List.exists (processPattern definitions)
+            | SynPat.Typed(pat, _, _) -> processPattern definitions pat
             | _ -> false
 
         let processParentBinding (binding: SynBinding) =
             if ExpressionUtilities.rangeContainsOtherRange binding.RangeOfBindingWithRhs identifier.idRange then
                 // inside binding's scope
-                rangeIncludedsDefinitions binding.RangeOfHeadPattern
+                rangeIncludedsDefinitionsBeforeCurrent binding.RangeOfHeadPattern
             else
                 // outside binding's scope
                 match binding with
                 | SynBinding(_, _, _, _, _, _, _, headPat, _, _, _, _, _) ->
                     match headPat with
-                    | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitions ident.idRange
+                    | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange
                     | SynPat.LongIdent(SynLongIdent(identParts, _, _), _, _, _, _, _) -> 
-                        identParts |> List.exists (fun ident -> rangeIncludedsDefinitions ident.idRange)
+                        identParts |> List.exists (fun ident -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange)
                     | _ -> false
 
         let processModuleDeclaration (moduleDecl: SynModuleDecl) =
@@ -107,11 +115,11 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
                 processExpression lambda.Body
                 || (lambda.Arguments |> List.exists processArgs)
             | Match(SynMatchClause(pattern, _, _, _, _, _)) ->
-                processPattern pattern
+                processPattern definitionsBeforeCurrent pattern
             | MemberDefinition(SynMemberDefn.Member(memberDefn, _)) ->
                 processBinding memberDefn
             | TypeDefinition(SynTypeDefn(_, _, _, Some(SynMemberDefn.ImplicitCtor(_, _, ctorArgs, _, _, _, _)), _, _)) ->
-                processPattern ctorArgs
+                processPattern definitionsBeforeCurrent ctorArgs
             | _ -> false
 
         let parents = args.GetParents args.NodeIndex
