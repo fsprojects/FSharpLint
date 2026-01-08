@@ -76,11 +76,25 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
             | SynPat.Typed(pat, _, _) -> processPattern pat
             | _ -> false
 
+        let processParentBinding (binding: SynBinding) =
+            if ExpressionUtilities.rangeContainsOtherRange binding.RangeOfBindingWithRhs identifier.idRange then
+                // inside binding's scope
+                rangeIncludedsDefinitions binding.RangeOfHeadPattern
+            else
+                // outside binding's scope
+                match binding with
+                | SynBinding(_, _, _, _, _, _, _, headPat, _, _, _, _, _) ->
+                    match headPat with
+                    | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitions ident.idRange
+                    | SynPat.LongIdent(SynLongIdent(identParts, _, _), _, _, _, _, _) -> 
+                        identParts |> List.exists (fun ident -> rangeIncludedsDefinitions ident.idRange)
+                    | _ -> false
+
         let processModuleDeclaration (moduleDecl: SynModuleDecl) =
             match moduleDecl with
             | SynModuleDecl.Let(_, bindings, _) ->
                 bindings 
-                |> List.exists processBinding
+                |> List.exists processParentBinding
             | _ -> false
 
         let processAstNode (node: AstNode) =
