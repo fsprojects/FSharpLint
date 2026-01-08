@@ -120,3 +120,21 @@ let Bar () =
 """
         
         this.AssertNoWarnings()
+
+    // Using attributes on nested functions (e.g [<TailCall>]) will give syntax error:
+    // Unexpected symbol '[<' in expression
+    [<Test>]
+    member this.``Top level private function with attributes should not give an error`` () =
+        this.Parse """
+[<TailCall>]
+let rec private Foo x =
+    if x = 0 then
+        Foo (x - 1)
+    else
+        0
+
+let Bar () =
+    Foo 3 |> ignore
+"""
+        
+        this.AssertNoWarnings()
