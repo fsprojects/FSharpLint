@@ -158,3 +158,16 @@ module Foo =
     let _foo = 1"""
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Should not produce error for bindings in match patterns that are not shadowing``() =
+        this.Parse """
+match node with
+| HintNode(expr, depth, rest) ->
+    match (getKey expr, expr) with
+    | (SyntaxHintNode.Wildcard as key), HintExpr(Expression.Wildcard)
+    | (SyntaxHintNode.Variable as key), HintPat(Pattern.Variable(_)) -> Some(key, expr, depth, rest)
+    | _ -> None
+| EndOfHint(_) -> None"""
+
+        Assert.IsTrue this.NoErrorsExist
