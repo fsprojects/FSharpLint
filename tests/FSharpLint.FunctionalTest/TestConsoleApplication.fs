@@ -39,7 +39,7 @@ module Tests =
                 |> Seq.sortByDescending _.Name
                 |> Seq.tryHead
             match dllDir with
-            | Some dir -> dir.FullName </> "fsharplint.dll"
+            | Some dir -> dir.FullName </> "fslint.dll"
             | None -> failwithf "No target framework folder found in %s" binDir.FullName
 
         let startInfo = ProcessStartInfo

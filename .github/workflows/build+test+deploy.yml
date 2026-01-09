@@ -57,7 +57,7 @@ jobs:
     - name: Remove global.json to allow using .NET 10 SDK (for dnx)
       run: rm --force global.json
     - name: Run fsharplint as tool using dnx
-      run: dnx fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --source ./out/ --prerelease --yes --interactive false
+      run: dnx fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --source ./out/ --prerelease --yes --interactive false
 
   packReleaseBinaries:
     needs: buildAndTest
@@ -183,11 +183,11 @@ jobs:
           </configuration>
           EOF
       - name: Install FSharpLint from downloaded binaries
-        run: dotnet tool install --global fsharplint --prerelease --framework net8.0
+        run: dotnet tool install --global fslint --prerelease --framework net8.0
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project (net8.0 only)
-        run: fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
+        run: fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
         
   testReleaseBinariesWithDotNet10:
     needs: packReleaseBinaries
@@ -217,8 +217,8 @@ jobs:
           </configuration>
           EOF
       - name: Install FSharpLint from downloaded binaries
-        run: dotnet tool install --global fsharplint --prerelease
+        run: dotnet tool install --global fslint --prerelease
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project
-        run: fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
+        run: fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
