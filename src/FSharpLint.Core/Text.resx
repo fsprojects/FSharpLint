@@ -393,4 +393,7 @@
   <data name="NoAsyncRunSynchronouslyInLibrary" xml:space="preserve">
     <value>Async.RunSynchronously should not be used in libraries.</value>
   </data>
+  <data name="RulesDisallowShadowing" xml:space="preserve">
+    <value>Rename variable or parameter so that it doesn't shadow another one with the same name.</value>
+  </data>
 </root>

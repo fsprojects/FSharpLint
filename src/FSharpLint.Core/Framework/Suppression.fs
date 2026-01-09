@@ -28,17 +28,17 @@ let private extractRules (rules:Set<String>) (str:string) =
     if Seq.isEmpty entries then rules else entries
 
 /// Parses a given file to find lines containing rule suppressions.
-let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
-    let rules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) rules
+let parseSuppressionInfo (originalRuleNames:Set<String>) (lines:string list) =
+    let lowerCasedRules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) originalRuleNames
 
     let choose lineNum line = 
         let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
         if matched.Success then
             let suppressionTarget =
                 if matched.Groups.Count = 3 then
-                    extractRules rules matched.Groups.[2].Value
+                    extractRules lowerCasedRules matched.Groups.[2].Value
                 else
-                    rules
+                    lowerCasedRules
             match matched.Groups.[1].Value with
             | "enable" -> Some (lineNum, Enable suppressionTarget)
             | "disable" -> Some (lineNum, Disable suppressionTarget)

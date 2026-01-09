@@ -262,7 +262,7 @@ module AbstractSyntaxArray =
                 | Else(body) -> extractExtraInfo (Expression(body)) SyntaxNode.Else
                 | _ -> node
 
-            traverseNode node (fun node -> left.Push (StackedNode(node, depth + 1)))
+            traverseNode node (fun aNode -> left.Push (StackedNode(aNode, depth + 1)))
 
             match astNodeToSyntaxNode node with
             | SyntaxNode.Other -> ()

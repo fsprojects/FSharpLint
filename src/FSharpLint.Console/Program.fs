@@ -175,9 +175,9 @@ let private lint
         handleLintResult lintResult
     with
     | exn ->
-        let target = if fileType = FileType.Source then "source" else target
+        let targetStr = if fileType = FileType.Source then "source" else target
         handleError
-            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
+            $"Lint failed while analysing %s{targetStr}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
 
     exitCode
 

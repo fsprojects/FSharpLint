@@ -9,7 +9,7 @@ open FSharpLint.Framework.Rules
 
 let private checkTupleOfWildcards fileContents pattern identifier identifierRange =
     let rec isWildcard = function
-        | SynPat.Paren(pattern, _) -> isWildcard pattern
+        | SynPat.Paren(innerPattern, _) -> isWildcard innerPattern
         | SynPat.Wild(_) -> true
         | _ -> false
 
