@@ -29,7 +29,7 @@ let private getValueOrFunctionIdents typeChecker accessControlLevel pattern =
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with
-    | AstNode.Binding(SynBinding(access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
+    | AstNode.Binding(SynBinding(_access, _, _, _, attributes, _, valData, pattern, _, _, _, _, _)) ->
         if not (isLiteral attributes) then
             match identifierTypeFromValData valData with
             | Value | Function ->

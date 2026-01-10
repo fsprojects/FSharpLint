@@ -223,7 +223,7 @@ let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range
                 [
                     for declaration in declarations do
                         match declaration with
-                        | FSharpImplementationFileDeclaration.Entity(entity, subDecls) ->
+                        | FSharpImplementationFileDeclaration.Entity(_entity, subDecls) ->
                             yield! getExpressions subDecls
                         | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(_,_,body) -> 
                             yield body

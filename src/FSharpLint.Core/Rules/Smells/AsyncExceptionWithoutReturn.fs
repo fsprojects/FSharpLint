@@ -21,7 +21,7 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
         | SynExpr.While (_, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
         | SynExpr.For (_, _, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
         | SynExpr.ForEach (_, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
-        | SynExpr.Match (_, _, clauses, range, _) ->
+        | SynExpr.Match (_, _, clauses, _range, _) ->
             let subExpressions = clauses |> List.map (fun (SynMatchClause (_, _, clause, range, _, _)) -> (clause, range))
             checkMultipleExpressions subExpressions returnEmptyArray
         | SynExpr.Do (innerExpression, range) -> checkExpression innerExpression range returnEmptyArray

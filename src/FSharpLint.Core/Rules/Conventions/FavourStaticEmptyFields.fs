@@ -12,7 +12,7 @@ type private EmptyLiteralType =
     | EmptyListLiteral
     | EmptyArrayLiteral
 
-let private getStaticEmptyErrorMessage  (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+let private getStaticEmptyErrorMessage (emptyLiteralType: EmptyLiteralType) =
     let errorMessageKey =
         match emptyLiteralType with
         | EmptyStringLiteral -> "RulesFavourStaticEmptyFieldsForString"
@@ -34,7 +34,7 @@ let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Ran
         Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
     Array.singleton
         { Range = range
-          Message = getStaticEmptyErrorMessage range emptyLiteralType
+          Message = getStaticEmptyErrorMessage emptyLiteralType
           SuggestedFix = Some suggestedFix
           TypeChecks = List.Empty }
 

@@ -8,7 +8,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
-let check args _ (clauses:SynMatchClause list) _ =
+let check _args _ (clauses:SynMatchClause list) _ =
     let choose (clauseOne: SynMatchClause) (clauseTwo: SynMatchClause) = 
         if clauseOne.Range.EndLine = clauseTwo.Range.StartLine then
             Some

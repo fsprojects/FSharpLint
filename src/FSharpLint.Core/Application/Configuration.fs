@@ -24,13 +24,13 @@ module internal FSharpJsonConverter =
 
         let allCases = FSharpType.GetUnionCases typeof<'TDiscriminatedUnion> 
 
-        override this.Read (reader: byref<Text.Json.Utf8JsonReader>, typeToConvert: Type, options: Text.Json.JsonSerializerOptions): 'TDiscriminatedUnion = 
+        override this.Read (reader: byref<Text.Json.Utf8JsonReader>, _typeToConvert: Type, _options: Text.Json.JsonSerializerOptions): 'TDiscriminatedUnion = 
             let value = reader.GetString()
             match allCases |> Array.tryFind (fun case -> case.Name = value) with
             | Some case -> FSharpValue.MakeUnion(case, Array.empty) :?> 'TDiscriminatedUnion
             | _ -> failwithf "Unexpected value: %A. Expected one of: %A" value allCases
 
-        override this.Write (writer: Text.Json.Utf8JsonWriter, value: 'TDiscriminatedUnion, options: Text.Json.JsonSerializerOptions): unit = 
+        override this.Write (writer: Text.Json.Utf8JsonWriter, value: 'TDiscriminatedUnion, _options: Text.Json.JsonSerializerOptions): unit = 
             writer.WriteStringValue(value.ToString())
 
     /// JSON converter  for discriminated unions that only have cases with no fields.
@@ -42,7 +42,7 @@ module internal FSharpJsonConverter =
             FSharpType.IsUnion typeToConvert 
             && (FSharpType.GetUnionCases typeToConvert |> Array.forall (fun typ -> typ.GetFields().Length = 0))
 
-        override this.CreateConverter (typeToConvert: Type, options: JsonSerializerOptions): JsonConverter =
+        override this.CreateConverter (typeToConvert: Type, _options: JsonSerializerOptions): JsonConverter =
             let converterType = typedefof<SimpleDUConverter<_>>
             Activator.CreateInstance(
                 converterType.MakeGenericType(Array.singleton typeToConvert),

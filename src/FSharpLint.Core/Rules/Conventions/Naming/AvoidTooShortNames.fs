@@ -11,7 +11,7 @@ open FSharpLint.Rules.Helper
 let private isIdentifierTooShort (identifier: string) =
     identifier.Length < 2 && not (identifier.StartsWith '_')
 
-let private checkIdentifierPart (identifier:Ident) (idText:string) =
+let private checkIdentifierPart (idText:string) =
     let formatError errorName =
         String.Format(Resources.GetString errorName, idText)
 
@@ -19,7 +19,7 @@ let private checkIdentifierPart (identifier:Ident) (idText:string) =
 
 let private checkIdentifier (identifier:Ident) (idText:string) =
     if isIdentifierTooShort idText then
-        checkIdentifierPart identifier idText
+        checkIdentifierPart idText
         |> Array.map (fun message ->
             { Range = identifier.idRange
               Message = message

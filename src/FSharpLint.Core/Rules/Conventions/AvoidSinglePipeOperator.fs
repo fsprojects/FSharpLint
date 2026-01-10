@@ -29,7 +29,7 @@ let runner (args: AstNodeRuleParams) =
             | _ -> false
 
         match expr with
-        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, appRange) when isSingleLine argExpr.Range ->
+        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _appRange) when isSingleLine argExpr.Range ->
             match funcExpr with
             | ExpressionUtilities.Identifier([ ident ], _) ->
                 if ident.idText = "op_PipeRight" then

@@ -25,9 +25,9 @@ let private runner (args: AstNodeRuleParams) =
                 | Some id when id = ident.idText ->
                     generateError suggestedFix range
                 | _ -> Array.empty
-            | SynExpr.LongIdent (_, SynLongIdent (id, _, _), _, range) -> generateError suggestedFix range
+            | SynExpr.LongIdent (_, SynLongIdent (_id, _, _), _, range) -> generateError suggestedFix range
             | _ -> Array.empty
-        | SynExpr.TryWith (expressions, clauseList, _range, _, _, _) as expr ->
+        | SynExpr.TryWith (_expressions, clauseList, _range, _, _, _) ->
             clauseList
             |> List.toArray
             |> Array.collect (fun clause ->

@@ -337,7 +337,7 @@ module Ast =
             addMany [Else elseExpr; Expression body; Expression cond]
         | SynExpr.IfThenElse(cond, body, None, _, _, _, _) ->
             addMany [Expression body; Expression cond]
-        | SynExpr.InterpolatedString(contents, _, range) -> 
+        | SynExpr.InterpolatedString(contents, _, _range) ->
             List.iter (
                 function
                     | SynInterpolatedStringPart.String _ -> ()

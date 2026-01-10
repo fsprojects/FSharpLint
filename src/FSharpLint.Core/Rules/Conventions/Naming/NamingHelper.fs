@@ -362,7 +362,7 @@ let isModule (moduleKind:SynModuleOrNamespaceKind) =
     | SynModuleOrNamespaceKind.GlobalNamespace -> false
 
 /// Is module name implicitly created from file name?
-let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, range, _)) =
+let isImplicitModule (SynModuleOrNamespace.SynModuleOrNamespace(longIdent, _, moduleKind, _, _, _, _, _range, _)) =
     let zeroLengthRange (range:Range) =
         (range.EndColumn - range.StartColumn) = 0 && range.StartLine = range.EndLine
 
