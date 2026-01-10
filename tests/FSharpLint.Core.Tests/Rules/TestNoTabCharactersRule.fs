@@ -11,7 +11,7 @@ open FSharpLint.Framework.Rules
 type TestNoTabCharactersRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
+    override this.Parse (input:string, ?fileName:string, ?_checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
