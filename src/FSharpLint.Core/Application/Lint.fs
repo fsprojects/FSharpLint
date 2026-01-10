@@ -308,32 +308,6 @@ module Lint =
 
         ReachedEnd(fileInfo.File, Seq.toList fileWarnings) |> lintInfo.ReportLinterProgress
 
-    let private runProcess (workingDir:string) (exePath:string) (args:string) =
-        let psi = 
-            System.Diagnostics.ProcessStartInfo(
-                FileName = exePath,
-                WorkingDirectory = workingDir,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                Arguments = args,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            )
-
-        use proc = new System.Diagnostics.Process(StartInfo = psi)
-        let sbOut = System.Text.StringBuilder()
-        proc.OutputDataReceived.Add(fun ea -> sbOut.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
-        let sbErr = System.Text.StringBuilder()
-        proc.ErrorDataReceived.Add(fun ea -> sbErr.AppendLine(ea.Data) |> ignore<Text.StringBuilder>)
-        proc.Start() |> ignore<bool>
-        proc.BeginOutputReadLine()
-        proc.BeginErrorReadLine()
-        proc.WaitForExit()
-
-        let exitCode = proc.ExitCode
-
-        (exitCode, (workingDir, exePath, args))
-
     let getProjectInfo (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         let errorMessageFromNotifications notifications =
             let extractError = function

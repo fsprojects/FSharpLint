@@ -32,8 +32,6 @@ let private validateCondition (maxBooleanOperators:int) condition =
         | _ ->
             total
 
-    let ruleName = "MaxNumberOfBooleanOperatorsInCondition"
-
     let numberOfBooleanOperators = countBooleanOperators 0 condition
 
     if numberOfBooleanOperators > maxBooleanOperators then

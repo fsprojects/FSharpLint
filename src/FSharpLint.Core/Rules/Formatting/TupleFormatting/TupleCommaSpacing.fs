@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper
 
 // Check for single space after commas in tuple.
-let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) tupleRange _ =
+let checkTupleCommaSpacing (args:AstNodeRuleParams) (tupleExprs:SynExpr list) _tupleRange _ =
     let choose (expr: SynExpr) (nextExpr: SynExpr) = 
       if expr.Range.EndLine = nextExpr.Range.StartLine && expr.Range.EndColumn + 2 <> nextExpr.Range.StartColumn then
         let commaRange = Range.mkRange String.Empty expr.Range.End nextExpr.Range.Start

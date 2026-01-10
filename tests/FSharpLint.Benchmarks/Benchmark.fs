@@ -27,7 +27,7 @@ type Benchmark () =
     let basePath = ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".." </> ".."
     let sourceFile = basePath </> "TypeChecker.fs"
 
-    let (fileInfo, lines) =
+    let (fileInfo, _lines) =
         let text = File.ReadAllText sourceFile
         let tree = generateAst text sourceFile
         ({ Ast = tree; Source = text; TypeCheckResults = None; ProjectCheckResults = None }, String.toLines text |> Array.toList)
