@@ -680,7 +680,7 @@ let defaultConfiguration =
     let assembly = typeof<Rules.Rule>.GetTypeInfo().Assembly
     let resourceName = 
         Assembly.GetExecutingAssembly().GetManifestResourceNames()
-        |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith("fsharplint.json", System.StringComparison.Ordinal))
+        |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith(SettingsFileName, System.StringComparison.Ordinal))
         |> Option.defaultWith (fun () -> failwith "Could not get resource name")
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
