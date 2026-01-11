@@ -55,7 +55,7 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
                 }
         | SynExpr.App (_, _, funcExpr, _, range) ->
             checkExpression funcExpr range returnEmptyArray
-        | SynExpr.LetOrUse (_, _, _, body, range, _) ->
+        | SynExpr.LetOrUse (_, _, _, false, _, body, range, _) ->
             checkExpression body range returnEmptyArray
         | _ -> Array.empty)
         (continuation ())
