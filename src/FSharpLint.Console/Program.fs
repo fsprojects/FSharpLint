@@ -41,7 +41,7 @@ with
 // TODO: investigate erroneous warning on this type definition
 // fsharplint:disable UnionDefinitionIndentation
 and private LintArgs =
-    | [<MainCommand; Mandatory>] Target of target:string
+    | [<MainCommand; Mandatory; Unique>] Target of target:string
     | [<AltCommandLine("-l")>] Lint_Config of lintConfig:string
     | File_Type of FileType
 // fsharplint:enable UnionDefinitionIndentation
@@ -53,6 +53,11 @@ with
             | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
+
+let errorHandler = ProcessExiter(colorizer = function
+    | ErrorCode.HelpText -> None
+    | _ -> Some ConsoleColor.Red)
+let private parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
 
 /// Expands a wildcard pattern to a list of matching files.
 /// Supports recursive search using ** (e.g., "**/*.fs" or "src/**/*.fs")
@@ -153,6 +158,12 @@ let private lint
         }
 
     let target = lintArgs.GetResult Target
+
+    if target.StartsWith "-" then
+        let usage = parser.PrintUsage()
+        handleError <| sprintf "ERROR: unrecognized argument: '%s'.%s%s" target Environment.NewLine usage
+        exit <| int exitCode
+
     let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
     try
@@ -202,6 +213,8 @@ let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.
 
     match arguments.GetSubCommand() with
     | Lint lintArgs ->
+        let target = lintArgs.GetResult Target
+
         lint lintArgs output toolsPath
     | _ ->
         ExitCode.Failure
@@ -212,10 +225,6 @@ let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrent
 
 [<EntryPoint>]
 let main argv =
-    let errorHandler = ProcessExiter(colorizer = function
-        | ErrorCode.HelpText -> None
-        | _ -> Some ConsoleColor.Red)
-    let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults toolsPath
     |> int
