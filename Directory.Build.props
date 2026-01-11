@@ -5,7 +5,12 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DebugType>embedded</DebugType>
-    <WarnOn>FS1182</WarnOn>
+    <WarnOn>
+      FS0193
+      ;FS1182
+      ;FS3218
+      ;FS3390
+    </WarnOn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
