@@ -17,10 +17,6 @@ type private MultilineCommentMarker =
     | Begin of int
     | End of int
 
-let private error name lineCount actual =
-    let errorFormatString = Resources.GetString("RulesSourceLengthError")
-    String.Format(errorFormatString, name, lineCount, actual)
-
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 
 let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
@@ -38,26 +34,30 @@ let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker
         | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
         | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
-let private stripMultilineComments (source: string) =
-    let markers = 
-        multilineCommentMarkerRegex.Matches source
-        |> Seq.map (fun markerMatch -> 
-            let index = markerMatch.Index
-            if source.[index] = '(' then
-                Begin index
-            else
-                End index)
-        |> Seq.sortBy (function | Begin index -> index | End index -> index)
-        |> Seq.toList
+let checkSourceLengthRule (config:Config) range fileContents errorName (skipRanges: array<Range>) =
+    let error name lineCount actual =
+        let errorFormatString = Resources.GetString("RulesSourceLengthError")
+        String.Format(errorFormatString, name, lineCount, actual)
 
-    getTopLevelBalancedPairs markers List.Empty
-    |> List.fold
-        (fun (currSource: string) (startIndex, endIndex) ->
-            currSource.Substring(0, startIndex) 
-            + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
-        source
+    let stripMultilineComments (source: string) =
+        let markers = 
+            multilineCommentMarkerRegex.Matches source
+            |> Seq.map (fun markerMatch -> 
+                let index = markerMatch.Index
+                if source.[index] = '(' then
+                    Begin index
+                else
+                    End index)
+            |> Seq.sortBy (function | Begin index -> index | End index -> index)
+            |> Seq.toList
 
-let checkSourceLengthRule (config:Config) range fileContents errorName =
+        getTopLevelBalancedPairs markers List.Empty
+        |> List.fold
+            (fun (currSource: string) (startIndex, endIndex) ->
+                currSource.Substring(0, startIndex) 
+                + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
+            source
+
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
         let sourceCode =
@@ -72,7 +72,13 @@ let checkSourceLengthRule (config:Config) range fileContents errorName =
             |> Seq.filter (fun line -> line.Trim().Length = 0)
             |> Seq.length
 
-        let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount
+        let skippedLinesCount =
+            skipRanges
+            |> Seq.collect (fun range -> seq { range.StartLine .. range.EndLine })
+            |> Seq.distinct
+            |> Seq.length
+
+        let skipResult = sourceCodeLines.Length - commentLinesCount - blankLinesCount - skippedLinesCount
         if skipResult > config.MaxLines then
             Array.singleton
                 {
