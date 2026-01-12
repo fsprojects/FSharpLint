@@ -56,7 +56,7 @@ type TestConsoleApplication() =
             abstract member PathName : string
         """
 
-        let (returnCode, errors) = main [| "lint"; input |]
+        let (returnCode, errors) = main [| "lint"; "--file-type"; "source"; input |]
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
@@ -78,7 +78,7 @@ type TestConsoleApplication() =
             abstract member PathName : string
         """
 
-        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; "--file-type"; "source"; input |]
 
         Assert.AreEqual(int ExitCode.Success, returnCode)
         Assert.AreEqual(Set.empty<string>, errors)
@@ -92,7 +92,7 @@ type TestConsoleApplication() =
             abstract member PathName : string
         """
 
-        let (returnCode, errors) = main [| "lint"; input |]
+        let (returnCode, errors) = main [| "lint"; "--file-type"; "source"; input |]
 
         Assert.AreEqual(int ExitCode.Success, returnCode)
         Assert.AreEqual(Set.empty<string>, errors)
@@ -114,7 +114,7 @@ type TestConsoleApplication() =
         type X = int Generic
         """
 
-        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; "--file-type"; "source"; input |]
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
@@ -128,8 +128,6 @@ type TestFileTypeInference() =
     [<TestCase("MySolution.sln", FileType.Solution, TestName = "inferFileType must recognize .sln files as Solution type")>]
     [<TestCase("MySolution.slnx", FileType.Solution, TestName = "inferFileType must recognize .slnx files as Solution type")>]
     [<TestCase("MySolution.slnf", FileType.Solution, TestName = "inferFileType must recognize .slnf files as Solution type")>]
-    [<TestCase("unknown.txt", FileType.Source, TestName = "inferFileType must treat unknown extensions as Source type")>]
-    [<TestCase("noextension", FileType.Source, TestName = "inferFileType must treat files without extensions as Source type")>]
     [<TestCase("src/MyProject/Program.fs", FileType.File, TestName = "inferFileType must handle .fs files in directories correctly")>]
     [<TestCase(@"C:\Projects\MySolution.slnx", FileType.Solution, TestName = "inferFileType must handle .slnx files with full paths correctly")>]
     [<TestCase(@"C:\Projects\MySolution.slnf", FileType.Solution, TestName = "inferFileType must handle .slnf files with full paths correctly")>]
@@ -140,7 +138,14 @@ type TestFileTypeInference() =
     [<TestCase("test?.fs", FileType.Wildcard, TestName = "inferFileType must recognize wildcard patterns with ? as Wildcard type")>]
     member _.``File type inference test cases``(filename: string, expectedType: int) =
         let result = FSharpLint.Console.Program.inferFileType filename
-        let expectedType = enum<FileType>(expectedType)
+        let expectedType = Some <| enum<FileType>(expectedType)
+        Assert.AreEqual(expectedType, result)
+
+    [<TestCase("unknown.txt", TestName = "inferFileType must treat unknown extensions as undecided")>]
+    [<TestCase("noextension", TestName = "inferFileType must treat files without extensions as undecided")>]
+    member _.``File type inference undecided test cases``(filename: string) =
+        let result = FSharpLint.Console.Program.inferFileType filename
+        let expectedType = None
         Assert.AreEqual(expectedType, result)
 
 [<TestFixture>]

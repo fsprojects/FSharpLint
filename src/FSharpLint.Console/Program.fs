@@ -110,17 +110,17 @@ let internal containsWildcard (target:string) =
     target.Contains("*") || target.Contains("?")
 
 /// Infers the file type of the target based on its file extension.
-let internal inferFileType (target:string) =
+let internal inferFileType (target:string) : Option<FileType> =
     if containsWildcard target then
-        FileType.Wildcard
+        Some FileType.Wildcard
     else if target.EndsWith ".fs" || target.EndsWith ".fsx" then
-        FileType.File
+        Some FileType.File
     else if target.EndsWith ".fsproj" then
-        FileType.Project
+        Some FileType.Project
     else if target.EndsWith ".slnx" || target.EndsWith ".slnf" || target.EndsWith ".sln" then
-        FileType.Solution
+        Some FileType.Solution
     else
-        FileType.Source
+        None
 
 let private lint
     (lintArgs: ParseResults<LintArgs>)
@@ -164,15 +164,15 @@ let private lint
         handleError <| sprintf "ERROR: unrecognized argument: '%s'.%s%s" target Environment.NewLine usage
         exit <| int exitCode
 
-    let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+    let fileType = lintArgs.TryGetResult File_Type |> Option.orElse (inferFileType target)
 
     try
         let lintResult =
             match fileType with
-            | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
-            | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
-            | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
-            | FileType.Wildcard ->
+            | Some FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+            | Some FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
+            | Some FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
+            | Some FileType.Wildcard ->
                 output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                 let files = expandWildcard target
                 if List.isEmpty files then
@@ -181,12 +181,13 @@ let private lint
                 else
                     output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
                     Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
-            | FileType.Project
-            | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
+            | Some FileType.Project -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
+            | Some unknownFileType -> failwith $"Unknown file type: {unknownFileType}"
+            | None -> LintResult.Failure (FailedToInferInputType target)
         handleLintResult lintResult
     with
     | exn ->
-        let target = if fileType = FileType.Source then "source" else target
+        let target = if fileType = Some FileType.Source then "source" else target
         handleError
             $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
 

@@ -57,6 +57,9 @@ module Lint =
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
 
+        /// Failed to infer input type from target
+        | FailedToInferInputType of string
+
         member this.Description
             with get() =
                 let getParseFailureReason = function
@@ -83,6 +86,8 @@ module Lint =
                 | FailedToParseFilesInProject failures ->
                     let failureReasons = String.Join("\n", failures |> List.map getParseFailureReason)
                     $"Lint failed to parse files. Failed with: {failureReasons}"
+                | FailedToInferInputType target ->
+                    $"Input type could not be inferred from target '{target}'. Explicitly set input type using --file-type parameter."
 
     [<NoComparison>]
     type Result<'SuccessType> =
