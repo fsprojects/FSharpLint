@@ -46,10 +46,19 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
         let rangeIncludedsDefinitionsBeforeCurrent =
             rangeIncludedsDefinitions definitionsBeforeCurrent
         
-        let processBinding binding =
-            match binding with
-            | SynBinding(_, _, _, _, _, _, _, _, _, _, range, _, _) ->
-                rangeIncludedsDefinitionsBeforeCurrent range
+        let processBinding (binding: SynBinding) =
+            if ExpressionUtilities.rangeContainsOtherRange binding.RangeOfBindingWithRhs identifier.idRange then
+                // inside binding's scope
+                rangeIncludedsDefinitionsBeforeCurrent binding.RangeOfHeadPattern
+            else
+                // outside binding's scope
+                match binding with
+                | SynBinding(_, _, _, _, _, _, _, headPat, _, _, _, _, _) ->
+                    match headPat with
+                    | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange
+                    | SynPat.LongIdent(SynLongIdent([ ident ], _, _), _, _, _, _, _) -> 
+                        rangeIncludedsDefinitionsBeforeCurrent ident.idRange
+                    | _ -> false
 
         let processArgs (args: SynSimplePats) =
             args
@@ -84,25 +93,11 @@ let private checkIdentifier (args: AstNodeRuleParams) (identifier: Ident) : arra
             | SynPat.Typed(pat, _, _) -> processPattern definitions pat
             | _ -> false
 
-        let processParentBinding (binding: SynBinding) =
-            if ExpressionUtilities.rangeContainsOtherRange binding.RangeOfBindingWithRhs identifier.idRange then
-                // inside binding's scope
-                rangeIncludedsDefinitionsBeforeCurrent binding.RangeOfHeadPattern
-            else
-                // outside binding's scope
-                match binding with
-                | SynBinding(_, _, _, _, _, _, _, headPat, _, _, _, _, _) ->
-                    match headPat with
-                    | SynPat.Named(SynIdent(ident, _), _, _, _) -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange
-                    | SynPat.LongIdent(SynLongIdent(identParts, _, _), _, _, _, _, _) -> 
-                        identParts |> List.exists (fun ident -> rangeIncludedsDefinitionsBeforeCurrent ident.idRange)
-                    | _ -> false
-
         let processModuleDeclaration (moduleDecl: SynModuleDecl) =
             match moduleDecl with
             | SynModuleDecl.Let(_, bindings, _) ->
                 bindings 
-                |> List.exists processParentBinding
+                |> List.exists processBinding
             | _ -> false
 
         let processAstNode (node: AstNode) =
