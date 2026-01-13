@@ -17,20 +17,21 @@ type internal RecursiveFunctionInfo =
         Attributes: SynAttributes
     }
 
+let internal getRecursiveFunctionsFromBindings (bindings: List<SynBinding>) =
+    bindings 
+    |> List.choose 
+        (fun binding -> 
+            match binding with
+            | SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent (SynLongIdent([ident], _, _), _, _, _, _, range), _, body, _, _, _) ->
+                Some { Identifier = ident; Range = range; Body = body; Attributes = attributes } 
+            | _ -> None)
+
 let internal (|RecursiveFunctions|_|) (astNode: AstNode)  =
     match astNode with
     | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _)) ->
-        let recursiveBindings =
-            bindings 
-            |> List.choose 
-                (fun binding -> 
-                    match binding with
-                    | SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent (SynLongIdent([ident], _, _), _, _, _, _, range), _, body, _, _, _) ->
-                        Some { Identifier = ident; Range = range; Body = body; Attributes = attributes } 
-                    | _ -> None)
-        match recursiveBindings with
+        match getRecursiveFunctionsFromBindings bindings with
         | [] -> None
-        | _ -> Some recursiveBindings
+        | recursiveBindings -> Some recursiveBindings
     | _ -> None
 
 let internal functionIsCalledInOneOf (checkInfo: FSharpCheckFileResults)
