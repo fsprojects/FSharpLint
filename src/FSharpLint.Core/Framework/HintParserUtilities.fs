@@ -105,6 +105,7 @@ module MergeSyntaxTrees =
         | Constant.UIntPtr(_) -> SyntaxHintNode.ConstantUIntPtr
         | Constant.UserNum(_) -> SyntaxHintNode.ConstantUserNum
 
+    [<TailCall>]
     let rec private getExprKey =
         function
         | Expression.FunctionApplication(_)
@@ -126,6 +127,7 @@ module MergeSyntaxTrees =
         | Expression.Wildcard -> SyntaxHintNode.Wildcard
         | Expression.Variable(_) -> SyntaxHintNode.Variable
 
+    [<TailCall>]
     let rec private getPatternKey =
         function
         | Pattern.Cons(_) -> SyntaxHintNode.Cons
@@ -140,11 +142,13 @@ module MergeSyntaxTrees =
         | Pattern.Array(_) -> SyntaxHintNode.ArrayOrList
         | Pattern.Null -> SyntaxHintNode.Null
 
+    [<TailCall>]
     let rec private getKey =
         function
         | HintExpr(expr) -> getExprKey expr
         | HintPat(pattern) -> getPatternKey pattern
 
+    [<TailCall>]
     let rec private getChildren =
         function
         | HintExpr(Expression.Parentheses(expr)) -> getChildren <| HintExpr expr
@@ -224,18 +228,20 @@ module MergeSyntaxTrees =
         | HintPat(Pattern.Parentheses(expr)) -> getHashCode <| HintPat expr
         | _ -> 0
 
+    [<TailCall>]
+    let rec private depthFirstTraversal stack (nodes: Queue<HintNode*int>) =
+        match stack with
+        | [] -> ()
+        | (currentExpr, currentDepth) :: rest ->
+            nodes.Enqueue(currentExpr, currentDepth)
+            let children = getChildren currentExpr
+            let childNodes = children |> List.map (fun child -> (child, currentDepth + 1))
+            depthFirstTraversal (childNodes @ rest) nodes
+
     let private hintToList (hint: Hint) =
         let nodes = Queue<_>()
 
-        let rec depthFirstTraversal expr depth =
-            let children = getChildren expr
-
-            nodes.Enqueue(expr, depth)
-
-            for child in children do
-                depthFirstTraversal child (depth + 1)
-
-        depthFirstTraversal hint.MatchedNode 0
+        depthFirstTraversal (List.singleton (hint.MatchedNode, 0)) nodes
 
         (Seq.toList nodes, hint)
 
@@ -244,21 +250,22 @@ module MergeSyntaxTrees =
     type private TransposedNode =
         | HintNode of key: HintNode * depth: int * rest: HintList
         | EndOfHint of Hint
+    
+    [<TailCall>]
+    let rec private transposeHeadRec builtList =
+        function
+        | (((key, depth) :: tail), hint) :: rest ->
+            let restOfHintList = (tail, hint)
+            let next = HintNode(key, depth, restOfHintList) :: builtList
+            transposeHeadRec next rest
+        | ([], hint) :: rest ->
+            let next = EndOfHint(hint) :: builtList
+            transposeHeadRec next rest
+        | [] -> builtList
 
     /// Gets the head of each given list
     let private transposeHead hintLists =
-        let rec transposeHead builtList =
-            function
-            | (((key, depth) :: tail), hint) :: rest ->
-                let restOfHintList = (tail, hint)
-                let next = HintNode(key, depth, restOfHintList) :: builtList
-                transposeHead next rest
-            | ([], hint) :: rest ->
-                let next = EndOfHint(hint) :: builtList
-                transposeHead next rest
-            | [] -> builtList
-
-        transposeHead List.Empty hintLists
+        transposeHeadRec List.Empty hintLists
 
     let isAnyMatch =
         function
@@ -269,6 +276,7 @@ module MergeSyntaxTrees =
         items |> Seq.map (fun (_, _, _, hint) -> hint) |> Seq.toList
 
     let mergeHints hints =
+// fsharplint:disable EnsureTailCallDiagnosticsInRecursiveFunctions
         let rec getEdges transposed =
             let map =
                 transposed
@@ -319,6 +327,7 @@ module MergeSyntaxTrees =
                 Edges = edges
                 MatchedHint = matchedHints
             }
+// fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions
 
         let transposed = hints |> List.map hintToList |> transposeHead
 

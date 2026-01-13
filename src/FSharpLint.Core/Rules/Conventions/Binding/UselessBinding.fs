@@ -9,6 +9,13 @@ open FSharp.Compiler.CodeAnalysis
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+[<TailCall>]
+let rec private matchingIdentifier (bindingIdent:Ident) = function
+    | SynExpr.Paren(expr, _, _, _) ->
+        matchingIdentifier bindingIdent expr
+    | SynExpr.Ident(ident) when ident.idText = bindingIdent.idText -> Some ident
+    | _ -> None
+
 let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pattern expr range maybeSuggestedFix =
     match checkInfo with
     | Some checkInfo ->
@@ -30,12 +37,6 @@ let private checkForUselessBinding (checkInfo:FSharpCheckFileResults option) pat
             match symbol with
             | Some(symbol) -> isNotMutable symbol
             | None -> false
-
-        let rec matchingIdentifier (bindingIdent:Ident) = function
-            | SynExpr.Paren(expr, _, _, _) ->
-                matchingIdentifier bindingIdent expr
-            | SynExpr.Ident(ident) when ident.idText = bindingIdent.idText -> Some ident
-            | _ -> None
 
         findBindingIdentifier pattern
         |> Option.bind (fun bindingIdent -> matchingIdentifier bindingIdent expr)

@@ -95,31 +95,32 @@ module IgnoreFiles =
             |> Array.toList
             |> fun segments -> Ignore(segments, IsDirectory(isDirectory))
 
-    let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
-        let rec getRemainingGlobSeqForMatches (pathSegment:string) (globSeqs:Regex list list) =
+    [<TailCall>]
+    let rec private doesGlobSeqMatchPathSeq globs isDirectory remainingPath currentlyMatchingGlobs =
+        let getRemainingGlobSeqForMatches (pathSegment:string) (globSeqs:Regex list list) =
             List.choose 
                 (function
                     | (globSegment: Regex)::remaining when globSegment.IsMatch(pathSegment) -> Some remaining
                     | _ -> None) 
                 globSeqs
 
-        let rec doesGlobSeqMatchPathSeq remainingPath currentlyMatchingGlobs =
-            match remainingPath with
-            | [_] when isDirectory -> false
-            | currentSegment::remaining ->
-                let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+        match remainingPath with
+        | [_] when isDirectory -> false
+        | currentSegment::remaining ->
+            let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
 
-                let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
+            let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
 
-                let aGlobWasCompletelyMatched = List.exists List.isEmpty currentlyMatchingGlobs
+            let aGlobWasCompletelyMatched = List.exists List.isEmpty currentlyMatchingGlobs
 
-                let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
+            let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
 
-                if matched then true
-                else doesGlobSeqMatchPathSeq remaining currentlyMatchingGlobs
-            | [] -> false
+            if matched then true
+            else doesGlobSeqMatchPathSeq globs isDirectory remaining currentlyMatchingGlobs
+        | [] -> false
 
-        doesGlobSeqMatchPathSeq path List.Empty
+    let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
+        doesGlobSeqMatchPathSeq globs isDirectory path List.Empty
 
     let shouldFileBeIgnored (ignorePaths:Ignore list) (filePath:string) =
         let segments = filePath.Split Path.DirectorySeparatorChar |> Array.toList

@@ -28,29 +28,31 @@ let private checkIdentifier (identifier:Ident) (idText:string) =
     else
         Array.empty
 
+[<TailCall>]
+let rec private getParameterWithBelowMinimumLengthInner patArray acc =
+    match patArray with
+    | SynPat.Named(SynIdent(ident, _), _, _, _)::tail ->
+        if isIdentifierTooShort ident.idText then
+            Array.singleton (ident, ident.idText, None) |> Array.append acc |> getParameterWithBelowMinimumLengthInner tail
+        else
+            getParameterWithBelowMinimumLengthInner tail acc
+    | SynPat.Paren(pat, _)::tail ->
+        match pat with
+        | SynPat.Typed(typedPat, _, _) ->
+            getParameterWithBelowMinimumLengthInner (typedPat::tail) acc
+        | SynPat.Tuple(_, elementPats, _, _) ->
+            getParameterWithBelowMinimumLengthInner elementPats acc
+        | _ -> getParameterWithBelowMinimumLengthInner (pat::tail) acc
+    | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
+        match argPats with
+        | SynArgPats.Pats(pats) ->
+            getParameterWithBelowMinimumLengthInner (List.append pats tail) acc
+        | _ ->
+            getParameterWithBelowMinimumLengthInner tail acc
+    | _ -> acc
+
 let private getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * string * (unit -> bool) option) array =
-    let rec loop patArray acc =
-        match patArray with
-        | SynPat.Named(SynIdent(ident, _), _, _, _)::tail ->
-            if isIdentifierTooShort ident.idText then
-                Array.singleton (ident, ident.idText, None) |> Array.append acc |> loop tail
-            else
-                loop tail acc
-        | SynPat.Paren(pat, _)::tail ->
-            match pat with
-            | SynPat.Typed(typedPat, _, _) ->
-                loop (typedPat::tail) acc
-            | SynPat.Tuple(_, elementPats, _, _) ->
-                loop elementPats acc
-            | _ -> loop (pat::tail) acc
-        | SynPat.LongIdent(_, _, _, argPats, _, _)::tail ->
-            match argPats with
-            | SynArgPats.Pats(pats) ->
-                loop (List.append pats tail) acc
-            | _ ->
-                loop tail acc
-        | _ -> acc
-    loop pats Array.empty
+    getParameterWithBelowMinimumLengthInner pats Array.empty
 
 let private getIdentifiers (args:AstNodeRuleParams) =
     match args.AstNode with

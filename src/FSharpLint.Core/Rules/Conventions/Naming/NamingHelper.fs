@@ -253,54 +253,54 @@ type AccessControlLevel =
     | Private
     | Internal
 
-let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) index =
+[<TailCall>]
+let rec private getAccessibility (syntaxArray: array<AbstractSyntaxArray.Node>) state isPrivateWhenReachedBinding index =
     let resolveAccessControlLevel = function
         | Some(SynAccess.Public _) | None -> AccessControlLevel.Public
         | Some(SynAccess.Private _) -> AccessControlLevel.Private
         | Some(SynAccess.Internal _) -> AccessControlLevel.Internal
+    if index = 0 then state
+    else
+        let node = syntaxArray.[index]
+        match node.Actual with
+        | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
+        | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
+        | UnionCase(SynUnionCase(_, _, _, _, access, _, _))
+        | Field(SynField(_, _, _, _, _, _, access, _, _))
+        | ComponentInfo(SynComponentInfo(_, _, _, _, _, _, access, _))
+        | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _, _))
+        | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
+        | Pattern(SynPat.Named(_, _, access, _))
+        | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
+            getAccessibility syntaxArray (resolveAccessControlLevel access) isPrivateWhenReachedBinding node.ParentIndex
+        | TypeSimpleRepresentation(_)
+        | Pattern(_) -> AccessControlLevel.Public
+        | MemberDefinition(_) ->
+            if isPrivateWhenReachedBinding then AccessControlLevel.Private
+            else getAccessibility syntaxArray state isPrivateWhenReachedBinding node.ParentIndex
+        | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _, _)) ->
+            if isPrivateWhenReachedBinding then AccessControlLevel.Private
+            else getAccessibility syntaxArray (resolveAccessControlLevel access) true node.ParentIndex
+        | EnumCase(_)
+        | TypeRepresentation(_)
+        | Type(_)
+        | Match(_)
+        | ConstructorArguments(_)
+        | TypeParameter(_)
+        | InterfaceImplementation(_)
+        | ModuleDeclaration(_)
+        | Identifier(_)
+        | SimplePattern(_)
+        | File(_)
+        | LambdaArg(_)
+        | SimplePatterns(_) -> getAccessibility syntaxArray state isPrivateWhenReachedBinding node.ParentIndex
+        | TypeDefinition(_)
+        | Else(_)
+        | LambdaBody(_)
+        | Expression(_) -> getAccessibility syntaxArray state true node.ParentIndex
 
-    let rec getAccessibility state isPrivateWhenReachedBinding index =
-        if index = 0 then state
-        else
-            let node = syntaxArray.[index]
-            match node.Actual with
-            | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Record(access, _, _))
-            | TypeSimpleRepresentation(SynTypeDefnSimpleRepr.Union(access, _, _))
-            | UnionCase(SynUnionCase(_, _, _, _, access, _, _))
-            | Field(SynField(_, _, _, _, _, _, access, _, _))
-            | ComponentInfo(SynComponentInfo(_, _, _, _, _, _, access, _))
-            | ModuleOrNamespace (SynModuleOrNamespace.SynModuleOrNamespace(_, _, _, _, _, _, access, _, _))
-            | ExceptionRepresentation(SynExceptionDefnRepr.SynExceptionDefnRepr(_, _, _, _, access, _))
-            | Pattern(SynPat.Named(_, _, access, _))
-            | Pattern(SynPat.LongIdent(_, _, _, _, access, _)) ->
-                getAccessibility (resolveAccessControlLevel access) isPrivateWhenReachedBinding node.ParentIndex
-            | TypeSimpleRepresentation(_)
-            | Pattern(_) -> AccessControlLevel.Public
-            | MemberDefinition(_) ->
-                if isPrivateWhenReachedBinding then AccessControlLevel.Private
-                else getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
-            | Binding(SynBinding(access, _, _, _, _, _, _, _, _, _, _, _, _)) ->
-                if isPrivateWhenReachedBinding then AccessControlLevel.Private
-                else getAccessibility (resolveAccessControlLevel access) true node.ParentIndex
-            | EnumCase(_)
-            | TypeRepresentation(_)
-            | Type(_)
-            | Match(_)
-            | ConstructorArguments(_)
-            | TypeParameter(_)
-            | InterfaceImplementation(_)
-            | ModuleDeclaration(_)
-            | Identifier(_)
-            | SimplePattern(_)
-            | File(_)
-            | LambdaArg(_)
-            | SimplePatterns(_) -> getAccessibility state isPrivateWhenReachedBinding node.ParentIndex
-            | TypeDefinition(_)
-            | Else(_)
-            | LambdaBody(_)
-            | Expression(_) -> getAccessibility state true node.ParentIndex
-
-    getAccessibility AccessControlLevel.Public false index
+let getAccessControlLevel (syntaxArray:AbstractSyntaxArray.Node []) index =
+    getAccessibility syntaxArray AccessControlLevel.Public false index
 
 
 /// Is an attribute with a given name?

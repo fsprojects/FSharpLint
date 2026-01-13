@@ -215,22 +215,23 @@ let rec private tryFindTypedExpression (range: Range) (expressions: List<FSharpE
         tryFindTypedExpression range rest
     | [] -> None
 
+[<TailCall>]
+let rec private getExpressions acc declarations =
+    match declarations with
+    | [] -> acc
+    | declaration :: rest ->
+        match declaration with
+        | FSharpImplementationFileDeclaration.Entity(_entity, subDecls) ->
+            getExpressions acc (subDecls @ rest)
+        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(_,_,body) -> 
+            getExpressions (body :: acc) rest
+        | _ -> 
+            getExpressions acc rest
+
 let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
     let expressions =
         match checkFile.ImplementationFile with
-        | Some implementationFile ->
-            let rec getExpressions declarations =
-                [
-                    for declaration in declarations do
-                        match declaration with
-                        | FSharpImplementationFileDeclaration.Entity(_entity, subDecls) ->
-                            yield! getExpressions subDecls
-                        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(_,_,body) -> 
-                            yield body
-                        | _ -> () 
-                ]
-                    
-            getExpressions implementationFile.Declarations
+        | Some implementationFile -> getExpressions List.empty implementationFile.Declarations
         | None -> List.empty
 
     tryFindTypedExpression range expressions

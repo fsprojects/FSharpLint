@@ -289,16 +289,17 @@ module AbstractSyntaxArray =
 
         result
 
-    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) index =
-        let rec getBreadcrumbs breadcrumbs index =
-            if index = 0 then
-                let node = syntaxArray.[index]
-                node.Actual::breadcrumbs
-            else if index < syntaxArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
-                let node = syntaxArray.[index]
-                getBreadcrumbs (node.Actual::breadcrumbs) node.ParentIndex
-            else
-                breadcrumbs
+    [<TailCall>]
+    let rec private getBreadcrumbsInner (syntaxArray:Node []) maxBreadcrumbs breadcrumbs index =
+        if index = 0 then
+            let node = syntaxArray.[index]
+            node.Actual::breadcrumbs
+        else if index < syntaxArray.Length && (List.length breadcrumbs) < maxBreadcrumbs then
+            let node = syntaxArray.[index]
+            getBreadcrumbsInner syntaxArray maxBreadcrumbs (node.Actual::breadcrumbs) node.ParentIndex
+        else
+            breadcrumbs
 
+    let getBreadcrumbs maxBreadcrumbs (syntaxArray:Node []) index =
         if index = 0 then List.Empty
-        else getBreadcrumbs List.Empty (syntaxArray.[index].ParentIndex) |> List.rev
+        else getBreadcrumbsInner syntaxArray maxBreadcrumbs List.Empty (syntaxArray.[index].ParentIndex) |> List.rev

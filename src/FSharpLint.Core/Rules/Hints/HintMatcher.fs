@@ -313,18 +313,18 @@ module private MatchExpression =
             let expressions = List.map AstNode.Expression exprs
             doExpressionsMatch expressions hintExprs arguments
         | _ -> NoMatch
+    
+    and [<TailCall>] innerDoExpressionsMatch args: HintMatch =
+        match args with
+        | head::tail -> 
+            head |> matchHintExpr (fun () -> innerDoExpressionsMatch tail)
+        | [] -> Match(List.Empty)
 
     and [<TailCall>] private doExpressionsMatch expressions hintExpressions (arguments:Arguments) =
         if List.length expressions = List.length hintExpressions then
             let subHints = 
                 (expressions, hintExpressions)
                 ||> List.map2 (fun expr hint -> arguments.SubHint(expr, hint))
-            
-            let rec innerDoExpressionsMatch args: HintMatch =
-                match args with
-                | head::tail -> 
-                    head |> matchHintExpr (fun () -> innerDoExpressionsMatch tail)
-                | [] -> Match(List.Empty)
 
             innerDoExpressionsMatch subHints
         else
@@ -474,16 +474,16 @@ module private MatchPattern =
         | Pattern.Array(_) ->
             matchArray (pattern, hint)
 
+    and [<TailCall>] innerDoPatternsMatch lst =
+        match lst with
+        | (pattern, hintExpression) :: tail ->
+            matchHintPattern
+                (fun () -> innerDoPatternsMatch tail)
+                (pattern, hintExpression)
+        | [] -> true
+
     and [<TailCall>] private doPatternsMatch patterns hintExpressions =
         if List.length patterns = List.length hintExpressions then
-            let rec innerDoPatternsMatch lst =
-                match lst with
-                | (pattern, hintExpression) :: tail ->
-                    matchHintPattern
-                        (fun () -> innerDoPatternsMatch tail)
-                        (pattern, hintExpression)
-                | [] -> true
-
             innerDoPatternsMatch (List.zip patterns hintExpressions)
         else
             false
