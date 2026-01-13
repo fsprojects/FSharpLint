@@ -105,6 +105,18 @@ let dog x =
     ()""")
         Assert.IsFalse this.ErrorsExist
 
+    [<Test>]
+    member this.NestedFunctionWithTooManyLines() =
+        this.Parse($"""
+module Program
+
+let dog x =
+    let foo y =
+        %s{generateNewLines FunctionLength 8}
+        ()
+    ()""")
+        Assert.IsTrue this.ErrorsExist
+
 [<Literal>]
 let LambdaFunctionLength = 5
 [<TestFixture>]
