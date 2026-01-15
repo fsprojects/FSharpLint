@@ -150,6 +150,18 @@ let bar target =
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
+    member this.``Should not produce error in lambda function when parameter with same name exists in another function``() =
+        this.Parse """
+let foo lines =
+    let bar line = 
+        line
+
+    lines
+    |> List.map (fun line -> line)"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
     member this.``Should not produce error when variable name starts with underscore``() =
         this.Parse """
 let _foo = 0
