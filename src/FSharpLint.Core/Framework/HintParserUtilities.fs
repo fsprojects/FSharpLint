@@ -59,7 +59,7 @@ module MergeSyntaxTrees =
 
     and [<CustomEquality; NoComparison>] Edges =
         {
-            Lookup: Dictionary<int, Node>
+            Lookup: Map<int, Node>
             AnyMatch: (char option * Node) list
         }
 
@@ -79,7 +79,7 @@ module MergeSyntaxTrees =
 
         static member Empty =
             {
-                Lookup = Dictionary<_, _>()
+                Lookup = Map.empty
                 AnyMatch = List.Empty
             }
 
@@ -270,15 +270,15 @@ module MergeSyntaxTrees =
 
     let mergeHints hints =
         let rec getEdges transposed =
-            let map = Dictionary<_, _>()
-
-            transposed
-            |> List.choose (function
-                | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest)
-                | EndOfHint(_) -> None)
-            |> List.filter (isAnyMatch >> not)
-            |> Seq.groupBy (fun (key, expr, _, _) -> Utilities.hash2 key (getHashCode expr))
-            |> Seq.iter (fun (hashcode, items) -> map.Add(hashcode, mergeHints (getHints items)))
+            let map =
+                transposed
+                |> List.choose (function
+                    | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest)
+                    | EndOfHint(_) -> None)
+                |> List.filter (isAnyMatch >> not)
+                |> Seq.groupBy (fun (key, expr, _, _) -> Utilities.hash2 key (getHashCode expr))
+                |> Seq.map (fun (hashcode, items) -> (hashcode, mergeHints (getHints items)))
+                |> Map.ofSeq
 
             let anyMatches =
                 transposed

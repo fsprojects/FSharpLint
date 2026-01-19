@@ -15,11 +15,6 @@ type TestMergeSyntaxTrees() =
 
     [<Test>]
     member _.``Merge two function applications of same function with diff arguments, merged list has common prefix till args.``() =
-        let toDictionary list =
-            let dictionary = Dictionary<int, Node>()
-            for (x, y) in list do dictionary.Add(x, y)
-            dictionary
-
         match (run phint "List.map id ===> id", run phint "List.map woof ===> woof") with
         | Success(hint, _, _), Success(hint2, _, _) ->
             let expectedEdges =
@@ -32,15 +27,15 @@ type TestMergeSyntaxTrees() =
                                     MatchedHint = [hint2] })
                                  (Utilities.hash2 SyntaxHintNode.Identifier "id",
                                   { Edges = Edges.Empty
-                                    MatchedHint = [hint] }) ] |> toDictionary
+                                    MatchedHint = [hint] }) ] |> Map.ofList
                              AnyMatch = [] }
-                         MatchedHint = [] }) ] |> toDictionary
+                         MatchedHint = [] }) ] |> Map.ofList
                   AnyMatch = [] }
 
             let expectedRoot =
                 { Lookup =
                     [(Utilities.hash2 SyntaxHintNode.FuncApp 0,
-                      { Edges = expectedEdges; MatchedHint = [] })] |> toDictionary
+                      { Edges = expectedEdges; MatchedHint = [] })] |> Map.ofList
                   AnyMatch = [] }
 
             let mergedHint = MergeSyntaxTrees.mergeHints [hint; hint2]
