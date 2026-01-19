@@ -41,7 +41,7 @@ with
 // TODO: investigate erroneous warning on this type definition
 // fsharplint:disable UnionDefinitionIndentation
 and private LintArgs =
-    | [<MainCommand; Mandatory>] Target of target:string
+    | [<MainCommand; Mandatory; Unique>] Target of target:string
     | [<AltCommandLine("-l")>] Lint_Config of lintConfig:string
     | File_Type of FileType
 // fsharplint:enable UnionDefinitionIndentation
@@ -53,6 +53,11 @@ with
             | File_Type _ -> "Input type the linter will run against. If this is not set, the file type will be inferred from the file extension."
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
+
+let errorHandler = ProcessExiter(colorizer = function
+    | ErrorCode.HelpText -> None
+    | _ -> Some ConsoleColor.Red)
+let private parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
 
 /// Expands a wildcard pattern to a list of matching files.
 /// Supports recursive search using ** (e.g., "**/*.fs" or "src/**/*.fs")
@@ -105,17 +110,17 @@ let internal containsWildcard (target:string) =
     target.Contains("*") || target.Contains("?")
 
 /// Infers the file type of the target based on its file extension.
-let internal inferFileType (target:string) =
+let internal inferFileType (target:string) : Option<FileType> =
     if containsWildcard target then
-        FileType.Wildcard
+        Some FileType.Wildcard
     else if target.EndsWith ".fs" || target.EndsWith ".fsx" then
-        FileType.File
+        Some FileType.File
     else if target.EndsWith ".fsproj" then
-        FileType.Project
+        Some FileType.Project
     else if target.EndsWith ".slnx" || target.EndsWith ".slnf" || target.EndsWith ".sln" then
-        FileType.Solution
+        Some FileType.Solution
     else
-        FileType.Source
+        None
 
 let private lint
     (lintArgs: ParseResults<LintArgs>)
@@ -153,15 +158,21 @@ let private lint
         }
 
     let target = lintArgs.GetResult Target
-    let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+
+    if target.StartsWith "-" then
+        let usage = parser.PrintUsage()
+        handleError <| sprintf "ERROR: unrecognized argument: '%s'.%s%s" target Environment.NewLine usage
+        exit <| int exitCode
+
+    let fileType = lintArgs.TryGetResult File_Type |> Option.orElse (inferFileType target)
 
     try
         let lintResult =
             match fileType with
-            | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
-            | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
-            | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
-            | FileType.Wildcard ->
+            | Some FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+            | Some FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
+            | Some FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
+            | Some FileType.Wildcard ->
                 output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                 let files = expandWildcard target
                 if List.isEmpty files then
@@ -170,12 +181,13 @@ let private lint
                 else
                     output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
                     Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
-            | FileType.Project
-            | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
+            | Some FileType.Project -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
+            | Some unknownFileType -> failwith $"Unknown file type: {unknownFileType}"
+            | None -> LintResult.Failure (FailedToInferInputType target)
         handleLintResult lintResult
     with
     | exn ->
-        let target = if fileType = FileType.Source then "source" else target
+        let target = if fileType = Some FileType.Source then "source" else target
         handleError
             $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
 
@@ -212,10 +224,6 @@ let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrent
 
 [<EntryPoint>]
 let main argv =
-    let errorHandler = ProcessExiter(colorizer = function
-        | ErrorCode.HelpText -> None
-        | _ -> Some ConsoleColor.Red)
-    let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
     start parseResults toolsPath
     |> int

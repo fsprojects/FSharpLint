@@ -105,6 +105,9 @@ module Lint =
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
         | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
 
+        /// Failed to infer input type from target
+        | FailedToInferInputType of string
+
         member Description: string
 
     type Context =
