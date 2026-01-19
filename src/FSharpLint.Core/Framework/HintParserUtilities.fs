@@ -105,6 +105,7 @@ module MergeSyntaxTrees =
         | Constant.UIntPtr(_) -> SyntaxHintNode.ConstantUIntPtr
         | Constant.UserNum(_) -> SyntaxHintNode.ConstantUserNum
 
+    [<TailCall>]
     let rec private getExprKey =
         function
         | Expression.FunctionApplication(_)
@@ -126,6 +127,7 @@ module MergeSyntaxTrees =
         | Expression.Wildcard -> SyntaxHintNode.Wildcard
         | Expression.Variable(_) -> SyntaxHintNode.Variable
 
+    [<TailCall>]
     let rec private getPatternKey =
         function
         | Pattern.Cons(_) -> SyntaxHintNode.Cons
@@ -140,11 +142,13 @@ module MergeSyntaxTrees =
         | Pattern.Array(_) -> SyntaxHintNode.ArrayOrList
         | Pattern.Null -> SyntaxHintNode.Null
 
+    [<TailCall>]
     let rec private getKey =
         function
         | HintExpr(expr) -> getExprKey expr
         | HintPat(pattern) -> getPatternKey pattern
 
+    [<TailCall>]
     let rec private getChildren =
         function
         | HintExpr(Expression.Parentheses(expr)) -> getChildren <| HintExpr expr
@@ -224,18 +228,20 @@ module MergeSyntaxTrees =
         | HintPat(Pattern.Parentheses(expr)) -> getHashCode <| HintPat expr
         | _ -> 0
 
+    [<TailCall>]
+    let rec private depthFirstTraversal stack (nodes: Queue<HintNode*int>) =
+        match stack with
+        | [] -> ()
+        | (currentExpr, currentDepth) :: rest ->
+            nodes.Enqueue(currentExpr, currentDepth)
+            let children = getChildren currentExpr
+            let childNodes = children |> List.map (fun child -> (child, currentDepth + 1))
+            depthFirstTraversal (childNodes @ rest) nodes
+
     let private hintToList (hint: Hint) =
         let nodes = Queue<_>()
 
-        let rec depthFirstTraversal expr depth =
-            let children = getChildren expr
-
-            nodes.Enqueue(expr, depth)
-
-            for child in children do
-                depthFirstTraversal child (depth + 1)
-
-        depthFirstTraversal hint.MatchedNode 0
+        depthFirstTraversal (List.singleton (hint.MatchedNode, 0)) nodes
 
         (Seq.toList nodes, hint)
 
@@ -244,21 +250,22 @@ module MergeSyntaxTrees =
     type private TransposedNode =
         | HintNode of key: HintNode * depth: int * rest: HintList
         | EndOfHint of Hint
+    
+    [<TailCall>]
+    let rec private transposeHeadRec builtList =
+        function
+        | (((key, depth) :: tail), hint) :: rest ->
+            let restOfHintList = (tail, hint)
+            let next = HintNode(key, depth, restOfHintList) :: builtList
+            transposeHeadRec next rest
+        | ([], hint) :: rest ->
+            let next = EndOfHint(hint) :: builtList
+            transposeHeadRec next rest
+        | [] -> builtList
 
     /// Gets the head of each given list
     let private transposeHead hintLists =
-        let rec transposeHead builtList =
-            function
-            | (((key, depth) :: tail), hint) :: rest ->
-                let restOfHintList = (tail, hint)
-                let next = HintNode(key, depth, restOfHintList) :: builtList
-                transposeHead next rest
-            | ([], hint) :: rest ->
-                let next = EndOfHint(hint) :: builtList
-                transposeHead next rest
-            | [] -> builtList
-
-        transposeHead List.Empty hintLists
+        transposeHeadRec List.Empty hintLists
 
     let isAnyMatch =
         function
@@ -268,19 +275,51 @@ module MergeSyntaxTrees =
     let getHints items =
         items |> Seq.map (fun (_, _, _, hint) -> hint) |> Seq.toList
 
-    let mergeHints hints =
-        let rec getEdges transposed =
-            let map =
+    type private BuildState =
+        | ProcessTransposed of transposed: TransposedNode list
+        | CollectMapResults of 
+            matchedHints: Hint list *
+            mapAcc: (int * Node) list *
+            pendingGroups: (int * (HintList) list) list *
+            anyMatchItems: (char option * HintList list) list
+        | CollectAnyMatchResults of
+            matchedHints: Hint list *
+            map: Map<int, Node> *
+            anyMatchAcc: (char option * Node) list *
+            pendingAnyMatch: (char option * HintList list) list
+        | BuildNodeFromResult of
+            hash: int *
+            items: (HintList) list
+        | BuildAnyNodeFromResult of
+            key: char option *
+            items: HintList list
+
+    [<TailCall>]
+    let rec private getEdgesRec stack result =
+        match (stack, result) with
+        | [], Some edges -> edges
+        | [], None -> Edges.Empty
+    
+        | ProcessTransposed(transposed) :: restStack, _ ->
+            let matchedHints =
+                transposed
+                |> List.choose (function
+                    | EndOfHint(hint) -> Some(hint)
+                    | HintNode(_) -> None)
+
+            let allItems =
                 transposed
                 |> List.choose (function
                     | HintNode(expr, depth, rest) -> Some(getKey expr, expr, depth, rest)
                     | EndOfHint(_) -> None)
-                |> List.filter (isAnyMatch >> not)
-                |> Seq.groupBy (fun (key, expr, _, _) -> Utilities.hash2 key (getHashCode expr))
-                |> Seq.map (fun (hashcode, items) -> (hashcode, mergeHints (getHints items)))
-                |> Map.ofSeq
 
-            let anyMatches =
+            let mapItems =
+                allItems
+                |> List.filter (isAnyMatch >> not)
+                |> List.groupBy (fun (key, expr, _, _) -> Utilities.hash2 key (getHashCode expr))
+                |> List.map (fun (hash, items) -> (hash, getHints items))
+
+            let anyMatchItems =
                 transposed
                 |> List.choose (function
                     | HintNode(expr, depth, rest) ->
@@ -295,31 +334,60 @@ module MergeSyntaxTrees =
                 |> Seq.choose (fun (expr, items) ->
                     match expr with
                     | HintPat(Pattern.Wildcard)
-                    | HintExpr(Expression.Wildcard) -> Some(None, mergeHints (getHints items))
+                    | HintExpr(Expression.Wildcard) -> Some(None, getHints items)
                     | HintPat(Pattern.Variable(var))
-                    | HintExpr(Expression.Variable(var)) -> Some(Some(var), mergeHints (getHints items))
+                    | HintExpr(Expression.Variable(var)) -> Some(Some(var), getHints items)
                     | _ -> None)
                 |> Seq.toList
 
-            { Lookup = map; AnyMatch = anyMatches }
+            let nextStack = CollectMapResults(matchedHints, List.empty, mapItems, anyMatchItems) :: restStack
+            getEdgesRec nextStack None
 
-        and mergeHints hints =
+        | CollectMapResults(matchedHints, mapAcc, [], anyMatchItems) :: restStack, _ ->
+            let map = Map.ofList mapAcc
+            let nextStack = CollectAnyMatchResults(matchedHints, map, List.empty, anyMatchItems) :: restStack
+            getEdgesRec nextStack None
+
+        | CollectMapResults(matchedHints, mapAcc, (hash, hints) :: restGroups, anyMatchItems) :: restStack, _ ->
             let transposed = transposeHead hints
+            let contStack = CollectMapResults(matchedHints, mapAcc, restGroups, anyMatchItems) :: restStack
+            let nextStack = ProcessTransposed(transposed) :: BuildNodeFromResult(hash, hints) :: contStack
+            getEdgesRec nextStack None
 
-            let edges = getEdges transposed
+        | BuildNodeFromResult(hash, items) :: CollectMapResults(matchedHints, mapAcc, restGroups, anyMatchItems) :: restStack, Some(edges) ->
+            let matchedHintsForNode =
+                items
+                |> List.choose (fun (tail, hint) -> if List.isEmpty tail then Some hint else None)
+            let node = { Edges = edges; MatchedHint = matchedHintsForNode }
+            let newMapAcc = (hash, node) :: mapAcc
+            let nextStack = CollectMapResults(matchedHints, newMapAcc, restGroups, anyMatchItems) :: restStack
+            getEdgesRec nextStack None
 
-            let matchedHints =
-                transposed
-                |> Seq.choose (function
-                    | HintNode(_) -> None
-                    | EndOfHint(hint) -> Some(hint))
-                |> Seq.toList
+        | CollectAnyMatchResults(_, map, anyAcc, []) :: restStack, _ ->
+            let edges = { Lookup = map; AnyMatch = anyAcc }
+            getEdgesRec restStack (Some edges)
 
-            {
-                Edges = edges
-                MatchedHint = matchedHints
-            }
+        | CollectAnyMatchResults(matchedHints, map, anyAcc, (key, hints) :: restAny) :: restStack, _ ->
+            let transposed = transposeHead hints
+            let contStack = CollectAnyMatchResults(matchedHints, map, anyAcc, restAny) :: restStack
+            let nextStack = ProcessTransposed(transposed) :: BuildAnyNodeFromResult(key, hints) :: contStack
+            getEdgesRec nextStack None
 
+        | BuildAnyNodeFromResult(key, items) :: CollectAnyMatchResults(matchedHints, map, anyAcc, restAny) :: restStack, Some(edges) ->
+            let matchedHintsForNode =
+                items
+                |> List.choose (fun (tail, hint) -> if List.isEmpty tail then Some hint else None)
+            let node = { Edges = edges; MatchedHint = matchedHintsForNode }
+            let newAnyAcc = (key, node) :: anyAcc
+            let nextStack = CollectAnyMatchResults(matchedHints, map, newAnyAcc, restAny) :: restStack
+            getEdgesRec nextStack None
+
+        | _ -> failwith "Invalid state"
+
+    let private getEdges transposed =
+        getEdgesRec [ProcessTransposed(transposed)] None
+
+    let mergeHints hints =
         let transposed = hints |> List.map hintToList |> transposeHead
 
         getEdges transposed

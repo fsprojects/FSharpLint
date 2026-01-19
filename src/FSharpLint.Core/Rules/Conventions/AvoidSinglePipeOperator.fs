@@ -10,8 +10,33 @@ open FSharpLint.Framework.Rules
 
 let isSingleLine (range: FSharp.Compiler.Text.range) =
     range.EndLine = range.StartLine
+   
+type private CheckExprContinuationPassingStyleArgs =
+    {
+        Args: AstNodeRuleParams
+        Expr: SynExpr
+        OuterArgExpr: SynExpr
+        Range: FSharp.Compiler.Text.range
+        ParentList: list<AstNode>
+        Continuation: array<WarningDetails> -> array<WarningDetails>
+    }
 
-let runner (args: AstNodeRuleParams) =
+[<TailCall>]   
+let rec private checkParentPipedContinuationPassingStyle (args: AstNodeRuleParams) (expr: AstNode) outerArgExpr range cont =
+    match expr with
+    | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
+        checkExprContinuationPassingStyle 
+            {
+                Args = args
+                Expr = funcExpr
+                OuterArgExpr = outerArgExpr
+                Range = range
+                ParentList = List.Empty
+                Continuation = fun result -> cont (Seq.isEmpty result)
+            }
+    | _ -> cont false
+
+and [<TailCall>] private checkExprContinuationPassingStyle (arguments: CheckExprContinuationPassingStyleArgs) =
     let errors range suggestedFix =
         Array.singleton
             {
@@ -20,48 +45,63 @@ let runner (args: AstNodeRuleParams) =
                 SuggestedFix = suggestedFix
                 TypeChecks = List.Empty
             }
-    
-    let rec checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
-        let checkParentPiped (expr: AstNode) =
-            match expr with
-            | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, _argExpr, _range)) ->
-                checkExpr funcExpr outerArgExpr range List.Empty |> Seq.isEmpty
-            | _ -> false
 
-        match expr with
-        | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _appRange) when isSingleLine argExpr.Range ->
-            match funcExpr with
-            | ExpressionUtilities.Identifier([ ident ], _) ->
-                if ident.idText = "op_PipeRight" then
-                    match argExpr with
-                    | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
-                        Array.empty
-                    | SynExpr.IfThenElse _ ->
-                        Array.empty
-                    | _ ->
-                        let isParentPiped =
-                            match parentList with
-                            | head::_ -> checkParentPiped head
-                            | [] -> false
-                        if isParentPiped then
-                            Array.empty
-                        else
-                            let suggestedFix = lazy(
-                                let maybeFuncText = ExpressionUtilities.tryFindTextOfRange outerArgExpr.Range args.FileContent
-                                let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range args.FileContent
-                                match (maybeFuncText, maybeArgText) with
-                                | Some(funcText), Some(argText) ->
-                                    let replacementText = sprintf "%s %s" funcText argText
-                                    Some { FromText=args.FileContent; FromRange=range; ToText=replacementText }
-                                | _ -> None)
-                            errors ident.idRange (Some suggestedFix)
-                else
-                    Array.empty
-            | _ ->
-                Array.empty
+    match arguments.Expr with
+    | SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, _appRange) when isSingleLine argExpr.Range ->
+        match funcExpr with
+        | ExpressionUtilities.Identifier([ ident ], _) ->
+            if ident.idText = "op_PipeRight" then
+                match argExpr with
+                | SynExpr.App(_exprAtomicFlag, _isInfix, _funcExpr, _argExpr, _range) ->
+                    arguments.Continuation Array.empty
+                | SynExpr.IfThenElse _ ->
+                    arguments.Continuation Array.empty
+                | _ ->
+                    match arguments.ParentList with
+                    | head::_ -> 
+                        let continuation isParentPiped =
+                            if isParentPiped then
+                                arguments.Continuation Array.empty
+                            else
+                                let suggestedFix = lazy(
+                                    let maybeFuncText = ExpressionUtilities.tryFindTextOfRange arguments.OuterArgExpr.Range arguments.Args.FileContent
+                                    let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range arguments.Args.FileContent
+                                    match (maybeFuncText, maybeArgText) with
+                                    | Some(funcText), Some(argText) ->
+                                        let replacementText = sprintf "%s %s" funcText argText
+                                        Some { FromText=arguments.Args.FileContent; FromRange=arguments.Range; ToText=replacementText }
+                                    | _ -> None)
+                                arguments.Continuation (errors ident.idRange (Some suggestedFix))
+                        checkParentPipedContinuationPassingStyle arguments.Args head arguments.OuterArgExpr arguments.Range continuation
+                    | [] -> 
+                        let suggestedFix = lazy(
+                            let maybeFuncText = ExpressionUtilities.tryFindTextOfRange arguments.OuterArgExpr.Range arguments.Args.FileContent
+                            let maybeArgText = ExpressionUtilities.tryFindTextOfRange argExpr.Range arguments.Args.FileContent
+                            match (maybeFuncText, maybeArgText) with
+                            | Some(funcText), Some(argText) ->
+                                let replacementText = sprintf "%s %s" funcText argText
+                                Some { FromText=arguments.Args.FileContent; FromRange=arguments.Range; ToText=replacementText }
+                            | _ -> None)
+                        arguments.Continuation (errors ident.idRange (Some suggestedFix))
+            else
+                arguments.Continuation Array.empty
         | _ ->
-            Array.empty
+            arguments.Continuation Array.empty
+    | _ ->
+        arguments.Continuation Array.empty
 
+let private checkExpr (args: AstNodeRuleParams) (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
+    checkExprContinuationPassingStyle 
+        { 
+            Args = args
+            Expr = expr
+            OuterArgExpr = outerArgExpr
+            Range = range
+            ParentList = parentList
+            Continuation = id
+        }
+
+let runner (args: AstNodeRuleParams) =
     let error =
         match args.AstNode with
         | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range)) ->
@@ -70,7 +110,7 @@ let runner (args: AstNodeRuleParams) =
                 // function has extra arguments
                 Array.empty
             | _ ->
-                checkExpr funcExpr argExpr range (args.GetParents args.NodeIndex)
+                checkExpr args funcExpr argExpr range (args.GetParents args.NodeIndex)
         | _ ->
             Array.empty
 

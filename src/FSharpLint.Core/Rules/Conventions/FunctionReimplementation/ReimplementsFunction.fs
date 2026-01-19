@@ -7,20 +7,21 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private validateLambdaIsNotPointless (text:string) lambda range =
-    let rec isFunctionPointless expression = function
-        | Some(parameter:Ident) :: parameters ->
-            match expression with
-            | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
-                when identifier.idText = parameter.idText ->
-                isFunctionPointless expression parameters
-            | _ -> None
-        | None :: _ -> None
-        | [] ->
-            match expression with
-            | ExpressionUtilities.Identifier(ident, _) -> Some(ident)
-            | _ -> None
+[<TailCall>]
+let rec private isFunctionPointless expression = function
+    | Some(parameter:Ident) :: parameters ->
+        match expression with
+        | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
+            when identifier.idText = parameter.idText ->
+            isFunctionPointless expression parameters
+        | _ -> None
+    | None :: _ -> None
+    | [] ->
+        match expression with
+        | ExpressionUtilities.Identifier(ident, _) -> Some(ident)
+        | _ -> None
 
+let private validateLambdaIsNotPointless (text:string) lambda range =
     let generateError (identifier:LongIdent) =
         let identifier =
             identifier

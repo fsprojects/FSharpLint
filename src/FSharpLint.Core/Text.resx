@@ -378,6 +378,9 @@
   <data name="RulesEnsureTailCallDiagnosticsInRecursiveFunctions" xml:space="preserve">
     <value>The '{0}' function has a "rec" keyword, but no [&lt;TailCall&gt;] attribute. Consider adding [&lt;TailCall&gt;] attribute to the function and &lt;WarningsAsErrors&gt;FS3569&lt;/WarningsAsErrors&gt; property to project file (but only on .NET 8 and higher).</value>
   </data>
+  <data name="RulesEnsureTailCallDiagnosticsInRecursiveFunctionsNested" xml:space="preserve">
+    <value>NOTE: As this function is nested, you might need to convert it to private and non-nested (module-level or type-level) in case the version of F# you are using doesn't support adding attributes to nested functions.</value>
+  </data>
   <data name="RulesFavourAsKeyword" xml:space="preserve">
     <value>Prefer using the 'as' pattern to match a constant and bind it to a variable.</value>
   </data>

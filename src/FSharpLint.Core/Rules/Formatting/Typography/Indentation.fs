@@ -21,14 +21,15 @@ module ContextBuilder =
         |> List.unzip
         |> snd
 
-    let private extractSeqExprItems seqExpr =
-        let rec helper items = function
+    [<TailCall>]
+    let rec private extractSeqExprItemsInner items = function
             | SynExpr.Sequential(expr1=expr1; expr2=expr2) ->
-                helper (expr1::items) expr2
+                extractSeqExprItemsInner (expr1::items) expr2
             | other ->
                 (other::items)
 
-        helper List.Empty seqExpr
+    let private extractSeqExprItems seqExpr =
+        extractSeqExprItemsInner List.Empty seqExpr
         |> List.rev
 
     let private createAbsoluteAndOffsetOverrides expectedIndentation (rangeToUpdate:Range) =
@@ -38,15 +39,21 @@ module ContextBuilder =
                 (offsetLine, (false, expectedIndentation))) [(rangeToUpdate.StartLine + 1)..rangeToUpdate.EndLine]
         (absoluteOverride::relativeOverrides)
 
-    let rec private collectRecordFields = function
-        | (SynExpr.Record ( _, _, fields, _)) ->
-            let subRecords =
-                fields
-                |> List.choose (fun (SynExprRecordField(_, _, expr, _)) -> Option.map collectRecordFields expr)
-                |> List.concat
-            fields::subRecords
+    [<TailCall>]
+    let rec private collectRecordFieldsInner acc expr =
+        match expr with
+        | (SynExpr.Record (_, _, fields, _)) ->
+            let newAcc = fields :: acc
+            fields
+            |> List.fold (fun currentAcc (SynExprRecordField(_, _, exprOpt, _)) ->
+                match exprOpt with
+                | Some expr -> collectRecordFieldsInner currentAcc expr
+                | None -> currentAcc
+            ) newAcc
         | _ ->
-            List.Empty
+            acc
+
+    let private collectRecordFields = collectRecordFieldsInner List.Empty
 
     let private createAbsoluteAndOffsetOverridesBasedOnFirst (ranges:Range list) =
         match ranges with

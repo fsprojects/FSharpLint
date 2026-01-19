@@ -17,20 +17,16 @@ type TypedItemStyle =
 type Config = { TypedItemStyle:TypedItemStyle }
 
 let private getLeadingSpaces (text:string) =
-    let rec loop index =
-        if index < text.Length && text.[index] = ' '
-        then loop (index + 1)
-        else index
+    text |> Seq.takeWhile (fun char -> char = ' ') |> Seq.length
 
-    loop 0
+[<TailCall>]
+let rec private getTrailingSpacesInner (text: string) index count =
+    if index >= 0 && text.[index] = ' '
+    then getTrailingSpacesInner text (index - 1) (count + 1)
+    else count
 
 let private getTrailingSpaces (text:string) =
-    let rec loop index count =
-        if index >= 0 && text.[index] = ' '
-        then loop (index - 1) (count + 1)
-        else count
-
-    (loop (text.Length - 1) 0)
+    getTrailingSpacesInner text (text.Length - 1) 0
 
 let private expectedSpacesFromConfig (typedItemStyle:TypedItemStyle) =
     match typedItemStyle with

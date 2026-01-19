@@ -26,6 +26,18 @@ let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multil
 let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
 let private multilineCommentMarkerRegexCaptureGroupLength = 3
 
+[<TailCall>]
+let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
+    match toProcess with
+    | [] -> List.Empty
+    | Begin(index)::tail ->
+        getTopLevelBalancedPairs tail (index::stack)
+    | End(index)::tail ->
+        match stack with
+        | [] -> List.Empty
+        | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
+        | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
+
 let private stripMultilineComments (source: string) =
     let markers = 
         multilineCommentMarkerRegex.Matches source
@@ -37,17 +49,6 @@ let private stripMultilineComments (source: string) =
                 End index)
         |> Seq.sortBy (function | Begin index -> index | End index -> index)
         |> Seq.toList
-
-    let rec getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
-        match toProcess with
-        | [] -> List.Empty
-        | Begin(index)::tail ->
-            getTopLevelBalancedPairs tail (index::stack)
-        | End(index)::tail ->
-            match stack with
-            | [] -> List.Empty
-            | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
-            | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
     getTopLevelBalancedPairs markers List.Empty
     |> List.fold

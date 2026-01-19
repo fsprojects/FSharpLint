@@ -21,6 +21,20 @@ let rec Foo someParam =
         Assert.IsTrue <| this.ErrorExistsAt(2, 8)
 
     [<Test>]
+    member this.``When nested function is recursive, should error telling to put [<TailCall>] attribute and make function non-nested``() =
+        this.Parse """
+let Bar () =
+    let rec Foo someParam =
+        if someParam then
+            Foo false
+        else
+            ()
+    ()
+"""
+        Assert.IsTrue <| this.ErrorExistsAt(3, 12)
+        StringAssert.Contains("nested", this.ErrorMsg)
+
+    [<Test>]
     member this.``Should not error when function is recursive and has [<TailCall>] attribute``() =
         this.Parse """
 [<TailCall>]

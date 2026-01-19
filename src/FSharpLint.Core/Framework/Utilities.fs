@@ -64,17 +64,18 @@ module ExpressionUtilities =
     let rec removeParens = function
         | SynExpr.Paren(expr, _, _, _) -> removeParens expr
         | expression -> expression
+    
+    [<TailCall>]
+    let rec private findLineStart (str: string) (lineNumber:int) currLine (currPos:int) =
+        if currLine = lineNumber then Some currPos
+        else
+            let nextLinePos = str.IndexOf('\n', currPos)
+            if nextLinePos >= 0 then findLineStart str lineNumber (currLine + 1) (nextLinePos + 1)
+            else None
 
     /// Finds index of a given (line number, column) position in a string.
     let findPos (pos:pos) (str:string) =
-        let rec findLineStart (lineNumber:int) currLine (currPos:int) =
-            if currLine = lineNumber then Some currPos
-            else
-                let nextLinePos = str.IndexOf('\n', currPos)
-                if nextLinePos >= 0 then findLineStart lineNumber (currLine + 1) (nextLinePos + 1)
-                else None
-
-        findLineStart pos.Line 1 0
+        findLineStart str pos.Line 1 0
         |> Option.map (fun lineStart -> lineStart + pos.Column)
 
     /// Converts a LongIdent to a String.
@@ -147,6 +148,18 @@ module String =
 
     open System.IO
 
+    [<TailCall>]
+    let rec private iterateLines (lines: ResizeArray<string*int*bool>) (readLine: unit -> Option<string>) currentLine index =
+        match currentLine with
+        | Some line ->
+            let nextLine = readLine ()
+            let isLastLine = Option.isNone nextLine
+
+            lines.Add(line, index, isLastLine)
+
+            iterateLines lines readLine nextLine (index + 1)
+        | None -> ()
+
     let toLines input =
         let lines = ResizeArray()
         use reader = new StringReader(input)
@@ -156,17 +169,6 @@ module String =
             | null -> None
             | line -> Some line
 
-        let rec iterateLines currentLine index =
-            match currentLine with
-            | Some line ->
-                let nextLine = readLine ()
-                let isLastLine = Option.isNone nextLine
-
-                lines.Add(line, index, isLastLine)
-
-                iterateLines nextLine (index + 1)
-            | None -> ()
-
-        iterateLines (readLine ()) 0
+        iterateLines lines readLine (readLine ()) 0
 
         lines.ToArray()
