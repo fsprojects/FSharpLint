@@ -138,3 +138,22 @@ let Bar () =
 """
         
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Top level private function used in 2 or more functions with attributes should not give an error`` () =
+        this.Parse """
+let private foo x =
+    x
+
+[<TailCall>]
+let rec private bar y =
+    if foo y > 0 then
+        bar (y - 1)
+    else
+        0
+
+let baz () =
+    foo 0
+"""
+        
+        this.AssertNoWarnings()
