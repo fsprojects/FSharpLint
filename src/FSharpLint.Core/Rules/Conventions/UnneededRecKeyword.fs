@@ -46,17 +46,17 @@ let internal functionIsCalledInOneOf (checkInfo: FSharpCheckFileResults)
                 usage.Symbol.DisplayName = calleeName 
                 && ExpressionUtilities.rangeContainsOtherRange caller.Body.Range usage.Range))
 
-let private emitWarning (func: RecursiveFunctionInfo) =
-    { Range = func.Range
-      Message =
-          String.Format(
-              Resources.GetString "RulesUnneededRecKeyword",
-              func.Identifier.idText
-          )
-      SuggestedFix = None
-      TypeChecks = list.Empty }
-
 let runner (args: AstNodeRuleParams) =
+    let emitWarning (func: RecursiveFunctionInfo) =
+        { Range = func.Range
+          Message =
+              String.Format(
+                  Resources.GetString "RulesUnneededRecKeyword",
+                  func.Identifier.idText
+              )
+          SuggestedFix = None
+          TypeChecks = list.Empty }
+
     match (args.AstNode, args.CheckInfo) with
     | RecursiveFunctions(funcs), Some checkInfo ->
         funcs 

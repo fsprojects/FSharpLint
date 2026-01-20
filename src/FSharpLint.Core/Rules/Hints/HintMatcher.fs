@@ -666,72 +666,6 @@ type HintErrorConfig =
         ParentAstNode: AstNode option
     }
 
-let private hintError (config: HintErrorConfig) =
-    let toStringConfig =
-        {
-            ToStringConfig.Replace = false
-            ToStringConfig.ParentAstNode = None
-            ToStringConfig.Args = config.Args
-            ToStringConfig.MatchedVariables = config.MatchedVariables
-            ToStringConfig.ParentHintNode = None
-            ToStringConfig.HintNode = config.Hint.MatchedNode
-        }
-
-    let matched = FormatHint.toString toStringConfig
-
-    match config.Hint.Suggestion with
-    | Suggestion.Expr(expr) ->
-        let suggestion = FormatHint.toString { toStringConfig with HintNode = (HintExpr expr) }
-        let errorFormatString = Resources.GetString("RulesHintRefactor")
-        let error = System.String.Format(errorFormatString, matched, suggestion)
-
-        let toText =
-            FormatHint.toString
-                {
-                    toStringConfig with
-                        Replace = true
-                        ParentAstNode = config.ParentAstNode
-                        HintNode = (HintExpr expr)
-                }
-
-        let suggestedFix = lazy(
-            ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
-
-        { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
-    | Suggestion.Message(message) ->
-        let errorFormatString = Resources.GetString("RulesHintSuggestion")
-        let error = System.String.Format(errorFormatString, matched, message)
-        { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
-
-let private getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
-    let symbol =
-        checkFile.GetSymbolUseAtLocation(
-            methodIdent.Range.StartLine,
-            methodIdent.Range.EndColumn,
-            String.Empty,
-            List.map (fun (ident: Ident) -> ident.idText) methodIdent.LongIdent)
-
-    match symbol with
-    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
-        let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
-
-        if symbol.IsMember then Seq.tryHead symbol.CurriedParameterGroups
-        else None
-    | _ -> None
-
-/// Check a lambda function can be replaced with a function,
-/// it will not be if the lambda is automatically getting
-/// converted to a delegate type e.g. Func<T>.
-let private canReplaceLambdaWithFunction checkFile methodIdent index =
-    let parameters = getMethodParameters checkFile methodIdent
-
-    match parameters with
-    | Some(parameters) when index < Seq.length parameters ->
-        let parameter = parameters.[index]
-        not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
-    | _ -> true
-
 /// Check if lambda can be replaced with an identifier (cannot in the case when is a parameter with the type of a delegate).
 let private (|RequiresCheck|CanBeReplaced|CannotBeReplaced|) (breadcrumbs, range) =
     match filterParens breadcrumbs with
@@ -752,73 +686,139 @@ let private (|SuggestingReplacementOfLambda|OtherSuggestion|) = function
 let [<Literal>] private MaxBreadcrumbs = 6
 let private suggestions = ResizeArray()
 
-let private confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hint) =
-    let breadcrumbs = args.GetParents MaxBreadcrumbs
-    match (args.AstNode, hint.MatchedNode) with
-    | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
-    | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
-    | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern MatchPattern.returnTrue (pattern, hintPattern) ->
-        hintError
-            {
-                TypeChecks = List.Empty
-                Hint = hint
-                Args = args
-                Range = pattern.Range
-                MatchedVariables = (Dictionary<_, _>())
-                ParentAstNode = None
-            }
-        |> suggestions.Add
-    | AstNode.Expression(expr), HintExpr(hintExpr) ->
-        let arguments =
-            { MatchExpression.LambdaArguments = Map.empty
-              MatchExpression.MatchedVariables = Dictionary<_, _>()
-              MatchExpression.Expression = args.AstNode
-              MatchExpression.Hint = hintExpr
-              MatchExpression.FSharpCheckFileResults = args.CheckInfo
-              MatchExpression.Breadcrumbs = breadcrumbs }
+let rule config =
+    /// Searches the abstract syntax array for possible hint matches using the hint trie.
+    /// Any possible matches that are found will be given to the callback function `notify`,
+    /// any matches found are not guaranteed and it's expected that the caller verify the match.
+    let runner (config:Config) (args:AstNodeRuleParams) =
+        let confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hint) =
+            let hintError (config: HintErrorConfig) =
+                let toStringConfig =
+                    {
+                        ToStringConfig.Replace = false
+                        ToStringConfig.ParentAstNode = None
+                        ToStringConfig.Args = config.Args
+                        ToStringConfig.MatchedVariables = config.MatchedVariables
+                        ToStringConfig.ParentHintNode = None
+                        ToStringConfig.HintNode = config.Hint.MatchedNode
+                    }
 
-        match MatchExpression.matchHintExpr MatchExpression.returnEmptyMatch arguments with
-        | MatchExpression.Match(typeChecks) ->
-            let suggest checks =
+                let matched = FormatHint.toString toStringConfig
+
+                match config.Hint.Suggestion with
+                | Suggestion.Expr(expr) ->
+                    let suggestion = FormatHint.toString { toStringConfig with HintNode = (HintExpr expr) }
+                    let errorFormatString = Resources.GetString("RulesHintRefactor")
+                    let error = System.String.Format(errorFormatString, matched, suggestion)
+
+                    let toText =
+                        FormatHint.toString
+                            {
+                                toStringConfig with
+                                    Replace = true
+                                    ParentAstNode = config.ParentAstNode
+                                    HintNode = (HintExpr expr)
+                            }
+
+                    let suggestedFix = lazy(
+                        ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
+                        |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
+
+                    { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
+                | Suggestion.Message(message) ->
+                    let errorFormatString = Resources.GetString("RulesHintSuggestion")
+                    let error = System.String.Format(errorFormatString, matched, message)
+                    { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
+    
+            /// Check a lambda function can be replaced with a function,
+            /// it will not be if the lambda is automatically getting
+            /// converted to a delegate type e.g. Func<T>.
+            let canReplaceLambdaWithFunction checkFile methodIdent index =
+                let getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
+                    let symbol =
+                        checkFile.GetSymbolUseAtLocation(
+                            methodIdent.Range.StartLine,
+                            methodIdent.Range.EndColumn,
+                            String.Empty,
+                            List.map (fun (ident: Ident) -> ident.idText) methodIdent.LongIdent)
+
+                    match symbol with
+                    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
+                        let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+
+                        if symbol.IsMember then Seq.tryHead symbol.CurriedParameterGroups
+                        else None
+                    | _ -> None
+
+                let parameters = getMethodParameters checkFile methodIdent
+
+                match parameters with
+                | Some(parameters) when index < Seq.length parameters ->
+                    let parameter = parameters.[index]
+                    not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
+                | _ -> true
+
+            let breadcrumbs = args.GetParents MaxBreadcrumbs
+            match (args.AstNode, hint.MatchedNode) with
+            | AstNode.Expression(SynExpr.Paren(_)), HintExpr(_)
+            | AstNode.Pattern(SynPat.Paren(_)), HintPat(_) -> ()
+            | AstNode.Pattern(pattern), HintPat(hintPattern) when MatchPattern.matchHintPattern MatchPattern.returnTrue (pattern, hintPattern) ->
                 hintError
                     {
-                        TypeChecks = checks
+                        TypeChecks = List.Empty
                         Hint = hint
                         Args = args
-                        Range = expr.Range
-                        MatchedVariables = arguments.MatchedVariables
-                        ParentAstNode = (List.tryHead breadcrumbs)
+                        Range = pattern.Range
+                        MatchedVariables = (Dictionary<_, _>())
+                        ParentAstNode = None
                     }
                 |> suggestions.Add
+            | AstNode.Expression(expr), HintExpr(hintExpr) ->
+                let arguments =
+                    { MatchExpression.LambdaArguments = Map.empty
+                      MatchExpression.MatchedVariables = Dictionary<_, _>()
+                      MatchExpression.Expression = args.AstNode
+                      MatchExpression.Hint = hintExpr
+                      MatchExpression.FSharpCheckFileResults = args.CheckInfo
+                      MatchExpression.Breadcrumbs = breadcrumbs }
 
-            match (hint.MatchedNode, hint.Suggestion) with
-            | SuggestingReplacementOfLambda ->
-                match (breadcrumbs, expr.Range) with
-                | RequiresCheck(index, methodIdent) ->
-                    match args.CheckInfo with
-                    | Some checkFile ->
-                        let typeCheck = fun () -> canReplaceLambdaWithFunction checkFile methodIdent index
-                        suggest (typeCheck ::typeChecks)
-                    | None -> ()
-                | CanBeReplaced -> suggest typeChecks
-                | CannotBeReplaced -> ()
-            | OtherSuggestion -> suggest typeChecks
-        | MatchExpression.NoMatch -> ()
-    | _ -> ()
+                match MatchExpression.matchHintExpr MatchExpression.returnEmptyMatch arguments with
+                | MatchExpression.Match(typeChecks) ->
+                    let suggest checks =
+                        hintError
+                            {
+                                TypeChecks = checks
+                                Hint = hint
+                                Args = args
+                                Range = expr.Range
+                                MatchedVariables = arguments.MatchedVariables
+                                ParentAstNode = (List.tryHead breadcrumbs)
+                            }
+                        |> suggestions.Add
 
-/// Searches the abstract syntax array for possible hint matches using the hint trie.
-/// Any possible matches that are found will be given to the callback function `notify`,
-/// any matches found are not guaranteed and it's expected that the caller verify the match.
-let private runner (config:Config) (args:AstNodeRuleParams) =
-    match config.HintTrie.Lookup.TryGetValue args.NodeHashcode with
-    | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
-    | false, _ -> ()
+                    match (hint.MatchedNode, hint.Suggestion) with
+                    | SuggestingReplacementOfLambda ->
+                        match (breadcrumbs, expr.Range) with
+                        | RequiresCheck(index, methodIdent) ->
+                            match args.CheckInfo with
+                            | Some checkFile ->
+                                let typeCheck = fun () -> canReplaceLambdaWithFunction checkFile methodIdent index
+                                suggest (typeCheck ::typeChecks)
+                            | None -> ()
+                        | CanBeReplaced -> suggest typeChecks
+                        | CannotBeReplaced -> ()
+                    | OtherSuggestion -> suggest typeChecks
+                | MatchExpression.NoMatch -> ()
+            | _ -> ()
 
-    let result = suggestions.ToArray()
-    suggestions.Clear()
-    result
+        match config.HintTrie.Lookup.TryGetValue args.NodeHashcode with
+        | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
+        | false, _ -> ()
 
-let rule config =
+        let result = suggestions.ToArray()
+        suggestions.Clear()
+        result
+
     AstNodeRule
         {
             Name = "Hints"

@@ -17,25 +17,25 @@ let rec private isApplicationNode (syntaxArray: array<AbstractSyntaxArray.Node>)
         | AstNode.Expression(SynExpr.App(_) | SynExpr.New(_)) -> true
         | _ -> false
 
-let private isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) index =
-    if index <= 0 then false
-    else isApplicationNode syntaxArray syntaxArray.[index].ParentIndex
-
-let private validateTuple (maxItems:int) (items:SynExpr list) =
-    if List.length items > maxItems then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
-        let error = String.Format(errorFormatString, maxItems)
-        Array.singleton
-            {
-                Range = items.[maxItems].Range
-                Message = error
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-    else
-        Array.empty
-
 let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
+    let isInApplication (syntaxArray:AbstractSyntaxArray.Node[]) index =        
+        if index <= 0 then false
+        else isApplicationNode syntaxArray syntaxArray.[index].ParentIndex
+
+    let validateTuple (maxItems:int) (items:SynExpr list) =
+        if List.length items > maxItems then
+            let errorFormatString = Resources.GetString("RulesNumberOfItemsTupleError")
+            let error = String.Format(errorFormatString, maxItems)
+            Array.singleton
+                {
+                    Range = items.[maxItems].Range
+                    Message = error
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
+        else
+            Array.empty
+
     match args.AstNode with
     | AstNode.Expression (expression) ->
         match expression with

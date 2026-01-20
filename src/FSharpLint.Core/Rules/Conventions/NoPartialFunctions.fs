@@ -85,35 +85,6 @@ let private partialInstanceMemberIdentifiers =
         //("Foo.Bar.Baz", None, "string", PatternMatch)
     ]
 
-let private checkIfPartialIdentifier (config:Config) (identifier:string) (range:Range) =
-    if List.contains identifier config.AllowedPartials then
-        None
-    elif List.contains identifier config.AdditionalPartials then
-        Some {
-            Range = range
-            Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
-            SuggestedFix = None
-            TypeChecks = List.Empty
-        }
-    else
-        Map.tryFind identifier partialFunctionIdentifiers
-        |> Option.filter (fun _ -> not (List.contains identifier config.AllowedPartials))
-        |> Option.map (function
-            | PatternMatch ->
-                {
-                    Range = range
-                    Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
-                    SuggestedFix = None
-                    TypeChecks = List.Empty
-                }
-            | Function replacementFunction ->
-                {
-                    Range = range
-                    Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
-                    SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
-                    TypeChecks = List.Empty
-                })
-
 [<TailCall>]
 let rec private tryFindTypedExpression (range: Range) (expressions: List<FSharpExpr>): Option<FSharpExpr> = 
     match expressions with
@@ -228,14 +199,6 @@ let rec private getExpressions acc declarations =
         | _ -> 
             getExpressions acc rest
 
-let private getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
-    let expressions =
-        match checkFile.ImplementationFile with
-        | Some implementationFile -> getExpressions List.empty implementationFile.Declarations
-        | None -> List.empty
-
-    tryFindTypedExpression range expressions
-
 let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType) : Option<bool> =
     let matchingPartialInstanceMember =
         List.tryFind (fun (memberName: string, _, _, _) -> memberName.Split('.').[0] = typeName) partialInstanceMemberIdentifiers
@@ -249,103 +212,19 @@ let private matchesBuiltinFSharpType (typeName: string) (fsharpType: FSharpType)
         )
     | None -> None
 
-let private isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
-    let typeChecks =
-        let map (replacement: string * option<string> * string * Replacement) =
-            match replacement with
-            | (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
-                if not (fullyQualifiedInstanceMember.Contains ".") then
-                    failwith "Please use fully qualified name for the instance member"
-                let nameSegments = fullyQualifiedInstanceMember.Split '.'
-                let instanceMemberNameOnly =
-                    Array.tryLast nameSegments
-                    |> Option.defaultWith (fun () -> failwith $"{nameof(nameSegments)} is empty")
-                let isSourcePropSameAsReplacementProp = List.tryFind (fun sourceInstanceMemberName -> sourceInstanceMemberName = instanceMemberNameOnly) names
-                match isSourcePropSameAsReplacementProp with
-                | Some _ ->
-                    let typeName = fullyQualifiedInstanceMember.Substring(0, fullyQualifiedInstanceMember.Length - instanceMemberNameOnly.Length - 1)                    
-
-                    let instanceIdentifier = 
-                        String.concat
-                            "."
-                            (List.takeWhile 
-                                (fun sourceInstanceMemberName -> sourceInstanceMemberName <> instanceMemberNameOnly) 
-                                names)
-                    
-                    let instanceIdentifierSymbol = 
-                        let maybeSymbolUse = 
-                            checkFile.GetSymbolUseAtLocation(
-                                range.EndLine,
-                                range.EndColumn - ((String.concat "." names).Length - instanceIdentifier.Length),
-                                lineText,
-                                List.singleton instanceIdentifier)
-                        match maybeSymbolUse with
-                        | Some symbolUse ->
-                            match symbolUse.Symbol with
-                            | :? FSharpMemberOrFunctionOrValue as symbol -> Some symbol
-                            | _ -> None
-                        | _ -> None
-                    
-                    match instanceIdentifierSymbol with
-                    | Some identifierSymbol ->
-                        let typeMatches =
-                             let fsharpType = identifierSymbol.FullType
-                             match matchesBuiltinFSharpType typeName fsharpType with
-                             | Some value -> value
-                             | None -> identifierSymbol.FullType.TypeDefinition.FullName = typeName
-
-                        if typeMatches then
-                            match replacementStrategy with
-                            | PatternMatch ->
-                                Some
-                                    {
-                                        Range = range
-                                        Message =
-                                            String.Format(
-                                                Resources.GetString
-                                                    "RulesConventionsNoPartialFunctionsPatternMatchError",
-                                                fullyQualifiedInstanceMember
-                                            )
-                                        SuggestedFix = None
-                                        TypeChecks = (fun () -> typeMatches) |> List.singleton
-                                    }
-                            | Function replacementFunctionName ->
-                                Some
-                                    {
-                                        Range = range
-                                        Message =
-                                            String.Format(
-                                                Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
-                                                replacementFunctionName,
-                                                fullyQualifiedInstanceMember
-                                            )
-                                        SuggestedFix =
-                                            Some(
-                                                lazy
-                                                    (Some
-                                                        {
-                                                            FromText = (String.concat "." names)
-                                                            FromRange = range
-                                                            ToText = replacementFunctionName
-                                                        })
-                                            )
-                                        TypeChecks = (fun () -> typeMatches) |> List.singleton
-                                    }
-                        else
-                            None
-                    | _ -> None
-                | _ -> None
-
-        List.map map partialInstanceMemberIdentifiers
-    match List.tryFind(fun (typeCheck:Option<WarningDetails>) -> typeCheck.IsSome) typeChecks with
-    | None -> None
-    | Some instanceMember -> instanceMember
-
-let private checkMemberCallOnExpression 
+let checkMemberCallOnExpression 
     (checkFile: FSharpCheckFileResults) 
     (flieContent: string) 
     (range: Range) 
     (originalRange: Range): array<WarningDetails> =
+    let getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
+        let expressions =
+            match checkFile.ImplementationFile with
+            | Some implementationFile -> getExpressions List.empty implementationFile.Declarations
+            | None -> List.empty
+
+        tryFindTypedExpression range expressions
+
     match getTypedExpressionForRange checkFile range with
     | Some expression ->
         let choose (fullyQualifiedInstanceMember: string) (replacementStrategy: Replacement) =
@@ -406,7 +285,128 @@ let private checkMemberCallOnExpression
         |> List.toArray
     | None -> Array.empty
 
-let private runner (config:Config) (args:AstNodeRuleParams) =
+let runner (config:Config) (args:AstNodeRuleParams) =
+    let checkIfPartialIdentifier (config:Config) (identifier:string) (range:Range) =
+        if List.contains identifier config.AllowedPartials then
+            None
+        elif List.contains identifier config.AdditionalPartials then
+            Some {
+                Range = range
+                Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsAdditionalError"), identifier)
+                SuggestedFix = None
+                TypeChecks = List.Empty
+            }
+        else
+            Map.tryFind identifier partialFunctionIdentifiers
+            |> Option.filter (fun _ -> not (List.contains identifier config.AllowedPartials))
+            |> Option.map (function
+                | PatternMatch ->
+                    {
+                        Range = range
+                        Message = String.Format(Resources.GetString ("RulesConventionsNoPartialFunctionsPatternMatchError"), identifier)
+                        SuggestedFix = None
+                        TypeChecks = List.Empty
+                    }
+                | Function replacementFunction ->
+                    {
+                        Range = range
+                        Message = String.Format(Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError", replacementFunction, identifier)
+                        SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
+                        TypeChecks = List.Empty
+                    })
+
+    let isNonStaticInstanceMemberCall (checkFile:FSharpCheckFileResults) names lineText (range: Range) :(Option<WarningDetails>) =
+        let typeChecks =
+            let map (replacement: string * option<string> * string * Replacement) =
+                match replacement with
+                | (fullyQualifiedInstanceMember, _, _, replacementStrategy) ->
+                    if not (fullyQualifiedInstanceMember.Contains ".") then
+                        failwith "Please use fully qualified name for the instance member"
+                    let nameSegments = fullyQualifiedInstanceMember.Split '.'
+                    let instanceMemberNameOnly =
+                        Array.tryLast nameSegments
+                        |> Option.defaultWith (fun () -> failwith $"{nameof(nameSegments)} is empty")
+                    let isSourcePropSameAsReplacementProp = List.tryFind (fun sourceInstanceMemberName -> sourceInstanceMemberName = instanceMemberNameOnly) names
+                    match isSourcePropSameAsReplacementProp with
+                    | Some _ ->
+                        let typeName = fullyQualifiedInstanceMember.Substring(0, fullyQualifiedInstanceMember.Length - instanceMemberNameOnly.Length - 1)                    
+
+                        let instanceIdentifier = 
+                            String.concat
+                                "."
+                                (List.takeWhile 
+                                    (fun sourceInstanceMemberName -> sourceInstanceMemberName <> instanceMemberNameOnly) 
+                                    names)
+                    
+                        let instanceIdentifierSymbol = 
+                            let maybeSymbolUse = 
+                                checkFile.GetSymbolUseAtLocation(
+                                    range.EndLine,
+                                    range.EndColumn - ((String.concat "." names).Length - instanceIdentifier.Length),
+                                    lineText,
+                                    List.singleton instanceIdentifier)
+                            match maybeSymbolUse with
+                            | Some symbolUse ->
+                                match symbolUse.Symbol with
+                                | :? FSharpMemberOrFunctionOrValue as symbol -> Some symbol
+                                | _ -> None
+                            | _ -> None
+                    
+                        match instanceIdentifierSymbol with
+                        | Some identifierSymbol ->
+                            let typeMatches =
+                                 let fsharpType = identifierSymbol.FullType
+                                 match matchesBuiltinFSharpType typeName fsharpType with
+                                 | Some value -> value
+                                 | None -> identifierSymbol.FullType.TypeDefinition.FullName = typeName
+
+                            if typeMatches then
+                                match replacementStrategy with
+                                | PatternMatch ->
+                                    Some
+                                        {
+                                            Range = range
+                                            Message =
+                                                String.Format(
+                                                    Resources.GetString
+                                                        "RulesConventionsNoPartialFunctionsPatternMatchError",
+                                                    fullyQualifiedInstanceMember
+                                                )
+                                            SuggestedFix = None
+                                            TypeChecks = (fun () -> typeMatches) |> List.singleton
+                                        }
+                                | Function replacementFunctionName ->
+                                    Some
+                                        {
+                                            Range = range
+                                            Message =
+                                                String.Format(
+                                                    Resources.GetString "RulesConventionsNoPartialFunctionsReplacementError",
+                                                    replacementFunctionName,
+                                                    fullyQualifiedInstanceMember
+                                                )
+                                            SuggestedFix =
+                                                Some(
+                                                    lazy
+                                                        (Some
+                                                            {
+                                                                FromText = (String.concat "." names)
+                                                                FromRange = range
+                                                                ToText = replacementFunctionName
+                                                            })
+                                                )
+                                            TypeChecks = (fun () -> typeMatches) |> List.singleton
+                                        }
+                            else
+                                None
+                        | _ -> None
+                    | _ -> None
+
+            List.map map partialInstanceMemberIdentifiers
+        match List.tryFind(fun (typeCheck:Option<WarningDetails>) -> typeCheck.IsSome) typeChecks with
+        | None -> None
+        | Some instanceMember -> instanceMember
+
     match (args.AstNode, args.CheckInfo) with
     | (AstNode.Identifier (identifier, range), Some checkInfo) ->
         let checkPartialIdentifier =

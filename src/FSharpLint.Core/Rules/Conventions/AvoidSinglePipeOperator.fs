@@ -90,18 +90,18 @@ and [<TailCall>] private checkExprContinuationPassingStyle (arguments: CheckExpr
     | _ ->
         arguments.Continuation Array.empty
 
-let private checkExpr (args: AstNodeRuleParams) (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
-    checkExprContinuationPassingStyle 
-        { 
-            Args = args
-            Expr = expr
-            OuterArgExpr = outerArgExpr
-            Range = range
-            ParentList = parentList
-            Continuation = id
-        }
-
 let runner (args: AstNodeRuleParams) =
+    let checkExpr (args: AstNodeRuleParams) (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
+        checkExprContinuationPassingStyle 
+            { 
+                Args = args
+                Expr = expr
+                OuterArgExpr = outerArgExpr
+                Range = range
+                ParentList = parentList
+                Continuation = id
+            }
+
     let error =
         match args.AstNode with
         | AstNode.Expression(SynExpr.App(_exprAtomicFlag, _isInfix, funcExpr, argExpr, range)) ->

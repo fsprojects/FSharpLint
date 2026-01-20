@@ -32,36 +32,36 @@ let rec private countBooleanOperators total expressions =
         countBooleanOperators total rest
     | [] -> total
 
-let private validateCondition (maxBooleanOperators:int) condition =
-    let numberOfBooleanOperators = countBooleanOperators 0 (List.singleton condition)
-
-    if numberOfBooleanOperators > maxBooleanOperators then
-        let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
-        let error = String.Format(errorFormatString, maxBooleanOperators)
-        Array.singleton
-            {
-                Range = condition.Range
-                Message = error
-                SuggestedFix = None
-                TypeChecks = List.Empty
-            }
-    else
-        Array.empty
-
-let private runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Expression(expression) ->
-        match expression with
-        | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
-        | SynExpr.While(_, condition, _, _)
-        | SynExpr.Assert(condition, _) ->
-            validateCondition config.MaxItems condition
-        | _ -> Array.empty
-    | AstNode.Match(SynMatchClause(_, Some(whenExpr), _, _, _, _)) ->
-        validateCondition config.MaxItems whenExpr
-    | _ -> Array.empty
-
 let rule config =
+    let validateCondition (maxBooleanOperators:int) condition =
+        let numberOfBooleanOperators = countBooleanOperators 0 (List.singleton condition)
+
+        if numberOfBooleanOperators > maxBooleanOperators then
+            let errorFormatString = Resources.GetString("RulesNumberOfItemsBooleanConditionsError")
+            let error = String.Format(errorFormatString, maxBooleanOperators)
+            Array.singleton
+                {
+                    Range = condition.Range
+                    Message = error
+                    SuggestedFix = None
+                    TypeChecks = List.Empty
+                }
+        else
+            Array.empty
+
+    let runner (ruleConfig: Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
+        match args.AstNode with
+        | AstNode.Expression(expression) ->
+            match expression with
+            | SynExpr.IfThenElse(condition, _, _, _, _, _, _)
+            | SynExpr.While(_, condition, _, _)
+            | SynExpr.Assert(condition, _) ->
+                validateCondition ruleConfig.MaxItems condition
+            | _ -> Array.empty
+        | AstNode.Match(SynMatchClause(_, Some(whenExpr), _, _, _, _)) ->
+            validateCondition ruleConfig.MaxItems whenExpr
+        | _ -> Array.empty
+
     AstNodeRule
         {
             Name = "MaxNumberOfBooleanOperatorsInCondition"
