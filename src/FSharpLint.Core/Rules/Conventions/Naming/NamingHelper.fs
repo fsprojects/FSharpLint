@@ -114,114 +114,113 @@ let isAllLowercase (identifier:string) =
 let isAllUppercase (identifier:string) =
     Seq.forall (fun char -> Char.IsUpper char || (not <| Char.IsLetter char)) identifier
 
-let private pascalCaseRule (identifier:string) =
-    if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
-    else None
-
-let private camelCaseRule (identifier:string) =
-    if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
-    else None
-
-let private uppercaseRule (identifier:string) =
-    if not (isAllUppercase identifier) then Some "RulesNamingConventionsUppercaseError"
-    else None
-
-let private lowercaseRule (identifier:string) =
-    if not (isAllLowercase identifier) then Some "RulesNamingConventionsLowercaseError"
-    else None
-
-
-let private underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
-    let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
-    let errorKeyToRemoveLeadingOrTrailingUnderscores = "RulesNamingConventionsNoInfixUnderscoreError"
-    match underscoreMode with
-    | NamingUnderscores.AllowPrefix when identifier.TrimStart('_').Contains '_' ->
-        Some errorKeyToRemoveUnderscores
-    | NamingUnderscores.None when identifier.Contains '_' ->
-        Some errorKeyToRemoveUnderscores
-    | NamingUnderscores.AllowInfix when (identifier.StartsWith '_' || identifier.EndsWith '_') ->
-        Some errorKeyToRemoveLeadingOrTrailingUnderscores
-    | _ ->
-        None
-
-let private prefixRule (prefix:string) (identifier:string) =
-    if not (identifier.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
-    else None
-
-let private suffixRule (suffix:string) (identifier:string) =
-    if not (identifier.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
-    else None
-
-let private checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText:string) =
-    let formatError errorName =
-        String.Format(Resources.GetString errorName, idText)
-
-    let formatError2 additional errorName =
-        String.Format(Resources.GetString errorName, idText, additional)
-
-    let tryAddFix fix message = (message, fix identifier)
-
-    let casingError =
-        match config.Naming with
-        | Some NamingCase.PascalCase ->
-            pascalCaseRule idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
-        | Some NamingCase.CamelCase ->
-            camelCaseRule idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
-        | Some NamingCase.AllLowercase ->
-            lowercaseRule idText
-            |> Option.map (formatError >> tryAddFix (QuickFixes.toAllLowercase config.Underscores))
-        | Some NamingCase.AllUppercase ->
-            uppercaseRule idText
-            |> Option.map (formatError >> tryAddFix (QuickFixes.toAllUppercase config.Underscores))
-        | _ -> None
-
-    let underscoresError =
-        match config.Underscores with
-        | Some (NamingUnderscores.None as nuCfg) ->
-            underscoreRule nuCfg idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
-        | Some (NamingUnderscores.AllowPrefix as nuCfg) ->
-            underscoreRule nuCfg idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
-        | Some (NamingUnderscores.AllowInfix as nuCfg) ->
-            underscoreRule nuCfg idText
-            |> Option.map (formatError >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
-        | _ -> None
-
-    let prefixError =
-        Option.bind (fun prefix ->
-            prefixRule prefix idText
-            |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))) config.Prefix
-
-    let suffixError =
-        Option.bind (fun suffix ->
-            suffixRule suffix idText
-            |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))) config.Suffix
-
-    Array.choose id
-        [|
-            casingError
-            underscoresError
-            prefixError
-            suffixError
-        |]
-
-let private checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
-    if notOperator idText && isNotDoubleBackTickedIdent identifier then
-        checkIdentifierPart namingConfig identifier idText
-        |> Array.map (fun (message, suggestedFix) ->
-            {
-                Range = identifier.idRange
-                Message = message
-                SuggestedFix = Some suggestedFix
-                TypeChecks = List.Empty
-            })
-    else
-        Array.empty
-
 let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
+    let checkIdentifierPart (config:NamingConfig) (identifier:Ident) (idText:string) =
+        let formatError errorName =
+            String.Format(Resources.GetString errorName, idText)
+
+        let formatError2 additional errorName =
+            String.Format(Resources.GetString errorName, idText, additional)
+
+        let tryAddFix fix message = (message, fix identifier)
+
+        let pascalCaseRule (identifier:string) =
+            if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
+            else None
+
+        let camelCaseRule (identifier:string) =
+            if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
+            else None
+
+        let uppercaseRule (identifier:string) =
+            if not (isAllUppercase identifier) then Some "RulesNamingConventionsUppercaseError"
+            else None
+
+        let lowercaseRule (identifier:string) =
+            if not (isAllLowercase identifier) then Some "RulesNamingConventionsLowercaseError"
+            else None
+
+        let casingError =
+            match config.Naming with
+            | Some NamingCase.PascalCase ->
+                pascalCaseRule idText
+                |> Option.map (formatError >> tryAddFix QuickFixes.toPascalCase)
+            | Some NamingCase.CamelCase ->
+                camelCaseRule idText
+                |> Option.map (formatError >> tryAddFix QuickFixes.toCamelCase)
+            | Some NamingCase.AllLowercase ->
+                lowercaseRule idText
+                |> Option.map (formatError >> tryAddFix (QuickFixes.toAllLowercase config.Underscores))
+            | Some NamingCase.AllUppercase ->
+                uppercaseRule idText
+                |> Option.map (formatError >> tryAddFix (QuickFixes.toAllUppercase config.Underscores))
+            | _ -> None
+
+        let underscoresError =
+            let underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
+                let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
+                let errorKeyToRemoveLeadingOrTrailingUnderscores = "RulesNamingConventionsNoInfixUnderscoreError"
+                match underscoreMode with
+                | NamingUnderscores.AllowPrefix when identifier.TrimStart('_').Contains '_' ->
+                    Some errorKeyToRemoveUnderscores
+                | NamingUnderscores.None when identifier.Contains '_' ->
+                    Some errorKeyToRemoveUnderscores
+                | NamingUnderscores.AllowInfix when (identifier.StartsWith '_' || identifier.EndsWith '_') ->
+                    Some errorKeyToRemoveLeadingOrTrailingUnderscores
+                | _ ->
+                    None
+
+            match config.Underscores with
+            | Some (NamingUnderscores.None as nuCfg) ->
+                underscoreRule nuCfg idText
+                |> Option.map (formatError >> tryAddFix QuickFixes.removeAllUnderscores)
+            | Some (NamingUnderscores.AllowPrefix as nuCfg) ->
+                underscoreRule nuCfg idText
+                |> Option.map (formatError >> tryAddFix QuickFixes.removeNonPrefixingUnderscores)
+            | Some (NamingUnderscores.AllowInfix as nuCfg) ->
+                underscoreRule nuCfg idText
+                |> Option.map (formatError >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
+            | _ -> None
+
+        let prefixRule (prefix:string) (identifier:string) =
+            if not (identifier.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
+            else None
+
+        let suffixRule (suffix:string) (identifier:string) =
+            if not (identifier.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
+            else None
+
+        let prefixError =
+            Option.bind (fun prefix ->
+                prefixRule prefix idText
+                |> Option.map (formatError2 prefix >> tryAddFix (QuickFixes.addPrefix prefix))) config.Prefix
+
+        let suffixError =
+            Option.bind (fun suffix ->
+                suffixRule suffix idText
+                |> Option.map (formatError2 suffix >> tryAddFix (QuickFixes.addSuffix suffix))) config.Suffix
+
+        Array.choose id
+            [|
+                casingError
+                underscoresError
+                prefixError
+                suffixError
+            |]
+
+    let checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
+        if notOperator idText && isNotDoubleBackTickedIdent identifier then
+            checkIdentifierPart namingConfig identifier idText
+            |> Array.map (fun (message, suggestedFix) ->
+                {
+                    Range = identifier.idRange
+                    Message = message
+                    SuggestedFix = Some suggestedFix
+                    TypeChecks = List.Empty
+                })
+        else
+            Array.empty
+
     let astNodeRunner (args:AstNodeRuleParams) =
         namingRule.RuleConfig.GetIdentifiersToCheck args
         |> Array.collect (fun (identifier, idText, typeCheck) ->

@@ -8,31 +8,6 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework.Utilities
 open System
 
-let private getWarningDetails (ident: Ident) =
-    let formatError errorName =
-        String.Format(Resources.GetString errorName, ident.idText)
-
-    "RulesFavourNonMutablePropertyInitializationError"
-    |> formatError
-    |> Array.singleton
-    |> Array.map (fun message ->
-        { Range = ident.idRange
-          Message = message
-          SuggestedFix = None
-          TypeChecks = List.Empty })
-
-let private extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>) =
-    match app with
-    | SynExpr.App(_, _, expression, _, _) ->
-        match expression with
-        | SynExpr.LongIdent(_, SynLongIdent(identifiers, _, _), _, _) ->
-            match List.tryLast identifiers with
-            | Some _ ->
-                identifiers.[0].idText::instanceMethodCalls
-            | _ -> instanceMethodCalls
-        | _ -> instanceMethodCalls
-    | _ -> instanceMethodCalls
-
 [<TailCall>]
 let rec private extraFromBindings (bindings: List<SynBinding>) (classInstances: List<string>) =
     match bindings with
@@ -42,6 +17,31 @@ let rec private extraFromBindings (bindings: List<SynBinding>) (classInstances: 
 
 [<TailCall>]
 let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (continuation: unit -> array<WarningDetails>) : array<WarningDetails> =
+    let getWarningDetails (ident: Ident) =
+        let formatError errorName =
+            String.Format(Resources.GetString errorName, ident.idText)
+
+        "RulesFavourNonMutablePropertyInitializationError"
+        |> formatError
+        |> Array.singleton
+        |> Array.map (fun message ->
+            { Range = ident.idRange
+              Message = message
+              SuggestedFix = None
+              TypeChecks = List.Empty })
+    
+    let extraInstanceMethod (app:SynExpr) (instanceMethodCalls: List<string>) =
+        match app with
+        | SynExpr.App(_, _, expression, _, _) ->
+            match expression with
+            | SynExpr.LongIdent(_, SynLongIdent(identifiers, _, _), _, _) ->
+                match List.tryLast identifiers with
+                | Some _ ->
+                    identifiers.[0].idText::instanceMethodCalls
+                | _ -> instanceMethodCalls
+            | _ -> instanceMethodCalls
+        | _ -> instanceMethodCalls
+
     Array.append
         (match body with
         | SynExpr.LongIdentSet(SynLongIdent(identifiers, _, _), _, _) ->

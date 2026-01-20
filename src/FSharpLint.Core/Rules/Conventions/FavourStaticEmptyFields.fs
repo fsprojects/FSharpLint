@@ -12,34 +12,34 @@ type private EmptyLiteralType =
     | EmptyListLiteral
     | EmptyArrayLiteral
 
-let private getStaticEmptyErrorMessage (emptyLiteralType: EmptyLiteralType) =
-    let errorMessageKey =
-        match emptyLiteralType with
-        | EmptyStringLiteral -> "RulesFavourStaticEmptyFieldsForString"
-        | EmptyListLiteral -> "RulesFavourStaticEmptyFieldsForList"
-        | EmptyArrayLiteral -> "RulesFavourStaticEmptyFieldsForArray"
-
-    let formatError errorName =
-        Resources.GetString errorName
-
-    formatError errorMessageKey
-
-let private generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
-    let suggestedFix = lazy(
-        let replacementText =
-            match emptyLiteralType with
-            | EmptyStringLiteral -> "String.Empty"
-            | EmptyListLiteral -> "List.Empty"
-            | EmptyArrayLiteral -> "Array.empty"
-        Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
-    Array.singleton
-        { Range = range
-          Message = getStaticEmptyErrorMessage emptyLiteralType
-          SuggestedFix = Some suggestedFix
-          TypeChecks = List.Empty }
-
 [<TailCall>]
 let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: AstNodeRuleParams) (expressions: list<SynExpr>) =
+    let getStaticEmptyErrorMessage (emptyLiteralType: EmptyLiteralType) =
+        let errorMessageKey =
+            match emptyLiteralType with
+            | EmptyStringLiteral -> "RulesFavourStaticEmptyFieldsForString"
+            | EmptyListLiteral -> "RulesFavourStaticEmptyFieldsForList"
+            | EmptyArrayLiteral -> "RulesFavourStaticEmptyFieldsForArray"
+
+        let formatError errorName =
+            Resources.GetString errorName
+
+        formatError errorMessageKey
+    
+    let generateError (fileContents: string) (range:FSharp.Compiler.Text.Range) (emptyLiteralType: EmptyLiteralType) =
+        let suggestedFix = lazy(
+            let replacementText =
+                match emptyLiteralType with
+                | EmptyStringLiteral -> "String.Empty"
+                | EmptyListLiteral -> "List.Empty"
+                | EmptyArrayLiteral -> "Array.empty"
+            Some({ FromRange = range; FromText = fileContents; ToText = replacementText }))
+        Array.singleton
+            { Range = range
+              Message = getStaticEmptyErrorMessage emptyLiteralType
+              SuggestedFix = Some suggestedFix
+              TypeChecks = List.Empty }
+
     match expressions with
     | SynExpr.Const(SynConst.String ("", _, range), _) :: tail -> 
         let errors =

@@ -440,8 +440,6 @@ with
 
 // </Deprecated>
 
-let private getOrEmptyList hints = Option.defaultValue Array.empty hints
-
 type HintConfig = {
     add:string [] option
     ignore:string [] option
@@ -713,19 +711,6 @@ let getGlobalConfig (globalConfig:GlobalConfig option) =
         Rules.GlobalRuleConfig.numIndentationSpaces = globalConfig.numIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.numIndentationSpaces
     }) |> Option.defaultValue Rules.GlobalRuleConfig.Default
 
-let private parseHints (hints:string []) =
-    let parseHint hint =
-        match FParsec.CharParsers.run HintParser.phint hint with
-        | FParsec.CharParsers.Success(hint, _, _) -> hint
-        | FParsec.CharParsers.Failure(error, _, _) ->
-            raise <| ConfigurationException $"Failed to parse hint: {hint}{Environment.NewLine}{error}"
-
-    hints
-    |> Array.filter (System.String.IsNullOrWhiteSpace >> not)
-    |> Array.map parseHint
-    |> Array.toList
-    |> MergeSyntaxTrees.mergeHints
-
 let findDeprecation config deprecatedAllRules allRules =
     if config.NonPublicValuesNames.IsSome &&
         (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
@@ -761,6 +746,21 @@ let findDeprecation config deprecatedAllRules allRules =
 
 // fsharplint:disable MaxLinesInFunction
 let flattenConfig (config:Configuration) =
+    let parseHints (hints:string []) =
+        let parseHint hint =
+            match FParsec.CharParsers.run HintParser.phint hint with
+            | FParsec.CharParsers.Success(hint, _, _) -> hint
+            | FParsec.CharParsers.Failure(error, _, _) ->
+                raise <| ConfigurationException $"Failed to parse hint: {hint}{Environment.NewLine}{error}"
+
+        hints
+        |> Array.filter (System.String.IsNullOrWhiteSpace >> not)
+        |> Array.map parseHint
+        |> Array.toList
+        |> MergeSyntaxTrees.mergeHints
+
+    let getOrEmptyList hints = Option.defaultValue Array.empty hints
+
     let deprecatedAllRules =
         Array.concat
             [|

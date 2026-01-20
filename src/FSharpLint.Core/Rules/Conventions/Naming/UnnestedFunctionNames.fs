@@ -6,20 +6,20 @@ open FSharpLint.Framework.AstInfo
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Helper.Naming
 
-let private getIdentifiers (args: AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Binding (SynBinding (_, _, _, _, _attributes, _, valData, pattern, _, _, _, _,_)) ->
-        if isNested args args.NodeIndex then
-            Array.empty
-        else
-            let maxAccessibility = AccessControlLevel.Public
-            match identifierTypeFromValData valData with
-            | Function | Member ->
-                getPatternIdents maxAccessibility (fun _a11y innerPattern -> getFunctionIdents innerPattern) true pattern
-            | _ -> Array.empty
-    | _ -> Array.empty
-
 let rule config =
+    let getIdentifiers (args: AstNodeRuleParams) =
+        match args.AstNode with
+        | AstNode.Binding (SynBinding (_, _, _, _, _attributes, _, valData, pattern, _, _, _, _,_)) ->
+            if isNested args args.NodeIndex then
+                Array.empty
+            else
+                let maxAccessibility = AccessControlLevel.Public
+                match identifierTypeFromValData valData with
+                | Function | Member ->
+                    getPatternIdents maxAccessibility (fun _a11y innerPattern -> getFunctionIdents innerPattern) true pattern
+                | _ -> Array.empty
+        | _ -> Array.empty
+
     { Name = "UnnestedFunctionNames"
       Identifier = Identifiers.UnnestedFunctionNames
       RuleConfig =

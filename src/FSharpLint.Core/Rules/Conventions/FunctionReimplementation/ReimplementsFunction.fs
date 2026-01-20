@@ -21,38 +21,38 @@ let rec private isFunctionPointless expression = function
         | ExpressionUtilities.Identifier(ident, _) -> Some(ident)
         | _ -> None
 
-let private validateLambdaIsNotPointless (text:string) lambda range =
-    let generateError (identifier:LongIdent) =
-        let identifier =
-            identifier
-            |> List.map (fun ident ->
-                if PrettyNaming.IsLogicalOpName ident.idText then
-                    PrettyNaming.ConvertValLogicalNameToDisplayNameCore ident.idText |> sprintf "( %s )"
-                else
-                    ident.idText)
-            |> String.concat "."
-
-        let suggestedFix = lazy(
-            ExpressionUtilities.tryFindTextOfRange range text
-            |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
-
-        {
-            Range = range
-            Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
-            SuggestedFix = Some suggestedFix
-            TypeChecks = List.Empty
-        }
-
-    let argumentsAsIdentifiers =
-        lambda.Arguments
-        |> List.map Helper.FunctionReimplementation.getLambdaParamIdent
-        |> List.rev
-
-    isFunctionPointless lambda.Body argumentsAsIdentifiers
-    |> Option.map generateError
-    |> Option.toArray
-
 let runner (args:AstNodeRuleParams) =
+    let validateLambdaIsNotPointless (text:string) lambda range =
+        let generateError (identifier:LongIdent) =
+            let identifier =
+                identifier
+                |> List.map (fun ident ->
+                    if PrettyNaming.IsLogicalOpName ident.idText then
+                        PrettyNaming.ConvertValLogicalNameToDisplayNameCore ident.idText |> sprintf "( %s )"
+                    else
+                        ident.idText)
+                |> String.concat "."
+
+            let suggestedFix = lazy(
+                ExpressionUtilities.tryFindTextOfRange range text
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
+
+            {
+                Range = range
+                Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+                SuggestedFix = Some suggestedFix
+                TypeChecks = List.Empty
+            }
+
+        let argumentsAsIdentifiers =
+            lambda.Arguments
+            |> List.map Helper.FunctionReimplementation.getLambdaParamIdent
+            |> List.rev
+
+        isFunctionPointless lambda.Body argumentsAsIdentifiers
+        |> Option.map generateError
+        |> Option.toArray
+
     Helper.FunctionReimplementation.checkLambda args validateLambdaIsNotPointless
 
 let rule =

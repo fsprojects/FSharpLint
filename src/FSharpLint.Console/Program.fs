@@ -90,16 +90,6 @@ let internal expandWildcard (pattern:string) =
     else
         List.empty
 
-let private parserProgress (output:Output.IOutput) = function
-    | Starting file ->
-        String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
-    | ReachedEnd (_, warnings) ->
-        String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
-    | Failed (file, parseException) ->
-        String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-        output.WriteError
-            $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
-
 /// Checks if a string contains wildcard characters.
 let internal containsWildcard (target:string) =
     target.Contains("*") || target.Contains("?")
@@ -117,101 +107,111 @@ let internal inferFileType (target:string) =
     else
         FileType.Source
 
-let private lint
-    (lintArgs: ParseResults<LintArgs>)
-    (output: Output.IOutput)
-    (toolsPath:Ionide.ProjInfo.Types.ToolsPath)
-    : ExitCode =
-    let mutable exitCode = ExitCode.Success
-
-    let handleError (str:string) =
-        output.WriteError str
-        exitCode <- ExitCode.Failure
-
-    let handleLintResult = function
-        | LintResult.Success(warnings) ->
-            String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
-            |> output.WriteInfo
-            if not (List.isEmpty warnings) then
-                exitCode <- ExitCode.Failure
-        | LintResult.Failure(failure) ->
-            handleError failure.Description
-
-    let lintConfig = lintArgs.TryGetResult Lint_Config
-
-    let configParam =
-        match lintConfig with
-        | Some configPath -> FromFile configPath
-        | None -> Default
-
-    let lintParams =
-        {
-            CancellationToken = None
-            ReceivedWarning = Some output.WriteWarning
-            Configuration = configParam
-            ReportLinterProgress = Some (parserProgress output)
-        }
-
-    let target = lintArgs.GetResult Target
-    let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
-
-    try
-        let lintResult =
-            match fileType with
-            | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
-            | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
-            | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
-            | FileType.Wildcard ->
-                output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
-                let files = expandWildcard target
-                if List.isEmpty files then
-                    output.WriteInfo $"No files matching pattern '%s{target}' were found."
-                    LintResult.Success List.empty
-                else
-                    output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
-                    Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
-            | FileType.Project
-            | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
-        handleLintResult lintResult
-    with
-    | exn ->
-        let target = if fileType = FileType.Source then "source" else target
-        handleError
-            $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
-
-    exitCode
-
-let private start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
-    let output =
-        match arguments.TryGetResult Format with
-        | Some OutputFormat.MSBuild -> Output.MSBuildOutput() :> Output.IOutput
-        | Some OutputFormat.Standard
-        | Some _
-        | None -> Output.StandardOutput() :> Output.IOutput
-
-    if arguments.Contains ToolArgs.Version then
-        let maybeVersion =
-            Assembly.GetExecutingAssembly().GetCustomAttributes false
-            |> Seq.tryPick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
-        match maybeVersion with
-        | Some version ->
-            output.WriteInfo $"Current version: {version}"
-            Environment.Exit 0
-        | None ->
-            failwith "Error: unable to get version"
-
-    match arguments.GetSubCommand() with
-    | Lint lintArgs ->
-        lint lintArgs output toolsPath
-    | _ ->
-        ExitCode.Failure
-
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
 let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
 
 [<EntryPoint>]
 let main argv =
+    let lint
+        (lintArgs: ParseResults<LintArgs>)
+        (output: Output.IOutput)
+        (toolsPath:Ionide.ProjInfo.Types.ToolsPath)
+        : ExitCode =
+        let parserProgress (output:Output.IOutput) = function
+            | Starting file ->
+                String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
+            | ReachedEnd (_, warnings) ->
+                String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
+            | Failed (file, parseException) ->
+                String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
+                output.WriteError
+                    $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
+
+        let mutable exitCode = ExitCode.Success
+
+        let handleError (str:string) =
+            output.WriteError str
+            exitCode <- ExitCode.Failure
+
+        let handleLintResult = function
+            | LintResult.Success(warnings) ->
+                String.Format(Resources.GetString("ConsoleFinished"), List.length warnings)
+                |> output.WriteInfo
+                if not (List.isEmpty warnings) then
+                    exitCode <- ExitCode.Failure
+            | LintResult.Failure(failure) ->
+                handleError failure.Description
+
+        let lintConfig = lintArgs.TryGetResult Lint_Config
+
+        let configParam =
+            match lintConfig with
+            | Some configPath -> FromFile configPath
+            | None -> Default
+
+        let lintParams =
+            {
+                CancellationToken = None
+                ReceivedWarning = Some output.WriteWarning
+                Configuration = configParam
+                ReportLinterProgress = Some (parserProgress output)
+            }
+
+        let target = lintArgs.GetResult Target
+        let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
+
+        try
+            let lintResult =
+                match fileType with
+                | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+                | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
+                | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
+                | FileType.Wildcard ->
+                    output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
+                    let files = expandWildcard target
+                    if List.isEmpty files then
+                        output.WriteInfo $"No files matching pattern '%s{target}' were found."
+                        LintResult.Success List.empty
+                    else
+                        output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
+                        Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
+                | FileType.Project
+                | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
+            handleLintResult lintResult
+        with
+        | exn ->
+            let target = if fileType = FileType.Source then "source" else target
+            handleError
+                $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
+
+        exitCode
+
+    let start (arguments:ParseResults<ToolArgs>) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+        let output =
+            match arguments.TryGetResult Format with
+            | Some OutputFormat.MSBuild -> Output.MSBuildOutput() :> Output.IOutput
+            | Some OutputFormat.Standard
+            | Some _
+            | None -> Output.StandardOutput() :> Output.IOutput
+
+        if arguments.Contains ToolArgs.Version then
+            let maybeVersion =
+                Assembly.GetExecutingAssembly().GetCustomAttributes false
+                |> Seq.tryPick (function | :? AssemblyInformationalVersionAttribute as aiva -> Some aiva.InformationalVersion | _ -> None)
+            match maybeVersion with
+            | Some version ->
+                output.WriteInfo $"Current version: {version}"
+                Environment.Exit 0
+            | None ->
+                failwith "Error: unable to get version"
+
+        match arguments.GetSubCommand() with
+        | Lint lintArgs ->
+            lint lintArgs output toolsPath
+        | _ ->
+            ExitCode.Failure
+
     let errorHandler = ProcessExiter(colorizer = function
         | ErrorCode.HelpText -> None
         | _ -> Some ConsoleColor.Red)

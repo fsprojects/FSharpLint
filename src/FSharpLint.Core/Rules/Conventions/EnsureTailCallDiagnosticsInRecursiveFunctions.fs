@@ -8,22 +8,22 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private emitWarning (isNested: bool) (func: UnneededRecKeyword.RecursiveFunctionInfo) =
-    let message = 
-        String.Format(
-            Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
-            func.Identifier.idText
-        )
-    { Range = func.Range
-      Message = 
-        if isNested then 
-            sprintf "%s %s" message (Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctionsNested") 
-        else
-            message
-      SuggestedFix = None
-      TypeChecks = list.Empty }
-
 let runner (args: AstNodeRuleParams) =
+    let emitWarning (isNested: bool) (func: UnneededRecKeyword.RecursiveFunctionInfo) =
+        let message = 
+            String.Format(
+                Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctions",
+                func.Identifier.idText
+            )
+        { Range = func.Range
+          Message = 
+            if isNested then 
+                sprintf "%s %s" message (Resources.GetString "RulesEnsureTailCallDiagnosticsInRecursiveFunctionsNested") 
+            else
+                message
+          SuggestedFix = None
+          TypeChecks = list.Empty }
+
     let processFunction isNested checkInfo funcs functionInfo =
         if UnneededRecKeyword.functionIsCalledInOneOf checkInfo functionInfo funcs then
             let hasTailCallAttribute =

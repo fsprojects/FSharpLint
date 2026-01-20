@@ -50,31 +50,31 @@ let rec private lambdaArgumentIsLastApplicationInFunctionCalls fileContents expr
         | _ -> List.Empty
     | _ -> List.Empty
 
-let private validateLambdaCannotBeReplacedWithComposition fileContents _ lambda range =
-    let tryReplaceWithFunctionComposition expression =
-        match lambda.Arguments with
-        | [singleParameter] ->
-            match Helper.FunctionReimplementation.getLambdaParamIdent singleParameter with
-            | Some paramIdent -> 
-                match lambdaArgumentIsLastApplicationInFunctionCalls fileContents expression paramIdent List.Empty with
-                | [] -> None
-                | funcStrings -> Some funcStrings
-            | None -> None
-        | _ -> None
-
-    match tryReplaceWithFunctionComposition lambda.Body with
-    | None -> Array.empty
-    | Some funcStrings ->
-        let suggestedFix =
-            lazy(
-                Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
-        Array.singleton
-            { Range = range
-              Message = Resources.GetString("RulesCanBeReplacedWithComposition")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = List.Empty }
-
 let runner (args:AstNodeRuleParams) =
+    let validateLambdaCannotBeReplacedWithComposition fileContents _ lambda range =
+        let tryReplaceWithFunctionComposition expression =
+            match lambda.Arguments with
+            | [singleParameter] ->
+                match Helper.FunctionReimplementation.getLambdaParamIdent singleParameter with
+                | Some paramIdent -> 
+                    match lambdaArgumentIsLastApplicationInFunctionCalls fileContents expression paramIdent List.Empty with
+                    | [] -> None
+                    | funcStrings -> Some funcStrings
+                | None -> None
+            | _ -> None
+
+        match tryReplaceWithFunctionComposition lambda.Body with
+        | None -> Array.empty
+        | Some funcStrings ->
+            let suggestedFix =
+                lazy(
+                    Some { FromRange = range; FromText = fileContents; ToText = String.Join(" >> ", funcStrings) })
+            Array.singleton
+                { Range = range
+                  Message = Resources.GetString("RulesCanBeReplacedWithComposition")
+                  SuggestedFix = Some suggestedFix
+                  TypeChecks = List.Empty }
+
     Helper.FunctionReimplementation.checkLambda args (validateLambdaCannotBeReplacedWithComposition args.FileContent)
 
 let rule =
