@@ -135,4 +135,4 @@ The following rules can be specified for linting.
 - [DisallowShadowing (FL0092)](rules/FL0092.html)
 - [DiscourageStringInterpolationWithStringFormat (FL0093)](rules/FL0093.html)
 - [FavourNamedMembers (FL0094)](rules/FL0094.html)
-- [FavourBasicControlFlow (FL0095)](rules/FL0095.html)
+- [RecommendIfElseConstructOverMatch (FL0095)](rules/FL0095.html)

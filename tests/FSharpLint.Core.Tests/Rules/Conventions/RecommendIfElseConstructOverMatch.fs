@@ -1,12 +1,12 @@
-module FSharpLint.Core.Tests.Rules.Conventions.FavourBasicControlFlow
+module FSharpLint.Core.Tests.Rules.Conventions.RecommendIfElseConstructOverMatch
 
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestConventionsFavourFavourBasicControlFlow() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourBasicControlFlow.rule)
+type TestConventionsRecommendIfElseConstructOverMatch() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(RecommendIfElseConstructOverMatch.rule)
     
     
     [<Test>]

@@ -1,4 +1,4 @@
-module FSharpLint.Rules.FavourBasicControlFlow
+module FSharpLint.Rules.RecommendIfElseConstructOverMatch
 
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -26,14 +26,14 @@ let runner args =
     match args.AstNode with
     | AstNode.Expression(SynExpr.Match (_, _, synMatchClauses, range, _)) when isBasicControlFlow synMatchClauses ->
         { Range = range
-          Message = Resources.GetString "FavourBasicControlFlow"
+          Message = Resources.GetString "RecommendIfElseConstructOverMatch"
           SuggestedFix = None
           TypeChecks = List.empty }
         |> Array.singleton
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourBasicControlFlow"
-      Identifier = Identifiers.FavourBasicControlFlow
+    { Name = "RecommendIfElseConstructOverMatch"
+      Identifier = Identifiers.RecommendIfElseConstructOverMatch
       RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule
