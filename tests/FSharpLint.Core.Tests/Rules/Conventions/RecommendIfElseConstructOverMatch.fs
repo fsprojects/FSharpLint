@@ -39,6 +39,15 @@ match foo with
         Assert.IsTrue this.NoErrorsExist
 
     [<Test>]
+    member this.ThePresenceOfWhenClauseShouldNotProduceError() =
+        this.Parse """
+match foo with
+| bar when bar.Count = 0 -> ()
+| _ -> ()"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
     member this.TwoClausesWithWildcardShouldProduceError() =
         this.Parse """
 match foo with
