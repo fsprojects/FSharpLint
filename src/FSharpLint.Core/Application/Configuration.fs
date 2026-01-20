@@ -445,6 +445,13 @@ type HintConfig = {
     ignore:string [] option
 }
 
+let private flattenHints (config: HintConfig) = 
+    let ignores = 
+        Option.defaultValue Array.empty config.ignore
+        |> Set.ofArray
+    Option.defaultValue Array.empty config.add
+    |> Array.filter (fun hint -> not <| ignores.Contains hint)
+
 type GlobalConfig = {
     numIndentationSpaces:int option
 }
@@ -677,6 +684,43 @@ let loadConfig (configPath:string) =
     File.ReadAllText configPath
     |> parseConfig
 
+let private combineHints (baseConfig: HintConfig) (overridingConfig: HintConfig) =
+    let mergeLists baseList overridingList =
+        match (baseList, overridingList) with
+        | Some baseArray, None -> Some baseArray
+        | Some baseArray, Some overridingArray -> Array.append baseArray overridingArray |> Array.distinct |> Some
+        | None, _ -> overridingList
+    { 
+        add = mergeLists baseConfig.add overridingConfig.add
+        ignore = mergeLists baseConfig.ignore overridingConfig.ignore
+    }
+
+/// Combine two configs into one: all values that are Some in second config override 
+/// corresponding values in first config.
+let combineConfigs (baseConfig: Configuration) (overridingConfig: Configuration) : Configuration =
+    let baseFields = FSharp.Reflection.FSharpValue.GetRecordFields baseConfig
+    let partialConfigFields = FSharp.Reflection.FSharpValue.GetRecordFields overridingConfig
+    
+    let resultingRecordFields =
+        Array.map2
+            (fun baseValue overridingValue -> 
+                if isNull overridingValue then
+                    baseValue
+                else
+                    overridingValue)
+            baseFields
+            partialConfigFields
+
+    let mergedConfig =
+        FSharp.Reflection.FSharpValue.MakeRecord(typeof<Configuration>, resultingRecordFields) 
+            :?> Configuration
+
+    match (baseConfig.Hints, overridingConfig.Hints) with
+    | Some baseHints, Some overridingHints ->
+        { mergedConfig with Hints = Some(combineHints baseHints overridingHints) }
+    | _ -> 
+        mergedConfig    
+
 /// A default configuration specifying every analyser and rule is included as a resource file in the framework.
 /// This function loads and returns this default configuration.
 let defaultConfiguration =
@@ -770,7 +814,7 @@ let flattenConfig (config:Configuration) =
                 config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
                 // </Deprecated>
 
-                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (flattenHints config) }) |> Option.toArray
             |]
 
     let allRules =

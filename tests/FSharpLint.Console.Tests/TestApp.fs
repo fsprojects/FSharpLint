@@ -65,7 +65,7 @@ type TestConsoleApplication() =
     member _.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
         let fileContent = """
         {
-            "InterfaceNames": {
+            "interfaceNames": {
                 "enabled": false
             }
         }
@@ -118,6 +118,64 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
+        
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/466
+    /// Hints listed in the ignore section of the config were not being ignored.
+    [<Test>]
+    member __.``Ignoring a hint in the configuration should stop it from being output as warning.``() =
+        let input = """
+        let x = [1; 2; 3; 4] |> List.map (fun x -> x + 2) |> List.map (fun x -> x + 2)
+        let y = not (1 = 1)
+        """
+        
+        let commonErrorMessage = "`not (a = b)` might be able to be refactored into `a <> b`."
+        let disabledHintErrorMessage = "`List.map f (List.map g x)` might be able to be refactored into `List.map (g >> f) x`."
+
+        let (returnCode, errors) = main [| "lint"; input |]
+        
+        // Check default config triggers the hint we're expecting to ignore later.
+        Assert.AreEqual(-1, returnCode)
+        CollectionAssert.AreEquivalent(set [ commonErrorMessage; disabledHintErrorMessage ], errors)
+
+        let config = """
+        {
+            "hints": {
+                "ignore": [
+                    "List.map f (List.map g x) ===> List.map (g >> f) x"
+                ]
+            }
+        }
+        """
+        use config = new TemporaryFile(config, "json")
+
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+
+        Assert.AreEqual(-1, returnCode)
+        CollectionAssert.AreEquivalent(Set.singleton commonErrorMessage, errors)
+
+    /// Regression for bug discovered during: https://github.com/fsprojects/FSharpLint/issues/466
+    /// Adding a rule to the config was disabling other rules unless they're explicitly specified.
+    [<Test>]
+    member __.``Adding a rule to a custom config should not have side effects on other rules (from the default config).``() =
+        let config = """
+        {
+            "exceptionNames": {
+                "enabled": false
+            }
+        }
+        """
+        use config = new TemporaryFile(config, "json")
+        
+        let input = """
+        type Signature =
+            abstract member Encoded : string
+            abstract member PathName : string
+        """
+        
+        let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
+        
+        Assert.AreEqual(-1, returnCode)
+        Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
 
 [<TestFixture>]
 type TestFileTypeInference() =
