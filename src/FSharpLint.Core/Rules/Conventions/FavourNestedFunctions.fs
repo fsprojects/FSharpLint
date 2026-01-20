@@ -7,6 +7,14 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 
+type private FunctionBinding =
+    {
+        Identifier: Ident
+        Expression: SynExpr
+        Accessibility: Option<SynAccess>
+        Attributes: SynAttributes
+    }
+
 let runner (args: AstNodeRuleParams) =
     let getFunctionBindings (declaration: SynModuleDecl) = 
         match declaration with
@@ -15,9 +23,8 @@ let runner (args: AstNodeRuleParams) =
             |> List.choose
                 (fun binding ->
                     match binding with
-                    | SynBinding(_, _, _, _, attributes, _, _, SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, _, accessibility, _), _, expr, _, _, _)
-                        when extractAttributes attributes |> List.isEmpty ->
-                        Some(ident, expr, accessibility)
+                    | SynBinding(_, _, _, _, attributes, _, _, SynPat.LongIdent(SynLongIdent([ident], _, _), _, _, _, accessibility, _), _, expr, _, _, _) ->
+                        Some { Identifier = ident; Expression = expr; Accessibility = accessibility; Attributes = attributes }
                     | _ -> None
                 )
         | _ -> List.Empty
@@ -28,10 +35,10 @@ let runner (args: AstNodeRuleParams) =
             declarations
             |> Seq.collect getFunctionBindings
             |> Seq.choose 
-                (fun (ident, _expr, accessibility) ->
-                    match accessibility with
-                    | Some(SynAccess.Private _) -> 
-                        Some ident
+                (fun funcBinding ->
+                    match funcBinding.Accessibility with
+                    | Some(SynAccess.Private _) when extractAttributes funcBinding.Attributes |> List.isEmpty -> 
+                        Some funcBinding.Identifier
                     | _ -> None)
             |> Seq.toArray
 
@@ -41,11 +48,14 @@ let runner (args: AstNodeRuleParams) =
                 declarations
                 |> Seq.collect getFunctionBindings
                 |> Seq.choose 
-                    (fun (ident, body, _accessibility) ->
-                        if not(Array.exists (fun (each: Ident) -> each.idText = ident.idText) privateFunctionIdentifiers) then 
-                            Some body
-                        else
-                            None)
+                    (fun funcBinding ->
+                        let isOneOfPrivateFunctions =
+                            Array.exists
+                                (fun (each: Ident) -> each.idText = funcBinding.Identifier.idText)
+                                privateFunctionIdentifiers
+
+                        if not isOneOfPrivateFunctions then Some funcBinding.Expression
+                        else None)
             
             let emitWarningIfNeeded currFunctionIdentifier =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
