@@ -7,22 +7,23 @@ open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private isBasicControlFlow (synMatchClauses: List<SynMatchClause>) =
-    let isFirstClauseTarget firstClause =
-        match firstClause with
-        | SynMatchClause(SynPat.Named(_), _, _, _, _, _)
-        | SynMatchClause(SynPat.Const(_), _, _, _, _, _)
-        | SynMatchClause(SynPat.LongIdent(SynLongIdent _, _, _, SynArgPats.Pats [], _, _), _, _, _, _, _) -> true
-        | _ -> false
-
-    let isLastClauseTarget lastClause =
-        match lastClause with
-        | SynMatchClause(SynPat.Wild _, None, _, _, _, _) -> true
-        | _ -> false
-
-    synMatchClauses.Length = 2 && isFirstClauseTarget synMatchClauses.[0] && isLastClauseTarget synMatchClauses.[1]
-
 let runner args =
+    let isBasicControlFlow (synMatchClauses: List<SynMatchClause>) =
+        let isFirstClauseTarget firstClause =
+            match firstClause with
+            | SynMatchClause(SynPat.Const(_), _, _, _, _, _)
+            | SynMatchClause(SynPat.Named(SynIdent.SynIdent(_), _, _, _), None, _, _, _, _)
+            | SynMatchClause(SynPat.LongIdent(SynLongIdent(_), _, _, SynArgPats.Pats [], _, _), _, _, _, _, _) -> 
+                true
+            | _ -> false
+
+        let isLastClauseTarget lastClause =
+            match lastClause with
+            | SynMatchClause(SynPat.Wild _, None, _, _, _, _) -> true
+            | _ -> false
+
+        synMatchClauses.Length = 2 && isFirstClauseTarget synMatchClauses.[0] && isLastClauseTarget synMatchClauses.[1]
+    
     match args.AstNode with
     | AstNode.Expression(SynExpr.Match (_, _, synMatchClauses, range, _)) when isBasicControlFlow synMatchClauses ->
         { Range = range
