@@ -13,23 +13,23 @@ open FSharpLint.Rules
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.HintMatcher
 
-let private generateHintConfig hints =
-    let parseHints hints =
-        let parseHint hint =
-            match CharParsers.run phint hint with
-            | FParsec.CharParsers.Success(hint, _, _) -> hint
-            | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
-
-        List.map parseHint hints
-
-    parseHints hints
-    |> MergeSyntaxTrees.mergeHints
-
 [<AbstractClass>]
 type TestHintMatcherBase () =
     inherit TestRuleBase.TestRuleBase()
 
     let mutable hintTrie = Edges.Empty
+
+    let generateHintConfig hints =
+        let parseHints hints =
+            let parseHint hint =
+                match CharParsers.run phint hint with
+                | FParsec.CharParsers.Success(hint, _, _) -> hint
+                | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
+
+            List.map parseHint hints
+
+        parseHints hints
+        |> MergeSyntaxTrees.mergeHints
 
     member this.SetConfig (hints:string list) =
         hintTrie <- generateHintConfig hints

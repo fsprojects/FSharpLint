@@ -28,9 +28,6 @@ type ToStringConfig =
 type Config =
     { HintTrie:MergeSyntaxTrees.Edges }
 
-let private extractSimplePatterns (SynSimplePats.SimplePats(simplePatterns, _, _)) =
-    simplePatterns
-
 let rec private extractIdent = function
     | SynSimplePat.Id(ident, _, isCompilerGenerated, _, _, _) -> (ident, isCompilerGenerated)
     | SynSimplePat.Attrib(simplePattern, _, _)
@@ -42,47 +39,10 @@ type private LambdaArgumentMatch =
     | Wildcard
     | NoMatch
 
-let private matchLambdaArgument (LambdaArg.LambdaArg(hintArg), actualArg) =
-    match extractSimplePatterns actualArg with
-    | [] -> LambdaArgumentMatch.NoMatch
-    | simplePattern::_ ->
-        let identifier, isCompilerGenerated = extractIdent simplePattern
-
-        let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
-
-        match hintArg with
-        | Expression.LambdaArg(Expression.Variable(variable)) when not isWildcard ->
-            LambdaArgumentMatch.Variable(variable, identifier.idText)
-        | Expression.LambdaArg(Expression.Wildcard) -> LambdaArgumentMatch.Wildcard
-        | _ -> LambdaArgumentMatch.NoMatch
-
 [<RequireQualifiedAccess>]
 type private LambdaMatch =
     | Match of Map<char, string>
     | NoMatch
-
-let private matchLambdaArguments (hintArgs:HintParserTypes.LambdaArg list) (actualArgs:SynSimplePats list) =
-    if List.length hintArgs <> List.length actualArgs then
-        LambdaMatch.NoMatch
-    else
-        let matches =
-            List.zip hintArgs actualArgs
-            |> List.map matchLambdaArgument
-
-        let allArgsMatch =
-            List.forall (function
-                | LambdaArgumentMatch.NoMatch -> false
-                | _ -> true) matches
-
-        if allArgsMatch then
-            matches
-            |> List.choose (function
-                | LambdaArgumentMatch.Variable(variable, ident) -> Some(variable, ident)
-                | _ -> None)
-            |> Map.ofList
-            |> LambdaMatch.Match
-        else
-            LambdaMatch.NoMatch
 
 /// Converts a SynConst (FSharp AST) into a Constant (hint AST).
 let private matchConst = function
@@ -351,6 +311,46 @@ module private MatchExpression =
     and [<TailCall>] matchLambda arguments =
         match (arguments.Expression, arguments.Hint) with
         | Lambda({ Arguments = args; Body = body }, _), Expression.Lambda(lambdaArgs, LambdaBody(Expression.LambdaBody(lambdaBody))) ->
+            let matchLambdaArguments (hintArgs:HintParserTypes.LambdaArg list) (actualArgs:SynSimplePats list) =
+                let matchLambdaArgument (LambdaArg.LambdaArg(hintArg), actualArg) =
+                    let extractSimplePatterns (SynSimplePats.SimplePats(simplePatterns, _, _)) =
+                        simplePatterns
+
+                    match extractSimplePatterns actualArg with
+                    | [] -> LambdaArgumentMatch.NoMatch
+                    | simplePattern::_ ->
+                        let identifier, isCompilerGenerated = extractIdent simplePattern
+
+                        let isWildcard = isCompilerGenerated && identifier.idText.StartsWith("_")
+
+                        match hintArg with
+                        | Expression.LambdaArg(Expression.Variable(variable)) when not isWildcard ->
+                            LambdaArgumentMatch.Variable(variable, identifier.idText)
+                        | Expression.LambdaArg(Expression.Wildcard) -> LambdaArgumentMatch.Wildcard
+                        | _ -> LambdaArgumentMatch.NoMatch
+
+                if List.length hintArgs <> List.length actualArgs then
+                    LambdaMatch.NoMatch
+                else
+                    let matches =
+                        List.zip hintArgs actualArgs
+                        |> List.map matchLambdaArgument
+
+                    let allArgsMatch =
+                        List.forall (function
+                            | LambdaArgumentMatch.NoMatch -> false
+                            | _ -> true) matches
+
+                    if allArgsMatch then
+                        matches
+                        |> List.choose (function
+                            | LambdaArgumentMatch.Variable(variable, ident) -> Some(variable, ident)
+                            | _ -> None)
+                        |> Map.ofList
+                        |> LambdaMatch.Match
+                    else
+                        LambdaMatch.NoMatch
+            
             match matchLambdaArguments lambdaArgs args with
             | LambdaMatch.Match(lambdaArguments) ->
                 matchHintExpr

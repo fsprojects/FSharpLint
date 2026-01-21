@@ -7,27 +7,27 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private checkForBindingToAWildcard pattern range fileContent (expr: SynExpr) letBindingRange =
-    let rec findWildAndIgnoreParens = function
-        | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
-        | SynPat.Wild(_) -> true
-        | _ -> false
-
-    match ExpressionUtilities.tryFindTextOfRange expr.Range fileContent with
-    | Some exprText -> 
-        if findWildAndIgnoreParens pattern then
-            Array.singleton
-                { Range = range
-                  Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
-                  SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
-                                                    FromText = fileContent
-                                                    ToText = sprintf "(%s) |> ignore" exprText })))
-                  TypeChecks = List.Empty }
-        else
-            Array.empty
-    | None -> Array.empty
-
 let private runner (args:AstNodeRuleParams) =
+    let checkForBindingToAWildcard pattern range fileContent (expr: SynExpr) letBindingRange =
+        let rec findWildAndIgnoreParens = function
+            | SynPat.Paren(pattern, _) -> findWildAndIgnoreParens pattern
+            | SynPat.Wild(_) -> true
+            | _ -> false
+
+        match ExpressionUtilities.tryFindTextOfRange expr.Range fileContent with
+        | Some exprText -> 
+            if findWildAndIgnoreParens pattern then
+                Array.singleton
+                    { Range = range
+                      Message = Resources.GetString("RulesFavourIgnoreOverLetWildError")
+                      SuggestedFix = Some (lazy (Some({ FromRange = letBindingRange
+                                                        FromText = fileContent
+                                                        ToText = sprintf "(%s) |> ignore" exprText })))
+                      TypeChecks = List.Empty }
+            else
+                Array.empty
+        | None -> Array.empty
+
     match args.AstNode with
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, expr, range, _, _)) ->
         let bindingRange  = 
