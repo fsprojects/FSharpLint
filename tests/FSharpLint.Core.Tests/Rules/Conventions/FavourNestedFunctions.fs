@@ -173,3 +173,20 @@ let baz () =
 """
         
         this.AssertNoWarnings()
+
+
+    [<Test>]
+    member this.``Top level private function used in 2 or more functions (including nested modules) should not give an error`` () =
+        this.Parse """
+let private foo x =
+    x
+
+module Bar =
+    let foobar () =
+        foo 1
+
+let baz () =
+    foo 0
+"""
+        
+        this.AssertNoWarnings()
