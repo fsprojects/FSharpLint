@@ -9,15 +9,15 @@ open FSharpLint.Console.Output
 
 let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option) (report: string) (logger: IOutput) =
     try
-        let codeRoot =
+        let codeRootDirectory =
             match codeRoot with
             | None -> Directory.GetCurrentDirectory() |> Uri
             | Some root -> Path.GetFullPath root |> Uri
 
         // Construct full path to ensure path separators are normalized.
-        let report = Path.GetFullPath report
+        let reportPath = Path.GetFullPath report
         // Ensure the parent directory exists
-        let reportFile = FileInfo(report)
+        let reportFile = FileInfo(reportPath)
         reportFile.Directory.Create()
 
         let driver = 
@@ -32,7 +32,7 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
 
         use sarifLogger =
             new SarifLogger(
-                report,
+                reportPath,
                 logFilePersistenceOptions =
                     (FilePersistenceOptions.PrettyPrint ||| FilePersistenceOptions.ForceOverwrite),
                 run = run,
@@ -53,28 +53,11 @@ let writeReport (results: Suggestion.LintWarning list) (codeRoot: string option)
                     Name = analyzerResult.RuleName
                 )
 
-            (*
-            analyzerResult.ShortDescription
-            |> Option.iter (fun shortDescription ->
-                reportDescriptor.ShortDescription <-
-                    MultiformatMessageString(shortDescription, shortDescription, dict [])
-            )
-            *)
-
-            (*
-            result.Level <-
-                match analyzerResult.Message.Severity with
-                | Severity.Info -> FailureLevel.Note
-                | Severity.Hint -> FailureLevel.Note
-                | Severity.Warning -> FailureLevel.Warning
-                | Severity.Error -> FailureLevel.Error
-            *)
-
             let msg = Message(Text = analyzerResult.Details.Message)           
 
             let artifactLocation = 
                 ArtifactLocation(
-                    Uri = codeRoot.MakeRelativeUri(Uri(analyzerResult.Details.Range.FileName))
+                    Uri = codeRootDirectory.MakeRelativeUri(Uri(analyzerResult.Details.Range.FileName))
                 )
 
             let region = 
