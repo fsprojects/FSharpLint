@@ -10,7 +10,7 @@ open FSharpLint.Framework.Rules
 let private runner (args:AstNodeRuleParams) =
     let checkTupleOfWildcards fileContents pattern identifier identifierRange =
         let rec isWildcard = function
-            | SynPat.Paren(pattern, _) -> isWildcard pattern
+            | SynPat.Paren(innerPattern, _) -> isWildcard innerPattern
             | SynPat.Wild(_) -> true
             | _ -> false
 
@@ -42,9 +42,9 @@ let private runner (args:AstNodeRuleParams) =
     let isTupleMemberArgs breadcrumbs tupleRange =
         let (|MemberBindingArgs|_|) bindingPattern =
             match bindingPattern with
-            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, args, _, _), _, _, _, _, _) ->
-                match args with
-                | SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_) as args, _)]) -> Some(args)
+            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(_, _, _, argPats, _, _), _, _, _, _, _) ->
+                match argPats with
+                | SynArgPats.Pats([SynPat.Paren(SynPat.Tuple(_) as tuple, _)]) -> Some(tuple)
                 | _ -> None
             | _ -> None
 

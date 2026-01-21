@@ -20,13 +20,13 @@ type TestHintMatcherBase () =
     let mutable hintTrie = Edges.Empty
 
     let generateHintConfig hints =
-        let parseHints hints =
-            let parseHint hint =
-                match CharParsers.run phint hint with
+        let parseHints hintStrings =
+            let parseHint hintString =
+                match CharParsers.run phint hintString with
                 | FParsec.CharParsers.Success(hint, _, _) -> hint
                 | FParsec.CharParsers.Failure(error, _, _) -> failwithf "Invalid hint %s" error
 
-            List.map parseHint hints
+            List.map parseHint hintStrings
 
         parseHints hints
         |> MergeSyntaxTrees.mergeHints
@@ -34,22 +34,22 @@ type TestHintMatcherBase () =
     member this.SetConfig (hints:string list) =
         hintTrie <- generateHintConfig hints
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
+    override this.Parse (input:string, ?maybeFileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         let parseResults =
-            match fileName with
+            match maybeFileName with
             | Some fileName ->
                 ParseFile.parseSourceFile fileName input checker
             | None ->
                 ParseFile.parseSource input checker
 
-        let rule =
+        let astNodeRule =
             match HintMatcher.rule { HintTrie = hintTrie } with
-            | Rules.AstNodeRule rule -> rule
+            | Rules.AstNodeRule nodeRule -> nodeRule
             | _ -> failwith "TestHintMatcherBase only accepts AstNodeRules"
 
-        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
+        let resolvedGlobalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match Async.RunSynchronously parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -61,11 +61,11 @@ type TestHintMatcherBase () =
             let suggestions =
                 runAstNodeRules
                     {
-                        Rules = Array.singleton rule
-                        GlobalConfig = globalConfig
+                        Rules = Array.singleton astNodeRule
+                        GlobalConfig = resolvedGlobalConfig
                         TypeCheckResults = checkResult
                         ProjectCheckResults = None
-                        FilePath = (Option.defaultValue String.Empty fileName)
+                        FilePath = (Option.defaultValue String.Empty maybeFileName)
                         FileContent = input
                         Lines = (input.Split("\n"))
                         SyntaxArray = syntaxArray

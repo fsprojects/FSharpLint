@@ -523,12 +523,12 @@ module Lint =
 
                     let (successes, failures) =
                         lintResults
-                        |> Array.fold (fun (successes, failures) result ->
+                        |> Array.fold (fun (successList, failureList) result ->
                             match result with
                             | LintResult.Success warnings ->
-                                (List.append warnings successes, failures)
+                                (List.append warnings successList, failureList)
                             | LintResult.Failure err ->
-                                (successes, err :: failures)) (List.Empty, List.Empty)
+                                (successList, err :: failureList)) (List.Empty, List.Empty)
 
                     match failures with
                     | [] ->

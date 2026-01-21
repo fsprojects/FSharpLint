@@ -343,6 +343,7 @@
     "favourSingleton": { "enabled": false },
     "noAsyncRunSynchronouslyInLibrary": { "enabled": true },
     "favourNestedFunctions": { "enabled": false },
+    "disallowShadowing": { "enabled": false },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

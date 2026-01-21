@@ -55,7 +55,7 @@ let runner (args:AstNodeRuleParams) =
         else
             Array.empty
     
-    let getIdentifiers (args:AstNodeRuleParams) =
+    let identifiers =
         match args.AstNode with
         | AstNode.Expression(SynExpr.LetOrUseBang(_, _, _, pat, _, _, _, _, _)) ->
             getParameterWithBelowMinimumLength [pat]
@@ -72,8 +72,8 @@ let runner (args:AstNodeRuleParams) =
             getParameterWithBelowMinimumLength [namePattern]
         | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _, _)) ->
             match pattern with
-            | SynPat.LongIdent(SynLongIdent(identifiers, _, _),_, _, SynArgPats.Pats(names), _, _) ->
-                match identifiers with
+            | SynPat.LongIdent(SynLongIdent(idents, _, _),_, _, SynArgPats.Pats(names), _, _) ->
+                match idents with
                 | head::_  ->
                     let result: (Ident * string * (unit -> bool) option) array = getParameterWithBelowMinimumLength names
                     if isIdentifierTooShort head.idText then
@@ -103,7 +103,7 @@ let runner (args:AstNodeRuleParams) =
             Array.singleton (id, id.idText, None)
         | _ -> Array.empty
 
-    getIdentifiers args
+    identifiers
     |> Array.collect (fun (identifier, idText, typeCheck) ->
         let suggestions = checkIdentifier identifier idText
         Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }) suggestions)

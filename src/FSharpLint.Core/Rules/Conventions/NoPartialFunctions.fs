@@ -171,11 +171,11 @@ let rec private tryFindTypedExpression (range: Range) (expressions: List<FSharpE
         let interfaceImlps = 
             interfaceImplementations
             |> List.collect (fun (_, imlps) -> imlps)
-        let expressions =
+        let exprs =
             List.append overrides interfaceImlps
             |> Seq.cast<FSharpExpr>
             |> Seq.toList
-        tryFindTypedExpression range (baseCallExpr :: expressions @ rest)
+        tryFindTypedExpression range (baseCallExpr :: exprs @ rest)
     | FSharpExprPatterns.TraitCall(_sourceTypes, _traitName, _typeArgs, _typeInstantiation, _argTypes, argExprs) :: rest -> 
         tryFindTypedExpression range (argExprs @ rest)
     | FSharpExprPatterns.ValueSet(_valToSet, valueExpr) :: rest -> 
@@ -217,7 +217,7 @@ let checkMemberCallOnExpression
     (flieContent: string) 
     (range: Range) 
     (originalRange: Range): array<WarningDetails> =
-    let getTypedExpressionForRange (checkFile:FSharpCheckFileResults) (range: Range) =
+    let typedExpression =
         let expressions =
             match checkFile.ImplementationFile with
             | Some implementationFile -> getExpressions List.empty implementationFile.Declarations
@@ -225,7 +225,7 @@ let checkMemberCallOnExpression
 
         tryFindTypedExpression range expressions
 
-    match getTypedExpressionForRange checkFile range with
+    match typedExpression with
     | Some expression ->
         let choose (fullyQualifiedInstanceMember: string) (replacementStrategy: Replacement) =
             let typeName = fullyQualifiedInstanceMember.Split(".").[0]
@@ -286,7 +286,7 @@ let checkMemberCallOnExpression
     | None -> Array.empty
 
 let runner (config:Config) (args:AstNodeRuleParams) =
-    let checkIfPartialIdentifier (config:Config) (identifier:string) (range:Range) =
+    let checkIfPartialIdentifier (identifier:string) (range:Range) =
         if List.contains identifier config.AllowedPartials then
             None
         elif List.contains identifier config.AdditionalPartials then
@@ -410,7 +410,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
     match (args.AstNode, args.CheckInfo) with
     | (AstNode.Identifier (identifier, range), Some checkInfo) ->
         let checkPartialIdentifier =
-            checkIfPartialIdentifier config (String.concat "." identifier) range
+            checkIfPartialIdentifier (String.concat "." identifier) range
 
         match checkPartialIdentifier with
         | Some partialIdent ->

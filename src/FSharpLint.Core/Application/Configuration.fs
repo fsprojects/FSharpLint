@@ -107,16 +107,14 @@ module IgnoreFiles =
         match remainingPath with
         | [_] when isDirectory -> false
         | currentSegment::remaining ->
-            let currentlyMatchingGlobs = globs::currentlyMatchingGlobs
+            let updatedCurrentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment (globs::currentlyMatchingGlobs)
 
-            let currentlyMatchingGlobs = getRemainingGlobSeqForMatches currentSegment currentlyMatchingGlobs
-
-            let aGlobWasCompletelyMatched = List.exists List.isEmpty currentlyMatchingGlobs
+            let aGlobWasCompletelyMatched = List.exists List.isEmpty updatedCurrentlyMatchingGlobs
 
             let matched = aGlobWasCompletelyMatched && (isDirectory || (not isDirectory && List.isEmpty remaining))
 
             if matched then true
-            else doesGlobSeqMatchPathSeq globs isDirectory remaining currentlyMatchingGlobs
+            else doesGlobSeqMatchPathSeq globs isDirectory remaining updatedCurrentlyMatchingGlobs
         | [] -> false
 
     let private pathMatchesGlob (globs:Regex list) (path:string list) isDirectory =
@@ -387,7 +385,8 @@ type ConventionsConfig =
       suggestUseAutoProperty:EnabledConfig option
       usedUnderscorePrefixedElements:EnabledConfig option
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
-      favourNestedFunctions:EnabledConfig option }
+      favourNestedFunctions:EnabledConfig option
+      disallowShadowing:EnabledConfig option}
 with
     member this.Flatten() =
         Array.concat
@@ -416,6 +415,7 @@ with
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
+                this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -557,7 +557,8 @@ type Configuration =
       InterpolatedStringWithNoSubstitution:EnabledConfig option
       FavourSingleton:EnabledConfig option
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
-      FavourNestedFunctions:EnabledConfig option }
+      FavourNestedFunctions:EnabledConfig option
+      DisallowShadowing:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -661,6 +662,7 @@ with
         FavourSingleton = None
         NoAsyncRunSynchronouslyInLibrary = None
         FavourNestedFunctions = None
+        DisallowShadowing = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -688,7 +690,7 @@ let defaultConfiguration =
     use stream = assembly.GetManifestResourceStream(resourceName)
     match stream with
     | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
-    | stream ->
+    | _ ->
         use reader = new System.IO.StreamReader(stream)
 
         reader.ReadToEnd()
@@ -705,8 +707,8 @@ type LoadedRules =
       LineRules:LineRules
       DeprecatedRules:Rule [] }
 
-let getGlobalConfig (globalConfig:GlobalConfig option) =
-    globalConfig
+let getGlobalConfig (maybeGlobalConfig: GlobalConfig option) =
+    maybeGlobalConfig
     |> Option.map (fun globalConfig -> {
         Rules.GlobalRuleConfig.numIndentationSpaces = globalConfig.numIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.numIndentationSpaces
     }) |> Option.defaultValue Rules.GlobalRuleConfig.Default
@@ -747,11 +749,11 @@ let findDeprecation config deprecatedAllRules allRules =
 // fsharplint:disable MaxLinesInFunction
 let flattenConfig (config:Configuration) =
     let parseHints (hints:string []) =
-        let parseHint hint =
-            match FParsec.CharParsers.run HintParser.phint hint with
+        let parseHint hintString =
+            match FParsec.CharParsers.run HintParser.phint hintString with
             | FParsec.CharParsers.Success(hint, _, _) -> hint
             | FParsec.CharParsers.Failure(error, _, _) ->
-                raise <| ConfigurationException $"Failed to parse hint: {hint}{Environment.NewLine}{error}"
+                raise <| ConfigurationException $"Failed to parse hint: {hintString}{Environment.NewLine}{error}"
 
         hints
         |> Array.filter (System.String.IsNullOrWhiteSpace >> not)
@@ -765,12 +767,12 @@ let flattenConfig (config:Configuration) =
         Array.concat
             [|
                 // Deprecated grouped configs. TODO: remove in next major release
-                config.formatting |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                config.conventions |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
-                config.typography |> Option.map (fun config -> config.Flatten()) |> Option.toArray |> Array.concat
+                config.formatting |> Option.map (fun formattingConfig -> formattingConfig.Flatten()) |> Option.toArray |> Array.concat
+                config.conventions |> Option.map (fun conventionsConfig -> conventionsConfig.Flatten()) |> Option.toArray |> Array.concat
+                config.typography |> Option.map (fun typographyConfig -> typographyConfig.Flatten()) |> Option.toArray |> Array.concat
                 // </Deprecated>
 
-                config.Hints |> Option.map (fun config -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList config.add) }) |> Option.toArray
+                config.Hints |> Option.map (fun hintsConfig -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList hintsConfig.add) }) |> Option.toArray
             |]
 
     let allRules =
@@ -868,6 +870,7 @@ let flattenConfig (config:Configuration) =
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
                 config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
                 config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
+                config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules

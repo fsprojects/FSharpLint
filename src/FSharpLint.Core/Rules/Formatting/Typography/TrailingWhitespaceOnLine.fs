@@ -24,7 +24,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
 
         List.exists ((=) character) symbols
 
-    let doesStringNotEndWithWhitespace (config:Config) (str:string) =
+    let doesStringNotEndWithWhitespace (str:string) =
         match (config.NumberOfSpacesAllowed, config.OneSpaceAllowedAfterOperator) with
         | (numberOfSpacesAllowed, _) when numberOfSpacesAllowed > 0 ->
             str.Length - str.TrimEnd().Length <= numberOfSpacesAllowed
@@ -40,7 +40,7 @@ let checkTrailingWhitespaceOnLine (config:Config) (args:LineRuleParams) =
 
     let stringEndsWithWhitespace =
         not ignoringBlankLinesAndIsBlankLine &&
-        not <| doesStringNotEndWithWhitespace config line
+        not <| doesStringNotEndWithWhitespace line
 
     if stringEndsWithWhitespace then
         let whitespaceLength = line.Length - line.TrimEnd().Length

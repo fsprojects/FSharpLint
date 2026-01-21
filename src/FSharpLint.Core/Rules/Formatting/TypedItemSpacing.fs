@@ -38,7 +38,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         getTrailingSpacesInner text (text.Length - 1) 0
 
     /// Checks the provided range, containing a typed item, has valid spacing.
-    let checkRange (config:Config) (args:AstNodeRuleParams) (range:Range) =
+    let checkRange (range:Range) =
         let (expectedSpacesBefore, expectedSpacesAfter) =
             expectedSpacesFromConfig config.TypedItemStyle
 
@@ -77,7 +77,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
     | AstNode.Field (SynField (range=range)) ->
         // NOTE: This currently does not work for fields in union cases, since the range on union case fields is incorrect,
         // only including the type and not the field name. (https://github.com/dotnet/fsharp/issues/9279)
-        checkRange config args range |> Option.toArray
+        checkRange range |> Option.toArray
     | _ -> Array.empty
 
 let rule config =

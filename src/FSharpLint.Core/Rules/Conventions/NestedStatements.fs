@@ -53,22 +53,22 @@ let isElseIf args node index =
             | _ -> false
     | _ -> false
 
-let mutable depth = 0
+let mutable currentDepth = 0
 
 let decrementDepthToCommonParent args iIndex jIndex =
-    let distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) iIndex jIndex =
-        let mutable iIndex = iIndex
-        let mutable jIndex = jIndex
+    let distanceToCommonParent (syntaxArray:AbstractSyntaxArray.Node []) =
+        let mutable iCurrentIndex = iIndex
+        let mutable jCurrentIndex = jIndex
         let mutable distance = 0
 
-        while iIndex <> jIndex do
-            if iIndex > jIndex then
-                iIndex <- syntaxArray.[iIndex].ParentIndex
+        while iCurrentIndex <> jCurrentIndex do
+            if iCurrentIndex > jCurrentIndex then
+                iCurrentIndex <- syntaxArray.[iCurrentIndex].ParentIndex
 
-                if iIndex <> jIndex && areChildrenNested syntaxArray.[iIndex].Actual then
+                if iCurrentIndex <> jCurrentIndex && areChildrenNested syntaxArray.[iCurrentIndex].Actual then
                     distance <- distance + 1
             else
-                jIndex <- syntaxArray.[jIndex].ParentIndex
+                jCurrentIndex <- syntaxArray.[jCurrentIndex].ParentIndex
 
         distance
 
@@ -77,7 +77,7 @@ let decrementDepthToCommonParent args iIndex jIndex =
         let parent = args.SyntaxArray.[jIndex].ParentIndex
         if parent <> iIndex && parent <> args.SyntaxArray.[iIndex].ParentIndex then
             // Decrement depth until we reach a common parent.
-            depth <- depth - (distanceToCommonParent args.SyntaxArray iIndex jIndex)
+            currentDepth <- currentDepth - (distanceToCommonParent args.SyntaxArray)
 
 let mutable skipToIndex = None
 
@@ -88,8 +88,8 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
     let getRange node =
         match node with 
-        | AstNode.Expression(node) -> Some node.Range
-        | AstNode.Binding(node) -> Some node.RangeOfBindingWithRhs
+        | AstNode.Expression(expr) -> Some expr.Range
+        | AstNode.Binding(binding) -> Some binding.RangeOfBindingWithRhs
         | _ -> None
 
     let skip =
@@ -108,7 +108,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         decrementDepthToCommonParent args index (index + 1)
 
         if areChildrenNested node && not <| isMetaData args node index && not <| isElseIf args node index then
-            if depth >= config.Depth then
+            if currentDepth >= config.Depth then
                 // Skip children as we've had an error containing them.
                 let skipChildren = index + args.SyntaxArray.[index].NumberOfChildren + 1
                 decrementDepthToCommonParent args index skipChildren
@@ -124,7 +124,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                     })
                 |> Option.toArray
             else
-                depth <- depth + 1
+                currentDepth <- currentDepth + 1
                 Array.empty
         else
             Array.empty
@@ -132,7 +132,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         Array.empty
 
 let cleanup () =
-    depth <- 0
+    currentDepth <- 0
     skipToIndex <- None
 
 let rule config =

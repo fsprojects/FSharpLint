@@ -17,28 +17,28 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
                 firstExpression
                 range
                 (fun () -> (checkExpression secondExpression secondExpression.Range returnEmptyArray))
-        | SynExpr.Paren (innerExpression, _, _, range) -> checkExpression innerExpression range returnEmptyArray
-        | SynExpr.While (_, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
-        | SynExpr.For (_, _, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
-        | SynExpr.ForEach (_, _, _, _, _, _, innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
+        | SynExpr.Paren (innerExpression, _, _, innerRange) -> checkExpression innerExpression innerRange returnEmptyArray
+        | SynExpr.While (_, _, innerExpression, innerRange) -> checkExpression innerExpression innerRange returnEmptyArray
+        | SynExpr.For (_, _, _, _, _, _, _, innerExpression, innerRange) -> checkExpression innerExpression innerRange returnEmptyArray
+        | SynExpr.ForEach (_, _, _, _, _, _, innerExpression, innerRange) -> checkExpression innerExpression innerRange returnEmptyArray
         | SynExpr.Match (_, _, clauses, _range, _) ->
-            let subExpressions = clauses |> List.map (fun (SynMatchClause (_, _, clause, range, _, _)) -> (clause, range))
+            let subExpressions = clauses |> List.map (fun (SynMatchClause (_, _, clause, innerRange, _, _)) -> (clause, innerRange))
             checkMultipleExpressions subExpressions returnEmptyArray
-        | SynExpr.Do (innerExpression, range) -> checkExpression innerExpression range returnEmptyArray
+        | SynExpr.Do (innerExpression, innerRange) -> checkExpression innerExpression innerRange returnEmptyArray
         | SynExpr.TryWith (tryExpression, withCases, tryRange, _, _, _) ->
             let subExpressions =
                 withCases |> List.map (fun (SynMatchClause (_, _, withCase, withRange, _, _)) -> (withCase, withRange))
             checkMultipleExpressions subExpressions (fun () -> checkExpression tryExpression tryRange returnEmptyArray)
-        | SynExpr.TryFinally (tryExpression, finallyExpr, range, _, _, _) ->
-            checkExpression tryExpression range (fun () -> checkExpression finallyExpr range returnEmptyArray)
-        | SynExpr.IfThenElse (_, thenExpr, elseExpr, _, _, range, _) ->
+        | SynExpr.TryFinally (tryExpression, finallyExpr, innerRange, _, _, _) ->
+            checkExpression tryExpression range (fun () -> checkExpression finallyExpr innerRange returnEmptyArray)
+        | SynExpr.IfThenElse (_, thenExpr, elseExpr, _, _, innerRange, _) ->
             checkExpression
                 thenExpr
-                range
+                innerRange
                 (fun () -> 
                     match elseExpr with
                     | Some elseExpression ->
-                        checkExpression elseExpression range returnEmptyArray
+                        checkExpression elseExpression innerRange returnEmptyArray
                     | None -> Array.empty)
             
         | SynExpr.App (_, _, SynExpr.Ident failwithId, _, _) when
@@ -53,18 +53,18 @@ let rec checkExpression (expression: SynExpr) (range: range) (continuation: unit
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }
-        | SynExpr.App (_, _, funcExpr, _, range) ->
-            checkExpression funcExpr range returnEmptyArray
-        | SynExpr.LetOrUse (_, _, _, body, range, _) ->
-            checkExpression body range returnEmptyArray
+        | SynExpr.App (_, _, funcExpr, _, innerRange) ->
+            checkExpression funcExpr innerRange returnEmptyArray
+        | SynExpr.LetOrUse (_, _, _, body, innerRange, _) ->
+            checkExpression body innerRange returnEmptyArray
         | _ -> Array.empty)
         (continuation ())
 and [<TailCall>] checkMultipleExpressions (expressions: list<SynExpr * range>) (continuation: unit -> array<WarningDetails>) =
     match expressions with
-    | (expression, range) :: tail -> 
+    | (expression, innerRange) :: tail ->
         checkExpression
             expression
-            range
+            innerRange
             (fun () -> 
                 checkMultipleExpressions
                     tail

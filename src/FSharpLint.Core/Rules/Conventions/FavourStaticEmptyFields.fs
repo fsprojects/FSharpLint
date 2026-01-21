@@ -53,8 +53,8 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
         processExpressions errorsSoFar args (indexArgs :: tail)
     | SynExpr.Paren(expr, _, _, _) :: tail ->
         processExpressions errorsSoFar args (expr :: tail)
-    | SynExpr.Tuple(_, expressions, _, _) :: tail ->
-        processExpressions errorsSoFar args (List.append expressions tail)
+    | SynExpr.Tuple(_, exprs, _, _) :: tail ->
+        processExpressions errorsSoFar args (List.append exprs tail)
     | SynExpr.ArrayOrList(isArray, [], range) :: tail ->
         let emptyLiteralType =
             if isArray then EmptyArrayLiteral else EmptyListLiteral

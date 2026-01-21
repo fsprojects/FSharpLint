@@ -17,8 +17,8 @@ let rec getLambdaParamIdent = function
 
 let checkLambda (args:AstNodeRuleParams) checker =
     match args.AstNode with
-    | AstNode.Expression(SynExpr.Lambda(_)) as lambda -> 
-        match lambda with
+    | AstNode.Expression(SynExpr.Lambda(_)) as lambdaExpression -> 
+        match lambdaExpression with
         | Lambda(lambda, range) -> 
             if (not << List.isEmpty) lambda.Arguments then
                 checker args.FileContent lambda range

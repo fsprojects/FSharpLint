@@ -15,18 +15,18 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
         let sourceText = SourceText.ofString input
 
-        let fileName = Option.defaultValue "Test.fsx" fileName
+        let resolvedFileName = Option.defaultValue "Test.fsx" fileName
 
-        let projectOptions, _ = checker.GetProjectOptionsFromScript(fileName, sourceText) |> Async.RunSynchronously
+        let projectOptions, _ = checker.GetProjectOptionsFromScript(resolvedFileName, sourceText) |> Async.RunSynchronously
         let parsingOptions, _ = checker.GetParsingOptionsFromProjectOptions projectOptions
         let parseResults = checker.ParseFile("test.fsx", sourceText, parsingOptions) |> Async.RunSynchronously
 
-        let rule =
+        let noTabCharactersRule =
             match rule with
-            | NoTabCharactersRule rule -> rule
+            | NoTabCharactersRule ntcRule -> ntcRule
             | _ -> failwith "TestNoTabCharactersRuleBase only accepts NoTabCharactersRules"
 
-        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
+        let resolvedGlobalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         let lines = input.Split "\n"
 
@@ -35,21 +35,21 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
             runAstNodeRules
                 {
                     Rules = Array.empty
-                    GlobalConfig = globalConfig
+                    GlobalConfig = resolvedGlobalConfig
                     TypeCheckResults = None
                     ProjectCheckResults = None
-                    FilePath = fileName
+                    FilePath = resolvedFileName
                     FileContent = input
                     Lines = lines
                     SyntaxArray = syntaxArray
                 }
-        let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = Some rule; GenericLineRules = Array.empty }
+        let lineRules = { LineRules.IndentationRule = None; NoTabCharactersRule = Some noTabCharactersRule; GenericLineRules = Array.empty }
 
         runLineRules
             {
                 LineRules = lineRules
-                GlobalConfig = globalConfig
-                FilePath = fileName
+                GlobalConfig = resolvedGlobalConfig
+                FilePath = resolvedFileName
                 FileContent = input
                 Lines = lines
                 Context = context

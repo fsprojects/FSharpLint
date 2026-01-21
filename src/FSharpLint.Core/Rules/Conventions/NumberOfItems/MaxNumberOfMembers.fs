@@ -7,8 +7,8 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let rule config =
-    let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
+let rule (config:Helper.NumberOfItems.Config) =
+    let runner (args:AstNodeRuleParams) =
         let getMembers (members:SynMemberDefn list) =
             let isPublic = function
                 | Some(SynAccess.Public(_)) | None -> true
@@ -23,11 +23,11 @@ let rule config =
 
             List.filter isPublicMember members
 
-        let validateType (maxMembers:int) members typeRepresentation =
+        let validateType (maxMembers:int) typeMembers typeRepresentation =
             let members =
                 match typeRepresentation with
-                | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> members
-                | SynTypeDefnRepr.ObjectModel(_, members, _) -> getMembers members
+                | SynTypeDefnRepr.Simple(_) | SynTypeDefnRepr.Exception(_) -> typeMembers
+                | SynTypeDefnRepr.ObjectModel(_, classMembers, _) -> getMembers classMembers
 
             if List.length members > maxMembers then
                 let errorFormatString = Resources.GetString("RulesNumberOfItemsClassMembersError")
@@ -53,7 +53,7 @@ let rule config =
             Identifier = Identifiers.MaxNumberOfMembers
             RuleConfig =
                 {
-                    AstNodeRuleConfig.Runner = runner config
+                    AstNodeRuleConfig.Runner = runner
                     Cleanup = ignore
                 }
         }

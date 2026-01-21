@@ -25,7 +25,7 @@ let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVaria
     /// Confirms if two parts of the ast look alike.
     /// This is required as hints can bind variables: the bound location needs to be compared to
     /// parts of the ast that the hint covers with the same variable.
-    let isMatch iIndex jIndex (nodeArray:AbstractSyntaxArray.Node []) = 
+    let isMatch iIndex jIndex = 
         let numChildrenI = nodeArray.[iIndex].NumberOfChildren
         let numChildrenJ = nodeArray.[jIndex].NumberOfChildren
 
@@ -53,20 +53,20 @@ let rec checkTrie index trie (nodeArray:AbstractSyntaxArray.Node []) (boundVaria
             checkTrie (index + 1) trie nodeArray boundVariables notify
         else
             match trie.Edges.Lookup.TryGetValue node.Hashcode with
-            | true, trie -> checkTrie (index + 1) trie nodeArray boundVariables notify
+            | true, subTrie -> checkTrie (index + 1) subTrie nodeArray boundVariables notify
             | false, _ -> ()
 
-        let collect var trie = 
-            match var with
+        let collect maybeVar subTrie = 
+            match maybeVar with
             | Some(var) -> 
                 match boundVariables.TryGetValue var with
-                | true, varI when isMatch varI index nodeArray  -> 
-                    checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+                | true, varI when isMatch varI index  -> 
+                    checkTrie (index + node.NumberOfChildren + 1) subTrie nodeArray boundVariables notify
                 | false, _ -> 
                     boundVariables.Add(var, index)
-                    checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+                    checkTrie (index + node.NumberOfChildren + 1) subTrie nodeArray boundVariables notify
                 | true, _ -> ()
-            | None -> checkTrie (index + node.NumberOfChildren + 1) trie nodeArray boundVariables notify
+            | None -> checkTrie (index + node.NumberOfChildren + 1) subTrie nodeArray boundVariables notify
 
-        List.iter (fun (var, trie) -> collect var trie) trie.Edges.AnyMatch
+        List.iter (fun (var, subTrie) -> collect var subTrie) trie.Edges.AnyMatch
 // fsharplint:enable EnsureTailCallDiagnosticsInRecursiveFunctions

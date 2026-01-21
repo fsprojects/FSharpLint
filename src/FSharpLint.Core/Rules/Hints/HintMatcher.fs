@@ -190,11 +190,11 @@ module private MatchExpression =
         | ExpressionUtilities.Identifier([ident], _), ExpressionUtilities.Identifier([opIdent], _) when opIdent.idText = "op_Equality" ->
             match arguments.FSharpCheckFileResults with
             | Some checkFile ->
-                let symbolUse =
+                let maybeSymbolUse =
                     checkFile.GetSymbolUseAtLocation(
                         ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
-                match symbolUse with
+                match maybeSymbolUse with
                 | Some symbolUse ->
                     let checkSymbol () = 
                         match symbolUse.Symbol with
@@ -221,19 +221,19 @@ module private MatchExpression =
 
     [<TailCall>]
     let rec matchHintExpr (continuation: unit -> HintMatch) arguments =
-        let expr = removeParens arguments.Expression
-        let arguments = { arguments with Expression = expr }
+        let exprNode = removeParens arguments.Expression
+        let arguments = { arguments with Expression = exprNode }
 
         (continuation ()) &&~
         match arguments.Hint with
         | Expression.Variable(variable) when Map.containsKey variable arguments.LambdaArguments ->
-            match expr with
+            match exprNode with
             | AstNode.Expression(ExpressionUtilities.Identifier([identifier], _))
                     when identifier.idText = arguments.LambdaArguments.[variable] ->
                 Match(List.Empty)
             | _ -> NoMatch
         | Expression.Variable(var) ->
-            match expr with
+            match exprNode with
             | AstNode.Expression(expr) -> arguments.MatchedVariables.TryAdd(var, expr) |> ignore<bool>
             | _ -> ()
             Match(List.Empty)
@@ -242,10 +242,10 @@ module private MatchExpression =
         | Expression.Null
         | Expression.Constant(_)
         | Expression.Identifier(_) ->
-            if matchExpr expr = Some(arguments.Hint) then Match(List.Empty)
+            if matchExpr exprNode = Some(arguments.Hint) then Match(List.Empty)
             else NoMatch
         | Expression.Parentheses(hint) ->
-            arguments.SubHint(expr, hint) |> matchHintExpr returnEmptyMatch
+            arguments.SubHint(exprNode, hint) |> matchHintExpr returnEmptyMatch
         | Expression.Tuple(_) ->
             matchTuple arguments
         | Expression.List(_) ->
@@ -690,22 +690,22 @@ let rule config =
     /// Searches the abstract syntax array for possible hint matches using the hint trie.
     /// Any possible matches that are found will be given to the callback function `notify`,
     /// any matches found are not guaranteed and it's expected that the caller verify the match.
-    let runner (config:Config) (args:AstNodeRuleParams) =
-        let confirmFuzzyMatch (args:AstNodeRuleParams) (hint:HintParserTypes.Hint) =
-            let hintError (config: HintErrorConfig) =
+    let runner (args:AstNodeRuleParams) =
+        let confirmFuzzyMatch (hint:HintParserTypes.Hint) =
+            let hintError (hintErrorConfig: HintErrorConfig) =
                 let toStringConfig =
                     {
                         ToStringConfig.Replace = false
                         ToStringConfig.ParentAstNode = None
-                        ToStringConfig.Args = config.Args
-                        ToStringConfig.MatchedVariables = config.MatchedVariables
+                        ToStringConfig.Args = hintErrorConfig.Args
+                        ToStringConfig.MatchedVariables = hintErrorConfig.MatchedVariables
                         ToStringConfig.ParentHintNode = None
-                        ToStringConfig.HintNode = config.Hint.MatchedNode
+                        ToStringConfig.HintNode = hintErrorConfig.Hint.MatchedNode
                     }
 
                 let matched = FormatHint.toString toStringConfig
 
-                match config.Hint.Suggestion with
+                match hintErrorConfig.Hint.Suggestion with
                 | Suggestion.Expr(expr) ->
                     let suggestion = FormatHint.toString { toStringConfig with HintNode = (HintExpr expr) }
                     let errorFormatString = Resources.GetString("RulesHintRefactor")
@@ -716,43 +716,41 @@ let rule config =
                             {
                                 toStringConfig with
                                     Replace = true
-                                    ParentAstNode = config.ParentAstNode
+                                    ParentAstNode = hintErrorConfig.ParentAstNode
                                     HintNode = (HintExpr expr)
                             }
 
                     let suggestedFix = lazy(
-                        ExpressionUtilities.tryFindTextOfRange config.Range config.Args.FileContent
-                        |> Option.map (fun fromText -> { FromText = fromText; FromRange = config.Range; ToText = toText }))
+                        ExpressionUtilities.tryFindTextOfRange hintErrorConfig.Range hintErrorConfig.Args.FileContent
+                        |> Option.map (fun fromText -> { FromText = fromText; FromRange = hintErrorConfig.Range; ToText = toText }))
 
-                    { Range = config.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = config.TypeChecks }
+                    { Range = hintErrorConfig.Range; Message = error; SuggestedFix = Some suggestedFix; TypeChecks = hintErrorConfig.TypeChecks }
                 | Suggestion.Message(message) ->
                     let errorFormatString = Resources.GetString("RulesHintSuggestion")
                     let error = System.String.Format(errorFormatString, matched, message)
-                    { Range = config.Range; Message = error; SuggestedFix = None; TypeChecks = config.TypeChecks }
+                    { Range = hintErrorConfig.Range; Message = error; SuggestedFix = None; TypeChecks = hintErrorConfig.TypeChecks }
     
             /// Check a lambda function can be replaced with a function,
             /// it will not be if the lambda is automatically getting
             /// converted to a delegate type e.g. Func<T>.
-            let canReplaceLambdaWithFunction checkFile methodIdent index =
-                let getMethodParameters (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) =
-                    let symbol =
+            let canReplaceLambdaWithFunction (checkFile:FSharpCheckFileResults) (methodIdent: SynLongIdent) index =
+                let methodParameters =
+                    let maybeSymbolUse =
                         checkFile.GetSymbolUseAtLocation(
                             methodIdent.Range.StartLine,
                             methodIdent.Range.EndColumn,
                             String.Empty,
                             List.map (fun (ident: Ident) -> ident.idText) methodIdent.LongIdent)
 
-                    match symbol with
-                    | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
-                        let symbol = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
+                    match maybeSymbolUse with
+                    | Some(symbolUse) when (symbolUse.Symbol :? FSharpMemberOrFunctionOrValue) ->
+                        let symbol = symbolUse.Symbol :?> FSharpMemberOrFunctionOrValue
 
                         if symbol.IsMember then Seq.tryHead symbol.CurriedParameterGroups
                         else None
                     | _ -> None
 
-                let parameters = getMethodParameters checkFile methodIdent
-
-                match parameters with
+                match methodParameters with
                 | Some(parameters) when index < Seq.length parameters ->
                     let parameter = parameters.[index]
                     not (parameter.Type.HasTypeDefinition && parameter.Type.TypeDefinition.IsDelegate)
@@ -812,7 +810,7 @@ let rule config =
             | _ -> ()
 
         match config.HintTrie.Lookup.TryGetValue args.NodeHashcode with
-        | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray (Dictionary<_, _>()) (confirmFuzzyMatch args)
+        | true, trie -> Helper.Hints.checkTrie (args.NodeIndex + 1) trie args.SyntaxArray (Dictionary<_, _>()) confirmFuzzyMatch
         | false, _ -> ()
 
         let result = suggestions.ToArray()
@@ -825,7 +823,7 @@ let rule config =
             Identifier = Identifiers.Hints
             RuleConfig =
                 {
-                    AstNodeRuleConfig.Runner = runner config
+                    AstNodeRuleConfig.Runner = runner
                     Cleanup = ignore
                 }
         }
