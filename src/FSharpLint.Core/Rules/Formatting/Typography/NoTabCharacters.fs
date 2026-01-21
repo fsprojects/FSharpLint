@@ -18,14 +18,14 @@ module ContextBuilder =
             current
 
 let checkNoTabCharacters literalStrings (args:LineRuleParams) =
-    let isInLiteralString literalStrings range =
+    let isInLiteralString range =
         Seq.exists (fun (_, literalRange) -> ExpressionUtilities.rangeContainsOtherRange literalRange range) literalStrings
 
     let indexOfTab = args.Line.IndexOf('\t')
 
     if indexOfTab >= 0 then
         let range = Range.mkRange String.Empty (Position.mkPos args.LineNumber indexOfTab) (Position.mkPos args.LineNumber (indexOfTab + 1))
-        if isInLiteralString literalStrings range |> not then
+        if isInLiteralString range |> not then
             Array.singleton
                 { Range = range
                   Message = Resources.GetString("RulesTypographyTabCharacterError")

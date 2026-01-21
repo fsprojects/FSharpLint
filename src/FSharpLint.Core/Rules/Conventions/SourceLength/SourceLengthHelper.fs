@@ -74,7 +74,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName (skipRang
 
         let skippedLinesCount =
             skipRanges
-            |> Seq.collect (fun range -> seq { range.StartLine .. range.EndLine })
+            |> Seq.collect (fun skipRange -> seq { skipRange.StartLine .. skipRange.EndLine })
             |> Seq.distinct
             |> Seq.length
 

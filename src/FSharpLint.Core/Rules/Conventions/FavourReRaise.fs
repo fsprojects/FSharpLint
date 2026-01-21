@@ -36,7 +36,7 @@ let rec private checkExpr (expr) maybeIdent =
                 match pat with
                 | SynPat.Named (SynIdent(id, _), _, _, _) -> checkExpr app (Some id.idText)
                 | _ -> checkExpr app None)
-    | SynExpr.IfThenElse (_, expr, _, _, _, _, _) -> checkExpr expr maybeIdent
+    | SynExpr.IfThenElse (_, expression, _, _, _, _, _) -> checkExpr expression maybeIdent
     | _ -> Array.empty
 
 let private runner (args: AstNodeRuleParams) =

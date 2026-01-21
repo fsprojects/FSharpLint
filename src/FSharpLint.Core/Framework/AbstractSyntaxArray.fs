@@ -250,7 +250,7 @@ module AbstractSyntaxArray =
             tryAddPossibleSkips depth
 
             // Strip out "extra info".
-            let node =
+            let strippedNode =
                 let extractExtraInfo actual extraInfoNode =
                     possibleSkips.Push (PossibleSkip(nodes.Count, depth))
                     nodes.Add (TempNode(Utilities.hash2 extraInfoNode 0, actual))
@@ -262,13 +262,13 @@ module AbstractSyntaxArray =
                 | Else(body) -> extractExtraInfo (Expression(body)) SyntaxNode.Else
                 | _ -> node
 
-            traverseNode node (fun node -> left.Push (StackedNode(node, depth + 1)))
+            traverseNode strippedNode (fun aNode -> left.Push (StackedNode(aNode, depth + 1)))
 
-            match astNodeToSyntaxNode node with
+            match astNodeToSyntaxNode strippedNode with
             | SyntaxNode.Other -> ()
             | syntaxNode ->
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-                nodes.Add (TempNode(Utilities.hash2 syntaxNode (getHashCode node), node))
+                nodes.Add (TempNode(Utilities.hash2 syntaxNode (getHashCode strippedNode), strippedNode))
 
         tryAddPossibleSkips 0
 

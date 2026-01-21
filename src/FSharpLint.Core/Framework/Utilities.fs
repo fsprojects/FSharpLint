@@ -88,10 +88,10 @@ module ExpressionUtilities =
 
     /// Tries to find the source code within a given range.
     let tryFindTextOfRange (range:Range) (text:string) =
-        let startIndex = findPos range.Start text
-        let endIndex = findPos range.End text
+        let maybeStartIndex = findPos range.Start text
+        let maybeEndIndex = findPos range.End text
 
-        match (startIndex, endIndex) with
+        match (maybeStartIndex, maybeEndIndex) with
         | Some(startIndex), Some(endIndex) ->
             text.Substring(startIndex, endIndex - startIndex) |> Some
         | _ -> None

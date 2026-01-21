@@ -82,10 +82,10 @@ type TestRuleBase () =
 
         match Option.bind (fun (suggestedFix: Lazy<option<SuggestedFix>>) -> suggestedFix.Value) firstSuggestedFix with
         | Some(fix) ->
-            let startIndex = ExpressionUtilities.findPos fix.FromRange.Start source
-            let endIndex = ExpressionUtilities.findPos fix.FromRange.End source
+            let maybeStartIndex = ExpressionUtilities.findPos fix.FromRange.Start source
+            let maybeEndIndex = ExpressionUtilities.findPos fix.FromRange.End source
 
-            match (startIndex, endIndex) with
+            match (maybeStartIndex, maybeEndIndex) with
             | (Some(startIndex), Some(endIndex)) ->
                 (StringBuilder source)
                     .Remove(startIndex, endIndex - startIndex)

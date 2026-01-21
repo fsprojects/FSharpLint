@@ -16,7 +16,7 @@ type SuppressionInfo =
 type LineSuppression = { Line:int; Suppressions:SuppressionInfo list }
 
 /// Parses a given file to find lines containing rule suppressions.
-let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
+let parseSuppressionInfo (originalRuleNames:Set<String>) (lines:string list) =
     /// Extracts rule names from a whitespace separated string of rule names.
     let extractRules (rules:Set<String>) (str:string) =
         let (splitOnWhitespace:char[]) = null
@@ -29,16 +29,16 @@ let parseSuppressionInfo (rules:Set<String>) (lines:string list) =
         // If no rules set, then all rules are applied.
         if Seq.isEmpty entries then rules else entries
 
-    let rules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) rules
+    let lowerCasedRules = Set.map (fun (rule: String) -> rule.ToLowerInvariant()) originalRuleNames
 
     let choose lineNum line = 
         let matched = Regex.Match (line, ".*fsharplint:([a-z\-]+)\s*(.*)$")
         if matched.Success then
             let suppressionTarget =
                 if matched.Groups.Count = 3 then
-                    extractRules rules matched.Groups.[2].Value
+                    extractRules lowerCasedRules matched.Groups.[2].Value
                 else
-                    rules
+                    lowerCasedRules
             match matched.Groups.[1].Value with
             | "enable" -> Some (lineNum, Enable suppressionTarget)
             | "disable" -> Some (lineNum, Disable suppressionTarget)
@@ -62,21 +62,20 @@ let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list
     if List.isEmpty lineSuppressions then
         false
     else
-        let rule = rule.ToLowerInvariant()
-            
+        let ruleLowercase = rule.ToLowerInvariant()
         
         let fold (disabledRules:Set<String>) (lineSuppression:LineSuppression) = 
-            let innerFold (disabledRules:Set<String>) suppression = 
+            let innerFold (currentDisabledRules:Set<String>) suppression = 
                 match suppression with
                 | Enable(rules) ->
-                    Set.difference disabledRules rules
+                    Set.difference currentDisabledRules rules
                 | Disable(rules) ->
-                    Set.union disabledRules rules
+                    Set.union currentDisabledRules rules
                 | DisableLine(rules) ->
                     if line = lineSuppression.Line then
-                        Set.union disabledRules rules
+                        Set.union currentDisabledRules rules
                     else
-                        disabledRules
+                        currentDisabledRules
             List.fold innerFold disabledRules lineSuppression.Suppressions
 
         let disabledRules =
@@ -84,4 +83,4 @@ let isSuppressed (rule:String) (line:int) (lineSuppressions:LineSuppression list
             |> List.takeWhile (fun lineSupression -> lineSupression.Line <= line)
             |> List.fold fold Set.empty
 
-        disabledRules.Contains(rule)
+        disabledRules.Contains(ruleLowercase)

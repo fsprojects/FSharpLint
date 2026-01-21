@@ -11,9 +11,9 @@ open FSharpLint.Framework.Rules
 let rec private isFunctionPointless expression = function
     | Some(parameter:Ident) :: parameters ->
         match expression with
-        | SynExpr.App(_, _, expression, SynExpr.Ident(identifier), _)
+        | SynExpr.App(_, _, expr, SynExpr.Ident(identifier), _)
             when identifier.idText = parameter.idText ->
-            isFunctionPointless expression parameters
+            isFunctionPointless expr parameters
         | _ -> None
     | None :: _ -> None
     | [] ->
@@ -24,7 +24,7 @@ let rec private isFunctionPointless expression = function
 let runner (args:AstNodeRuleParams) =
     let validateLambdaIsNotPointless (text:string) lambda range =
         let generateError (identifier:LongIdent) =
-            let identifier =
+            let identifierString =
                 identifier
                 |> List.map (fun ident ->
                     if PrettyNaming.IsLogicalOpName ident.idText then
@@ -35,11 +35,11 @@ let runner (args:AstNodeRuleParams) =
 
             let suggestedFix = lazy(
                 ExpressionUtilities.tryFindTextOfRange range text
-                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifier }))
+                |> Option.map (fun fromText -> { FromText = fromText; FromRange = range; ToText = identifierString }))
 
             {
                 Range = range
-                Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifier)
+                Message = String.Format(Resources.GetString("RulesReimplementsFunction"), identifierString)
                 SuggestedFix = Some suggestedFix
                 TypeChecks = List.Empty
             }

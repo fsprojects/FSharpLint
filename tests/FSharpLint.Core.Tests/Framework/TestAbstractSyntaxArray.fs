@@ -133,7 +133,7 @@ type TestAst() =
 
         Assert.AreEqual(expected, actual)
         
-        let expected = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> Array.toList
+        let actual2 = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> Array.toList
         Assert.AreEqual([ (14, 0)
                           (13, 0)
                           (12, 1)
@@ -149,7 +149,7 @@ type TestAst() =
                           (0, 11)
                           (0, 11)
                           (0, 2) ],
-                        expected)
+                        actual2)
 
     /// e.g. a lambda arg shouldn't have the body of the lambda in its child nodes (that should be a sibling).
     [<Test>]
@@ -171,7 +171,7 @@ type TestAst() =
 
         Assert.AreEqual(expected, actual)
 
-        let expected = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> List.ofArray
+        let actual2 = array |> Array.map (fun node -> (node.NumberOfChildren, node.ParentIndex)) |> List.ofArray
         Assert.AreEqual([ (6, 0)
                           (5, 0)
                           (4, 1)
@@ -179,4 +179,5 @@ type TestAst() =
                           (0, 3)
                           (1, 2)
                           (0, 5) ],
-                        expected)
+                        actual2)
+

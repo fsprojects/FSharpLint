@@ -109,25 +109,25 @@ let internal inferFileType (target:string) =
 
 /// Must be called only once per process.
 /// We're calling it globally so we can call main multiple times from our tests.
-let toolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
+let globalToolsPath = Ionide.ProjInfo.Init.init (DirectoryInfo <| Directory.GetCurrentDirectory())  None
 
 [<EntryPoint>]
 let main argv =
+    let parserProgress (output:Output.IOutput) = function
+        | Starting file ->
+            String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
+        | ReachedEnd (_, warnings) ->
+            String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
+        | Failed (file, parseException) ->
+            String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
+            output.WriteError
+                $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
+
     let lint
         (lintArgs: ParseResults<LintArgs>)
         (output: Output.IOutput)
         (toolsPath:Ionide.ProjInfo.Types.ToolsPath)
         : ExitCode =
-        let parserProgress (output:Output.IOutput) = function
-            | Starting file ->
-                String.Format(Resources.GetString("ConsoleStartingFile"), file) |> output.WriteInfo
-            | ReachedEnd (_, warnings) ->
-                String.Format(Resources.GetString("ConsoleFinishedFile"), List.length warnings) |> output.WriteInfo
-            | Failed (file, parseException) ->
-                String.Format(Resources.GetString("ConsoleFailedToParseFile"), file) |> output.WriteError
-                output.WriteError
-                    $"Exception Message:{Environment.NewLine}{parseException.Message}{Environment.NewLine}Exception Stack Trace:{Environment.NewLine}{parseException.StackTrace}{Environment.NewLine}"
-
         let mutable exitCode = ExitCode.Success
 
         let handleError (str:string) =
@@ -181,9 +181,9 @@ let main argv =
             handleLintResult lintResult
         with
         | exn ->
-            let target = if fileType = FileType.Source then "source" else target
+            let targetStr = if fileType = FileType.Source then "source" else target
             handleError
-                $"Lint failed while analysing %s{target}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
+                $"Lint failed while analysing %s{targetStr}.{Environment.NewLine}Failed with: %s{exn.Message}{Environment.NewLine}Stack trace: {exn.StackTrace}"
 
         exitCode
 
@@ -217,5 +217,5 @@ let main argv =
         | _ -> Some ConsoleColor.Red)
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
-    start parseResults toolsPath
+    start parseResults globalToolsPath
     |> int

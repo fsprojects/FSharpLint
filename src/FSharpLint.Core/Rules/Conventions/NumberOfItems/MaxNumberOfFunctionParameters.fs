@@ -7,8 +7,8 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let rule config =
-    let runner (config:Helper.NumberOfItems.Config) (args:AstNodeRuleParams) =
+let rule (config:Helper.NumberOfItems.Config) =
+    let runner (args:AstNodeRuleParams) =
         let validateFunction (maxParameters:int) (constructorArguments:SynArgPats) =
             match constructorArguments with
             | SynArgPats.Pats(parameters)
@@ -35,7 +35,7 @@ let rule config =
             Identifier = Identifiers.MaxNumberOfFunctionParameters
             RuleConfig =
                 {
-                    AstNodeRuleConfig.Runner = runner config
+                    AstNodeRuleConfig.Runner = runner
                     Cleanup = ignore
                 }
         }

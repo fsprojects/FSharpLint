@@ -50,14 +50,14 @@ let rec private processLetBinding (instanceNames: Set<string>) (body: SynExpr) (
                 getWarningDetails propertyIdent
             | _ -> Array.empty
         | SynExpr.Sequential(_, _, expr1, expr2, _, _) ->
-            let instanceNames =
+            let modifiedInstanceNames =
                 Set.difference
                     instanceNames
                     (extraInstanceMethod expr1 List.empty |> Set.ofList)
             processLetBinding
-                instanceNames
+                modifiedInstanceNames
                 expr1
-                (fun () -> processLetBinding instanceNames expr2 returnEmptyArray)
+                (fun () -> processLetBinding modifiedInstanceNames expr2 returnEmptyArray)
         | _ -> Array.empty)
         (continuation())
 

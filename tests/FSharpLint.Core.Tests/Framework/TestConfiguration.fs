@@ -78,9 +78,9 @@ type TestConfiguration() =
         IgnoreFiles.shouldFileBeIgnored ignorePaths path
         |> Assert.IsFalse
 
-        let path = @"D:\dog\source2.fs".ToPlatformIndependentPath()
+        let path2 = @"D:\dog\source2.fs".ToPlatformIndependentPath()
 
-        IgnoreFiles.shouldFileBeIgnored ignorePaths path
+        IgnoreFiles.shouldFileBeIgnored ignorePaths path2
         |> Assert.IsTrue
 
     [<Test>]

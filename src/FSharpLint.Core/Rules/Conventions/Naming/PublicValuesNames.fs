@@ -25,9 +25,8 @@ let rule config =
 
                 match List.tryLast longIdent.LongIdent with
                 | Some ident when singleIdentifier ->
-                    let checkNotUnionCase = checkNotUnionCase ident
                     if accessControlLevel = AccessControlLevel.Public && isNotActivePattern ident then
-                        Array.singleton (ident, ident.idText, Some checkNotUnionCase)
+                        Array.singleton (ident, ident.idText, Some (checkNotUnionCase ident))
                     else
                         Array.empty
                 | None | Some _ -> Array.empty

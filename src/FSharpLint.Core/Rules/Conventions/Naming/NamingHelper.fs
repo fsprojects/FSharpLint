@@ -124,20 +124,20 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
 
         let tryAddFix fix message = (message, fix identifier)
 
-        let pascalCaseRule (identifier:string) =
-            if not (isPascalCase identifier) then Some "RulesNamingConventionsPascalCaseError"
+        let pascalCaseRule (identifierString:string) =
+            if not (isPascalCase identifierString) then Some "RulesNamingConventionsPascalCaseError"
             else None
 
-        let camelCaseRule (identifier:string) =
-            if not (isCamelCase identifier) then Some "RulesNamingConventionsCamelCaseError"
+        let camelCaseRule (identifierString:string) =
+            if not (isCamelCase identifierString) then Some "RulesNamingConventionsCamelCaseError"
             else None
 
-        let uppercaseRule (identifier:string) =
-            if not (isAllUppercase identifier) then Some "RulesNamingConventionsUppercaseError"
+        let uppercaseRule (identifierString:string) =
+            if not (isAllUppercase identifierString) then Some "RulesNamingConventionsUppercaseError"
             else None
 
-        let lowercaseRule (identifier:string) =
-            if not (isAllLowercase identifier) then Some "RulesNamingConventionsLowercaseError"
+        let lowercaseRule (identifierString:string) =
+            if not (isAllLowercase identifierString) then Some "RulesNamingConventionsLowercaseError"
             else None
 
         let casingError =
@@ -157,15 +157,15 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
             | _ -> None
 
         let underscoresError =
-            let underscoreRule (underscoreMode: NamingUnderscores) (identifier:string) =
+            let underscoreRule (underscoreMode: NamingUnderscores) (identifierString:string) =
                 let errorKeyToRemoveUnderscores = "RulesNamingConventionsUnderscoreError"
                 let errorKeyToRemoveLeadingOrTrailingUnderscores = "RulesNamingConventionsNoInfixUnderscoreError"
                 match underscoreMode with
-                | NamingUnderscores.AllowPrefix when identifier.TrimStart('_').Contains '_' ->
+                | NamingUnderscores.AllowPrefix when identifierString.TrimStart('_').Contains '_' ->
                     Some errorKeyToRemoveUnderscores
-                | NamingUnderscores.None when identifier.Contains '_' ->
+                | NamingUnderscores.None when identifierString.Contains '_' ->
                     Some errorKeyToRemoveUnderscores
-                | NamingUnderscores.AllowInfix when (identifier.StartsWith '_' || identifier.EndsWith '_') ->
+                | NamingUnderscores.AllowInfix when (identifierString.StartsWith '_' || identifierString.EndsWith '_') ->
                     Some errorKeyToRemoveLeadingOrTrailingUnderscores
                 | _ ->
                     None
@@ -182,12 +182,12 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
                 |> Option.map (formatError >> tryAddFix QuickFixes.removePrefixingAndSuffixingUnderscores)
             | _ -> None
 
-        let prefixRule (prefix:string) (identifier:string) =
-            if not (identifier.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
+        let prefixRule (prefix:string) (identifierString:string) =
+            if not (identifierString.StartsWith prefix) then Some "RulesNamingConventionsPrefixError"
             else None
 
-        let suffixRule (suffix:string) (identifier:string) =
-            if not (identifier.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
+        let suffixRule (suffix:string) (identifierString:string) =
+            if not (identifierString.EndsWith suffix) then Some "RulesNamingConventionsSuffixError"
             else None
 
         let prefixError =
@@ -323,10 +323,10 @@ let isExtern = isAttribute "DllImport"
 let isMeasureType = isAttribute "Measure"
 
 let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
-    let symbol = checkFile.GetSymbolUseAtLocation(
+    let maybeSymbol = checkFile.GetSymbolUseAtLocation(
                     ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
 
-    match symbol with
+    match maybeSymbol with
     | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false
     | Some(_) | None -> true
 

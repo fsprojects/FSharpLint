@@ -9,7 +9,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
 let private runner (args:AstNodeRuleParams) =
-    let checkForNamedPatternEqualsConstant (args:AstNodeRuleParams) pattern whenExpr (range:Range) =
+    let checkForNamedPatternEqualsConstant pattern whenExpr (range:Range) =
         let patternIdent =
             match pattern with
             | SynPat.Named(SynIdent.SynIdent(ident, _), _, _, _) -> Some(ident.idText)
@@ -45,7 +45,7 @@ let private runner (args:AstNodeRuleParams) =
 
     match args.AstNode with
     | AstNode.Match(SynMatchClause.SynMatchClause(pat, Some(whenExpr), _, range, _, _)) ->
-        checkForNamedPatternEqualsConstant args pat whenExpr range
+        checkForNamedPatternEqualsConstant pat whenExpr range
 
     | _ -> Array.empty
 

@@ -91,7 +91,7 @@ and [<TailCall>] private checkExprContinuationPassingStyle (arguments: CheckExpr
         arguments.Continuation Array.empty
 
 let runner (args: AstNodeRuleParams) =
-    let checkExpr (args: AstNodeRuleParams) (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
+    let checkExpr (expr: SynExpr) (outerArgExpr: SynExpr) (range: FSharp.Compiler.Text.range) (parentList: AstNode list): WarningDetails array =
         checkExprContinuationPassingStyle 
             { 
                 Args = args
@@ -110,7 +110,7 @@ let runner (args: AstNodeRuleParams) =
                 // function has extra arguments
                 Array.empty
             | _ ->
-                checkExpr args funcExpr argExpr range (args.GetParents args.NodeIndex)
+                checkExpr funcExpr argExpr range (args.GetParents args.NodeIndex)
         | _ ->
             Array.empty
 

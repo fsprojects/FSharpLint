@@ -83,9 +83,9 @@ module HintParser =
                 [ attempt pident
                   .>>. many (attempt (skipChar '.' >>. pident))
                   .>>. opt (skipChar '.' >>. pidentorop)
-                  |>> (fun ((startIdent, idents), operator) ->
+                  |>> (fun ((startIdent, idents), maybeOperator) ->
                       let identifiers = startIdent::idents
-                      match operator with
+                      match maybeOperator with
                       | Some(operator) -> identifiers@[operator]
                       | None -> identifiers)
                   attempt (pidentorop |>> fun identOrOpChars -> [identOrOpChars])

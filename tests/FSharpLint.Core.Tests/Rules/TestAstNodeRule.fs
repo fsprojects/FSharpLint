@@ -11,22 +11,22 @@ open FSharpLint.Framework.Rules
 type TestAstNodeRuleBase (rule:Rule) =
     inherit TestRuleBase.TestRuleBase()
 
-    override this.Parse (input:string, ?fileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
+    override this.Parse (input:string, ?maybeFileName:string, ?checkFile:bool, ?globalConfig:GlobalRuleConfig) =
         let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
         let parseResults =
-            match fileName with
+            match maybeFileName with
             | Some fileName ->
                 ParseFile.parseSourceFile fileName input checker
             | None ->
                 ParseFile.parseSource input checker
 
-        let rule =
+        let astNodeRule =
             match rule with
-            | AstNodeRule rule -> rule
+            | AstNodeRule nodeRule -> nodeRule
             | _ -> failwith "TestAstNodeRuleBase only accepts AstNodeRules"
 
-        let globalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
+        let resolvedGlobalConfig = Option.defaultValue GlobalRuleConfig.Default globalConfig
 
         match Async.RunSynchronously parseResults with
         | ParseFileResult.Success parseInfo ->
@@ -39,18 +39,18 @@ type TestAstNodeRuleBase (rule:Rule) =
             let suggestions =
                 runAstNodeRules
                     {
-                        Rules = Array.singleton rule
-                        GlobalConfig = globalConfig
+                        Rules = Array.singleton astNodeRule
+                        GlobalConfig = resolvedGlobalConfig
                         TypeCheckResults = checkResult
                         ProjectCheckResults = None
-                        FilePath = (Option.defaultValue String.Empty fileName)
+                        FilePath = (Option.defaultValue String.Empty maybeFileName)
                         FileContent = input
                         Lines = (input.Split("\n"))
                         SyntaxArray = syntaxArray
                     }
                 |> fst
 
-            rule.RuleConfig.Cleanup()
+            astNodeRule.RuleConfig.Cleanup()
 
             Array.iter this.PostSuggestion suggestions
         | _ ->

@@ -21,9 +21,9 @@ let runner args =
 
     let doesNotImplementIDisposable (checkFile:FSharpCheckFileResults) (ident: SynLongIdent) =
         let names = List.map (fun (identifier: Ident) -> identifier.idText) ident.LongIdent
-        let symbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, String.Empty, names)
+        let maybeSymbol = checkFile.GetSymbolUseAtLocation(ident.Range.StartLine, ident.Range.EndColumn, String.Empty, names)
 
-        match symbol with
+        match maybeSymbol with
         | Some(symbol) when (symbol.Symbol :? FSharpMemberOrFunctionOrValue) ->
             let ctor = symbol.Symbol :?> FSharpMemberOrFunctionOrValue
 

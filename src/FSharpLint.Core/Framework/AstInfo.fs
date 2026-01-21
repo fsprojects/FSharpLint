@@ -120,9 +120,9 @@ module AstInfo =
         if Seq.isEmpty str then
             true
         else
-            let operator = List.tryFind (fun (op: string) -> str.StartsWith(op)) operators
+            let maybeOperator = List.tryFind (fun (op: string) -> str.StartsWith(op)) operators
 
-            match operator with
+            match maybeOperator with
             | Some(operator) -> str.Substring(operator.Length) |> isSequenceOfOperators
             | None -> false
 
