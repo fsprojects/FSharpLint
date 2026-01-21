@@ -47,7 +47,7 @@ let runner (args: AstNodeRuleParams) =
         funcs
         |> List.choose (processFunction false checkInfo funcs)
         |> List.toArray
-    | AstNode.Expression(SynExpr.LetOrUse(true, _, bindings, _, _, _)), Some checkInfo ->
+    | AstNode.Expression(SynExpr.LetOrUse(true, _, _, false, bindings, _, _, _)), Some checkInfo ->
         match UnneededRecKeyword.getRecursiveFunctionsFromBindings bindings with
         | [] -> Array.empty
         | funcs -> 
