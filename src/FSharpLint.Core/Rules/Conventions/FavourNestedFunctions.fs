@@ -2,6 +2,7 @@
 
 open System
 open FSharp.Compiler.Syntax
+open FSharp.Compiler.Text
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Framework
@@ -42,25 +43,18 @@ let rec private collectMemberBindings (acc: list<FunctionBinding>) (memberDefns:
         collectMemberBindings acc rest
 
 let runner (args: AstNodeRuleParams) =
-    let getFunctionBindings (declaration: SynModuleDecl) = 
-        let collectBindingsInType (typeDefn: SynTypeDefn) =
-            match typeDefn with
-            | SynTypeDefn(_, SynTypeDefnRepr.ObjectModel(_, members, _), _, _, _, _) ->
-                collectMemberBindings List.empty members
-            | _ -> List.empty
-
+    let collectTopLevelFunctionBindings (declaration: SynModuleDecl): list<FunctionBinding> = 
         match declaration with
-        | SynModuleDecl.Let(_, bindings, _) ->
-            collectBindings bindings
-        | SynModuleDecl.Types(typeDefns, _) ->
-            typeDefns |> List.collect collectBindingsInType
-        | _ -> List.Empty
-
+        | SynModuleDecl.Let(_, bindings, _) -> collectBindings bindings
+        | _ -> List.empty
+    
     match args.AstNode with
-    | AstNode.ModuleOrNamespace(SynModuleOrNamespace(_, _, _kind, declarations, _, _, _, _, _)) ->
+    | AstNode.ModuleOrNamespace(SynModuleOrNamespace(_, _, _kind, declarations, _, _, _, moduleRange, _)) ->
+        let allTopLevelFunctionBindingsInModule =
+            declarations |> List.collect collectTopLevelFunctionBindings
+        
         let privateFunctionIdentifiers = 
-            declarations
-            |> Seq.collect getFunctionBindings
+            allTopLevelFunctionBindingsInModule
             |> Seq.choose 
                 (fun funcBinding ->
                     match funcBinding.Accessibility with
@@ -69,12 +63,35 @@ let runner (args: AstNodeRuleParams) =
                     | _ -> None)
             |> Seq.toArray
 
+        let collectFunctionBindings (node: AstNode) =
+            match node with
+            | AstNode.Binding(binding) 
+                when ExpressionUtilities.rangeContainsOtherRange moduleRange binding.RangeOfBindingWithRhs ->
+                collectBindings (List.singleton binding)
+            | AstNode.MemberDefinition(memberDefn)
+                when ExpressionUtilities.rangeContainsOtherRange moduleRange memberDefn.Range ->
+                match memberDefn with
+                | SynMemberDefn.Member(binding, _)  ->
+                    collectBindings (List.singleton binding)
+                | SynMemberDefn.GetSetMember(getMember, setMember, _, _)  ->
+                    collectBindings ((Option.toList getMember) @ (Option.toList setMember))
+                | SynMemberDefn.LetBindings(bindings, _, _, _)  ->
+                    collectBindings bindings
+                | SynMemberDefn.Interface(_, _, Some(members), _) ->
+                    collectMemberBindings List.empty members
+                | _  -> List.empty
+            | AstNode.LambdaBody(bodyExpr: SynExpr)
+                when ExpressionUtilities.rangeContainsOtherRange moduleRange bodyExpr.Range ->
+                List.singleton { Identifier = Ident("<lambda>", range()); Expression = bodyExpr; Accessibility = None; Attributes = List.empty }
+            | _ -> List.empty
+
         match args.CheckInfo with
-        | Some checkInfo when privateFunctionIdentifiers.Length > 0 ->
-            let allFunctionBindingsInModule =
-                declarations
-                |> List.collect getFunctionBindings
-            
+        | Some checkInfo when privateFunctionIdentifiers.Length > 0 ->  
+            let allFunctionsInModule =
+                args.SyntaxArray
+                |> Array.toList
+                |> List.collect (fun node -> collectFunctionBindings node.Actual)
+
             let emitWarningIfNeeded currFunctionIdentifier =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
                 | Some symbolUse ->
@@ -91,7 +108,7 @@ let runner (args: AstNodeRuleParams) =
                                         usage.Range)
 
                     let numberOfOtherFunctionsCurrFunctionIsUsedIn =
-                        allFunctionBindingsInModule
+                        allFunctionsInModule
                         |> Seq.filter functionUsesCurrFunction
                         |> Seq.length
 
