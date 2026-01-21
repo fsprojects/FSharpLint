@@ -55,3 +55,21 @@ match foo with
 | _ -> () """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.TwoClausesWithNullAndWildcardShouldProduceError() =
+        this.Parse """
+match foo with
+| null -> ()
+| _ -> () """
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.TwoClausesWithNullAndVariableShouldNotProduceError() =
+        this.Parse """
+match foo with
+| null -> ()
+| notNullFoo -> () """
+
+        Assert.IsTrue this.NoErrorsExist
