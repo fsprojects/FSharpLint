@@ -7,21 +7,21 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private checkForWildcardNamedWithAsPattern fileContents pattern =
-    match pattern with
-    | SynPat.As(SynPat.Wild(wildcardRange), SynPat.Named(SynIdent(identifier, _), _, _, _), range)
-        when wildcardRange <> range ->
-        let suggestedFix = 
-            lazy(
-                Some { FromRange = range; FromText = fileContents; ToText = identifier.idText })
-        Array.singleton
-            { Range = range
-              Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
-              SuggestedFix = Some suggestedFix
-              TypeChecks = List.Empty }
-    | _ -> Array.empty
-
 let private runner (args:AstNodeRuleParams) =
+    let checkForWildcardNamedWithAsPattern fileContents pattern =
+        match pattern with
+        | SynPat.As(SynPat.Wild(wildcardRange), SynPat.Named(SynIdent(identifier, _), _, _, _), range)
+            when wildcardRange <> range ->
+            let suggestedFix = 
+                lazy(
+                    Some { FromRange = range; FromText = fileContents; ToText = identifier.idText })
+            Array.singleton
+                { Range = range
+                  Message = Resources.GetString("RulesWildcardNamedWithAsPattern")
+                  SuggestedFix = Some suggestedFix
+                  TypeChecks = List.Empty }
+        | _ -> Array.empty
+
     match args.AstNode with
     | AstNode.Pattern(SynPat.As(SynPat.Wild(_), SynPat.Named(_), _) as pattern) ->
         checkForWildcardNamedWithAsPattern args.FileContent pattern

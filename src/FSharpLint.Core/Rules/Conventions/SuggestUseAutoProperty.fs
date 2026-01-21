@@ -64,19 +64,19 @@ and [<TailCall>] isImmutableSequentialExpression args expression (continuation: 
             )
     | _ -> continuation false
 
-let private hasStructAttribute node =
-    match node with
-    | AstNode.TypeDefinition(SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
-        attributes
-        |> extractAttributes
-        |> List.exists
-            (fun attribute ->
-                match List.tryLast attribute.TypeName.LongIdent with
-                | Some(ident) -> ident.idText = "Struct" || ident.idText = "StructAttribute"
-                | None -> false)
-    | _ -> false
-
 let private runner (args: AstNodeRuleParams) =
+    let hasStructAttribute node =
+        match node with
+        | AstNode.TypeDefinition(SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
+            attributes
+            |> extractAttributes
+            |> List.exists
+                (fun attribute ->
+                    match List.tryLast attribute.TypeName.LongIdent with
+                    | Some(ident) -> ident.idText = "Struct" || ident.idText = "StructAttribute"
+                    | None -> false)
+        | _ -> false
+
     match args.AstNode with
     | MemberDefinition
         (
