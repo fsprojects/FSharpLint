@@ -164,7 +164,10 @@ let main argv =
         try
             let lintResult =
                 match fileType with
-                | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+                | FileType.File -> 
+                    if target.EndsWith ".fs" then
+                        output.WriteInfo "Going to analyse single .fs file, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
+                    Lint.asyncLintFile lintParams target |> Async.RunSynchronously
                 | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
                 | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
                 | FileType.Wildcard ->
