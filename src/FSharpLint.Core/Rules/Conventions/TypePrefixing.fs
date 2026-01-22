@@ -9,9 +9,9 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework.ExpressionUtilities
 
 type Mode =
-    | Hybrid = 0
-    | Always = 1
-    | Never = 2
+    | Hybrid
+    | Always
+    | Never
 
 [<RequireQualifiedAccess>]
 type Config = { Mode: Mode }

@@ -53,12 +53,12 @@ Package | Latest Stable Version | Latest Version (including Pre-Releases)
 
 ## How to contribute
 
-Bug reports, feature requests, and pull requests are very welcome! Please [read the Contribution Guidelines](./CONTRIBUTING.md)
+Bug reports, feature requests, and pull requests are very welcome! Please read the [Contribution Guidelines](./CONTRIBUTING.md)
 to get started.
 
 ## Licensing
 
-The project is licensed under MIT. For more information on the license see the LICENSE file.
+The project is licensed under MIT. For more information on the license see the [LICENSE file](./LICENSE).
 
 ## Maintainer(s)
 
