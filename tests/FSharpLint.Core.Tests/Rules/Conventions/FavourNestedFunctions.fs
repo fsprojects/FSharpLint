@@ -187,6 +187,21 @@ type Bar() =
         
         Assert.IsTrue this.ErrorsExist
 
+    [<Test>]
+    member this.``Top level private function used in 1 method 2 times should give an error`` () =
+        this.Parse """
+let private foo x =
+    x
+
+type Bar() =
+    member self.Foobar() =
+        let baz () =
+            foo 2
+        foo 1
+"""
+        
+        Assert.IsTrue this.ErrorsExist
+
 
     [<Test>]
     member this.``Top level private function used in 2 or more functions (including nested modules) should not give an error`` () =
