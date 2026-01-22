@@ -11,6 +11,7 @@ type TestConventionsDiscourageStringInterpolationWithStringFormat() =
     [<Test>]
     member this.StringInterpolationWithSprintfShouldNotProduceError() =
         this.Parse """
+let world = "world"
 let someString = sprintf "Hello %s" world"""
 
         Assert.IsTrue this.NoErrorsExist
@@ -18,6 +19,7 @@ let someString = sprintf "Hello %s" world"""
     [<Test>]
     member this.StringInterpolationWithStringFormatShouldProduceError() =
         this.Parse """
+let world = "world"
 let someString = String.Format("Hello {0}", world)"""
 
         Assert.IsTrue this.ErrorsExist
@@ -35,6 +37,7 @@ let someFunction someTemplate =
     [<Test>]
     member this.StringInterpolationWithStringFormatAndLocalVariableShouldProduceError() =
         this.Parse """
+let world = "world"
 let someTemplate = "Hello {0}"
 let someString = String.Format(someTemplate, world)"""
 
@@ -45,9 +48,10 @@ let someString = String.Format(someTemplate, world)"""
     member this.StringInterpolationWithMultipleModuleWithSameVariableNameShouldNotProduceError() =
         this.Parse """
 module Foo =
-    let someTemplate = "Hello, this is not for String.Format actually"
+    let someTemplate = "Hello {0}"
 module Bar =
     let someFunction someTemplate =
+        let world = "world"
         Console.WriteLine(String.Format(someTemplate, "world"))"""
 
         Assert.IsTrue this.NoErrorsExist
@@ -58,11 +62,12 @@ module Bar =
         this.Parse """
 module Bar =
     let exampleFunction () =
-        let someTemplate = "Hello, this is not for String.Format actually"
+        let someTemplate = "Hello {0}"
         someTemplate
     let someFunction someTemplate =
-        let returnConstInt () =
-            89
+        let someNestedFunc () =
+            1
+        let world = "world"
         Console.WriteLine(String.Format(someTemplate, "world"))"""
 
         Assert.IsTrue this.NoErrorsExist
@@ -74,8 +79,9 @@ module Bar =
 module Bar =
     let exampleFunction someTemplate =
         let someResults =
-            let someTemplate = "Hello, this is not for String.Format actually"
+            let someTemplate = "Hello {0}"
             someTemplate
+        let world = "world"
         Console.WriteLine(String.Format(someTemplate, "world"))"""
 
         Assert.IsTrue this.NoErrorsExist
