@@ -256,7 +256,8 @@ let MemberLength = 70
 [<TestFixture>]
 type TestMaxLinesInMember() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInMember.rule { Config.MaxLines = MemberLength })
-        [<Test>]
+
+    [<Test>]
     member this.MemberTooManyLines() =
         this.Parse $"""
 module Program
