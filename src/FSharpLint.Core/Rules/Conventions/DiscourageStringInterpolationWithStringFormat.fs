@@ -1,4 +1,4 @@
-module FSharpLint.Rules.PreferStringInterpolationWithSprintf
+module FSharpLint.Rules.DiscourageStringInterpolationWithStringFormat
 
 open System
 open FSharpLint.Framework
@@ -13,7 +13,7 @@ let runner args =
 
     let emitViolation range =
         { Range = range
-          Message = Resources.GetString "RulesPreferStringInterpolationWithSprintf"
+          Message = Resources.GetString "RulesDiscourageStringInterpolationWithStringFormat"
           SuggestedFix = None
           TypeChecks = List.empty }
         |> Array.singleton
@@ -51,7 +51,7 @@ let runner args =
     | _ -> Array.empty
 
 let rule =
-    { Name = "PreferStringInterpolationWithSprintf"
-      Identifier = Identifiers.PreferStringInterpolationWithSprintf
+    { Name = "DiscourageStringInterpolationWithStringFormat"
+      Identifier = Identifiers.DiscourageStringInterpolationWithStringFormat
       RuleConfig = { AstNodeRuleConfig.Runner = runner; Cleanup = ignore } }
     |> AstNodeRule

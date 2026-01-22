@@ -302,7 +302,7 @@
     "indentation": {
         "enabled": false
     },
-    "preferStringInterpolationWithSprintf": {
+    "discourageStringInterpolationWithStringFormat": {
         "enabled": false
     },
     "maxCharactersOnLine": {

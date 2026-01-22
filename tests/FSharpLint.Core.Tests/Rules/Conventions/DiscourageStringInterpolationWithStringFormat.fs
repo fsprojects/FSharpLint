@@ -1,12 +1,12 @@
-module FSharpLint.Core.Tests.Rules.Conventions.PreferStringInterpolationWithSprintf
+module FSharpLint.Core.Tests.Rules.Conventions.DiscourageStringInterpolationWithStringFormat
 
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestConventionsPreferStringInterpolationWithSprintf() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(PreferStringInterpolationWithSprintf.rule)
+type TestConventionsDiscourageStringInterpolationWithStringFormat() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(DiscourageStringInterpolationWithStringFormat.rule)
 
     [<Test>]
     member this.StringInterpolationWithSprintfShouldNotProduceError() =

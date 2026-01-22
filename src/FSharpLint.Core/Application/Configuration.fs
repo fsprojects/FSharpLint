@@ -387,7 +387,7 @@ type ConventionsConfig =
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
       favourNestedFunctions:EnabledConfig option
       disallowShadowing:EnabledConfig option
-      preferStringInterpolationWithSprintf:EnabledConfig option}
+      discourageStringInterpolationWithStringFormat:EnabledConfig option}
 with
     member this.Flatten() =
         Array.concat
@@ -417,7 +417,7 @@ with
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
-                this.preferStringInterpolationWithSprintf |> Option.bind (constructRuleIfEnabled PreferStringInterpolationWithSprintf.rule) |> Option.toArray
+                this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -561,7 +561,7 @@ type Configuration =
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
       FavourNestedFunctions:EnabledConfig option
       DisallowShadowing:EnabledConfig option
-      PreferStringInterpolationWithSprintf:EnabledConfig option }
+      DiscourageStringInterpolationWithStringFormat:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -590,7 +590,7 @@ with
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
         IndexerAccessorStyleConsistency = None
-        PreferStringInterpolationWithSprintf = None
+        DiscourageStringInterpolationWithStringFormat = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
