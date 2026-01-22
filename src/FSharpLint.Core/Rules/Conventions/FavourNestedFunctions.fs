@@ -91,6 +91,25 @@ let runner (args: AstNodeRuleParams) =
                 args.SyntaxArray
                 |> Array.toList
                 |> List.collect (fun node -> collectFunctionBindings node.Actual)
+                |> List.distinctBy (fun funcBinding -> funcBinding.Expression.Range)
+
+            let contains oneBinding anotherBinding =
+                oneBinding.Expression.Range <> anotherBinding.Expression.Range
+                &&
+                ExpressionUtilities.rangeContainsOtherRange 
+                    oneBinding.Expression.Range 
+                    anotherBinding.Expression.Range
+            
+            // If a function is nested in another function or method and both use the same private
+            // function, treat them as one function when counting number of functions in which a
+            // function is used.
+            let allFunctionsInModuleExcludingNested =
+                allFunctionsInModule
+                |> List.filter 
+                    (fun funcBinding -> 
+                        allFunctionsInModule 
+                        |> List.forall 
+                            (fun otherBinding -> contains otherBinding funcBinding |> not))
 
             let emitWarningIfNeeded currFunctionIdentifier =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
@@ -108,7 +127,7 @@ let runner (args: AstNodeRuleParams) =
                                         usage.Range)
 
                     let numberOfOtherFunctionsCurrFunctionIsUsedIn =
-                        allFunctionsInModule
+                        allFunctionsInModuleExcludingNested
                         |> Seq.filter functionUsesCurrFunction
                         |> Seq.length
 

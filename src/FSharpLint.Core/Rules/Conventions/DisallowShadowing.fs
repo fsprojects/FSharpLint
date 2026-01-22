@@ -17,11 +17,6 @@ let rec private extractIdentifier (pattern: SynSimplePat) =
     | SynSimplePat.Typed(pat, _, _) ->
         extractIdentifier pat
 
-let private extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : List<Ident> =
-    match simplePats with
-    | SynSimplePats.SimplePats(patterns, _, _) ->
-        patterns |> List.map extractIdentifier
-
 let private rangeIncludesDefinitions (definitions: array<FSharpSymbolUse>) range =
     definitions
     |> Array.exists (fun usage -> ExpressionUtilities.rangeContainsOtherRange range usage.Range)
@@ -73,6 +68,11 @@ let rec private processPatterns (definitionsAndPatterns: list<array<FSharpSymbol
     | _ -> false
 
 let runner (args: AstNodeRuleParams) =
+    let extractIdentifiersFromSimplePats (simplePats: SynSimplePats) : List<Ident> =
+        match simplePats with
+        | SynSimplePats.SimplePats(patterns, _, _) ->
+            patterns |> List.map extractIdentifier
+
     let checkIdentifier (identifier: Ident) : array<WarningDetails> =
         let name = identifier.idText
         match args.CheckInfo with
