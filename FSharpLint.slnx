@@ -102,6 +102,8 @@
     <File Path="docs/content/how-tos/rules/FL0088.md" />
     <File Path="docs/content/how-tos/rules/FL0089.md" />
     <File Path="docs/content/how-tos/rules/FL0090.md" />
+    <File Path="docs/content/how-tos/rules/FL0091.md" />
+    <File Path="docs/content/how-tos/rules/FL0092.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/FSharpLint.Console/FSharpLint.Console.fsproj" />
