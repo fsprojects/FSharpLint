@@ -91,6 +91,7 @@ let runner (args: AstNodeRuleParams) =
                 args.SyntaxArray
                 |> Array.toList
                 |> List.collect (fun node -> collectFunctionBindings node.Actual)
+                |> List.distinctBy (fun expr -> expr.Expression.Range)
 
             let emitWarningIfNeeded currFunctionIdentifier =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
