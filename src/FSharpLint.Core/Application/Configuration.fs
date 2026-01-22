@@ -704,9 +704,9 @@ let defaultConfiguration =
         |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith(SettingsFileName, System.StringComparison.Ordinal))
         |> Option.defaultWith (fun () -> failwith "Could not get resource name")
     use stream = assembly.GetManifestResourceStream(resourceName)
-    match stream with
-    | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
-    | _ ->
+    if isNull stream then
+        failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
+    else
         use reader = new System.IO.StreamReader(stream)
 
         reader.ReadToEnd()

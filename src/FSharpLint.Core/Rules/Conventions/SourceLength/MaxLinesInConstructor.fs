@@ -8,9 +8,10 @@ open FSharpLint.Framework.Rules
 let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     match args.AstNode with
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, valData, _, _, _, _, _, _) as binding) ->
-        match identifierTypeFromValData valData with
-        | Constructor -> Helper.SourceLength.checkSourceLengthRule config binding.RangeOfBindingWithRhs args.FileContent "Constructor" Array.empty
-        | _ -> Array.empty
+        if identifierTypeFromValData valData = Constructor then
+            Helper.SourceLength.checkSourceLengthRule config binding.RangeOfBindingWithRhs args.FileContent "Constructor" Array.empty
+        else
+            Array.empty
     | _ -> Array.empty
 
 let rule config =
