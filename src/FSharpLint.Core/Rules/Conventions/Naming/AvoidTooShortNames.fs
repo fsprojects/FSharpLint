@@ -14,6 +14,7 @@ let private isIdentifierTooShort (identifier: string) =
 [<TailCall>]
 let rec private getParameterWithBelowMinimumLengthInner patArray acc =
     match patArray with
+    | [] -> acc
     | SynPat.Named(SynIdent(ident, _), _, _, _)::tail ->
         if isIdentifierTooShort ident.idText then
             Array.singleton (ident, ident.idText, None) |> Array.append acc |> getParameterWithBelowMinimumLengthInner tail
@@ -32,7 +33,7 @@ let rec private getParameterWithBelowMinimumLengthInner patArray acc =
             getParameterWithBelowMinimumLengthInner (List.append pats tail) acc
         | _ ->
             getParameterWithBelowMinimumLengthInner tail acc
-    | _ -> acc
+    | _ :: tail -> getParameterWithBelowMinimumLengthInner tail acc
 
 let runner (args:AstNodeRuleParams) =
     let getParameterWithBelowMinimumLength (pats: SynPat list): (Ident * string * (unit -> bool) option) array =

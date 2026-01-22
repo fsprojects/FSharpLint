@@ -47,10 +47,10 @@ module Ast =
     [<TailCall>]
     let rec private flattenFuncExpr flattened exprToFlatten =
         match exprToFlatten with
-        | SynExpr.App(_, _, x, y, _) ->
-            match x with
+        | SynExpr.App(_, _, funcExpr, argExpr, _) ->
+            match funcExpr with
             | SynExpr.App(_, true, SynExpr.LongIdent(_, SynLongIdent([op], _, _), _, _), rhs, _) as app ->
-                let lhs = y
+                let lhs = argExpr
 
                 match op.idText with
                 | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" ->
@@ -59,7 +59,7 @@ module Ast =
                     flattenFuncExpr (lhs::flattened) rhs
                 | _ -> flattenFuncExpr (lhs::flattened) app
             | expression ->
-                let leftExpr, rightExpr = (expression, y)
+                let leftExpr, rightExpr = (expression, argExpr)
                 flattenFuncExpr (rightExpr::flattened) leftExpr
         | expr -> expr::flattened
 

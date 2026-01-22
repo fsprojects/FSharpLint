@@ -205,3 +205,13 @@ module Base32Util =
 """
 
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.AvoidTooShortNamesShouldProduceError19() =
+        this.Parse """
+match exprToFlatten with
+| SynExpr.App(_, _, x, y, _) -> ()
+| _ -> ()
+"""
+
+        Assert.IsTrue this.ErrorsExist
