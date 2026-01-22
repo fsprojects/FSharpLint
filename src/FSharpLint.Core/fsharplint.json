@@ -302,9 +302,6 @@
     "indentation": {
         "enabled": false
     },
-    "discourageStringInterpolationWithStringFormat": {
-        "enabled": false
-    },
     "maxCharactersOnLine": {
         "enabled": false,
         "config": {
@@ -347,6 +344,9 @@
     "noAsyncRunSynchronouslyInLibrary": { "enabled": true },
     "favourNestedFunctions": { "enabled": false },
     "disallowShadowing": { "enabled": false },
+    "discourageStringInterpolationWithStringFormat": {
+        "enabled": false
+    },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

@@ -590,7 +590,6 @@ with
         RecursiveAsyncFunction = None
         AvoidTooShortNames = None
         IndexerAccessorStyleConsistency = None
-        DiscourageStringInterpolationWithStringFormat = None
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
@@ -667,6 +666,7 @@ with
         NoAsyncRunSynchronouslyInLibrary = None
         FavourNestedFunctions = None
         DisallowShadowing = None
+        DiscourageStringInterpolationWithStringFormat = None
     }
 
 // fsharplint:enable RecordFieldNames
