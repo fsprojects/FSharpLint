@@ -9,7 +9,15 @@ open FSharpLint.Framework.Rules
 
 let runner (args: AstNodeRuleParams) =
     match args.AstNode with
-    | _node -> failwith "Not yet implemented"
+    | AstNode.Field(SynField(_, false, None, _, false, _, _, range, _)) -> 
+        Array.singleton 
+            { 
+                Range = range
+                Message = Resources.GetString "RulesFavourNamesInDUMembers"
+                SuggestedFix = None
+                TypeChecks = List.Empty 
+            }
+    | _ -> Array.empty
 
 let rule =
     AstNodeRule
