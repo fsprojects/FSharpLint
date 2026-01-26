@@ -57,3 +57,11 @@ type Foo =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Should not produce error for DU with one case with one field``() =
+        this.Parse """
+type Foo = | Foo of int
+"""
+
+        Assert.IsTrue this.NoErrorsExist
