@@ -217,7 +217,5 @@ let main argv =
         | _ -> Some ConsoleColor.Red)
     let parser = ArgumentParser.Create<ToolArgs>(programName = "fsharplint", errorHandler = errorHandler)
     let parseResults = parser.ParseCommandLine argv
-    let test = String.Format("Hello {0}", "world")
-    Console.Write(test)
     start parseResults globalToolsPath
     |> int
