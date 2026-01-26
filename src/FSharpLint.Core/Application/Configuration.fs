@@ -875,6 +875,7 @@ let flattenConfig (config:Configuration) =
                 config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
                 config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
+                config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules
