@@ -347,6 +347,7 @@
     "discourageStringInterpolationWithStringFormat": {
         "enabled": false
     },
+    "favourNamesInDUMembers": { "enabled": false },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
