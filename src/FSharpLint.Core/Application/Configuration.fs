@@ -71,8 +71,8 @@ module IgnoreFiles =
 
     [<NoComparison>]
     type Ignore =
-        | Ignore of Regex list * IsDirectory
-        | Negate of Regex list * IsDirectory
+        | Ignore of segments: Regex list * isDir: IsDirectory
+        | Negate of segments: Regex list * isDir: IsDirectory
 
     let parseIgnorePath (path:string) =
         let globToRegex glob =
@@ -566,6 +566,9 @@ type Configuration =
       DiscourageStringInterpolationWithStringFormat:EnabledConfig option
       FavourNamesInDUMembers:EnabledConfig option }
 with
+// Method Zero is too big but can't be split into parts because it returns a record
+// and it requires all fields to be set.
+// fsharplint:disable MaxLinesInMember
     static member Zero = {
         Global = None
         ignoreFiles = None
@@ -673,6 +676,7 @@ with
         FavourNamesInDUMembers = None
     }
 
+// fsharplint:enable MaxLinesInMember
 // fsharplint:enable RecordFieldNames
 
 /// Tries to parse the provided config text.

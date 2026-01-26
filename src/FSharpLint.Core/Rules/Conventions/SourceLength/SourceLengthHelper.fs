@@ -14,8 +14,8 @@ type Config =
     }
 
 type private MultilineCommentMarker =
-    | Begin of int
-    | End of int
+    | Begin of charIndex: int
+    | End of charIndex: int
 
 let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
 

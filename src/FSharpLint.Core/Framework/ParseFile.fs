@@ -32,13 +32,13 @@ module ParseFile =
 
     [<NoComparison>]
     type ParseFileFailure =
-        | FailedToParseFile of FSharpDiagnostic []
+        | FailedToParseFile of failures: FSharpDiagnostic []
         | AbortedTypeCheck
 
     [<NoComparison>]
     type ParseFileResult<'Content> =
-        | Failed of ParseFileFailure
-        | Success of 'Content
+        | Failed of failure: ParseFileFailure
+        | Success of result: 'Content
 
     let private parse file source (checker:FSharpChecker, options) = async {
         let sourceText = SourceText.ofString source

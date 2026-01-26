@@ -6,11 +6,11 @@ open System.Text.RegularExpressions
 /// Represents rule suppression information.
 type SuppressionInfo =
     /// Re-enables rules for the rest of the file.
-    | Enable of Set<String>
+    | Enable of ruleNames: Set<String>
     /// Disables rules for the rest of the file.
-    | Disable of Set<String>
+    | Disable of ruleNames: Set<String>
     /// Disables rules for a single line.
-    | DisableLine of Set<String>
+    | DisableLine of ruleNames: Set<String>
 
 /// Specifies the suppressions for an individual line.
 type LineSuppression = { Line:int; Suppressions:SuppressionInfo list }

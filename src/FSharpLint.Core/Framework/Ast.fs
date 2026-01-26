@@ -12,32 +12,32 @@ module Ast =
     /// Nodes in the AST to be visited.
     [<NoEquality; NoComparison>]
     type AstNode =
-        | Expression of SynExpr
-        | Pattern of SynPat
-        | SimplePattern of SynSimplePat
-        | SimplePatterns of SynSimplePats
-        | ModuleOrNamespace of SynModuleOrNamespace
-        | ModuleDeclaration of SynModuleDecl
-        | Binding of SynBinding
-        | TypeDefinition of SynTypeDefn
-        | MemberDefinition of SynMemberDefn
-        | ComponentInfo of SynComponentInfo
-        | ExceptionRepresentation of SynExceptionDefnRepr
-        | UnionCase of SynUnionCase
-        | EnumCase of SynEnumCase
-        | TypeRepresentation of SynTypeDefnRepr
-        | TypeSimpleRepresentation of SynTypeDefnSimpleRepr
-        | Type of SynType
-        | Field of SynField
-        | Match of SynMatchClause
-        | ConstructorArguments of SynArgPats
-        | TypeParameter of SynTypar
-        | InterfaceImplementation of SynInterfaceImpl
-        | Identifier of string list * range : range
-        | File of ParsedInput
-        | LambdaBody of SynExpr
-        | LambdaArg of SynSimplePats
-        | Else of SynExpr
+        | Expression of expression: SynExpr
+        | Pattern of pattern: SynPat
+        | SimplePattern of pattern: SynSimplePat
+        | SimplePatterns of patterns: SynSimplePats
+        | ModuleOrNamespace of moduleOrNamespace: SynModuleOrNamespace
+        | ModuleDeclaration of moduleDeclaration: SynModuleDecl
+        | Binding of binding: SynBinding
+        | TypeDefinition of typeDefinition: SynTypeDefn
+        | MemberDefinition of memberDefinition: SynMemberDefn
+        | ComponentInfo of componenetInfo: SynComponentInfo
+        | ExceptionRepresentation of exceptionRepresentation: SynExceptionDefnRepr
+        | UnionCase of unionCase: SynUnionCase
+        | EnumCase of enumCase: SynEnumCase
+        | TypeRepresentation of typeRepresentation: SynTypeDefnRepr
+        | TypeSimpleRepresentation of typeRepresentation: SynTypeDefnSimpleRepr
+        | Type of synType: SynType
+        | Field of field: SynField
+        | Match of matchClause: SynMatchClause
+        | ConstructorArguments of constructorArguments: SynArgPats
+        | TypeParameter of typeParameter: SynTypar
+        | InterfaceImplementation of interfaceImplementation: SynInterfaceImpl
+        | Identifier of idents: string list * range : range
+        | File of syntaxTree: ParsedInput
+        | LambdaBody of bodyExpression: SynExpr
+        | LambdaArg of argExpression: SynSimplePats
+        | Else of expression: SynExpr
 
     /// Concatenates the nested-list structure of `SynAttributes` into a `SynAttribute list` to keep other code
     /// mostly unchanged.
