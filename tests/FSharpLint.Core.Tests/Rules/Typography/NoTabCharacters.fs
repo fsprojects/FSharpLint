@@ -17,12 +17,20 @@ type TestTypographyTabCharacterInFile() =
 
     [<Test>]
     member this.``Tab character in literal strings are not reported``() =
-        let source = String.Format("""
-            let a = @"a{0}b"
-            let b = {1}
-            a{0}b
-            {1}
-            """, "\t", "\"\"\"")
+        let tab = "\t"
+        let longStringWrapper = "\"\"\""
+        let source =
+            sprintf
+                """
+let a = @"a%sb"
+let b = %s
+a%sb
+%s"""
+                tab
+                longStringWrapper
+                tab
+                longStringWrapper
+
         this.Parse (source)
 
         Assert.IsFalse(this.ErrorExistsAt(2, 23))

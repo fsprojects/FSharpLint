@@ -133,3 +133,4 @@ The following rules can be specified for linting.
 - [NoAsyncRunSynchronouslyInLibrary (FL0090)](rules/FL0090.html)
 - [FavourNestedFunctions (FL0091)](rules/FL0091.html)
 - [DisallowShadowing (FL0092)](rules/FL0092.html)
+- [DiscourageStringInterpolationWithStringFormat (FL0093)](rules/FL0093.html)

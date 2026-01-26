@@ -386,7 +386,8 @@ type ConventionsConfig =
       usedUnderscorePrefixedElements:EnabledConfig option
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
       favourNestedFunctions:EnabledConfig option
-      disallowShadowing:EnabledConfig option}
+      disallowShadowing:EnabledConfig option
+      discourageStringInterpolationWithStringFormat:EnabledConfig option}
 with
     member this.Flatten() =
         Array.concat
@@ -416,6 +417,7 @@ with
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
+                this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -558,7 +560,8 @@ type Configuration =
       FavourSingleton:EnabledConfig option
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
       FavourNestedFunctions:EnabledConfig option
-      DisallowShadowing:EnabledConfig option }
+      DisallowShadowing:EnabledConfig option
+      DiscourageStringInterpolationWithStringFormat:EnabledConfig option }
 with
     static member Zero = {
         Global = None
@@ -663,6 +666,7 @@ with
         NoAsyncRunSynchronouslyInLibrary = None
         FavourNestedFunctions = None
         DisallowShadowing = None
+        DiscourageStringInterpolationWithStringFormat = None
     }
 
 // fsharplint:enable RecordFieldNames
@@ -871,6 +875,7 @@ let flattenConfig (config:Configuration) =
                 config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
                 config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
+                config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules

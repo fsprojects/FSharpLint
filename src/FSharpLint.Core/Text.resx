@@ -402,4 +402,7 @@
   <data name="RulesDisallowShadowing" xml:space="preserve">
     <value>Rename variable or parameter so that it doesn't shadow another one with the same name.</value>
   </data>
+  <data name="RulesDiscourageStringInterpolationWithStringFormat" xml:space="preserve">
+    <value>Use sprintf instead of String.Format.</value>
+  </data>
 </root>
