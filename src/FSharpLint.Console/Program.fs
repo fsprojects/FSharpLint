@@ -54,11 +54,12 @@ with
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
 
+let private validTargetFileExtensions = [ ".fs"; ".fsx"; ".fsproj"; ".sln"; ".slnx" ]
 /// Expands a wildcard pattern to a list of matching files.
 /// Supports recursive search using ** (e.g., "**/*.fs" or "src/**/*.fs")
 let internal expandWildcard (pattern:string) =
-    let isFSharpFile (filePath:string) =
-        filePath.EndsWith ".fs" || filePath.EndsWith ".fsx"
+    let isValidTargetFile (filePath:string) =
+        validTargetFileExtensions |> List.exists filePath.EndsWith
     
     let normalizedPattern = pattern.Replace('\\', '/')
     
@@ -85,7 +86,7 @@ let internal expandWildcard (pattern:string) =
     let fullDirectory = Path.GetFullPath directory
     if Directory.Exists fullDirectory then
         Directory.GetFiles(fullDirectory, searchPattern, searchOption)
-        |> Array.filter isFSharpFile
+        |> Array.filter isValidTargetFile
         |> Array.toList
     else
         List.empty
