@@ -63,7 +63,7 @@
     <Compile Include="Rules\Conventions\FavourNestedFunctions.fs" />
     <Compile Include="Rules\Conventions\DisallowShadowing.fs" />
     <Compile Include="Rules\Conventions\DiscourageStringInterpolationWithStringFormat.fs" />
-    <Compile Include="Rules\Conventions\FavourNamesInDUMembers.fs" />
+    <Compile Include="Rules\Conventions\FavourNamedMembers.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />

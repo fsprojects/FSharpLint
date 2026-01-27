@@ -98,4 +98,4 @@ let NoAsyncRunSynchronouslyInLibrary = identifier 90
 let FavourNestedFunctions = identifier 91
 let DisallowShadowing = identifier 92
 let DiscourageStringInterpolationWithStringFormat = identifier 93
-let FavourNamesInDUMembers = identifier 94
+let FavourNamedMembers = identifier 94

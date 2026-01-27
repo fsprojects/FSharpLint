@@ -1,4 +1,4 @@
-﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourNamesInDUMembers
+﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourNamedMembers
 
 open NUnit.Framework
 
@@ -6,8 +6,8 @@ open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestFavourNamesInDUMembers() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourNamesInDUMembers.rule)
+type TestFavourNamedMembers() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourNamedMembers.rule)
 
     [<Test>]
     member this.``Should produce error for DU with unnamed fields``() =

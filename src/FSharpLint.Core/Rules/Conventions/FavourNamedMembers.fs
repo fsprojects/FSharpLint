@@ -1,4 +1,4 @@
-﻿module FSharpLint.Rules.FavourNamesInDUMembers
+﻿module FSharpLint.Rules.FavourNamedMembers
 
 open System
 open FSharpLint.Framework
@@ -12,7 +12,7 @@ let runner (args: AstNodeRuleParams) =
         Array.singleton 
             { 
                 Range = range
-                Message = Resources.GetString "RulesFavourNamesInDUMembers"
+                Message = Resources.GetString "RulesFavourNamedMembers"
                 SuggestedFix = None
                 TypeChecks = List.Empty 
             }
@@ -45,8 +45,8 @@ let runner (args: AstNodeRuleParams) =
 let rule =
     AstNodeRule
         {
-            Name = "FavourNamesInDUMembers"
-            Identifier = Identifiers.FavourNamesInDUMembers
+            Name = "FavourNamedMembers"
+            Identifier = Identifiers.FavourNamedMembers
             RuleConfig =
                 {
                     AstNodeRuleConfig.Runner = runner
