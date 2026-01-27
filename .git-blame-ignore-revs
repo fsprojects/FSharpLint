@@ -3,6 +3,7 @@
 # that they are unlikely to be what you are interested in when blaming.
 # Like formatting with Fantomas
 # https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignore-commits-in-the-blame-view
+# NOTE: order is oldest commits go at the top, newest ones at the bottom
 
 # Console,Core,Tests: fix FSharpLint warning (Fixing the warning for AvoidTooShortNames rule.)
 e9410e83af1de4d76230b0e8d44ae6a99fac6d7b
@@ -12,3 +13,6 @@ e9410e83af1de4d76230b0e8d44ae6a99fac6d7b
 
 # README,Core: reviewed rules categories & their descriptions
 2ab7b6ad9b5ad63f1934c1476ae5965022bb49f9
+
+# Rename FL0094
+b33fd78a73160e82cdf7c7ce9313b33d5f630a06
