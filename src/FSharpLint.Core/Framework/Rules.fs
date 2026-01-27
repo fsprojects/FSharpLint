@@ -81,10 +81,10 @@ type IndentationRuleConfig = LineRuleConfigWithContext<Map<int,bool*int>>
 type NoTabCharactersRuleConfig = LineRuleConfigWithContext<(string*range) list>
 
 type Rule =
-    | AstNodeRule of RuleMetadata<AstNodeRuleConfig>
-    | LineRule of RuleMetadata<LineRuleConfig>
-    | IndentationRule of RuleMetadata<IndentationRuleConfig>
-    | NoTabCharactersRule of RuleMetadata<NoTabCharactersRuleConfig>
+    | AstNodeRule of rule: RuleMetadata<AstNodeRuleConfig>
+    | LineRule of rule: RuleMetadata<LineRuleConfig>
+    | IndentationRule of rule: RuleMetadata<IndentationRuleConfig>
+    | NoTabCharactersRule of rule: RuleMetadata<NoTabCharactersRuleConfig>
 
 let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:string []) (details:WarningDetails) =
     {

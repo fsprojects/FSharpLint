@@ -41,7 +41,7 @@ type private LambdaArgumentMatch =
 
 [<RequireQualifiedAccess>]
 type private LambdaMatch =
-    | Match of Map<char, string>
+    | Match of arguments: Map<char, string>
     | NoMatch
 
 /// Converts a SynConst (FSharp AST) into a Constant (hint AST).
@@ -173,7 +173,7 @@ module private MatchExpression =
 
     [<NoComparison; NoEquality>]
     type HintMatch =
-        | Match of (unit -> bool) list
+        | Match of matches: (unit -> bool) list
         | NoMatch
 
     let internal returnEmptyMatch () = Match List.Empty

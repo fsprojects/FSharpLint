@@ -71,8 +71,8 @@ module IgnoreFiles =
 
     [<NoComparison>]
     type Ignore =
-        | Ignore of Regex list * IsDirectory
-        | Negate of Regex list * IsDirectory
+        | Ignore of segments: Regex list * isDir: IsDirectory
+        | Negate of segments: Regex list * isDir: IsDirectory
 
     let parseIgnorePath (path:string) =
         let globToRegex glob =
@@ -387,7 +387,8 @@ type ConventionsConfig =
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
       favourNestedFunctions:EnabledConfig option
       disallowShadowing:EnabledConfig option
-      discourageStringInterpolationWithStringFormat:EnabledConfig option}
+      discourageStringInterpolationWithStringFormat:EnabledConfig option
+      favourNamesInDUMembers:EnabledConfig option }
 with
     member this.Flatten() =
         Array.concat
@@ -418,6 +419,7 @@ with
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
                 this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
+                this.favourNamesInDUMembers |> Option.bind (constructRuleIfEnabled FavourNamesInDUMembers.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -561,8 +563,12 @@ type Configuration =
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
       FavourNestedFunctions:EnabledConfig option
       DisallowShadowing:EnabledConfig option
-      DiscourageStringInterpolationWithStringFormat:EnabledConfig option }
+      DiscourageStringInterpolationWithStringFormat:EnabledConfig option
+      FavourNamesInDUMembers:EnabledConfig option }
 with
+// Method Zero is too big but can't be split into parts because it returns a record
+// and it requires all fields to be set.
+// fsharplint:disable MaxLinesInMember
     static member Zero = {
         Global = None
         ignoreFiles = None
@@ -667,8 +673,10 @@ with
         FavourNestedFunctions = None
         DisallowShadowing = None
         DiscourageStringInterpolationWithStringFormat = None
+        FavourNamesInDUMembers = None
     }
 
+// fsharplint:enable MaxLinesInMember
 // fsharplint:enable RecordFieldNames
 
 /// Tries to parse the provided config text.
@@ -876,6 +884,7 @@ let flattenConfig (config:Configuration) =
                 config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
+                config.FavourNamesInDUMembers |> Option.bind (constructRuleIfEnabled FavourNamesInDUMembers.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules

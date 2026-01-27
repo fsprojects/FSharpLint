@@ -249,7 +249,7 @@ module MergeSyntaxTrees =
 
     type private TransposedNode =
         | HintNode of key: HintNode * depth: int * rest: HintList
-        | EndOfHint of Hint
+        | EndOfHint of hint: Hint
     
     [<TailCall>]
     let rec private transposeHeadRec builtList =

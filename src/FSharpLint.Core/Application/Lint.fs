@@ -37,25 +37,25 @@ module Lint =
     [<NoComparison>]
     type LintFailure =
         /// Project file path did not exist on the local filesystem.
-        | ProjectFileCouldNotBeFound of string
+        | ProjectFileCouldNotBeFound of projectFilePath: string
 
         /// Received exception when trying to get the list of F# file from the project file.
-        | MSBuildFailedToLoadProjectFile of string * BuildFailure
+        | MSBuildFailedToLoadProjectFile of projectFilePath: string * failure: BuildFailure
 
         /// Failed to load a FSharpLint configuration file.
-        | FailedToLoadConfig of string
+        | FailedToLoadConfig of errorMessage: string
 
         /// The specified file for linting could not be found.
-        | FailedToLoadFile of string
+        | FailedToLoadFile of filePath: string
 
         /// Failed to analyse a loaded FSharpLint configuration at runtime e.g. invalid hint.
-        | RunTimeConfigError of string
+        | RunTimeConfigError of errorMessage: string
 
         /// `FSharp.Compiler.Services` failed when trying to parse a file.
-        | FailedToParseFile of ParseFile.ParseFileFailure
+        | FailedToParseFile of failure: ParseFile.ParseFileFailure
 
         /// `FSharp.Compiler.Services` failed when trying to parse one or more files in a project.
-        | FailedToParseFilesInProject of ParseFile.ParseFileFailure list
+        | FailedToParseFilesInProject of failures: ParseFile.ParseFileFailure list
 
         member this.Description
             with get() =
@@ -86,20 +86,20 @@ module Lint =
 
     [<NoComparison>]
     type Result<'SuccessType> =
-        | Success of 'SuccessType
-        | Failure of LintFailure
+        | Success of result: 'SuccessType
+        | Failure of failure: LintFailure
 
     /// Provides information on what the linter is currently doing.
     [<NoComparison>]
     type ProjectProgress =
         /// Started parsing a file (file path).
-        | Starting of string
+        | Starting of filePath: string
 
         /// Finished parsing a file (file path).
-        | ReachedEnd of string * Suggestion.LintWarning list
+        | ReachedEnd of filePath: string * violations: Suggestion.LintWarning list
 
         /// Failed to parse a file (file path, exception that caused failure).
-        | Failed of string * System.Exception
+        | Failed of filePath: string * ex: System.Exception
     with
         /// Path of the F# file the progress information is for.
         member this.FilePath() =
@@ -340,8 +340,8 @@ module Lint =
     /// Result of running the linter.
     [<RequireQualifiedAccess; NoEquality; NoComparison>]
     type LintResult =
-        | Success of Suggestion.LintWarning list
-        | Failure of LintFailure
+        | Success of violations: Suggestion.LintWarning list
+        | Failure of failure: LintFailure
 
         member this.TryGetSuccess([<Out>] success:byref<Suggestion.LintWarning list>) =
             match this with
@@ -353,7 +353,7 @@ module Lint =
             | _ -> false
 
     type ConfigurationParam =
-        | Configuration of Configuration
+        | Configuration of config: Configuration
         | FromFile of configPath:string
         /// Tries to load the config from file `fsharplint.json`.
         /// If this file doesn't exist or is invalid, falls back to the default configuration.

@@ -27,8 +27,8 @@ type ExitCode =
 // Allowing underscores in union case names for proper Argu command line option formatting.
 // fsharplint:disable UnionCasesNames
 type private ToolArgs =
-    | [<AltCommandLine("-f")>] Format of OutputFormat
-    | [<CliPrefix(CliPrefix.None)>] Lint of ParseResults<LintArgs>
+    | [<AltCommandLine("-f")>] Format of formatArg: OutputFormat
+    | [<CliPrefix(CliPrefix.None)>] Lint of lintArgs: ParseResults<LintArgs>
     | Version
 with
     interface IArgParserTemplate with

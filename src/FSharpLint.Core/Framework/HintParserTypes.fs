@@ -3,70 +3,70 @@
 module HintParserTypes =
 
     type Constant =
-        | Byte of byte
-        | Bytes of byte[]
-        | Char of char
-        | Decimal of decimal
-        | Double of double
-        | Int16 of int16
-        | Int32 of int32
-        | Int64 of int64
-        | IntPtr of nativeint
-        | SByte of sbyte
-        | Single of single
-        | UInt16 of uint16
-        | UInt32 of uint32
-        | UInt64 of uint64
-        | UIntPtr of unativeint
-        | UserNum of bigint * char
-        | String of string
+        | Byte of value: byte
+        | Bytes of value: byte[]
+        | Char of value: char
+        | Decimal of value: decimal
+        | Double of value: double
+        | Int16 of value: int16
+        | Int32 of value: int32
+        | Int64 of value: int64
+        | IntPtr of value: nativeint
+        | SByte of value: sbyte
+        | Single of value: single
+        | UInt16 of value: uint16
+        | UInt32 of value: uint32
+        | UInt64 of value: uint64
+        | UIntPtr of value: unativeint
+        | UserNum of value: bigint * suffix: char
+        | String of value: string
         | Unit
-        | Bool of bool
+        | Bool of value: bool
 
     [<RequireQualifiedAccess>]
     type Pattern =
-        | Cons of Pattern * Pattern
-        | Or of Pattern * Pattern
+        | Cons of lhs: Pattern * rhs: Pattern
+        | Or of lhs: Pattern * rhs: Pattern
         | Wildcard
-        | Variable of char
-        | Identifier of string list
-        | Constant of Constant
-        | Parentheses of Pattern
-        | Tuple of Pattern list
-        | List of Pattern list
-        | Array of Pattern list
+        | Variable of name: char
+        | Identifier of nameParts: string list
+        | Constant of value: Constant
+        | Parentheses of innerHint: Pattern
+        | Tuple of hints: Pattern list
+        | List of hints: Pattern list
+        | Array of hints: Pattern list
         | Null
 
     [<RequireQualifiedAccess>]
     type Expression =
-        | FunctionApplication of Expression list
-        | InfixOperator of operatorIdentifier:Expression * Expression * Expression
-        | PrefixOperator of operatorIdentifier:Expression * Expression
-        | AddressOf of singleAmpersand:bool * Expression
+        | FunctionApplication of hints: Expression list
+        | InfixOperator of operatorIdentifier:Expression * leftHint: Expression * rightHint: Expression
+        | PrefixOperator of operatorIdentifier:Expression * hint: Expression
+        | AddressOf of singleAmpersand:bool * hint: Expression
         | Wildcard
-        | Variable of char
-        | Identifier of string list
-        | Constant of Constant
-        | Parentheses of Expression
-        | Lambda of LambdaArg list * LambdaBody
-        | LambdaBody of Expression
-        | LambdaArg of Expression
-        | Tuple of Expression list
-        | List of Expression list
-        | Array of Expression list
+        | Variable of varChar: char
+        | Identifier of hints: string list
+        | Constant of constant: Constant
+        | Parentheses of hint: Expression
+        | Lambda of args: LambdaArg list * body: LambdaBody
+        | LambdaBody of body: Expression
+        | LambdaArg of arg: Expression
+        | Tuple of hints: Expression list
+        | List of hints:Expression list
+        | Array of hints:Expression list
         | If of cond:Expression * body:Expression * ``else``:Expression option
-        | Else of Expression
+        | Else of hint: Expression
         | Null
     and LambdaArg = LambdaArg of Expression
     and LambdaBody = LambdaBody of Expression
 
     type HintNode =
-        | HintPat of Pattern
-        | HintExpr of Expression
+        | HintPat of hint: Pattern
+        | HintExpr of hint: Expression
 
     type Suggestion =
-        | Expr of Expression
-        | Message of string
+        | Expr of expression: Expression
+        | Message of message: string
 
     type Hint =
         { MatchedNode:HintNode
