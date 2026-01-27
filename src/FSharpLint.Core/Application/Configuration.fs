@@ -388,7 +388,7 @@ type ConventionsConfig =
       favourNestedFunctions:EnabledConfig option
       disallowShadowing:EnabledConfig option
       discourageStringInterpolationWithStringFormat:EnabledConfig option
-      favourNamesInDUMembers:EnabledConfig option }
+      favourNamedMembers:EnabledConfig option }
 with
     member this.Flatten() =
         Array.concat
@@ -419,7 +419,7 @@ with
                 this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
                 this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
-                this.favourNamesInDUMembers |> Option.bind (constructRuleIfEnabled FavourNamesInDUMembers.rule) |> Option.toArray
+                this.favourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -564,7 +564,7 @@ type Configuration =
       FavourNestedFunctions:EnabledConfig option
       DisallowShadowing:EnabledConfig option
       DiscourageStringInterpolationWithStringFormat:EnabledConfig option
-      FavourNamesInDUMembers:EnabledConfig option }
+      FavourNamedMembers:EnabledConfig option }
 with
 // Method Zero is too big but can't be split into parts because it returns a record
 // and it requires all fields to be set.
@@ -673,7 +673,7 @@ with
         FavourNestedFunctions = None
         DisallowShadowing = None
         DiscourageStringInterpolationWithStringFormat = None
-        FavourNamesInDUMembers = None
+        FavourNamedMembers = None
     }
 
 // fsharplint:enable MaxLinesInMember
@@ -884,7 +884,7 @@ let flattenConfig (config:Configuration) =
                 config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
-                config.FavourNamesInDUMembers |> Option.bind (constructRuleIfEnabled FavourNamesInDUMembers.rule)
+                config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
             |]
 
     findDeprecation config deprecatedAllRules allRules

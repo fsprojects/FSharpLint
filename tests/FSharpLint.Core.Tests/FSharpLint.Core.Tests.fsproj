@@ -53,7 +53,7 @@
     <Compile Include="Rules\Conventions\FavourSingleton.fs" />
     <Compile Include="Rules\Conventions\FavourNestedFunctions.fs" />
     <Compile Include="Rules\Conventions\DisallowShadowing.fs" />
-    <Compile Include="Rules\Conventions\FavourNamesInDUMembers.fs" />
+    <Compile Include="Rules\Conventions\FavourNamedMembers.fs" />
     <Compile Include="Rules\Conventions\Naming\NamingHelpers.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />

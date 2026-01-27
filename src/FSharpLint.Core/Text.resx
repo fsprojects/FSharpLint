@@ -405,7 +405,7 @@
   <data name="RulesDiscourageStringInterpolationWithStringFormat" xml:space="preserve">
     <value>Use sprintf instead of String.Format.</value>
   </data>
-  <data name="RulesFavourNamesInDUMembers" xml:space="preserve">
+  <data name="RulesFavourNamedMembers" xml:space="preserve">
     <value>Use named discriminated union fields.</value>
   </data>
 </root>
