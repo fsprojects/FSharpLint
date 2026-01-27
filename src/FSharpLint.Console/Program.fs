@@ -162,6 +162,7 @@ let main argv =
         let target = lintArgs.GetResult Target
         let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
+        let warningPrefix = "WARNING:"
         let projectRecommendationMessage = "Using a project (slnx/sln/fsproj) can detect more issues."
 
         try
@@ -169,7 +170,7 @@ let main argv =
                 match fileType with
                 | FileType.File -> 
                     if target.EndsWith ".fs" then
-                        output.WriteInfo $"Going to analyse single .fs file, but not recommended. {projectRecommendationMessage}"
+                        output.WriteError $"{warningPrefix} Going to analyze single .fs file, but not recommended. {projectRecommendationMessage}"
                     Lint.asyncLintFile lintParams target |> Async.RunSynchronously
                 | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
                 | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
@@ -181,7 +182,7 @@ let main argv =
                     else
                         let fileTypes = files |> List.map inferFileType
                         if fileTypes |> List.forall (fun aType -> aType = FileType.File) then
-                            output.WriteInfo $"Wildcard detected, but not recommended. {projectRecommendationMessage}"
+                            output.WriteError $"{warningPrefix} Wildcard detected, but not recommended. {projectRecommendationMessage}"
                         output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
                         let results = 
                             let getResult file inferredFileType =
