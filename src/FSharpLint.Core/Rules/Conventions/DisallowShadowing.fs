@@ -27,7 +27,7 @@ let rec private processExpressions
     (processArgs: SynSimplePats -> bool)
     (expressions: list<SynExpr>) =
     match expressions with
-    | SynExpr.LetOrUse(_, _, bindings, _, _, _) :: rest ->
+    | SynExpr.LetOrUse(_, _, _, false, bindings, _, _, _) :: rest ->
         bindings |> List.exists processBinding
         || processExpressions processBinding processArgs rest
     | SynExpr.Sequential(_, _, expr1, expr2, _, _) :: rest ->
@@ -60,7 +60,7 @@ let rec private processPatterns (definitionsAndPatterns: list<array<FSharpSymbol
     | (definitions, SynPat.Paren(pat, _)) :: rest ->
         processPatterns ((definitions, pat) :: rest)
     | (definitions, SynPat.Record(fieldPats, _)) :: rest ->
-        processPatterns ((fieldPats |> List.map (fun (_, _, pat) -> (definitions, pat))) @ rest)
+        processPatterns ((fieldPats |> List.map (fun patPairField -> (definitions, patPairField.Pattern))) @ rest)
     | (definitions, SynPat.Tuple(_, pats, _, _)) :: rest ->
         processPatterns ((pats |> List.map (fun pat -> (definitions, pat))) @ rest)
     | (definitions, SynPat.Typed(pat, _, _)) :: rest ->
