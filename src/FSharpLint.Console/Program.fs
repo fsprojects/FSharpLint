@@ -54,11 +54,12 @@ with
             | Lint_Config _ -> "Path to the config for the lint."
 // fsharplint:enable UnionCasesNames
 
+let private validTargetFileExtensions = [ ".fs"; ".fsx"; ".fsproj"; ".sln"; ".slnx" ]
 /// Expands a wildcard pattern to a list of matching files.
 /// Supports recursive search using ** (e.g., "**/*.fs" or "src/**/*.fs")
 let internal expandWildcard (pattern:string) =
-    let isFSharpFile (filePath:string) =
-        filePath.EndsWith ".fs" || filePath.EndsWith ".fsx"
+    let isValidTargetFile (filePath:string) =
+        validTargetFileExtensions |> List.exists filePath.EndsWith
     
     let normalizedPattern = pattern.Replace('\\', '/')
     
@@ -85,7 +86,7 @@ let internal expandWildcard (pattern:string) =
     let fullDirectory = Path.GetFullPath directory
     if Directory.Exists fullDirectory then
         Directory.GetFiles(fullDirectory, searchPattern, searchOption)
-        |> Array.filter isFSharpFile
+        |> Array.filter isValidTargetFile
         |> Array.toList
     else
         List.empty
@@ -161,21 +162,49 @@ let main argv =
         let target = lintArgs.GetResult Target
         let fileType = lintArgs.TryGetResult File_Type |> Option.defaultValue (inferFileType target)
 
+        let warningPrefix = "WARNING:"
+        let projectRecommendationMessage = "Using a project (slnx/sln/fsproj) can detect more issues."
+
         try
             let lintResult =
                 match fileType with
-                | FileType.File -> Lint.asyncLintFile lintParams target |> Async.RunSynchronously
+                | FileType.File -> 
+                    if target.EndsWith ".fs" then
+                        output.WriteError $"{warningPrefix} Going to analyze single .fs file, but not recommended. {projectRecommendationMessage}"
+                    Lint.asyncLintFile lintParams target |> Async.RunSynchronously
                 | FileType.Source -> Lint.asyncLintSource lintParams target |> Async.RunSynchronously
                 | FileType.Solution -> Lint.asyncLintSolution lintParams target toolsPath |> Async.RunSynchronously
                 | FileType.Wildcard ->
-                    output.WriteInfo "Wildcard detected, but not recommended. Using a project (slnx/sln/fsproj) can detect more issues."
                     let files = expandWildcard target
                     if List.isEmpty files then
                         output.WriteInfo $"No files matching pattern '%s{target}' were found."
                         LintResult.Success List.empty
                     else
+                        let fileTypes = files |> List.map inferFileType
+                        if fileTypes |> List.forall (fun aType -> aType = FileType.File) then
+                            output.WriteError $"{warningPrefix} Wildcard detected, but not recommended. {projectRecommendationMessage}"
                         output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
-                        Lint.asyncLintFiles lintParams files |> Async.RunSynchronously
+                        let results = 
+                            let getResult file inferredFileType =
+                                match inferredFileType with
+                                | FileType.File ->  Lint.asyncLintFile lintParams file
+                                | FileType.Solution -> Lint.asyncLintSolution lintParams file toolsPath
+                                | FileType.Project
+                                | _ -> Lint.asyncLintProject lintParams file toolsPath
+
+                            List.map2 getResult files fileTypes
+                            |> List.map Async.RunSynchronously
+                                
+                        let failures = 
+                            results 
+                            |> List.choose (function | LintResult.Failure failure -> Some failure | _ -> None)
+                        let warnings = 
+                            results 
+                            |> List.collect (function | LintResult.Success warning -> warning | _ -> List.empty)
+            
+                        match failures with
+                        | firstFailure :: _ -> LintResult.Failure firstFailure
+                        | [] -> LintResult.Success warnings
                 | FileType.Project
                 | _ -> Lint.asyncLintProject lintParams target toolsPath |> Async.RunSynchronously
             handleLintResult lintResult

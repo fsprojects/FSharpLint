@@ -176,3 +176,25 @@ type TestWildcardExpansion() =
         let results = expandWildcard pattern
         
         Assert.That(results, Is.Empty)
+
+    [<Test>]
+    member _.``expandWildcard finds project files``() =
+        use file1 = new TemporaryFile("""<Project Sdk="Microsoft.NET.Sdk" />""", "fsproj")
+        let dir = Path.GetDirectoryName(file1.FileName)
+        let pattern = Path.Combine(dir, "*.fsproj")
+        
+        let results = expandWildcard pattern
+        
+        Assert.That(results, Does.Contain(file1.FileName))
+
+    [<Test>]
+    member _.``expandWildcard finds solution files``() =
+        use slnFile = new TemporaryFile("""<Solution />""", "sln")
+        use slnxFile = new TemporaryFile("""<Solution />""", "slnx")
+        let dir = Path.GetDirectoryName(slnFile.FileName)
+        let pattern = Path.Combine(dir, "*.sln*")
+        
+        let results = expandWildcard pattern
+        
+        Assert.That(results, Does.Contain(slnFile.FileName))
+        Assert.That(results, Does.Contain(slnxFile.FileName))
