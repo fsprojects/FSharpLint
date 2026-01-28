@@ -147,6 +147,9 @@ module Lint =
             Context: Context
         }
 
+    /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
+    val getConfig: ConfigurationParam -> Result<Configuration, string>
+
     /// Runs all rules which take a line of text as input.
     val runLineRules : RunLineRulesConfig -> Suggestion.LintWarning []
 

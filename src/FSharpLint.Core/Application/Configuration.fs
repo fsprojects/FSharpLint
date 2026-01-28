@@ -712,12 +712,24 @@ type LineRules =
     { GenericLineRules:RuleMetadata<LineRuleConfig> []
       NoTabCharactersRule:RuleMetadata<NoTabCharactersRuleConfig> option
       IndentationRule:RuleMetadata<IndentationRuleConfig> option }
+    with
+        member this.Count: uint =
+            this.GenericLineRules.Length
+            + (Option.count this.IndentationRule)
+            + (Option.count this.NoTabCharactersRule)
+            |> uint
 
 type LoadedRules =
     { GlobalConfig:Rules.GlobalRuleConfig
       AstNodeRules:RuleMetadata<AstNodeRuleConfig> []
       LineRules:LineRules
-      DeprecatedRules:Rule [] }
+      DeprecatedRules:Rule []
+      TotalRuleCount:uint }
+    with
+        member this.Count: uint =
+            (uint this.AstNodeRules.Length)
+            + this.LineRules.Count
+            + (uint this.DeprecatedRules.Length)
 
 let getGlobalConfig (maybeGlobalConfig: GlobalConfig option) =
     maybeGlobalConfig
@@ -725,7 +737,7 @@ let getGlobalConfig (maybeGlobalConfig: GlobalConfig option) =
         Rules.GlobalRuleConfig.numIndentationSpaces = globalConfig.numIndentationSpaces |> Option.defaultValue Rules.GlobalRuleConfig.Default.numIndentationSpaces
     }) |> Option.defaultValue Rules.GlobalRuleConfig.Default
 
-let findDeprecation config deprecatedAllRules allRules =
+let findDeprecation totalRuleCount config deprecatedAllRules allRules =
     if config.NonPublicValuesNames.IsSome &&
         (config.PrivateValuesNames.IsSome || config.InternalValuesNames.IsSome) then
         failwith "nonPublicValuesNames has been deprecated, use privateValuesNames and/or internalValuesNames instead"
@@ -756,6 +768,7 @@ let findDeprecation config deprecatedAllRules allRules =
                 IndentationRule = indentationRule
                 NoTabCharactersRule = noTabCharactersRule
             }
+        TotalRuleCount = uint(totalRuleCount + deprecatedAllRules.Length)
     }
 
 // fsharplint:disable MaxLinesInFunction
@@ -787,9 +800,7 @@ let flattenConfig (config:Configuration) =
                 config.Hints |> Option.map (fun hintsConfig -> HintMatcher.rule { HintMatcher.Config.HintTrie = parseHints (getOrEmptyList hintsConfig.add) }) |> Option.toArray
             |]
 
-    let allRules =
-        Array.choose
-            id
+    let allPossibleRules =
             [|
                 config.TypedItemSpacing |> Option.bind (constructRuleWithConfig TypedItemSpacing.rule)
                 config.TypePrefixing |> Option.bind (constructTypePrefixingRuleWithConfig TypePrefixing.rule)
@@ -887,4 +898,6 @@ let flattenConfig (config:Configuration) =
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
             |]
 
-    findDeprecation config deprecatedAllRules allRules
+    let allEnabledRules = Array.choose id allPossibleRules
+
+    findDeprecation allPossibleRules.Length config deprecatedAllRules allEnabledRules
