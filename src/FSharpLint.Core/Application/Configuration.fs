@@ -564,7 +564,8 @@ type Configuration =
       FavourNestedFunctions:EnabledConfig option
       DisallowShadowing:EnabledConfig option
       DiscourageStringInterpolationWithStringFormat:EnabledConfig option
-      FavourNamedMembers:EnabledConfig option }
+      FavourNamedMembers:EnabledConfig option
+      SynchronousFunctionNames:EnabledConfig option }
 with
 // Method Zero is too big but can't be split into parts because it returns a record
 // and it requires all fields to be set.
@@ -674,6 +675,7 @@ with
         DisallowShadowing = None
         DiscourageStringInterpolationWithStringFormat = None
         FavourNamedMembers = None
+        SynchronousFunctionNames = None
     }
 
 // fsharplint:enable MaxLinesInMember
@@ -896,6 +898,7 @@ let flattenConfig (config:Configuration) =
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
+                config.SynchronousFunctionNames |> Option.bind (constructRuleIfEnabled SynchronousFunctionNames.rule)
             |]
 
     let allEnabledRules = Array.choose id allPossibleRules
