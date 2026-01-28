@@ -100,3 +100,4 @@ let DisallowShadowing = identifier 92
 let DiscourageStringInterpolationWithStringFormat = identifier 93
 let FavourNamedMembers = identifier 94
 let SynchronousFunctionNames = identifier 95
+let AsynchronousFunctionNames = identifier 96

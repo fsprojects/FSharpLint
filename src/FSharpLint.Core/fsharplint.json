@@ -349,6 +349,7 @@
     },
     "favourNamedMembers": { "enabled": false },
     "synchronousFunctionNames": { "enabled": true },
+    "asynchronousFunctionNames": { "enabled": true },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",
