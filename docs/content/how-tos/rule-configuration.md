@@ -136,3 +136,4 @@ The following rules can be specified for linting.
 - [DiscourageStringInterpolationWithStringFormat (FL0093)](rules/FL0093.html)
 - [FavourNamedMembers (FL0094)](rules/FL0094.html)
 - [SynchronousFunctionNames (FL0095)](rules/FL0095.html)
+- [AsynchronousFunctionNames (FL0096)](rules/FL0096.html)
