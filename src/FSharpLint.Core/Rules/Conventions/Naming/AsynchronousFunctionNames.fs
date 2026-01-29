@@ -19,28 +19,40 @@ let runner (args: AstNodeRuleParams) =
     
     match args.AstNode with
     | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), identRange), returnInfo, _, _, _, _)) ->
-        match returnInfo with
-        | Some SynchronousFunctionNames.ReturnsAsync ->
-            match funcIdent with
-            | SynchronousFunctionNames.HasAsyncPrefix _ ->
-                Array.empty
-            | SynchronousFunctionNames.HasAsyncSuffix name 
-            | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
-                let nameWithAsync = SynchronousFunctionNames.asyncSuffixOrPrefix + name
-                emitWarning identRange nameWithAsync "Async"
-        | Some SynchronousFunctionNames.ReturnsTask ->
-            match funcIdent with
-            | SynchronousFunctionNames.HasAsyncSuffix _ ->
-                Array.empty
-            | SynchronousFunctionNames.HasAsyncPrefix name 
-            | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
-                let nameWithAsync = name + SynchronousFunctionNames.asyncSuffixOrPrefix
-                emitWarning identRange nameWithAsync "Task"
-        | None -> 
-            // TODO: get type using typed tree in args.CheckInfo
+        let parents = args.GetParents args.NodeIndex
+        let hasEnclosingFunctionOrMethod =
+            parents
+            |> List.exists
+                (fun node ->
+                    match node with
+                    | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(_), _, _, _, _, _)) -> true
+                    | _ -> false)
+        
+        if hasEnclosingFunctionOrMethod then
             Array.empty
-        | _ ->
-            Array.empty
+        else
+            match returnInfo with
+            | Some SynchronousFunctionNames.ReturnsAsync ->
+                match funcIdent with
+                | SynchronousFunctionNames.HasAsyncPrefix _ ->
+                    Array.empty
+                | SynchronousFunctionNames.HasAsyncSuffix name 
+                | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = SynchronousFunctionNames.asyncSuffixOrPrefix + name
+                    emitWarning identRange nameWithAsync "Async"
+            | Some SynchronousFunctionNames.ReturnsTask ->
+                match funcIdent with
+                | SynchronousFunctionNames.HasAsyncSuffix _ ->
+                    Array.empty
+                | SynchronousFunctionNames.HasAsyncPrefix name 
+                | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = name + SynchronousFunctionNames.asyncSuffixOrPrefix
+                    emitWarning identRange nameWithAsync "Task"
+            | None -> 
+                // TODO: get type using typed tree in args.CheckInfo
+                Array.empty
+            | _ ->
+                Array.empty
     | _ -> Array.empty
 
 let rule =
