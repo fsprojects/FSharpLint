@@ -47,8 +47,14 @@ let runner (args: AstNodeRuleParams) =
         | Some ReturnsNonAsync ->
             match funcIdent with
             | HasAsyncPrefix name ->
+                let startsWithLowercase = Char.IsLower name.[0]
                 let nameWithoutAsync = name.Substring asyncSuffixOrPrefix.Length
-                emitWarning identRange nameWithoutAsync
+                let suggestedName = 
+                    if startsWithLowercase then
+                        sprintf "%c%s" (Char.ToLowerInvariant nameWithoutAsync.[0]) (nameWithoutAsync.Substring 1)
+                    else
+                        nameWithoutAsync
+                emitWarning identRange suggestedName
             | HasAsyncSuffix name ->
                 let nameWithoutAsync = name.Substring(0, name.Length - asyncSuffixOrPrefix.Length)
                 emitWarning identRange nameWithoutAsync
