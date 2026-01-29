@@ -28,6 +28,14 @@ let runner (args: AstNodeRuleParams) =
             | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
                 let nameWithAsync = SynchronousFunctionNames.asyncSuffixOrPrefix + name
                 emitWarning identRange nameWithAsync "Async"
+        | Some SynchronousFunctionNames.ReturnsTask ->
+            match funcIdent with
+            | SynchronousFunctionNames.HasAsyncSuffix _ ->
+                Array.empty
+            | SynchronousFunctionNames.HasAsyncPrefix name 
+            | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
+                let nameWithAsync = name + SynchronousFunctionNames.asyncSuffixOrPrefix
+                emitWarning identRange nameWithAsync "Task"
         | None -> 
             // TODO: get type using typed tree in args.CheckInfo
             Array.empty
