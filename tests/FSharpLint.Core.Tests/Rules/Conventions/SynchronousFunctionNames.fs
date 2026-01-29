@@ -89,3 +89,74 @@ let BarAsync(): Task<int> =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+
+    [<Test>]
+    member this.``Non-asynchronous method named Async* should give violations offering removing Async prefix``() =
+        this.Parse """
+type Foo() =
+    member this.AsyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-asynchronous method named *Async should give violations offering removing Async suffix``() =
+        this.Parse """
+type Foo() =
+    member this.BarAsync(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Private non-asynchronous method named *Async should give violations offering removing Async suffix``() =
+        this.Parse """
+type Foo() =
+    member private this.AsyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Internal non-asynchronous method named *Async should give violations offering removing Async suffix``() =
+        this.Parse """
+type Foo() =
+    member internal this.AsyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Async methods with Async prefix should give no violations``() =
+        this.Parse """
+type Foo() =
+    member this.AsyncFoo(): Async<int> =
+        async { return 1 }
+    member this.AsyncBar(): Async<unit> =
+        async { return () }
+    member this.AsyncBaz(): Async<unit> =
+        async { do! Async.Sleep(1000) }
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Methods that return Task with Async suffix should give no violations``() =
+        this.Parse """
+type Foo() =
+    member this.FooAsync(): Task =
+        null
+    member this.BarAsync(): Task<int> =
+        null
+"""
+
+        Assert.IsTrue this.NoErrorsExist
