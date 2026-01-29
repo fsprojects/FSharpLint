@@ -19,3 +19,14 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-asynchronous function named *Async should give violations offering removing Async suffix``() =
+        this.Parse """
+module Foo =
+    let BarAsync(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("Bar", this.ErrorMsg)
