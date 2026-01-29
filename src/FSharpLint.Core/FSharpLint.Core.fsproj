@@ -64,7 +64,6 @@
     <Compile Include="Rules\Conventions\DisallowShadowing.fs" />
     <Compile Include="Rules\Conventions\DiscourageStringInterpolationWithStringFormat.fs" />
     <Compile Include="Rules\Conventions\FavourNamedMembers.fs" />
-    <Compile Include="Rules\Conventions\SynchronousFunctionNames.fs" />
     <Compile Include="Rules\Conventions\SourceLength\SourceLengthHelper.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInLambdaFunction.fs" />
     <Compile Include="Rules\Conventions\SourceLength\MaxLinesInMatchLambdaFunction.fs" />
@@ -81,6 +80,7 @@
     <Compile Include="Rules\Conventions\FunctionReimplementation\FunctionReimplementationHelper.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\ReimplementsFunction.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\CanBeReplacedWithComposition.fs" />
+    <Compile Include="Rules\Conventions\Naming\SynchronousFunctionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\NamingHelper.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
