@@ -45,7 +45,7 @@ module Foo =
         StringAssert.Contains("Baz", this.ErrorMsg)
 
     [<Test>]
-    member this.``Private non-asynchronous function named *Async should give violations offering removing Async suffix``() =
+    member this.``Private non-asynchronous function named Async* should give violations offering removing Async suffix``() =
         this.Parse """
 module Foo =
     let private AsyncBar(): int =
@@ -54,6 +54,17 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("Bar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Private non-asynchronous function named async* should give violations offering removing Async suffix``() =
+        this.Parse """
+module Foo =
+    let private asyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("bar", this.ErrorMsg)
 
     [<Test>]
     member this.``Internal non-asynchronous function named *Async should give violations offering removing Async suffix``() =
