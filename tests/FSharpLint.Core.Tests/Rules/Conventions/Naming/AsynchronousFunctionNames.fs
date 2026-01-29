@@ -30,3 +30,30 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function returning Task should give violations offering adding Async suffix``() =
+        this.Parse """
+module Foo =
+    let Bar(): Task =
+        null
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-public functions should give no violations``() =
+        this.Parse """
+module Foo =
+    let private Bar1(): Async<int> =
+        async { return 1 }
+    let internal BarBaz1(): Async<int> =
+        async { return 1 }
+    let private Bar2(): Task<int> =
+        null
+    let internal BarBaz2(): Task =
+        null
+"""
+
+        Assert.IsTrue this.NoErrorsExist
