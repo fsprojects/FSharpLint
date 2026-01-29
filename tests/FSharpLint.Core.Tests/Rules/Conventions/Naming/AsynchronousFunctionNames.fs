@@ -57,3 +57,52 @@ module Foo =
 """
 
         Assert.IsTrue this.NoErrorsExist
+    
+    [<Test>]
+    member this.``Method returning Async<'T> should give violations offering adding Async prefix``() =
+        this.Parse """
+type Foo() =
+    member this.Bar(): Async<int> =
+        async { return 1 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Method returning Task<'T> should give violations offering adding Async suffix``() =
+        this.Parse """
+type Foo() =
+    member this.Bar(): Task<int> =
+        null
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Method returning Task should give violations offering adding Async suffix``() =
+        this.Parse """
+type Foo() =
+    member this.Bar(): Task =
+        null
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-public methods should give no violations``() =
+        this.Parse """
+type Foo() =
+    member private this.Bar1(): Async<int> =
+        async { return 1 }
+    member internal this.BarBaz1(): Async<int> =
+        async { return 1 }
+    member private this.Bar2(): Task<int> =
+        null
+    member internal this.BarBaz2(): Task =
+        null
+"""
+
+        Assert.IsTrue this.NoErrorsExist
