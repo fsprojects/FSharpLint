@@ -409,6 +409,6 @@
     <value>Use named discriminated union fields.</value>
   </data>
   <data name="RulesSynchronousFunctionNames" xml:space="preserve">
-    <value>This function does not return Async or Task. Consider naming it {0}</value>
+    <value>This function does not return Async or Task. Consider renaming it to {0}.</value>
   </data>
 </root>

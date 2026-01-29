@@ -6,13 +6,16 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharp.Compiler.Syntax
+open FSharp.Compiler.Symbols
+
+let asyncSuffixOrPrefix = "Async"
 
 let (|HasAsyncPrefix|HasAsyncSuffix|HasNoAsyncPrefixOrSuffix|) (pattern: SynLongIdent) =
     match List.tryLast pattern.LongIdent with
     | Some name ->
-        if name.idText.StartsWith "Async" then
+        if name.idText.StartsWith(asyncSuffixOrPrefix, StringComparison.InvariantCultureIgnoreCase) then
             HasAsyncPrefix name.idText
-        elif name.idText.EndsWith "Async" then
+        elif name.idText.EndsWith asyncSuffixOrPrefix then
             HasAsyncSuffix name.idText
         else
             HasNoAsyncPrefixOrSuffix name.idText
@@ -44,14 +47,14 @@ let runner (args: AstNodeRuleParams) =
         | Some ReturnsNonAsync ->
             match funcIdent with
             | HasAsyncPrefix name ->
-                let nameWithoutAsync = name.Substring 5
+                let nameWithoutAsync = name.Substring asyncSuffixOrPrefix.Length
                 emitWarning identRange nameWithoutAsync
             | HasAsyncSuffix name ->
-                let nameWithoutAsync = name.Substring(0, name.Length - 5)
+                let nameWithoutAsync = name.Substring(0, name.Length - asyncSuffixOrPrefix.Length)
                 emitWarning identRange nameWithoutAsync
             | HasNoAsyncPrefixOrSuffix _ -> Array.empty
         | None -> 
-            // TODO: get type from args.CheckInfo
+            // TODO: get type using typed tree in args.CheckInfo
             Array.empty
         | _ ->
             Array.empty
