@@ -28,6 +28,15 @@ let (|ReturnsTask|ReturnsAsync|ReturnsNonAsync|) (returnInfo: SynBindingReturnIn
     | _ -> ReturnsNonAsync
 
 let runner (args: AstNodeRuleParams) =
+    let emitWarning range newFunctionName =
+        Array.singleton
+            {
+                Range = range
+                Message = $"This function does not return Async or Task. Consider naming it {newFunctionName}"
+                SuggestedFix = None
+                TypeChecks = List.empty
+            }
+
     match args.AstNode with
     | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, _, identRange), returnInfo, _, _, _, _)) ->
         match returnInfo with
@@ -35,14 +44,10 @@ let runner (args: AstNodeRuleParams) =
             match funcIdent with
             | HasAsyncPrefix name ->
                 let nameWithoutAsync = name.Substring 5
-                Array.singleton
-                    {
-                        Range = identRange
-                        Message = $"This function does not return Async or Task. Consider naming it {nameWithoutAsync}"
-                        SuggestedFix = None
-                        TypeChecks = List.empty
-                    }
-            | HasAsyncSuffix _ -> Array.empty
+                emitWarning identRange nameWithoutAsync
+            | HasAsyncSuffix name ->
+                let nameWithoutAsync = name.Substring(0, name.Length - 5)
+                emitWarning identRange nameWithoutAsync
             | HasNoAsyncPrefixOrSuffix _ -> Array.empty
         | None -> 
             // TODO: get type from args.CheckInfo
