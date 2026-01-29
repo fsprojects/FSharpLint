@@ -29,11 +29,11 @@ let (|ReturnsTask|ReturnsAsync|ReturnsNonAsync|) (returnInfo: SynBindingReturnIn
     | _ -> ReturnsNonAsync
 
 let runner (args: AstNodeRuleParams) =
-    let emitWarning range newFunctionName =
+    let emitWarning range (newFunctionName: string) =
         Array.singleton
             {
                 Range = range
-                Message = $"This function does not return Async or Task. Consider naming it {newFunctionName}"
+                Message = String.Format(Resources.GetString "RulesSynchronousFunctionNames", newFunctionName)
                 SuggestedFix = None
                 TypeChecks = List.empty
             }
