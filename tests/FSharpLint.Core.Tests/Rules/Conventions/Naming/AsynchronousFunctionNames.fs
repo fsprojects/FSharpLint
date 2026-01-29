@@ -57,6 +57,35 @@ module Foo =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Nested functions should give no violations``() =
+        this.Parse """
+module Foo =
+    let Foo() =
+        let Bar(): Async<int> =
+            async { return 1 }
+        ()
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Nested functions inside methods and type's functions should give no violations``() =
+        this.Parse """
+type Foo() =
+    let foo () =
+        let Bar(): Async<int> =
+            async { return 1 }
+        ()
+
+    member this.FooBar() =
+        let Baz(): Async<int> =
+            async { return 1 }
+        ()
+"""
+
+        Assert.IsTrue this.NoErrorsExist
     
     [<Test>]
     member this.``Method returning Async<'T> should give violations offering adding Async prefix``() =
