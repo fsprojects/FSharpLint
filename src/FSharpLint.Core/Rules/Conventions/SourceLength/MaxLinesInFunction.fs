@@ -10,9 +10,10 @@ let runner (config:Helper.SourceLength.Config) (args:AstNodeRuleParams) =
     let nodeAsFunctionBinding (node: AstNode) =
         match node with
         | AstNode.Binding(SynBinding(_, _, _, _, _, _, valData, _, _, _, _, _, _) as binding) ->
-            match identifierTypeFromValData valData with
-            | Function -> Some binding
-            | _ -> None
+            if identifierTypeFromValData valData = Function then
+                Some binding
+            else
+                None
         | _ -> None
 
     match nodeAsFunctionBinding args.AstNode with

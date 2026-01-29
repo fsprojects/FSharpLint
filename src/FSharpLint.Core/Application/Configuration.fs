@@ -388,7 +388,8 @@ type ConventionsConfig =
       favourNestedFunctions:EnabledConfig option
       disallowShadowing:EnabledConfig option
       discourageStringInterpolationWithStringFormat:EnabledConfig option
-      favourNamedMembers:EnabledConfig option }
+      favourNamedMembers:EnabledConfig option
+      recommendIfElseConstructOverMatch:EnabledConfig option }
 with
     member this.Flatten() =
         Array.concat
@@ -420,6 +421,7 @@ with
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
                 this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
                 this.favourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule) |> Option.toArray
+                this.recommendIfElseConstructOverMatch |> Option.bind (constructRuleIfEnabled RecommendIfElseConstructOverMatch.rule) |> Option.toArray
             |]
 
 [<Obsolete(ObsoleteMsg, ObsoleteWarnTreatAsError)>]
@@ -490,6 +492,7 @@ type Configuration =
       RedundantNewKeyword:EnabledConfig option
       FavourNonMutablePropertyInitialization:EnabledConfig option
       FavourReRaise:EnabledConfig option
+      RecommendIfElseConstructOverMatch:EnabledConfig option
       FavourStaticEmptyFields:EnabledConfig option
       AsyncExceptionWithoutReturn:EnabledConfig option
       UnneededRecKeyword:EnabledConfig option
@@ -599,6 +602,7 @@ with
         RedundantNewKeyword = None
         FavourNonMutablePropertyInitialization = None
         FavourReRaise = None
+        RecommendIfElseConstructOverMatch = None
         FavourStaticEmptyFields = None
         AsyncExceptionWithoutReturn = None
         UnneededRecKeyword = None
@@ -700,9 +704,9 @@ let defaultConfiguration =
         |> Seq.tryFind (fun resourceFile -> resourceFile.EndsWith(SettingsFileName, System.StringComparison.Ordinal))
         |> Option.defaultWith (fun () -> failwith "Could not get resource name")
     use stream = assembly.GetManifestResourceStream(resourceName)
-    match stream with
-    | null -> failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
-    | _ ->
+    if isNull stream then
+        failwithf "Resource '%s' not found in assembly '%s'" resourceName (assembly.FullName)
+    else
         use reader = new System.IO.StreamReader(stream)
 
         reader.ReadToEnd()
@@ -896,6 +900,7 @@ let flattenConfig (config:Configuration) =
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
+                config.RecommendIfElseConstructOverMatch |> Option.bind (constructRuleIfEnabled RecommendIfElseConstructOverMatch.rule)
             |]
 
     let allEnabledRules = Array.choose id allPossibleRules

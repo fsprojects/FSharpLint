@@ -408,4 +408,7 @@
   <data name="RulesFavourNamedMembers" xml:space="preserve">
     <value>Use named discriminated union fields.</value>
   </data>
+  <data name="RecommendIfElseConstructOverMatch" xml:space="preserve">
+    <value>Rather use simpler if-else construct instead of match clause.</value>
+  </data>
 </root>
