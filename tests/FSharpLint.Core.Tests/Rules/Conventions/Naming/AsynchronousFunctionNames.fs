@@ -19,3 +19,14 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function returning Task<'T> should give violations offering adding Async suffix``() =
+        this.Parse """
+module Foo =
+    let Bar(): Task<int> =
+        null
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
