@@ -20,7 +20,8 @@ let (|HasAsyncPrefix|HasAsyncSuffix|HasNoAsyncPrefixOrSuffix|) (pattern: SynLong
 
 let (|ReturnsTask|ReturnsAsync|ReturnsNonAsync|) (returnInfo: SynBindingReturnInfo) =
     match returnInfo with
-    | SynBindingReturnInfo(SynType.LongIdent(SynLongIdent(typeIdent, _, _)), _, _, _) ->
+    | SynBindingReturnInfo(SynType.LongIdent(SynLongIdent(typeIdent, _, _)), _, _, _)
+    | SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent(typeIdent, _, _)), _, _, _, _, _, _), _, _, _) ->
         match List.tryLast typeIdent with
         | Some ident when ident.idText = "Async" -> ReturnsAsync
         | Some ident when ident.idText = "Task" -> ReturnsTask
