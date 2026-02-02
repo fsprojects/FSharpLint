@@ -18,7 +18,8 @@ let runner (args: AstNodeRuleParams) =
             }
     
     match args.AstNode with
-    | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), identRange), returnInfo, _, _, _, _)) ->
+    | AstNode.Binding (SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), identRange), returnInfo, _, _, _, _))
+        when not <| SynchronousFunctionNames.hasObsoleteAttribute attributes ->
         let parents = args.GetParents args.NodeIndex
         let hasEnclosingFunctionOrMethod =
             parents
