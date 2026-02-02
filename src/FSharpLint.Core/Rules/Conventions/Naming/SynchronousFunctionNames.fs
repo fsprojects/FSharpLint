@@ -31,6 +31,14 @@ let (|ReturnsTask|ReturnsAsync|ReturnsNonAsync|) (returnInfo: SynBindingReturnIn
         | _ -> ReturnsNonAsync
     | _ -> ReturnsNonAsync
 
+let hasObsoleteAttribute (attributes: SynAttributes) =
+    extractAttributes attributes
+    |> List.exists 
+        (fun attribute -> 
+            match List.tryLast attribute.TypeName.LongIdent with
+            | Some ident -> ident.idText = "Obsolete"
+            | None -> false)
+
 let runner (args: AstNodeRuleParams) =
     let emitWarning range (newFunctionName: string) =
         Array.singleton
@@ -42,7 +50,8 @@ let runner (args: AstNodeRuleParams) =
             }
 
     match args.AstNode with
-    | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, _, identRange), returnInfo, _, _, _, _)) ->
+    | AstNode.Binding (SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent(funcIdent, _, _, _, _, identRange), returnInfo, _, _, _, _))
+        when not <| hasObsoleteAttribute attributes ->
         match returnInfo with
         | Some ReturnsNonAsync ->
             match funcIdent with
