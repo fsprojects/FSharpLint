@@ -135,3 +135,41 @@ type Foo() =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Functions returning Async or Task with [<Obsolete>] attribute should not give violations``() =
+        this.Parse """
+module Foo =
+    [<Obsolete>]
+    let Foo(): Async<int> =
+        async { return 1 }
+
+    [<Obsolete>]
+    let Bar(): Task<int> =
+        null
+
+    [<Obsolete>]
+    let Baz(): Task =
+        null
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Methods returning Async or Task with [<Obsolete>] attribute should not give violations``() =
+        this.Parse """
+type Foo() =
+    [<Obsolete>]
+    member this.Foo(): Async<int> =
+        async { return 1 }
+
+    [<Obsolete>]
+    member this.Bar(): Task<int> =
+        null
+
+    [<Obsolete>]
+    member this.Baz(): Task =
+        null
+"""
+
+        Assert.IsTrue this.NoErrorsExist

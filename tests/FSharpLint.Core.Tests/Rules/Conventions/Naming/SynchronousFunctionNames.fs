@@ -171,3 +171,41 @@ type Foo() =
 """
 
         Assert.IsTrue this.NoErrorsExist
+    
+    [<Test>]
+    member this.``Non-asynchronous functions marked with [<Obsolete>] attribute should not give violations``() =
+        this.Parse """
+module Foo =
+    [<Obsolete>]
+    let AsyncBar(): int =
+        1
+    
+    [<Obsolete>]
+    let BarAsync(): int =
+        1
+
+    [<Obsolete>]
+    let private AsyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Non-asynchronous methods marked with [<Obsolete>] attribute should not give violations``() =
+        this.Parse """
+type Foo() =
+    [<Obsolete>]
+    member this.AsyncBar(): int =
+        1
+    
+    [<Obsolete>]
+    member this.BarAsync(): int =
+        1
+
+    [<Obsolete>]
+    member private this.AsyncBar(): int =
+        1
+"""
+
+        Assert.IsTrue this.NoErrorsExist

@@ -5,6 +5,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 
 let runner (args: AstNodeRuleParams) =
@@ -18,7 +19,8 @@ let runner (args: AstNodeRuleParams) =
             }
     
     match args.AstNode with
-    | AstNode.Binding (SynBinding (_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), identRange), returnInfo, _, _, _, _)) ->
+    | AstNode.Binding (SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), identRange), returnInfo, _, _, _, _))
+        when not <| Helper.Naming.isAttribute "Obsolete" attributes ->
         let parents = args.GetParents args.NodeIndex
         let hasEnclosingFunctionOrMethod =
             parents
@@ -32,21 +34,21 @@ let runner (args: AstNodeRuleParams) =
             Array.empty
         else
             match returnInfo with
-            | Some SynchronousFunctionNames.ReturnsAsync ->
+            | Some ReturnsAsync ->
                 match funcIdent with
-                | SynchronousFunctionNames.HasAsyncPrefix _ ->
+                | HasAsyncPrefix _ ->
                     Array.empty
-                | SynchronousFunctionNames.HasAsyncSuffix name 
-                | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
-                    let nameWithAsync = SynchronousFunctionNames.asyncSuffixOrPrefix + name
+                | HasAsyncSuffix name 
+                | HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = asyncSuffixOrPrefix + name
                     emitWarning identRange nameWithAsync "Async"
-            | Some SynchronousFunctionNames.ReturnsTask ->
+            | Some ReturnsTask ->
                 match funcIdent with
-                | SynchronousFunctionNames.HasAsyncSuffix _ ->
+                | HasAsyncSuffix _ ->
                     Array.empty
-                | SynchronousFunctionNames.HasAsyncPrefix name 
-                | SynchronousFunctionNames.HasNoAsyncPrefixOrSuffix name ->
-                    let nameWithAsync = name + SynchronousFunctionNames.asyncSuffixOrPrefix
+                | HasAsyncPrefix name 
+                | HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = name + asyncSuffixOrPrefix
                     emitWarning identRange nameWithAsync "Task"
             | None -> 
                 // TODO: get type using typed tree in args.CheckInfo
