@@ -350,6 +350,7 @@
     "favourNamedMembers": { "enabled": false },
     "synchronousFunctionNames": { "enabled": true },
     "asynchronousFunctionNames": { "enabled": true },
+    "simpleAsyncComplementaryHelpers": { "enabled": false },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

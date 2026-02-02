@@ -414,4 +414,10 @@
   <data name="RulesAsynchronousFunctionNames" xml:space="preserve">
     <value>This function returns {0}. Consider renaming it to {1}.</value>
   </data>
+  <data name="RulesSimpleAsyncComplementaryHelpersAsync" xml:space="preserve">
+    <value>Consider creating twin helper function/method `{0}{1}` that just calls `Async.StartAsTask({2}{3}{4})` under the hood.</value>
+  </data>
+  <data name="RulesSimpleAsyncComplementaryHelpersTask" xml:space="preserve">
+    <value>Consider creating twin helper function/method `{0}{1}` that just calls `async {{ return Async.AwaitTask ({2}Async{3}) }}` under the hood.</value>
+  </data>
 </root>

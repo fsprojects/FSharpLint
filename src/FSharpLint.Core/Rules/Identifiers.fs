@@ -101,3 +101,4 @@ let DiscourageStringInterpolationWithStringFormat = identifier 93
 let FavourNamedMembers = identifier 94
 let SynchronousFunctionNames = identifier 95
 let AsynchronousFunctionNames = identifier 96
+let SimpleAsyncComplementaryHelpers = identifier 97
