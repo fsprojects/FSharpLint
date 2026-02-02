@@ -5,39 +5,11 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Symbols
 
 let asyncSuffixOrPrefix = "Async"
-
-let (|HasAsyncPrefix|HasAsyncSuffix|HasNoAsyncPrefixOrSuffix|) (pattern: SynLongIdent) =
-    match List.tryLast pattern.LongIdent with
-    | Some name ->
-        if name.idText.StartsWith(asyncSuffixOrPrefix, StringComparison.InvariantCultureIgnoreCase) then
-            HasAsyncPrefix name.idText
-        elif name.idText.EndsWith asyncSuffixOrPrefix then
-            HasAsyncSuffix name.idText
-        else
-            HasNoAsyncPrefixOrSuffix name.idText
-    | _ -> HasNoAsyncPrefixOrSuffix String.Empty
-
-let (|ReturnsTask|ReturnsAsync|ReturnsNonAsync|) (returnInfo: SynBindingReturnInfo) =
-    match returnInfo with
-    | SynBindingReturnInfo(SynType.LongIdent(SynLongIdent(typeIdent, _, _)), _, _, _)
-    | SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent(typeIdent, _, _)), _, _, _, _, _, _), _, _, _) ->
-        match List.tryLast typeIdent with
-        | Some ident when ident.idText = "Async" -> ReturnsAsync
-        | Some ident when ident.idText = "Task" -> ReturnsTask
-        | _ -> ReturnsNonAsync
-    | _ -> ReturnsNonAsync
-
-let hasObsoleteAttribute (attributes: SynAttributes) =
-    extractAttributes attributes
-    |> List.exists 
-        (fun attribute -> 
-            match List.tryLast attribute.TypeName.LongIdent with
-            | Some ident -> ident.idText = "Obsolete"
-            | None -> false)
 
 let runner (args: AstNodeRuleParams) =
     let emitWarning range (newFunctionName: string) =
@@ -51,7 +23,7 @@ let runner (args: AstNodeRuleParams) =
 
     match args.AstNode with
     | AstNode.Binding (SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent(funcIdent, _, _, _, _, identRange), returnInfo, _, _, _, _))
-        when not <| hasObsoleteAttribute attributes ->
+        when not <| Helper.Naming.isAttribute "Obsolete" attributes ->
         match returnInfo with
         | Some ReturnsNonAsync ->
             match funcIdent with

@@ -80,9 +80,9 @@
     <Compile Include="Rules\Conventions\FunctionReimplementation\FunctionReimplementationHelper.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\ReimplementsFunction.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\CanBeReplacedWithComposition.fs" />
+    <Compile Include="Rules\Conventions\Naming\NamingHelper.fs" />
     <Compile Include="Rules\Conventions\Naming\SynchronousFunctionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\AsynchronousFunctionNames.fs" />
-    <Compile Include="Rules\Conventions\Naming\NamingHelper.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\TypeNames.fs" />
