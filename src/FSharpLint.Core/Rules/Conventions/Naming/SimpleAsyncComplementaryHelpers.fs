@@ -34,7 +34,7 @@ let runner (args: AstNodeRuleParams) =
             |> List.choose
                 (fun binding ->
                     match binding with
-                    | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, _, _), _, _, _, _, _) ->
+                    | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), _), _, _, _, _, _) ->
                         match funcIdent with
                         | HasAsyncPrefix name -> Some(0, funcIdent, name.Substring asyncSuffixOrPrefix.Length)
                         | HasAsyncSuffix name -> Some(1, funcIdent, name.Substring(0, name.Length - asyncSuffixOrPrefix.Length))
