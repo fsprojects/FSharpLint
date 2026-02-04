@@ -32,6 +32,7 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckR
 
 let private projectNamesUnlikelyToBeLibraries =
     [
+        "tests"
         "test"
         "console"
         "CLI"
