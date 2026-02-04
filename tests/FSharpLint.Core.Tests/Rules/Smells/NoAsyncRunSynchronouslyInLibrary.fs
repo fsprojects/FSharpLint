@@ -134,45 +134,46 @@ let Foo() =
 
 [<TestFixture>]
 type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
+
     [<Test>]
     member this.``Unlikely to be library if contains "test" in name``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "TestProject",
-            LibraryHeuristicResultByProjectName.Unlikely
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "TestProject"
         )
 
     [<Test>]
     member this.``Unlikely to be library if contains "console" in name``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "FooConsole",
-            LibraryHeuristicResultByProjectName.Unlikely
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooConsole"
         )
 
     [<Test>]
     member this.``Likely to be library if contains Contains "Lib" as a PascalCase segment``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "LibFoo",
-            LibraryHeuristicResultByProjectName.Likely
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "LibFoo"
         )
 
     [<Test>]
     member this.``Uncertain if contains contains "Lib" but not as a PascalCase segment``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "LibreOfficeProg",
-            LibraryHeuristicResultByProjectName.Uncertain
+            LibraryHeuristicResultByProjectName.Uncertain,
+            howLikelyProjectIsLibrary "LibreOfficeProg"
         )
 
     [<Test>]
     member this.``Likely to be library if contains ends with "lib" (case-insensitive)``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "FooLib",
-            LibraryHeuristicResultByProjectName.Likely
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "FooLib"
         )
 
     [<Test>]
     member this.``Unlikely to be library if contains "CLI" in name``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "FooCLI",
-            LibraryHeuristicResultByProjectName.Unlikely
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooCLI"
         )
 
