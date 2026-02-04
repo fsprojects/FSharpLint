@@ -134,37 +134,102 @@ let Foo() =
 
 [<TestFixture>]
 type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "tests" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "IntegrationTests"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "testing" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "UnitTesting"
+        )
+
     [<Test>]
     member this.``Unlikely to be library if contains "test" in name``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "TestProject",
-            LibraryHeuristicResultByProjectName.Unlikely
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "TestSuite"
         )
 
     [<Test>]
     member this.``Unlikely to be library if contains "console" in name``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "FooConsole",
-            LibraryHeuristicResultByProjectName.Unlikely
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooConsole"
         )
 
     [<Test>]
     member this.``Likely to be library if contains Contains "Lib" as a PascalCase segment``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "LibFoo",
-            LibraryHeuristicResultByProjectName.Likely
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "LibFoo"
         )
 
     [<Test>]
     member this.``Uncertain if contains contains "Lib" but not as a PascalCase segment``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "LibreOfficeProg",
-            LibraryHeuristicResultByProjectName.Uncertain
+            LibraryHeuristicResultByProjectName.Uncertain,
+            howLikelyProjectIsLibrary "LibreOfficeProg"
         )
 
     [<Test>]
     member this.``Likely to be library if contains ends with "lib" (case-insensitive)``() =
         Assert.AreEqual(
-            howLikelyProjectIsLibrary "FooLib",
-            LibraryHeuristicResultByProjectName.Likely
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "FooLib"
         )
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "CLI" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooCLI"
+        )
+
+    [<Test>]
+    member this.``Uncertain to be library if contains "cli" in name not related to CLI``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Uncertain,
+            howLikelyProjectIsLibrary "InclinedDriver"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "TUI" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooTUI"
+        )
+
+    [<Test>]
+    member this.``Likely to be library if it starts with "lib", e.g. camelCase``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "libFoo"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by dots``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo.console.app"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by dashes``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo-console-app"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by underscores``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo_console_app"
+        )
+

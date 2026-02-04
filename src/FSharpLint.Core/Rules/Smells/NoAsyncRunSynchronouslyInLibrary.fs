@@ -30,15 +30,44 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckR
     | None ->
         false
 
-let excludedProjectNames = [ "test"; "console" ]
+let private projectNamesUnlikelyToBeLibraries =
+    [
+        "tests"
+        "test"
+        "testing"
+        "console"
+        "CLI"
+        "TUI"
+    ]
+    |> Seq.map (fun name -> name.ToLowerInvariant())
+
+let private possibleProjectNameSegmentSeparators =
+    [|
+        '.'
+        '_'
+        '-'
+    |]
 
 let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultByProjectName =
-    let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
-    if nameSegments |> Seq.contains "Lib" then
+    let libraryAbbrev = "lib"
+    let nameSegments =
+        Helper.Naming.QuickFixes.splitByCaseChange projectFileName
+        |> Seq.map (fun segment -> segment.ToLowerInvariant())
+    if nameSegments |> Seq.contains libraryAbbrev then
         Likely
-    elif excludedProjectNames |> List.exists (fun name -> projectFileName.ToLowerInvariant().Contains name) then
+    elif
+        nameSegments
+        |> Seq.exists (
+            fun segment ->
+                let subSegments = segment.Split possibleProjectNameSegmentSeparators
+                subSegments
+                |> Seq.exists (fun subSegment ->
+                    projectNamesUnlikelyToBeLibraries
+                    |> Seq.exists (fun noLibName -> noLibName = subSegment)
+                )
+        ) then
         Unlikely
-    elif projectFileName.ToLowerInvariant().EndsWith "lib" then
+    elif projectFileName.ToLowerInvariant().EndsWith libraryAbbrev then
         Likely
     else
         Uncertain
