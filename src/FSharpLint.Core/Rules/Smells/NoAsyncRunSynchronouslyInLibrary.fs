@@ -30,7 +30,7 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckR
     | None ->
         false
 
-let private excludedProjectNames =
+let private projectNamesUnlikelyToBeLibraries =
     [
         "test"
         "console"
@@ -41,7 +41,7 @@ let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultB
     let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
     if nameSegments |> Seq.contains "Lib" then
         Likely
-    elif excludedProjectNames |> List.exists (fun name -> projectFileName.ToLowerInvariant().Contains(name.ToLowerInvariant())) then
+    elif nameSegments |> Seq.exists (fun segment -> projectNamesUnlikelyToBeLibraries |> Seq.exists (fun noLibName -> noLibName.ToLowerInvariant() = segment.ToLowerInvariant())) then
         Unlikely
     elif projectFileName.ToLowerInvariant().EndsWith "lib" then
         Likely
