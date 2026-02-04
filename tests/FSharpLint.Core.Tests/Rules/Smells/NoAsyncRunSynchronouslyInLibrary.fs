@@ -184,3 +184,10 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
             howLikelyProjectIsLibrary "InclinedDriver"
         )
 
+    [<Test>]
+    member this.``Likely to be library if it starts with "lib", e.g. camelCase``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Likely,
+            howLikelyProjectIsLibrary "libFoo"
+        )
+
