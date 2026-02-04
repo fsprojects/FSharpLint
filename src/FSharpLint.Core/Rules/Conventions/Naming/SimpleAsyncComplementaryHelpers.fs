@@ -7,6 +7,19 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
+open FSharp.Compiler.Text
+
+type private ReturnType =
+    | Async
+    | AsyncUnit
+    | Task
+
+type private Func =
+    {
+        BaseName: string
+        Range: range
+        ReturnType: ReturnType
+    }
 
 [<TailCall>]
 let rec private getBindings (acc: list<SynBinding>) (declarations: list<SynModuleDecl>) =
@@ -17,56 +30,94 @@ let rec private getBindings (acc: list<SynBinding>) (declarations: list<SynModul
     | _ :: rest -> getBindings acc rest
 
 let runner (args: AstNodeRuleParams) =
-    let emitWarning range missingFunctionName =
+    let emitWarning (func: Func) =
+        let message =
+            match func.ReturnType with
+            | Async -> 
+                String.Format(
+                    Resources.GetString "RulesSimpleAsyncComplementaryHelpersAsync",
+                    func.BaseName + asyncSuffixOrPrefix,
+                    String.Empty,
+                    asyncSuffixOrPrefix,
+                    func.BaseName,
+                    String.Empty
+                )
+            | AsyncUnit ->
+                String.Format(
+                    Resources.GetString "RulesSimpleAsyncComplementaryHelpersAsync",
+                    func.BaseName + asyncSuffixOrPrefix,
+                    "(): Task",
+                    asyncSuffixOrPrefix,
+                    func.BaseName,
+                    String.Empty
+                )
+            | Task ->
+                String.Format(
+                    Resources.GetString "RulesSimpleAsyncComplementaryHelpersTask",
+                    asyncSuffixOrPrefix + func.BaseName,
+                    String.Empty,
+                    func.BaseName,
+                    String.Empty
+                )
+
         Array.singleton
             {
-                Range = range
-                Message = $"Create {missingFunctionName}"
+                Range = func.Range
+                Message = message
                 SuggestedFix = None
                 TypeChecks = List.empty
             }
 
+
     let processDeclarations (declarations: list<SynModuleDecl>) =
         let bindings = getBindings List.Empty declarations
 
-        let funcsGrouped = 
+        let funcs = 
             bindings
             |> List.choose
                 (fun binding ->
                     match binding with
-                    | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), _), _, _, _, _, _) ->
+                    | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, _, (None | Some(SynAccess.Public _)), _), returnInfo, _, _, _, _) ->
                         match funcIdent with
-                        | HasAsyncPrefix name -> Some(0, funcIdent, name.Substring asyncSuffixOrPrefix.Length)
-                        | HasAsyncSuffix name -> Some(1, funcIdent, name.Substring(0, name.Length - asyncSuffixOrPrefix.Length))
-                        | HasNoAsyncPrefixOrSuffix _ -> None
+                        | HasAsyncPrefix name ->
+                            let returnType =
+                                match returnInfo with
+                                | Some(SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent(_, _, _)), _, [ SynType.LongIdent (SynLongIdent ([ unitIdent ], [], [None])) ], _, _, _, _), _, _, _))
+                                    when unitIdent.idText = "unit" ->
+                                    AsyncUnit
+                                | _ -> Async
+
+                            Some
+                                { 
+                                    BaseName = name.Substring asyncSuffixOrPrefix.Length
+                                    Range = funcIdent.Range
+                                    ReturnType = returnType
+                                }
+                        | HasAsyncSuffix name ->
+                            Some
+                                {
+                                    BaseName = name.Substring(0, name.Length - asyncSuffixOrPrefix.Length)
+                                    Range = funcIdent.Range
+                                    ReturnType = Task
+                                }
+                        | HasNoAsyncPrefixOrSuffix _ ->
+                            None
                     | _ -> None)
-            |> List.groupBy (fun (key, _, _) -> key)
-            |> Map.ofList
 
-        let asyncFuncs = funcsGrouped |> Map.tryFind 0 |> Option.defaultValue List.Empty
-        let taskFuncs = funcsGrouped |> Map.tryFind 1 |> Option.defaultValue List.Empty
+        let asyncFuncs = funcs |> List.filter (fun func -> func.ReturnType <> Task)
+        let taskFuncs = funcs |> List.filter (fun func -> func.ReturnType = Task)
         
-        let asyncFunWarnings =
-            asyncFuncs
+        let checkFuncs (targetFuncs: list<Func>) (otherFuncs: list<Func>) =
+            targetFuncs
             |> List.map
-                (fun (_, ident, baseName) ->
-                    if taskFuncs |> List.exists (fun (_, _, otherBaseName) -> baseName = otherBaseName) then
+                (fun func ->
+                    if otherFuncs |> List.exists (fun otherFunc -> otherFunc.BaseName = func.BaseName) then
                         Array.empty
                     else
-                        emitWarning ident.Range (baseName + asyncSuffixOrPrefix))
-            |> Array.concat
-
-        let taskFunWarnings =
-            taskFuncs
-            |> List.map
-                (fun (_, ident, baseName) ->
-                    if asyncFuncs |> List.exists (fun (_, _, otherBaseName) -> baseName = otherBaseName) then
-                        Array.empty
-                    else
-                        emitWarning ident.Range (asyncSuffixOrPrefix + baseName))
+                        emitWarning func)
             |> Array.concat
         
-        Array.append asyncFunWarnings taskFunWarnings
+        Array.append (checkFuncs asyncFuncs taskFuncs) (checkFuncs taskFuncs asyncFuncs)
 
     match args.AstNode with
     | Ast.ModuleOrNamespace(SynModuleOrNamespace(_, _, _, declarations, _, _, _, _, _)) ->
