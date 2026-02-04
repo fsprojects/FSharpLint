@@ -38,6 +38,13 @@ let private projectNamesUnlikelyToBeLibraries =
     ]
     |> Seq.map (fun name -> name.ToLowerInvariant())
 
+let private possibleProjectNameSegmentSeparators =
+    [|
+        '.'
+        '_'
+        '-'
+    |]
+
 let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultByProjectName =
     let libraryAbbrev = "lib"
     let nameSegments =
@@ -49,8 +56,12 @@ let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultB
         nameSegments
         |> Seq.exists (
             fun segment ->
-                projectNamesUnlikelyToBeLibraries
-                |> Seq.exists (fun noLibName -> noLibName = segment)
+                let subSegments = segment.Split possibleProjectNameSegmentSeparators
+                subSegments
+                |> Seq.exists (fun subSegment ->
+                    projectNamesUnlikelyToBeLibraries
+                    |> Seq.exists (fun noLibName -> noLibName = subSegment)
+                )
         ) then
         Unlikely
     elif projectFileName.ToLowerInvariant().EndsWith libraryAbbrev then
