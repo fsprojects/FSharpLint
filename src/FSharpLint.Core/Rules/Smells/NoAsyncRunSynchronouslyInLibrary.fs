@@ -34,8 +34,10 @@ let private projectNamesUnlikelyToBeLibraries =
     [
         "tests"
         "test"
+        "testing"
         "console"
         "CLI"
+        "TUI"
     ]
     |> Seq.map (fun name -> name.ToLowerInvariant())
 

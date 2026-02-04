@@ -143,6 +143,13 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
         )
 
     [<Test>]
+    member this.``Unlikely to be library if contains "testing" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "UnitTesting"
+        )
+
+    [<Test>]
     member this.``Unlikely to be library if contains "test" in name``() =
         Assert.AreEqual(
             LibraryHeuristicResultByProjectName.Unlikely,
@@ -192,6 +199,13 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
         )
 
     [<Test>]
+    member this.``Unlikely to be library if contains "TUI" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "FooTUI"
+        )
+
+    [<Test>]
     member this.``Likely to be library if it starts with "lib", e.g. camelCase``() =
         Assert.AreEqual(
             LibraryHeuristicResultByProjectName.Likely,
@@ -204,3 +218,18 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
             LibraryHeuristicResultByProjectName.Unlikely,
             howLikelyProjectIsLibrary "foo.console.app"
         )
+
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by dashes``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo-console-app"
+        )
+
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by underscores``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo_console_app"
+        )
+
