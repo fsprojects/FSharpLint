@@ -168,3 +168,11 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
             howLikelyProjectIsLibrary "FooLib",
             LibraryHeuristicResultByProjectName.Likely
         )
+
+    [<Test>]
+    member this.``Unlikely to be library if contains "CLI" in name``() =
+        Assert.AreEqual(
+            howLikelyProjectIsLibrary "FooCLI",
+            LibraryHeuristicResultByProjectName.Unlikely
+        )
+

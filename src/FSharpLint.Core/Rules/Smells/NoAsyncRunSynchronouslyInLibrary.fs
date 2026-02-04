@@ -30,7 +30,12 @@ let hasEntryPoint (checkFileResults: FSharpCheckFileResults) (maybeProjectCheckR
     | None ->
         false
 
-let excludedProjectNames = [ "test"; "console" ]
+let private excludedProjectNames =
+    [
+        "test"
+        "console"
+        "CLI"
+    ]
 
 let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultByProjectName =
     let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
