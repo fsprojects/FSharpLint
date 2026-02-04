@@ -177,3 +177,10 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
             howLikelyProjectIsLibrary "FooCLI"
         )
 
+    [<Test>]
+    member this.``Uncertain to be library if contains "cli" in name not related to CLI``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Uncertain,
+            howLikelyProjectIsLibrary "InclinedDriver"
+        )
+
