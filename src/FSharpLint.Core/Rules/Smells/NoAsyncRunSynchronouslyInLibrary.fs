@@ -38,8 +38,10 @@ let private projectNamesUnlikelyToBeLibraries =
     ]
 
 let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultByProjectName =
-    let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
-    if nameSegments |> Seq.contains "Lib" then
+    let nameSegments =
+        Helper.Naming.QuickFixes.splitByCaseChange projectFileName
+        |> Seq.map (fun segment -> segment.ToLowerInvariant())
+    if nameSegments |> Seq.contains "lib" then
         Likely
     elif nameSegments |> Seq.exists (fun segment -> projectNamesUnlikelyToBeLibraries |> Seq.exists (fun noLibName -> noLibName.ToLowerInvariant() = segment.ToLowerInvariant())) then
         Unlikely
