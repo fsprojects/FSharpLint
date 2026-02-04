@@ -191,3 +191,9 @@ type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
             howLikelyProjectIsLibrary "libFoo"
         )
 
+    [<Test>]
+    member this.``Unlikely to be library if it contains "console", but segments are separated by dots``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "foo.console.app"
+        )
