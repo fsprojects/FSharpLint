@@ -136,6 +136,13 @@ let Foo() =
 type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
 
     [<Test>]
+    member this.``Unlikely to be library if contains "tests" in name``() =
+        Assert.AreEqual(
+            LibraryHeuristicResultByProjectName.Unlikely,
+            howLikelyProjectIsLibrary "IntegrationTests"
+        )
+
+    [<Test>]
     member this.``Unlikely to be library if contains "test" in name``() =
         Assert.AreEqual(
             LibraryHeuristicResultByProjectName.Unlikely,
