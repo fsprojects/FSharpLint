@@ -41,7 +41,7 @@ let howLikelyProjectIsLibrary (projectFileName: string): LibraryHeuristicResultB
     let nameSegments = Helper.Naming.QuickFixes.splitByCaseChange projectFileName
     if nameSegments |> Seq.contains "Lib" then
         Likely
-    elif excludedProjectNames |> List.exists (fun name -> projectFileName.ToLowerInvariant().Contains name) then
+    elif excludedProjectNames |> List.exists (fun name -> projectFileName.ToLowerInvariant().Contains(name.ToLowerInvariant())) then
         Unlikely
     elif projectFileName.ToLowerInvariant().EndsWith "lib" then
         Likely
