@@ -136,3 +136,15 @@ module Foo =
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync(foo: int, bar): Task<int>", this.ErrorMsg)
         StringAssert.Contains("Async.StartAsTask(AsyncBar(foo, bar))", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-function values with Async prefix or suffix should not give violations``() =
+        this.Parse """
+module Foo =
+    let AsyncBar = 1
+
+module Bar =
+    let FooAsync = 1
+"""
+
+        Assert.IsTrue this.NoErrorsExist
