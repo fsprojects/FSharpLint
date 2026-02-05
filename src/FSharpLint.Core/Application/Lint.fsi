@@ -15,6 +15,7 @@ module ConfigurationManagement =
 module Lint =
 
     open System.Threading
+    open System.Threading.Tasks
     open FSharpLint.Framework
     open FSharpLint.Framework.Configuration
     open FSharpLint.Framework.Rules
@@ -156,6 +157,9 @@ module Lint =
     /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val asyncLintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
 
+    /// Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
+    val lintSolutionAsync : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath ->  Task<LintResult>
+
     /// [Obsolete] Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
@@ -163,11 +167,17 @@ module Lint =
     /// path to the `.fsproj` file.
     val asyncLintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Async<LintResult>
 
+    /// Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
+    val lintProjectAsync : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Task<LintResult>
+
     /// [Obsolete] Lints an entire F# project by retrieving the files from a given path to the `.fsproj` file.
     val lintProject : optionalParams:OptionalLintParameters -> projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
 
     /// Lints F# source code async.
     val asyncLintSource : optionalParams:OptionalLintParameters -> source:string -> Async<LintResult>
+
+    /// Lints F# source code async.
+    val lintSourceAsync : optionalParams:OptionalLintParameters -> source:string -> Task<LintResult>
 
     /// [Obsolete] Lints F# source code.
     val lintSource : optionalParams:OptionalLintParameters -> source:string -> LintResult
@@ -179,11 +189,17 @@ module Lint =
     /// Lints an F# file from a given path to the `.fs` file.
     val asyncLintFile : optionalParams:OptionalLintParameters -> filePath:string -> Async<LintResult>
 
+    /// Lints an F# file from a given path to the `.fs` file.
+    val lintFileAsync : optionalParams:OptionalLintParameters -> filePath:string -> Task<LintResult>
+
     /// [Obsolete] Lints an F# file from a given path to the `.fs` file.
     val lintFile : optionalParams:OptionalLintParameters -> filePath:string -> LintResult
 
     /// Lints multiple F# files from given file paths.
     val asyncLintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> Async<LintResult>
+
+    /// Lints multiple F# files from given file paths.
+    val lintFilesAsync : optionalParams:OptionalLintParameters -> filePaths:string seq -> Task<LintResult>
 
     /// [Obsolete] Lints multiple F# files from given file paths.
     val lintFiles : optionalParams:OptionalLintParameters -> filePaths:string seq -> LintResult
