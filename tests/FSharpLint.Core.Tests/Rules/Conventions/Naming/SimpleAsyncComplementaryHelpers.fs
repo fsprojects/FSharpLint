@@ -19,3 +19,15 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Non-public functions that return Async should not give violations``() =
+        this.Parse """
+module Foo =
+    let internal AsyncBar(): Async<int> =
+        async { return 0 }
+    let private AsyncBaz(): Async<int> =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.NoErrorsExist
