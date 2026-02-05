@@ -93,7 +93,8 @@ let runner (args: AstNodeRuleParams) =
 
         let tryGetFunction (binding: SynBinding) =
             match binding with
-            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, (None | Some(SynAccess.Public _)), _), returnInfo, _, _, _, _) ->
+            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, (None | Some(SynAccess.Public _)), _), returnInfo, _, _, _, _)
+                when not argPats.Patterns.IsEmpty ->
                 let returnTypeParam =
                     match returnInfo with
                     | Some(SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent _), _, [ typeParam ], _, _, _, _), _, _, _)) ->
