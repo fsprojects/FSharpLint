@@ -174,3 +174,93 @@ type Foo() =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+[<TestFixture>]
+type TestAsynchronousFunctionNamesAllAPIs() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AsynchronousFunctionNames.rule { Mode = AllAPIs })
+
+    [<TestCase "private">]
+    [<TestCase "internal">]
+    member this.``Non-public function returning Async<'T> should give violations`` (accessibility: string) =
+        this.Parse <|
+            sprintf
+                """
+module Foo =
+    let %s Bar(): Async<int> =
+        async { return 1 }
+"""
+                accessibility
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<TestCase "private">]
+    [<TestCase "internal">]
+    member this.``Non-public function returning Task<'T> should give violations`` (accessibility: string) =
+        this.Parse <|
+            sprintf
+                """
+module Foo =
+    let %s Bar(): Task<int> =
+        null
+"""
+                accessibility
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Nested functions returning Async<'T> should give violations``() =
+        this.Parse """
+module Foo =
+    let Foo() =
+        let Bar(): Async<int> =
+            async { return 1 }
+        ()
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Nested functions returning Task<'T> should give violations``() =
+        this.Parse """
+module Foo =
+    let Foo() =
+        let Bar(): Task<int> =
+            null
+        ()
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<TestCase "private">]
+    [<TestCase "internal">]
+    member this.``Non-public method returning Async<'T> should give violations`` (accessibility: string) =
+        this.Parse <|
+            sprintf
+                """
+type Foo() =
+    member %s this.Bar(): Async<int> =
+        async { return 1 }
+"""
+                accessibility
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<TestCase "private">]
+    [<TestCase "internal">]
+    member this.``Non-public method returning Task<'T> should give violations`` (accessibility: string) =
+        this.Parse <|
+            sprintf
+                """
+type Foo() =
+    member %s this.Bar(): Task<int> =
+        null
+"""
+                accessibility
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
