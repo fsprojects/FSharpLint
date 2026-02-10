@@ -567,7 +567,7 @@ type Configuration =
       FavourNamedMembers:EnabledConfig option
       SynchronousFunctionNames:EnabledConfig option
       AsynchronousFunctionNames:EnabledConfig option
-      SimpleAsyncComplementaryHelpers:EnabledConfig option }
+      SimpleAsyncComplementaryHelpers:RuleConfig<SimpleAsyncComplementaryHelpers.Config> option }
 with
 // Method Zero is too big but can't be split into parts because it returns a record
 // and it requires all fields to be set.
@@ -904,7 +904,7 @@ let flattenConfig (config:Configuration) =
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
                 config.SynchronousFunctionNames |> Option.bind (constructRuleIfEnabled SynchronousFunctionNames.rule)
                 config.AsynchronousFunctionNames |> Option.bind (constructRuleIfEnabled AsynchronousFunctionNames.rule)
-                config.SimpleAsyncComplementaryHelpers |> Option.bind (constructRuleIfEnabled SimpleAsyncComplementaryHelpers.rule)
+                config.SimpleAsyncComplementaryHelpers |> Option.bind (constructRuleWithConfig SimpleAsyncComplementaryHelpers.rule)
             |]
 
     let allEnabledRules = Array.choose id allPossibleRules

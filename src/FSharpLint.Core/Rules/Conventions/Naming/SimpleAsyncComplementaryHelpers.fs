@@ -9,6 +9,16 @@ open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 
+type AsynchronousFunctionsMode =
+    | OnlyPublicAPIsInLibraries
+    | AnyPublicAPIs
+    | AllAPIs
+
+[<RequireQualifiedAccess>]
+type Config = {
+    Mode: AsynchronousFunctionsMode
+}
+
 type private ReturnType =
     | Async of typeParam: Option<SynType> * isLowercase: bool
     | Task of typeParam: Option<SynType>
@@ -36,7 +46,7 @@ let rec private extractArgIdentRange (pattern: SynPat) =
     | SynPat.Typed(pat, _, _) -> pat.Range
     | _ -> pattern.Range
 
-let runner (args: AstNodeRuleParams) =
+let runner (config: Config) (args: AstNodeRuleParams) =
     let emitWarning (func: Func) =
         let funcDefinitionString = 
             match ExpressionUtilities.tryFindTextOfRange func.Range args.FileContent with
@@ -174,7 +184,7 @@ let runner (args: AstNodeRuleParams) =
             |> Array.concat
         
         Array.append (checkFuncs asyncFuncs taskFuncs) (checkFuncs taskFuncs asyncFuncs)
-
+    
     match args.AstNode with
     | Ast.ModuleOrNamespace(SynModuleOrNamespace(_, _, _, declarations, _, _, _, _, _)) ->
         processDeclarations declarations
@@ -182,14 +192,14 @@ let runner (args: AstNodeRuleParams) =
         processDeclarations declarations
     | _ -> Array.empty
 
-let rule =
+let rule config =
     AstNodeRule
         {
             Name = "SimpleAsyncComplementaryHelpers"
             Identifier = Identifiers.SimpleAsyncComplementaryHelpers
             RuleConfig =
                 {
-                    AstNodeRuleConfig.Runner = runner
+                    AstNodeRuleConfig.Runner = runner config
                     Cleanup = ignore
                 }
         }

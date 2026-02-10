@@ -4,10 +4,11 @@ open NUnit.Framework
 
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
+open FSharpLint.Rules.SimpleAsyncComplementaryHelpers
 
 [<TestFixture>]
 type TestSimpleAsyncComplementaryHelpers() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(SimpleAsyncComplementaryHelpers.rule)
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(SimpleAsyncComplementaryHelpers.rule { Mode = AnyPublicAPIs })
 
     [<Test>]
     member this.``Function AsyncBar should give violations offering creation of BarAsync``() =
