@@ -10,11 +10,6 @@ open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
 
-type AsynchronousFunctionsMode =
-    | OnlyPublicAPIsInLibraries
-    | AnyPublicAPIs
-    | AllAPIs
-
 [<RequireQualifiedAccess>]
 type Config = {
     Mode: AsynchronousFunctionsMode

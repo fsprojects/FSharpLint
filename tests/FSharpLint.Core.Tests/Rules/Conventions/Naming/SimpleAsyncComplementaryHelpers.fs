@@ -5,6 +5,7 @@ open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
 open FSharpLint.Rules.SimpleAsyncComplementaryHelpers
+open FSharpLint.Rules.Helper.Naming.Asynchronous
 
 [<TestFixture>]
 type TestSimpleAsyncComplementaryHelpers() =
