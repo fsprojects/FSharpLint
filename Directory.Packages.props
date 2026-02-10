@@ -8,9 +8,9 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
     <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.2" />
     <PackageVersion Include="FParsec" Version="1.1.1" />
-    <PackageVersion Include="FSharp.Compiler.Service" Version="43.10.100" />
+    <PackageVersion Include="FSharp.Compiler.Service" Version="43.10.103" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="6.1.2" />
-    <PackageVersion Include="FSharp.Core" Version="10.0.100" />
+    <PackageVersion Include="FSharp.Core" Version="10.0.103" />
     <PackageVersion Include="FSharpx.Collections" Version="3.1.0" />
     <PackageVersion Include="Ionide.ProjInfo.ProjectSystem" Version="0.70.2" />
     <PackageVersion Include="Ionide.ProjInfo.FCS" Version="0.70.2" />
