@@ -19,6 +19,7 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
 
     [<Test>]
     member this.``Non-public functions that return Async should not give violations``() =
@@ -54,6 +55,7 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("AsyncBar", this.ErrorMsg)
+        StringAssert.Contains("async { return Async.AwaitTask (BarAsync()) }", this.ErrorMsg)
 
     [<Test>]
     member this.``Non-public functions that return Task should not give violations``() =
@@ -99,6 +101,7 @@ module Foo =
 
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync(): Task", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
 
     [<Test>]
     member this.``Functions that return Async<unit> and don't follow naming conventions should not give violations``() =
