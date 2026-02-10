@@ -8,7 +8,12 @@ open FSharpLint.Framework.Rules
 open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 
-let runner (args: AstNodeRuleParams) =
+[<RequireQualifiedAccess>]
+type Config = {
+    Mode: AsynchronousFunctionsMode
+}
+
+let runner (_config: Config) (args: AstNodeRuleParams) =
     let emitWarning range (newFunctionName: string) (returnTypeName: string) =
         Array.singleton
             {
@@ -57,14 +62,14 @@ let runner (args: AstNodeRuleParams) =
                 Array.empty
     | _ -> Array.empty
 
-let rule =
+let rule config =
     AstNodeRule
         {
             Name = "AsynchronousFunctionNames"
             Identifier = Identifiers.AsynchronousFunctionNames
             RuleConfig =
                 {
-                    AstNodeRuleConfig.Runner = runner
+                    AstNodeRuleConfig.Runner = runner config
                     Cleanup = ignore
                 }
         }

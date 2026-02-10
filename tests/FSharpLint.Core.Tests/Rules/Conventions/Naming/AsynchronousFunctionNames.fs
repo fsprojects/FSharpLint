@@ -4,10 +4,11 @@ open NUnit.Framework
 
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
+open FSharpLint.Rules.Helper.Naming.Asynchronous
 
 [<TestFixture>]
 type TestAsynchronousFunctionNames() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AsynchronousFunctionNames.rule)
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AsynchronousFunctionNames.rule { Mode = AnyPublicAPIs })
 
     [<Test>]
     member this.``Function returning Async<'T> should give violations offering adding Async prefix``() =
