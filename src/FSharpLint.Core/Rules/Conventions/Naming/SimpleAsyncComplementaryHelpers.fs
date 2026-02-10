@@ -18,7 +18,7 @@ type private Func =
         BaseName: string
         Range: range
         ReturnType: ReturnType
-        Arguments: list<string>
+        ArgumentsString: string
     }
 
 [<TailCall>]
@@ -48,13 +48,6 @@ let runner (args: AstNodeRuleParams) =
             | Some typeParam -> ExpressionUtilities.tryFindTextOfRange typeParam.Range args.FileContent
             | None -> None
 
-        let argString =
-            match func.Arguments with
-            | [] | ["()"] ->
-                "()"
-            | arguments ->
-                " " + String.Join(" ", arguments)
-
         let message =
             match func.ReturnType with
             | Async typeParam -> 
@@ -70,7 +63,7 @@ let runner (args: AstNodeRuleParams) =
                     typeDefString,
                     asyncSuffixOrPrefix,
                     func.BaseName,
-                    argString
+                    func.ArgumentsString
                 )
             | Task typeParam ->
                 let newFuncName = funcDefinitionString.Replace(func.BaseName + asyncSuffixOrPrefix, asyncSuffixOrPrefix + func.BaseName)
@@ -83,7 +76,7 @@ let runner (args: AstNodeRuleParams) =
                     newFuncName,
                     typeDefString,
                     func.BaseName,
-                    argString
+                    func.ArgumentsString
                 )
 
         Array.singleton
@@ -106,15 +99,29 @@ let runner (args: AstNodeRuleParams) =
                     | Some(SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent _), _, [ typeParam ], _, _, _, _), _, _, _)) ->
                         Some typeParam 
                     | _ -> None
-                        
-                let funcArgRanges = 
-                    match argPats with
-                    | SynArgPats.NamePatPairs(pairs, _, _) -> pairs |> List.map (fun (ident, _, _) -> ident.idRange)
-                    | SynArgPats.Pats(pats) -> pats |> List.map extractArgIdentRange
-
+                
                 let funcArgs =
-                    funcArgRanges
-                    |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
+                    match argPats with
+                    | SynArgPats.NamePatPairs(pairs, _, _) ->
+                        let argsList =
+                            pairs
+                            |> List.map (fun (ident, _, _) -> ident.idRange)
+                            |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
+                        " " + String.Join(" ", argsList)
+                    | SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, _), _) ]) ->
+                        "()"
+                    | SynArgPats.Pats([ SynPat.Paren(SynPat.Tuple(_, pats, _, _), _) ]) ->
+                        let argsList =
+                            pats
+                            |> List.map extractArgIdentRange
+                            |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
+                        sprintf "(%s)" (String.Join(", ", argsList))
+                    | SynArgPats.Pats(pats) ->
+                        let argsList =
+                            pats
+                            |> List.map extractArgIdentRange
+                            |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
+                        " " + String.Join(" ", argsList)
 
                 match funcIdent with
                 | HasAsyncPrefix name ->
@@ -123,7 +130,7 @@ let runner (args: AstNodeRuleParams) =
                             BaseName = name.Substring asyncSuffixOrPrefix.Length
                             Range = binding.RangeOfHeadPattern
                             ReturnType = Async returnTypeParam
-                            Arguments = funcArgs
+                            ArgumentsString = funcArgs
                         }
                 | HasAsyncSuffix name ->
                     Some
@@ -131,7 +138,7 @@ let runner (args: AstNodeRuleParams) =
                             BaseName = name.Substring(0, name.Length - asyncSuffixOrPrefix.Length)
                             Range = binding.RangeOfHeadPattern
                             ReturnType = Task returnTypeParam
-                            Arguments = funcArgs
+                            ArgumentsString = funcArgs
                         }
                 | HasNoAsyncPrefixOrSuffix _ ->
                     None
