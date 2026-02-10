@@ -22,6 +22,18 @@ module Foo =
         StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
 
     [<Test>]
+    member this.``Function asyncBar should give violations offering creation of barAsync``() =
+        this.Parse """
+module Foo =
+    let asyncBar(): Async<int> =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("barAsync(): Task<int>", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(asyncBar())", this.ErrorMsg)
+
+    [<Test>]
     member this.``Non-public functions that return Async should not give violations``() =
         this.Parse """
 module Foo =
@@ -40,6 +52,18 @@ module Foo =
     let AsyncBar(): Async<int> =
         async { return 0 }
     let BarAsync(): Task<int> =
+        Async.StartAsTask(AsyncBar())
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Lowercase functions that comply with conventions should not give violations``() =
+        this.Parse """
+module Foo =
+    let asyncBar(): Async<int> =
+        async { return 0 }
+    let barAsync(): Task<int> =
         Async.StartAsTask(AsyncBar())
 """
 
