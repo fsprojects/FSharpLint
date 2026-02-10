@@ -173,3 +173,47 @@ module Bar =
 """
 
         Assert.IsTrue this.NoErrorsExist
+
+[<TestFixture>]
+type TestSimpleAsyncComplementaryHelpersAllAPIs() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(SimpleAsyncComplementaryHelpers.rule { Mode = AllAPIs })
+
+    [<Test>]
+    member this.``Private functions that return Async should give violations``() =
+        this.Parse """
+module Foo =
+    let private AsyncBaz(): Async<int> =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Internal functions that return Async should give violations``() =
+        this.Parse """
+module Foo =
+    let internal AsyncBar(): Async<int> =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Private functions that return Task should give violations``() =
+        this.Parse """
+module Foo =
+    let private BazAsync(): Task<int> =
+        Task.FromResult(1)
+"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Internal functions that return Task should give violations``() =
+        this.Parse """
+module Foo =
+    let internal BarAsync(): Task<int> =
+        Task.FromResult(1)
+"""
+
+        Assert.IsTrue this.ErrorsExist
