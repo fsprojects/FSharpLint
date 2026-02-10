@@ -484,6 +484,9 @@ module Lint =
             return FailedToLoadFile projectFilePath |> LintResult.Failure
     }
 
+    let lintProjectAsync (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+        Async.StartAsTask(asyncLintProject optionalParams projectFilePath toolsPath)
+
     [<Obsolete "Use asyncLintProject instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintProject optionalParams projectFilePath toolsPath =
         asyncLintProject optionalParams projectFilePath toolsPath |> Async.RunSynchronously
@@ -544,6 +547,9 @@ module Lint =
             return FailedToLoadFile solutionFilePath |> LintResult.Failure
     }
 
+    let lintSolutionAsync (optionalParams:OptionalLintParameters) (solutionFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+        Async.StartAsTask(asyncLintSolution optionalParams solutionFilePath toolsPath)
+
     [<Obsolete "Use asyncLintSolution instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintSolution optionalParams solutionFilePath toolsPath =
         asyncLintSolution optionalParams solutionFilePath toolsPath |> Async.RunSynchronously
@@ -593,6 +599,9 @@ module Lint =
                 return lintParsedSource optionalParams parsedFileInfo
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
         }
+
+    let lintSourceAsync optionalParams source =
+        Async.StartAsTask(asyncLintSource optionalParams source)
 
     [<Obsolete "Use asyncLintSource instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintSource optionalParams source =
@@ -646,6 +655,9 @@ module Lint =
             return FailedToLoadFile filePath |> LintResult.Failure
     }
 
+    let lintFileAsync optionalParams filePath =
+        Async.StartAsTask(asyncLintFile optionalParams filePath)
+
     [<Obsolete "Use asyncLintFile instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintFile optionalParams filePath =
         asyncLintFile optionalParams filePath |> Async.RunSynchronously
@@ -691,6 +703,9 @@ module Lint =
         | Error err ->
             return LintResult.Failure (RunTimeConfigError err)
     }
+
+    let lintFilesAsync optionalParams filePaths =
+        Async.StartAsTask(asyncLintFiles optionalParams filePaths)
 
     [<Obsolete "Use asyncLintFiles instead, otherwise this synchronous version might cause thread blocking issues; this API will be removed in the future.">]
     let lintFiles optionalParams filePaths =

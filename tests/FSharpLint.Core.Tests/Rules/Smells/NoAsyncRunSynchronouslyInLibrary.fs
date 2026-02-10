@@ -4,6 +4,7 @@ open NUnit.Framework
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules
 open FSharpLint.Rules.NoAsyncRunSynchronouslyInLibrary
+open FSharpLint.Rules.Utilities.LibraryHeuristics
 
 [<TestFixture>]
 type TestNoAsyncRunSynchronouslyInLibrary() =

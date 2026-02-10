@@ -31,6 +31,8 @@
     <Compile Include="Framework\Suppression.fs" />
     <!-- Rules -->
     <Compile Include="Rules\Identifiers.fs" />
+    <Compile Include="Rules\NamingHelper.fs" />
+    <Compile Include="Rules\Utilities.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleFormattingHelper.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleCommaSpacing.fs" />
     <Compile Include="Rules\Formatting\TupleFormatting\TupleIndentation.fs" />
@@ -80,9 +82,9 @@
     <Compile Include="Rules\Conventions\FunctionReimplementation\FunctionReimplementationHelper.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\ReimplementsFunction.fs" />
     <Compile Include="Rules\Conventions\FunctionReimplementation\CanBeReplacedWithComposition.fs" />
-    <Compile Include="Rules\Conventions\Naming\NamingHelper.fs" />
     <Compile Include="Rules\Conventions\Naming\SynchronousFunctionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\AsynchronousFunctionNames.fs" />
+    <Compile Include="Rules\Conventions\Naming\SimpleAsyncComplementaryHelpers.fs" />
     <Compile Include="Rules\Conventions\Naming\InterfaceNames.fs" />
     <Compile Include="Rules\Conventions\Naming\ExceptionNames.fs" />
     <Compile Include="Rules\Conventions\Naming\TypeNames.fs" />
