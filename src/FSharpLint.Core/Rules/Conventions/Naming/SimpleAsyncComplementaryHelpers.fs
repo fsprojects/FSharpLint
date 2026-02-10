@@ -5,6 +5,7 @@ open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
+open FSharpLint.Rules.Utilities.LibraryHeuristics
 open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
@@ -111,10 +112,16 @@ let runner (config: Config) (args: AstNodeRuleParams) =
     let processDeclarations (declarations: list<SynModuleDecl>) =
         let bindings = getBindings List.Empty declarations
 
+        let isAccessibilityLevelApplicable (accessibility: Option<SynAccess>) =
+            match accessibility with
+            | None
+            | Some(SynAccess.Public _) -> true
+            | _ -> config.Mode = AllAPIs
+
         let tryGetFunction (binding: SynBinding) =
             match binding with
-            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, (None | Some(SynAccess.Public _)), _), returnInfo, _, _, _, _)
-                when not argPats.Patterns.IsEmpty ->
+            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, accessibility, _), returnInfo, _, _, _, _)
+                when isAccessibilityLevelApplicable accessibility && not argPats.Patterns.IsEmpty ->
                 let returnTypeParam =
                     match returnInfo with
                     | Some(SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent _), _, [ typeParam ], _, _, _, _), _, _, _)) ->
@@ -184,13 +191,21 @@ let runner (config: Config) (args: AstNodeRuleParams) =
             |> Array.concat
         
         Array.append (checkFuncs asyncFuncs taskFuncs) (checkFuncs taskFuncs asyncFuncs)
-    
-    match args.AstNode with
-    | Ast.ModuleOrNamespace(SynModuleOrNamespace(_, _, _, declarations, _, _, _, _, _)) ->
-        processDeclarations declarations
-    | ModuleDeclaration(SynModuleDecl.NestedModule(_, _, declarations, _, _, _)) ->
-        processDeclarations declarations
-    | _ -> Array.empty
+
+    let likelyhoodOfBeingInLibrary =
+        match args.ProjectCheckInfo with
+        | Some projectInfo -> howLikelyProjectIsLibrary projectInfo.ProjectContext.ProjectOptions.ProjectFileName
+        | None -> Unlikely
+
+    if config.Mode = OnlyPublicAPIsInLibraries && likelyhoodOfBeingInLibrary <> Likely then
+        Array.empty
+    else
+        match args.AstNode with
+        | Ast.ModuleOrNamespace(SynModuleOrNamespace(_, _, _, declarations, _, _, _, _, _)) ->
+            processDeclarations declarations
+        | ModuleDeclaration(SynModuleDecl.NestedModule(_, _, declarations, _, _, _)) ->
+            processDeclarations declarations
+        | _ -> Array.empty
 
 let rule config =
     AstNodeRule
