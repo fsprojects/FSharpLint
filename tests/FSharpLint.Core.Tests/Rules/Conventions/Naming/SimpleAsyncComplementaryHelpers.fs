@@ -124,3 +124,15 @@ module Foo =
         Assert.IsTrue this.ErrorsExist
         StringAssert.Contains("BarAsync(foo: int): Task<int>", this.ErrorMsg)
         StringAssert.Contains("Async.StartAsTask(AsyncBar foo)", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function parameters in tuple form must be preserved in offered solution``() =
+        this.Parse """
+module Foo =
+    let AsyncBar(foo: int, bar): Async<int> =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync(foo: int, bar): Task<int>", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(AsyncBar(foo, bar))", this.ErrorMsg)
