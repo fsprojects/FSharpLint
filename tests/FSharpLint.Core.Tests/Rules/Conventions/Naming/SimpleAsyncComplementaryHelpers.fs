@@ -18,7 +18,7 @@ module Foo =
 """
 
         Assert.IsTrue this.ErrorsExist
-        StringAssert.Contains("BarAsync", this.ErrorMsg)
+        StringAssert.Contains("BarAsync(): Task<int>", this.ErrorMsg)
         StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
 
     [<Test>]
@@ -54,7 +54,7 @@ module Foo =
 """
 
         Assert.IsTrue this.ErrorsExist
-        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+        StringAssert.Contains("AsyncBar(): Async<int>", this.ErrorMsg)
         StringAssert.Contains("async { return Async.AwaitTask (BarAsync()) }", this.ErrorMsg)
 
     [<Test>]
