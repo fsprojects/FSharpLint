@@ -175,6 +175,54 @@ type Foo() =
 
         Assert.IsTrue this.NoErrorsExist
 
+    [<Test>]
+    member this.``Function without explicit type returning Async<'T> should give violations offering adding Async prefix``() =
+        this.Parse """
+module Foo =
+    let Bar() =
+        async { return 1 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function without explicit type returning Task<'T> should give violations offering adding Async suffix``() =
+        this.Parse """
+module Foo =
+    let Bar() =
+        task {}
+"""
+        
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function without explicit type returning Task should give violations offering adding Async suffix``() =
+        this.Parse """
+open System.Threading.Tasks
+
+module Foo =
+    let Bar() =
+        let Baz(): Task =
+            null
+        Baz()
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Method without explicit type returning Async<'T> should give violations offering adding Async prefix``() =
+        this.Parse """
+type Foo() =
+    member this.Bar() =
+        async { return 1 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar", this.ErrorMsg)
+
 [<TestFixture>]
 type TestAsynchronousFunctionNamesAllAPIs() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(AsynchronousFunctionNames.rule { Mode = AllAPIs })
