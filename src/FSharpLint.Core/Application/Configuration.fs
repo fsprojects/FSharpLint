@@ -566,7 +566,7 @@ type Configuration =
       DiscourageStringInterpolationWithStringFormat:EnabledConfig option
       FavourNamedMembers:EnabledConfig option
       SynchronousFunctionNames:EnabledConfig option
-      AsynchronousFunctionNames:EnabledConfig option
+      AsynchronousFunctionNames:RuleConfig<AsynchronousFunctionNames.Config> option
       SimpleAsyncComplementaryHelpers:RuleConfig<SimpleAsyncComplementaryHelpers.Config> option }
 with
 // Method Zero is too big but can't be split into parts because it returns a record
@@ -903,7 +903,7 @@ let flattenConfig (config:Configuration) =
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)
                 config.SynchronousFunctionNames |> Option.bind (constructRuleIfEnabled SynchronousFunctionNames.rule)
-                config.AsynchronousFunctionNames |> Option.bind (constructRuleIfEnabled AsynchronousFunctionNames.rule)
+                config.AsynchronousFunctionNames |> Option.bind (constructRuleWithConfig AsynchronousFunctionNames.rule)
                 config.SimpleAsyncComplementaryHelpers |> Option.bind (constructRuleWithConfig SimpleAsyncComplementaryHelpers.rule)
             |]
 

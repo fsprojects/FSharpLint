@@ -349,7 +349,12 @@
     },
     "favourNamedMembers": { "enabled": false },
     "synchronousFunctionNames": { "enabled": true },
-    "asynchronousFunctionNames": { "enabled": true },
+    "asynchronousFunctionNames": { 
+        "enabled": true,
+        "config": {
+            "mode": "OnlyPublicAPIsInLibraries"
+        }
+    },
     "simpleAsyncComplementaryHelpers": { 
         "enabled": false,
         "config": {

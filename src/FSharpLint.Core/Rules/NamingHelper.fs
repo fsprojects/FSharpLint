@@ -466,6 +466,11 @@ let getFunctionIdents (pattern:SynPat) =
     | _ -> Array.empty
 
 module Asynchronous =
+    type AsynchronousFunctionsMode =
+        | OnlyPublicAPIsInLibraries
+        | AnyPublicAPIs
+        | AllAPIs
+
     let asyncSuffixOrPrefix = "Async"
 
     let (|HasAsyncPrefix|HasAsyncSuffix|HasNoAsyncPrefixOrSuffix|) (pattern: SynLongIdent) =
