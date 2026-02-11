@@ -38,6 +38,7 @@ type TestNoTabCharactersRuleBase (rule:Rule) =
                     GlobalConfig = resolvedGlobalConfig
                     TypeCheckResults = None
                     ProjectCheckResults = None
+                    ProjectOptions = Lazy<_>()
                     FilePath = resolvedFileName
                     FileContent = input
                     Lines = lines
