@@ -175,6 +175,54 @@ module Bar =
 
         Assert.IsTrue this.NoErrorsExist
 
+    [<Test>]
+    member this.``Function AsyncBar without explicit type should give violations offering creation of BarAsync``() =
+        this.Parse """
+module Foo =
+    let AsyncBar() =
+        async { return 0 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync(): Task<int>", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Function BarAsync without explicit type should give violations offering creation of AsyncBar``() =
+        this.Parse """
+module Foo =
+    let BarAsync() =
+        task { return 1 }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("AsyncBar(): Async<int>", this.ErrorMsg)
+        StringAssert.Contains("async { return Async.AwaitTask (BarAsync()) }", this.ErrorMsg)
+
+    [<Test>]
+    member this.``Functions without explicit type that comply with conventions should not give violations``() =
+        this.Parse """
+module Foo =
+    let AsyncBar() =
+        async { return 0 }
+    let BarAsync() =
+        Async.StartAsTask(AsyncBar())
+"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+    [<Test>]
+    member this.``Function AsyncBar with generic return type should give violations offering creation of BarAsync``() =
+        this.Parse """
+module Foo =
+    let AsyncBar() =
+        async { return Map.ofList [ 0, "foo" ] }
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        StringAssert.Contains("BarAsync(): Task<Map<int,string>>", this.ErrorMsg)
+        StringAssert.Contains("Async.StartAsTask(AsyncBar())", this.ErrorMsg)
+
 [<TestFixture>]
 type TestSimpleAsyncComplementaryHelpersAllAPIs() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(SimpleAsyncComplementaryHelpers.rule { Mode = AllAPIs })
