@@ -476,7 +476,11 @@ module Asynchronous =
     let (|HasAsyncPrefix|HasAsyncSuffix|HasNoAsyncPrefixOrSuffix|) (pattern: SynLongIdent) =
         match List.tryLast pattern.LongIdent with
         | Some name ->
-            if name.idText.StartsWith(asyncSuffixOrPrefix, StringComparison.InvariantCultureIgnoreCase) then
+            if not (isNotDoubleBackTickedIdent name) then
+                // Consider any identifier surrounded by double backticks (usually used as test names)
+                // to not have Async prefix or suffix.
+                HasNoAsyncPrefixOrSuffix name.idText
+            elif name.idText.StartsWith(asyncSuffixOrPrefix, StringComparison.InvariantCultureIgnoreCase) then
                 HasAsyncPrefix name.idText
             elif name.idText.EndsWith asyncSuffixOrPrefix then
                 HasAsyncSuffix name.idText
@@ -493,3 +497,19 @@ module Asynchronous =
             | Some ident when ident.idText = "Task" -> ReturnsTask
             | _ -> ReturnsNonAsync
         | _ -> ReturnsNonAsync
+    
+    let (|FSharpTypeAsync|FSharpTypeTask|FSharpTypeTaskNonGeneric|FSharpTypeNonAsync|) (fSharpType: FSharpType) =
+        try
+            // BasicQualifiedName may throw InvalidOperationException for some types
+            // e.g. arrays, but not for Async<'T> or Task<'T>, so assume non-async type.
+            match fSharpType.BasicQualifiedName with
+            | "Microsoft.FSharp.Control.FSharpAsync`1" -> FSharpTypeAsync
+            | name when name.StartsWith "System.Threading.Tasks.Task" ->
+                if fSharpType.GenericArguments.Count > 0 then
+                    FSharpTypeTask
+                else
+                    FSharpTypeTaskNonGeneric
+            | _ -> FSharpTypeNonAsync
+        with
+        | :? InvalidOperationException ->
+            FSharpTypeNonAsync
