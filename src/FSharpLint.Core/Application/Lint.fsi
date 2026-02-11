@@ -129,6 +129,7 @@ module Lint =
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
             ProjectCheckResults: FSharpCheckProjectResults option
+            ProjectOptions: Lazy<FSharpProjectOptions option>
             FilePath: string
             FileContent: string
             Lines: string[]

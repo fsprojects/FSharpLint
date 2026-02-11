@@ -38,6 +38,7 @@ type TestIndentationRuleBase (rule:Rule) =
                     GlobalConfig = resolvedGlobalConfig
                     TypeCheckResults = None
                     ProjectCheckResults = None
+                    ProjectOptions = Lazy<_>(None)
                     FilePath = resolvedFileName
                     FileContent = input
                     Lines = lines
