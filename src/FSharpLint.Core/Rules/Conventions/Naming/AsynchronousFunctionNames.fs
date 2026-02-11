@@ -7,6 +7,7 @@ open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 open FSharpLint.Rules.Utilities.LibraryHeuristics
 open Helper.Naming.Asynchronous
+open Utilities.TypedTree
 open FSharp.Compiler.Syntax
 
 [<RequireQualifiedAccess>]
@@ -41,6 +42,24 @@ let runner (config: Config) (args: AstNodeRuleParams) =
         match args.AstNode with
         | AstNode.Binding (SynBinding (_, _, _, _, attributes, _, _, SynPat.LongIdent(funcIdent, _, _, _, accessibility, identRange), returnInfo, _, _, _, _))
             when isAccessibilityLevelApplicable accessibility && not <| Helper.Naming.isAttribute "Obsolete" attributes ->
+            let checkAsyncFunction () =
+                match funcIdent with
+                | HasAsyncPrefix _ ->
+                    Array.empty
+                | HasAsyncSuffix name 
+                | HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = asyncSuffixOrPrefix + name
+                    emitWarning identRange nameWithAsync "Async"
+
+            let checkTaskFunction () =
+                match funcIdent with
+                | HasAsyncSuffix _ ->
+                    Array.empty
+                | HasAsyncPrefix name 
+                | HasNoAsyncPrefixOrSuffix name ->
+                    let nameWithAsync = name + asyncSuffixOrPrefix
+                    emitWarning identRange nameWithAsync "Task"
+            
             let parents = args.GetParents args.NodeIndex
             let hasEnclosingFunctionOrMethod =
                 parents
@@ -54,25 +73,20 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                 Array.empty
             else
                 match returnInfo with
-                | Some ReturnsAsync ->
-                    match funcIdent with
-                    | HasAsyncPrefix _ ->
-                        Array.empty
-                    | HasAsyncSuffix name 
-                    | HasNoAsyncPrefixOrSuffix name ->
-                        let nameWithAsync = asyncSuffixOrPrefix + name
-                        emitWarning identRange nameWithAsync "Async"
-                | Some ReturnsTask ->
-                    match funcIdent with
-                    | HasAsyncSuffix _ ->
-                        Array.empty
-                    | HasAsyncPrefix name 
-                    | HasNoAsyncPrefixOrSuffix name ->
-                        let nameWithAsync = name + asyncSuffixOrPrefix
-                        emitWarning identRange nameWithAsync "Task"
+                | Some ReturnsAsync -> checkAsyncFunction()
+                | Some ReturnsTask -> checkTaskFunction()
                 | None -> 
-                    // TODO: get type using typed tree in args.CheckInfo
-                    Array.empty
+                    match args.CheckInfo with
+                    | Some checkInfo ->
+                        match getFunctionReturnType checkInfo args.Lines funcIdent with
+                        | Some returnType ->
+                            match returnType with
+                            | FSharpTypeAsync -> checkAsyncFunction()
+                            | FSharpTypeTask
+                            | FSharpTypeTaskNonGeneric -> checkTaskFunction()
+                            | FSharpTypeNonAsync -> Array.empty
+                        | None -> Array.empty
+                    | None -> Array.empty
                 | _ ->
                     Array.empty
         | _ -> Array.empty
