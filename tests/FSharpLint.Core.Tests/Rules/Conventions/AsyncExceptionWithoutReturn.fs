@@ -9,7 +9,7 @@ type TestAsyncExceptionWithoutReturn() =
     inherit FSharpLint.Core.Tests.TestAstNodeRuleBase.TestAstNodeRuleBase(AsyncExceptionWithoutReturn.rule)
 
     [<Test>]
-    member this.AsyncRaiseWithoutReturn() =
+    member this.RaiseInAsyncBlockWithoutReturn() =
         this.Parse("""
 module Program
 
@@ -22,7 +22,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncRaiseWithReturn() =
+    member this.RaiseInAsyncBlockWithReturn() =
         this.Parse("""
 module Program
 
@@ -34,7 +34,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncFailWithWithoutReturn() =
+    member this.FailWithInAsyncBlockWithoutReturn() =
         this.Parse("""
 module Program
 
@@ -47,7 +47,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithfWithoutReturn1() =
+    member this.FailwithfInAsyncBlockWithoutReturn1() =
         this.Parse("""
 module Program
 
@@ -61,7 +61,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithfWithoutReturn2() =
+    member this.FailwithfInAsyncBlockWithoutReturn2() =
         this.Parse("""
 module Program
 
@@ -74,7 +74,7 @@ let someAsyncFunction () =
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.AsyncFailwithWithReturn() =
+    member this.FailwithInAsyncBlockWithReturn() =
         this.Parse("""
 module Program
 
@@ -86,7 +86,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncFailwithfWithReturn() =
+    member this.FailwithfInAsyncBlockWithReturn() =
         this.Parse("""
 module Program
 
@@ -99,7 +99,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncRaiseWithReturnInnerExpression() =
+    member this.RaiseInAsyncBlockWithReturnInnerExpression() =
         this.Parse("""
 module Program
 
@@ -114,7 +114,7 @@ let someAsyncFunction () =
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.AsyncRaiseWithoutReturnInnerExpression() =
+    member this.RaiseInAsyncBlockWithoutReturnInnerExpression() =
         this.Parse("""
 module Program
 
