@@ -43,6 +43,7 @@ type TestAstNodeRuleBase (rule:Rule) =
                         GlobalConfig = resolvedGlobalConfig
                         TypeCheckResults = checkResult
                         ProjectCheckResults = None
+                        ProjectOptions = Lazy<_>(None)
                         FilePath = (Option.defaultValue String.Empty maybeFileName)
                         FileContent = input
                         Lines = (input.Split("\n"))
