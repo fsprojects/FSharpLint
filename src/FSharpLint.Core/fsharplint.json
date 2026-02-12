@@ -342,7 +342,7 @@
     },
     "favourSingleton": { "enabled": false },
     "noAsyncRunSynchronouslyInLibrary": { "enabled": true },
-    "favourNestedFunctions": { "enabled": false },
+    "favourLocalOverPrivate": { "enabled": false },
     "disallowShadowing": { "enabled": false },
     "discourageStringInterpolationWithStringFormat": {
         "enabled": false

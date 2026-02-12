@@ -62,7 +62,7 @@
     <Compile Include="Rules\Conventions\EnsureTailCallDiagnosticsInRecursiveFunctions.fs" />
     <Compile Include="Rules\Conventions\FailwithBadUsage.fs" />
     <Compile Include="Rules\Conventions\FavourSingleton.fs" />
-    <Compile Include="Rules\Conventions\FavourNestedFunctions.fs" />
+    <Compile Include="Rules\Conventions\FavourLocalOverPrivate.fs" />
     <Compile Include="Rules\Conventions\DisallowShadowing.fs" />
     <Compile Include="Rules\Conventions\DiscourageStringInterpolationWithStringFormat.fs" />
     <Compile Include="Rules\Conventions\FavourNamedMembers.fs" />

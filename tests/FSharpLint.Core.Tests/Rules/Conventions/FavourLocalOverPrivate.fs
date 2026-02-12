@@ -1,12 +1,12 @@
-﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourNestedFunctions
+﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourLocalOverPrivate
 
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestFavourNestedFunctions() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourNestedFunctions.rule)
+type TestFavourLocalOverPrivate() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourLocalOverPrivate.rule)
 
     [<Test>]
     member this.``Top level functions that are not used in another function should not give an error`` () =

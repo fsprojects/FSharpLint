@@ -396,8 +396,8 @@
   <data name="NoAsyncRunSynchronouslyInLibrary" xml:space="preserve">
     <value>Async.RunSynchronously should not be used in libraries.</value>
   </data>
-  <data name="RulesFavourNestedFunctions" xml:space="preserve">
-    <value>Prefer using local functions over private module-level functions</value>
+  <data name="RulesFavourLocalOverPrivate" xml:space="preserve">
+    <value>Prefer using local functions and values over private module-level functions/values</value>
   </data>
   <data name="RulesDisallowShadowing" xml:space="preserve">
     <value>Rename variable or parameter so that it doesn't shadow another one with the same name.</value>
