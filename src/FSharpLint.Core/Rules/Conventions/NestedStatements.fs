@@ -10,14 +10,15 @@ open FSharpLint.Framework.Rules
 [<RequireQualifiedAccess>]
 type Config = { Depth:int }
 
-/// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
-/// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
-/// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
-let private isCompilerGeneratedMatch = function
-    | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
-    | _ -> false
+let private areChildrenNested = 
+    /// Lambda wildcard arguments are named internally as _argN, a match is then generated for them in the AST.
+    /// e.g. fun _ -> () is represented in the AST as fun _arg1 -> match _arg1 with | _ -> ().
+    /// This function returns true if the given match statement is compiler generated for a lambda wildcard argument.
+    let isCompilerGeneratedMatch = function
+        | SynExpr.Match(_, SynExpr.Ident(ident), _, _, _) when ident.idText.StartsWith("_arg") -> true
+        | _ -> false
 
-let private areChildrenNested = function
+    function
     | AstNode.Binding(SynBinding(_))
     | AstNode.Expression(SynExpr.Lambda(_))
     | AstNode.Expression(SynExpr.MatchLambda(_))

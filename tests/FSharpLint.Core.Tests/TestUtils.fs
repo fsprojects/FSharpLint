@@ -7,13 +7,13 @@
     open FSharpLint.Framework
     open Utilities
 
+    let private performanceTestSourceFile = 
 #if NETCOREAPP2_0
-    let private basePath = __SOURCE_DIRECTORY__ </>  ".." </> ".."
+        let basePath = __SOURCE_DIRECTORY__ </>  ".." </> ".."
 #else
-    let private basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".."
+        let basePath = TestContext.CurrentContext.TestDirectory </> ".." </> ".." </> ".." </> ".."
 #endif
-
-    let private performanceTestSourceFile = basePath </> "TypeChecker.fs"
+        basePath </> "TypeChecker.fs"
 
     let asyncGenerateAst source =
         async {

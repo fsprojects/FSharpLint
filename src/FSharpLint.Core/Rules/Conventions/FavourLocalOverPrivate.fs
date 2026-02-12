@@ -1,4 +1,4 @@
-﻿module FSharpLint.Rules.FavourNestedFunctions
+﻿module FSharpLint.Rules.FavourLocalOverPrivate
 
 open System
 open FSharp.Compiler.Syntax
@@ -8,7 +8,7 @@ open FSharpLint.Framework.Rules
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
 
-type private FunctionBinding =
+type private Binding =
     {
         Identifier: Ident
         Expression: SynExpr
@@ -23,11 +23,13 @@ let private collectBindings (bindings: list<SynBinding>) =
             match binding with
             | SynBinding(_, _, _, _, attributes, _, _, SynPat.LongIdent(SynLongIdent(idents, _, _), _, _, _, accessibility, _), _, expr, _, _, _) ->
                 Some { Identifier = List.last idents; Expression = expr; Accessibility = accessibility; Attributes = attributes }
+            | SynBinding(_, _, _, _, attributes, _, _, SynPat.Named(SynIdent(ident, _), _, accessibility, _), _, expr, _, _, _) ->
+                Some { Identifier = ident; Expression = expr; Accessibility = accessibility; Attributes = attributes }
             | _ -> None
         )
 
 [<TailCall>]
-let rec private collectMemberBindings (acc: list<FunctionBinding>) (memberDefns: list<SynMemberDefn>): list<FunctionBinding> =
+let rec private collectMemberBindings (acc: list<Binding>) (memberDefns: list<SynMemberDefn>): list<Binding> =
     match memberDefns with
     | [] ->
         acc
@@ -43,7 +45,7 @@ let rec private collectMemberBindings (acc: list<FunctionBinding>) (memberDefns:
         collectMemberBindings acc rest
 
 let runner (args: AstNodeRuleParams) =
-    let collectTopLevelFunctionBindings (declaration: SynModuleDecl): list<FunctionBinding> = 
+    let collectTopLevelFunctionBindings (declaration: SynModuleDecl): list<Binding> = 
         match declaration with
         | SynModuleDecl.Let(_, bindings, _) -> collectBindings bindings
         | _ -> List.empty
@@ -115,7 +117,7 @@ let runner (args: AstNodeRuleParams) =
                 match ExpressionUtilities.getSymbolFromIdent args.CheckInfo (SynExpr.Ident currFunctionIdentifier) with
                 | Some symbolUse ->
                     let allSymbolUses = checkInfo.GetUsesOfSymbolInFile symbolUse.Symbol
-                    let functionUsesCurrFunction (funcBinding: FunctionBinding) =
+                    let functionUsesCurrFunction (funcBinding: Binding) =
                         if funcBinding.Identifier.idText = currFunctionIdentifier.idText then
                             false
                         else
@@ -134,7 +136,7 @@ let runner (args: AstNodeRuleParams) =
                     if numberOfOtherFunctionsCurrFunctionIsUsedIn = 1 then
                         Some {
                             Range = currFunctionIdentifier.idRange
-                            WarningDetails.Message = Resources.GetString "RulesFavourNestedFunctions"
+                            WarningDetails.Message = Resources.GetString "RulesFavourLocalOverPrivate"
                             SuggestedFix = None
                             TypeChecks = List.Empty
                         }
@@ -148,8 +150,8 @@ let runner (args: AstNodeRuleParams) =
     | _ -> Array.empty
 
 let rule =
-    { Name = "FavourNestedFunctions"
-      Identifier = Identifiers.FavourNestedFunctions
+    { Name = "FavourLocalOverPrivate"
+      Identifier = Identifiers.FavourLocalOverPrivate
       RuleConfig =
         { AstNodeRuleConfig.Runner = runner
           Cleanup = ignore } }

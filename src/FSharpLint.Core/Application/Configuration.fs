@@ -385,7 +385,7 @@ type ConventionsConfig =
       suggestUseAutoProperty:EnabledConfig option
       usedUnderscorePrefixedElements:EnabledConfig option
       ensureTailCallDiagnosticsInRecursiveFunctions:EnabledConfig option
-      favourNestedFunctions:EnabledConfig option
+      favourLocalOverPrivate:EnabledConfig option
       disallowShadowing:EnabledConfig option
       discourageStringInterpolationWithStringFormat:EnabledConfig option
       favourNamedMembers:EnabledConfig option }
@@ -416,7 +416,7 @@ with
                 this.suggestUseAutoProperty |> Option.bind (constructRuleIfEnabled SuggestUseAutoProperty.rule) |> Option.toArray
                 this.ensureTailCallDiagnosticsInRecursiveFunctions |> Option.bind (constructRuleIfEnabled EnsureTailCallDiagnosticsInRecursiveFunctions.rule) |> Option.toArray
                 this.indexerAccessorStyleConsistency |> Option.bind (constructRuleWithConfig IndexerAccessorStyleConsistency.rule) |> Option.toArray
-                this.favourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule) |> Option.toArray
+                this.favourLocalOverPrivate |> Option.bind (constructRuleIfEnabled FavourLocalOverPrivate.rule) |> Option.toArray
                 this.disallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule) |> Option.toArray
                 this.discourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule) |> Option.toArray
                 this.favourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule) |> Option.toArray
@@ -561,7 +561,7 @@ type Configuration =
       InterpolatedStringWithNoSubstitution:EnabledConfig option
       FavourSingleton:EnabledConfig option
       NoAsyncRunSynchronouslyInLibrary:EnabledConfig option
-      FavourNestedFunctions:EnabledConfig option
+      FavourLocalOverPrivate:EnabledConfig option
       DisallowShadowing:EnabledConfig option
       DiscourageStringInterpolationWithStringFormat:EnabledConfig option
       FavourNamedMembers:EnabledConfig option
@@ -673,7 +673,7 @@ with
         InterpolatedStringWithNoSubstitution = None
         FavourSingleton = None
         NoAsyncRunSynchronouslyInLibrary = None
-        FavourNestedFunctions = None
+        FavourLocalOverPrivate = None
         DisallowShadowing = None
         DiscourageStringInterpolationWithStringFormat = None
         FavourNamedMembers = None
@@ -898,7 +898,7 @@ let flattenConfig (config:Configuration) =
                 config.InterpolatedStringWithNoSubstitution |> Option.bind (constructRuleIfEnabled InterpolatedStringWithNoSubstitution.rule)
                 config.FavourSingleton |> Option.bind (constructRuleIfEnabled FavourSingleton.rule)
                 config.NoAsyncRunSynchronouslyInLibrary |> Option.bind (constructRuleIfEnabled NoAsyncRunSynchronouslyInLibrary.rule)
-                config.FavourNestedFunctions |> Option.bind (constructRuleIfEnabled FavourNestedFunctions.rule)
+                config.FavourLocalOverPrivate |> Option.bind (constructRuleIfEnabled FavourLocalOverPrivate.rule)
                 config.DisallowShadowing |> Option.bind (constructRuleIfEnabled DisallowShadowing.rule)
                 config.DiscourageStringInterpolationWithStringFormat |> Option.bind (constructRuleIfEnabled DiscourageStringInterpolationWithStringFormat.rule)
                 config.FavourNamedMembers |> Option.bind (constructRuleIfEnabled FavourNamedMembers.rule)

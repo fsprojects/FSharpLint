@@ -64,70 +64,70 @@ and [<TailCall>] isImmutableSequentialExpression args expression (continuation: 
             )
     | _ -> continuation false
 
-let private runner (args: AstNodeRuleParams) =
-    let hasStructAttribute node =
-        match node with
-        | AstNode.TypeDefinition(SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
-            attributes
-            |> extractAttributes
-            |> List.exists
-                (fun attribute ->
-                    match List.tryLast attribute.TypeName.LongIdent with
-                    | Some(ident) -> ident.idText = "Struct" || ident.idText = "StructAttribute"
-                    | None -> false)
-        | _ -> false
-
-    match args.AstNode with
-    | MemberDefinition
-        (
-            SynMemberDefn.Member
-                (
-                    SynBinding
-                        (
-                            _accessibility,
-                            _kind,
-                            _,
-                            false,
-                            _attributes,
-                            _xmlDoc,
-                            SynValData (Some memberFlags, _, _),
-                            SynPat.LongIdent (memberIdentifier, _, _, argPats, _, _),
-                            _returnInfo,
-                            expr,
-                            _bindingRange,
-                            _,
-                            _
-                        ),
-                    memberRange
-                )
-        ) when memberFlags.IsInstance ->
-        match (expr, argPats) with
-        | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
-            Array.empty
-        | expression, _ when isImmutableValueExpression args expression id ->
-            match args.GetParents args.NodeIndex with
-            | parentNode :: _ when hasStructAttribute parentNode ->
-                Array.empty
-            | _ ->
-                let suggestedFix =
-                    lazy
-                        (match memberIdentifier.LongIdent with
-                            | [ _; memberName ] ->
-                                Some
-                                    { FromText = args.FileContent
-                                      FromRange = memberIdentifier.Range
-                                      ToText = $"val {memberName.idText}" }
-                            | _ -> None)
-            
-                Array.singleton
-                    { Range = memberRange
-                      Message = Resources.GetString "RulesSuggestUseAutoProperty"
-                      SuggestedFix = Some suggestedFix
-                      TypeChecks = List.Empty }
-        | _ -> Array.empty
-    | _ -> Array.empty
-
 let rule =
+    let runner (args: AstNodeRuleParams) =
+        let hasStructAttribute node =
+            match node with
+            | AstNode.TypeDefinition(SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
+                attributes
+                |> extractAttributes
+                |> List.exists
+                    (fun attribute ->
+                        match List.tryLast attribute.TypeName.LongIdent with
+                        | Some(ident) -> ident.idText = "Struct" || ident.idText = "StructAttribute"
+                        | None -> false)
+            | _ -> false
+
+        match args.AstNode with
+        | MemberDefinition
+            (
+                SynMemberDefn.Member
+                    (
+                        SynBinding
+                            (
+                                _accessibility,
+                                _kind,
+                                _,
+                                false,
+                                _attributes,
+                                _xmlDoc,
+                                SynValData (Some memberFlags, _, _),
+                                SynPat.LongIdent (memberIdentifier, _, _, argPats, _, _),
+                                _returnInfo,
+                                expr,
+                                _bindingRange,
+                                _,
+                                _
+                            ),
+                        memberRange
+                    )
+            ) when memberFlags.IsInstance ->
+            match (expr, argPats) with
+            | _, SynArgPats.Pats pats when pats.Length > 0 -> // non-property member
+                Array.empty
+            | expression, _ when isImmutableValueExpression args expression id ->
+                match args.GetParents args.NodeIndex with
+                | parentNode :: _ when hasStructAttribute parentNode ->
+                    Array.empty
+                | _ ->
+                    let suggestedFix =
+                        lazy
+                            (match memberIdentifier.LongIdent with
+                                | [ _; memberName ] ->
+                                    Some
+                                        { FromText = args.FileContent
+                                          FromRange = memberIdentifier.Range
+                                          ToText = $"val {memberName.idText}" }
+                                | _ -> None)
+            
+                    Array.singleton
+                        { Range = memberRange
+                          Message = Resources.GetString "RulesSuggestUseAutoProperty"
+                          SuggestedFix = Some suggestedFix
+                          TypeChecks = List.Empty }
+            | _ -> Array.empty
+        | _ -> Array.empty
+
     AstNodeRule
         {
             Name = "SuggestUseAutoProperty"

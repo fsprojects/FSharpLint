@@ -1,12 +1,12 @@
-﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourNestedFunctions
+﻿module FSharpLint.Core.Tests.Rules.Conventions.FavourLocalOverPrivate
 
 open NUnit.Framework
 open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestFavourNestedFunctions() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourNestedFunctions.rule)
+type TestFavourLocalOverPrivate() =
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FavourLocalOverPrivate.rule)
 
     [<Test>]
     member this.``Top level functions that are not used in another function should not give an error`` () =
@@ -44,6 +44,45 @@ let Bar () =
 """
         
         Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Top level private values that are not used in another function should not give an error`` () =
+        this.Parse """
+let private foo = 0
+
+let Bar () =
+    ()
+"""
+        
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Top level private value that is used in single function should give an error`` () =
+        this.Parse """
+let private foo = ()
+
+let Bar () =
+    foo
+    ()
+"""
+        
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Private value that is used in more than one function should not give an error`` () =
+        this.Parse """
+let private foo = ()
+
+let Bar () =
+    foo
+    ()
+
+let Baz () =
+    foo
+    ()
+"""
+        
+        this.AssertNoWarnings()
 
     [<Test>]
     member this.``Top level recursive private function that is used in single other function should give an error`` () =

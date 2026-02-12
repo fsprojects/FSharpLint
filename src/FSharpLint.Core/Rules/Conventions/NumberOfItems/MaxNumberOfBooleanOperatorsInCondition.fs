@@ -7,8 +7,11 @@ open FSharp.Compiler.Syntax
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
+// There is no need to recreate the set on every function call.
+//fsharplint:disable FavourLocalOverPrivate
 let private boolFunctions =
     Set.ofList ["op_BooleanOr"; "op_BooleanAnd"; "not"]
+//fsharplint:enable FavourLocalOverPrivate
 
 [<TailCall>]
 let rec private countBooleanOperators total expressions = 

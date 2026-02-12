@@ -124,14 +124,14 @@ let rec private checkExpr node maybeIdentifier =
                 | _ -> checkExpr app None)
             | _ -> Array.empty
 
-let private runner (args: AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Expression expr -> checkExpr expr None
-    | _ -> Array.empty
-
 let cleanup () = failwithMessages <- Set.empty
 
 let rule =
+    let runner (args: AstNodeRuleParams) =
+        match args.AstNode with
+        | AstNode.Expression expr -> checkExpr expr None
+        | _ -> Array.empty
+
     AstNodeRule
         {
             Name = "FailwithBadUsage"

@@ -98,8 +98,11 @@ let rec private countCases (pat: SynPat) (count: int) =
         countCases lhs localSoFar
     | _ -> localSoFar
 
+// There is no need to recreate the set on every function call.
+//fsharplint:disable FavourLocalOverPrivate
 /// Boolean operator functions.
 let private boolFunctions = Set.ofList ["op_BooleanOr"; "op_BooleanAnd"]
+//fsharplint:enable FavourLocalOverPrivate
 
 [<TailCall>]
 let rec private countOperators count expressions =

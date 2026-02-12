@@ -28,6 +28,7 @@ type ToStringConfig =
 type Config =
     { HintTrie:MergeSyntaxTrees.Edges }
 
+[<TailCall>]
 let rec private extractIdent = function
     | SynSimplePat.Id(ident, _, isCompilerGenerated, _, _, _) -> (ident, isCompilerGenerated)
     | SynSimplePat.Attrib(simplePattern, _, _)
@@ -684,13 +685,14 @@ let private (|SuggestingReplacementOfLambda|OtherSuggestion|) = function
     | _ -> OtherSuggestion
 
 let [<Literal>] private MaxBreadcrumbs = 6
-let private suggestions = ResizeArray()
 
 let rule config =
     /// Searches the abstract syntax array for possible hint matches using the hint trie.
     /// Any possible matches that are found will be given to the callback function `notify`,
     /// any matches found are not guaranteed and it's expected that the caller verify the match.
     let runner (args:AstNodeRuleParams) =
+        let suggestions = ResizeArray()
+
         let confirmFuzzyMatch (hint:HintParserTypes.Hint) =
             let hintError (hintErrorConfig: HintErrorConfig) =
                 let toStringConfig =

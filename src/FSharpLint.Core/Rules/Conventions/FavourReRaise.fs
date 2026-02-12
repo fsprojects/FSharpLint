@@ -39,12 +39,12 @@ let rec private checkExpr (expr) maybeIdent =
     | SynExpr.IfThenElse (_, expression, _, _, _, _, _) -> checkExpr expression maybeIdent
     | _ -> Array.empty
 
-let private runner (args: AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Expression expr -> checkExpr expr None
-    | _ -> Array.empty
-
 let rule =
+    let runner (args: AstNodeRuleParams) =
+        match args.AstNode with
+        | AstNode.Expression expr -> checkExpr expr None
+        | _ -> Array.empty
+
     AstNodeRule
         {
             Name = "FavourReRaise"
