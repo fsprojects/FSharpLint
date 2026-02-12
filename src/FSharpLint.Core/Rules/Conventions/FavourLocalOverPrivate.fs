@@ -23,6 +23,8 @@ let private collectBindings (bindings: list<SynBinding>) =
             match binding with
             | SynBinding(_, _, _, _, attributes, _, _, SynPat.LongIdent(SynLongIdent(idents, _, _), _, _, _, accessibility, _), _, expr, _, _, _) ->
                 Some { Identifier = List.last idents; Expression = expr; Accessibility = accessibility; Attributes = attributes }
+            | SynBinding(_, _, _, _, attributes, _, _, SynPat.Named(SynIdent(ident, _), _, accessibility, _), _, expr, _, _, _) ->
+                Some { Identifier = ident; Expression = expr; Accessibility = accessibility; Attributes = attributes }
             | _ -> None
         )
 
