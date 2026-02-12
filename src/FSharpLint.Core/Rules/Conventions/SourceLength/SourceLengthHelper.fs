@@ -17,11 +17,6 @@ type private MultilineCommentMarker =
     | Begin of charIndex: int
     | End of charIndex: int
 
-let private singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
-
-let private multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
-let private multilineCommentMarkerRegexCaptureGroupLength = 3
-
 [<TailCall>]
 let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker>) (stack: List<int>) : List<int*int> =
     match toProcess with
@@ -35,6 +30,11 @@ let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker
         | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
 let checkSourceLengthRule (config:Config) range fileContents errorName (skipRanges: array<Range>) =
+    let singleLineCommentRegex = Regex(@"^[\s]*\/\/.*$", RegexOptions.Multiline)
+
+    let multilineCommentMarkerRegex = Regex @"(\(\*[^\)])|([^\(]\*\))"
+    let multilineCommentMarkerRegexCaptureGroupLength = 3
+
     let error name lineCount actual =
         let errorFormatString = Resources.GetString("RulesSourceLengthError")
         String.Format(errorFormatString, name, lineCount, actual)

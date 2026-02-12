@@ -21,6 +21,8 @@ type private Replacement =
     | PatternMatch
     | Function of functionName:string
 
+// There is no need to recreate the map on every function call.
+//fsharplint:disable FavourLocalOverPrivate
 let private partialFunctionIdentifiers =
     Map.ofList
         [
@@ -71,6 +73,7 @@ let private partialFunctionIdentifiers =
             ("List.reduceBack", Function "List.foldBack")
             ("List.pick", Function "List.tryPick")
         ]
+//fsharplint:disable FavourLocalOverPrivate
 
 /// List of tuples (fully qualified instance member name, namespace, argument compiled type name, replacement strategy)
 let private partialInstanceMemberIdentifiers =

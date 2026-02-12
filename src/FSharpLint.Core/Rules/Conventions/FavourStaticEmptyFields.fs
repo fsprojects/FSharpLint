@@ -84,14 +84,13 @@ let rec private processExpressions (errorsSoFar: array<WarningDetails>) (args: A
         processExpressions errorsSoFar args tail
     | [] -> errorsSoFar
 
-let private runner (args: AstNodeRuleParams) =
-    match args.AstNode with
-    | AstNode.Expression(expr) -> 
-        processExpressions Array.empty args (List.singleton expr)
-    | _ -> Array.empty
-
-
 let rule =
+    let runner (args: AstNodeRuleParams) =
+        match args.AstNode with
+        | AstNode.Expression(expr) -> 
+            processExpressions Array.empty args (List.singleton expr)
+        | _ -> Array.empty
+
     AstNodeRule
         {
             Name = "FavourStaticEmptyFields"

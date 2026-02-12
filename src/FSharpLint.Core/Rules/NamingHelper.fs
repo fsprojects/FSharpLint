@@ -96,8 +96,6 @@ let private isNotDoubleBackTickedIdent =
 
     isDoubleBackTickedIdent >> not
 
-let private notOperator = isOperator >> not
-
 let isPascalCase (identifier:string) =
     let withoutUnderscorePrefix = identifier.TrimStart '_'
     if withoutUnderscorePrefix.Length = 0 then true
@@ -209,6 +207,8 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
             |]
 
     let checkIdentifier (namingConfig:NamingConfig) (identifier:Ident) (idText:string) =
+        let notOperator = isOperator >> not
+
         if notOperator idText && isNotDoubleBackTickedIdent identifier then
             checkIdentifierPart namingConfig identifier idText
             |> Array.map (fun (message, suggestedFix) ->

@@ -7,12 +7,7 @@ open FSharpLint.Framework.Suggestion
 open FSharpLint.Framework.Ast
 open FSharpLint.Framework.Rules
 
-let private isAsyncCompExpr = function
-    | SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.ComputationExpr _), _)
-        when compExprName.idText = "async" ->
-        true
-    | _ -> false
-
+[<TailCall>]
 let rec private getIdentFromSynPat = function
     | SynPat.LongIdent (longDotId=longDotId) ->
         longDotId
@@ -23,13 +18,20 @@ let rec private getIdentFromSynPat = function
     | _ ->
         None
 
-let private getFunctionNameFromAsyncCompExprBinding = function
-    | SynBinding (headPat=headPat; expr=expr) when isAsyncCompExpr expr ->
-        getIdentFromSynPat headPat
-    | _ ->
-        None
-
 let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangExpr:SynExpr) breadcrumbs =
+    let getFunctionNameFromAsyncCompExprBinding = 
+        let isAsyncCompExpr = function
+            | SynExpr.App (_, _, (SynExpr.Ident compExprName), (SynExpr.ComputationExpr _), _)
+                when compExprName.idText = "async" ->
+                true
+            | _ -> false
+
+        function
+        | SynBinding (headPat=headPat; expr=expr) when isAsyncCompExpr expr ->
+            getIdentFromSynPat headPat
+        | _ ->
+            None
+    
     let doTokenRange = Range.mkRange "do!" (Position.mkPos range.StartLine range.StartColumn) (Position.mkPos range.StartLine (range.StartColumn + 3))
 
     let suggestFix () = 
