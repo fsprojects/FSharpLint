@@ -36,6 +36,28 @@ jobs:
     - name: Run FSharpLint on itself
       run: make selfcheck
 
+  testToolInvocation:
+    needs: buildAndTest
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    - name: Restore tools
+      run: dotnet tool restore
+    - name: Build and pack
+      run: dotnet fsi build.fsx -t Pack
+    - name: Remove global.json to allow using .NET 10 SDK (for dnx)
+      run: rm --force global.json
+    - name: Run fsharplint as tool using dnx
+      run: dnx fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --source ./out/ --prerelease --yes --interactive false
 
   packReleaseBinaries:
     needs: buildAndTest
@@ -161,11 +183,11 @@ jobs:
           </configuration>
           EOF
       - name: Install FSharpLint from downloaded binaries
-        run: dotnet tool install --global dotnet-fsharplint --prerelease --framework net8.0
+        run: dotnet tool install --global fslint --prerelease --framework net8.0
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project (net8.0 only)
-        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
+        run: fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj --framework net8.0
         
   testReleaseBinariesWithDotNet10:
     needs: packReleaseBinaries
@@ -195,8 +217,8 @@ jobs:
           </configuration>
           EOF
       - name: Install FSharpLint from downloaded binaries
-        run: dotnet tool install --global dotnet-fsharplint --prerelease
+        run: dotnet tool install --global fslint --prerelease
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Lint FSharpLint.Console project
-        run: dotnet fsharplint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
+        run: fslint lint ./src/FSharpLint.Console/FSharpLint.Console.fsproj
