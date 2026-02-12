@@ -58,7 +58,7 @@ let checkRecursiveAsyncFunction (args:AstNodeRuleParams) (range:Range) (doBangEx
             match crumb with
             | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _)) ->
                 bindings
-            | AstNode.Expression (SynExpr.LetOrUse (true, false, bindings, _, _, _)) ->
+            | AstNode.Expression (SynExpr.LetOrUse (true, false, _, false, bindings, _, _, _)) ->
                 bindings
             | _ -> List.Empty)
         |> List.choose getFunctionNameFromAsyncCompExprBinding

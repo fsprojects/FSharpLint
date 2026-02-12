@@ -145,7 +145,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                     | SynArgPats.NamePatPairs(pairs, _, _) ->
                         let argsList =
                             pairs
-                            |> List.map (fun (ident, _, _) -> ident.idRange)
+                            |> List.map _.Range
                             |> List.choose (fun range -> ExpressionUtilities.tryFindTextOfRange range args.FileContent)
                         " " + String.Join(" ", argsList)
                     | SynArgPats.Pats([ SynPat.Paren(SynPat.Const(SynConst.Unit, _), _) ]) ->
