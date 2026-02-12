@@ -9,6 +9,8 @@ open FSharpLint.Rules.Utilities.LibraryHeuristics
 open Helper.Naming.Asynchronous
 open FSharp.Compiler.Syntax
 open FSharp.Compiler.Text
+open Utilities.TypedTree
+open FSharp.Compiler.Symbols
 
 [<RequireQualifiedAccess>]
 type Config = {
@@ -16,8 +18,8 @@ type Config = {
 }
 
 type private ReturnType =
-    | Async of typeParam: Option<SynType> * isLowercase: bool
-    | Task of typeParam: Option<SynType>
+    | Async of typeParamString: Option<string> * isLowercase: bool
+    | Task of typeParamString: Option<string>
 
 type private Func =
     {
@@ -49,11 +51,6 @@ let runner (config: Config) (args: AstNodeRuleParams) =
             | Some text -> text
             | None -> failwithf "Invalid range: %A" func.Range
 
-        let tryGetTypeParamString (maybeTypeParam: Option<SynType>) =
-            match maybeTypeParam with
-            | Some typeParam -> ExpressionUtilities.tryFindTextOfRange typeParam.Range args.FileContent
-            | None -> None
-
         let message =
             match func.ReturnType with
             | Async (typeParam, isLowercase) -> 
@@ -69,7 +66,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
                     else
                         newFuncName
                 let typeDefString =
-                    match tryGetTypeParamString typeParam with
+                    match typeParam with
                     | Some "unit" -> ": Task"
                     | Some str -> $": Task<{str}>"
                     | None -> String.Empty
@@ -84,7 +81,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
             | Task typeParam ->
                 let newFuncName = funcDefinitionString.Replace(func.BaseName + asyncSuffixOrPrefix, asyncSuffixOrPrefix + func.BaseName)
                 let typeDefString =
-                    match tryGetTypeParamString typeParam with
+                    match typeParam with
                     | Some str -> $": Async<{str}>"
                     | None -> String.Empty
                 String.Format(
@@ -112,16 +109,36 @@ let runner (config: Config) (args: AstNodeRuleParams) =
             | None
             | Some(SynAccess.Public _) -> true
             | _ -> config.Mode = AllAPIs
+        
+        let tryGetReturnTypeParamDisplayName (displayContext: Option<FSharpDisplayContext>) (returnType: FSharpType) =
+            match tryGetLastGenericArg returnType with
+            | Some paramType ->
+                Some <| paramType.Format (displayContext |> Option.defaultValue FSharpDisplayContext.Empty)
+            | _ -> None
 
         let tryGetFunction (binding: SynBinding) =
             match binding with
-            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, accessibility, _), returnInfo, _, _, _, _)
+            | SynBinding(_, _, _, _, _, _, _, SynPat.LongIdent(funcIdent, _, _, argPats, accessibility, _), returnInfo, _, bindingRange, _, _)
                 when isAccessibilityLevelApplicable accessibility && not argPats.Patterns.IsEmpty ->
                 let returnTypeParam =
                     match returnInfo with
                     | Some(SynBindingReturnInfo(SynType.App(SynType.LongIdent(SynLongIdent _), _, [ typeParam ], _, _, _, _), _, _, _)) ->
-                        Some typeParam 
-                    | _ -> None
+                        ExpressionUtilities.tryFindTextOfRange typeParam.Range args.FileContent
+                    | _ ->
+                        match args.CheckInfo with
+                        | Some checkInfo ->
+                            match getFunctionReturnType checkInfo args.Lines funcIdent with
+                            | Some returnType ->
+                                match returnType with
+                                | FSharpTypeAsync
+                                | FSharpTypeTask ->
+                                    tryGetReturnTypeParamDisplayName
+                                        (checkInfo.GetDisplayContextForPos bindingRange.End)
+                                        returnType
+                                | FSharpTypeTaskNonGeneric -> Some "unit"
+                                | FSharpTypeNonAsync -> None
+                            | None -> None
+                        | None -> None
                 
                 let funcArgs =
                     match argPats with

@@ -1,5 +1,43 @@
 ﻿module FSharpLint.Rules.Utilities
 
+open FSharp.Compiler.CodeAnalysis
+open FSharp.Compiler.Symbols
+open FSharp.Compiler.Syntax
+
+module TypedTree =
+    let tryGetLastGenericArg (fSharpType: FSharpType) =
+        Seq.tryLast fSharpType.GenericArguments
+
+    [<TailCall>]
+    let rec private getReturnType (fSharpType: FSharpType) =
+        if fSharpType.IsFunctionType then
+            match tryGetLastGenericArg fSharpType with
+            | Some argType -> getReturnType argType
+            | None -> fSharpType
+        else
+            fSharpType
+
+    let getFunctionReturnType
+        (checkInfo: FSharpCheckFileResults)
+        (lines: array<string>)
+        (funcIdent: SynLongIdent) : Option<FSharpType> =
+        let maybeSymbolUse =
+            match List.tryLast funcIdent.LongIdent with
+            | Some ident ->
+                checkInfo.GetSymbolUseAtLocation(
+                    ident.idRange.EndLine,
+                    ident.idRange.EndColumn,
+                    lines.[ident.idRange.EndLine - 1],
+                    List.singleton ident.idText)
+            | None -> None
+        match maybeSymbolUse with
+        | Some symbolUse ->
+            match symbolUse.Symbol with
+            | :? FSharpMemberOrFunctionOrValue as func when func.IsFunction ->
+                Some <| getReturnType func.FullType
+            | _ -> None
+        | _ -> None
+
 module LibraryHeuristics =
     type LibraryHeuristicResultByProjectName =
         | Likely
