@@ -27,12 +27,14 @@
 
   <ItemGroup>
     <Compile Include="Output.fs" />
+    <Compile Include="Sarif.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Argu" />
     <PackageReference Include="FSharp.Core" />
+	<PackageReference Include="Sarif.Sdk" />
   </ItemGroup>
 
   <ItemGroup>
