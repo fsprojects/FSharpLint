@@ -125,6 +125,7 @@ module Lint =
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
             ProjectCheckResults: FSharpCheckProjectResults option
+            ProjectOptions: Lazy<FSharpProjectOptions option>
             FilePath: string
             FileContent: string
             Lines: string[]
@@ -149,6 +150,7 @@ module Lint =
                     Lines = config.Lines
                     CheckInfo = config.TypeCheckResults
                     ProjectCheckInfo = config.ProjectCheckResults
+                    ProjectOptions = config.ProjectOptions
                     GlobalConfig = config.GlobalConfig
                 }
             // Build state for rules with context.
@@ -263,6 +265,10 @@ module Lint =
                         GlobalConfig = enabledRules.GlobalConfig
                         TypeCheckResults = fileInfo.TypeCheckResults
                         ProjectCheckResults = fileInfo.ProjectCheckResults
+                        ProjectOptions = lazy( 
+                            fileInfo.ProjectCheckResults
+                            |> Option.map _.ProjectContext.ProjectOptions
+                        )
                         FilePath = fileInfo.File
                         FileContent = fileInfo.Text
                         Lines = lines

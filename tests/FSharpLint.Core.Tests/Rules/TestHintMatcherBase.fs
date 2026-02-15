@@ -65,6 +65,7 @@ type TestHintMatcherBase () =
                         GlobalConfig = resolvedGlobalConfig
                         TypeCheckResults = checkResult
                         ProjectCheckResults = None
+                        ProjectOptions = Lazy<_>()
                         FilePath = (Option.defaultValue String.Empty maybeFileName)
                         FileContent = input
                         Lines = (input.Split("\n"))
