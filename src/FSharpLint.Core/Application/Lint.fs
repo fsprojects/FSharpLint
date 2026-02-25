@@ -436,9 +436,9 @@ module Lint =
 
                     Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
 
-                let checker = FSharpChecker.Create(keepAssemblyContents=true)
+                let checker = FSharpChecker.Create(keepAssemblyContents=true, parallelReferenceResolution=true)
 
-                let parseFilesInProject files projectOptions = async {
+                let parseFilesInProject files (projectOptions:FSharpProjectOptions) = async {
                     let lintInformation =
                         { Configuration = config
                           CancellationToken = optionalParams.CancellationToken
@@ -452,21 +452,31 @@ module Lint =
                             Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
                         |> Option.defaultValue false
 
-                    let! parsedFiles =
-                        files
-                        |> List.filter (not << isIgnoredFile)
+                    let filesToLint = files |> List.filter (not << isIgnoredFile)
+
+                    // Run project check and per-file parse+check concurrently.
+                    // The project check warms the FCS incremental builder; parallel
+                    // per-file checks share the builder and benefit from its warmed state.
+                    let projectCheckAsync = checker.ParseAndCheckProject projectOptions
+                    let perFileAsync =
+                        filesToLint
                         |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
-                        |> Async.Sequential
+                        |> Async.Parallel
+
+                    let! results = Async.Parallel [|
+                        async { let! r = projectCheckAsync in return box r }
+                        async { let! r = perFileAsync in return box r }
+                    |]
+                    let projectCheckResults = results.[0] :?> FSharpCheckProjectResults
+                    let parsedFiles = results.[1] :?> ParseFile.ParseFileResult<ParseFile.FileParseInfo>[]
 
                     let failedFiles = Array.choose getFailedFiles parsedFiles
 
                     if Array.isEmpty failedFiles then
-                        let! projectCheckResults = checker.ParseAndCheckProject projectOptions
-
                         parsedFiles
                         |> Array.choose getParsedFiles
-                        |> Array.iter (fun fileParseResult -> 
-                            lint 
+                        |> Array.iter (fun fileParseResult ->
+                            lint
                                 lintInformation
                                 { fileParseResult with ProjectCheckResults = Some projectCheckResults })
 
