@@ -436,9 +436,12 @@ module Lint =
 
                     Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
 
+                // parallelReferenceResolution=true was measured here and intentionally left off:
+                // on FCS 43.9.201 it gave no wall-clock improvement and ~20% more CPU
+                // (FsHotWatch.slnx: ~56s/74 CPU-s without it vs ~58s/94 CPU-s with it).
                 let checker = FSharpChecker.Create(keepAssemblyContents=true)
 
-                let parseFilesInProject files projectOptions = async {
+                let parseFilesInProject files (projectOptions:FSharpProjectOptions) = async {
                     let lintInformation =
                         { Configuration = config
                           CancellationToken = optionalParams.CancellationToken
@@ -452,21 +455,27 @@ module Lint =
                             Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
                         |> Option.defaultValue false
 
+                    let filesToLint = files |> List.filter (not << isIgnoredFile)
+
+                    // Check the whole project first to fully warm the FCS incremental
+                    // builder, then run the per-file checks in parallel against that
+                    // now-complete builder. Doing the project check concurrently with
+                    // the per-file checks races on the shared builder and yields
+                    // non-deterministic type info for typed rules; awaiting it first
+                    // keeps the parallel speed-up while making results deterministic.
+                    let! projectCheckResults = checker.ParseAndCheckProject projectOptions
                     let! parsedFiles =
-                        files
-                        |> List.filter (not << isIgnoredFile)
+                        filesToLint
                         |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
-                        |> Async.Sequential
+                        |> Async.Parallel
 
                     let failedFiles = Array.choose getFailedFiles parsedFiles
 
                     if Array.isEmpty failedFiles then
-                        let! projectCheckResults = checker.ParseAndCheckProject projectOptions
-
                         parsedFiles
                         |> Array.choose getParsedFiles
-                        |> Array.iter (fun fileParseResult -> 
-                            lint 
+                        |> Array.iter (fun fileParseResult ->
+                            lint
                                 lintInformation
                                 { fileParseResult with ProjectCheckResults = Some projectCheckResults })
 
