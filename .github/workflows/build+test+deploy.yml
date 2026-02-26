@@ -17,7 +17,7 @@ on:
 jobs:
   buildAndTest:
     # Only run if the event is NOT 'schedule' (e.g., 'push') OR if the event is 'schedule' AND the repo is not a fork
-    if: ${{ (github.event_name != 'schedule') || (github.event_name == 'schedule' && github.event.repository.fork == false) }}
+    if: ${{ (github.event_name != 'schedule') || github.event.repository.fork == false }}
 
     strategy:
       matrix:
