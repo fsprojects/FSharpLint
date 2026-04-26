@@ -23,6 +23,14 @@ module Dictionary =
 
         dict.Add(key, value)
 
+module Array =
+
+    let inline mapIfNotEmpty ([<InlineIfLambda>] mapping: 'Source -> 'Dest) (array: 'Source array) =
+        if Array.isEmpty array then
+            Array.empty
+        else
+            Array.map mapping array
+
 module ExpressionUtilities =
 
     open System
