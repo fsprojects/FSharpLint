@@ -150,16 +150,16 @@ module String =
     open System.IO
 
     [<TailCall>]
-    let rec private iterateLines (lines: ResizeArray<string*int*bool>) (readLine: unit -> Option<string>) currentLine index =
+    let rec private iterateLines (lines: ResizeArray<string*int*bool>) (readLine: unit -> ValueOption<string>) currentLine index =
         match currentLine with
-        | Some line ->
+        | ValueSome line ->
             let nextLine = readLine ()
-            let isLastLine = Option.isNone nextLine
+            let isLastLine = ValueOption.isNone nextLine
 
             lines.Add(line, index, isLastLine)
 
             iterateLines lines readLine nextLine (index + 1)
-        | None -> ()
+        | ValueNone -> ()
 
     let toLines input =
         let lines = ResizeArray()
@@ -167,8 +167,8 @@ module String =
 
         let readLine () =
             match reader.ReadLine() with
-            | null -> None
-            | line -> Some line
+            | null -> ValueNone
+            | line -> ValueSome line
 
         iterateLines lines readLine (readLine ()) 0
 
