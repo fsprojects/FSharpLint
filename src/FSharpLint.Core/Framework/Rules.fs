@@ -97,12 +97,12 @@ let toWarning (identifier:string) (ruleName:string) (filePath:string) (lines:str
 
 let runAstNodeRule (rule:RuleMetadata<AstNodeRuleConfig>) (config:AstNodeRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.mapIfNotEmpty (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRuleWithContext (rule:RuleMetadata<LineRuleConfigWithContext<'Context>>) (context:'Context) (config:LineRuleParams) =
     rule.RuleConfig.Runner context config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.mapIfNotEmpty (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
 
 let runLineRule (rule:RuleMetadata<LineRuleConfig>) (config:LineRuleParams) =
     rule.RuleConfig.Runner config
-    |> Array.map (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
+    |> Array.mapIfNotEmpty (toWarning rule.Identifier rule.Name config.FilePath config.Lines)
