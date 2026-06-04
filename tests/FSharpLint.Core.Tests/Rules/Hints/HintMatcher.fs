@@ -982,3 +982,14 @@ res
         this.Parse(source)
         Assert.AreEqual(expected, this.ApplyQuickFix source)
 
+    /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/856
+    [<Test>]
+    member this.``Interpolated strings with different literal text content should be treated as diffrerent``() =
+        this.SetConfig(["if x then y else y ===> y"])
+
+        this.Parse """
+let label (p: int) (currentPage: int) =
+    if p = currentPage then $"Page {p}" else $"Goto page {p}"
+"""
+        
+        Assert.That this.NoErrorsExist
