@@ -202,6 +202,9 @@ module AbstractSyntaxArray =
         | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> hash x
         | Pattern(SynPat.Const(SynConst.UIntPtr(x), _))
         | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> hash x
+        | Expression(SynExpr.InterpolatedString(contents, _, _)) ->
+            contents 
+            |> List.fold (fun acc part -> acc ^^^ (part.ToString() |> hash)) 0
         | _ -> 0
 
     [<Struct; NoEquality; NoComparison>]
