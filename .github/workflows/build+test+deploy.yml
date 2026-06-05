@@ -47,8 +47,9 @@ jobs:
     - uses: actions/checkout@v4
 
       with:
-        # we need fetch-depth: 0 because we use the `git describe` command in build.fsx
+        # we need these fetch options because we use the `git describe` command in build.fsx
         fetch-depth: 0
+        fetch-tags: true
 
     - name: Restore tools
       run: dotnet tool restore
@@ -71,6 +72,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+      with:
+        # we need these fetch options because we use the `git describe` command in build.fsx
+        fetch-depth: 0
+        fetch-tags: true
+
     - name: Restore tools
       run: dotnet tool restore
     - name: Download artifact
