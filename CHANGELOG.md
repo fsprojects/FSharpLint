@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2026-06-05
+
+- Fix: hint false positive for interpolated strings without sprintf #857 #856 [@webwarrior-ws]
+- Added new rule SynchronousFunctionNames that flags synchronous functions marked with async prefixes or suffixes in their names #834 #837 #843 [@webwarrior-ws]
+- Added new rule AsynchronousFunctionNames that flags asynchronous functions that lack async prefixes or suffixes in their names #835 #837 #842 #843 [@webwarrior-ws]
+- Added new rule SimpleAsyncComplementaryHelpers that recommends adding Async-based to Task-based async functions, and viceversa #841 #843 [@webwarrior-ws]
+- Improve lib name heuristics to try determining if a project is a library or not #839 [@knocte]
+- UX: Print number of enabled/total/disabled rules before linting #833 [@webwarrior-ws]
+- Feature: Allow wildcard support to also match .fsproj, .sln and .slnx files #815 #831 [@webwarrior-ws]
+- Added new rule FavourNamedMembers that recommends to use names for DU members #719 #829 #830 [@webwarrior-ws] [@knocte]
+- Added new rule DiscourageStringInterpolationWithStringFormat that will recommend sprintf over String.Format #542 #547 #589 #821 [@janus] [@parhamsaremi] [@webwarrior-ws] [@knocte]
+- Fix: false negative in AvoidTooShortNames rule #825 #828 [@webwarrior-ws]
+- Chore: Housekeeping #824 [@knocte]
+- Added new rule DisallowShadowing #112 #676 [@webwarrior-ws] [@knocte]
+- Added new rule FavourNestedFunctions that recommends private functions to rather be local/nested functions #638 #648 #823 #826 [@webwarrior-ws]
+- Fix: false negative in EnsureTailCallDiagnosticsInRecursiveFunctions (was not checking nested functions) #819 [@webwarrior-ws]
+- Refactor: use (immutable) Map instead of (mutable) Dictionary in some hint-related functions #820 [@webwarrior-ws]
+- Refactor: add more warnings to build and improve var reuse #817 #818 #711 [@knocte] [@BennieCopeland]
+- Docs: improve UsedUnderscorePrefixedElements rationale #817 [@knocte]
+- Added new rule NoAsyncRunSynchronouslyInLibrary that flags usage of Async.RunSynchronously in library projects #785 [@webwarrior-ws]
+- Refactor: exit code handling in Console project #813 [@knocte]
+- Fix: false negative of rule AvoidTooShortNames #592 #593 #812 [@parhamsaremi] [@knocte] [@webwarrior-ws]
+- Refactor: re-enable NoPartialFunctions check for our own SelfCheck build target, using FCS workaround #810 [@webwarrior-ws] [@knocte]
+
 ## [0.26.10] - 2025-12-30
 
 - AvoidSinglePipeOperator: fix false positive, allowing single pipe operator with multiline argument #808 [@webwarrior-ws]
