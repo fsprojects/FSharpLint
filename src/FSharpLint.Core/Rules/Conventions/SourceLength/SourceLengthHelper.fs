@@ -69,7 +69,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName (skipRang
         let sourceCodeLines = sourceCode.Split([| '\n'; '\r' |]) 
         let blankLinesCount = 
             sourceCodeLines
-            |> Seq.filter (fun line -> line.AsSpan().IsWhiteSpace())
+            |> Seq.filter String.IsNullOrWhiteSpace
             |> Seq.length
 
         let skippedLinesCount =
