@@ -274,6 +274,7 @@ Target.create "SelfCheck" (fun _ ->
             "trailingWhitespaceOnLine"
 
             // TODO: we should enable at some point
+            "typePrefixing"
             "unnestedFunctionNames"
             "nestedFunctionNames"
             "nestedStatements"
