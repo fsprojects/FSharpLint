@@ -265,9 +265,18 @@ module Lint =
                         GlobalConfig = enabledRules.GlobalConfig
                         TypeCheckResults = fileInfo.TypeCheckResults
                         ProjectCheckResults = fileInfo.ProjectCheckResults
-                        ProjectOptions = lazy( 
+                        // FSharpProjectContext.ProjectOptions is unavailable by design when
+                        // the check results come from FCS's TransparentCompiler (the getter
+                        // throws). Degrade to None so rules needing project options (e.g. the
+                        // library heuristics) fall back gracefully instead of failing the
+                        // whole file with an internal error.
+                        ProjectOptions = lazy(
                             fileInfo.ProjectCheckResults
-                            |> Option.map _.ProjectContext.ProjectOptions
+                            |> Option.bind (fun projectCheckResults ->
+                                try
+                                    Some projectCheckResults.ProjectContext.ProjectOptions
+                                with _ ->
+                                    None)
                         )
                         FilePath = fileInfo.File
                         FileContent = fileInfo.Text
