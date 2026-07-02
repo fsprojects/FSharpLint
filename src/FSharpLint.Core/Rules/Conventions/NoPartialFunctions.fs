@@ -173,7 +173,7 @@ let rec private tryFindTypedExpression (range: Range) (expressions: List<FSharpE
             |> List.collect (fun (_, imlps) -> imlps)
         let exprs =
             List.append overrides interfaceImlps
-            |> Seq.cast<FSharpExpr>
+            |> Seq.map (fun expr -> expr.Body)
             |> Seq.toList
         tryFindTypedExpression range (baseCallExpr :: exprs @ rest)
     | FSharpExprPatterns.TraitCall(_sourceTypes, _traitName, _typeArgs, _typeInstantiation, _argTypes, argExprs) :: rest -> 
