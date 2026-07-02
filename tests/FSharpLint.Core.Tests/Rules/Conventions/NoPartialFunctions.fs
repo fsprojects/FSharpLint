@@ -182,6 +182,24 @@ module Program =
 """
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Regression test for object expressions``() =
+        this.Parse """
+type Foo =
+    abstract Bar: unit -> unit
+
+let host = 
+    { new Foo with
+        member _.Bar() =
+            () }
+
+let x = 
+    JsonDocument.Parse(responseBody).RootElement |> ignore
+    Option.ofObj(host).Value
+"""
+        
+        Assert.IsTrue this.ErrorsExist
 (*
     // Examples for future additions, see 'Foo.Bar.Baz' in partialInstanceMemberIdentifiers in .Core/.../NoPartialFunctions.fs
 
