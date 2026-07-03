@@ -28,6 +28,11 @@ module ParseFile =
 
         /// Path to the file.
         File:string
+
+        /// Path to the project file (.fsproj) this file belongs to, when known.
+        /// Callers can supply this so the library-heuristic rules work even when the
+        /// project options cannot be derived from the check results.
+        ProjectFileName:string option
     }
 
     [<NoComparison>]
@@ -54,6 +59,7 @@ module ParseFile =
                     TypeCheckResults = Some(typeCheckResults)
                     ProjectCheckResults = None
                     File = file
+                    ProjectFileName = None
                 }
         | FSharpCheckFileAnswer.Aborted -> return Failed(AbortedTypeCheck)
     }

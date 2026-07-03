@@ -31,7 +31,7 @@ type AstNodeRuleParams =
       Lines:string []
       CheckInfo:FSharpCheckFileResults option
       ProjectCheckInfo:FSharpCheckProjectResults option
-      ProjectOptions: Lazy<FSharpProjectOptions option>
+      ProjectFileName: Lazy<string option>
       GlobalConfig:GlobalRuleConfig }
 
 type LineRuleParams =
