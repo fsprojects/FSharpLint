@@ -57,6 +57,7 @@ let private partialFunctionIdentifiers =
             ("Seq.reduce", Function "Seq.fold")
             ("Seq.reduceBack", Function "Seq.foldBack")
             ("Seq.pick", Function "Seq.tryPick")
+            ("Seq.cast", Function "Seq.choose tryUnbox")
 
             // List
             ("List.exactlyOne", Function "List.tryExactlyOne")
