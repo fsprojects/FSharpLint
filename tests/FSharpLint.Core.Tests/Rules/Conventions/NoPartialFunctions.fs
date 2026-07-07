@@ -172,6 +172,16 @@ if foo.Head 1 then
         this.AssertErrorWithMessageExists("Consider using 'List.tryHead' instead of partial function/method 'List.Head'.")
 
     [<Test>]
+    member this.``Error for Seq.cast``() =
+        this.Parse """
+let foo = [ box "Hello"; box 42 ]
+let bar = Seq.cast<string> foo
+"""
+
+        Assert.IsTrue this.ErrorsExist
+        this.AssertErrorWithMessageExists("Consider using 'Seq.choose tryUnbox' instead of partial function/method 'Seq.cast'.")
+
+    [<Test>]
     member this.``Regression found when parsing Console/Program_fs``() =
         this.Parse """
 module Program =
