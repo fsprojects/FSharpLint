@@ -163,49 +163,68 @@ module AbstractSyntaxArray =
         | [] -> 0
 
     /// Get hash code of an ast node to be used for the fuzzy match of hints against the ast.
-    let private getHashCode node =
-        match node with
-        | Identifier(idents, _) -> getIdentHash idents
-        | Pattern(SynPat.Const(SynConst.Bool(x), _))
-        | Expression(SynExpr.Const(SynConst.Bool(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Byte(x), _))
-        | Expression(SynExpr.Const(SynConst.Byte(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Bytes(x, _, _), _))
-        | Expression(SynExpr.Const(SynConst.Bytes(x, _, _), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Char(x), _))
-        | Expression(SynExpr.Const(SynConst.Char(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Decimal(x), _))
-        | Expression(SynExpr.Const(SynConst.Decimal(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Double(x), _))
-        | Expression(SynExpr.Const(SynConst.Double(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Int16(x), _))
-        | Expression(SynExpr.Const(SynConst.Int16(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Int32(x), _))
-        | Expression(SynExpr.Const(SynConst.Int32(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Int64(x), _))
-        | Expression(SynExpr.Const(SynConst.Int64(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.IntPtr(x), _))
-        | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.SByte(x), _))
-        | Expression(SynExpr.Const(SynConst.SByte(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.Single(x), _))
-        | Expression(SynExpr.Const(SynConst.Single(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.String(x, _, _), _))
-        | Expression(SynExpr.Const(SynConst.String(x, _, _), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.UInt16(x), _))
-        | Expression(SynExpr.Const(SynConst.UInt16(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.UInt16s(x), _))
-        | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.UInt32(x), _))
-        | Expression(SynExpr.Const(SynConst.UInt32(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.UInt64(x), _))
-        | Expression(SynExpr.Const(SynConst.UInt64(x), _)) -> hash x
-        | Pattern(SynPat.Const(SynConst.UIntPtr(x), _))
-        | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) -> hash x
-        | Expression(SynExpr.InterpolatedString(contents, _, _)) ->
-            contents 
-            |> List.fold (fun acc part -> acc ^^^ (part.ToString() |> hash)) 0
-        | _ -> 0
+    [<TailCall>]
+    let rec private getHashCode (acc: int) (nodes: list<AstNode>) =
+        match nodes with
+        | Identifier(idents, _) :: rest -> getHashCode (getIdentHash idents) rest
+        | Pattern(SynPat.Const(SynConst.Bool(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Bool(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Byte(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Byte(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Bytes(x, _, _), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Bytes(x, _, _), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Char(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Char(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Decimal(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Decimal(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Double(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Double(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Int16(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Int16(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Int32(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Int32(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Int64(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Int64(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.IntPtr(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.IntPtr(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.SByte(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.SByte(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.Single(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.Single(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.String(x, _, _), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.String(x, _, _), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.UInt16(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.UInt16(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.UInt16s(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.UInt16s(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.UInt32(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.UInt32(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.UInt64(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.UInt64(x), _)) :: rest -> getHashCode (hash x) rest
+        | Pattern(SynPat.Const(SynConst.UIntPtr(x), _)) :: rest
+        | Expression(SynExpr.Const(SynConst.UIntPtr(x), _)) :: rest -> getHashCode (hash x) rest
+        | Expression(SynExpr.InterpolatedString(contents, _, _)) :: rest ->
+            getHashCode
+                (contents |> List.fold (fun acc part -> acc ^^^ (part.ToString() |> hash)) 0)
+                rest
+        | Expression(SynExpr.Record(_, _, recordFields, _)) :: rest ->
+            let fieldNamesHash =
+                recordFields
+                |> Seq.map 
+                    (function 
+                     | SynExprRecordField.SynExprRecordField((ident, _), _, Some(_), _) -> 
+                        getIdentHash (ident.LongIdent |> List.map (fun each -> each.idText))
+                     | _ -> 0)
+                |> Seq.fold (^^^) 0
+            let fields =
+                recordFields
+                |> List.choose 
+                    (function | SynExprRecordField.SynExprRecordField((_, _), _, maybeExpr, _) -> maybeExpr)
+                |> List.map Expression
+            getHashCode fieldNamesHash (rest @ fields)
+        | [] -> 0
+        | _ :: rest -> getHashCode acc rest
+        ^^^ acc
 
     [<Struct; NoEquality; NoComparison>]
     type private StackedNode(node: AstNode, depth: int) =
@@ -271,7 +290,7 @@ module AbstractSyntaxArray =
             | SyntaxNode.Other -> ()
             | syntaxNode ->
                 possibleSkips.Push (PossibleSkip(nodes.Count, depth))
-                nodes.Add (TempNode(Utilities.hash2 syntaxNode (getHashCode strippedNode), strippedNode))
+                nodes.Add (TempNode(Utilities.hash2 syntaxNode (getHashCode 0 (List.singleton strippedNode)), strippedNode))
 
         tryAddPossibleSkips 0
 
