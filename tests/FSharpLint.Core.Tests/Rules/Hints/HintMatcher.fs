@@ -993,3 +993,27 @@ let label (p: int) (currentPage: int) =
 """
         
         Assert.That this.NoErrorsExist
+
+    [<Test>]
+    member this.``Records with different data should be treated as diffrerent``() =
+        this.SetConfig(["if x then y else y ===> y"])
+
+        this.Parse """
+
+type Text =
+    {
+        Text: string
+    }
+
+let foo =
+    if 2 = 2 then
+        {
+            Text = "foo"
+        }
+    else
+        {
+            Text = "bar"
+        }
+"""
+        
+        Assert.That this.NoErrorsExist
