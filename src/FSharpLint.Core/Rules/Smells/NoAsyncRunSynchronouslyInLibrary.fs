@@ -93,6 +93,8 @@ let isInObsoleteMethodOrFunction parents =
 
 let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDetails> =
     let ruleNotApplicable =
+        args.FilePath.EndsWith ".fsx"
+        ||
         isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
         ||
         match (args.CheckInfo, args.ProjectOptions.Value) with
