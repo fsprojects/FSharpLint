@@ -133,6 +133,17 @@ let Foo() =
 
         this.AssertNoWarnings()
 
+    [<Test>]
+    member this.``Async.RunSynchronously may be used in .fsx files``() =
+        this.Parse("""
+async {
+    return ()
+}
+|> Async.RunSynchronously""",
+            "script.fsx")
+
+        this.AssertNoWarnings()
+
 [<TestFixture>]
 type TestNoAsyncRunSynchronouslyInLibraryHeuristic() =
 
