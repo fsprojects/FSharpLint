@@ -403,15 +403,7 @@ module Lint =
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
     let getConfig (configParam:ConfigurationParam) =
-        match configParam with
-        | Configuration config -> Ok config
-        | FromFile filePath ->
-            try
-                Configuration.loadConfig filePath
-                |> Ok
-            with
-            | ex -> Error (string ex)
-        | Default ->
+        let getDefault () =
             try
                 Configuration.loadConfig $"./{Configuration.SettingsFileName}"
                 |> Ok
@@ -419,6 +411,20 @@ module Lint =
             | :? System.IO.FileNotFoundException ->
                 Ok Configuration.defaultConfiguration
             | ex -> Error (string ex)
+        
+        match configParam with
+        | Configuration config -> Ok config
+        | FromFile filePath ->
+            try
+                match getDefault () with
+                | Ok defaultConfig ->
+                    let partialConfig = Configuration.loadConfig filePath
+                    Configuration.combineConfigs defaultConfig partialConfig |> Ok
+                | Error(_) as err -> err
+            with
+            | ex -> Error (string ex)
+        | Default ->
+            getDefault ()
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.

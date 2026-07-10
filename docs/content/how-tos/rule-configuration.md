@@ -10,7 +10,7 @@ menu_order: 3
 
 The linter by default looks for a file named `fsharplint.json` in the current working directory. Typically you would have this file in the root of your project.
 
-At this moment in time the configuration requires every rule to be added to your file, rather than a typical approach where you would override just the rules you want to change from their defaults. This will be addressed in a future version see: [Issue #488](https://github.com/fsprojects/FSharpLint/issues/488).
+Entries in configuration file override corresponding entries in default configuration, so you only need to specify rules that you want to change from their defaults.
 
 Check out the [default configuration](https://github.com/fsprojects/FSharpLint/blob/master/src/FSharpLint.Core/fsharplint.json) that the tool comes with to see all possible settings and their default values.
 
