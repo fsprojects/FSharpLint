@@ -8,6 +8,7 @@ open FSharpLint.Application.Lint
 open FSharpLint.Framework
 open FSharpLint.Framework.Utilities
 
+[<MemoryDiagnoser>]
 type Benchmark () =
 
     let generateAst source sourceFile =
