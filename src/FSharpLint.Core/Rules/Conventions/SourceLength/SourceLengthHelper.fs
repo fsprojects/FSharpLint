@@ -54,8 +54,9 @@ let checkSourceLengthRule (config:Config) range fileContents errorName (skipRang
         getTopLevelBalancedPairs markers List.Empty
         |> List.fold
             (fun (currSource: string) (startIndex, endIndex) ->
-                currSource.Substring(0, startIndex) 
-                + currSource.Substring(endIndex + multilineCommentMarkerRegexCaptureGroupLength))
+                let left = currSource.AsSpan(0, startIndex) 
+                let right = currSource.AsSpan(endIndex + multilineCommentMarkerRegexCaptureGroupLength)
+                String.Concat(left, right))
             source
 
     match tryFindTextOfRange range fileContents with
