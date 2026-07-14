@@ -28,7 +28,7 @@ let internal getRecursiveFunctionsFromBindings (bindings: List<SynBinding>) =
 
 let internal (|RecursiveFunctions|_|) (astNode: AstNode)  =
     match astNode with
-    | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _)) ->
+    | AstNode.ModuleDeclaration (SynModuleDecl.Let (true, bindings, _, _)) ->
         match getRecursiveFunctionsFromBindings bindings with
         | [] -> None
         | recursiveBindings -> Some recursiveBindings

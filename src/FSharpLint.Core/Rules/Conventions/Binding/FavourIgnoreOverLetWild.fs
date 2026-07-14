@@ -32,8 +32,8 @@ let private runner (args:AstNodeRuleParams) =
     | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, expr, range, _, _)) ->
         let bindingRange  = 
             match args.GetParents(args.NodeIndex) with
-            | AstNode.ModuleDeclaration(SynModuleDecl.Let(_, _, range)) :: _
-            | AstNode.Expression(SynExpr.LetOrUse(_, false, _, _, range, _)) :: _ -> 
+            | AstNode.ModuleDeclaration(SynModuleDecl.Let(_, _, range, _)) :: _
+            | AstNode.Expression(ExpressionUtilities.LetOrUse({Range = range}, false, false)) :: _ -> 
                 Some(range)
             | _ -> None
 

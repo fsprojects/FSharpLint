@@ -37,7 +37,7 @@ let runner args =
                     |> List.exists 
                         (fun decl ->
                             match decl with
-                            | SynModuleDecl.Let(_, bindings, _) ->
+                            | SynModuleDecl.Let(_, bindings, _, _) ->
                                 bindings |> List.exists isBindingOfIdentifierToTemplate
                             | _ -> false)
                 | _ -> false
