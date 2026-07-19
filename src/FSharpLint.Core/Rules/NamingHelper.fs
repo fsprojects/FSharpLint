@@ -223,7 +223,7 @@ let toAstNodeRule (namingRule:RuleMetadata<NamingRuleConfig>) =
 
     let astNodeRunner (args:AstNodeRuleParams) =
         namingRule.RuleConfig.GetIdentifiersToCheck args
-        |> Array.collect (fun (identifier, idText, typeCheck) ->
+        |> Array.collectIfNotEmpty (fun (identifier, idText, typeCheck) ->
             let suggestions = checkIdentifier namingRule.RuleConfig.Config identifier idText
             Array.map (fun suggestion -> { suggestion with TypeChecks = Option.toList typeCheck }) suggestions)
 
