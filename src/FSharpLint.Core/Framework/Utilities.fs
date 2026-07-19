@@ -25,6 +25,14 @@ module Dictionary =
 
 module Array =
 
+    // Calling Array.collect with an empty array causes it to allocate two empty arrays, which causes significant allocations
+    // This wrapper short circuits the empty case by directly returning array.empty
+    let inline collectIfNotEmpty ([<InlineIfLambda>] mapping: 'Source -> 'Dest array) (array: 'Source array) =
+        if Array.isEmpty array then
+            Array.empty
+        else
+            Array.collect mapping array
+
     let inline mapIfNotEmpty ([<InlineIfLambda>] mapping: 'Source -> 'Dest) (array: 'Source array) =
         if Array.isEmpty array then
             Array.empty
