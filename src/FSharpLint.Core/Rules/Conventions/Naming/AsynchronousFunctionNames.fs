@@ -32,7 +32,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
         | _ -> config.Mode = AllAPIs
 
     let likelyhoodOfBeingInLibrary =
-        match args.ProjectOptions.Value with
+        match args.ProjectOptions with
         | Some projectOptions -> howLikelyProjectIsLibrary projectOptions.ProjectFileName
         | None -> Unlikely
 
