@@ -6,6 +6,7 @@ open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
+[<NonParallelizable>]
 type TestConventionsFailwithBadUsage() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(FailwithBadUsage.rule)
 
