@@ -59,6 +59,56 @@ module TestApi =
             Assert.Less(result, 250)
             fprintf TestContext.Out "Average runtime of linter on parsed file: %d (milliseconds)."  result
 
+        /// Regression: analyzer hosts built on FCS's TransparentCompiler
+        /// supply ProjectCheckResults whose FSharpProjectContext.ProjectOptions getter
+        /// throws by design. Rules forcing the two-phase ProjectOptions lazy (the library
+        /// heuristics in AsynchronousFunctionNames & co.) then failed the whole file with
+        /// an internal error. The lazy must degrade to None instead.
+        [<Test>]
+        member _.``Lint parsed TransparentCompiler results without internal failure``() =
+            let source = "module TransparentCompilerRepro\n\nlet answer = async { return 42 }\n"
+            let transparentChecker = FSharpChecker.Create(keepAssemblyContents = true, useTransparentCompiler = true)
+            let sourceText = SourceText.ofString source
+
+            let (options, _diagnostics) =
+                transparentChecker.GetProjectOptionsFromScript(sourceFile, sourceText)
+                |> Async.RunSynchronously
+
+            let parseResults, checkAnswer =
+                transparentChecker.ParseAndCheckFileInProject(sourceFile, 0, sourceText, options)
+                |> Async.RunSynchronously
+
+            let checkResults =
+                match checkAnswer with
+                | FSharpCheckFileAnswer.Succeeded results -> results
+                | FSharpCheckFileAnswer.Aborted -> failwith "type check aborted"
+
+            let projectResults =
+                transparentChecker.ParseAndCheckProject options |> Async.RunSynchronously
+
+            let fileInfo =
+                { Ast = parseResults.ParseTree
+                  Source = source
+                  TypeCheckResults = Some checkResults
+                  ProjectCheckResults = Some projectResults }
+
+            let mutable internalFailure = None
+
+            let optionalParams =
+                { OptionalLintParameters.Default with
+                    ReportLinterProgress =
+                        Some (fun progress ->
+                            match progress with
+                            | ProjectProgress.Failed(_, ex) -> internalFailure <- Some ex
+                            | _ -> ()) }
+
+            match lintParsedFile optionalParams fileInfo sourceFile with
+            | LintResult.Success _ ->
+                match internalFailure with
+                | Some ex -> Assert.Fail $"lint failed internally: {ex}"
+                | None -> ()
+            | LintResult.Failure failure -> Assert.Fail(string failure)
+
         [<Test>]
         member _.``Lint project via absolute path``() =
             let projectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "FSharpLint.FunctionalTest.TestedProject.NetCore"
