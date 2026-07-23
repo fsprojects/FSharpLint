@@ -78,6 +78,10 @@ module Lint =
 
         /// Optional results of project-wide type info (allows for a more accurate lint).
         ProjectCheckResults:FSharpCheckProjectResults option
+        /// Path to the project file (.fsproj), when known. Lets the library-heuristic
+        /// rules work under hosts (e.g. TransparentCompiler analyzer hosts) where the
+        /// project options cannot be derived from the check results.
+        ProjectFileName:string option
     }
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -129,7 +133,7 @@ module Lint =
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
             ProjectCheckResults: FSharpCheckProjectResults option
-            ProjectOptions: Lazy<FSharpProjectOptions option>
+            ProjectFileName: Lazy<string option>
             FilePath: string
             FileContent: string
             Lines: string[]
