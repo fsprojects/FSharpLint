@@ -97,7 +97,7 @@ let checkIfInLibrary (args: AstNodeRuleParams) (range: range) : array<WarningDet
         ||
         isInObsoleteMethodOrFunction (args.GetParents args.NodeIndex)
         ||
-        match (args.CheckInfo, args.ProjectOptions.Value) with
+        match (args.CheckInfo, args.ProjectOptions) with
         | Some checkFileResults, Some projectOptions ->
             let projectFile = System.IO.FileInfo projectOptions.ProjectFileName
             match howLikelyProjectIsLibrary projectFile.Name with
