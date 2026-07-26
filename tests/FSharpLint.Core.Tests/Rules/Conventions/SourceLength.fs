@@ -76,6 +76,23 @@ let dog x =
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
+    member this.FunctionTooManyLinesWithMultiLineCommentAtEnd() =
+        this.Parse($"""
+module Program
+
+let dog x =
+    (*
+    Foo
+    Bar
+    *)
+    %s{generateNewLines (FunctionLength - 4) 4}
+    (*
+    Baz
+    *)
+    ()""")
+        Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
     member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
         this.Parse($"""
 module Program
