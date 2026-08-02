@@ -35,32 +35,32 @@ let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker
         | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
         | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
+let internal stripMultilineComments (source: string) =
+    let markers = 
+        multilineCommentMarkerRegex.Matches source
+        |> Seq.map (fun markerMatch -> 
+            let index = markerMatch.Index
+            if source.[index] = '(' then
+                Begin index
+            else
+                End index)
+        |> Seq.sortBy (function | Begin index -> index | End index -> index)
+        |> Seq.toList
+
+    match getTopLevelBalancedPairs markers List.Empty with
+    | [] -> source
+    | pairs ->
+
+        (StringBuilder(source), pairs)
+        ||> List.fold
+            (fun (currSource: StringBuilder) (startIndex, endIndex) ->
+                currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
+        |> _.ToString()
+
 let checkSourceLengthRule (config:Config) range fileContents errorName (skipRanges: array<Range>) =
     let error name lineCount actual =
         let errorFormatString = Resources.GetString("RulesSourceLengthError")
         String.Format(errorFormatString, name, lineCount, actual)
-
-    let stripMultilineComments (source: string) =
-        let markers = 
-            multilineCommentMarkerRegex.Matches source
-            |> Seq.map (fun markerMatch -> 
-                let index = markerMatch.Index
-                if source.[index] = '(' then
-                    Begin index
-                else
-                    End index)
-            |> Seq.sortBy (function | Begin index -> index | End index -> index)
-            |> Seq.toList
-
-        match getTopLevelBalancedPairs markers List.Empty with
-        | [] -> source
-        | pairs ->
-
-            (StringBuilder(source), pairs)
-            ||> List.fold
-                (fun (currSource: StringBuilder) (startIndex, endIndex) ->
-                    currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
-            |> _.ToString()
 
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
