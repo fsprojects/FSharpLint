@@ -1,6 +1,7 @@
 module FSharpLint.Rules.Helper.SourceLength
 
 open System
+open System.Text
 open System.Text.RegularExpressions
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -46,13 +47,20 @@ let internal stripMultilineComments (source: string) =
         |> Seq.sortBy (function | Begin index -> index | End index -> index)
         |> Seq.toList
 
-    getTopLevelBalancedPairs markers List.Empty
-    |> List.fold
-        (fun (currSource: string) (startIndex, endIndex) ->
-            let left = currSource.AsSpan(0, startIndex) 
-            let right = currSource.AsSpan(endIndex + multilineCommentMarkerRegexCaptureGroupLength)
-            String.Concat(left, right))
-        source
+    // Process block comment removal
+    // - If no comments, return input as is
+    // - If one comment, just remove it directly
+    // - If several comments, remove them all starting from the last, as removing them from the front changes the offsets of later ones
+    match getTopLevelBalancedPairs markers List.Empty with
+    | [] -> source
+    | [ (startIndex, endIndex) ] -> source.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex )
+    | pairs ->
+
+        (pairs, StringBuilder(source))
+        ||> List.foldBack
+            (fun (startIndex, endIndex)(currSource: StringBuilder)  ->
+                currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
+        |> _.ToString()
 
 let checkSourceLengthRule (config:Config) range fileContents errorName (skipRanges: array<Range>) =
     let error name lineCount actual =
