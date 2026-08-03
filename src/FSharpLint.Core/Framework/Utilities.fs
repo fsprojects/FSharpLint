@@ -158,8 +158,8 @@ module ExpressionUtilities =
         |> Option.defaultValue 0
 
     let rangeContainsOtherRange (containingRange:Range) (range:Range) =
-        (range.StartLine, range.StartColumn) >= (containingRange.StartLine, containingRange.StartColumn) 
-            && (range.EndLine, range.EndColumn) <= (containingRange.EndLine, containingRange.EndColumn)
+        (struct (range.StartLine, range.StartColumn)).CompareTo(struct(containingRange.StartLine, containingRange.StartColumn)) > -1
+            && (struct (range.EndLine, range.EndColumn)).CompareTo(struct(containingRange.EndLine, containingRange.EndColumn)) < 1
 
     /// Active pattern to match any SynExpr.LetOrUse
     /// Returns a tuple of (record, isBang, isUse) allowing matching on both booleans and accessing the full record
