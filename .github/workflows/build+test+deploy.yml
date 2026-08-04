@@ -28,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
       with:
         # we need these fetch options because we use the `git describe` command in build.fsx
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
       with:
         # we need these fetch options because we use the `git describe` command in build.fsx
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Restore tools
       run: dotnet tool restore
     - name: Restore dependencies
@@ -148,7 +148,7 @@ jobs:
     steps:
       - name: List .NET SDKs
         run: dotnet --list-sdks
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -182,7 +182,7 @@ jobs:
     steps:
       - name: List .NET SDKs
         run: dotnet --list-sdks
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
