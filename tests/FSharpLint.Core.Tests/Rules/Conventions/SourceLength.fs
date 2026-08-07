@@ -371,7 +371,20 @@ let UnionLength = 500
 [<TestFixture>]
 type TestMaxLinesInUnion() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInUnion.rule { Config.MaxLines = UnionLength })
-    // TODO: Add tests.
+    
+    // Test a Union type with an acceptable number of lines, with inline block comments
+    // This cased used to trip the exception described in https://github.com/fsprojects/FSharpLint/issues/869
+    //   but should be fixed now.
+    [<Test>]
+    member this.UnionNotTooManyLines() =
+        this.Parse """
+/// Represents a single group of bindings in a class with an implicit constructor
+type IncrClassBindingGroup = 
+    | IncrClassBindingGroup of Tast.Binding list * (*isStatic:*) bool* (*recursive:*) bool
+    | IncrClassDo of Expr * (*isStatic:*) bool     
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
 [<Literal>]
 let RecordLength = 500
