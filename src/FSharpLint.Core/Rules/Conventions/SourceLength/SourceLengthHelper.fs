@@ -65,7 +65,7 @@ let checkSourceLengthRule (config:Config) range fileContents errorName (skipRang
             stripMultilineComments sourceCode
 
         let commentLinesCount = 
-            singleLineCommentRegex.Matches(sourceCode).Count
+            singleLineCommentRegex.Count(sourceCode)
 
         let sourceCodeLines = sourceCode.Split([| '\n'; '\r' |]) 
         let blankLinesCount = 
