@@ -1,0 +1,10 @@
+{
+    "genericTypesNames": {
+        "enabled": true,
+        "config": {
+            "naming": "PascalCase",
+            "underscores": "None",
+            "prefix": "T"
+        }
+    }
+}

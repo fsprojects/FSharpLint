@@ -246,8 +246,9 @@ Target.create "SelfCheck" (fun _ ->
 
         let consoleProj = Path.Combine(srcDir.FullName, "FSharpLint.Console", "FSharpLint.Console.fsproj") |> FileInfo
         let sol = Path.Combine(rootDir.FullName, solutionFileName) |> FileInfo
+        let configFilePath = Path.Combine(sol.DirectoryName, "fsharplint.json")
 
-        exec "dotnet" $"run --framework net9.0 lint %s{sol.FullName}" consoleProj.Directory.FullName
+        exec "dotnet" $"run --framework net9.0 lint --lint-config %s{configFilePath} %s{sol.FullName}" consoleProj.Directory.FullName
 
     printfn "Running self-check with default rules..."
     runLinter ()
