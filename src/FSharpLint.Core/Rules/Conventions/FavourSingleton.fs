@@ -17,7 +17,7 @@ let runner args =
               SuggestedFix = None
               TypeChecks = List.Empty }
     match args.AstNode with
-    | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, _, _, expression, _, _, _)) ->
+    | AstNode.Expression(expression) ->
         match expression with
         | SynExpr.ArrayOrListComputed(_isArray, innerExpr, range) ->
             match innerExpr with
