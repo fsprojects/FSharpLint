@@ -1,6 +1,7 @@
 module FSharpLint.Rules.Helper.SourceLength
 
 open System
+open System.Text
 open System.Text.RegularExpressions
 open FSharpLint.Framework
 open FSharpLint.Framework.Suggestion
@@ -51,13 +52,15 @@ let checkSourceLengthRule (config:Config) range fileContents errorName (skipRang
             |> Seq.sortBy (function | Begin index -> index | End index -> index)
             |> Seq.toList
 
-        getTopLevelBalancedPairs markers List.Empty
-        |> List.fold
-            (fun (currSource: string) (startIndex, endIndex) ->
-                let left = currSource.AsSpan(0, startIndex) 
-                let right = currSource.AsSpan(endIndex + multilineCommentMarkerRegexCaptureGroupLength)
-                String.Concat(left, right))
-            source
+        match getTopLevelBalancedPairs markers List.Empty with
+        | [] -> source
+        | pairs ->
+
+            (StringBuilder(source), pairs)
+            ||> List.fold
+                (fun (currSource: StringBuilder) (startIndex, endIndex) ->
+                    currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
+            |> _.ToString()
 
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
