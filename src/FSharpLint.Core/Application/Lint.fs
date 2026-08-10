@@ -125,7 +125,7 @@ module Lint =
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
             ProjectCheckResults: FSharpCheckProjectResults option
-            ProjectOptions: Lazy<FSharpProjectOptions option>
+            ProjectOptions: ParseFile.LinterProjectOptions option
             FilePath: string
             FileContent: string
             Lines: string[]
@@ -265,10 +265,7 @@ module Lint =
                         GlobalConfig = enabledRules.GlobalConfig
                         TypeCheckResults = fileInfo.TypeCheckResults
                         ProjectCheckResults = fileInfo.ProjectCheckResults
-                        ProjectOptions = lazy( 
-                            fileInfo.ProjectCheckResults
-                            |> Option.map _.ProjectContext.ProjectOptions
-                        )
+                        ProjectOptions = fileInfo.ProjectOptions
                         FilePath = fileInfo.File
                         FileContent = fileInfo.Text
                         Lines = lines
@@ -399,6 +396,8 @@ module Lint =
         TypeCheckResults:FSharpCheckFileResults option
         /// Optional results of project-wide type info (allows for a more accurate lint).
         ProjectCheckResults:FSharpCheckProjectResults option
+        /// Optional project options. Allows rules to operate on project options.
+        ProjectOptions: ParseFile.LinterProjectOptions option
     }
 
     /// Gets a FSharpLint Configuration based on the provided ConfigurationParam.
@@ -581,6 +580,7 @@ module Lint =
                   ParseFile.Ast = parsedFileInfo.Ast
                   ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
                   ParseFile.ProjectCheckResults = parsedFileInfo.ProjectCheckResults
+                  ParseFile.ProjectOptions = parsedFileInfo.ProjectOptions
                   ParseFile.File = "<inline source>" }
 
             lint lintInformation parsedFileInfo
@@ -600,7 +600,8 @@ module Lint =
                     { Source = parseFileInformation.Text
                       Ast = parseFileInformation.Ast
                       TypeCheckResults = parseFileInformation.TypeCheckResults
-                      ProjectCheckResults = None }
+                      ProjectCheckResults = None
+                      ProjectOptions = None }
 
                 return lintParsedSource optionalParams parsedFileInfo
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
@@ -635,6 +636,7 @@ module Lint =
                   ParseFile.Ast = parsedFileInfo.Ast
                   ParseFile.TypeCheckResults = parsedFileInfo.TypeCheckResults
                   ParseFile.ProjectCheckResults = parsedFileInfo.ProjectCheckResults
+                  ParseFile.ProjectOptions = parsedFileInfo.ProjectOptions
                   ParseFile.File = filePath }
 
             lint lintInformation parsedFileInfo
@@ -653,7 +655,8 @@ module Lint =
                     { Source = astFileParseInfo.Text
                       Ast = astFileParseInfo.Ast
                       TypeCheckResults = astFileParseInfo.TypeCheckResults
-                      ProjectCheckResults = astFileParseInfo.ProjectCheckResults }
+                      ProjectCheckResults = astFileParseInfo.ProjectCheckResults
+                      ProjectOptions = astFileParseInfo.ProjectOptions }
 
                 return lintParsedFile optionalParams parsedFileInfo filePath
             | ParseFile.Failed failure -> return LintResult.Failure(FailedToParseFile failure)
@@ -684,7 +687,8 @@ module Lint =
                             { Source = astFileParseInfo.Text
                               Ast = astFileParseInfo.Ast
                               TypeCheckResults = astFileParseInfo.TypeCheckResults 
-                              ProjectCheckResults = astFileParseInfo.ProjectCheckResults }
+                              ProjectCheckResults = astFileParseInfo.ProjectCheckResults 
+                              ProjectOptions = astFileParseInfo.ProjectOptions }
                         return lintParsedFile optionalParams parsedFileInfo filePath
                     | ParseFile.Failed failure ->
                         return LintResult.Failure (FailedToParseFile failure)

@@ -14,6 +14,10 @@ module TestApi =
 
     let sourceFile = basePath </> "tests" </> "TypeChecker.fs"
 
+    // Test project used for transparent/background compiler project options tests
+    let asyncTestProjectPath = basePath </> "tests" </> "FSharpLint.FunctionalTest.TestedProject" </> "LibAsync"
+    let asyncTestProjectFile = asyncTestProjectPath </> "LibAsync.fsproj"
+
     [<TestFixture(Category = "Acceptance Tests")>]
     type TestApi() =
         let generateAst source =
@@ -38,7 +42,7 @@ module TestApi =
         member _.``Performance of linting an existing file``() =
             let text = File.ReadAllText sourceFile
             let tree = generateAst text
-            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None; ProjectCheckResults = None }
+            let fileInfo = { Ast = tree; Source = text; TypeCheckResults = None; ProjectCheckResults = None; ProjectOptions = None }
 
             let stopwatch = Stopwatch.StartNew()
             let times = ResizeArray()
@@ -58,6 +62,22 @@ module TestApi =
 
             Assert.Less(result, 250)
             fprintf TestContext.Out "Average runtime of linter on parsed file: %d (milliseconds)."  result
+
+        // Test linting the async-name test project with the default linting functions, which use the background compiler
+        //    This should tokenize "LibAsync.fsproj" tokenizes to ["Lib"; "Async"; ".fsproj"] -> Likely a library.
+        [<Test>]
+        member _.``Lint async naming test project with background compiler``() =
+            task {
+                let! result = asyncLintProject OptionalLintParameters.Default asyncTestProjectFile toolsPath
+
+                match result with
+                | LintResult.Success warnings ->
+                    Assert.AreEqual(1, warnings.Length)
+                    Assert.AreEqual(FSharpLint.Rules.Identifiers.AsynchronousFunctionNames, warnings.[0].RuleIdentifier)
+                    StringAssert.Contains("This function returns Async. Consider renaming it to AsyncBar.", warnings.[0].Details.Message)
+                | LintResult.Failure err ->
+                    Assert.Fail(string err)
+            }
 
         [<Test>]
         member _.``Lint project via absolute path``() =
