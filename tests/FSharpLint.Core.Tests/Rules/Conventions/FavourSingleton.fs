@@ -83,6 +83,21 @@ let foo = bar [ 0 ]"""
         Assert.IsTrue(this.ErrorExistsAt(3, 16))
 
     [<Test>]
+    member this.``List with a single item (that is not constant or identifier) should produce an error``() =
+        this.Parse """
+let foo = bar [ "baz".Length ]"""
+        
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(2, 14))
+
+    [<Test>]
+    member this.``List expression should not produce ans error``() =
+        this.Parse """
+let foo = bar [ for i=0 to 3 do yield i+1 ]"""
+        
+        this.AssertNoWarnings()
+
+    [<Test>]
     member this.SingletonListWithMatchCaseShouldNotProduceError() =
         this.Parse """
 let foo = List.empty
