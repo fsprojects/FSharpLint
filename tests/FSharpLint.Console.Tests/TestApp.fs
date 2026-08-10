@@ -46,7 +46,7 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; input.FileName |]
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
-        Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
+        Assert.AreEqual(Set.singleton "Consider changing `Signature` to be prefixed with `I`.", errors)
 
     [<Test>]
     member _.``Lint source without any config, rule enabled in default config is triggered for given source.``() =
@@ -59,7 +59,7 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; input |]
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
-        Assert.AreEqual(set ["Consider changing `Signature` to be prefixed with `I`."], errors)
+        Assert.AreEqual(Set.singleton "Consider changing `Signature` to be prefixed with `I`.", errors)
 
     [<Test>]
     member _.``Lint source with valid config to disable rule, disabled rule is not triggered for given source.``() =
@@ -117,7 +117,7 @@ type TestConsoleApplication() =
         let (returnCode, errors) = main [| "lint"; "--lint-config"; config.FileName; input |]
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
-        Assert.AreEqual(set ["Use prefix syntax for generic type."], errors)
+        Assert.AreEqual(Set.singleton "Use prefix syntax for generic type.", errors)
 
 [<TestFixture>]
 type TestFileTypeInference() =

@@ -61,7 +61,7 @@ let runner (args:AstNodeRuleParams) =
         | AstNode.Expression(ExpressionUtilities.LetOrUse({Bindings = binding :: _}, true, _)) ->
             match binding with
             | SynBinding(headPat = pat) ->
-                getParameterWithBelowMinimumLength [pat]
+                getParameterWithBelowMinimumLength (List.singleton pat)
         | AstNode.Expression(SynExpr.Lambda(_, _, lambdaArgs, _, _, _, _)) ->
             let lambdaIdent = FunctionReimplementation.getLambdaParamIdent lambdaArgs
             match lambdaIdent with
@@ -72,7 +72,7 @@ let runner (args:AstNodeRuleParams) =
         | AstNode.Expression(SynExpr.For(_, _, identifier, _, _, _, _, _, _)) when isIdentifierTooShort identifier.idText ->
             Array.singleton (identifier, identifier.idText, None)
         | AstNode.Match(SynMatchClause(namePattern, _, _, _, _, _)) ->
-            getParameterWithBelowMinimumLength [namePattern]
+            getParameterWithBelowMinimumLength (List.singleton namePattern)
         | AstNode.Binding(SynBinding(_, _, _, _, _, _, _, pattern, _, _, _, _, _)) ->
             match pattern with
             | SynPat.LongIdent(SynLongIdent(idents, _, _),_, _, SynArgPats.Pats(names), _, _) ->

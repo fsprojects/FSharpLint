@@ -144,7 +144,7 @@ module private MatchExpression =
     let private matchExpr = function
         | AstNode.Expression(ExpressionUtilities.Identifier([ident], _)) ->
             let ident = identAsDecompiledOpName ident
-            Some(Expression.Identifier([ident]))
+            Some(Expression.Identifier(List.singleton ident))
         | AstNode.Expression(SynExpr.LongIdent(_, ident, _, _)) ->
             let identifier = List.map (fun (ident: Ident) -> ident.idText) ident.LongIdent
             Some(Expression.Identifier(identifier))
@@ -420,7 +420,7 @@ module private MatchExpression =
            Expression.PrefixOperator(Expression.Identifier([op]), expr)) ->
             matchHintExpr
                 (fun () -> arguments.SubHint(AstNode.Expression(rightExpr), expr) |> matchHintExpr returnEmptyMatch)
-                (arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier([op])))
+                (arguments.SubHint(AstNode.Expression(opExpr), Expression.Identifier(List.singleton op)))
         | _ -> NoMatch
 
     and [<TailCall>] private matchAddressOf arguments =

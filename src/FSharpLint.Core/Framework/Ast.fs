@@ -54,7 +54,7 @@ module Ast =
 
                 match op.idText with
                 | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" ->
-                    flattenFuncExpr [rhs] lhs
+                    flattenFuncExpr (List.singleton rhs) lhs
                 | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" ->
                     flattenFuncExpr (lhs::flattened) rhs
                 | _ -> flattenFuncExpr (lhs::flattened) app

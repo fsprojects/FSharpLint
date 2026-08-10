@@ -327,7 +327,7 @@ module Lint =
         let loader = Ionide.ProjInfo.WorkspaceLoader.Create toolsPath
         let notifications = ResizeArray<_>()
         loader.Notifications.Add notifications.Add
-        let options = loader.LoadProjects [projectFilePath]
+        let options = loader.LoadProjects (List.singleton projectFilePath)
         options
         |> Seq.tryFind (fun opt -> opt.ProjectFileName = projectFilePath)
         |> Option.map (fun proj -> Ionide.ProjInfo.FCS.mapToFSharpProjectOptions proj options)

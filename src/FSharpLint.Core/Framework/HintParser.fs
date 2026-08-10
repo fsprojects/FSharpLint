@@ -67,7 +67,7 @@ module HintParser =
         let private plongident: (CharStream<unit> -> Reply<char list list>) =
             choice
                 [ attempt (sepBy1 pident (skipChar '.'))
-                  pident |>> fun identChars -> [identChars] ]
+                  pident |>> List.singleton ]
 
         let private pidentorop: (CharStream<unit> -> Reply<char list>) =
             choice
@@ -86,9 +86,9 @@ module HintParser =
                   |>> (fun ((startIdent, idents), maybeOperator) ->
                       let identifiers = startIdent::idents
                       match maybeOperator with
-                      | Some(operator) -> identifiers@[operator]
+                      | Some(operator) -> identifiers @ (List.singleton operator)
                       | None -> identifiers)
-                  attempt (pidentorop |>> fun identOrOpChars -> [identOrOpChars])
+                  attempt (pidentorop |>> List.singleton)
                   plongident ]
             |>> List.map charListToString
 
