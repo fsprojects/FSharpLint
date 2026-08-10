@@ -6,7 +6,7 @@ open NUnit.Framework
 open FSharpLint.Console.Program
 
 let getErrorsFromOutput (output:string) =
-    let splitOutput = output.Split([|Environment.NewLine|], StringSplitOptions.None)
+    let splitOutput = output.Split(Array.singleton Environment.NewLine, StringSplitOptions.None)
 
     set [ for index in 1..splitOutput.Length - 1 do
             if splitOutput.[index].StartsWith "Error" then yield splitOutput.[index - 1] ]

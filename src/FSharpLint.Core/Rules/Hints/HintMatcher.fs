@@ -192,7 +192,7 @@ module private MatchExpression =
             | Some checkFile ->
                 let maybeSymbolUse =
                     checkFile.GetSymbolUseAtLocation(
-                        ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
+                        ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, List.singleton ident.idText)
 
                 match maybeSymbolUse with
                 | Some symbolUse ->

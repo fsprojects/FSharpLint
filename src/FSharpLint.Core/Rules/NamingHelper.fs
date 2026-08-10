@@ -324,7 +324,7 @@ let isMeasureType = isAttribute "Measure"
 
 let isNotUnionCase (checkFile:FSharpCheckFileResults) (ident:Ident) =
     let maybeSymbol = checkFile.GetSymbolUseAtLocation(
-                    ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
+                    ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, List.singleton ident.idText)
 
     match maybeSymbol with
     | Some(symbol) when (symbol.Symbol :? FSharpUnionCase) -> false

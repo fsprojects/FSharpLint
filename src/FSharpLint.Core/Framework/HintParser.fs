@@ -538,7 +538,7 @@ module HintParser =
             let op = InfixOperator(prefix, remainingOpChars,
                                    precedence, associativity, (),
                                    fun remOpChars expr1 expr2 ->
-                                        let opIdent = Expression.Identifier [prefix + remOpChars]
+                                        let opIdent = Expression.Identifier (List.singleton (prefix + remOpChars))
                                         Expression.InfixOperator(opIdent, expr1, expr2))
             opp.AddOperator(op)
 
@@ -555,10 +555,10 @@ module HintParser =
                 if prefix = "&" then Expression.AddressOf(true, expr)
                 else if prefix = "&&" then Expression.AddressOf(false, expr)
                 else if prefix = "!" || prefix = "~" then
-                    let opIdent = Expression.Identifier [prefix + remOpChars]
+                    let opIdent = Expression.Identifier (List.singleton (prefix + remOpChars))
                     Expression.PrefixOperator(opIdent, expr)
                 else
-                    let opIdent = Expression.Identifier ["~" + prefix + remOpChars]
+                    let opIdent = Expression.Identifier (List.singleton ("~" + prefix + remOpChars))
                     Expression.PrefixOperator(opIdent, expr)
 
             let prefixOp =

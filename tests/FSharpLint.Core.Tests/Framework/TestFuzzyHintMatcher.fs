@@ -161,7 +161,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun _ -> () ===> ignore"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"fun _ -> () ===> ignore"))
 
         let matches = ResizeArray()
 
@@ -179,7 +179,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.isEmpty [] ===> true"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"List.isEmpty [] ===> true"))
 
         let matches = ResizeArray()
 
@@ -197,7 +197,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"x + 0 ===> x"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"x + 0 ===> x"))
 
         let matches = ResizeArray()
 
@@ -215,7 +215,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"~~~1 ===> x"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"~~~1 ===> x"))
 
         let matches = ResizeArray()
 
@@ -234,8 +234,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"List.rev (List.rev x) ===> x"]
-
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"List.rev (List.rev x) ===> x"))
         let matches = ResizeArray()
 
         possibleMatches array hintTrie (fun n1 hint -> matches.Add(n1, hint))
@@ -252,7 +251,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"fun x -> x ===> id"))
 
         let matches = ResizeArray()
 
@@ -270,7 +269,7 @@ do
 
         let array = generateAst source |> astToArray
 
-        let hintTrie = MergeSyntaxTrees.mergeHints [toHint @"fun x -> x ===> id"]
+        let hintTrie = MergeSyntaxTrees.mergeHints (List.singleton (toHint @"fun x -> x ===> id"))
 
         let matches = ResizeArray()
 

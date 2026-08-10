@@ -155,13 +155,13 @@ module MergeSyntaxTrees =
         | HintExpr(Expression.Lambda(args, LambdaBody(body))) ->
             [ for LambdaArg(arg) in args -> HintExpr arg
               yield HintExpr body ]
-        | HintExpr(Expression.LambdaArg(arg)) -> [ HintExpr arg ]
-        | HintExpr(Expression.LambdaBody(body)) -> [ HintExpr body ]
+        | HintExpr(Expression.LambdaArg(arg)) -> List.singleton (HintExpr arg)
+        | HintExpr(Expression.LambdaBody(body)) -> List.singleton (HintExpr body )
         | HintExpr(Expression.InfixOperator(Expression.Identifier([ "::" ]) as ident, lhs, rhs)) ->
             [ HintExpr ident; HintExpr(Expression.Tuple([ lhs; rhs ])) ]
         | HintExpr(Expression.InfixOperator(ident, lhs, rhs)) -> [ HintExpr ident; HintExpr lhs; HintExpr rhs ]
         | HintExpr(Expression.PrefixOperator(ident, expr)) -> [ HintExpr ident; HintExpr expr ]
-        | HintExpr(Expression.AddressOf(_, expr)) -> [ HintExpr expr ]
+        | HintExpr(Expression.AddressOf(_, expr)) -> List.singleton (HintExpr expr)
         | HintExpr(Expression.FunctionApplication(exprs))
         | HintExpr(Expression.Tuple(exprs))
         | HintExpr(Expression.List(exprs))
@@ -169,7 +169,7 @@ module MergeSyntaxTrees =
         | HintExpr(Expression.If(ifCond, bodyExpr, Some(elseExpr))) ->
             [ HintExpr ifCond; HintExpr bodyExpr; HintExpr elseExpr ]
         | HintExpr(Expression.If(ifCond, bodyExpr, None)) -> [ HintExpr ifCond; HintExpr bodyExpr ]
-        | HintExpr(Expression.Else(expression)) -> [ HintExpr expression ]
+        | HintExpr(Expression.Else(expression)) -> List.singleton (HintExpr expression)
         | HintExpr(Expression.Identifier(_))
         | HintExpr(Expression.Constant(_))
         | HintExpr(Expression.Null)
@@ -180,7 +180,7 @@ module MergeSyntaxTrees =
         | HintPat(Pattern.Array(patterns))
         | HintPat(Pattern.List(patterns))
         | HintPat(Pattern.Tuple(patterns)) -> List.map HintPat patterns
-        | HintPat(Pattern.Parentheses(pattern)) -> [ HintPat pattern ]
+        | HintPat(Pattern.Parentheses(pattern)) -> List.singleton (HintPat pattern)
         | HintPat(Pattern.Variable(_))
         | HintPat(Pattern.Identifier(_))
         | HintPat(Pattern.Constant(_))
@@ -385,7 +385,7 @@ module MergeSyntaxTrees =
         | _ -> failwith "Invalid state"
 
     let private getEdges transposed =
-        getEdgesRec [ProcessTransposed(transposed)] None
+        getEdgesRec (List.singleton <| ProcessTransposed transposed) None
 
     let mergeHints hints =
         let transposed = hints |> List.map hintToList |> transposeHead
