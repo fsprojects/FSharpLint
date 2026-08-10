@@ -83,7 +83,7 @@ module IgnoreFiles =
         let isDirectory = path.EndsWith("/")
 
         let getRegexSegments (path:string) =
-            path.Split([| '/' |], StringSplitOptions.RemoveEmptyEntries)
+            path.Split(Array.singleton '/', StringSplitOptions.RemoveEmptyEntries)
             |> Array.map globToRegex
 
         if path.StartsWith("!") then

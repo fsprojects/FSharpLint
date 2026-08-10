@@ -48,7 +48,7 @@ module ExpressionUtilities =
     open FSharp.Compiler.CodeAnalysis
 
     let (|Identifier|_|) = function
-        | SynExpr.Ident(ident) -> Some([ident], ident.idRange)
+        | SynExpr.Ident(ident) -> Some(List.singleton ident, ident.idRange)
         | SynExpr.LongIdent(_, longIdent, _, _) -> Some(longIdent.LongIdent, longIdent.Range)
         | _ -> None
 

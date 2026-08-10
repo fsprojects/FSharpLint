@@ -54,7 +54,7 @@ module Ast =
 
                 match op.idText with
                 | "op_PipeRight" | "op_PipeRight2" | "op_PipeRight3" ->
-                    flattenFuncExpr [rhs] lhs
+                    flattenFuncExpr (List.singleton rhs) lhs
                 | "op_PipeLeft" | "op_PipeLeft2" | "op_PipeLeft3" ->
                     flattenFuncExpr (lhs::flattened) rhs
                 | _ -> flattenFuncExpr (lhs::flattened) app
@@ -337,7 +337,7 @@ module Ast =
                     ) andBangs
                     add <| Pattern pattern
             | [] -> () // error case. @@TODO@@ any other handling needed here?
-        | SynExpr.Ident(ident) -> add <| Identifier([ident.idText], ident.idRange)
+        | SynExpr.Ident(ident) -> add <| Identifier(List.singleton ident.idText, ident.idRange)
         | SynExpr.LongIdent(_, SynLongIdent(ident, _, _), _, range) ->
             add <| Identifier(List.map (fun (identifier: Ident) -> identifier.idText) ident, range)
         | SynExpr.IfThenElse(cond, body, Some(elseExpr), _, _, _, _) ->
@@ -404,7 +404,7 @@ module Ast =
             add <| Type synType
             add <| SimplePattern simplePattern
         | SynSimplePat.Attrib(simplePattern, _, _) -> add <| SimplePattern simplePattern
-        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| Identifier([identifier.idText], identifier.idRange)
+        | SynSimplePat.Id(identifier, _, _, _, _, _) -> add <| Identifier(List.singleton identifier.idText, identifier.idRange)
 
     let inline private matchChildren node add =
         match node with

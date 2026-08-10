@@ -22,7 +22,7 @@ let foo = [ 10; 20 ]"""
 let foo = [ 10 ]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(2, 12))
+        Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
     member this.ListWithASingleIdentShouldProduceError() =
@@ -54,7 +54,7 @@ let foo = [| 10; 20 |]"""
 let foo = [| 10 |]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(2, 13))
+        Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
     member this.ArrayWithASingleIdentShouldProduceError() =
@@ -71,6 +71,30 @@ let foo = [| bar |]"""
 let bar = true
 let foo = [| bar; false; true |]"""
 
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``List with a single item in function call should produce an error``() =
+        this.Parse """
+let bar lst = List.length lst
+let foo = bar [ 0 ]"""
+        
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(3, 14))
+
+    [<Test>]
+    member this.``List with a single item (that is not constant or identifier) should produce an error``() =
+        this.Parse """
+let foo = bar [ "baz".Length ]"""
+        
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(2, 14))
+
+    [<Test>]
+    member this.``List expression should not produce ans error``() =
+        this.Parse """
+let foo = bar [ for i=0 to 3 do yield i+1 ]"""
+        
         this.AssertNoWarnings()
 
     [<Test>]

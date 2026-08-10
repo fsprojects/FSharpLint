@@ -33,7 +33,7 @@ let private runner (args:AstNodeRuleParams) =
             let checkNotMutable (ident:Ident) = fun () ->
                 let maybeSymbol =
                     checkFileResults.GetSymbolUseAtLocation(
-                        ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, [ident.idText])
+                        ident.idRange.StartLine, ident.idRange.EndColumn, String.Empty, List.singleton ident.idText)
 
                 match maybeSymbol with
                 | Some(symbol) -> isNotMutable symbol
