@@ -74,6 +74,15 @@ let foo = [| bar; false; true |]"""
         this.AssertNoWarnings()
 
     [<Test>]
+    member this.``List with a single item in function call should produce an error``() =
+        this.Parse """
+let bar lst = List.length lst
+let foo = bar [ 0 ]"""
+        
+        Assert.IsTrue this.ErrorsExist
+        Assert.IsTrue(this.ErrorExistsAt(3, 16))
+
+    [<Test>]
     member this.SingletonListWithMatchCaseShouldNotProduceError() =
         this.Parse """
 let foo = List.empty
