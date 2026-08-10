@@ -22,7 +22,7 @@ let foo = [ 10; 20 ]"""
 let foo = [ 10 ]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(2, 12))
+        Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
     member this.ListWithASingleIdentShouldProduceError() =
@@ -54,7 +54,7 @@ let foo = [| 10; 20 |]"""
 let foo = [| 10 |]"""
 
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(2, 13))
+        Assert.IsTrue(this.ErrorExistsAt(2, 10))
 
     [<Test>]
     member this.ArrayWithASingleIdentShouldProduceError() =
@@ -80,7 +80,7 @@ let bar lst = List.length lst
 let foo = bar [ 0 ]"""
         
         Assert.IsTrue this.ErrorsExist
-        Assert.IsTrue(this.ErrorExistsAt(3, 16))
+        Assert.IsTrue(this.ErrorExistsAt(3, 14))
 
     [<Test>]
     member this.``List with a single item (that is not constant or identifier) should produce an error``() =
