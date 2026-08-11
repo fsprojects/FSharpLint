@@ -104,13 +104,15 @@ module ExpressionUtilities =
 
     /// Tries to find the source code within a given range.
     let tryFindTextOfRange (range:Range) (text:string) =
-        let maybeStartIndex = findPos range.Start text
-        let maybeEndIndex = findPos range.End text
-
-        match (maybeStartIndex, maybeEndIndex) with
-        | Some(startIndex), Some(endIndex) ->
-            text.Substring(startIndex, endIndex - startIndex) |> Some
-        | _ -> None
+        match findLineStart text range.Start.Line 1 0 with
+        | Some startLineOffset ->
+            match findLineStart text range.End.Line range.Start.Line startLineOffset with
+            | Some endLineOffset ->
+                let startIndex = startLineOffset + range.Start.Column
+                let endIndex = endLineOffset + range.End.Column
+                text.Substring(startIndex, endIndex - startIndex) |> Some
+            | None -> None
+        | None -> None
 
     let getLeadingSpaces (range:Range) (text:string) =
         let range = Range.mkRange String.Empty (Position.mkPos range.StartLine 0) range.End
