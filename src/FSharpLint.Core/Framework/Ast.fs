@@ -65,11 +65,12 @@ module Ast =
 
     /// Inlines pipe operators to give a flat function application expression
     /// e.g. `x |> List.map id` to `List.map id x`.
+    [<return: Struct>]
     let (|FuncApp|_|) functionApplication =
         match functionApplication with
         | AstNode.Expression(SynExpr.App(_, _, _, _, range) as functionApplication) ->
-            Some(flattenFuncExpr List.Empty functionApplication, range)
-        | _ -> None
+            ValueSome(flattenFuncExpr List.Empty functionApplication, range)
+        | _ -> ValueNone
 
     [<NoEquality; NoComparison>]
     type Lambda = { Arguments:SynSimplePats list; Body:SynExpr }
