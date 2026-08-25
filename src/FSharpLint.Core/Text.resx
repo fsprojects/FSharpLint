@@ -420,4 +420,10 @@
   <data name="RulesSimpleAsyncComplementaryHelpersTask" xml:space="preserve">
     <value>Consider creating twin helper function/method `{0}{1}` that just calls `async {{ return Async.AwaitTask ({2}Async{3}) }}` under the hood.</value>
   </data>
+  <data name="RulesConventionsNoImpureFunctionsError" xml:space="preserve">
+    <value>Consider not using impure function '{0}'.</value>
+  </data>
+  <data name="RulesConventionsNoImpureFunctionsReplacementError" xml:space="preserve">
+    <value>Consider using '{0}' instead of impure function '{1}'.</value>
+  </data>
 </root>

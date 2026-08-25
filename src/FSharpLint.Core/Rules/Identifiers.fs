@@ -102,3 +102,4 @@ let FavourNamedMembers = identifier 94
 let SynchronousFunctionNames = identifier 95
 let AsynchronousFunctionNames = identifier 96
 let SimpleAsyncComplementaryHelpers = identifier 97
+let NoImpureFunctions = identifier 98

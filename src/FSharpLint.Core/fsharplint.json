@@ -361,6 +361,13 @@
             "mode": "OnlyPublicAPIsInLibraries"
         }
     },
+    "noImpureFunctions": {
+        "enabled": false,
+        "config": {
+            "allowedImpureFunctions": [],
+            "additionalImpureFunctions": []
+        }
+    },
     "hints": {
         "add": [
             "not (a =  b) ===> a <> b",

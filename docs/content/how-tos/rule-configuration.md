@@ -137,3 +137,4 @@ The following rules can be specified for linting.
 - [FavourNamedMembers (FL0094)](rules/FL0094.html)
 - [SynchronousFunctionNames (FL0095)](rules/FL0095.html)
 - [AsynchronousFunctionNames (FL0096)](rules/FL0096.html)
+- [NoImpureFunctions (FL0098)](rules/FL0098.html)

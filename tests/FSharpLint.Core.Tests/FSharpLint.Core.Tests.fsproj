@@ -40,6 +40,7 @@
     <Compile Include="Rules\Conventions\FunctionReimplementation.fs" />
     <Compile Include="Rules\Conventions\SourceLength.fs" />
     <Compile Include="Rules\Conventions\NoPartialFunctions.fs" />
+    <Compile Include="Rules\Conventions\NoImpureFunctions.fs" />
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\DiscourageStringInterpolationWithStringFormat.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
