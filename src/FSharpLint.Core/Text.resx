@@ -426,4 +426,7 @@
   <data name="RulesConventionsNoImpureFunctionsReplacementError" xml:space="preserve">
     <value>Consider using '{0}' instead of impure function '{1}'.</value>
   </data>
+  <data name="RulesConventionsNoImpureFunctionsDisallowedTypeError" xml:space="preserve">
+    <value>Consider not using mutable type '{0}'.</value>
+  </data>
 </root>
