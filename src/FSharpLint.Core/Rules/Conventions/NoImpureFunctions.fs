@@ -70,15 +70,15 @@ let runner (config:Config) (args:AstNodeRuleParams) =
             |> Option.map issueWarning
     
     let disallowedTypes =
-        let builtinIdentifiers = Map.keys impureFunctionIdentifiers
-        (Seq.append config.AdditionalImpureFunctions builtinIdentifiers)
+        let builtinIdentifiers = Map.keys impureFunctionIdentifiers |> Set.ofSeq
+        (Set.ofList config.AdditionalImpureFunctions) + builtinIdentifiers - (Set.ofList config.AllowedImpureFunctions)
         |> Seq.choose (fun definition ->
             let wildcardSuffix = ".*"
             if definition.EndsWith wildcardSuffix then
                 Some <| definition.Substring(0, definition.Length - wildcardSuffix.Length)
             else
                 None)
-        |> Seq.toList
+        |> Set.ofSeq
 
     let checkForDisallowedType (checkResults: FSharpCheckFileResults) (range: Range) =
         let allSymbolUses = checkResults.GetAllUsesOfAllSymbolsInFile()
@@ -99,7 +99,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                         else
                             entity.FullName
                         
-                    if disallowedTypes |> List.contains fullNameWithoutTypeParams then
+                    if disallowedTypes |> Set.contains fullNameWithoutTypeParams then
                         Array.singleton
                             {
                                 Range = range
