@@ -7,7 +7,11 @@ open FSharpLint.Core.Tests
 
 [<TestFixture>]
 type TestConventionsNoImpureFunctions() =
-    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(NoImpureFunctions.rule { AdditionalImpureFunctions = ["Custom.impure"]; AllowedImpureFunctions = ["Array.set"] })
+    inherit TestAstNodeRuleBase.TestAstNodeRuleBase(
+        NoImpureFunctions.rule { 
+            AdditionalImpureFunctions = ["Custom.impure"]
+            AllowedImpureFunctions = ["Array.set"; "System.Collections.Generic.Dictionary.*"]
+        })
 
     [<Test>]
     member this.``Error for impure function which should be replaced with another function``() =
@@ -56,6 +60,14 @@ type IHasList =
     abstract List: List<int>
 
 let x (hasList: IHasList) = hasList.List")
+        
+        this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``No error for creating a type from allowed list``() =
+        this.Parse("open System.Collections.Generic
+
+let x = new Dictionary<int,int>()")
         
         this.AssertNoWarnings()
 
