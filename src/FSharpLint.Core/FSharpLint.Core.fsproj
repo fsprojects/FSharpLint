@@ -53,6 +53,7 @@
     <Compile Include="Rules\Conventions\RedundantNewKeyword.fs" />
     <Compile Include="Rules\Conventions\NestedStatements.fs" />
     <Compile Include="Rules\Conventions\NoPartialFunctions.fs" />
+    <Compile Include="Rules\Conventions\NoImpureFunctions.fs" />
     <Compile Include="Rules\Conventions\CyclomaticComplexity.fs" />
     <Compile Include="Rules\Conventions\FavourReRaise.fs" />
     <Compile Include="Rules\Conventions\FavourConsistentThis.fs" />
