@@ -76,6 +76,23 @@ let dog x =
         Assert.IsFalse this.ErrorsExist
 
     [<Test>]
+    member this.FunctionTooManyLinesWithMultiLineCommentAtEnd() =
+        this.Parse($"""
+module Program
+
+let dog x =
+    (*
+    Foo
+    Bar
+    *)
+    %s{generateNewLines (FunctionLength - 4) 4}
+    (*
+    Baz
+    *)
+    ()""")
+        Assert.IsFalse this.ErrorsExist
+
+    [<Test>]
     member this.FunctionTooManyLinesWithNestsedMultiLineComment() =
         this.Parse($"""
 module Program
@@ -354,7 +371,20 @@ let UnionLength = 500
 [<TestFixture>]
 type TestMaxLinesInUnion() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(MaxLinesInUnion.rule { Config.MaxLines = UnionLength })
-    // TODO: Add tests.
+    
+    // Test a Union type with an acceptable number of lines, with inline block comments
+    // This cased used to trip the exception described in https://github.com/fsprojects/FSharpLint/issues/869
+    //   but should be fixed now.
+    [<Test>]
+    member this.UnionNotTooManyLines() =
+        this.Parse """
+/// Represents a single group of bindings in a class with an implicit constructor
+type IncrClassBindingGroup = 
+    | IncrClassBindingGroup of Tast.Binding list * (*isStatic:*) bool* (*recursive:*) bool
+    | IncrClassDo of Expr * (*isStatic:*) bool     
+"""
+
+        Assert.IsFalse(this.ErrorExistsAt(4, 5))
 
 [<Literal>]
 let RecordLength = 500
@@ -414,3 +444,75 @@ module Program
 let foo = ""
 exception SomeException of string""")
         Assert.IsFalse(this.ErrorExistsAt(2, 0))
+
+// Tests for 'stripMultilineComments' 
+// ref https://github.com/fsprojects/FSharpLint/issues/869
+[<TestFixture>]
+type TestStripMultilineComments() =
+
+    [<Test>]
+    member this.RemoveCommentFromStart() =
+        let input = """
+let dog x =
+    (*
+    Foo
+    Bar
+    *)
+    printf System.String.Empty
+    ()"""
+        
+        let expected = """
+let dog x =
+    
+    printf System.String.Empty
+    ()"""
+
+        let actual = FSharpLint.Rules.Helper.SourceLength.stripMultilineComments input
+        Assert.AreEqual(expected, actual)
+
+    [<Test>]
+    member this.RemoveCommentFromEnd() =
+        let input = """
+let dog x =
+    printf System.String.Empty
+    (*
+    Baz
+    *)
+    ()"""
+        
+        let expected = """
+let dog x =
+    printf System.String.Empty
+    
+    ()"""
+
+        let actual = FSharpLint.Rules.Helper.SourceLength.stripMultilineComments input
+        Assert.AreEqual(expected, actual)
+
+    [<Test>]
+    member this.RemoveMultipleComments() =
+        let input = """
+let dog x =
+    (*
+    Foo (* baz *)
+    let (*) = id
+    Bar
+    *)
+    let (*) a b = a + b
+    printf System.String.Empty
+    (*
+    Baz
+    *)
+    ()"""
+        
+        let expected = """
+let dog x =
+    
+    let (*) a b = a + b
+    printf System.String.Empty
+    
+    ()"""
+
+        let actual = FSharpLint.Rules.Helper.SourceLength.stripMultilineComments input
+        Assert.AreEqual(expected, actual)
+
