@@ -499,17 +499,11 @@ module Asynchronous =
         | _ -> ReturnsNonAsync
     
     let (|FSharpTypeAsync|FSharpTypeTask|FSharpTypeTaskNonGeneric|FSharpTypeNonAsync|) (fSharpType: FSharpType) =
-        try
-            // BasicQualifiedName may throw InvalidOperationException for some types
-            // e.g. arrays, but not for Async<'T> or Task<'T>, so assume non-async type.
-            match fSharpType.BasicQualifiedName with
-            | "Microsoft.FSharp.Control.FSharpAsync`1" -> FSharpTypeAsync
-            | name when name.StartsWith "System.Threading.Tasks.Task" ->
-                if fSharpType.GenericArguments.Count > 0 then
-                    FSharpTypeTask
-                else
-                    FSharpTypeTaskNonGeneric
-            | _ -> FSharpTypeNonAsync
-        with
-        | :? InvalidOperationException ->
-            FSharpTypeNonAsync
+        match fSharpType.BasicQualifiedName with
+        | Some "Microsoft.FSharp.Control.FSharpAsync`1" -> FSharpTypeAsync
+        | Some name when name.StartsWith "System.Threading.Tasks.Task" ->
+            if fSharpType.GenericArguments.Count > 0 then
+                FSharpTypeTask
+            else
+                FSharpTypeTaskNonGeneric
+        | _ -> FSharpTypeNonAsync
