@@ -59,6 +59,10 @@ module Lint =
         ReceivedWarning: (Suggestion.LintWarning -> unit) option
 
         ReportLinterProgress: (ProjectProgress -> unit) option
+
+        /// Optional pre-created FSharpChecker to reuse across multiple lint calls.
+        /// When None, a new checker is created for each lint invocation.
+        Checker: FSharpChecker option
     } with
         static member Default: OptionalLintParameters
 
@@ -163,6 +167,12 @@ module Lint =
 
     /// [Obsolete] Lints an entire F# solution by linting all projects specified in the `.sln`, `slnx` or `.slnf` file.
     val lintSolution : optionalParams:OptionalLintParameters -> solutionFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> LintResult
+
+    /// Load MSBuild project information and return FSharpProjectOptions.
+    val getProjectOptions : projectFilePath:string -> toolsPath:Ionide.ProjInfo.Types.ToolsPath -> Result<FSharpProjectOptions, LintFailure>
+
+    /// Lints a project using pre-loaded FSharpProjectOptions.
+    val asyncLintProjectOptions : optionalParams:OptionalLintParameters -> projectOptions:FSharpProjectOptions -> Async<LintResult>
 
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.

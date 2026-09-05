@@ -221,7 +221,7 @@ module Lint =
         |> Array.concat
         |> Array.concat
 
-    let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
+    let lintWithRules lintInfo (enabledRules: Configuration.LoadedRules) (fileInfo:ParseFile.FileParseInfo) =
         let suggestionsRequiringTypeChecks = ConcurrentStack<_>()
 
         let fileWarnings = ResizeArray()
@@ -240,8 +240,6 @@ module Lint =
             match lintInfo.CancellationToken with
             | Some(value) -> not value.IsCancellationRequested
             | None -> true
-
-        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
 
         let lines = String.toLines fileInfo.Text |> Array.map (fun (line, _, _) -> line)
         let allRuleNames =
@@ -314,6 +312,12 @@ module Lint =
 
         ReachedEnd(fileInfo.File, Seq.toList fileWarnings) |> lintInfo.ReportLinterProgress
 
+    /// Convenience wrapper that computes enabledRules from config each time.
+    /// Used by single-file and source-linting paths where rules aren't shared across files.
+    let lint lintInfo (fileInfo:ParseFile.FileParseInfo) =
+        let enabledRules = Configuration.flattenConfig lintInfo.Configuration
+        lintWithRules lintInfo enabledRules fileInfo
+
     let getProjectInfo (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
         let errorMessageFromNotifications notifications =
             let extractError = function
@@ -378,12 +382,16 @@ module Lint =
         ReceivedWarning:(Suggestion.LintWarning -> unit) option
         /// This function will be called any time the linter progress changes for a project.
         ReportLinterProgress:(ProjectProgress -> unit) option
+        /// Optional pre-created FSharpChecker to reuse across multiple lint calls.
+        /// When None, a new checker is created for each lint invocation.
+        Checker:FSharpChecker option
     } with
         static member Default = {
             OptionalLintParameters.CancellationToken = None
             Configuration = Default
             ReceivedWarning = None
             ReportLinterProgress = None
+            Checker = None
         }
 
     /// If your application has already parsed the F# source files using `FSharp.Compiler.Services`
@@ -420,74 +428,95 @@ module Lint =
                 Ok Configuration.defaultConfiguration
             | ex -> Error (string ex)
 
+    /// Load MSBuild project information and return FSharpProjectOptions.
+    let getProjectOptions (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
+        if IO.File.Exists projectFilePath then
+            let projectFilePath = Path.GetFullPath projectFilePath
+            getProjectInfo projectFilePath toolsPath
+            |> Result.mapError (fun err -> MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage err))
+        else
+            Error (FailedToLoadFile projectFilePath)
+
+    /// Lints a project using pre-loaded FSharpProjectOptions.
+    let asyncLintProjectOptions (optionalParams:OptionalLintParameters) (projectOptions:FSharpProjectOptions) = async {
+        let lintWarnings = LinkedList<Suggestion.LintWarning>()
+
+        match getConfig optionalParams.Configuration with
+        | Ok config ->
+            let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
+
+            let warningReceived (warning:Suggestion.LintWarning) =
+                lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
+                Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
+
+            let checker =
+                match optionalParams.Checker with
+                | Some existingChecker -> existingChecker
+                // parallelReferenceResolution=true was measured here and intentionally left off:
+                // on FCS 43.9.201 it gave no wall-clock improvement and ~20% more CPU
+                // (FsHotWatch.slnx: ~56s/74 CPU-s without it vs ~58s/94 CPU-s with it).
+                | None -> FSharpChecker.Create(keepAssemblyContents=true)
+
+            let parseFilesInProject files = async {
+                let lintInformation =
+                    { Configuration = config
+                      CancellationToken = optionalParams.CancellationToken
+                      ErrorReceived = warningReceived
+                      ReportLinterProgress = projectProgress }
+
+                let enabledRules = Configuration.flattenConfig config
+
+                let isIgnoredFile filePath =
+                    config.ignoreFiles
+                    |> Option.map (fun ignoreFiles ->
+                        let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
+                        Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
+                    |> Option.defaultValue false
+
+                let filesToLint = files |> List.filter (not << isIgnoredFile)
+
+                // Check the whole project first to fully warm the FCS incremental
+                // builder, then run the per-file checks in parallel against that
+                // now-complete builder. Doing the project check concurrently with
+                // the per-file checks races on the shared builder and yields
+                // non-deterministic type info for typed rules; awaiting it first
+                // keeps the parallel speed-up while making results deterministic.
+                let! projectCheckResults = checker.ParseAndCheckProject projectOptions
+                let! parsedFiles =
+                    filesToLint
+                    |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
+                    |> Async.Parallel
+
+                let failedFiles = Array.choose getFailedFiles parsedFiles
+
+                if Array.isEmpty failedFiles then
+                    parsedFiles
+                    |> Array.choose getParsedFiles
+                    |> Array.iter (fun fileParseResult ->
+                        lintWithRules
+                            lintInformation
+                            enabledRules
+                            { fileParseResult with ProjectCheckResults = Some projectCheckResults })
+                    return Success ()
+                else
+                    return Failure (FailedToParseFilesInProject (Array.toList failedFiles))
+            }
+
+            match! parseFilesInProject (Array.toList projectOptions.SourceFiles) with
+            | Success _ -> return lintWarnings |> Seq.toList |> LintResult.Success
+            | Failure lintFailure -> return LintResult.Failure lintFailure
+        | Error err ->
+            return RunTimeConfigError err |> LintResult.Failure
+    }
+
     /// Lints an entire F# project by retrieving the files from a given
     /// path to the `.fsproj` file.
     let asyncLintProject (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) = async {
-        if IO.File.Exists projectFilePath then
-            let projectFilePath = Path.GetFullPath projectFilePath
-            let lintWarnings = LinkedList<Suggestion.LintWarning>()
-
-            match getConfig optionalParams.Configuration with
-            | Ok config ->
-                let projectProgress = Option.defaultValue ignore optionalParams.ReportLinterProgress
-
-                let warningReceived (warning:Suggestion.LintWarning) =
-                    lintWarnings.AddLast warning |> ignore<LinkedListNode<Suggestion.LintWarning>>
-
-                    Option.iter (fun func -> func warning) optionalParams.ReceivedWarning
-
-                let checker = FSharpChecker.Create(keepAssemblyContents=true)
-
-                let parseFilesInProject files projectOptions = async {
-                    let lintInformation =
-                        { Configuration = config
-                          CancellationToken = optionalParams.CancellationToken
-                          ErrorReceived = warningReceived
-                          ReportLinterProgress = projectProgress }
-
-                    let isIgnoredFile filePath =
-                        config.ignoreFiles
-                        |> Option.map (fun ignoreFiles ->
-                            let parsedIgnoreFiles = ignoreFiles |> Array.map IgnoreFiles.parseIgnorePath |> Array.toList
-                            Configuration.IgnoreFiles.shouldFileBeIgnored parsedIgnoreFiles filePath)
-                        |> Option.defaultValue false
-
-                    let! parsedFiles =
-                        files
-                        |> List.filter (not << isIgnoredFile)
-                        |> List.map (fun file -> ParseFile.parseFile file checker (Some projectOptions))
-                        |> Async.Sequential
-
-                    let failedFiles = Array.choose getFailedFiles parsedFiles
-
-                    if Array.isEmpty failedFiles then
-                        let! projectCheckResults = checker.ParseAndCheckProject projectOptions
-
-                        parsedFiles
-                        |> Array.choose getParsedFiles
-                        |> Array.iter (fun fileParseResult -> 
-                            lint 
-                                lintInformation
-                                { fileParseResult with ProjectCheckResults = Some projectCheckResults })
-
-                        return Success ()
-                    else
-                        return Failure (FailedToParseFilesInProject (Array.toList failedFiles))
-                }
-
-                match getProjectInfo projectFilePath toolsPath with
-                | Ok projectOptions ->
-                    match! parseFilesInProject (Array.toList projectOptions.SourceFiles) projectOptions with
-                    | Success _ -> return lintWarnings |> Seq.toList |> LintResult.Success
-                    | Failure lintFailure -> return LintResult.Failure lintFailure
-                | Error error ->
-                    return 
-                        MSBuildFailedToLoadProjectFile (projectFilePath, BuildFailure.InvalidProjectFileMessage error)
-                        |> LintResult.Failure
-            | Error err ->
-                return RunTimeConfigError err |> LintResult.Failure
-        else
-            return FailedToLoadFile projectFilePath |> LintResult.Failure
+        match getProjectOptions projectFilePath toolsPath with
+        | Ok projectOptions ->
+            return! asyncLintProjectOptions optionalParams projectOptions
+        | Error lintFailure ->
+            return LintResult.Failure lintFailure
     }
 
     let lintProjectAsync (optionalParams:OptionalLintParameters) (projectFilePath:string) (toolsPath:Ionide.ProjInfo.Types.ToolsPath) =
@@ -506,7 +535,18 @@ module Lint =
             // Pre-load configuration so it isn't reloaded for every project.
             match getConfig optionalParams.Configuration with
             | Ok config ->
-                let optionalParams = { optionalParams with Configuration = ConfigurationParam.Configuration config }
+                // Share a single FSharpChecker across every project in the solution so
+                  // that parsed trees, referenced-assembly symbols, and project typecheck
+                  // results computed for one project can be reused when a later project
+                  // in the same build closure references it.
+                let sharedChecker =
+                    match optionalParams.Checker with
+                    | Some existingChecker -> existingChecker
+                    | None -> FSharpChecker.Create(keepAssemblyContents=true)
+                let optionalParams =
+                    { optionalParams with
+                        Configuration = ConfigurationParam.Configuration config
+                        Checker = Some sharedChecker }
 
                 try
                     // Use Microsoft.Build.Construction.SolutionFile for modern solution parsing
@@ -525,9 +565,42 @@ module Lint =
                                 projectPath.Replace("\\", "/"))
                         |> Seq.toArray
 
-                    let! lintResults = 
+                    // Share one WorkspaceLoader across the solution so MSBuild design-time
+                      // builds happen once per process and the whole project graph is visible
+                      // when resolving project-to-project references.
+                    let loader = Ionide.ProjInfo.WorkspaceLoader.Create toolsPath
+                    let loadNotifications = ResizeArray<_>()
+                    loader.Notifications.Add loadNotifications.Add
+                    let loadedProjects = loader.LoadProjects (Array.toList projectsInSolution)
+
+                    // Lint a single solution project against the shared loader/checker.
+                    let lintProjectInSolution projPath =
+                        let normalized = Path.GetFullPath projPath
+                        let optProj =
+                            loadedProjects
+                            |> Seq.tryFind (fun loadedProj -> Path.GetFullPath loadedProj.ProjectFileName = normalized)
+                        match optProj with
+                        | Some proj ->
+                            // Map with a singleton known-set so FCS resolves P2P references
+                            // against compiled DLLs (matching the per-project load path). Passing
+                            // the full set would make FCS treat referenced projects as source
+                            // projects and re-type-check them per dependent, duplicating work.
+                            let fsprojOpts = Ionide.ProjInfo.FCS.mapToFSharpProjectOptions proj [proj]
+                            asyncLintProjectOptions optionalParams fsprojOpts
+                        | None ->
+                            async {
+                                let errMsg =
+                                    loadNotifications
+                                    |> Seq.tryPick (function
+                                        | Ionide.ProjInfo.Types.WorkspaceProjectState.Failed(projectFile, loadError) when Path.GetFullPath projectFile = normalized -> Some (string loadError)
+                                        | _ -> None)
+                                    |> Option.defaultValue "Unknown error when loading project file."
+                                return LintResult.Failure (MSBuildFailedToLoadProjectFile (projPath, BuildFailure.InvalidProjectFileMessage errMsg))
+                            }
+
+                    let! lintResults =
                         projectsInSolution
-                        |> Array.map (fun projectFilePath -> asyncLintProject optionalParams projectFilePath toolsPath)
+                        |> Array.map lintProjectInSolution
                         |> Async.Sequential
 
                     let (successes, failures) =
@@ -592,7 +665,10 @@ module Lint =
     /// Lints F# source code.
     let asyncLintSource optionalParams source =
         async {
-            let checker = FSharpChecker.Create(keepAssemblyContents=true)
+            let checker =
+                match optionalParams.Checker with
+                | Some existingChecker -> existingChecker
+                | None -> FSharpChecker.Create(keepAssemblyContents=true)
 
             match! ParseFile.parseSource source checker with
             | ParseFile.Success(parseFileInformation) ->
@@ -645,7 +721,10 @@ module Lint =
     /// Lints an F# file from a given path to the `.fs` file.
     let asyncLintFile optionalParams filePath = async {
         if IO.File.Exists filePath then
-            let checker = FSharpChecker.Create(keepAssemblyContents=true)
+            let checker =
+                match optionalParams.Checker with
+                | Some existingChecker -> existingChecker
+                | None -> FSharpChecker.Create(keepAssemblyContents=true)
 
             match! ParseFile.parseFile filePath checker None with
             | ParseFile.Success astFileParseInfo ->
@@ -670,7 +749,10 @@ module Lint =
 
     /// Lints multiple F# files from given file paths.
     let asyncLintFiles optionalParams filePaths = async {
-        let checker = FSharpChecker.Create(keepAssemblyContents=true)
+        let checker =
+            match optionalParams.Checker with
+            | Some existingChecker -> existingChecker
+            | None -> FSharpChecker.Create(keepAssemblyContents=true)
         
         match getConfig optionalParams.Configuration with
         | Ok config ->

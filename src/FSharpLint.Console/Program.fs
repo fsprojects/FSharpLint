@@ -157,6 +157,7 @@ let main argv =
                 ReceivedWarning = Some output.WriteWarning
                 Configuration = configParam
                 ReportLinterProgress = Some (parserProgress output)
+                Checker = None
             }
 
         let target = lintArgs.GetResult Target
