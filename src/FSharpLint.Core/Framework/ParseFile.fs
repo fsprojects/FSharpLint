@@ -26,13 +26,13 @@ module ParseFile =
             | ProjectSnapshot(snapshot) -> snapshot.ProjectFileName
 
 #if false
-        member x.ProjectId =
-            match x with
+        member this.ProjectId =
+            match this with
             | BackgroundCompilerOptions(options) -> options.ProjectId
             | TransparentCompilerOptions(snapshot) -> snapshot.ProjectId
 
-        member x.SourceFiles =
-            match x with
+        member this.SourceFiles =
+            match this with
             | BackgroundCompilerOptions(options) ->
                 options.SourceFiles
                 |> Array.toList
@@ -41,8 +41,8 @@ module ParseFile =
                 |> List.map (fun f -> f.FileName)
             |> List.map System.IO.Path.GetFullPath
 
-        member x.ReferencedProjectsPath =
-            match x with
+        member this.ReferencedProjectsPath =
+            match this with
             | BackgroundCompilerOptions(options) ->
                 options.ReferencedProjects
                 |> Array.choose (fun p -> p.ProjectFilePath)
@@ -51,13 +51,13 @@ module ParseFile =
                 snapshot.ReferencedProjects
                 |> List.choose (fun p -> p.ProjectFilePath)
 
-        member x.LoadTime =
-            match x with
+        member this.LoadTime =
+            match this with
             | BackgroundCompilerOptions(options) -> options.LoadTime
             | TransparentCompilerOptions(snapshot) -> snapshot.LoadTime
 
-        member x.OtherOptions =
-            match x with
+        member this.OtherOptions =
+            match this with
             | BackgroundCompilerOptions(options) ->
                 options.OtherOptions
                 |> Array.toList
