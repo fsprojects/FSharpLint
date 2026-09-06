@@ -25,6 +25,7 @@ module ParseFile =
             | ProjectOptions(options) -> options.ProjectFileName
             | ProjectSnapshot(snapshot) -> snapshot.ProjectFileName
 
+        // These members presently unused, but kept because they could be useful later
 #if false
         member this.ProjectId =
             match this with
