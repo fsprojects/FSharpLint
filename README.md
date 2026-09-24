@@ -32,7 +32,7 @@ The [docs](http://fsprojects.github.io/FSharpLint/) contain an overview of the t
 
 Package | Latest Stable Version | Latest Version (including Pre-Releases)
 ------- | --------------------- | ----------------------------------------
-[dotnet tool](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/v/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/vpre/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/)
+dotnet tool | [![NuGet Status](http://img.shields.io/nuget/v/dotnet-fsharplint.svg?style=flat)](https://www.nuget.org/packages/dotnet-fsharplint/) | [![NuGet Status](http://img.shields.io/nuget/vpre/fslint.svg?style=flat)](https://www.nuget.org/packages/fslint/)
 [API](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/v/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/) | [![NuGet Status](http://img.shields.io/nuget/vpre/FSharpLint.Core.svg?style=flat)](https://www.nuget.org/packages/FSharpLint.Core/)
 
 ## How to build
