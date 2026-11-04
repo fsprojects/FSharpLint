@@ -27,3 +27,35 @@ type TestConventionsNoImpureFunctions() =
 Array.set x 0 None")
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.``Error for creating a mutable list``() =
+        this.Parse("let x = System.Collections.Generic.List<int>()")
+        
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Error for creating a mutable list without explicit type param``() =
+        this.Parse("let x = System.Collections.Generic.List [ 1; 2 ]")
+        
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``Error for creating a mutable list with new keyword``() =
+        this.Parse("open System.Collections.Generic
+
+let x = new List<int>()")
+        
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
+    member this.``No error for using an existing mutable list``() =
+        this.Parse("open System.Collections.Generic
+
+type IHasList =
+    abstract List: List<int>
+
+let x (hasList: IHasList) = hasList.List")
+        
+        this.AssertNoWarnings()
+
