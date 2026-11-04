@@ -1,4 +1,4 @@
-﻿module FSharpLint.Core.Tests.Rules.Conventions.NoImpureFunctions
+﻿module FSharpLint.Core.Tests.Rules.Conventions.NoMutatorFunctions
 
 
 open NUnit.Framework
@@ -6,27 +6,27 @@ open FSharpLint.Rules
 open FSharpLint.Core.Tests
 
 [<TestFixture>]
-type TestConventionsNoImpureFunctions() =
+type TestConventionsNoMutatorFunctions() =
     inherit TestAstNodeRuleBase.TestAstNodeRuleBase(
-        NoImpureFunctions.rule { 
-            AdditionalImpureFunctions = ["Custom.impure"]
-            AllowedImpureFunctions = ["Array.set"; "System.Collections.Generic.Dictionary.*"]
+        NoMutatorFunctions.rule { 
+            AdditionalMutatorFunctions = ["Custom.mutator"]
+            AllowedMutatorFunctions = ["Array.set"; "System.Collections.Generic.Dictionary.*"]
         })
 
     [<Test>]
-    member this.``Error for impure function which should be replaced with another function``() =
+    member this.``Error for mutator function which should be replaced with another function``() =
         this.Parse("let x = Array.sortInPlace [2; 1; 4]")
 
         Assert.IsTrue this.ErrorsExist
     
     [<Test>]
-    member this.``Error for user-specified impure function``() =
-        this.Parse("let x = Custom.impure (ref 4)")
+    member this.``Error for user-specified mutator function``() =
+        this.Parse("let x = Custom.mutator (ref 4)")
 
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
-    member this.``No error for user-specified allowed partial function``() =
+    member this.``No error for user-specified allowed mutator function``() =
         this.Parse("let x = [| Some 4; None |]
 Array.set x 0 None")
 

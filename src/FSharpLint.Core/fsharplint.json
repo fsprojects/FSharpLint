@@ -361,11 +361,11 @@
             "mode": "OnlyPublicAPIsInLibraries"
         }
     },
-    "noImpureFunctions": {
+    "noMutatorFunctions": {
         "enabled": false,
         "config": {
-            "allowedImpureFunctions": [],
-            "additionalImpureFunctions": []
+            "allowedMutatorFunctions": [],
+            "additionalMutatorFunctions": []
         }
     },
     "hints": {

@@ -1,4 +1,4 @@
-﻿module FSharpLint.Rules.NoImpureFunctions
+﻿module FSharpLint.Rules.NoMutatorFunctions
 
 open System
 open FSharpLint.Framework
@@ -12,8 +12,8 @@ open FSharp.Compiler.Syntax
 
 [<RequireQualifiedAccess>]
 type Config = {
-    AllowedImpureFunctions:string list
-    AdditionalImpureFunctions:string list
+    AllowedMutatorFunctions:string list
+    AdditionalMutatorFunctions:string list
 }
 
 let private impureFunctionIdentifiers =
@@ -48,30 +48,30 @@ let runner (config:Config) (args:AstNodeRuleParams) =
             | Some replacementFunction ->
                 {
                     Range = range
-                    Message = String.Format(Resources.GetString "RulesConventionsNoImpureFunctionsReplacementError", replacementFunction, identifier)
+                    Message = String.Format(Resources.GetString "RulesConventionsNoMutatorFunctionsReplacementError", replacementFunction, identifier)
                     SuggestedFix = Some (lazy ( Some { FromText = identifier; FromRange = range; ToText = replacementFunction }))
                     TypeChecks = List.Empty
                 }
             | None -> 
                 {
                     Range = range
-                    Message = String.Format(Resources.GetString "RulesConventionsNoImpureFunctionsError", identifier)
+                    Message = String.Format(Resources.GetString "RulesConventionsNoMutatorFunctionsError", identifier)
                     SuggestedFix = None
                     TypeChecks = List.Empty
                 }
 
-        if List.contains identifier config.AllowedImpureFunctions then
+        if List.contains identifier config.AllowedMutatorFunctions then
             None
-        elif List.contains identifier config.AdditionalImpureFunctions then
+        elif List.contains identifier config.AdditionalMutatorFunctions then
             issueWarning None |> Some
         else
             Map.tryFind identifier impureFunctionIdentifiers
-            |> Option.filter (fun _ -> not (List.contains identifier config.AllowedImpureFunctions))
+            |> Option.filter (fun _ -> not (List.contains identifier config.AllowedMutatorFunctions))
             |> Option.map issueWarning
     
     let disallowedTypes =
         let builtinIdentifiers = Map.keys impureFunctionIdentifiers |> Set.ofSeq
-        (Set.ofList config.AdditionalImpureFunctions) + builtinIdentifiers - (Set.ofList config.AllowedImpureFunctions)
+        (Set.ofList config.AdditionalMutatorFunctions) + builtinIdentifiers - (Set.ofList config.AllowedMutatorFunctions)
         |> Seq.choose (fun definition ->
             let wildcardSuffix = ".*"
             if definition.EndsWith wildcardSuffix then
@@ -103,7 +103,7 @@ let runner (config:Config) (args:AstNodeRuleParams) =
                         Array.singleton
                             {
                                 Range = range
-                                Message = String.Format(Resources.GetString "RulesConventionsNoImpureFunctionsDisallowedTypeError", entity.FullName)
+                                Message = String.Format(Resources.GetString "RulesConventionsNoMutatorFunctionsDisallowedTypeError", entity.FullName)
                                 SuggestedFix = None
                                 TypeChecks = List.Empty
                             }
@@ -134,8 +134,8 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 let rule config =
     AstNodeRule
         {
-            Name = "NoImpureFunctions"
-            Identifier = Identifiers.NoImpureFunctions
+            Name = "NoMutatorFunctions"
+            Identifier = Identifiers.NoMutatorFunctions
             RuleConfig =
                 {
                     AstNodeRuleConfig.Runner = runner config

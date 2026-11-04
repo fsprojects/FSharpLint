@@ -559,7 +559,7 @@ type Configuration =
       SynchronousFunctionNames:EnabledConfig option
       AsynchronousFunctionNames:RuleConfig<AsynchronousFunctionNames.Config> option
       SimpleAsyncComplementaryHelpers:RuleConfig<SimpleAsyncComplementaryHelpers.Config> option
-      NoImpureFunctions:RuleConfig<NoImpureFunctions.Config> option }
+      NoMutatorFunctions:RuleConfig<NoMutatorFunctions.Config> option }
 with
 // Method Zero is too big but can't be split into parts because it returns a record
 // and it requires all fields to be set.
@@ -672,7 +672,7 @@ with
         SynchronousFunctionNames = None
         AsynchronousFunctionNames = None
         SimpleAsyncComplementaryHelpers = None
-        NoImpureFunctions = None
+        NoMutatorFunctions = None
     }
 
 // fsharplint:enable MaxLinesInMember
@@ -899,7 +899,7 @@ let flattenConfig (config:Configuration) =
                 config.SynchronousFunctionNames |> Option.bind (constructRuleIfEnabled SynchronousFunctionNames.rule)
                 config.AsynchronousFunctionNames |> Option.bind (constructRuleWithConfig AsynchronousFunctionNames.rule)
                 config.SimpleAsyncComplementaryHelpers |> Option.bind (constructRuleWithConfig SimpleAsyncComplementaryHelpers.rule)
-                config.NoImpureFunctions |> Option.bind (constructRuleWithConfig NoImpureFunctions.rule)
+                config.NoMutatorFunctions |> Option.bind (constructRuleWithConfig NoMutatorFunctions.rule)
             |]
 
     let allEnabledRules = Array.choose id allPossibleRules
