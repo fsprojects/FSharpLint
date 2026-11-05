@@ -78,6 +78,9 @@ module Lint =
 
         /// Optional results of project-wide type info (allows for a more accurate lint).
         ProjectCheckResults:FSharpCheckProjectResults option
+
+        /// Optional project options. Allows rules to operate on project options.
+        ProjectOptions: ParseFile.LinterProjectOptions option
     }
 
     type BuildFailure = | InvalidProjectFileMessage of string
@@ -129,7 +132,7 @@ module Lint =
             GlobalConfig: Rules.GlobalRuleConfig
             TypeCheckResults: FSharpCheckFileResults option
             ProjectCheckResults: FSharpCheckProjectResults option
-            ProjectOptions: Lazy<FSharpProjectOptions option>
+            ProjectOptions: ParseFile.LinterProjectOptions option
             FilePath: string
             FileContent: string
             Lines: string[]
