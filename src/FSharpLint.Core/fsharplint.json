@@ -362,7 +362,7 @@
         }
     },
     "noMutatorFunctions": {
-        "enabled": false,
+        "enabled": true,
         "config": {
             "allowedMutatorFunctions": [],
             "additionalMutatorFunctions": []
