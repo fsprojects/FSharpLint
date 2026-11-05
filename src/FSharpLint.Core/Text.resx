@@ -421,10 +421,10 @@
     <value>Consider creating twin helper function/method `{0}{1}` that just calls `async {{ return Async.AwaitTask ({2}Async{3}) }}` under the hood.</value>
   </data>
   <data name="RulesConventionsNoMutatorFunctionsError" xml:space="preserve">
-    <value>Consider not using impure function '{0}'.</value>
+    <value>Consider not using mutator function '{0}'.</value>
   </data>
   <data name="RulesConventionsNoMutatorFunctionsReplacementError" xml:space="preserve">
-    <value>Consider using '{0}' instead of impure function '{1}'.</value>
+    <value>Consider using '{0}' instead of mutator function '{1}'.</value>
   </data>
   <data name="RulesConventionsNoMutatorFunctionsDisallowedTypeError" xml:space="preserve">
     <value>Consider not using mutable type '{0}'.</value>

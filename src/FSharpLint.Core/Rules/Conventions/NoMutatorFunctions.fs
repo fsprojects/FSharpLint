@@ -16,11 +16,11 @@ type Config = {
     AdditionalMutatorFunctions:string list
 }
 
-let private impureFunctionIdentifiers =
+let private mutatorFunctionIdentifiers =
     Map.ofList
         [
             ("Array.sortInPlace", Some "Array.sort")
-            ("Array.sortInPlaceBy", Some "Array.Array.sortBy")
+            ("Array.sortInPlaceBy", Some "Array.sortBy")
             ("Array.sortInPlaceWith", Some "Array.sortWith")
 
             ("Array.set", Some "Array.updateAt")
@@ -42,7 +42,7 @@ let private impureFunctionIdentifiers =
         ]
 
 let runner (config:Config) (args:AstNodeRuleParams) =
-    let checkIfImpureIdentifier (identifier:string) (range:Range) =
+    let checkIfMutatorIdentifier (identifier:string) (range:Range) =
         let issueWarning maybeReplacementFunction =
             match maybeReplacementFunction with
             | Some replacementFunction ->
@@ -65,12 +65,12 @@ let runner (config:Config) (args:AstNodeRuleParams) =
         elif List.contains identifier config.AdditionalMutatorFunctions then
             issueWarning None |> Some
         else
-            Map.tryFind identifier impureFunctionIdentifiers
+            Map.tryFind identifier mutatorFunctionIdentifiers
             |> Option.filter (fun _ -> not (List.contains identifier config.AllowedMutatorFunctions))
             |> Option.map issueWarning
     
     let disallowedTypes =
-        let builtinIdentifiers = Map.keys impureFunctionIdentifiers |> Set.ofSeq
+        let builtinIdentifiers = Map.keys mutatorFunctionIdentifiers |> Set.ofSeq
         (Set.ofList config.AdditionalMutatorFunctions) + builtinIdentifiers - (Set.ofList config.AllowedMutatorFunctions)
         |> Seq.choose (fun definition ->
             let wildcardSuffix = ".*"
@@ -115,9 +115,9 @@ let runner (config:Config) (args:AstNodeRuleParams) =
 
     match (args.AstNode, args.CheckInfo) with
     | AstNode.Identifier (identifier, range), _ ->
-        match checkIfImpureIdentifier (String.concat "." identifier) range with
-        | Some impureIdentifierWarning ->
-            Array.singleton impureIdentifierWarning
+        match checkIfMutatorIdentifier (String.concat "." identifier) range with
+        | Some mutatorIdentifierWarning ->
+            Array.singleton mutatorIdentifierWarning
         | _ ->
             Array.Empty()
     | AstNode.Expression(SynExpr.App(_, false, funcExpr, _, _range)), Some(checkResults) when not disallowedTypes.IsEmpty ->
