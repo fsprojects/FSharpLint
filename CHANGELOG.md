@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.2] - 2026-11-06
+
+- Chore: prevent forks' CI to fail on schedule triggers [#847] [@knocte]
+- Performance: swap Option with ValueOption [#852] [@Numpsy]
+- Performance: swap .Trim() with .IsWhiteSpace() [#854] [@Numpsy]
+- Chore: try to fix unncessary pre-release publishing of vNext tag [#858] [@knocte]
+- Performance: use IsNullOrWhiteSpace instead of AsSpan [#859] [@knocte]
+- Performance: reduce zero length array allocations [#851] [@Numpsy]
+- Performance: lazify ProjectOptions record member [#845] [@Numpsy]
+- Fix (NoPartialFunctions rule): bug when using object expressions [#864] [@webwarrior-ws]
+- Fix (NoPartialFunctions rule): false negative when using Seq.cast [#865] [@webwarrior-ws]
+- Fix (Hints): false positive when using records [#866] [@webwarrior-ws]
+- Fix (NoAsyncRunSynchronouslyInLibrary rule): false positive in .fsx scripts [#867] [@webwarrior-ws]
+- Tests (Benchmarks): enabled allocation reporting [#868] [@Numpsy]
+- Removed hint: `"if x then y else y ===> y"` was dropped due to causing many false positives [#871] [@webwarrior-ws]
+- Updated FCS dependency: to v43.12.201, and remove workarounds that are no longer needed with new version [#850] [@Numpsy]
+- Performance: use Span instead of Substring [#870] [@Numpsy]
+- Performance: use String.Concat instead of Seq.fold [#765] [@Numpsy]
+- Performance: more avoidance of empty-array allocations [#873] [@Numpsy]
+- Fix (Test Suite): race condition in FailwithBadUsage rule's tests that made them flaky [#860] [@w3lld1]
+- Performance: avoid boxing tuple comparisons [#879] [@Numpsy]
+- Performance: reduce allocations by using Regex.Count() instead of Regex.Matches().Count [#881] [@Numpsy]
+- Fix (FavourSingleton rule): false negatives [#883] [@webwarrior-ws]
+- Performance (SourceLengthHelper): use StringBuilder instead of String.Concat [#878] [@Numpsy]
+- Performance: fixed massive IndexOf hotspot [#884] [@Numpsy]
+- Chore (CI): updated actions/checkout step to avoid NodeJS warnings [@Numpsy]
+- New: NoMutatorFunctions rule, enabled by default [#885] [@webwarrior-ws]
+- Performance: converted an active pattern to return a Struct [#875] [@Numpsy]
+
 ## [0.27.0] - 2026-06-05
 
 - Fix: hint false positive for interpolated strings without sprintf #857 #856 [@webwarrior-ws]
