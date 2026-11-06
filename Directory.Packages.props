@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Argu" Version="6.2.5" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
-    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
     <PackageVersion Include="FParsec" Version="1.1.1" />
     <PackageVersion Include="FSharp.Compiler.Service" Version="43.12.201" />
     <PackageVersion Include="FSharp.Control.Reactive" Version="6.1.2" />
