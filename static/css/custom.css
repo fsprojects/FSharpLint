@@ -1,0 +1,7 @@
+:root #header + #content > #left > #rlblock_left{
+    display:none !important;
+}
+
+#sidebar ul li > a.active {
+    color: #ffffff;
+}
