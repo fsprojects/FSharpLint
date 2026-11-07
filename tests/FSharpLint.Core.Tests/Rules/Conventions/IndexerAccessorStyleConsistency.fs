@@ -63,15 +63,7 @@ prefix + firstChar + rest"""
         this.Parse """
 module Program
 
-let yamlDocuments =
-    Seq.map
-        (fun (fileInfo: FileInfo) ->
-            let yaml = YamlStream()
-            use reader = new StreamReader(fileInfo.FullName)
-            yaml.Load reader
-            yaml.Documents[0].RootNode
-        )
-        fileInfos"""
+let x = a.b[0]"""
 
         Assert.IsTrue this.ErrorsExist
 
