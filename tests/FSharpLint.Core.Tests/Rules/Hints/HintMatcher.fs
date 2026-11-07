@@ -984,7 +984,7 @@ res
 
     /// Regression test for: https://github.com/fsprojects/FSharpLint/issues/856
     [<Test>]
-    member this.``Interpolated strings with different literal text content should be treated as diffrerent``() =
+    member this.``Interpolated strings with different literal text content should be treated as different``() =
         this.SetConfig(["if x then y else y ===> y"])
 
         this.Parse """
@@ -995,7 +995,7 @@ let label (p: int) (currentPage: int) =
         Assert.That this.NoErrorsExist
 
     [<Test>]
-    member this.``Records with different data should be treated as diffrerent``() =
+    member this.``Records with different data should be treated as different``() =
         this.SetConfig(["if x then y else y ===> y"])
 
         this.Parse """
@@ -1020,7 +1020,7 @@ let foo =
 
     [<Test>]
     [<Ignore("Fixing it would take a lot of work since AbstractSyntaxArray.getHashCode function would have to be defined for all expression types.")>]
-    member this.``Records with different data (not a literal constant) should be treated as diffrerent``() =
+    member this.``Records with different data (not a literal constant) should be treated as different``() =
         this.SetConfig(["if x then y else y ===> y"])
 
         this.Parse """

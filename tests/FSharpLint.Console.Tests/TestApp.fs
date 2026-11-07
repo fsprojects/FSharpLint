@@ -22,18 +22,41 @@ type TemporaryFile(fileContent : string, extension) =
         member _.Dispose() =
             File.Delete(filename)
 
-let main input =
-    use stdout = new StringWriter()
-    let existing = Console.Out
-    Console.SetOut(stdout)
+type TemporaryDirectory() =
+    let dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))
+    do
+        Directory.CreateDirectory(dir) |> ignore<DirectoryInfo>
+
+    member val DirectoryPath = dir
+
+    interface System.IDisposable with
+        member _.Dispose() =
+            if Directory.Exists(dir) then
+                Directory.Delete(dir, true)
+
+let runMain input =
+    use output = new StringWriter()
+    let existingOut = Console.Out
+    let existingError = Console.Error
+    Console.SetOut(output)
+    Console.SetError(output)
     try
         let returnCode = FSharpLint.Console.Program.main input
-        (returnCode, getErrorsFromOutput <| stdout.ToString())
+        (returnCode, output.ToString())
     finally
-        Console.SetOut(existing)
+        Console.SetOut(existingOut)
+        Console.SetError(existingError)
+
+let main input =
+    let (returnCode, output) = runMain input
+    (returnCode, getErrorsFromOutput output)
 
 [<TestFixture>]
 type TestConsoleApplication() =
+
+    let warningLabel = "WARNING"
+    let projectOrSolRecommendation = "Using a project (slnx/sln/fsproj) can detect more issues"
+
     [<Test>]
     member _.``Lint file, expected rules are triggered.``() =
         let fileContent = """
@@ -118,6 +141,40 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(Set.singleton "Use prefix syntax for generic type.", errors)
+
+    [<Test>]
+    member _.``Lint file, warning prefix and project recommendation are output.``() =
+        use input = new TemporaryFile("module Program", "fs")
+
+        let (_, output) = runMain [| "lint"; input.FileName |]
+
+        Assert.That(output, Does.Contain warningLabel)
+        Assert.That(output, Does.Contain projectOrSolRecommendation)
+
+    [<Test>]
+    member _.``Lint wildcard *.fs, warning prefix and project recommendation are output.``() =
+        use tempDir = new TemporaryDirectory()
+        let filePath = Path.Combine(tempDir.DirectoryPath, "Test.fs")
+        File.WriteAllText(filePath, "module Program")
+        let pattern = Path.Combine(tempDir.DirectoryPath, "*.fs")
+
+        let (_, output) = runMain [| "lint"; pattern |]
+
+        Assert.That(output, Does.Contain warningLabel)
+        Assert.That(output, Does.Contain projectOrSolRecommendation)
+
+    [<Test>]
+    member _.``Lint wildcard *.fsx, warning prefix and project recommendation are NOT output.``() =
+        use tempDir = new TemporaryDirectory()
+        let filePath = Path.Combine(tempDir.DirectoryPath, "Test.fsx")
+        File.WriteAllText(filePath, "module Program")
+        let pattern = Path.Combine(tempDir.DirectoryPath, "*.fsx")
+
+        let (_, output) = runMain [| "lint"; pattern |]
+
+        Assert.That(output, Does.Not.Contain warningLabel)
+        Assert.That(output, Does.Not.Contain projectOrSolRecommendation)
+
 
 [<TestFixture>]
 type TestFileTypeInference() =
