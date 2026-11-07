@@ -35,32 +35,37 @@ let rec private getTopLevelBalancedPairs (toProcess: List<MultilineCommentMarker
         | [ beginIndex ] -> (beginIndex, index) :: getTopLevelBalancedPairs tail List.Empty
         | _::restOfStack -> getTopLevelBalancedPairs tail restOfStack
 
+let internal stripMultilineComments (source: string) =
+    let markers = 
+        multilineCommentMarkerRegex.Matches source
+        |> Seq.map (fun markerMatch -> 
+            let index = markerMatch.Index
+            if source.[index] = '(' then
+                Begin index
+            else
+                End index)
+        |> Seq.sortBy (function | Begin index -> index | End index -> index)
+        |> Seq.toList
+
+    // Process block comment removal
+    // - If no comments, return input as is
+    // - If one comment, just remove it directly
+    // - If several comments, remove them all starting from the last, as removing them from the front changes the offsets of later ones
+    match getTopLevelBalancedPairs markers List.Empty with
+    | [] -> source
+    | [ (startIndex, endIndex) ] -> source.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex )
+    | pairs ->
+
+        (pairs, StringBuilder(source))
+        ||> List.foldBack
+            (fun (startIndex, endIndex)(currSource: StringBuilder)  ->
+                currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
+        |> _.ToString()
+
 let checkSourceLengthRule (config:Config) range fileContents errorName (skipRanges: array<Range>) =
     let error name lineCount actual =
         let errorFormatString = Resources.GetString("RulesSourceLengthError")
         String.Format(errorFormatString, name, lineCount, actual)
-
-    let stripMultilineComments (source: string) =
-        let markers = 
-            multilineCommentMarkerRegex.Matches source
-            |> Seq.map (fun markerMatch -> 
-                let index = markerMatch.Index
-                if source.[index] = '(' then
-                    Begin index
-                else
-                    End index)
-            |> Seq.sortBy (function | Begin index -> index | End index -> index)
-            |> Seq.toList
-
-        match getTopLevelBalancedPairs markers List.Empty with
-        | [] -> source
-        | pairs ->
-
-            (StringBuilder(source), pairs)
-            ||> List.fold
-                (fun (currSource: StringBuilder) (startIndex, endIndex) ->
-                    currSource.Remove(startIndex, (endIndex + multilineCommentMarkerRegexCaptureGroupLength) - startIndex))
-            |> _.ToString()
 
     match tryFindTextOfRange range fileContents with
     | Some(sourceCode) -> 
