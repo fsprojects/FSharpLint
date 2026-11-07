@@ -22,6 +22,18 @@ type TemporaryFile(fileContent : string, extension) =
         member _.Dispose() =
             File.Delete(filename)
 
+type TemporaryDirectory() =
+    let dir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))
+    do
+        Directory.CreateDirectory(dir) |> ignore<DirectoryInfo>
+
+    member val DirectoryPath = dir
+
+    interface System.IDisposable with
+        member _.Dispose() =
+            if Directory.Exists(dir) then
+                Directory.Delete(dir, true)
+
 let runMain input =
     use output = new StringWriter()
     let existingOut = Console.Out
@@ -41,6 +53,10 @@ let main input =
 
 [<TestFixture>]
 type TestConsoleApplication() =
+
+    let warningLabel = "WARNING"
+    let projectOrSolRecommendation = "Using a project (slnx/sln/fsproj) can detect more issues"
+
     [<Test>]
     member _.``Lint file, expected rules are triggered.``() =
         let fileContent = """
@@ -132,8 +148,20 @@ type TestConsoleApplication() =
 
         let (_, output) = runMain [| "lint"; input.FileName |]
 
-        Assert.That(output, Does.Contain "WARNING:")
-        Assert.That(output, Does.Contain "Using a project (slnx/sln/fsproj) can detect more issues.")
+        Assert.That(output, Does.Contain warningLabel)
+        Assert.That(output, Does.Contain projectOrSolRecommendation)
+
+    [<Test>]
+    member _.``Lint wildcard *.fs, warning prefix and project recommendation are output.``() =
+        use tempDir = new TemporaryDirectory()
+        let filePath = Path.Combine(tempDir.DirectoryPath, "Test.fs")
+        File.WriteAllText(filePath, "module Program")
+        let pattern = Path.Combine(tempDir.DirectoryPath, "*.fs")
+
+        let (_, output) = runMain [| "lint"; pattern |]
+
+        Assert.That(output, Does.Contain warningLabel)
+        Assert.That(output, Does.Contain projectOrSolRecommendation)
 
 [<TestFixture>]
 type TestFileTypeInference() =
