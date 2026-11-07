@@ -116,3 +116,11 @@ match foo with
 | _ -> printf "baz" """
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.IndexerAccessorShouldNotProduceError() =
+        this.Parse """
+let x = a.b[0]"""
+
+        Assert.IsTrue this.NoErrorsExist
+
