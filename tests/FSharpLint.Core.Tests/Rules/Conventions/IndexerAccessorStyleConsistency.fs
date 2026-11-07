@@ -59,6 +59,15 @@ prefix + firstChar + rest"""
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.IndexerAccessorStyleConsistencyCSharpStyleWhenUsingOCaml3() =
+        this.Parse """
+module Program
+
+let x = a.b[0]"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.IndexerAccessorStyleConsistencyOCamlStyleWhenUsingOCaml() =
         this.Parse """
 module Program

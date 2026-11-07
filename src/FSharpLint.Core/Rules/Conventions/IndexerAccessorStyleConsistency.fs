@@ -30,7 +30,7 @@ let runner (config: Config) (args: AstNodeRuleParams) =
     match config.Style with
     | IndexerAccessorStyle.OCaml ->
         match args.AstNode with
-        | AstNode.Expression (SynExpr.App (ExprAtomicFlag.Atomic, _, SynExpr.Ident _, SynExpr.ArrayOrListComputed (_, _expr, range), _)) ->
+        | AstNode.Expression (SynExpr.App (ExprAtomicFlag.Atomic, _, _, SynExpr.ArrayOrListComputed (_, _expr, range), _)) ->
             generateOutput range IndexerAccessorStyle.OCaml
         | _ -> 
             Array.empty
