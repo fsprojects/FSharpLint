@@ -22,15 +22,22 @@ type TemporaryFile(fileContent : string, extension) =
         member _.Dispose() =
             File.Delete(filename)
 
-let main input =
-    use stdout = new StringWriter()
-    let existing = Console.Out
-    Console.SetOut(stdout)
+let runMain input =
+    use output = new StringWriter()
+    let existingOut = Console.Out
+    let existingError = Console.Error
+    Console.SetOut(output)
+    Console.SetError(output)
     try
         let returnCode = FSharpLint.Console.Program.main input
-        (returnCode, getErrorsFromOutput <| stdout.ToString())
+        (returnCode, output.ToString())
     finally
-        Console.SetOut(existing)
+        Console.SetOut(existingOut)
+        Console.SetError(existingError)
+
+let main input =
+    let (returnCode, output) = runMain input
+    (returnCode, getErrorsFromOutput output)
 
 [<TestFixture>]
 type TestConsoleApplication() =
@@ -118,6 +125,15 @@ type TestConsoleApplication() =
 
         Assert.AreEqual(int ExitCode.Failure, returnCode)
         Assert.AreEqual(Set.singleton "Use prefix syntax for generic type.", errors)
+
+    [<Test>]
+    member _.``Lint file, warning prefix and project recommendation are output.``() =
+        use input = new TemporaryFile("module Program", "fs")
+
+        let (_, output) = runMain [| "lint"; input.FileName |]
+
+        Assert.That(output, Does.Contain "WARNING:")
+        Assert.That(output, Does.Contain "Using a project (slnx/sln/fsproj) can detect more issues.")
 
 [<TestFixture>]
 type TestFileTypeInference() =
