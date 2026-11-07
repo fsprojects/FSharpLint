@@ -59,6 +59,23 @@ prefix + firstChar + rest"""
         Assert.IsTrue this.ErrorsExist
 
     [<Test>]
+    member this.IndexerAccessorStyleConsistencyCSharpStyleWhenUsingOCaml3() =
+        this.Parse """
+module Program
+
+let yamlDocuments =
+    Seq.map
+        (fun (fileInfo: FileInfo) ->
+            let yaml = YamlStream()
+            use reader = new StreamReader(fileInfo.FullName)
+            yaml.Load reader
+            yaml.Documents[0].RootNode
+        )
+        fileInfos"""
+
+        Assert.IsTrue this.ErrorsExist
+
+    [<Test>]
     member this.IndexerAccessorStyleConsistencyOCamlStyleWhenUsingOCaml() =
         this.Parse """
 module Program
