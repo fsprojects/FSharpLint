@@ -19,26 +19,36 @@ let runner args =
     match args.AstNode with
     | AstNode.Expression(expression) ->
         match expression with
-        | SynExpr.ArrayOrListComputed(_isArray, innerExpr, _) ->
-            match innerExpr with
-            | SynExpr.ComputationExpr _
-            | SynExpr.For _ 
-            | SynExpr.ForEach _ 
-            | SynExpr.IfThenElse _ 
-            | SynExpr.IndexRange _
-            | SynExpr.LetOrUse _
-            | SynExpr.Match _
-            | SynExpr.Sequential _
-            | SynExpr.SequentialOrImplicitYield _
-            | SynExpr.Set _ 
-            | SynExpr.TryFinally _
-            | SynExpr.TryWith _
-            | SynExpr.While _
-            | SynExpr.YieldOrReturn _
-            | SynExpr.YieldOrReturnFrom _ ->
+        | SynExpr.ArrayOrListComputed(isArray, innerExpr, _) ->
+            let isIndexer =
+                not isArray
+                && match args.GetParents 1 with
+                   | AstNode.Expression (SynExpr.App (ExprAtomicFlag.Atomic, _, _, argExpr, _)) :: _ ->
+                       obj.ReferenceEquals(argExpr, expression)
+                   | _ -> false
+
+            if isIndexer then
                 Array.empty
-            | _ ->
-                generateViolation expression.Range
+            else
+                match innerExpr with
+                | SynExpr.ComputationExpr _
+                | SynExpr.For _
+                | SynExpr.ForEach _
+                | SynExpr.IfThenElse _
+                | SynExpr.IndexRange _
+                | SynExpr.LetOrUse _
+                | SynExpr.Match _
+                | SynExpr.Sequential _
+                | SynExpr.SequentialOrImplicitYield _
+                | SynExpr.Set _
+                | SynExpr.TryFinally _
+                | SynExpr.TryWith _
+                | SynExpr.While _
+                | SynExpr.YieldOrReturn _
+                | SynExpr.YieldOrReturnFrom _ ->
+                    Array.empty
+                | _ ->
+                    generateViolation expression.Range
         | _ -> Array.empty
     | _ -> Array.empty
 let rule =
