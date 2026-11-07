@@ -190,7 +190,8 @@ let main argv =
                         LintResult.Success List.empty
                     else
                         let fileTypes = files |> List.map inferFileType
-                        if fileTypes |> List.forall (fun aType -> aType = FileType.File) then
+                        let areAllFsx = files |> List.forall (fun file -> file.EndsWith ".fsx")
+                        if fileTypes |> List.forall (fun aType -> aType = FileType.File) && not areAllFsx then
                             output.WriteError $"{warningPrefix} Wildcard detected, but not recommended. {projectRecommendationMessage}"
                         output.WriteInfo $"Found %d{List.length files} file(s) matching pattern '%s{target}'."
                         let results = 
