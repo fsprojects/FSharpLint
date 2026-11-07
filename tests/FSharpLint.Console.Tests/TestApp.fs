@@ -163,6 +163,19 @@ type TestConsoleApplication() =
         Assert.That(output, Does.Contain warningLabel)
         Assert.That(output, Does.Contain projectOrSolRecommendation)
 
+    [<Test>]
+    member _.``Lint wildcard *.fsx, warning prefix and project recommendation are NOT output.``() =
+        use tempDir = new TemporaryDirectory()
+        let filePath = Path.Combine(tempDir.DirectoryPath, "Test.fsx")
+        File.WriteAllText(filePath, "module Program")
+        let pattern = Path.Combine(tempDir.DirectoryPath, "*.fsx")
+
+        let (_, output) = runMain [| "lint"; pattern |]
+
+        Assert.That(output, Does.Not.Contain warningLabel)
+        Assert.That(output, Does.Not.Contain projectOrSolRecommendation)
+
+
 [<TestFixture>]
 type TestFileTypeInference() =
     
