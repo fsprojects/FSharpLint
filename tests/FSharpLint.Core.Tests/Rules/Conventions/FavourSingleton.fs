@@ -118,9 +118,17 @@ match foo with
         this.AssertNoWarnings()
 
     [<Test>]
-    member this.IndexerAccessorShouldNotProduceError() =
+    member this.CSharpStyleIndexerAccessorShouldNotProduceError() =
         this.Parse """
 let x = a.b[0]"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+
+    [<Test>]
+    member this.OCamlStyleIndexerAccessorShouldNotProduceError() =
+        this.Parse """
+let x = a.b.[0]"""
 
         Assert.IsTrue this.NoErrorsExist
 
