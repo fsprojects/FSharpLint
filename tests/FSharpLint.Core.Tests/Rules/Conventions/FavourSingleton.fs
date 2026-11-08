@@ -116,3 +116,19 @@ match foo with
 | _ -> printf "baz" """
 
         this.AssertNoWarnings()
+
+    [<Test>]
+    member this.CSharpStyleIndexerAccessorShouldNotProduceError() =
+        this.Parse """
+let x = a.b[0]"""
+
+        Assert.IsTrue this.NoErrorsExist
+
+
+    [<Test>]
+    member this.OCamlStyleIndexerAccessorShouldNotProduceError() =
+        this.Parse """
+let x = a.b.[0]"""
+
+        Assert.IsTrue this.NoErrorsExist
+
