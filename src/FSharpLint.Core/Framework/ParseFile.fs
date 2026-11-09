@@ -1,5 +1,7 @@
 namespace FSharpLint.Framework
 
+#nowarn "FS0057" // 'FSharpProjectSnapshot' is considered experimental. Note: Could suppress this more locally if building with the .NET 10 compiler
+
 /// Provides functionality to parse F# files using `FSharp.Compiler.Service`.
 module ParseFile =
 
@@ -10,6 +12,59 @@ module ParseFile =
     open FSharp.Compiler.Syntax
     open FSharp.Compiler.Text
     open Utilities
+
+    /// Options related to the project being linted.
+    /// Based on https://github.com/ionide/FSharp.Analyzers.SDK/blob/f323144f0a4db51be564a3187838f2328f0e9182/src/FSharp.Analyzers.SDK/FSharp.Analyzers.SDK.fsi#L66
+    [<NoEquality; NoComparison>]
+    type LinterProjectOptions =
+        | ProjectOptions of options: FSharpProjectOptions
+        | ProjectSnapshot of snapshot: FSharpProjectSnapshot
+
+        member this.ProjectFileName =
+            match this with
+            | ProjectOptions(options) -> options.ProjectFileName
+            | ProjectSnapshot(snapshot) -> snapshot.ProjectFileName
+
+        // These members presently unused, but kept because they could be useful later
+#if false
+        member this.ProjectId =
+            match this with
+            | BackgroundCompilerOptions(options) -> options.ProjectId
+            | TransparentCompilerOptions(snapshot) -> snapshot.ProjectId
+
+        member this.SourceFiles =
+            match this with
+            | BackgroundCompilerOptions(options) ->
+                options.SourceFiles
+                |> Array.toList
+            | TransparentCompilerOptions(snapshot) ->
+                snapshot.SourceFiles
+                |> List.map (fun f -> f.FileName)
+            |> List.map System.IO.Path.GetFullPath
+
+        member this.ReferencedProjectsPath =
+            match this with
+            | BackgroundCompilerOptions(options) ->
+                options.ReferencedProjects
+                |> Array.choose (fun p -> p.ProjectFilePath)
+                |> Array.toList
+            | TransparentCompilerOptions(snapshot) ->
+                snapshot.ReferencedProjects
+                |> List.choose (fun p -> p.ProjectFilePath)
+
+        member this.LoadTime =
+            match this with
+            | BackgroundCompilerOptions(options) -> options.LoadTime
+            | TransparentCompilerOptions(snapshot) -> snapshot.LoadTime
+
+        member this.OtherOptions =
+            match this with
+            | BackgroundCompilerOptions(options) ->
+                options.OtherOptions
+                |> Array.toList
+            | TransparentCompilerOptions(snapshot) -> snapshot.OtherOptions
+
+#endif
 
     /// Information for a file to be linted that is given to the analysers.
     [<NoEquality; NoComparison>]
@@ -25,6 +80,9 @@ module ParseFile =
 
         /// Optional results of project-wide type info (allows for a more accurate lint).
         ProjectCheckResults:FSharpCheckProjectResults option
+
+        /// Optional project options. Allows rules to operate on project options.
+        ProjectOptions: LinterProjectOptions option
 
         /// Path to the file.
         File:string
@@ -53,6 +111,7 @@ module ParseFile =
                     Ast = parseResults.ParseTree
                     TypeCheckResults = Some(typeCheckResults)
                     ProjectCheckResults = None
+                    ProjectOptions =  Some (ProjectOptions options) 
                     File = file
                 }
         | FSharpCheckFileAnswer.Aborted -> return Failed(AbortedTypeCheck)
