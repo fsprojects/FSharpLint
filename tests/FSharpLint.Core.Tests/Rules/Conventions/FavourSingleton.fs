@@ -132,3 +132,10 @@ let x = a.b.[0]"""
 
         Assert.IsTrue this.NoErrorsExist
 
+    [<Test>]
+    member this.CSharpStyleIndexerAccessorOnFunctionCallShouldNotProduceError() =
+        this.Parse """
+let line () = "a b c"
+line()[0]"""
+
+        Assert.IsTrue this.NoErrorsExist
