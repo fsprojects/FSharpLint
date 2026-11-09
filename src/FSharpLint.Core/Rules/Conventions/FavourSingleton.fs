@@ -23,8 +23,15 @@ let runner args =
             let isIndexer =
                 not isArray
                 && match args.GetParents 1 with
-                   | AstNode.Expression (SynExpr.App (ExprAtomicFlag.Atomic, _, _, argExpr, _)) :: _ ->
-                       obj.ReferenceEquals(argExpr, expression)
+                   | AstNode.Expression (SynExpr.App (exprAtomicFlag, _, funcExpr, argExpr, _)) :: _ 
+                     when obj.ReferenceEquals(argExpr, expression) ->
+                       exprAtomicFlag = ExprAtomicFlag.Atomic
+                       || match args.CheckInfo with 
+                          | Some checkResults ->
+                              match checkResults.TryGetCapturedType funcExpr.Range with
+                              | Some indexedExpressionType -> not indexedExpressionType.IsFunctionType
+                              | None -> false
+                          | None -> false
                    | _ -> false
 
             if isIndexer then
