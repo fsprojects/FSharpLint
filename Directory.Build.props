@@ -10,6 +10,7 @@
       ;FS1182
       ;FS3218
       ;FS3390
+      ;FS3569
     </WarnOn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
